@@ -79,7 +79,7 @@ import com.google.inject.name.Named;
  */
 public class RenderingGadgetRewriter implements GadgetRewriter {
   private static final Logger LOG = Logger.getLogger(RenderingGadgetRewriter.class.getName());
-  
+
   private static final int INLINE_JS_BUFFER = 50;
 
   protected static final String DEFAULT_CSS =
@@ -201,7 +201,7 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
     onloadScript.appendChild(bodyTag.getOwnerDocument().createTextNode(
         "gadgets.util.runOnLoadHandlers();"));
   }
-  
+
   protected void injectGadgetBeacon(Gadget gadget, Node headTag, Node firstHeadChild)
           throws GadgetException {
     Element beaconNode = headTag.getOwnerDocument().createElement("script");
@@ -222,7 +222,7 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
     Set<String> externForcedLibs = defaultExternLibs;
 
     // gather the libraries we'll need to generate the extern libs
-    String externParam = context.getParameter("libs");    
+    String externParam = context.getParameter("libs");
     if (StringUtils.isNotBlank(externParam)) {
       externForcedLibs = Sets.newTreeSet(Arrays.asList(StringUtils.split(externParam, ':')));
     }
@@ -230,14 +230,14 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
     if (!externForcedLibs.isEmpty()) {
       String jsUrl = jsUriManager.makeExternJsUri(gadget, externForcedLibs).toString();
       Element libsTag = headTag.getOwnerDocument().createElement("script");
-      libsTag.setAttribute("src", jsUrl.replace("&", "&amp;"));
+      libsTag.setAttribute("src", jsUrl);
       headTag.insertBefore(libsTag, firstHeadChild);
     }
 
     List<String> unsupported = Lists.newLinkedList();
 
     List<FeatureResource> externForcedResources =
-        featureRegistry.getFeatureResources(context, externForcedLibs, unsupported); 
+        featureRegistry.getFeatureResources(context, externForcedLibs, unsupported);
     if (!unsupported.isEmpty()) {
       LOG.info("Unknown feature(s) in extern &libs=: " + unsupported.toString());
       unsupported.clear();
@@ -259,10 +259,10 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
       if (!requiredUnsupported.isEmpty()) {
         throw new UnsupportedFeatureException(requiredUnsupported.toString());
       }
-    }    
+    }
 
     // Inline or externalize the gadgetFeatureKeys
-    List<FeatureResource> inlineResources = Lists.newArrayList();        
+    List<FeatureResource> inlineResources = Lists.newArrayList();
     List<String> allRequested = Lists.newArrayList(gadgetFeatureKeys);
 
     if (externalizeFeatures) {
@@ -272,7 +272,7 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
       if (!externGadgetLibs.isEmpty()) {
         String jsUrl = jsUriManager.makeExternJsUri(gadget, externGadgetLibs).toString();
         Element libsTag = headTag.getOwnerDocument().createElement("script");
-        libsTag.setAttribute("src", jsUrl.replace("&", "&amp;"));
+        libsTag.setAttribute("src", jsUrl);
         headTag.insertBefore(libsTag, firstHeadChild);
       }
     } else {
@@ -301,7 +301,7 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
 
     String libraryConfig =
         getLibraryConfig(gadget, featureRegistry.getFeatures(allRequested));
-    
+
     // Size has a small fudge factor added to it for delimiters and such.
     StringBuilder inlineJs = new StringBuilder(size + libraryConfig.length() + INLINE_JS_BUFFER);
 
@@ -317,7 +317,7 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
           inlineJs.setLength(0);
         }
         Element referenceTag = headTag.getOwnerDocument().createElement("script");
-        referenceTag.setAttribute("src", theContent.replace("&", "&amp;"));
+        referenceTag.setAttribute("src", theContent);
         headTag.insertBefore(referenceTag, firstHeadChild);
       } else {
         inlineJs.append(theContent).append(";\n");
@@ -361,7 +361,7 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
         if (conf != null) {
           config.put(name, conf);
         }
-        
+
         // See if this feature has configuration data
         ConfigContributor contributor = configContributors.get(name);
         if (contributor != null) {

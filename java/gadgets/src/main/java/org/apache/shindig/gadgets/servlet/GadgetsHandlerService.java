@@ -126,7 +126,11 @@ public class GadgetsHandlerService {
     String iframeUrl =
         (fields.contains("iframeurl") || fields.contains(BeanFilter.ALL_FIELDS)) ?
             iframeUriManager.makeRenderingUri(gadget).toString() : null;
-    return createMetadataResponse(context.getUrl(), gadget.getSpec(), iframeUrl, fields);
+    Boolean needsTokenRefresh =
+        (fields.contains("needstokenrefresh") || fields.contains(BeanFilter.ALL_FIELDS)) ?
+            gadget.getAllFeatures().contains("auth-refresh") : null;
+    return createMetadataResponse(context.getUrl(), gadget.getSpec(), iframeUrl,
+        needsTokenRefresh, fields);
   }
 
   /**
@@ -230,12 +234,15 @@ public class GadgetsHandlerService {
   }
 
   private GadgetsHandlerApi.MetadataResponse createMetadataResponse(
-      Uri url, GadgetSpec spec, String iframeUrl, Set<String> fields) {
+      Uri url, GadgetSpec spec, String iframeUrl, Boolean needsTokenRefresh,
+      Set<String> fields) {
     return (GadgetsHandlerApi.MetadataResponse) beanFilter.createFilteredBean(
         beanDelegator.createDelegator(spec, GadgetsHandlerApi.MetadataResponse.class,
             ImmutableMap.<String, Object>of(
-                "url", url, "error", BeanDelegator.NULL,
-                "iframeurl", BeanDelegator.nullable(iframeUrl))),
+                "url", url,
+                "error", BeanDelegator.NULL,
+                "iframeurl", BeanDelegator.nullable(iframeUrl),
+                "needstokenrefresh", BeanDelegator.nullable(needsTokenRefresh))),
         fields);
   }
 

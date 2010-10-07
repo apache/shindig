@@ -30,7 +30,7 @@ gadgets.window = gadgets.window || {};
    * Detects the inner dimensions of a frame.
    * See: http://www.quirksmode.org/viewport/compatibility.html for more
    * information.
-   * @returns {Object} An object with width and height properties.
+   * @return {Object} An object with width and height properties.
    * @member gadgets.window
    */
   gadgets.window.getViewportDimensions = function() {

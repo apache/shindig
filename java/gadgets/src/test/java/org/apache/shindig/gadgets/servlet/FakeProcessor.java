@@ -23,6 +23,7 @@ import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.features.FeatureRegistry;
 import org.apache.shindig.gadgets.process.ProcessingException;
 import org.apache.shindig.gadgets.process.Processor;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
@@ -64,10 +65,17 @@ public class FakeProcessor extends Processor {
           "<Content type=\"html\">Hello, world</Content>" +
           "</Module>";
 
+  private final FeatureRegistry featureRegistry;
+
   public FakeProcessor() {
+    this(null);
+  }
+
+  public FakeProcessor(FeatureRegistry featureRegistry) {
     super(null, null, null, null, null);
     this.gadgets.put(FakeProcessor.SPEC_URL, FakeProcessor.SPEC_XML);
     this.gadgets.put(FakeProcessor.SPEC_URL2, FakeProcessor.SPEC_XML2);
+    this.featureRegistry = featureRegistry;
   }
 
   @Override
@@ -84,7 +92,8 @@ public class FakeProcessor extends Processor {
       return new Gadget()
           .setContext(context)
           .setSpec(spec)
-          .setCurrentView(view);
+          .setCurrentView(view)
+          .setGadgetFeatureRegistry(featureRegistry);
     } catch (GadgetException e) {
       throw new RuntimeException(e);
     }

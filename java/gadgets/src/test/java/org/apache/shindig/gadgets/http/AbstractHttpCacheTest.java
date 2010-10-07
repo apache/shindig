@@ -33,6 +33,7 @@ import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.AuthType;
 import org.apache.shindig.gadgets.oauth.OAuthArguments;
 import org.apache.shindig.gadgets.spec.RequestAuthenticationInfo;
+import org.apache.shindig.gadgets.uri.UriCommon.Param;
 import org.easymock.EasyMock;
 import org.junit.Test;
 
@@ -40,6 +41,7 @@ import java.util.Map;
 
 public class AbstractHttpCacheTest {
   protected static final Uri DEFAULT_URI = Uri.parse("http://example.org/file.txt");
+  protected static final Uri IMAGE_URI = Uri.parse("http://example.org/image.png");
   private static final Uri APP_URI = Uri.parse("http://example.org/gadget.xml");
   private static final String MODULE_ID = "100";
   private static final String SERVICE_NAME = "service";
@@ -53,6 +55,49 @@ public class AbstractHttpCacheTest {
     HttpRequest request = new HttpRequest(DEFAULT_URI).setAuthType(AuthType.NONE);
     CacheKeyBuilder key = new CacheKeyBuilder()
         .setLegacyParam(0, DEFAULT_URI).setLegacyParam(1, AuthType.NONE);
+
+    assertEquals(key.build(), cache.createKey(request));
+  }
+
+  private HttpRequest getMockImageRequest(String height, String width, String quality,
+      String mimeType) {
+    HttpRequest request = EasyMock.createMock(HttpRequest.class);
+    expect(request.getUri()).andReturn(IMAGE_URI).anyTimes();
+    expect(request.getAuthType()).andReturn(AuthType.NONE).anyTimes();
+    expect(request.getSecurityToken()).andReturn(null).anyTimes();
+    expect(request.getParam(Param.RESIZE_HEIGHT.getKey())).andReturn(height).anyTimes();
+    expect(request.getParam(Param.RESIZE_WIDTH.getKey())).andReturn(width).anyTimes();
+    expect(request.getParam(Param.RESIZE_QUALITY.getKey())).andReturn(quality).anyTimes();
+    expect(request.getRewriteMimeType()).andReturn(mimeType).anyTimes();
+    replay(request);
+    return request;
+  }
+
+  @Test
+  public void createKeySimpleImageRequest() throws Exception {
+    // Mock the Request with Image Resize (Quality) params, without rewrite mimeType.
+    HttpRequest request = getMockImageRequest("100", "80", "70", null);
+    CacheKeyBuilder key = new CacheKeyBuilder()
+        .setLegacyParam(0, IMAGE_URI)
+        .setLegacyParam(1, AuthType.NONE)
+        .setParam("rh", "100")
+        .setParam("rw", "80")
+        .setParam("rq", "70");
+
+    assertEquals(key.build(), cache.createKey(request));
+  }
+
+  @Test
+  public void createKeyImageRequestRewrite() throws Exception {
+    // Mock the Request with Image Resize (Quality) params and specified rewrite mimeType.
+    HttpRequest request = getMockImageRequest("100", "80", "70", "image/jpg");
+    CacheKeyBuilder key = new CacheKeyBuilder()
+        .setLegacyParam(0, IMAGE_URI)
+        .setLegacyParam(1, AuthType.NONE)
+        .setParam("rh", "100")
+        .setParam("rw", "80")
+        .setParam("rq", "70")
+        .setParam("rm", "image/jpg");
 
     assertEquals(key.build(), cache.createKey(request));
   }
@@ -259,7 +304,7 @@ public class AbstractHttpCacheTest {
 
     assertEquals(0, cache.map.size());
   }
-  
+
   @Test
   public void addResponseIfModifiedSince() {
     HttpRequest request = new HttpRequest(DEFAULT_URI);
@@ -354,8 +399,8 @@ public class AbstractHttpCacheTest {
         .create();
     cache.map.put(key, response);
 
-    // The cache itself still hold and return staled value, 
-    // caller responsible to decide what to do about it 
+    // The cache itself still hold and return staled value,
+    // caller responsible to decide what to do about it
     assertEquals(response, cache.removeResponse(request));
     assertEquals(0, cache.map.size());
   }

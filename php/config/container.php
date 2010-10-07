@@ -227,7 +227,7 @@ $shindigConfig = array(
   'cache_memcache_pconnect' => true,
   'cache_time' => 24 * 60 * 60,
   // If you use CacheStorageFile as caching backend, this is the directory where it stores the temporary files
-  'cache_root' => '/tmp/shindig',
+  'cache_root' => sys_get_temp_dir() . '/shindig',
 
   // connection timeout setting for all curl requests, set this time something low if you want errors reported
   // quicker to the end user, and high (between 10 and 20) if your on a slow connection

@@ -68,6 +68,12 @@
           <excludes>
             <exclude>org/apache/shindig/common/testing/*.java</exclude>
           </excludes>
+          <systemProperties>
+            <property>
+              <name>java.awt.headless</name>
+              <value>true</value>
+            </property>
+          </systemProperties>
         </configuration>
       </plugin>
       <plugin>
@@ -176,12 +182,6 @@
       <artifactId>xml-apis</artifactId>
     </dependency>
 
-    <!-- test -->
-    <dependency>
-      <groupId>xerces</groupId>
-      <artifactId>xmlParserAPIs</artifactId>
-      <scope>test</scope>
-    </dependency>
     <!-- needed for ehcache's use of slf4j -->
     <dependency>
       <groupId>org.slf4j</groupId>

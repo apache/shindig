@@ -18,7 +18,7 @@
 
 
 /**
- * @fileoverview Functions for dealing with locale-specific formatting
+ * @fileoverview Functions for dealing with locale-specific formatting.
  *
  * Note: Gadgets locale is set at render time. Gadget containers should emit
  * the data files required by the i18n feature by emitting
@@ -46,19 +46,19 @@ gadgets.i18n.numFormatter_ = null;
  * @return {string} string representation of date/time.
  */
 gadgets.i18n.formatDateTime = function(pattern, date) {
-    if (!gadgets.i18n.dtFormatter_) {
-        gadgets.i18n.dtFormatter_ = new gadgets.i18n.DateTimeFormat(gadgets.i18n.DateTimeConstants);
-        typeof pattern == 'string'
+  if (!gadgets.i18n.dtFormatter_) {
+    gadgets.i18n.dtFormatter_ = new gadgets.i18n.DateTimeFormat(gadgets.i18n.DateTimeConstants);
+    typeof pattern == 'string'
                 ? gadgets.i18n.dtFormatter_.applyPattern(pattern)
                 : gadgets.i18n.dtFormatter_.applyStandardPattern(pattern);
-        gadgets.i18n.dtFormatter_.patternInUse_ = pattern;
-    } else if (gadgets.i18n.dtFormatter_.patternInUse_ != pattern) {
-        typeof pattern == 'string'
+    gadgets.i18n.dtFormatter_.patternInUse_ = pattern;
+  } else if (gadgets.i18n.dtFormatter_.patternInUse_ != pattern) {
+    typeof pattern == 'string'
                 ? gadgets.i18n.dtFormatter_.applyPattern(pattern)
                 : gadgets.i18n.dtFormatter_.applyStandardPattern(pattern);
-        gadgets.i18n.dtFormatter_.patternInUse_ = pattern;
-    }
-    return gadgets.i18n.dtFormatter_.format(date);
+    gadgets.i18n.dtFormatter_.patternInUse_ = pattern;
+  }
+  return gadgets.i18n.dtFormatter_.format(date);
 };
 
 
@@ -76,19 +76,19 @@ gadgets.i18n.formatDateTime = function(pattern, date) {
  * @return {number} The number of characters advanced or 0 if failed.
  */
 gadgets.i18n.parseDateTime = function(pattern, text, start, date) {
-    if (!gadgets.i18n.dtParser_) {
-        gadgets.i18n.dtParser_ = new gadgets.i18n.DateTimeParse(gadgets.i18n.DateTimeConstants);
-        typeof pattern == 'string'
+  if (!gadgets.i18n.dtParser_) {
+    gadgets.i18n.dtParser_ = new gadgets.i18n.DateTimeParse(gadgets.i18n.DateTimeConstants);
+    typeof pattern == 'string'
                 ? gadgets.i18n.dtParser_.applyPattern(pattern)
                 : gadgets.i18n.dtParser_.applyStandardPattern(pattern);
-        gadgets.i18n.dtParser_.patternInUse_ = pattern;
-    } else if (gadgets.i18n.dtParser_.patternInUse_ != pattern) {
-        typeof pattern == 'string'
+    gadgets.i18n.dtParser_.patternInUse_ = pattern;
+  } else if (gadgets.i18n.dtParser_.patternInUse_ != pattern) {
+    typeof pattern == 'string'
                 ? gadgets.i18n.dtParser_.applyPattern(pattern)
                 : gadgets.i18n.dtParser_.applyStandardPattern(pattern);
-        gadgets.i18n.dtParser_.patternInUse_ = pattern;
-    }
-    return gadgets.i18n.dtParser_.parse(text, start, date);
+    gadgets.i18n.dtParser_.patternInUse_ = pattern;
+  }
+  return gadgets.i18n.dtParser_.parse(text, start, date);
 };
 
 
@@ -104,23 +104,23 @@ gadgets.i18n.parseDateTime = function(pattern, text, start, date) {
  * @return {string} The formatted string.
  */
 gadgets.i18n.formatNumber = function(pattern, value, opt_currencyCode) {
-    if (!gadgets.i18n.numFormatter_) {
-        gadgets.i18n.numFormatter_ = new gadgets.i18n.NumberFormat(gadgets.i18n.NumberFormatConstants);
-        typeof pattern == 'string'
+  if (!gadgets.i18n.numFormatter_) {
+    gadgets.i18n.numFormatter_ = new gadgets.i18n.NumberFormat(gadgets.i18n.NumberFormatConstants);
+    typeof pattern == 'string'
                 ? gadgets.i18n.numFormatter_.applyPattern(
-                  pattern, opt_currencyCode)
+        pattern, opt_currencyCode)
                 : gadgets.i18n.numFormatter_.applyStandardPattern(
                   pattern, opt_currencyCode);
-        gadgets.i18n.numFormatter_.patternInUse_ = pattern;
-    } else if (gadgets.i18n.numFormatter_.patternInUse_ != pattern) {
-        typeof pattern == 'string'
+    gadgets.i18n.numFormatter_.patternInUse_ = pattern;
+  } else if (gadgets.i18n.numFormatter_.patternInUse_ != pattern) {
+    typeof pattern == 'string'
                 ? gadgets.i18n.numFormatter_.applyPattern(
-                  pattern, opt_currencyCode)
+        pattern, opt_currencyCode)
                 : gadgets.i18n.numFormatter_.applyStandardPattern(
                   pattern, opt_currencyCode);
-        gadgets.i18n.numFormatter_.patternInUse_ = pattern;
-    }
-    return gadgets.i18n.numFormatter_.format(value);
+    gadgets.i18n.numFormatter_.patternInUse_ = pattern;
+  }
+  return gadgets.i18n.numFormatter_.format(value);
 };
 
 
@@ -139,27 +139,27 @@ gadgets.i18n.formatNumber = function(pattern, value, opt_currencyCode) {
  * @return {number} Parsed number, 0 if in error.
  */
 gadgets.i18n.parseNumber = function(pattern, text, opt_pos, opt_currencyCode) {
-    if (!gadgets.i18n.numFormatter_) {
-        gadgets.i18n.numFormatter_ = new gadgets.i18n.NumberFormat();
-        typeof pattern == 'string'
+  if (!gadgets.i18n.numFormatter_) {
+    gadgets.i18n.numFormatter_ = new gadgets.i18n.NumberFormat();
+    typeof pattern == 'string'
                 ? gadgets.i18n.numFormatter_.applyPattern(pattern,
                                                           opt_currencyCode)
                 : gadgets.i18n.numFormatter_.applyStandardPattern(
                   pattern, opt_currencyCode);
-        gadgets.i18n.numFormatter_.patternInUse_ = pattern;
-        gadgets.i18n.numFormatter_.currencyCodeInUse_ = opt_currencyCode;
-    } else if (gadgets.i18n.numFormatter_.patternInUse_ != pattern ||
-               gadgets.i18n.numFormatter_.currencyCodeInUse_
+    gadgets.i18n.numFormatter_.patternInUse_ = pattern;
+    gadgets.i18n.numFormatter_.currencyCodeInUse_ = opt_currencyCode;
+  } else if (gadgets.i18n.numFormatter_.patternInUse_ != pattern ||
+      gadgets.i18n.numFormatter_.currencyCodeInUse_
                        != opt_currencyCode) {
-        typeof pattern == 'string'
+    typeof pattern == 'string'
                 ? gadgets.i18n.numFormatter_.applyPattern(pattern,
                                                           opt_currencyCode)
                 : gadgets.i18n.numFormatter_.applyStandardPattern(
                   pattern, opt_currencyCode);
-        gadgets.i18n.numFormatter_.patternInUse_ = pattern;
-        gadgets.i18n.numFormatter_.currencyCodeInUse_ = opt_currencyCode;
-    }
-    return gadgets.i18n.numFormatter_.parse(text, opt_pos);
+    gadgets.i18n.numFormatter_.patternInUse_ = pattern;
+    gadgets.i18n.numFormatter_.currencyCodeInUse_ = opt_currencyCode;
+  }
+  return gadgets.i18n.numFormatter_.parse(text, opt_pos);
 };
 
 // Couple of constants to represent predefined Date/Time format type.

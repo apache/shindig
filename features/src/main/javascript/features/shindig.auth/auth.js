@@ -133,9 +133,9 @@ shindig.Auth = function() {
     authToken = args.join('&');
   }
 
-  function init (configuration) {
+  function init(configuration) {
     var urlParams = gadgets.util.getUrlParameters();
-    var config = configuration["shindig.auth"] || {};
+    var config = configuration['shindig.auth'] || {};
 
     // Auth token - might be injected into the gadget directly, or might
     // be on the URL (hopefully on the fragment).
@@ -151,22 +151,22 @@ shindig.Auth = function() {
     // Trusted JSON.  We use eval directly because this was injected by the
     // container server and json parsing is slow in IE.
     if (config.trustedJson) {
-      trusted = eval("(" + config.trustedJson + ")");
+      trusted = eval('(' + config.trustedJson + ')');
     }
   }
 
-  gadgets.config.register("shindig.auth", null, init);
+  gadgets.config.register('shindig.auth', null, init);
 
   return /** @scope shindig.auth */ {
 
     /**
      * Gets the auth token.
      *
-     * @return {string} the gadget authentication token
+     * @return {string} the gadget authentication token.
      *
      * @member shindig.auth
      */
-    getSecurityToken : function() {
+    getSecurityToken: function() {
       return authToken;
     },
 
@@ -177,7 +177,7 @@ shindig.Auth = function() {
      *
      * @member shindig.auth
      */
-    updateSecurityToken : function(newToken) {
+    updateSecurityToken: function(newToken) {
       authToken = newToken;
     },
 
@@ -186,7 +186,7 @@ shindig.Auth = function() {
      * a trusted container server.
      * @return {Object}
      */
-    getTrustedData : function() {
+    getTrustedData: function() {
       return trusted;
     }
   };

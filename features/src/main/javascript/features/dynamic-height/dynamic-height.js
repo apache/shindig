@@ -40,11 +40,11 @@ gadgets.window = gadgets.window || {};
    *
    * @param {Element} elem the element with the attribute to look for.
    * @param {string} attr the CSS attribute name of interest.
-   * @returns {number} the value of the px attr of the elem.
+   * @return {number} the value of the px attr of the elem.
    * @private
    */
   function parseIntFromElemPxAttribute(elem, attr) {
-    var style = window.getComputedStyle(elem, "");
+    var style = window.getComputedStyle(elem, '');
     var value = style.getPropertyValue(attr);
     value.match(/^([0-9]+)/);
     return parseInt(RegExp.$1, 10);
@@ -58,12 +58,12 @@ gadgets.window = gadgets.window || {};
    * containing parent element. Not counting "float" elements may lead to
    * undercounting.
    *
-   * @returns {number} the height of the gadget.
+   * @return {number} the height of the gadget.
    * @private
    */
   function getHeightForWebkit() {
     var result = 0;
-    var queue = [ document.body ];
+    var queue = [document.body];
 
     while (queue.length > 0) {
       var elem = queue.shift();
@@ -75,18 +75,18 @@ gadgets.window = gadgets.window || {};
             typeof child.scrollHeight !== 'undefined') {
           // scrollHeight already accounts for border-bottom, padding-bottom.
           var bottom = child.offsetTop + child.scrollHeight +
-              parseIntFromElemPxAttribute(child, "margin-bottom");
+              parseIntFromElemPxAttribute(child, 'margin-bottom');
           result = Math.max(result, bottom);
         }
         queue.push(child);
       }
-    } 
+    }
 
     // Add border, padding and margin of the containing body.
     return result
-        + parseIntFromElemPxAttribute(document.body, "border-bottom")
-        + parseIntFromElemPxAttribute(document.body, "margin-bottom")
-        + parseIntFromElemPxAttribute(document.body, "padding-bottom");
+        + parseIntFromElemPxAttribute(document.body, 'border-bottom')
+        + parseIntFromElemPxAttribute(document.body, 'margin-bottom')
+        + parseIntFromElemPxAttribute(document.body, 'padding-bottom');
   }
 
   /**
@@ -125,7 +125,7 @@ gadgets.window = gadgets.window || {};
         // Based on studying the values output by different browsers,
         // use the value that's NOT equal to the viewport height found above.
         newHeight = docEl.scrollHeight !== vh ?
-                     docEl.scrollHeight : docEl.offsetHeight;
+            docEl.scrollHeight : docEl.offsetHeight;
       } else if (navigator.userAgent.indexOf('AppleWebKit') >= 0) {
         // In Webkit:
         // Property scrollHeight and offsetHeight will only increase in value.
@@ -166,7 +166,7 @@ gadgets.window = gadgets.window || {};
         !isNaN(newHeight) &&
         !(heightAutoCalculated && newHeight === 0)) {
       oldHeight = newHeight;
-      gadgets.rpc.call(null, "resize_iframe", null, newHeight);
+      gadgets.rpc.call(null, 'resize_iframe', null, newHeight);
     }
   };
 }());

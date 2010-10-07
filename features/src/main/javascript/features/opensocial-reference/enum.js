@@ -110,21 +110,21 @@ opensocial.Enum.prototype.getDisplayValue = function() {
  */
 opensocial.Enum.Smoker = {
   /** @member opensocial.Enum.Smoker */
-  NO : 'NO',
+  NO: 'NO',
   /** @member opensocial.Enum.Smoker */
-  YES : 'YES',
+  YES: 'YES',
   /** @member opensocial.Enum.Smoker */
-  SOCIALLY : 'SOCIALLY',
+  SOCIALLY: 'SOCIALLY',
   /** @member opensocial.Enum.Smoker */
-  OCCASIONALLY : 'OCCASIONALLY',
+  OCCASIONALLY: 'OCCASIONALLY',
   /** @member opensocial.Enum.Smoker */
-  REGULARLY : 'REGULARLY',
+  REGULARLY: 'REGULARLY',
   /** @member opensocial.Enum.Smoker */
-  HEAVILY : 'HEAVILY',
+  HEAVILY: 'HEAVILY',
   /** @member opensocial.Enum.Smoker */
-  QUITTING : 'QUITTING',
+  QUITTING: 'QUITTING',
   /** @member opensocial.Enum.Smoker */
-  QUIT : 'QUIT'
+  QUIT: 'QUIT'
 };
 
 
@@ -141,21 +141,21 @@ opensocial.Enum.Smoker = {
  */
 opensocial.Enum.Drinker = {
   /** @member opensocial.Enum.Drinker */
-  NO : 'NO',
+  NO: 'NO',
   /** @member opensocial.Enum.Drinker */
-  YES : 'YES',
+  YES: 'YES',
   /** @member opensocial.Enum.Drinker */
-  SOCIALLY : 'SOCIALLY',
+  SOCIALLY: 'SOCIALLY',
   /** @member opensocial.Enum.Drinker */
-  OCCASIONALLY : 'OCCASIONALLY',
+  OCCASIONALLY: 'OCCASIONALLY',
   /** @member opensocial.Enum.Drinker */
-  REGULARLY : 'REGULARLY',
+  REGULARLY: 'REGULARLY',
   /** @member opensocial.Enum.Drinker */
-  HEAVILY : 'HEAVILY',
+  HEAVILY: 'HEAVILY',
   /** @member opensocial.Enum.Drinker */
-  QUITTING : 'QUITTING',
+  QUITTING: 'QUITTING',
   /** @member opensocial.Enum.Drinker */
-  QUIT : 'QUIT'
+  QUIT: 'QUIT'
 };
 
 
@@ -172,9 +172,9 @@ opensocial.Enum.Drinker = {
  */
 opensocial.Enum.Gender = {
   /** @member opensocial.Enum.Gender */
-  MALE : 'MALE',
+  MALE: 'MALE',
   /** @member opensocial.Enum.Gender */
-  FEMALE : 'FEMALE'
+  FEMALE: 'FEMALE'
 };
 
 
@@ -191,17 +191,17 @@ opensocial.Enum.Gender = {
  */
 opensocial.Enum.LookingFor = {
   /** @member opensocial.Enum.LookingFor */
-  DATING : 'DATING',
+  DATING: 'DATING',
   /** @member opensocial.Enum.LookingFor */
-  FRIENDS : 'FRIENDS',
+  FRIENDS: 'FRIENDS',
   /** @member opensocial.Enum.LookingFor */
-  RELATIONSHIP : 'RELATIONSHIP',
+  RELATIONSHIP: 'RELATIONSHIP',
   /** @member opensocial.Enum.LookingFor */
-  NETWORKING : 'NETWORKING',
+  NETWORKING: 'NETWORKING',
   /** @member opensocial.Enum.LookingFor */
-  ACTIVITY_PARTNERS : 'ACTIVITY_PARTNERS',
+  ACTIVITY_PARTNERS: 'ACTIVITY_PARTNERS',
   /** @member opensocial.Enum.LookingFor */
-  RANDOM : 'RANDOM'
+  RANDOM: 'RANDOM'
 };
 
 
@@ -218,15 +218,15 @@ opensocial.Enum.LookingFor = {
  */
 opensocial.Enum.Presence = {
   /** @member opensocial.Enum.Presence */
-  AWAY : 'AWAY',
+  AWAY: 'AWAY',
   /** @member opensocial.Enum.Presence */
-  CHAT : 'CHAT',
+  CHAT: 'CHAT',
   /** @member opensocial.Enum.Presence */
-  DND : 'DND',
+  DND: 'DND',
   /** @member opensocial.Enum.Presence */
-  OFFLINE : 'OFFLINE',
+  OFFLINE: 'OFFLINE',
   /** @member opensocial.Enum.Presence */
-  ONLINE : 'ONLINE',
+  ONLINE: 'ONLINE',
   /** @member opensocial.Enum.Presence */
-  XA : 'XA'
+  XA: 'XA'
 };

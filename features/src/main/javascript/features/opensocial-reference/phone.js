@@ -60,14 +60,14 @@ opensocial.Phone.Field = {
    *
    * @member opensocial.Phone.Field
    */
-  TYPE : 'type',
+  TYPE: 'type',
 
   /**
    * The phone number, specified as a String.
    *
    * @member opensocial.Phone.Field
    */
-  NUMBER : 'number'
+  NUMBER: 'number'
 };
 
 
@@ -76,12 +76,12 @@ opensocial.Phone.Field = {
  *
  * @param {string} key The key to get data for;
  *    keys are defined in <a href="opensocial.Phone.Field.html"><code>
- *    Phone.Field</code></a>
+ *    Phone.Field</code></a>.
  * @param {Object.<opensocial.DataRequest.DataRequestFields, Object>}
  *  opt_params Additional
  *    <a href="opensocial.DataRequest.DataRequestFields.html">params</a>
  *    to pass to the request.
- * @return {string} The data
+ * @return {string} The data.
  */
 opensocial.Phone.prototype.getField = function(key, opt_params) {
   return opensocial.Container.getField(this.fields_, key, opt_params);

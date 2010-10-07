@@ -149,7 +149,8 @@ public abstract class AbstractHttpCache implements HttpCache {
         .setLegacyParam(8, getTokenName(request))
         .setParam("rh", request.getParam(RESIZE_HEIGHT))
         .setParam("rw", request.getParam(RESIZE_WIDTH))
-        .setParam("rq", request.getParam(RESIZE_QUALITY));
+        .setParam("rq", request.getParam(RESIZE_QUALITY))
+        .setParam("rm", request.getRewriteMimeType());
 
     return keyBuilder.build();
   }

@@ -42,96 +42,96 @@ gadgets.rpctx = gadgets.rpctx || {};
  */
 if (!gadgets.rpctx.frameElement) {  // make lib resilient to double-inclusion
 
-gadgets.rpctx.frameElement = function() {
-  // Consts for FrameElement.
-  var FE_G2C_CHANNEL = '__g2c_rpc';
-  var FE_C2G_CHANNEL = '__c2g_rpc';
-  var process;
-  var ready;
+  gadgets.rpctx.frameElement = function() {
+    // Consts for FrameElement.
+    var FE_G2C_CHANNEL = '__g2c_rpc';
+    var FE_C2G_CHANNEL = '__c2g_rpc';
+    var process;
+    var ready;
 
-  function callFrameElement(targetId, from, rpc) {
-    try {
-      if (from !== '..') {
-        // Call from gadget to the container.
-        var fe = window.frameElement;
+    function callFrameElement(targetId, from, rpc) {
+      try {
+        if (from !== '..') {
+          // Call from gadget to the container.
+          var fe = window.frameElement;
 
-        if (typeof fe[FE_G2C_CHANNEL] === 'function') {
-          // Complete the setup of the FE channel if need be.
-          if (typeof fe[FE_G2C_CHANNEL][FE_C2G_CHANNEL] !== 'function') {
-            fe[FE_G2C_CHANNEL][FE_C2G_CHANNEL] = function(args) {
+          if (typeof fe[FE_G2C_CHANNEL] === 'function') {
+            // Complete the setup of the FE channel if need be.
+            if (typeof fe[FE_G2C_CHANNEL][FE_C2G_CHANNEL] !== 'function') {
+              fe[FE_G2C_CHANNEL][FE_C2G_CHANNEL] = function(args) {
+                process(gadgets.json.parse(args));
+              };
+            }
+
+            // Conduct the RPC call.
+            fe[FE_G2C_CHANNEL](gadgets.json.stringify(rpc));
+            return true;
+          }
+        } else {
+          // Call from container to gadget[targetId].
+          var frame = document.getElementById(targetId);
+
+          if (typeof frame[FE_G2C_CHANNEL] === 'function' &&
+              typeof frame[FE_G2C_CHANNEL][FE_C2G_CHANNEL] === 'function') {
+
+            // Conduct the RPC call.
+            frame[FE_G2C_CHANNEL][FE_C2G_CHANNEL](gadgets.json.stringify(rpc));
+            return true;
+          }
+        }
+      } catch (e) {
+      }
+      return false;
+    }
+
+    return {
+      getCode: function() {
+        return 'fe';
+      },
+
+      isParentVerifiable: function() {
+        return false;
+      },
+
+      init: function(processFn, readyFn) {
+        // No global setup.
+        process = processFn;
+        ready = readyFn;
+        return true;
+      },
+
+      setup: function(receiverId, token) {
+        // Indicate OK to call to container. This will be true
+        // by the end of this method.
+        if (receiverId !== '..') {
+          try {
+            var frame = document.getElementById(receiverId);
+            frame[FE_G2C_CHANNEL] = function(args) {
               process(gadgets.json.parse(args));
             };
+          } catch (e) {
+            return false;
           }
-
-          // Conduct the RPC call.
-          fe[FE_G2C_CHANNEL](gadgets.json.stringify(rpc));
-          return true;
         }
-      } else {
-        // Call from container to gadget[targetId].
-        var frame = document.getElementById(targetId);
-
-        if (typeof frame[FE_G2C_CHANNEL] === 'function' &&
-            typeof frame[FE_G2C_CHANNEL][FE_C2G_CHANNEL] === 'function') {
-
-          // Conduct the RPC call.
-          frame[FE_G2C_CHANNEL][FE_C2G_CHANNEL](gadgets.json.stringify(rpc));
-          return true;
-        }
-      }
-    } catch (e) {
-    }
-    return false;
-  }
-
-  return {
-    getCode: function() {
-      return 'fe';
-    },
-
-    isParentVerifiable: function() {
-      return false;
-    },
-  
-    init: function(processFn, readyFn) {
-      // No global setup.
-      process = processFn;
-      ready = readyFn;
-      return true;
-    },
-
-    setup: function(receiverId, token) {
-      // Indicate OK to call to container. This will be true
-      // by the end of this method.
-      if (receiverId !== '..') {
-        try {
-          var frame = document.getElementById(receiverId);
-          frame[FE_G2C_CHANNEL] = function(args) {
-            process(gadgets.json.parse(args));
+        if (receiverId === '..') {
+          ready('..', true);
+          var ackFn = function() {
+            window.setTimeout(function() {
+              gadgets.rpc.call(receiverId, gadgets.rpc.ACK);
+            }, 500);
           };
-        } catch (e) {
-          return false;
+          // Setup to container always happens before onload.
+          // If it didn't, the correct fix would be in gadgets.util.
+          gadgets.util.registerOnLoadHandler(ackFn);
         }
-      }
-      if (receiverId === '..') {
-        ready('..', true);
-        var ackFn = function() {
-          window.setTimeout(function() {
-            gadgets.rpc.call(receiverId, gadgets.rpc.ACK);
-          }, 500);
-        };
-        // Setup to container always happens before onload.
-        // If it didn't, the correct fix would be in gadgets.util.
-        gadgets.util.registerOnLoadHandler(ackFn);
-      }
-      return true;
-    },
+        return true;
+      },
 
-    call: function(targetId, from, rpc) {
-      return callFrameElement(targetId, from, rpc);
-    } 
+      call: function(targetId, from, rpc) {
+        return callFrameElement(targetId, from, rpc);
+      }
 
-  };
-}();
+    };
+  }();
 
 } // !end of double-inclusion guard

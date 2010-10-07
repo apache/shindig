@@ -150,12 +150,12 @@ class GadgetHtmlRendererTest extends PHPUnit_Framework_TestCase {
                     $this->fail('two entries with script type inline');
                 }
                 //this is from dynamic height and should not be included
-                $this->assertFalse(strpos($script['content'], 'gadgets.window=gadgets.window||{};'));
+                $this->assertFalse(strpos($script['content'], 'gadgets.window = gadgets.window || {};'));
                 //minimessage should be included
-                $miniMessagePos = strpos($script['content'], 'gadgets.MiniMessage=function');
+                $miniMessagePos = strpos($script['content'], 'gadgets.MiniMessage = function');
                 $this->assertTrue($miniMessagePos > 0);
                 //we force flash to be appended, so it should be after minimessage
-                $this->assertTrue(strpos($script['content'], 'gadgets.flash=gadgets.flash||{};') > $miniMessagePos);
+                $this->assertTrue(strpos($script['content'], 'gadgets.flash = gadgets.flash || {};') > $miniMessagePos);
                 $hasInline = true;
                 break;
             default:

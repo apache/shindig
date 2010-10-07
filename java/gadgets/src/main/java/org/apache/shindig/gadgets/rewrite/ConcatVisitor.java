@@ -186,7 +186,7 @@ public class ConcatVisitor implements DomWalker.Visitor {
       // with new (concat) URI, immediately ahead of the first elem.
       Element firstElem = sourceBatch.get(0);
       Element elemConcat = (Element)firstElem.cloneNode(true);
-      elemConcat.setAttribute(type.getSrcAttrib(), concatUri.getUri().toString().replace("&", "&amp;"));
+      elemConcat.setAttribute(type.getSrcAttrib(), concatUri.getUri().toString());
       firstElem.getParentNode().insertBefore(elemConcat, firstElem);
 
       // Now for all Elements, either A) remove them or B) replace each
@@ -247,9 +247,12 @@ public class ConcatVisitor implements DomWalker.Visitor {
   private Element getSibling(Element root, boolean isPrev) {
     Node cur = root;
     while ((cur = getNext(cur, isPrev)) != null) {
-      if (cur.getNodeType() == Node.TEXT_NODE && StringUtils.isEmpty(cur.getTextContent())) {
+      // Text nodes are safe to skip, as they won't effect styles or scripts.
+      // It is also safe to skip comment nodes except for conditional comments.
+      if (cur.getNodeType() == Node.TEXT_NODE ||
+          (cur.getNodeType() == Node.COMMENT_NODE && !isConditionalComment(cur))) {
         continue;
-      }
+      } 
       break;
     }
     if (cur != null && cur.getNodeType() == Node.ELEMENT_NODE) {
@@ -301,5 +304,12 @@ public class ConcatVisitor implements DomWalker.Visitor {
     // we should not batch across the links with title attribute, as it will lead to reordering of
     // styles.
     return areLinkNodesCompatible && current.getAttribute("title").equals(next.getAttribute("title"));
+  }
+
+  /**
+   * Checks if a given comment node is coditional comment.
+   */
+  private boolean isConditionalComment(Node node) {
+    return node.getNodeValue().trim().startsWith("[if");
   }
 }

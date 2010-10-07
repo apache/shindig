@@ -17,7 +17,7 @@
  */
 
 /**
- * @fileoverview Date/Time parsing library with locale support
+ * @fileoverview Date/Time parsing library with locale support.
  */
 
 gadgets.i18n = gadgets.i18n || {};
@@ -122,7 +122,7 @@ gadgets.i18n = gadgets.i18n || {};
  * @constructor
  */
 gadgets.i18n.DateTimeParse = function(symbol) {
-    this.symbols_ = symbol;
+  this.symbols_ = symbol;
 };
 
 /**
@@ -192,65 +192,65 @@ gadgets.i18n.DateTimeParse.ambiguousYearCenturyStart = 80;
  *     be parsed.
  */
 gadgets.i18n.DateTimeParse.prototype.applyPattern = function(pattern) {
-    this.patternParts_ = [];
-    var inQuote = false;
-    var buf = '';
+  this.patternParts_ = [];
+  var inQuote = false;
+  var buf = '';
 
-    for (var i = 0; i < pattern.length; i++) {
-        var ch = pattern.charAt(i);
+  for (var i = 0; i < pattern.length; i++) {
+    var ch = pattern.charAt(i);
 
     // handle space, add literal part (if exist), and add space part
-        if (ch == ' ') {
-            if (buf.length > 0) {
-                this.patternParts_.push({text: buf, count: 0, abutStart: false});
-                buf = '';
-            }
-            this.patternParts_.push({text: ' ', count: 0, abutStart: false});
-            while (i + 1 < pattern.length && pattern.charAt(i + 1) == ' ') {
-                i++;
-            }
-        } else if (inQuote) {
-            // inside quote, except '', just copy or exit
-            if (ch == '\'') {
-                if (i + 1 < pattern.length && pattern.charAt(i + 1) == '\'') {
-                    // quote appeared twice continuously, interpret as one quote.
-                    buf += ch;
-                    ++i;
-                } else {
-                    // exit quote
-                    inQuote = false;
-                }
-            } else {
-                // literal
-                buf += ch;
-            }
-        } else if (gadgets.i18n.DateTimeParse.PATTERN_CHARS_.indexOf(ch) >= 0) {
-            // outside quote, it is a pattern char
-            if (buf.length > 0) {
-                this.patternParts_.push({text: buf, count: 0, abutStart: false});
-                buf = '';
-            }
-            var count = this.getNextCharCount_(pattern, i);
-            this.patternParts_.push({text: ch, count: count, abutStart: false});
-            i += count - 1;
-        } else if (ch == '\'') {
-            // Two consecutive quotes is a quote literal, inside or outside of quotes.
-            if (i + 1 < pattern.length && pattern.charAt(i + 1) == '\'') {
-                buf += "'";
-                i++;
-            } else {
-                inQuote = true;
-            }
-        } else {
-            buf += ch;
-        }
-    }
-
-    if (buf.length > 0) {
+    if (ch == ' ') {
+      if (buf.length > 0) {
         this.patternParts_.push({text: buf, count: 0, abutStart: false});
+        buf = '';
+      }
+      this.patternParts_.push({text: ' ', count: 0, abutStart: false});
+      while (i + 1 < pattern.length && pattern.charAt(i + 1) == ' ') {
+        i++;
+      }
+    } else if (inQuote) {
+      // inside quote, except '', just copy or exit
+      if (ch == '\'') {
+        if (i + 1 < pattern.length && pattern.charAt(i + 1) == '\'') {
+          // quote appeared twice continuously, interpret as one quote.
+          buf += ch;
+          ++i;
+        } else {
+          // exit quote
+          inQuote = false;
+        }
+      } else {
+        // literal
+        buf += ch;
+      }
+    } else if (gadgets.i18n.DateTimeParse.PATTERN_CHARS_.indexOf(ch) >= 0) {
+      // outside quote, it is a pattern char
+      if (buf.length > 0) {
+        this.patternParts_.push({text: buf, count: 0, abutStart: false});
+        buf = '';
+      }
+      var count = this.getNextCharCount_(pattern, i);
+      this.patternParts_.push({text: ch, count: count, abutStart: false});
+      i += count - 1;
+    } else if (ch == '\'') {
+      // Two consecutive quotes is a quote literal, inside or outside of quotes.
+      if (i + 1 < pattern.length && pattern.charAt(i + 1) == '\'') {
+        buf += "'";
+        i++;
+      } else {
+        inQuote = true;
+      }
+    } else {
+      buf += ch;
     }
+  }
 
-    this.markAbutStart_();
+  if (buf.length > 0) {
+    this.patternParts_.push({text: buf, count: 0, abutStart: false});
+  }
+
+  this.markAbutStart_();
 };
 
 
@@ -258,25 +258,25 @@ gadgets.i18n.DateTimeParse.prototype.applyPattern = function(pattern) {
  * Apply a predefined pattern to this Parser.
  * @param {number} formatType A constant used to identified the predefined
  *     pattern string stored in locale repository.
- * @return {void} nothing
+ * @return {void} nothing.
  */
 gadgets.i18n.DateTimeParse.prototype.applyStandardPattern = function(formatType)
-{
-    var pattern;
+    {
+  var pattern;
   // formatType constants are defined in a way so that following resolution is
-    // possible.
-    if (formatType < 4) {
-        pattern = this.symbols_.DATEFORMATS[formatType];
-    } else if (formatType < 8) {
-        pattern = this.symbols_.TIMEFORMATS[formatType - 4];
-    } else if (formatType < 12) {
-        pattern = this.symbols_.DATEFORMATS[formatType - 8];
-        pattern += ' ';
-        pattern += this.symbols_.TIMEFORMATS[formatType - 8];
-    } else {
-        return this.applyStandardPattern(gadgets.i18n.MEDIUM_DATETIME_FORMAT);
-    }
-    return this.applyPattern(pattern);
+  // possible.
+  if (formatType < 4) {
+    pattern = this.symbols_.DATEFORMATS[formatType];
+  } else if (formatType < 8) {
+    pattern = this.symbols_.TIMEFORMATS[formatType - 4];
+  } else if (formatType < 12) {
+    pattern = this.symbols_.DATEFORMATS[formatType - 8];
+    pattern += ' ';
+    pattern += this.symbols_.TIMEFORMATS[formatType - 8];
+  } else {
+    return this.applyStandardPattern(gadgets.i18n.MEDIUM_DATETIME_FORMAT);
+  }
+  return this.applyPattern(pattern);
 };
 
 
@@ -289,7 +289,7 @@ gadgets.i18n.DateTimeParse.prototype.applyStandardPattern = function(formatType)
  * @return {number} How many characters parser advanced.
  */
 gadgets.i18n.DateTimeParse.prototype.parse = function(text, start, date) {
-    return this.internalParse_(text, start, date, false);
+  return this.internalParse_(text, start, date, false);
 };
 
 
@@ -304,94 +304,94 @@ gadgets.i18n.DateTimeParse.prototype.parse = function(text, start, date) {
  * @private
  */
 gadgets.i18n.DateTimeParse.prototype.internalParse_ =
-function(text, start, date, validation) {
-    var cal = new gadgets.i18n.DateTimeParse.MyDate_();
-    var parsePos = [start];
+    function(text, start, date, validation) {
+  var cal = new gadgets.i18n.DateTimeParse.MyDate_();
+  var parsePos = [start];
 
   // For parsing abutting numeric fields. 'abutPat' is the
-    // offset into 'pattern' of the first of 2 or more abutting
-    // numeric fields. 'abutStart' is the offset into 'text'
-    // where parsing the fields begins. 'abutPass' starts off as 0
-    // and increments each time we try to parse the fields.
-    var abutPat = -1; // If >=0, we are in a run of abutting numeric fields
-    var abutStart = 0;
-    var abutPass = 0;
+  // offset into 'pattern' of the first of 2 or more abutting
+  // numeric fields. 'abutStart' is the offset into 'text'
+  // where parsing the fields begins. 'abutPass' starts off as 0
+  // and increments each time we try to parse the fields.
+  var abutPat = -1; // If >=0, we are in a run of abutting numeric fields
+  var abutStart = 0;
+  var abutPass = 0;
 
-    for (var i = 0; i < this.patternParts_.length; ++i) {
-        if (this.patternParts_[i].count > 0) {
-            if (abutPat < 0 && this.patternParts_[i].abutStart) {
-                abutPat = i;
-                abutStart = start;
-                abutPass = 0;
-            }
+  for (var i = 0; i < this.patternParts_.length; ++i) {
+    if (this.patternParts_[i].count > 0) {
+      if (abutPat < 0 && this.patternParts_[i].abutStart) {
+        abutPat = i;
+        abutStart = start;
+        abutPass = 0;
+      }
 
       // Handle fields within a run of abutting numeric fields. Take
-            // the pattern "HHmmss" as an example. We will try to parse
-            // 2/2/2 characters of the input text, then if that fails,
-            // 1/2/2. We only adjust the width of the leftmost field; the
-            // others remain fixed. This allows "123456" => 12:34:56, but
-            // "12345" => 1:23:45. Likewise, for the pattern "yyyyMMdd" we
-            // try 4/2/2, 3/2/2, 2/2/2, and finally 1/2/2.
-            if (abutPat >= 0) {
-                // If we are at the start of a run of abutting fields, then
-                // shorten this field in each pass. If we can't shorten
-                // this field any more, then the parse of this set of
-                // abutting numeric fields has failed.
-                var count = this.patternParts_[i].count;
-                if (i == abutPat) {
-                    count -= abutPass;
-                    abutPass++;
-                    if (count == 0) {
-                        // tried all possible width, fail now
-                        return 0;
-                    }
-                }
+      // the pattern "HHmmss" as an example. We will try to parse
+      // 2/2/2 characters of the input text, then if that fails,
+      // 1/2/2. We only adjust the width of the leftmost field; the
+      // others remain fixed. This allows "123456" => 12:34:56, but
+      // "12345" => 1:23:45. Likewise, for the pattern "yyyyMMdd" we
+      // try 4/2/2, 3/2/2, 2/2/2, and finally 1/2/2.
+      if (abutPat >= 0) {
+        // If we are at the start of a run of abutting fields, then
+        // shorten this field in each pass. If we can't shorten
+        // this field any more, then the parse of this set of
+        // abutting numeric fields has failed.
+        var count = this.patternParts_[i].count;
+        if (i == abutPat) {
+          count -= abutPass;
+          abutPass++;
+          if (count == 0) {
+            // tried all possible width, fail now
+            return 0;
+          }
+        }
 
-                if (!this.subParse_(text, parsePos, this.patternParts_[i], count,
-                        cal)) {
-                    // If the parse fails anywhere in the run, back up to the
-                    // start of the run and retry.
-                    i = abutPat - 1;
-                    parsePos[0] = abutStart;
-                    continue;
-                }
-            }
+        if (!this.subParse_(text, parsePos, this.patternParts_[i], count,
+            cal)) {
+          // If the parse fails anywhere in the run, back up to the
+          // start of the run and retry.
+          i = abutPat - 1;
+          parsePos[0] = abutStart;
+          continue;
+        }
+      }
 
-                // Handle non-numeric fields and non-abutting numeric fields.
-            else {
-                abutPat = -1;
-                if (!this.subParse_(text, parsePos, this.patternParts_[i], 0, cal)) {
-                    return 0;
-                }
-            }
-        } else {
-            // Handle literal pattern characters. These are any
-            // quoted characters and non-alphabetic unquoted
-            // characters.
-            abutPat = -1;
+    // Handle non-numeric fields and non-abutting numeric fields.
+      else {
+        abutPat = -1;
+        if (!this.subParse_(text, parsePos, this.patternParts_[i], 0, cal)) {
+          return 0;
+        }
+      }
+    } else {
+      // Handle literal pattern characters. These are any
+      // quoted characters and non-alphabetic unquoted
+      // characters.
+      abutPat = -1;
       // A run of white space in the pattern matches a run
-            // of white space in the input text.
-            if (this.patternParts_[i].text.charAt(0) == ' ') {
-                // Advance over run in input text
-                var s = parsePos[0];
-                this.skipSpace_(text, parsePos);
+      // of white space in the input text.
+      if (this.patternParts_[i].text.charAt(0) == ' ') {
+        // Advance over run in input text
+        var s = parsePos[0];
+        this.skipSpace_(text, parsePos);
 
         // Must see at least one white space char in input
-                if (parsePos[0] > s) {
-                    continue;
-                }
-            } else if (text.indexOf(this.patternParts_[i].text, parsePos[0]) ==
-                       parsePos[0]) {
-                parsePos[0] += this.patternParts_[i].text.length;
-                continue;
-            }
-      // We fall through to this point if the match fails
-            return 0;
+        if (parsePos[0] > s) {
+          continue;
         }
+      } else if (text.indexOf(this.patternParts_[i].text, parsePos[0]) ==
+          parsePos[0]) {
+        parsePos[0] += this.patternParts_[i].text.length;
+        continue;
+      }
+      // We fall through to this point if the match fails
+      return 0;
     }
+  }
 
   // return progress
-    return cal.calcDate_(date, validation) ? parsePos[0] - start : 0;
+  return cal.calcDate_(date, validation) ? parsePos[0] - start : 0;
 };
 
 /**
@@ -405,13 +405,13 @@ function(text, start, date, validation) {
  * @private
  */
 gadgets.i18n.DateTimeParse.prototype.getNextCharCount_ =
-function(pattern, start) {
-    var ch = pattern.charAt(start);
-    var next = start + 1;
-    while (next < pattern.length && pattern.charAt(next) == ch) {
-        ++next;
-    }
-    return next - start;
+    function(pattern, start) {
+  var ch = pattern.charAt(start);
+  var next = start + 1;
+  while (next < pattern.length && pattern.charAt(next) == ch) {
+    ++next;
+  }
+  return next - start;
 };
 
 /**
@@ -435,12 +435,12 @@ gadgets.i18n.DateTimeParse.NUMERIC_FORMAT_CHARS_ = 'MydhHmsSDkK';
  * @private
  */
 gadgets.i18n.DateTimeParse.prototype.isNumericField_ = function(part) {
-    if (part.count <= 0) {
-        return false;
-    }
-    var i = gadgets.i18n.DateTimeParse.NUMERIC_FORMAT_CHARS_.indexOf(
-            part.text.charAt(0));
-    return i > 0 || i == 0 && part.count < 3;
+  if (part.count <= 0) {
+    return false;
+  }
+  var i = gadgets.i18n.DateTimeParse.NUMERIC_FORMAT_CHARS_.indexOf(
+      part.text.charAt(0));
+  return i > 0 || i == 0 && part.count < 3;
 };
 
 
@@ -457,22 +457,22 @@ gadgets.i18n.DateTimeParse.prototype.isNumericField_ = function(part) {
  * @private
  */
 gadgets.i18n.DateTimeParse.prototype.markAbutStart_ = function() {
-    // abut parts are continuous numeric parts. abutStart is the switch
-    // point from non-abut to abut
-    var abut = false;
+  // abut parts are continuous numeric parts. abutStart is the switch
+  // point from non-abut to abut
+  var abut = false;
 
-    for (var i = 0; i < this.patternParts_.length; i++) {
-        if (this.isNumericField_(this.patternParts_[i])) {
-            // if next part is not following abut sequence, and isNumericField_
-            if (!abut && i + 1 < this.patternParts_.length &&
-                this.isNumericField_(this.patternParts_[i + 1])) {
-                abut = true;
-                this.patternParts_[i].abutStart = true;
-            }
-        } else {
-            abut = false;
-        }
+  for (var i = 0; i < this.patternParts_.length; i++) {
+    if (this.isNumericField_(this.patternParts_[i])) {
+      // if next part is not following abut sequence, and isNumericField_
+      if (!abut && i + 1 < this.patternParts_.length &&
+          this.isNumericField_(this.patternParts_[i + 1])) {
+        abut = true;
+        this.patternParts_[i].abutStart = true;
+      }
+    } else {
+      abut = false;
     }
+  }
 };
 
 
@@ -484,10 +484,10 @@ gadgets.i18n.DateTimeParse.prototype.markAbutStart_ = function() {
  * @private
  */
 gadgets.i18n.DateTimeParse.prototype.skipSpace_ = function(text, pos) {
-    var m = text.substring(pos[0]).match(/^\s+/);
-    if (m) {
-        pos[0] += m[0].length;
-    }
+  var m = text.substring(pos[0]).match(/^\s+/);
+  if (m) {
+    pos[0] += m[0].length;
+  }
 };
 
 /**
@@ -504,67 +504,67 @@ gadgets.i18n.DateTimeParse.prototype.skipSpace_ = function(text, pos) {
  * @private
  */
 gadgets.i18n.DateTimeParse.prototype.subParse_ =
-function(text, pos, part, digitCount, cal) {
-    this.skipSpace_(text, pos);
+    function(text, pos, part, digitCount, cal) {
+  this.skipSpace_(text, pos);
 
-    var start = pos[0];
-    var ch = part.text.charAt(0);
+  var start = pos[0];
+  var ch = part.text.charAt(0);
 
   // parse integer value if it is a numeric field
-    var value = -1;
-    if (this.isNumericField_(part)) {
-        if (digitCount > 0) {
-            if ((start + digitCount) > text.length) {
-                return false;
-            }
-            value = this.parseInt_(
-                    text.substring(0, start + digitCount), pos);
-        } else {
-            value = this.parseInt_(text, pos);
-        }
+  var value = -1;
+  if (this.isNumericField_(part)) {
+    if (digitCount > 0) {
+      if ((start + digitCount) > text.length) {
+        return false;
+      }
+      value = this.parseInt_(
+          text.substring(0, start + digitCount), pos);
+    } else {
+      value = this.parseInt_(text, pos);
     }
+  }
 
-    switch (ch) {
-        case 'G': // ERA
-            cal.era = this.matchString_(text, pos, this.symbols_.ERAS);
-            return true;
-        case 'M': // MONTH
-            return this.subParseMonth_(text, pos, cal, value);
-        case 'E':
-            return this.subParseDayOfWeek_(text, pos, cal);
-        case 'a': // AM_PM
-            cal.ampm = this.matchString_(text, pos, this.symbols_.AMPMS);
-            return true;
-        case 'y': // YEAR
-            return this.subParseYear_(text, pos, start, value, part, cal);
-        case 'd': // DATE
-            cal.day = value;
-            return true;
-        case 'S': // FRACTIONAL_SECOND
-            return this.subParseFractionalSeconds_(value, pos, start, cal);
-        case 'h': // HOUR (1..12)
-            if (value == 12) {
-                value = 0;
-            }
-        case 'K': // HOUR (0..11)
-        case 'H': // HOUR_OF_DAY (0..23)
-        case 'k': // HOUR_OF_DAY (1..24)
-            cal.hours = value;
-            return true;
-        case 'm': // MINUTE
-            cal.minutes = value;
-            return true;
-        case 's': // SECOND
-            cal.seconds = value;
-            return true;
+  switch (ch) {
+    case 'G': // ERA
+      cal.era = this.matchString_(text, pos, this.symbols_.ERAS);
+      return true;
+    case 'M': // MONTH
+      return this.subParseMonth_(text, pos, cal, value);
+    case 'E':
+      return this.subParseDayOfWeek_(text, pos, cal);
+    case 'a': // AM_PM
+      cal.ampm = this.matchString_(text, pos, this.symbols_.AMPMS);
+      return true;
+    case 'y': // YEAR
+      return this.subParseYear_(text, pos, start, value, part, cal);
+    case 'd': // DATE
+      cal.day = value;
+      return true;
+    case 'S': // FRACTIONAL_SECOND
+      return this.subParseFractionalSeconds_(value, pos, start, cal);
+    case 'h': // HOUR (1..12)
+      if (value == 12) {
+        value = 0;
+      }
+    case 'K': // HOUR (0..11)
+    case 'H': // HOUR_OF_DAY (0..23)
+    case 'k': // HOUR_OF_DAY (1..24)
+      cal.hours = value;
+      return true;
+    case 'm': // MINUTE
+      cal.minutes = value;
+      return true;
+    case 's': // SECOND
+      cal.seconds = value;
+      return true;
 
-        case 'z': // ZONE_OFFSET
-        case 'Z': // TIMEZONE_RFC
-        case 'v': // TIMEZONE_GENERIC
-            return this.subparseTimeZoneInGMT_(text, pos, cal);
-        default:
-            return false;
-    }
+    case 'z': // ZONE_OFFSET
+    case 'Z': // TIMEZONE_RFC
+    case 'v': // TIMEZONE_GENERIC
+      return this.subparseTimeZoneInGMT_(text, pos, cal);
+    default:
+      return false;
+  }
 };
 
 /**
@@ -584,31 +584,31 @@ function(text, pos, part, digitCount, cal) {
  * @private
  */
 gadgets.i18n.DateTimeParse.prototype.subParseYear_ =
-function(text, pos, start, value, part, cal) {
-    var ch;
-    if (value < 0) {
-        //possible sign
-        ch = text.charAt(pos[0]);
-        if (ch != '+' && ch != '-') {
-            return false;
-        }
-        pos[0]++;
-        value = this.parseInt_(text, pos);
-        if (value < 0) {
-            return false;
-        }
-        if (ch == '-') {
-            value = -value;
-        }
+    function(text, pos, start, value, part, cal) {
+  var ch;
+  if (value < 0) {
+    //possible sign
+    ch = text.charAt(pos[0]);
+    if (ch != '+' && ch != '-') {
+      return false;
     }
+    pos[0]++;
+    value = this.parseInt_(text, pos);
+    if (value < 0) {
+      return false;
+    }
+    if (ch == '-') {
+      value = -value;
+    }
+  }
 
   // only if 2 digit was actually parsed, and pattern say it has 2 digit.
-    if (ch == null && (pos[0] - start) == 2 && part.count == 2) {
-        cal.setTwoDigitYear_(value);
-    } else {
-        cal.year = value;
-    }
-    return true;
+  if (ch == null && (pos[0] - start) == 2 && part.count == 2) {
+    cal.setTwoDigitYear_(value);
+  } else {
+    cal.year = value;
+  }
+  return true;
 };
 
 /**
@@ -624,24 +624,24 @@ function(text, pos, start, value, part, cal) {
  * @private
  */
 gadgets.i18n.DateTimeParse.prototype.subParseMonth_ =
-function(text, pos, cal, value) {
-    // when month is symbols, i.e., MMM or MMMM, value will be -1
-    if (value < 0) {
-        // Want to be able to parse both short and long forms.
-        // Try count == 4 first:
-        value = this.matchString_(text, pos, this.symbols_.MONTHS);
-        if (value < 0) { // count == 4 failed, now try count == 3
-            value = this.matchString_(text, pos, this.symbols_.SHORTMONTHS);
-        }
-        if (value < 0) {
-            return false;
-        }
-        cal.month = value;
-        return true;
-    } else {
-        cal.month = value - 1;
-        return true;
+    function(text, pos, cal, value) {
+  // when month is symbols, i.e., MMM or MMMM, value will be -1
+  if (value < 0) {
+    // Want to be able to parse both short and long forms.
+    // Try count == 4 first:
+    value = this.matchString_(text, pos, this.symbols_.MONTHS);
+    if (value < 0) { // count == 4 failed, now try count == 3
+      value = this.matchString_(text, pos, this.symbols_.SHORTMONTHS);
     }
+    if (value < 0) {
+      return false;
+    }
+    cal.month = value;
+    return true;
+  } else {
+    cal.month = value - 1;
+    return true;
+  }
 };
 
 /**
@@ -654,18 +654,18 @@ function(text, pos, cal, value) {
  * @private
  */
 gadgets.i18n.DateTimeParse.prototype.subParseDayOfWeek_ =
-function(text, pos, cal) {
-    // Handle both short and long forms.
-    // Try count == 4 (DDDD) first:
-    var value = this.matchString_(text, pos, this.symbols_.WEEKDAYS);
-    if (value < 0) {
-        value = this.matchString_(text, pos, this.symbols_.SHORTWEEKDAYS);
-    }
-    if (value < 0) {
-        return false;
-    }
-    cal.dayOfWeek = value;
-    return true;
+    function(text, pos, cal) {
+  // Handle both short and long forms.
+  // Try count == 4 (DDDD) first:
+  var value = this.matchString_(text, pos, this.symbols_.WEEKDAYS);
+  if (value < 0) {
+    value = this.matchString_(text, pos, this.symbols_.SHORTWEEKDAYS);
+  }
+  if (value < 0) {
+    return false;
+  }
+  cal.dayOfWeek = value;
+  return true;
 };
 
 /**
@@ -680,12 +680,12 @@ function(text, pos, cal) {
  * @private
  */
 gadgets.i18n.DateTimeParse.prototype.subParseFractionalSeconds_ =
-function(value, pos, start, cal) {
-    // Fractional seconds left-justify
-    var len = pos[0] - start;
-    cal.milliseconds = len < 3 ? value * Math.pow(10, 3 - len) :
-                       Math.round(value / Math.pow(10, len - 3));
-    return true;
+    function(value, pos, start, cal) {
+  // Fractional seconds left-justify
+  var len = pos[0] - start;
+  cal.milliseconds = len < 3 ? value * Math.pow(10, 3 - len) :
+      Math.round(value / Math.pow(10, len - 3));
+  return true;
 };
 
 /**
@@ -699,32 +699,32 @@ function(value, pos, start, cal) {
  * @private
  */
 gadgets.i18n.DateTimeParse.prototype.subparseTimeZoneInGMT_ =
-function(text, pos, cal) {
-    // First try to parse generic forms such as GMT-07:00. Do this first
-    // in case localized DateFormatZoneData contains the string "GMT"
-    // for a zone; in that case, we don't want to match the first three
-    // characters of GMT+/-HH:MM etc.
+    function(text, pos, cal) {
+  // First try to parse generic forms such as GMT-07:00. Do this first
+  // in case localized DateFormatZoneData contains the string "GMT"
+  // for a zone; in that case, we don't want to match the first three
+  // characters of GMT+/-HH:MM etc.
 
-    // For time zones that have no known names, look for strings
-    // of the form:
-    //    GMT[+-]hours:minutes or
-    //    GMT[+-]hhmm or
-    //    GMT.
-    if (text.indexOf('GMT', pos[0]) == pos[0]) {
-        pos[0] += 3;  // 3 is the length of GMT
-        return this.parseTimeZoneOffset_(text, pos, cal);
-    }
+  // For time zones that have no known names, look for strings
+  // of the form:
+  //    GMT[+-]hours:minutes or
+  //    GMT[+-]hhmm or
+  //    GMT.
+  if (text.indexOf('GMT', pos[0]) == pos[0]) {
+    pos[0] += 3;  // 3 is the length of GMT
+    return this.parseTimeZoneOffset_(text, pos, cal);
+  }
 
   // TODO(shanjian): check for named time zones by looking through the locale
-    // data from the DateFormatZoneData strings. should parse both short and long
-    // forms.
-    // subParseZoneString(text, start, cal);
+  // data from the DateFormatZoneData strings. should parse both short and long
+  // forms.
+  // subParseZoneString(text, start, cal);
 
-    // As a last resort, look for numeric timezones of the form
-    // [+-]hhmm as specified by RFC 822.  This code is actually
-    // a little more permissive than RFC 822.  It will try to do
-    // its best with numbers that aren't strictly 4 digits long.
-    return this.parseTimeZoneOffset_(text, pos, cal);
+  // As a last resort, look for numeric timezones of the form
+  // [+-]hhmm as specified by RFC 822.  This code is actually
+  // a little more permissive than RFC 822.  It will try to do
+  // its best with numbers that aren't strictly 4 digits long.
+  return this.parseTimeZoneOffset_(text, pos, cal);
 };
 
 /**
@@ -738,50 +738,50 @@ function(text, pos, cal) {
  * @private
  */
 gadgets.i18n.DateTimeParse.prototype.parseTimeZoneOffset_ =
-function(text, pos, cal) {
-    if (pos[0] >= text.length) {
-        cal.tzOffset = 0;
-        return true;
-    }
+    function(text, pos, cal) {
+  if (pos[0] >= text.length) {
+    cal.tzOffset = 0;
+    return true;
+  }
 
-    var sign = 1;
-    switch (text.charAt(pos[0])) {
-        case '-': sign = -1;  // fall through
-        case '+': pos[0]++;
-    }
+  var sign = 1;
+  switch (text.charAt(pos[0])) {
+    case '-': sign = -1;  // fall through
+    case '+': pos[0]++;
+  }
 
   // Look for hours:minutes or hhmm.
-    var st = pos[0];
-    var value = this.parseInt_(text, pos);
+  var st = pos[0];
+  var value = this.parseInt_(text, pos);
+  if (value == 0 && pos[0] == st) {
+    return false;
+  }
+
+  var offset;
+  if (pos[0] < text.length && text.charAt(pos[0]) == ':') {
+    // This is the hours:minutes case
+    offset = value * 60;
+    pos[0]++;
+    st = pos[0];
+    value = this.parseInt_(text, pos);
     if (value == 0 && pos[0] == st) {
-        return false;
+      return false;
     }
-
-    var offset;
-    if (pos[0] < text.length && text.charAt(pos[0]) == ':') {
-        // This is the hours:minutes case
-        offset = value * 60;
-        pos[0]++;
-        st = pos[0];
-        value = this.parseInt_(text, pos);
-        if (value == 0 && pos[0] == st) {
-            return false;
-        }
-        offset += value;
-    } else {
-        // This is the hhmm case.
-        offset = value;
+    offset += value;
+  } else {
+    // This is the hhmm case.
+    offset = value;
     // Assume "-23".."+23" refers to hours.
-        if (offset < 24 && (pos[0] - st) <= 2)
-            offset *= 60;
-        else
-            // todo: this looks questionable, should have more error checking
-            offset = offset % 100 + offset / 100 * 60;
-    }
+    if (offset < 24 && (pos[0] - st) <= 2)
+      offset *= 60;
+    else;
+    // todo: this looks questionable, should have more error checking
+    offset = offset % 100 + offset / 100 * 60;
+  }
 
-    offset *= sign;
-    cal.tzOffset = -offset;
-    return true;
+  offset *= sign;
+  cal.tzOffset = -offset;
+  return true;
 };
 
 /**
@@ -794,12 +794,12 @@ function(text, pos, cal) {
  * @private
  */
 gadgets.i18n.DateTimeParse.prototype.parseInt_ = function(text, pos) {
-    var m = text.substring(pos[0]).match(/^\d+/);
-    if (!m) {
-        return -1;
-    }
-    pos[0] += m[0].length;
-    return parseInt(m[0], 10);
+  var m = text.substring(pos[0]).match(/^\d+/);
+  if (!m) {
+    return -1;
+  }
+  pos[0] += m[0].length;
+  return parseInt(m[0], 10);
 };
 
 /**
@@ -817,27 +817,27 @@ gadgets.i18n.DateTimeParse.prototype.parseInt_ = function(text, pos) {
  * @private
  */
 gadgets.i18n.DateTimeParse.prototype.matchString_ = function(text, pos, data) {
-    // There may be multiple strings in the data[] array which begin with
-    // the same prefix (e.g., Cerven and Cervenec (June and July) in Czech).
-    // We keep track of the longest match, and return that. Note that this
-    // unfortunately requires us to test all array elements.
-    var bestMatchLength = 0;
-    var bestMatch = -1;
-    var lower_text = text.substring(pos[0]).toLowerCase();
-    for (var i = 0; i < data.length; ++i) {
-        var len = data[i].length;
+  // There may be multiple strings in the data[] array which begin with
+  // the same prefix (e.g., Cerven and Cervenec (June and July) in Czech).
+  // We keep track of the longest match, and return that. Note that this
+  // unfortunately requires us to test all array elements.
+  var bestMatchLength = 0;
+  var bestMatch = -1;
+  var lower_text = text.substring(pos[0]).toLowerCase();
+  for (var i = 0; i < data.length; ++i) {
+    var len = data[i].length;
     // Always compare if we have no match yet; otherwise only compare
-        // against potentially better matches (longer strings).
-        if (len > bestMatchLength &&
+    // against potentially better matches (longer strings).
+    if (len > bestMatchLength &&
             lower_text.indexOf(data[i].toLowerCase()) == 0) {
-            bestMatch = i;
-            bestMatchLength = len;
-        }
+      bestMatch = i;
+      bestMatchLength = len;
     }
-    if (bestMatch >= 0) {
-        pos[0] += bestMatchLength;
-    }
-    return bestMatch;
+  }
+  if (bestMatch >= 0) {
+    pos[0] += bestMatchLength;
+  }
+  return bestMatch;
 };
 
 
@@ -861,19 +861,19 @@ gadgets.i18n.DateTimeParse.MyDate_ = function() {
  * two-digit years are unambiguous.
  *
  * @param {number} year 2 digit year value before adjustment.
- * @return {number} disambiguated year
+ * @return {number} disambiguated year.
  * @private
  */
 gadgets.i18n.DateTimeParse.MyDate_.prototype.setTwoDigitYear_ = function(year)
-{
-    var now = new Date();
-    var defaultCenturyStartYear =
-            now.getFullYear() - gadgets.i18n.DateTimeParse.ambiguousYearCenturyStart;
-    var ambiguousTwoDigitYear = defaultCenturyStartYear % 100;
-    this.ambiguousYear = (year == ambiguousTwoDigitYear);
-    year += Math.floor(defaultCenturyStartYear / 100) * 100 +
-            (year < ambiguousTwoDigitYear ? 100 : 0);
-    return this.year = year;
+    {
+  var now = new Date();
+  var defaultCenturyStartYear =
+      now.getFullYear() - gadgets.i18n.DateTimeParse.ambiguousYearCenturyStart;
+  var ambiguousTwoDigitYear = defaultCenturyStartYear % 100;
+  this.ambiguousYear = (year == ambiguousTwoDigitYear);
+  year += Math.floor(defaultCenturyStartYear / 100) * 100 +
+      (year < ambiguousTwoDigitYear ? 100 : 0);
+  return this.year = year;
 };
 
 /**
@@ -888,110 +888,110 @@ gadgets.i18n.DateTimeParse.MyDate_.prototype.setTwoDigitYear_ = function(year)
  * @private
  */
 gadgets.i18n.DateTimeParse.MyDate_.prototype.calcDate_ =
-function(date, validation) {
-    // year 0 is 1 BC, and so on.
-    if (this.era != undefined && this.year != undefined &&
-        this.era == 0 && this.year > 0) {
-        this.year = -(this.year - 1);
-    }
+    function(date, validation) {
+  // year 0 is 1 BC, and so on.
+  if (this.era != undefined && this.year != undefined &&
+      this.era == 0 && this.year > 0) {
+    this.year = -(this.year - 1);
+  }
 
-    if (this.year != undefined) {
-        date.setFullYear(this.year);
-    }
+  if (this.year != undefined) {
+    date.setFullYear(this.year);
+  }
 
   // The setMonth and setDate logic is a little tricky. We need to make sure
-    // day of month is smaller enough so that it won't cause a month switch when
-    // setting month. For example, if data in date is Nov 30, when month is set
-    // to Feb, because there is no Feb 30, JS adjust it to Mar 2. So Feb 12 will
-    // become  Mar 12.
-    var org_date = date.getDate();
-    date.setDate(1); // every month has a 1st day, this can actually be anything
-    // less than 29.
+  // day of month is smaller enough so that it won't cause a month switch when
+  // setting month. For example, if data in date is Nov 30, when month is set
+  // to Feb, because there is no Feb 30, JS adjust it to Mar 2. So Feb 12 will
+  // become  Mar 12.
+  var org_date = date.getDate();
+  date.setDate(1); // every month has a 1st day, this can actually be anything
+  // less than 29.
 
-    if (this.month != undefined) {
-        date.setMonth(this.month);
-    }
+  if (this.month != undefined) {
+    date.setMonth(this.month);
+  }
 
-    if (this.day != undefined) {
-        date.setDate(this.day);
-    } else {
-        date.setDate(org_date);
-    }
+  if (this.day != undefined) {
+    date.setDate(this.day);
+  } else {
+    date.setDate(org_date);
+  }
 
-    if (this.hours == undefined) {
-        this.hours = date.getHours();
-    }
+  if (this.hours == undefined) {
+    this.hours = date.getHours();
+  }
 
   // adjust ampm
-    if (this.ampm != undefined && this.ampm > 0) {
-        if (this.hours < 12) {
-            this.hours += 12;
-        }
+  if (this.ampm != undefined && this.ampm > 0) {
+    if (this.hours < 12) {
+      this.hours += 12;
     }
-    date.setHours(this.hours);
+  }
+  date.setHours(this.hours);
 
-    if (this.minutes != undefined) {
-        date.setMinutes(this.minutes);
-    }
+  if (this.minutes != undefined) {
+    date.setMinutes(this.minutes);
+  }
 
-    if (this.seconds != undefined) {
-        date.setSeconds(this.seconds);
-    }
+  if (this.seconds != undefined) {
+    date.setSeconds(this.seconds);
+  }
 
-    if (this.milliseconds != undefined) {
-        date.setMilliseconds(this.milliseconds);
-    }
+  if (this.milliseconds != undefined) {
+    date.setMilliseconds(this.milliseconds);
+  }
 
   // If validation is needed, verify that the uncalculated date fields
-    // match the calculated date fields.  We do this before we set the
-    // timezone offset, which will skew all of the dates.
-    //
-    // Don't need to check the day of week as it is guaranteed to be
-    // correct or return false below.
-    if (validation &&
-        (this.year != undefined && this.year != date.getFullYear() ||
-         this.month != undefined && this.month != date.getMonth() ||
-         this.dayOfMonth != undefined && this.dayOfMonth != date.getDate() ||
-         this.hours >= 24 || this.minutes >= 60 || this.seconds >= 60 ||
-         this.milliseconds >= 1000)) {
-        return false;
-    }
+  // match the calculated date fields.  We do this before we set the
+  // timezone offset, which will skew all of the dates.
+  //
+  // Don't need to check the day of week as it is guaranteed to be
+  // correct or return false below.
+  if (validation &&
+      (this.year != undefined && this.year != date.getFullYear() ||
+      this.month != undefined && this.month != date.getMonth() ||
+      this.dayOfMonth != undefined && this.dayOfMonth != date.getDate() ||
+      this.hours >= 24 || this.minutes >= 60 || this.seconds >= 60 ||
+      this.milliseconds >= 1000)) {
+    return false;
+  }
 
   // adjust time zone
-    if (this.tzOffset != undefined) {
-        var offset = date.getTimezoneOffset();
-        date.setTime(date.getTime() + (this.tzOffset - offset) * 60 * 1000);
-    }
+  if (this.tzOffset != undefined) {
+    var offset = date.getTimezoneOffset();
+    date.setTime(date.getTime() + (this.tzOffset - offset) * 60 * 1000);
+  }
 
   // resolve ambiguous year if needed
-    if (this.ambiguousYear) { // the two-digit year == the default start year
-        var defaultCenturyStart = new Date();
-        defaultCenturyStart.setFullYear(
-                defaultCenturyStart.getFullYear() -
-                gadgets.i18n.DateTimeParse.ambiguousYearCenturyStart);
-        if (date.getTime() < defaultCenturyStart.getTime()) {
-            date.setFullYear(defaultCenturyStart.getFullYear() + 100);
-        }
+  if (this.ambiguousYear) { // the two-digit year == the default start year
+    var defaultCenturyStart = new Date();
+    defaultCenturyStart.setFullYear(
+        defaultCenturyStart.getFullYear() -
+        gadgets.i18n.DateTimeParse.ambiguousYearCenturyStart);
+    if (date.getTime() < defaultCenturyStart.getTime()) {
+      date.setFullYear(defaultCenturyStart.getFullYear() + 100);
     }
+  }
 
   // dayOfWeek, validation only
-    if (this.dayOfWeek != undefined) {
-        if (this.day == undefined) {
-            // adjust to the nearest day of the week
-            var adjustment = (7 + this.dayOfWeek - date.getDay()) % 7;
-            if (adjustment > 3) {
-                adjustment -= 7;
-            }
-            var orgMonth = date.getMonth();
-            date.setDate(date.getDate() + adjustment);
+  if (this.dayOfWeek != undefined) {
+    if (this.day == undefined) {
+      // adjust to the nearest day of the week
+      var adjustment = (7 + this.dayOfWeek - date.getDay()) % 7;
+      if (adjustment > 3) {
+        adjustment -= 7;
+      }
+      var orgMonth = date.getMonth();
+      date.setDate(date.getDate() + adjustment);
 
       // don't let it switch month
-            if (date.getMonth() != orgMonth) {
-                date.setDate(date.getDate() + (adjustment > 0 ? -7 : 7));
-            }
-        } else if (this.dayOfWeek != date.getDay()) {
-            return false;
-        }
+      if (date.getMonth() != orgMonth) {
+        date.setDate(date.getDate() + (adjustment > 0 ? -7 : 7));
+      }
+    } else if (this.dayOfWeek != date.getDay()) {
+      return false;
     }
-    return true;
+  }
+  return true;
 };

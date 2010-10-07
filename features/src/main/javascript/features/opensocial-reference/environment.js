@@ -39,9 +39,9 @@
 /**
  * Base interface for all environment objects.
  *
- * @param {string} domain The current domain
+ * @param {string} domain The current domain.
  * @param {Object.<string, Object.<string, boolean>>} supportedFields
- *    The fields supported by this container
+ *    The fields supported by this container.
  *
  * @private
  * @constructor
@@ -56,7 +56,7 @@ opensocial.Environment = function(domain, supportedFields) {
  * Returns the current domain &mdash;
  * for example, "orkut.com" or "myspace.com".
  *
- * @return {string} The domain
+ * @return {string} The domain.
  */
 opensocial.Environment.prototype.getDomain = function() {
   return this.domain;
@@ -80,59 +80,59 @@ opensocial.Environment.ObjectType = {
   /**
    * @member opensocial.Environment.ObjectType
    */
-  PERSON : 'person',
+  PERSON: 'person',
   /**
    * @member opensocial.Environment.ObjectType
    */
-  ADDRESS : 'address',
+  ADDRESS: 'address',
   /**
    * @member opensocial.Environment.ObjectType
    */
-  BODY_TYPE : 'bodyType',
+  BODY_TYPE: 'bodyType',
   /**
    * @member opensocial.Environment.ObjectType
    */
-  EMAIL : 'email',
+  EMAIL: 'email',
   /**
    * @member opensocial.Environment.ObjectType
    */
-  NAME : 'name',
+  NAME: 'name',
   /**
    * @member opensocial.Environment.ObjectType
    */
-  ORGANIZATION : 'organization',
+  ORGANIZATION: 'organization',
   /**
    * @member opensocial.Environment.ObjectType
    */
-  PHONE : 'phone',
+  PHONE: 'phone',
   /**
    * @member opensocial.Environment.ObjectType
    */
-  URL : 'url',
+  URL: 'url',
   /**
    * @member opensocial.Environment.ObjectType
    */
-  ACTIVITY : 'activity',
+  ACTIVITY: 'activity',
   /**
    * @member opensocial.Environment.ObjectType
    */
-  MEDIA_ITEM : 'mediaItem',
+  MEDIA_ITEM: 'mediaItem',
   /**
    * @member opensocial.Environment.ObjectType
    */
-  MESSAGE : 'message',
+  MESSAGE: 'message',
   /**
    * @member opensocial.Environment.ObjectType
    */
-  MESSAGE_TYPE : 'messageType',
+  MESSAGE_TYPE: 'messageType',
   /**
    * @member opensocial.Environment.ObjectType
    */
-  SORT_ORDER : 'sortOrder',
+  SORT_ORDER: 'sortOrder',
   /**
    * @member opensocial.Environment.ObjectType
    */
-  FILTER_TYPE : 'filterType'
+  FILTER_TYPE: 'filterType'
 };
 
 
@@ -142,9 +142,9 @@ opensocial.Environment.ObjectType = {
  *
  * @param {opensocial.Environment.ObjectType} objectType
  *    The <a href="opensocial.Environment.ObjectType.html">object type</a>
- *    to check for the field
- * @param {string} fieldName The name of the field to check for
- * @return {boolean} True if the field is supported on the specified object type
+ *    to check for the field.
+ * @param {string} fieldName The name of the field to check for.
+ * @return {boolean} True if the field is supported on the specified object type.
  */
 opensocial.Environment.prototype.supportsField = function(objectType,
     fieldName) {

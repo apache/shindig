@@ -28,15 +28,15 @@ if (gadgets && gadgets.rpc) { //Dont bind if gadgets.rpc not defined
      * Execute the JSON-RPC batch of gadgets.rpc. The container is expected to implement
      * the method osapi._handleGadgetRpcMethod(<JSON-RPC batch>)
      *
-     * @param {Object} requests the opensocial JSON-RPC request batch
+     * @param {Object} requests the opensocial JSON-RPC request batch.
      * @param {function(Object)} callback to the osapi batch with either an error response or
-     * a JSON-RPC batch result
+     * a JSON-RPC batch result.
      * @private
      */
     function execute(requests, callback) {
-        var rpcCallback = function(response) {
+      var rpcCallback = function(response) {
         if (!response) {
-          callback({ code : 500, message : 'Container refused the request' });
+          callback({ code: 500, message: 'Container refused the request' });
         } else if (response.error) {
           callback(response);
         } else {
@@ -52,15 +52,15 @@ if (gadgets && gadgets.rpc) { //Dont bind if gadgets.rpc not defined
     }
 
     function init(config) {
-      var transport = { name : "gadgets.rpc", "execute" : execute };
-      var services = config["osapi.services"];
+      var transport = { name: 'gadgets.rpc', 'execute' : execute };
+      var services = config['osapi.services'];
       if (services) {
         // Iterate over the defined services, extract the gadget.rpc endpoint and
         // bind to it
         for (var endpointName in services) if (services.hasOwnProperty(endpointName)) {
-          if (endpointName === "gadgets.rpc") {
+          if (endpointName === 'gadgets.rpc') {
             var methods = services[endpointName];
-            for (var i=0; i < methods.length; i++) {
+            for (var i = 0; i < methods.length; i++) {
               osapi._registerMethod(methods[i], transport);
             }
           }
@@ -96,7 +96,7 @@ if (gadgets && gadgets.rpc) { //Dont bind if gadgets.rpc not defined
           if (!response.error) {
             for (var i = 0; i < response.length; i++) {
               // do not rebind container.listMethods implementation
-              if (response[i] != "container.listMethods") {
+              if (response[i] != 'container.listMethods') {
                 osapi._registerMethod(response[i], transport);
               }
             }
@@ -114,7 +114,7 @@ if (gadgets && gadgets.rpc) { //Dont bind if gadgets.rpc not defined
 
     // Do not run this in container mode.
     if (gadgets.config && gadgets.config.isGadget) {
-      gadgets.config.register("osapi.services", null, init);
+      gadgets.config.register('osapi.services', null, init);
     }
   })();
 }

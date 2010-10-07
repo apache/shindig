@@ -53,6 +53,7 @@ os.Loader = {};
 
 /**
  * A map of URLs which were already loaded.
+ * @private
  */
 os.Loader.loadedUrls_ = {};
 
@@ -63,7 +64,7 @@ os.Loader.loadedUrls_ = {};
  * @param {Function} callback Function to call once loaded.
  */
 os.Loader.loadUrl = function(url, callback) {
-  if (typeof(window['gadgets']) != "undefined") {
+  if (typeof(window['gadgets']) != 'undefined') {
     os.Loader.requestUrlGadgets_(url, callback);
   } else {
     os.Loader.requestUrlXHR_(url, callback);
@@ -76,6 +77,7 @@ os.Loader.loadUrl = function(url, callback) {
  * the same URL twice.
  * @param {string} url The URL of the Template Library.
  * @param {Function} callback Function to call once loaded.
+ * @private
  */
 os.Loader.requestUrlXHR_ = function(url, callback) {
   if (os.Loader.loadedUrls_[url]) {
@@ -87,12 +89,12 @@ os.Loader.requestUrlXHR_ = function(url, callback) {
       shindig.xhrwrapper &&
       shindig.xhrwrapper.createXHR) {
     req = shindig.xhrwrapper.createXHR();
-  } else if (typeof XMLHttpRequest != "undefined") {
+  } else if (typeof XMLHttpRequest != 'undefined') {
     req = new XMLHttpRequest();
   } else {
-    req = new ActiveXObject("MSXML2.XMLHTTP");
+    req = new ActiveXObject('MSXML2.XMLHTTP');
   }
-  req.open("GET", url, true);
+  req.open('GET', url, true);
   req.onreadystatechange = function() {
     if (req.readyState == 4) {
       os.Loader.loadContent(req.responseText, url);
@@ -107,6 +109,7 @@ os.Loader.requestUrlXHR_ = function(url, callback) {
  * @param {string} url The URL where the content is located.
  * @param {Function} callback Function to call with the data from the URL
  *     once it is fetched.
+ * @private
  */
 os.Loader.requestUrlGadgets_ = function(url, callback) {
   var params = {};
@@ -154,7 +157,8 @@ os.Loader.loadContent = function(xmlString, url) {
 /**
  * Gets the function that should be used for processing a tag.
  * @param {string} tagName Name of the tag.
- * @return {Function|null} The function for processing such tags.
+ * @return {?Function} The function for processing such tags.
+ * @private
  */
 os.Loader.getProcessorFunction_ = function(tagName) {
   // TODO(levik): This won't work once compiler does name mangling.
@@ -165,7 +169,12 @@ os.Loader.getProcessorFunction_ = function(tagName) {
  * Processes the <Templates> node.
  */
 os.Loader.processTemplatesNode = function(node) {
-  for (var child = node.firstChild; child; child = child.nextSibling) {
+  // since the ie domparse does not return a general parent element
+  // we check here if firstChild is really present
+  if (node.firstChild) {
+    node = node.firstChild;
+  }
+  for (var child = node; child; child = child.nextSibling) {
     if (child.nodeType == DOM_ELEMENT_NODE) {
       var handler = os.Loader.getProcessorFunction_(child.tagName);
       if (handler) {
@@ -179,8 +188,8 @@ os.Loader.processTemplatesNode = function(node) {
  * Processes the <Namespace> node.
  */
 os.Loader.processNamespaceNode = function(node) {
-  var prefix = node.getAttribute("prefix");
-  var url = node.getAttribute("url");
+  var prefix = node.getAttribute('prefix');
+  var url = node.getAttribute('url');
   os.createNamespace(prefix, url);
 };
 
@@ -188,8 +197,8 @@ os.Loader.processNamespaceNode = function(node) {
  * Processes the <TemplateDef> node
  */
 os.Loader.processTemplateDefNode = function(node) {
-  var tag = node.getAttribute("tag");
-  var name = node.getAttribute("name");
+  var tag = node.getAttribute('tag');
+  var name = node.getAttribute('name');
   for (var child = node.firstChild; child; child = child.nextSibling) {
     if (child.nodeType == DOM_ELEMENT_NODE) {
       // TODO(levik): This won't work once compiler does name mangling.
@@ -205,17 +214,17 @@ os.Loader.processTemplateDefNode = function(node) {
  * Processes the <Template> node
  */
 os.Loader.processTemplateNode = function(node, opt_tag, opt_name) {
-  var tag = opt_tag || node.getAttribute("tag");
-  var name = opt_name || node.getAttribute("name");
+  var tag = opt_tag || node.getAttribute('tag');
+  var name = opt_name || node.getAttribute('name');
   if (tag) {
-    var tagParts = tag.split(":");
+    var tagParts = tag.split(':');
     if (tagParts.length != 2) {
-      throw Error("Invalid tag name: " + tag);
+      throw Error('Invalid tag name: ' + tag);
     }
     var nsObj = os.getNamespace(tagParts[0]);
     if (!nsObj) {
-      throw Error("Namespace not registered: " + tagParts[0] +
-          " while trying to define " + tag);
+      throw Error('Namespace not registered: ' + tagParts[0] +
+          ' while trying to define ' + tag);
     }
     var template = os.compileXMLNode(node);
     nsObj[tagParts[1]] = os.createTemplateCustomTag(template);
@@ -273,25 +282,25 @@ os.Loader.injectJavaScript = function(jsCode) {
 os.Loader.injectStyle = function(cssCode) {
   var sheet;
   if (document.styleSheets.length == 0) {
-    document.getElementsByTagName("head")[0].appendChild(
-        document.createElement("style"));
+    document.getElementsByTagName('head')[0].appendChild(
+        document.createElement('style'));
   }
   sheet = document.styleSheets[0];
-  var rules = cssCode.split("}");
+  var rules = cssCode.split('}');
   for (var i = 0; i < rules.length; i++) {
-    var rule = rules[i].replace(/\n/g, "").replace(/\s+/g, " ");
+    var rule = rules[i].replace(/\n/g, '').replace(/\s+/g, ' ');
     try {
       if (rule.length > 2) {
         if (sheet.insertRule) {
-          rule = rule + "}";
-            sheet.insertRule(rule, sheet.cssRules.length);
+          rule = rule + '}';
+          sheet.insertRule(rule, sheet.cssRules.length);
         } else {
-          var ruleParts = rule.split("{");
+          var ruleParts = rule.split('{');
           sheet.addRule(ruleParts[0], ruleParts[1]);
         }
       }
     } catch (err) {
-      gadgets.error("Error in stylesheet: " + rule + " - " + e.name + " - " + e.message);
+      gadgets.error('Error in stylesheet: ' + rule + ' - ' + err.name + ' - ' + err.message);
     }
   }
 };

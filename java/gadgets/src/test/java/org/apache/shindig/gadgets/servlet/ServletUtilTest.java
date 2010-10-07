@@ -210,6 +210,9 @@ public class ServletUtilTest {
   
   @Test
   public void testCopyResponseToServlet() throws Exception {
+    FakeTimeSource fakeTime = new FakeTimeSource();
+    HttpUtil.setTimeSource(fakeTime);
+
     HttpResponse response = new HttpResponseBuilder()
         .setResponseString("response string").setHttpStatusCode(200).addHeader("h1", "v1")
         .addHeader("h2", "v2").setCacheTtl(1000).create();
@@ -223,6 +226,7 @@ public class ServletUtilTest {
     assertEquals("response string", recorder.getResponseAsString());
     assertEquals("v1", recorder.getHeader("h1"));
     assertEquals("v2", recorder.getHeader("h2"));
+    assertEquals("public,max-age=1000", recorder.getHeader("Cache-Control"));
   }
   
   @Test

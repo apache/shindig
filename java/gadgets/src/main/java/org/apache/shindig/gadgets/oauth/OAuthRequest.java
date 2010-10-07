@@ -474,7 +474,7 @@ public class OAuthRequest {
     }
     params.add(new Parameter(OAuth.OAUTH_VERSION, OAuth.VERSION_1_0));
     params.add(new Parameter(OAuth.OAUTH_TIMESTAMP,
-        Long.toString(fetcherConfig.getClock().currentTimeMillis() / 1000)));
+        Long.toString(fetcherConfig.getClock().currentTimeMillis() / 1000L)));
     // the oauth.net java code uses a clock to generate nonces, which causes nonce collisions
     // under heavy load.  A random nonce is more reliable.
     params.add(new Parameter(OAuth.OAUTH_NONCE, String.valueOf(Math.abs(Crypto.RAND.nextLong()))));
@@ -770,7 +770,7 @@ public class OAuthRequest {
       try {
         int expireSecs = Integer.parseInt(OAuthUtil.getParameter(reply,
             OAuthConstants.OAUTH_EXPIRES_IN));
-        long expireMillis = fetcherConfig.getClock().currentTimeMillis() + expireSecs * 1000;
+        long expireMillis = fetcherConfig.getClock().currentTimeMillis() + expireSecs * 1000L;
         accessorInfo.setTokenExpireMillis(expireMillis);
       } catch (NumberFormatException e) {
         // Hrm.  Bogus server.  We can safely ignore this, we'll just wait for the server to

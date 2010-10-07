@@ -58,11 +58,11 @@ os.createNamespace = function(ns, url) {
     tags = {};
     os.nsmap_[ns] = tags;
     opensocial.xmlutil.NSMAP[ns] = url;
-  } else if (opensocial.xmlutil.NSMAP[ns] == null ) {
+  } else if (opensocial.xmlutil.NSMAP[ns] == null) {
     // Lazily register an auto-created namespace.
     opensocial.xmlutil.NSMAP[ns] = url;
   } else if (opensocial.xmlutil.NSMAP[ns] != url) {
-    throw("Namespace " + ns + " already defined with url " +
+    throw ('Namespace ' + ns + ' already defined with url ' +
         opensocial.xmlutil.NSMAP[ns]);
   }
   return tags;

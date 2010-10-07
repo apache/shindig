@@ -19,7 +19,7 @@
 
 /**
  * @fileoverview Emulate XMLHttpRequest using gadgets.io.makeRequest.
- * 
+ *
  * This is not a complete implementation of XMLHttpRequest:
  * - synchronous send() is unsupported;
  * - the callback function will not get full header information, as makeRequest
@@ -28,7 +28,7 @@
 
 shindig.xhrwrapper = shindig.xhrwrapper || {};
 
-(function () {
+(function() {
 
   // Save the browser's XMLHttpRequest and ActiveXObject constructors.
   var RealXMLHttpRequest = window.XMLHttpRequest;
@@ -36,11 +36,11 @@ shindig.xhrwrapper = shindig.xhrwrapper || {};
 
   /**
    * Creates a real XMLHttpRequest object.
-   * 
+   *
    * This function is to be used by code that needs access to the browser's
    * XMLHttpRequest functionality, such as the code that implements
    * gadgets.io.makeRequest itself.
-   * 
+   *
    * @return {Object|undefined} A XMLHttpRequest object, if one could
    *     be created.
    */
@@ -64,7 +64,7 @@ shindig.xhrwrapper = shindig.xhrwrapper || {};
 
   /**
    * @class XhrWrapper class.
-   * 
+   *
    * @constructor
    * @description Implements the XMLHttpRequest interface, using
    *     gadgets.io.makeRequest to make the actual network accesses.
@@ -88,7 +88,7 @@ shindig.xhrwrapper = shindig.xhrwrapper || {};
 
   /**
    * Returns all response headers as a string.
-   * 
+   *
    * @return {?string} The text of all response headers, or null if no response
    *     has been received.
    */
@@ -106,7 +106,7 @@ shindig.xhrwrapper = shindig.xhrwrapper || {};
 
   /**
    * Returns the value of a particular response header.
-   * 
+   *
    * @param {string} The name of the header to return.
    * @return {?string} The value of the header, or null if no response has
    *     been received or the header doesn't exist in the response.
@@ -122,7 +122,7 @@ shindig.xhrwrapper = shindig.xhrwrapper || {};
 
   /**
    * Initializes a request.
-   * 
+   *
    * @param {string} method The HTTP method to use ('POST' or 'GET').
    * @param {string} url The URL to which to send the request.
    * @param {boolean=} opt_async Whether to perform the operation
@@ -161,7 +161,7 @@ shindig.xhrwrapper = shindig.xhrwrapper || {};
 
   /**
    * Sends the request.
-   * 
+   *
    * @param {string=} opt_data The data used to populate the body of a POST
    *     request.
    */
@@ -200,7 +200,7 @@ shindig.xhrwrapper = shindig.xhrwrapper || {};
 
   /**
    * Sets the value of an HTTP request header.
-   * 
+   *
    * @param {string} header The name of the header to set.
    * @param {string} value The value for the header.
    */
@@ -211,7 +211,7 @@ shindig.xhrwrapper = shindig.xhrwrapper || {};
 
   /**
    * Processes the results from makeRequest and calls onreadystatechange.
-   * 
+   *
    * @param {Object} response The response from makeRequest.
    * @private
    */
@@ -246,14 +246,14 @@ shindig.xhrwrapper = shindig.xhrwrapper || {};
 
   /**
    * Points the request URL to the correct server.
-   * 
+   *
    * If the URL is pointing to the gadget server, this function assumes the
    * gadget's author wanted to point to the gadget contents location and
    * changes it so that it points to the right place.
-   * 
+   *
    * For example, if the gadget is rendered in https://shindig/gadgets/ifr
    * and the gadget's contents are at http://foo.com/bar/baz.html:
-   * 
+   *
    * - foo.xml gets turned into http://foo.com/bar/foo.xml
    * - /foo/bar.xml gets turned into http://foo.com/foo/bar.xml
    * - //foo.com/bar.xml gets turned into http://foo.com/bar.xml
@@ -277,18 +277,18 @@ shindig.xhrwrapper = shindig.xhrwrapper || {};
 
   /**
    * @class A class for processing URLs.
-   * 
+   *
    * @constructor
    * @description Pries apart the components of a URL, so it can be sliced
    * and diced and combined with other URLs as needed.
    */
   function Url(url) {
-    this.schema = "";
-    this.authority = "";
-    this.path = "";
-    this.filename = "";
-    this.query = "";
-    this.fragment = "";
+    this.schema = '';
+    this.authority = '';
+    this.path = '';
+    this.filename = '';
+    this.query = '';
+    this.fragment = '';
 
     var parse = url;
     var sharp = parse.indexOf('#');
@@ -337,7 +337,7 @@ shindig.xhrwrapper = shindig.xhrwrapper || {};
 
   /**
    * Fully qualifies this URL if it is relative, using a given base URL.
-   * 
+   *
    * @param {Url} base The base URL.
    */
   Url.prototype.fullyQualify = function(base) {
@@ -354,11 +354,11 @@ shindig.xhrwrapper = shindig.xhrwrapper || {};
 
   /**
    * Returns a readable representation of the URL.
-   * 
+   *
    * @return {string} A readable URL.
    */
   Url.prototype.toString = function() {
-    var url = "";
+    var url = '';
     if (this.schema) {
       url += this.schema;
     }
@@ -407,12 +407,12 @@ shindig.xhrwrapper = shindig.xhrwrapper || {};
    *
    * This is bad because when this code tries to call gadgets.io.makeRequest,
    * it will call the wrong function, or it might even be undefined.
-   * 
+   *
    * Therefore, we save the original namespaces before the gadget has a chance
    * to overwrite them, then switch between them as necessary.
-   * 
+   *
    * This works like this:
-   * 
+   *
    * switchOriginalNS_();
    * try {
    *   functionThatNeedsTheOriginalNamespaces();
@@ -425,11 +425,11 @@ shindig.xhrwrapper = shindig.xhrwrapper || {};
    */
   var originalNS = {};
   var gadgetNS = {};
-  var namespaces = ['gadgets', 'opensocial', 'shindig']; 
+  var namespaces = ['gadgets', 'opensocial', 'shindig'];
 
   /**
    * Copies the Shindig namespaces between two objects.
-   * 
+   *
    * @param {Object} from Object to copy from, or null for the global object.
    * @param {Object} to Object to copy to, or null for the global object.
    * @private
@@ -465,7 +465,7 @@ shindig.xhrwrapper = shindig.xhrwrapper || {};
 
   // Save the original namespaces.
   copyNS_(null, originalNS);
-  
+
   // Replace the browser's XMLHttpRequest and ActiveXObject constructors with
   // xhrwrapper's.
   if (window.XMLHttpRequest) {

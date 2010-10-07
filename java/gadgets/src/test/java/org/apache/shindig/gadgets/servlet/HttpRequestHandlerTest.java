@@ -287,7 +287,7 @@ public class HttpRequestHandlerTest extends EasyMockTestCase {
   }
 
   @Test
-  public void testJsonGet() throws Exception {
+  public void testJsonObjectGet() throws Exception {
     JSONObject request = new JSONObject("{method:http.get, id:req1, params : {"
         + "href:'http://www.example.org/somecontent', format:'json'"
         + "}}");
@@ -304,6 +304,27 @@ public class HttpRequestHandlerTest extends EasyMockTestCase {
     verify();
 
     JsonAssert.assertJsonEquals("{ headers : {}, status : 200, content : {key: 1}}}",
+        converter.convertToString(httpApiResponse));
+  }
+
+  @Test
+  public void testJsonArrayGet() throws Exception {
+    JSONObject request = new JSONObject("{method:http.get, id:req1, params : {"
+        + "href:'http://www.example.org/somecontent', format:'json'"
+        + "}}");
+    HttpRequest httpRequest = new HttpRequest(Uri.parse("http://www.example.org/somecontent"));
+    httpRequest.setMethod("GET");
+    builder.setResponseString("[{key:1},{key:2}]");
+    expect(pipeline.execute(eqRequest(httpRequest))).andReturn(builder.create()).anyTimes();
+
+    replay();
+    RpcHandler operation = registry.getRpcHandler(request);
+
+    HttpRequestHandler.HttpApiResponse httpApiResponse =
+        (HttpRequestHandler.HttpApiResponse)operation.execute(emptyFormItems, token, converter).get();
+    verify();
+
+    JsonAssert.assertJsonEquals("{ headers : {}, status : 200, content : [{key:1},{key:2}]}}",
         converter.convertToString(httpApiResponse));
   }
 

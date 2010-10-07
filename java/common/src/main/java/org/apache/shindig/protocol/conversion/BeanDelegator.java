@@ -173,7 +173,7 @@ public class BeanDelegator {
 
     /**
      * Proxy the interface function to the source object
-     * @throw UnsupportedOperationException if method is not supported by source
+     * @throws UnsupportedOperationException if method is not supported by source
      */
     public Object invoke(Object proxy, Method method, Object[] args) {
       Class<?> sourceClass = source.getClass();

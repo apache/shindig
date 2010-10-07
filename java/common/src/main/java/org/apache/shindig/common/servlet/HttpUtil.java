@@ -160,7 +160,7 @@ public final class HttpUtil {
    * Set the header for Cross-Site Resource Sharing.
    * @param resp HttpServletResponse to modify
    * @param validOrigins a space separated list of Origins as defined by the html5 spec
-   * @see http://dev.w3.org/html5/spec/browsers.html#origin-0
+   * @see <a href="http://dev.w3.org/html5/spec/browsers.html#origin-0">html 5 spec, section 5.3</a>
    */
   public static void setCORSheader(HttpServletResponse resp, Collection<String> validOrigins) {
     if (validOrigins == null) {

@@ -176,4 +176,21 @@ public class BasicHttpFetcherTest {
     }
     EasyMock.verify(mockEntity, mockInputStream);
   }
+  
+  /*
+   * https://issues.apache.org/jira/browse/SHINDIG-1425
+   */
+  @Test
+  public void testHeadWithMaxObjectSizeBytes() throws Exception {
+	fetcher.setMaxObjectSizeBytes(1024 * 1024);
+    Uri uri = new UriBuilder(Uri.parse("http://www.google.com/search"))
+        .addQueryParameter("body", "")
+        .addQueryParameter("status", "200")
+        .toUri();
+    HttpRequest request = new HttpRequest(uri);
+    request.setMethod("HEAD");
+    HttpResponse response = fetcher.fetch(request);
+    assertEquals(200, response.getHttpStatusCode());
+    assertEquals("", response.getResponseAsString());
+  }
 }

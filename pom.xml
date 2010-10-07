@@ -148,7 +148,7 @@
     </developer>
     <developer>
       <id>bhofmann</id>
-      <name>Bastian Hoffman</name>
+      <name>Bastian Hofmann</name>
       <email>bhofmann@apache.org</email>
       <organization>ASF</organization>
       <roles>
@@ -358,6 +358,15 @@
       <id>gagan</id>
       <name>Gagandeep Singh</name>
       <email>gagan@apache.org</email>
+      <organization>ASF</organization>
+      <roles>
+        <role>PMC Member</role>
+      </roles>
+    </developer>
+    <developer>
+      <id>hnguy</id>
+      <name>Han Nguyen</name>
+      <email>hnguy@apache.org</email>
       <organization>ASF</organization>
       <roles>
         <role>PMC Member</role>
@@ -592,7 +601,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-checkstyle-plugin</artifactId>
-            <version>2.3</version>
+            <version>2.6</version>
             <configuration>
               <configLocation>http://svn.apache.org/repos/asf/shindig/trunk/etc/checkstyle/checkstyle.xml</configLocation>
               <headerLocation>http://svn.apache.org/repos/asf/shindig/trunk/etc/checkstyle/java.header</headerLocation>
@@ -731,6 +740,8 @@
                 <exclude>**/create.sql</exclude>
                 <exclude>**/drop.sql</exclude>
                 <exclude>**/derby.log</exclude>
+                <exclude>content/editor/CodeMirror-0.8/js/*</exclude>
+                <exclude>content/editor/CodeMirror-0.8/css/*</exclude>
               </excludes>
             </configuration>
           </plugin>
@@ -834,6 +845,7 @@
         <module>java/server</module>
         <module>java/samples</module>
         <module>extras</module>
+        <module>php</module>
         <module>assembly</module>
       </modules>
       <build>
@@ -879,7 +891,13 @@
         </plugins>
       </build>
     </profile>
-
+    <profile>
+      <id>php</id>
+      <modules>
+        <module>features</module>
+        <module>php</module>
+      </modules>
+    </profile>
     <profile>
       <id>assemble</id>
       <build>
@@ -964,8 +982,13 @@
         <!-- Maven -->
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-antrun-plugin</artifactId>
+          <version>1.5</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>2.3.1</version>
+          <version>2.3.2</version>
           <configuration>
             <source>1.5</source>
             <target>1.5</target>
@@ -1195,6 +1218,8 @@
               <exclude>**/create.sql</exclude>
               <exclude>**/drop.sql</exclude>
               <exclude>**/derby.log</exclude>
+              <exclude>content/editor/CodeMirror-0.8/js/*</exclude>
+              <exclude>content/editor/CodeMirror-0.8/css/*</exclude>
             </excludes>
           </configuration>
         </plugin>
@@ -1454,12 +1479,26 @@
        <artifactId>htmlparser</artifactId>
        <version>r4209</version>
        <scope>compile</scope>
+       <exclusions>
+         <!-- force use of xml-apis until caja fixes their pom -->
+         <exclusion>
+           <groupId>xerces</groupId>
+           <artifactId>xmlParserAPIs</artifactId>
+         </exclusion>
+       </exclusions>
      </dependency>
-      <dependency>
-        <groupId>caja</groupId>
-        <artifactId>caja</artifactId>
-        <version>r4251</version>
-        <scope>compile</scope>
+     <dependency>
+       <groupId>caja</groupId>
+       <artifactId>caja</artifactId>
+       <version>r4251</version>
+       <scope>compile</scope>
+       <exclusions>
+         <!-- force use of xml-apis until caja fixes their pom -->
+         <exclusion>
+           <groupId>xerces</groupId>
+           <artifactId>xmlParserAPIs</artifactId>
+         </exclusion>
+       </exclusions>
       </dependency>
       <dependency>
         <groupId>net.oauth.core</groupId>
@@ -1576,11 +1615,6 @@
         <groupId>xerces</groupId>
         <artifactId>xercesImpl</artifactId>
         <version>2.9.1</version>
-      </dependency>
-      <dependency>
-        <groupId>xerces</groupId>
-        <artifactId>xmlParserAPIs</artifactId>
-        <version>2.6.2</version>
       </dependency>
       <dependency>
         <groupId>org.apache.sanselan</groupId>

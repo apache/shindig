@@ -19,6 +19,7 @@ package org.apache.shindig.gadgets.parse;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.parse.caja.CajaHtmlParser;
 import org.apache.shindig.gadgets.parse.nekohtml.NekoSimplifiedHtmlParser;
 
 import org.w3c.dom.DOMImplementation;
@@ -42,6 +43,9 @@ public class ParseTreeSerializerBenchmark {
   private GadgetHtmlParser nekoSimpleParser = new NekoSimplifiedHtmlParser(
       DOCUMENT_PROVIDER);
 
+  private GadgetHtmlParser cajaParser = new CajaHtmlParser(
+      DOCUMENT_PROVIDER);
+
   
   private boolean warmup;
 
@@ -58,13 +62,14 @@ public class ParseTreeSerializerBenchmark {
 
     this.numRuns = 10;
     warmup = true;
-    //runCaja();
+    runCaja();
     runNekoSimple();
+
     //Sleep to let JIT kick in
     Thread.sleep(10000L);
     this.numRuns = numRuns;
     warmup = false;
-    //runCaja();
+    runCaja();
     runNekoSimple();
   }
 
@@ -72,6 +77,13 @@ public class ParseTreeSerializerBenchmark {
     output("NekoSimple-----------------");
     timeParseDom(nekoSimpleParser);
     timeParseDomSerialize(nekoSimpleParser);
+  }
+
+
+  private void runCaja() throws Exception {
+    output("Caja-----------------");
+    timeParseDom(cajaParser);
+    timeParseDomSerialize(cajaParser);
   }
 
   private void output(String string) {

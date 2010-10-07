@@ -27,12 +27,12 @@
  * @return {string} Input with leading and trailing whitespace removed.
  */
 os.trim = function(string) {
-  return string.replace(/^\s+|\s+$/g, '');         
+  return string.replace(/^\s+|\s+$/g, '');
 };
 
 
 /**
- * Checks whether or not a given character is alpha-numeric. * 
+ * Checks whether or not a given character is alpha-numeric. *
  * @param {string} ch Character to check.
  * @return {boolean} This character is alpha-numeric.
  */
@@ -67,7 +67,7 @@ os.appendChildren = function(sourceNode, targetNode) {
 };
 
 /**
- * Given a property name (e.g. 'foo') will create a JavaBean-style getter 
+ * Given a property name (e.g. 'foo') will create a JavaBean-style getter
  * (e.g. 'getFoo').
  * @param {string} propertyName Name of the property.
  * @return {string} The name of the getter function.

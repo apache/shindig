@@ -19,12 +19,14 @@
 package org.apache.shindig.gadgets.servlet;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.auth.SecurityTokenCodec;
 import org.apache.shindig.auth.SecurityTokenException;
 import org.apache.shindig.common.EasyMockTestCase;
 import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.gadgets.features.FeatureRegistry;
 import org.apache.shindig.gadgets.process.ProcessingException;
 import org.apache.shindig.protocol.conversion.BeanDelegator;
 import org.apache.shindig.protocol.conversion.BeanFilter;
@@ -45,7 +47,8 @@ public class GadgetHandlerServiceTest extends EasyMockTestCase {
   private final BeanDelegator delegator = new BeanDelegator(
     GadgetsHandlerService.apiClasses, GadgetsHandlerService.enumConversionMap);
 
-  private final FakeProcessor processor = new FakeProcessor();
+  private final FeatureRegistry mockRegistry = mock(FeatureRegistry.class);
+  private final FakeProcessor processor = new FakeProcessor(mockRegistry);
   private final FakeIframeUriManager urlGenerator = new FakeIframeUriManager();
 
   private FakeSecurityTokenCodec tokenCodec;
@@ -73,9 +76,12 @@ public class GadgetHandlerServiceTest extends EasyMockTestCase {
     GadgetsHandlerApi.MetadataRequest request = createMetadataRequest(
         FakeProcessor.SPEC_URL, CONTAINER, "view",
         createTokenData(null, null), ImmutableList.of("*"));
+    EasyMock.expect(mockRegistry.getFeatures(EasyMock.isA(List.class)))
+        .andReturn(Lists.newArrayList("auth-refresh"));
     replay();
     GadgetsHandlerApi.MetadataResponse response = gadgetHandler.getMetadata(request);
     assertEquals(FakeIframeUriManager.DEFAULT_IFRAME_URI.toString(), response.getIframeUrl());
+    assertTrue(response.getNeedsTokenRefresh());
     assertEquals(1, response.getViews().size());
     assertTrue(response.getViews().get("default").getContent().contains("Hello, world" ));
     assertEquals(FakeProcessor.SPEC_TITLE, response.getModulePrefs().getTitle());
@@ -105,7 +111,6 @@ public class GadgetHandlerServiceTest extends EasyMockTestCase {
     verify();
   }
 
-
   @Test(expected = ProcessingException.class)
   public void testGetMetadataNoContainer() throws Exception {
     GadgetsHandlerApi.MetadataRequest request = createMetadataRequest(
@@ -114,7 +119,6 @@ public class GadgetHandlerServiceTest extends EasyMockTestCase {
     replay();
     GadgetsHandlerApi.MetadataResponse response = gadgetHandler.getMetadata(request);
   }
-
 
   @Test(expected = ProcessingException.class)
   public void testGetMetadataNoUrl() throws Exception {
@@ -147,6 +151,8 @@ public class GadgetHandlerServiceTest extends EasyMockTestCase {
   public void testGetMetadataNoToken() throws Exception {
     GadgetsHandlerApi.MetadataRequest request = createMetadataRequest(
         FakeProcessor.SPEC_URL, CONTAINER, "view", null, ImmutableList.of("*"));
+    EasyMock.expect(mockRegistry.getFeatures(EasyMock.isA(List.class)))
+        .andReturn(Lists.newArrayList("auth-refresh"));
     replay();
     GadgetsHandlerApi.MetadataResponse response = gadgetHandler.getMetadata(request);
     assertEquals(FakeIframeUriManager.DEFAULT_IFRAME_URI.toString(), response.getIframeUrl());

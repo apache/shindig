@@ -60,22 +60,25 @@ os.Container.domLoaded_ = false;
 
 /**
  * @type {number} The number of libraries needed to load.
+ * @private
  */
 os.Container.requiredLibraries_ = 0;
 
 /**
  * @type {boolean} Determines whether all templates are automatically processed.
+ * @private
  */
 os.Container.autoProcess_ = true;
 
 /**
  * @type {boolean} Has the document been processed already?
+ * @private
  */
 os.Container.processed_ = false;
 
 os.Container.disableAutoProcessing = function() {
   if (os.Container.processed_) {
-    throw Error("Document already processed.");
+    throw Error('Document already processed.');
   }
   os.Container.autoProcess_ = false;
 };
@@ -95,7 +98,7 @@ os.Container.registerDomLoadListener_ = function() {
   var gadgets = window['gadgets'];
   if (gadgets && gadgets.util) {
     gadgets.util.registerOnLoadHandler(os.Container.onDomLoad_);
-  } else if (typeof(navigator) != 'undefined' && navigator.product && 
+  } else if (typeof(navigator) != 'undefined' && navigator.product &&
       navigator.product == 'Gecko') {
     window.addEventListener('DOMContentLoaded', os.Container.onDomLoad_, false);
   } if (window.addEventListener) {
@@ -122,7 +125,7 @@ os.Container.onDomLoad_ = function() {
   if (os.Container.domLoaded_) {
     return;
   }
-  for (var i = 0; i < os.Container.domLoadCallbacks_.length; i ++) {
+  for (var i = 0; i < os.Container.domLoadCallbacks_.length; i++) {
     try {
       os.Container.domLoadCallbacks_[i]();
     } catch (e) {
@@ -198,7 +201,7 @@ os.Container.compileInlineTemplates = function(opt_data, opt_doc) {
 
 /**
  * @return {JsEvalContext} the default rendering context to use - this will
- * contain all available data. 
+ * contain all available data.
  */
 os.Container.getDefaultContext = function() {
   if ((window['gadgets'] && gadgets.util.hasFeature('opensocial-data')) ||
@@ -248,7 +251,7 @@ os.Container.renderInlineTemplates = function(opt_doc) {
         // This template will render when the specified data is available.
         var keys = requiredData.split(/[\, ]+/);
         var callback = os.Container.createRenderClosure(template, el);
-        if ("true" == node.getAttribute("autoUpdate")) {
+        if ('true' == node.getAttribute('autoUpdate')) {
           if (rendered) {
             opensocial.data.getDataContext().registerDeferredListener_(keys, callback);
           } else {
@@ -274,31 +277,31 @@ os.Container.renderInlineTemplates = function(opt_doc) {
 * @param {Object=} opt_data Optional data to be used as to create a context.
 * @param {Object=} opt_context Optional pre-constructed rendering context.
 * @return {Function} The constructed closure.
-* TODO(davidbyttow): Move this into util.js
+* TODO(davidbyttow): Move this into util.js.
 */
 os.Container.createRenderClosure = function(template, element, opt_data,
     opt_context) {
- var closure = function() {
-   var context = opt_context;
-   var data = opt_data;
-   if (!context) {
-     if (data) {
-       context = os.createContext(data);
-     } else {
-       context = os.Container.getDefaultContext();
-       data = context.data_;
-     }
-   }
-   template.renderInto(element, data, context);
- };
- return closure;
+  var closure = function() {
+    var context = opt_context;
+    var data = opt_data;
+    if (!context) {
+      if (data) {
+        context = os.createContext(data);
+      } else {
+        context = os.Container.getDefaultContext();
+        data = context.data_;
+      }
+    }
+    template.renderInto(element, data, context);
+  };
+  return closure;
 };
 
 /**
  * Creates a closure that will hide a DOM element.
  * @param {Element} element The DOM element to inject the template into.
  * @return {Function} The constructed closure.
- * TODO(davidbyttow): Move this into util.js
+ * TODO(davidbyttow): Move this into util.js.
  */
 os.Container.createHideElementClosure = function(element) {
   var closure = function() {
@@ -362,27 +365,27 @@ os.Container.processGadget = function() {
   if (!window['gadgets']) {
     return;
   }
-  
+
   // Honor the "disableAutoProcessing" feature param.
-  var params = gadgets.util.getFeatureParameters("opensocial-templates");
+  var params = gadgets.util.getFeatureParameters('opensocial-templates');
   if (!params) {
     return;
   }
-  if (params.disableAutoProcessing && 
-      params.disableAutoProcessing.toLowerCase != "false") {
+  if (params.disableAutoProcessing &&
+      params.disableAutoProcessing.toLowerCase != 'false') {
     os.Container.autoProcess_ = false;
   }
-  
+
   // Honor the "requireLibrary" feature param(s).
   if (params.requireLibrary) {
-    if (typeof params.requireLibrary == "string") {
+    if (typeof params.requireLibrary == 'string') {
       os.Container.addRequiredLibrary(params.requireLibrary);
     } else {
       for (var i = 0; i < params.requireLibrary.length; i++) {
         os.Container.addRequiredLibrary(params.requireLibrary[i]);
       }
     }
-  }  
+  }
 };
 
 //Process the gadget when the page loads.
@@ -391,14 +394,15 @@ os.Container.executeOnDomLoad(os.Container.processGadget);
 /**
  * A flag to determine if auto processing is waiting for libraries to load.
  * @type {boolean}
+ * @private
  */
 os.Container.processWaitingForLibraries_ = false;
 
 /**
  * Utility method which will automatically register all templates
  * and render all that are inline.
- * @param {Object=} opt_data Optional JSON object to render templates against
- * @param {Document=} opt_doc Optional document to use instead of window.document
+ * @param {Object=} opt_data Optional JSON object to render templates against.
+ * @param {Document=} opt_doc Optional document to use instead of window.document.
  */
 os.Container.processDocument = function(opt_data, opt_doc) {
   if (os.Container.requiredLibraries_ > 0) {
@@ -423,21 +427,22 @@ os.Container.executeOnDomLoad(function() {
 
 /**
  * A handler called when one of the required libraries loads.
+ * @private
  */
 os.Container.onLibraryLoad_ = function() {
   if (os.Container.requiredLibraries_ > 0) {
     os.Container.requiredLibraries_--;
-    if (os.Container.requiredLibraries_ == 0 && 
+    if (os.Container.requiredLibraries_ == 0 &&
         os.Container.processWaitingForLibraries_) {
       os.Container.processDocument();
     }
-  } 
+  }
 };
 
 /**
  * Adds a required library - the processing will be deferred until all
  * required libraries have loaded.
- * @param {string} libUrl The URL of the library needed to process this page
+ * @param {string} libUrl The URL of the library needed to process this page.
  */
 os.Container.addRequiredLibrary = function(libUrl) {
   os.Container.requiredLibraries_++;
@@ -502,7 +507,7 @@ os.Container.registerTagElement_ = function(element, name) {
       if (!nsObj) {
         // Auto Create a namespace for lazy registration.
         nsObj = os.createNamespace(tagParts[0], null);
-      }    
+      }
       nsObj[tagParts[1]] = os.createTemplateCustomTag(template);
     }
   }

@@ -58,7 +58,7 @@ opensocial.Address.Field = {
    *
    * @member opensocial.Address.Field
    */
-  TYPE : 'type',
+  TYPE: 'type',
 
   /**
    * If the container does not have structured addresses in its data store,
@@ -68,70 +68,70 @@ opensocial.Address.Field = {
    *
    * @member opensocial.Address.Field
    */
-  UNSTRUCTURED_ADDRESS : 'unstructuredAddress',
+  UNSTRUCTURED_ADDRESS: 'unstructuredAddress',
 
   /**
    * The po box of the address if there is one. Specified as a String.
    *
    * @member opensocial.Address.Field
    */
-  PO_BOX : 'poBox',
+  PO_BOX: 'poBox',
 
   /**
    * The street address. Specified as a String.
    *
    * @member opensocial.Address.Field
    */
-  STREET_ADDRESS : 'streetAddress',
+  STREET_ADDRESS: 'streetAddress',
 
   /**
    * The extended street address. Specified as a String.
    *
    * @member opensocial.Address.Field
    */
-  EXTENDED_ADDRESS : 'extendedAddress',
+  EXTENDED_ADDRESS: 'extendedAddress',
 
   /**
    * The region. Specified as a String.
    *
    * @member opensocial.Address.Field
    */
-  REGION : 'region',
+  REGION: 'region',
 
   /**
    * The locality. Specified as a String.
    *
    * @member opensocial.Address.Field
    */
-  LOCALITY : 'locality',
+  LOCALITY: 'locality',
 
   /**
    * The postal code. Specified as a String.
    *
    * @member opensocial.Address.Field
    */
-  POSTAL_CODE : 'postalCode',
+  POSTAL_CODE: 'postalCode',
 
   /**
    * The country. Specified as a String.
    *
    * @member opensocial.Address.Field
    */
-  COUNTRY : 'country',
+  COUNTRY: 'country',
 
   /**
    * The latitude. Specified as a Number.
    *
    * @member opensocial.Address.Field
    */
-  LATITUDE : 'latitude',
+  LATITUDE: 'latitude',
 
   /**
    * The longitude. Specified as a Number.
    *
    * @member opensocial.Address.Field
    */
-  LONGITUDE : 'longitude'
+  LONGITUDE: 'longitude'
 };
 
 
@@ -144,8 +144,8 @@ opensocial.Address.Field = {
  * @param {Object.<opensocial.DataRequest.DataRequestFields, Object>}
  *  opt_params Additional
  *    <a href="opensocial.DataRequest.DataRequestFields.html">params</a>
- *    to pass to the request
- * @return {string} The data
+ *    to pass to the request.
+ * @return {string} The data.
  */
 opensocial.Address.prototype.getField = function(key, opt_params) {
   return opensocial.Container.getField(this.fields_, key, opt_params);

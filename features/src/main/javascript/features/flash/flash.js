@@ -41,7 +41,7 @@ gadgets.flash.getMajorVersion = function() {
   var flashMajorVersion = 0;
   if (navigator.plugins && navigator.mimeTypes && navigator.mimeTypes.length) {
     // Flash detection for browsers using Netscape's plugin architecture
-    var i = navigator.plugins["Shockwave Flash"];
+    var i = navigator.plugins['Shockwave Flash'];
     if (i && i.description) {
       flashMajorVersion = parseInt(i.description.match(/[0-9]+/)[0], 10);
     }
@@ -51,7 +51,7 @@ gadgets.flash.getMajorVersion = function() {
     // "ShockwaveFlash.ShockwaveFlash.{majorVersion}".
     for (var version = 10; version > 0; version--) {
       try {
-        var dummy = new ActiveXObject("ShockwaveFlash.ShockwaveFlash." + version);
+        var dummy = new ActiveXObject('ShockwaveFlash.ShockwaveFlash.' + version);
         return version;
       } catch (e) {
       }
@@ -99,7 +99,7 @@ gadgets.flash.embedFlash = function(swfUrl, swfContainer, swfVersion, opt_params
   if (swfUrl.indexOf('//') == 0) {
     swfUrl = document.location.protocol + swfUrl;
   }
-  
+
   var ver = gadgets.flash.getMajorVersion();
   if (ver) {
     var swfVer = parseInt(swfVersion, 10);
@@ -160,12 +160,12 @@ gadgets.flash.embedFlash = function(swfUrl, swfContainer, swfVersion, opt_params
         var propIsHtmlSafe = function(val) {
           return !/["<>]/.test(val);
         };
-       
+
         opt_params.movie = swfUrl;
         var attr = {
           width: opt_params.width,
           height: opt_params.height,
-          classid: "clsid:D27CDB6E-AE6D-11CF-96B8-444553540000"
+          classid: 'clsid:D27CDB6E-AE6D-11CF-96B8-444553540000'
         };
         if (opt_params.id) {
           attr.id = opt_params.id;
@@ -183,8 +183,8 @@ gadgets.flash.embedFlash = function(swfUrl, swfContainer, swfVersion, opt_params
 
         for (var paramsProp in opt_params) {
           var param = document.createElement('param');
-          if (!/^swf_/.test(paramsProp) && 
-              !attr[paramsProp] && 
+          if (!/^swf_/.test(paramsProp) &&
+              !attr[paramsProp] &&
               !/___$/.test(paramsProp) &&
               propIsHtmlSafe(paramsProp) &&
               propIsHtmlSafe(opt_params[paramsProp])) {
@@ -216,21 +216,21 @@ gadgets.flash.embedFlash = function(swfUrl, swfContainer, swfVersion, opt_params
  * @member gadgets.flash
  */
 gadgets.flash.embedCachedFlash = function(swfUrl, swfContainer, swfVersion, opt_params) {
-  var url = gadgets.io.getProxyUrl(swfUrl, { rewriteMime: "application/x-shockwave-flash" });
+  var url = gadgets.io.getProxyUrl(swfUrl, { rewriteMime: 'application/x-shockwave-flash' });
   return gadgets.flash.embedFlash(url, swfContainer, swfVersion, opt_params);
 };
 
-/** 
+/**
  * iGoogle compatible way to get flash version.
- * @deprecated use gadgets.flash.getMajorVersion instead
+ * @deprecated use gadgets.flash.getMajorVersion instead.
  * @see gadgets.flash.getMajorVersion
  */
 var _IG_GetFlashMajorVersion = gadgets.flash.getMajorVersion;
 
 
-/** 
+/**
  * iGoogle compatible way to embed flash
- * @deprecated use gadgets.flash.embedFlash instead
+ * @deprecated use gadgets.flash.embedFlash instead.
  * @see gadgets.flash.embedFlash
  */
 var _IG_EmbedFlash = function(swfUrl, swfContainer, opt_params) {
@@ -238,9 +238,9 @@ var _IG_EmbedFlash = function(swfUrl, swfContainer, opt_params) {
       opt_params);
 };
 
-/** 
+/**
  * iGoogle compatible way to embed cached flash
- * @deprecated use gadgets.flash.embedCachedFlash() instead
+ * @deprecated use gadgets.flash.embedCachedFlash() instead.
  * @see gadgets.flash.embedCachedFlash
  */
 var _IG_EmbedCachedFlash = function(swfUrl, swfContainer, opt_params) {

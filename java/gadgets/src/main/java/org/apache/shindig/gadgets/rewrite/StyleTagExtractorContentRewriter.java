@@ -23,7 +23,6 @@ import com.google.inject.Inject;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.rewrite.DomWalker.Visitor;
-import org.apache.shindig.gadgets.uri.ConcatUriManager;
 import org.apache.shindig.gadgets.uri.ProxyUriManager;
 
 import java.util.Arrays;

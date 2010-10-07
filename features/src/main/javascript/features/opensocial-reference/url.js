@@ -58,21 +58,21 @@ opensocial.Url.Field = {
    *
    * @member opensocial.Url.Field
    */
-  TYPE : 'type',
+  TYPE: 'type',
 
   /**
    * The text of the link. Specified as a String.
    *
    * @member opensocial.Url.Field
    */
-  LINK_TEXT : 'linkText',
+  LINK_TEXT: 'linkText',
 
   /**
    * The address the url points to. Specified as a String.
    *
    * @member opensocial.Url.Field
    */
-  ADDRESS : 'address'
+  ADDRESS: 'address'
 };
 
 
@@ -81,12 +81,12 @@ opensocial.Url.Field = {
  *
  * @param {string} key The key to get data for;
  *    keys are defined in <a href="opensocial.Url.Field.html"><code>
- *    Url.Field</code></a>
+ *    Url.Field</code></a>.
  * @param {Object.<opensocial.DataRequest.DataRequestFields, Object>}
  *  opt_params Additional
  *    <a href="opensocial.DataRequest.DataRequestFields.html">params</a>
  *    to pass to the request.
- * @return {string} The data
+ * @return {string} The data.
  */
 opensocial.Url.prototype.getField = function(key, opt_params) {
   return opensocial.Container.getField(this.fields_, key, opt_params);

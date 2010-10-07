@@ -28,27 +28,27 @@
 var JsonPerson = function(opt_params) {
   opt_params = opt_params || {};
 
-  JsonPerson.constructObject(opt_params, "bodyType", opensocial.BodyType);
-  JsonPerson.constructObject(opt_params, "currentLocation", opensocial.Address);
-  JsonPerson.constructObject(opt_params, "name", opensocial.Name);
-  JsonPerson.constructObject(opt_params, "profileSong", opensocial.Url);
-  JsonPerson.constructObject(opt_params, "profileVideo", opensocial.Url);
+  JsonPerson.constructObject(opt_params, 'bodyType', opensocial.BodyType);
+  JsonPerson.constructObject(opt_params, 'currentLocation', opensocial.Address);
+  JsonPerson.constructObject(opt_params, 'name', opensocial.Name);
+  JsonPerson.constructObject(opt_params, 'profileSong', opensocial.Url);
+  JsonPerson.constructObject(opt_params, 'profileVideo', opensocial.Url);
 
-  JsonPerson.constructDate(opt_params, "dateOfBirth");
+  JsonPerson.constructDate(opt_params, 'dateOfBirth');
 
-  JsonPerson.constructArrayObject(opt_params, "addresses", opensocial.Address);
-  JsonPerson.constructArrayObject(opt_params, "emails", opensocial.Email);
-  JsonPerson.constructArrayObject(opt_params, "jobs", opensocial.Organization);
-  JsonPerson.constructArrayObject(opt_params, "phoneNumbers", opensocial.Phone);
-  JsonPerson.constructArrayObject(opt_params, "schools",
+  JsonPerson.constructArrayObject(opt_params, 'addresses', opensocial.Address);
+  JsonPerson.constructArrayObject(opt_params, 'emails', opensocial.Email);
+  JsonPerson.constructArrayObject(opt_params, 'jobs', opensocial.Organization);
+  JsonPerson.constructArrayObject(opt_params, 'phoneNumbers', opensocial.Phone);
+  JsonPerson.constructArrayObject(opt_params, 'schools',
       opensocial.Organization);
-  JsonPerson.constructArrayObject(opt_params, "urls", opensocial.Url);
+  JsonPerson.constructArrayObject(opt_params, 'urls', opensocial.Url);
 
-  JsonPerson.constructEnum(opt_params, "gender");
-  JsonPerson.constructEnum(opt_params, "smoker");
-  JsonPerson.constructEnum(opt_params, "drinker");
-  JsonPerson.constructEnum(opt_params, "networkPresence");
-  JsonPerson.constructEnumArray(opt_params, "lookingFor");
+  JsonPerson.constructEnum(opt_params, 'gender');
+  JsonPerson.constructEnum(opt_params, 'smoker');
+  JsonPerson.constructEnum(opt_params, 'drinker');
+  JsonPerson.constructEnum(opt_params, 'networkPresence');
+  JsonPerson.constructEnumArray(opt_params, 'lookingFor');
 
   opensocial.Person.call(this, opt_params, opt_params['isOwner'],
       opt_params['isViewer']);
@@ -99,10 +99,10 @@ JsonPerson.constructArrayObject = function(map, fieldName, className) {
 };
 
 JsonPerson.prototype.getDisplayName = function() {
-  return this.getField("displayName");
+  return this.getField('displayName');
 };
 
 JsonPerson.prototype.getAppData = function(key) {
-  var appData = this.getField("appData");
+  var appData = this.getField('appData');
   return appData && appData[key];
 };

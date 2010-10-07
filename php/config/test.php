@@ -23,6 +23,7 @@
  * you should not use these settings in production
  */
 $shindigConfig = array(
+  'compress_javascript' => false,
   'private_key_file' => realpath(dirname(__FILE__) . '/../test/certs') . '/private.key',
   'public_key_file' => realpath(dirname(__FILE__) . '/../test/certs') . '/public.crt',
   'private_key_phrase' => 'partuza',

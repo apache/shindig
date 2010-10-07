@@ -461,7 +461,7 @@ public class BasicHttpFetcher implements HttpFetcher {
 
     HttpEntity entity = response.getEntity();
 
-    if (maxObjSize > 0 && entity.getContentLength() > maxObjSize) {
+    if (maxObjSize > 0 && entity != null && entity.getContentLength() > maxObjSize) {
       return HttpResponse.badrequest("Exceeded maximum number of bytes - " + maxObjSize);
     }
 

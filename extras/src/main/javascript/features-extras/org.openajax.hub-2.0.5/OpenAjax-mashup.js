@@ -28,7 +28,7 @@ OpenAjax.hub = function() {
 
     return /** @scope OpenAjax.hub */ {
         implementer: "http://openajax.org",
-        implVersion: "2.0.4",
+        implVersion: "2.0.5",
         specVersion: "2.0",
         implExtraData: {},
         libraries: libs,

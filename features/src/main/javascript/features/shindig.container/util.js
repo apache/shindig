@@ -17,7 +17,7 @@
  */
 
 /**
- * @fileoverview Utility functions for the Open Gadget Container
+ * @fileoverview Utility functions for the Open Gadget Container.
  */
 
 Function.prototype.inherits = function(parentCtor) {

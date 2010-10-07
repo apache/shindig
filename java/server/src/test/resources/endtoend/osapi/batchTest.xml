@@ -51,8 +51,8 @@
           fetchBatchWithTwoPeopleCalls: function() {
             function receivedData(response) {
               assertFalse('Data error', response.error);
-              assertTrue('Jane is true - ' + gadgets.json.stringify(response), response.jane)
-              assertTrue('John is true - ' + gadgets.json.stringify(response), response.john)
+              assertTrue('Jane is true - ' + gadgets.json.stringify(response), response.jane);
+              assertTrue('John is true - ' + gadgets.json.stringify(response), response.john);
 //              assertFriends(response.jane.concat(response.john));
               finished();
             }

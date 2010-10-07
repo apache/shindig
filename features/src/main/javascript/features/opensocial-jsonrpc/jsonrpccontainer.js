@@ -28,11 +28,11 @@ var JsonRpcContainer = function(configParams) {
 
   var path = configParams.path;
   // Path for social API calls
-  this.path_ = path.replace("%host%", document.location.host);
+  this.path_ = path.replace('%host%', document.location.host);
 
   // Path for calls to invalidate
   var invalidatePath = configParams.invalidatePath;
-  this.invalidatePath_ = invalidatePath.replace("%host%",
+  this.invalidatePath_ = invalidatePath.replace('%host%',
       document.location.host);
 
   var supportedFieldsArray = configParams.supportedFields;
@@ -59,7 +59,7 @@ var JsonRpcContainer = function(configParams) {
 var JsonRpcRequestItem = function(rpc, opt_processData) {
   this.rpc = rpc;
   this.processData = opt_processData ||
-                     function (rawJson) {
+                     function(rawJson) {
                        return rawJson;
                      };
 
@@ -81,7 +81,7 @@ var JsonRpcRequestItem = function(rpc, opt_processData) {
 
   JsonRpcContainer.prototype.requestShareApp = function(recipientIds, reason,
       opt_callback, opt_params) {
-    var callbackId = "cId_" + Math.random();
+    var callbackId = 'cId_' + Math.random();
     callbackIdStore[callbackId] = opt_callback;
 
     var body = gadgets.util.unescapeString(reason.getField(
@@ -89,7 +89,7 @@ var JsonRpcRequestItem = function(rpc, opt_processData) {
 
     if (!body || body.length === 0) {
       var bodyMsgKey = gadgets.util.unescapeString(reason.getField(
-        opensocial.Message.Field.BODY_ID));
+          opensocial.Message.Field.BODY_ID));
       body = gadgets.Prefs.getMsg(bodyMsgKey);
     }
 
@@ -104,10 +104,10 @@ var JsonRpcRequestItem = function(rpc, opt_processData) {
   /**
    * Receives the returned results from the parent container.
    *
-   * @param {boolean} success if false, the message will not be sent
-   * @param {string=} opt_errorCode an error code if success is false
+   * @param {boolean} success if false, the message will not be sent.
+   * @param {string=} opt_errorCode an error code if success is false.
    * @param {?Array.<string>} recipientIds an array of recipient IDs,
-   *     if success is true
+   *     if success is true.
    * @private
    */
   JsonRpcContainer.requestShareAppCallback_ = function(callbackId,
@@ -129,7 +129,7 @@ var JsonRpcRequestItem = function(rpc, opt_processData) {
 
   JsonRpcContainer.prototype.requestCreateActivity = function(activity, priority,
       opt_callback) {
-    opt_callback = opt_callback || function(){};
+    opt_callback = opt_callback || function() {};
 
     var req = opensocial.newDataRequest();
     var viewer = opensocial.newIdSpec({'userId' : 'VIEWER'});
@@ -140,7 +140,7 @@ var JsonRpcRequestItem = function(rpc, opt_processData) {
   };
 
   JsonRpcContainer.prototype.requestData = function(dataRequest, callback) {
-    callback = callback || function(){};
+    callback = callback || function() {};
 
     var requestObjects = dataRequest.getRequestObjects();
     var totalRequests = requestObjects.length;
@@ -185,13 +185,13 @@ var JsonRpcRequestItem = function(rpc, opt_processData) {
         var response = result[k];
 
         if (request.key && response.id !== request.key) {
-          throw "Request key(" + request.key +
-              ") and response id(" + response.id + ") do not match";
+          throw 'Request key(' + request.key +
+              ') and response id(' + response.id + ') do not match';
         }
 
         var rawData = response.result || response.data;
         var error = response.error;
-        var errorMessage = "";
+        var errorMessage = '';
 
         if (error) {
           errorMessage = error.message;
@@ -211,20 +211,20 @@ var JsonRpcRequestItem = function(rpc, opt_processData) {
 
     // TODO: get the jsonbatch url from the container config
     var makeRequestParams = {
-      "CONTENT_TYPE" : "JSON",
-      "METHOD" : "POST",
-      "AUTHORIZATION" : "SIGNED",
-      "POST_DATA" : gadgets.json.stringify(jsonBatchData)
+      'CONTENT_TYPE' : 'JSON',
+      'METHOD' : 'POST',
+      'AUTHORIZATION' : 'SIGNED',
+      'POST_DATA' : gadgets.json.stringify(jsonBatchData)
     };
 
     var url = [this.path_];
     var token = shindig.auth.getSecurityToken();
     if (token) {
-      url.push("?st=", encodeURIComponent(token));
+      url.push('?st=', encodeURIComponent(token));
     }
 
     this.sendRequest(url.join(''), sendResponse, makeRequestParams,
-        "application/json");
+        'application/json');
   };
 
   JsonRpcContainer.prototype.sendRequest = function(relativeUrl, callback, params, contentType) {
@@ -234,8 +234,8 @@ var JsonRpcRequestItem = function(rpc, opt_processData) {
   JsonRpcContainer.generateErrorResponse = function(result, requestObjects,
       callback) {
     var globalErrorCode =
-            JsonRpcContainer.translateHttpError(result.rc
-                    || result.result.error || result.data.error)  
+        JsonRpcContainer.translateHttpError(result.rc
+                    || result.result.error || result.data.error)
                     || opensocial.ResponseItem.Error.INTERNAL_ERROR;
 
     var errorResponseMap = {};
@@ -286,14 +286,14 @@ var JsonRpcRequestItem = function(rpc, opt_processData) {
     }
 
     if (groupId === 'FRIENDS') {
-      groupId = "@friends";
+      groupId = '@friends';
     } else if (groupId == 'ALL') {
-      groupId = "@all";
+      groupId = '@all';
     } else if (groupId === 'SELF' || !groupId) {
-      groupId = "@self";
+      groupId = '@self';
     }
 
-    return { userId : userIds, groupId : groupId};
+    return { userId: userIds, groupId: groupId};
   };
 
   JsonRpcContainer.prototype.newFetchPersonRequest = function(id, opt_params) {
@@ -302,14 +302,14 @@ var JsonRpcRequestItem = function(rpc, opt_processData) {
 
     var me = this;
     return new JsonRpcRequestItem(peopleRequest.rpc,
-            function(rawJson) {
-              return me.createPersonFromJson(rawJson, opt_params);
-            });
+        function(rawJson) {
+          return me.createPersonFromJson(rawJson, opt_params);
+        });
   };
 
   JsonRpcContainer.prototype.newFetchPeopleRequest = function(idSpec,
       opt_params) {
-    var rpc = { method : "people.get" };
+    var rpc = { method: 'people.get' };
     rpc.params = this.translateIdSpec(idSpec);
 
     FieldTranslations.addAppDataAsProfileFields(opt_params);
@@ -362,28 +362,28 @@ var JsonRpcRequestItem = function(rpc, opt_processData) {
   JsonRpcContainer.prototype.isWildcardKey = function(key) {
     // Some containers support * to mean all keys in the js apis.
     // This allows the RESTful apis to be compatible with them.
-    return key === "*";
+    return key === '*';
   };
 
   JsonRpcContainer.prototype.newFetchPersonAppDataRequest = function(idSpec, keys,
       opt_params) {
-    var rpc = { method : "appdata.get" };
+    var rpc = { method: 'appdata.get' };
     rpc.params = this.translateIdSpec(idSpec);
-    rpc.params.appId = "@app";
+    rpc.params.appId = '@app';
     rpc.params.fields = this.getFieldsList(keys);
     FieldTranslations.translateNetworkDistance(idSpec, rpc.params);
 
     return new JsonRpcRequestItem(rpc,
-        function (appData) {
+        function(appData) {
           return opensocial.Container.escape(appData, opt_params, true);
         });
   };
 
   JsonRpcContainer.prototype.newUpdatePersonAppDataRequest = function(key,
       value) {
-    var rpc = { method : "appdata.update" };
-    rpc.params = {userId: ["@viewer"], groupId: "@self"};
-    rpc.params.appId = "@app";
+    var rpc = { method: 'appdata.update' };
+    rpc.params = {userId: ['@viewer'], groupId: '@self'};
+    rpc.params.appId = '@app';
     rpc.params.data = {};
     rpc.params.data[key] = value;
     rpc.params.fields = key;
@@ -391,9 +391,9 @@ var JsonRpcRequestItem = function(rpc, opt_processData) {
   };
 
   JsonRpcContainer.prototype.newRemovePersonAppDataRequest = function(keys) {
-    var rpc = { method : "appdata.delete" };
-    rpc.params = {userId: ["@viewer"], groupId: "@self"};
-    rpc.params.appId = "@app";
+    var rpc = { method: 'appdata.delete' };
+    rpc.params = {userId: ['@viewer'], groupId: '@self'};
+    rpc.params.appId = '@app';
     rpc.params.fields = this.getFieldsList(keys);
 
     return new JsonRpcRequestItem(rpc);
@@ -401,9 +401,9 @@ var JsonRpcRequestItem = function(rpc, opt_processData) {
 
   JsonRpcContainer.prototype.newFetchActivitiesRequest = function(idSpec,
       opt_params) {
-    var rpc = { method : "activities.get" };
+    var rpc = { method: 'activities.get' };
     rpc.params = this.translateIdSpec(idSpec);
-    rpc.params.appId = "@app";
+    rpc.params.appId = '@app';
     FieldTranslations.translateStandardArguments(opt_params, rpc.params);
     FieldTranslations.translateNetworkDistance(idSpec, rpc.params);
 
@@ -421,7 +421,11 @@ var JsonRpcRequestItem = function(rpc, opt_processData) {
   JsonRpcContainer.prototype.newActivity = function(opt_params) {
     return new JsonActivity(opt_params, true);
   };
-
+  
+  JsonRpcContainer.prototype.newAlbum = function(opt_params) {
+	  return new JsonAlbum(opt_params);
+  };
+  
   JsonRpcContainer.prototype.newMediaItem = function(mimeType, url, opt_params) {
     opt_params = opt_params || {};
     opt_params['mimeType'] = mimeType;
@@ -431,9 +435,9 @@ var JsonRpcRequestItem = function(rpc, opt_processData) {
 
   JsonRpcContainer.prototype.newCreateActivityRequest = function(idSpec,
       activity) {
-    var rpc = { method : "activities.create" };
+    var rpc = { method: 'activities.create' };
     rpc.params = this.translateIdSpec(idSpec);
-    rpc.params.appId = "@app";
+    rpc.params.appId = '@app';
     FieldTranslations.translateNetworkDistance(idSpec, rpc.params);
     rpc.params.activity = activity.toJsonObject();
 
@@ -441,25 +445,25 @@ var JsonRpcRequestItem = function(rpc, opt_processData) {
   };
 
   JsonRpcContainer.prototype.invalidateCache = function() {
-    var rpc = { method : "cache.invalidate" };
-    var invalidationKeys = { invalidationKeys : ["@viewer"] };
+    var rpc = { method: 'cache.invalidate' };
+    var invalidationKeys = { invalidationKeys: ['@viewer'] };
     rpc.params = invalidationKeys;
 
     var makeRequestParams = {
-      "CONTENT_TYPE" : "JSON",
-      "METHOD" : "POST",
-      "AUTHORIZATION" : "SIGNED",
-      "POST_DATA" : gadgets.json.stringify(rpc)
+      'CONTENT_TYPE' : 'JSON',
+      'METHOD' : 'POST',
+      'AUTHORIZATION' : 'SIGNED',
+      'POST_DATA' : gadgets.json.stringify(rpc)
     };
 
     var url = [this.invalidatePath_];
     var token = shindig.auth.getSecurityToken();
     if (token) {
-      url.push("?st=", encodeURIComponent(token));
+      url.push('?st=', encodeURIComponent(token));
     }
 
     this.sendRequest(url.join(''), null, makeRequestParams,
-        "application/json");
+        'application/json');
   };
 
 })();
@@ -473,7 +477,7 @@ JsonRpcContainer.prototype.newMessageCollection = function(opt_params) {
 };
 
 JsonRpcContainer.prototype.newFetchMessageCollectionsRequest = function(idSpec, opt_params) {
-  var rpc = { method : "messages.get" };
+  var rpc = { method: 'messages.get' };
   rpc.params = this.translateIdSpec(idSpec);
 
   return new JsonRpcRequestItem(rpc,
@@ -488,7 +492,7 @@ JsonRpcContainer.prototype.newFetchMessageCollectionsRequest = function(idSpec, 
 };
 
 JsonRpcContainer.prototype.newFetchMessagesRequest = function(idSpec, msgCollId, opt_params) {
-  var rpc = { method : "messages.get" };
+  var rpc = { method: 'messages.get' };
   rpc.params = this.translateIdSpec(idSpec);
   rpc.params.msgCollId = msgCollId;
 
@@ -501,4 +505,66 @@ JsonRpcContainer.prototype.newFetchMessagesRequest = function(idSpec, msgCollId,
         }
         return new opensocial.Collection(messages);
       });
+};
+
+JsonRpcContainer.prototype.newCreateAlbumRequest = function(idSpec, album) {
+  var rpc = { method : "albums.create" };
+  rpc.params = this.translateIdSpec(idSpec);
+  rpc.params.appId = "@app"; 
+  rpc.params.album = album.toJsonObject();
+  
+  return new JsonRpcRequestItem(rpc);	
+};
+
+JsonRpcContainer.prototype.newDeleteAlbumRequest = function(idSpec, albumId) {
+  var rpc = { method : "albums.delete" };
+  rpc.params = this.translateIdSpec(idSpec);
+  rpc.params.appId = "@app"; 	
+  rpc.params.albumId = albumId;
+  
+  return new JsonRpcRequestItem(rpc);
+};
+
+JsonRpcContainer.prototype.newFetchAlbumsRequest = function(idSpec, opt_params) {
+  var rpc = { method : "albums.get" };
+  rpc.params = this.translateIdSpec(idSpec);
+  rpc.params.appId = "@app";
+
+  return new JsonRpcRequestItem(rpc, function(rawJson) {
+    rawJson = rawJson['list'];
+    var albums = [];
+    for ( var i = 0; i < rawJson.length; i++) {
+      albums.push(new JsonAlbum(rawJson[i]));
+    }
+
+    return new opensocial.Collection(albums);
+  });
+};
+
+JsonRpcContainer.prototype.newCreateMediaItemRequest = function(idSpec, albumId, mediaItem) {
+  var rpc = { method : "mediaItems.create" };
+  rpc.params = this.translateIdSpec(idSpec);
+  rpc.params.appId = "@app"; 
+  rpc.params.albumId = albumId;
+  rpc.params.mediaItem = mediaItem.toJsonObject();
+  
+  return new JsonRpcRequestItem(rpc);
+};
+
+JsonRpcContainer.prototype.newFetchMediaItemsRequest = function(idSpec, albumId, opt_params) {
+  var rpc = { method : "mediaItems.get" };
+  rpc.params = this.translateIdSpec(idSpec);
+  rpc.params.appId = "@app";
+  rpc.params.albumId = albumId;
+
+  return new JsonRpcRequestItem(rpc, function(rawJson) {
+    rawJson = rawJson['list'];
+    var mediaItems = [];
+    for ( var i = 0; i < rawJson.length; i++) {
+      mediaItems.push(new JsonMediaItem(rawJson[i]));
+    }
+
+    return new opensocial.Collection(mediaItems);
+  });
+
 };

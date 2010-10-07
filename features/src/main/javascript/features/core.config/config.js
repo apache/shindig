@@ -55,14 +55,13 @@
  * configuration.
  */
 
-/** @namespace */
 gadgets.config = function() {
   var components = {};
   var configuration;
 
   return {
     'register':
-    /**
+        /**
      * Registers a configurable component and its configuration parameters.
      * Multiple callbacks may be registered for a single component if needed.
      *
@@ -71,7 +70,7 @@ gadgets.config = function() {
      *     the name of a fully qualified javascript object reference
      *     (e.g. "gadgets.io").
      * @param {Object=} opt_validators Mapping of option name to validation
-     *     functions that take the form function(data) {return isValid(data);}
+     *     functions that take the form function(data) {return isValid(data);}.
      * @param {function(Object)=} opt_callback A function to be invoked when a
      *     configuration is registered. If passed, this function will be invoked
      *     immediately after a call to init has been made. Do not assume that
@@ -85,21 +84,21 @@ gadgets.config = function() {
      * @name register
      * @function
      */
-    function(component, opt_validators, opt_callback) {
-      var registered = components[component];
-      if (!registered) {
-        registered = [];
-        components[component] = registered;
-      }
+        function(component, opt_validators, opt_callback) {
+          var registered = components[component];
+          if (!registered) {
+            registered = [];
+            components[component] = registered;
+          }
 
-      registered.push({
-        validators: opt_validators || {},
-        callback: opt_callback
-      });
-    },
+          registered.push({
+            validators: opt_validators || {},
+            callback: opt_callback
+          });
+        },
 
     'get':
-    /**
+        /**
      * Retrieves configuration data on demand.
      *
      * @param {string=} opt_component The component to fetch. If not provided
@@ -110,12 +109,12 @@ gadgets.config = function() {
      * @name get
      * @function
      */
-    function(opt_component) {
-      if (opt_component) {
-        return configuration[opt_component] || {};
-      }
-      return configuration;
-    },
+        function(opt_component) {
+          if (opt_component) {
+            return configuration[opt_component] || {};
+          }
+          return configuration;
+        },
 
     /**
      * Initializes the configuration.
@@ -124,7 +123,7 @@ gadgets.config = function() {
      * @param {boolean=} opt_noValidation True if you want to skip validation.
      * @throws {Error} If there is a configuration error.
      * @member gadgets.config
-     * @name init 
+     * @name init
      * @function
      */
     'init': function(config, opt_noValidation) {
@@ -208,7 +207,7 @@ gadgets.config = function() {
      * @function
      */
     'ExistsValidator': function(data) {
-      return typeof data !== "undefined";
+      return typeof data !== 'undefined';
     },
 
     /**
@@ -219,7 +218,7 @@ gadgets.config = function() {
      * @function
      */
     'NonEmptyStringValidator': function(data) {
-      return typeof data === "string" && data.length > 0;
+      return typeof data === 'string' && data.length > 0;
     },
 
     /**
@@ -230,7 +229,7 @@ gadgets.config = function() {
      * @function
      */
     'BooleanValidator': function(data) {
-      return typeof data === "boolean";
+      return typeof data === 'boolean';
     },
 
     /**

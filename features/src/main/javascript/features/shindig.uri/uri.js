@@ -30,7 +30,7 @@
  * Further, only set operations are provided for query/fragment params,
  * in order to keep the API relatively small, yet sufficiently flexible. Values set to
  * null are equivalent to being removed, for instance.
- * 
+ *
  * Limitations include, but are not limited to:
  * + Multiple params with the same key not supported via set APIs.
  * + Full RPC-compliant parsing not supported. A "highly useful" subset is impl'd.
@@ -46,15 +46,15 @@
  * alert(other);  // Emits "http://other.com/bar?hi=bye"
  */
 shindig.uri = (function() {
-  var PARSE_REGEX = new RegExp("^(?:([^:/?#]+):)?(?://([^/?#]*))?([^?#]*)(?:\\?([^#]*))?(?:#(.*))?");
+  var PARSE_REGEX = new RegExp('^(?:([^:/?#]+):)?(?://([^/?#]*))?([^?#]*)(?:\\?([^#]*))?(?:#(.*))?');
 
   return function(opt_in) {
-    var schema_ = "";
-    var authority_ = "";
-    var path_ = "";
-    var query_ = "";
+    var schema_ = '';
+    var authority_ = '';
+    var path_ = '';
+    var query_ = '';
     var qparms_ = null;
-    var fragment_ = "";
+    var fragment_ = '';
     var fparms_ = null;
     var unesc = window.decodeURIComponent ? decodeURIComponent : unescape;
     var esc = window.encodeURIComponent ? encodeURIComponent : escape;
@@ -62,7 +62,7 @@ shindig.uri = (function() {
 
     function parseFrom(url) {
       if (url.match(PARSE_REGEX) === null) {
-        throw "Malformed URL: " + url;
+        throw 'Malformed URL: ' + url;
       }
       schema_ = RegExp.$1;
       authority_ = RegExp.$2;
@@ -79,7 +79,7 @@ shindig.uri = (function() {
         if (val === undefined) {
           continue;
         }
-        str.push(esc(key) + (val !== null ? '=' + esc(val) : ""));
+        str.push(esc(key) + (val !== null ? '=' + esc(val) : ''));
       }
       return str.join('&');
     }
@@ -119,19 +119,19 @@ shindig.uri = (function() {
       fparms_ = setParams(fparms_ || parseParams(fragment_), argOne, argTwo);
       return bundle;
     }
-    
+
     function getOrigin() {
       return [
-          schema_,
-          schema_ !== "" ? ":" : "",
-          authority_ !== "" ? "//" : "",
-          authority_
-      ].join("");
+        schema_,
+        schema_ !== '' ? ':' : '',
+        authority_ !== '' ? '//' : '',
+        authority_
+      ].join('');
     }
 
     /**
      * Returns a readable representation of the URL.
-     * 
+     *
      * @return {string} A readable URL.
      */
     function toString() {
@@ -140,24 +140,24 @@ shindig.uri = (function() {
       return [
         getOrigin(),
         path_,
-        query !== "" ? "?" : "",
+        query !== '' ? '?' : '',
         query,
-        fragment !== "" ? "#" : "",
+        fragment !== '' ? '#' : '',
         fragment
-      ].join("");
+      ].join('');
     }
 
     function parseParams(str) {
       var params = [];
-      var pairs = str.split("&");
+      var pairs = str.split('&');
       for (var i = 0, j = pairs.length; i < j; ++i) {
         var kv = pairs[i].split('=');
         var key = kv.shift();
         var value = null;
         if (kv.length > 0) {
-          value = kv.join('').replace(/\+/g, " ");
+          value = kv.join('').replace(/\+/g, ' ');
         }
-        params.push([ key, value != null ? unesc(value) : null ]);
+        params.push([key, value != null ? unesc(value) : null]);
       }
       return params;
     }
@@ -190,14 +190,14 @@ shindig.uri = (function() {
           }
         }
         if (!found) {
-          pset.push([ key, newParams[key] ]);
+          pset.push([key, newParams[key]]);
         }
       }
       return pset;
     }
 
     function stripPrefix(str, pfx) {
-      str = str || "";
+      str = str || '';
       if (str[0] === pfx) {
         str = str.substr(pfx.length);
       }
@@ -205,8 +205,8 @@ shindig.uri = (function() {
     }
 
     // CONSTRUCTOR
-    if (typeof opt_in === "object" &&
-        typeof opt_in.toString === "function") {
+    if (typeof opt_in === 'object' &&
+        typeof opt_in.toString === 'function') {
       // Assume it's another shindig.uri, or something that can be parsed from one.
       parseFrom(opt_in.toString());
     } else if (opt_in) {
@@ -227,7 +227,7 @@ shindig.uri = (function() {
       // Setters
       setSchema: function(schema) { schema_ = schema; return bundle; },
       setAuthority: function(authority) { authority_ = authority; return bundle; },
-      setPath: function(path) { path_ = (path[0] === "/" ? "" : "/") + path; return bundle; },
+      setPath: function(path) { path_ = (path[0] === '/' ? '' : '/') + path; return bundle; },
       setQuery: function(query) { qparms_ = null; query_ = stripPrefix(query, '?'); return bundle; },
       setFragment: function(fragment) { fparms_ = null; fragment_ = stripPrefix(fragment, '#'); return bundle; },
       setQP: setQP,

@@ -1,5 +1,4 @@
 <?php
-// Code taken from http://oauth.googlecode.com/ (r1226) (with modifications)
 // vim: foldmethod=marker
 
 /* Generic exception class
@@ -219,11 +218,8 @@ abstract class OAuthSignatureMethod_RSA_SHA1 extends OAuthSignatureMethod {
 }
 
 class OAuthRequest {
-  // Made protected for Shindig - need access to the $parameters array.
   protected $parameters;
-  // Made protected for Shindig - need access to $http_method.
   protected $http_method;
-  // Made protected for Shindig - need access to $http_url.
   protected $http_url;
   // for debug purposes
   public $base_string;
@@ -231,7 +227,7 @@ class OAuthRequest {
   public static $POST_INPUT = 'php://input';
 
   function __construct($http_method, $http_url, $parameters=NULL) {
-    @$parameters or $parameters = array();
+    $parameters = ($parameters) ? $parameters : array();
     $parameters = array_merge( OAuthUtil::parse_parameters(parse_url($http_url, PHP_URL_QUERY)), $parameters);
     $this->parameters = $parameters;
     $this->http_method = $http_method;
@@ -246,12 +242,12 @@ class OAuthRequest {
     $scheme = (!isset($_SERVER['HTTPS']) || $_SERVER['HTTPS'] != "on")
               ? 'http'
               : 'https';
-    @$http_url or $http_url = $scheme .
-                              '://' . $_SERVER['SERVER_NAME'] .
+    $http_url = ($http_url) ? $http_url : $scheme .
+                              '://' . $_SERVER['HTTP_HOST'] .
                               ':' .
                               $_SERVER['SERVER_PORT'] .
                               $_SERVER['REQUEST_URI'];
-    @$http_method or $http_method = $_SERVER['REQUEST_METHOD'];
+    $http_method = ($http_method) ? $http_method : $_SERVER['REQUEST_METHOD'];
 
     // We weren't handed any parameters, so let's find the ones relevant to
     // this request.
@@ -267,8 +263,9 @@ class OAuthRequest {
       // It's a POST request of the proper content-type, so parse POST
       // parameters and add those overriding any duplicates from GET
       if ($http_method == "POST"
-          && @strstr($request_headers["Content-Type"],
-                     "application/x-www-form-urlencoded")
+          &&  isset($request_headers['Content-Type'])
+          && strstr($request_headers['Content-Type'],
+                     'application/x-www-form-urlencoded')
           ) {
         $post_data = OAuthUtil::parse_parameters(
           file_get_contents(self::$POST_INPUT)
@@ -278,7 +275,7 @@ class OAuthRequest {
 
       // We have a Authorization-header with OAuth data. Parse the header
       // and add those overriding any duplicates from GET or POST
-      if (@substr($request_headers['Authorization'], 0, 6) == "OAuth ") {
+      if (isset($request_headers['Authorization']) && substr($request_headers['Authorization'], 0, 6) == 'OAuth ') {
         $header_parameters = OAuthUtil::split_header(
           $request_headers['Authorization']
         );
@@ -294,7 +291,7 @@ class OAuthRequest {
    * pretty much a helper function to set up the request
    */
   public static function from_consumer_and_token($consumer, $token, $http_method, $http_url, $parameters=NULL) {
-    @$parameters or $parameters = array();
+    $parameters = ($parameters) ?  $parameters : array();
     $defaults = array("oauth_version" => OAuthRequest::$version,
                       "oauth_nonce" => OAuthRequest::generate_nonce(),
                       "oauth_timestamp" => OAuthRequest::generate_timestamp(),
@@ -384,12 +381,10 @@ class OAuthRequest {
   public function get_normalized_http_url() {
     $parts = parse_url($this->http_url);
 
-    $port = @$parts['port'];
-    $scheme = $parts['scheme'];
-    $host = $parts['host'];
-    $path = @$parts['path'];
-
-    $port or $port = ($scheme == 'https') ? '443' : '80';
+    $scheme = (isset($parts['scheme'])) ? $parts['scheme'] : 'http';
+    $port = (isset($parts['port'])) ? $parts['port'] : (($scheme == 'https') ? '443' : '80');
+    $host = (isset($parts['host'])) ? $parts['host'] : '';
+    $path = (isset($parts['path'])) ? $parts['path'] : '';
 
     if (($scheme == 'https' && $port != '443')
         || ($scheme == 'http' && $port != '80')) {
@@ -573,9 +568,10 @@ class OAuthServer {
   /**
    * figure out the signature with some defaults
    */
-  private function get_signature_method(&$request) {
-    $signature_method =
-        @$request->get_parameter("oauth_signature_method");
+  private function get_signature_method($request) {
+    $signature_method = $request instanceof OAuthRequest 
+        ? $request->get_parameter("oauth_signature_method")
+        : NULL;
 
     if (!$signature_method) {
       // According to chapter 7 ("Accessing Protected Ressources") the signature-method
@@ -597,8 +593,11 @@ class OAuthServer {
   /**
    * try to find the consumer for the provided request's consumer key
    */
-  private function get_consumer(&$request) {
-    $consumer_key = @$request->get_parameter("oauth_consumer_key");
+  private function get_consumer($request) {
+    $consumer_key = $request instanceof OAuthRequest 
+        ? $request->get_parameter("oauth_consumer_key")
+        : NULL;
+
     if (!$consumer_key) {
       throw new OAuthException("Invalid consumer key");
     }
@@ -614,8 +613,11 @@ class OAuthServer {
   /**
    * try to find the token for the provided request's token key
    */
-  private function get_token(&$request, $consumer, $token_type="access") {
-    $token_field = @$request->get_parameter('oauth_token');
+  private function get_token($request, $consumer, $token_type="access") {
+    $token_field = $request instanceof OAuthRequest
+         ? $request->get_parameter('oauth_token')
+         : NULL;
+
     $token = $this->data_store->lookup_token(
       $consumer, $token_type, $token_field
     );
@@ -629,10 +631,14 @@ class OAuthServer {
    * all-in-one function to check the signature on a request
    * should guess the signature method appropriately
    */
-  private function check_signature(&$request, $consumer, $token) {
+  private function check_signature($request, $consumer, $token) {
     // this should probably be in a different method
-    $timestamp = @$request->get_parameter('oauth_timestamp');
-    $nonce = @$request->get_parameter('oauth_nonce');
+    $timestamp = $request instanceof OAuthRequest
+        ? $request->get_parameter('oauth_timestamp')
+        : NULL;
+    $nonce = $request instanceof OAuthRequest
+        ? $request->get_parameter('oauth_nonce')
+        : NULL;
 
     $this->check_timestamp($timestamp);
     $this->check_nonce($consumer, $token, $nonce, $timestamp);
@@ -820,13 +826,6 @@ class OAuthUtil {
       $parameter = OAuthUtil::urldecode_rfc3986($split[0]);
       $value = isset($split[1]) ? OAuthUtil::urldecode_rfc3986($split[1]) : '';
 
-      // if we received an empty parameter (can happen with sth like "...php?&key=v..."
-      // which we do not send with our signedrequests, we omit it from the signature
-      // as well
-      if (! $parameter) {
-          continue;
-      }
-
       if (isset($parsed_parameters[$parameter])) {
         // We have already recieved parameter(s) with this name, so add to the list
         // of parameters with this name
@@ -862,7 +861,8 @@ class OAuthUtil {
       if (is_array($value)) {
         // If two or more parameters share the same name, they are sorted by their value
         // Ref: Spec: 9.1.1 (1)
-        natsort($value);
+        // June 12th, 2010 - changed to sort because of issue 164 by hidetaka
+        sort($value, SORT_STRING);
         foreach ($value as $duplicate_value) {
           $pairs[] = $parameter . '=' . $duplicate_value;
         }

@@ -17,7 +17,7 @@
  */
 
 /**
- * @fileoverview Functions for setting, getting and deleting cookies
+ * @fileoverview Functions for setting, getting and deleting cookies.
  */
 
 /**
@@ -102,14 +102,14 @@ shindig.cookies.set = function(name, value, opt_maxAge, opt_path, opt_domain) {
 
 /**
  * Returns the value for the first cookie with the given name
- * @param {string} name The name of the cookie to get
+ * @param {string} name The name of the cookie to get.
  * @param {string} opt_default If not found this is returned instead.
  * @return {string|undefined} The value of the cookie. If no cookie is set this
  *                            returns opt_default or undefined if opt_default is
  *                            not provided.
  */
 shindig.cookies.get = function(name, opt_default) {
-  var nameEq = name + "=";
+  var nameEq = name + '=';
   var cookie = String(document.cookie);
   for (var pos = -1; (pos = cookie.indexOf(nameEq, pos + 1)) >= 0;) {
     var i = pos;
@@ -157,7 +157,7 @@ shindig.cookies.remove = function(name, opt_path, opt_domain) {
 /**
  * Gets the names and values for all the cookies
  * @private
- * @return {Object} An object with keys and values
+ * @return {Object} An object with keys and values.
  */
 shindig.cookies.getKeyValues_ = function() {
   var cookie = String(document.cookie);
@@ -180,7 +180,7 @@ shindig.cookies.getKeyValues_ = function() {
 
 /**
  * Gets the names for all the cookies
- * @return {Array} An array with the names of the cookies
+ * @return {Array} An array with the names of the cookies.
  */
 shindig.cookies.getKeys = function() {
   return shindig.cookies.getKeyValues_().keys;
@@ -189,7 +189,7 @@ shindig.cookies.getKeys = function() {
 
 /**
  * Gets the values for all the cookies
- * @return {Array} An array with the values of the cookies
+ * @return {Array} An array with the values of the cookies.
  */
 shindig.cookies.getValues = function() {
   return shindig.cookies.getKeyValues_().values;
@@ -221,7 +221,7 @@ shindig.cookies.getCount = function() {
 
 /**
  * Returns whether there is a cookie with the given name
- * @param {string} key The name of the cookie to test for
+ * @param {string} key The name of the cookie to test for.
  * @return {boolean}
  */
 shindig.cookies.containsKey = function(key) {
@@ -236,7 +236,7 @@ shindig.cookies.containsKey = function(key) {
 /**
  * Returns whether there is a cookie with the given value. (This is an O(n)
  * operation.)
- * @param {string} value The value to check for
+ * @param {string} value The value to check for.
  * @return {boolean}
  */
 shindig.cookies.containsValue = function(value) {
@@ -266,6 +266,6 @@ shindig.cookies.clear = function() {
  * to the size of a cookie. To make sure users can't break this limit, we
  * should truncate long cookies at 3950 bytes, to be extra careful with dumb
  * browsers/proxies that interpret 4K as 4000 rather than 4096
- * @type number
+ * @type {number}
  */
 shindig.cookies.MAX_COOKIE_LENGTH = 3950;

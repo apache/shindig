@@ -262,14 +262,17 @@ public final class UriUtils {
     String contentTypeWithoutCharset = content;
     String[] parts = StringUtils.split(content, ';');
     if (parts.length >= 2) {
-      contentTypeWithoutCharset = parts[0];
+      StringBuilder contentTypeWithoutCharsetBuilder = new StringBuilder(parts.length);
+      contentTypeWithoutCharsetBuilder.append(parts[0]);
+
       for (int i = 1; i < parts.length; i++) {
         String parameterAndValue = parts[i].trim().toLowerCase();
         String[] splits = StringUtils.split(parameterAndValue, '=');
         if (splits.length > 0 && !splits[0].trim().equals(CHARSET)) {
-          contentTypeWithoutCharset += ";" + parts[i];
+          contentTypeWithoutCharsetBuilder.append(';').append(parts[i]);
         }
       }
+      contentTypeWithoutCharset = contentTypeWithoutCharsetBuilder.toString();
     }
 
     return contentTypeWithoutCharset;

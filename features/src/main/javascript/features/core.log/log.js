@@ -37,118 +37,118 @@
  */
 
 gadgets['log'] = (function() {
-   /** @const */
-   var info_=1;
-   /** @const */
-   var warning_=2;
-   /** @const */
-   var error_=3;
-   /** @const */
-   var none_=4;
+  /** @const */
+  var info_ = 1;
+  /** @const */
+  var warning_ = 2;
+  /** @const */
+  var error_ = 3;
+  /** @const */
+  var none_ = 4;
 
-/**
+  /**
  * Log an informational message
- * @param {Object} message - the message to log
+ * @param {Object} message - the message to log.
  * @member gadgets
  * @name log
  * @function
  */
-var log = function(message) {
-  logAtLevel(info_, message);
-};
- 
-/**
+  var log = function(message) {
+    logAtLevel(info_, message);
+  };
+
+  /**
  * Log a warning
- * @param {Object} message - the message to log
- * @static 
+ * @param {Object} message - the message to log.
+ * @static
  */
-gadgets.warn = function(message) {
-  logAtLevel(warning_, message);
-};
+  gadgets.warn = function(message) {
+    logAtLevel(warning_, message);
+  };
 
-/**
+  /**
  * Log an error
- * @param {Object} message - The message to log
- * @static 
+ * @param {Object} message - The message to log.
+ * @static
  */
-gadgets.error = function(message) {
-  logAtLevel(error_, message);
-};
+  gadgets.error = function(message) {
+    logAtLevel(error_, message);
+  };
 
-/**
+  /**
  * Sets the log level threshold.
  * @param {number} logLevel - New log level threshold.
  * @static
  * @member gadgets.log
  * @name setLogLevel
  */
-gadgets['setLogLevel'] = function(logLevel) {
-  logLevelThreshold_ = logLevel;
-};
+  gadgets['setLogLevel'] = function(logLevel) {
+    logLevelThreshold_ = logLevel;
+  };
 
-/**
+  /**
  * Logs a log message if output console is available, and log threshold is met.
  * @param {number} level - the level to log with. Optional, defaults to gadgets.log.INFO.
- * @param {Object} message - The message to log
+ * @param {Object} message - The message to log.
  * @private
  */
- function logAtLevel(level, message) {
-  if (level < logLevelThreshold_ || !_console) {
-    return;
-  }
+  function logAtLevel(level, message) {
+    if (level < logLevelThreshold_ || !_console) {
+      return;
+    }
 
-  if (level === warning_ && _console.warn) {
-    _console.warn(message);
-  } else if (level === error_ && _console.error) {
-    _console.error(message);
-  } else if (_console.log) {
-    _console.log(message);
-  }
-};
+    if (level === warning_ && _console.warn) {
+      _console.warn(message);
+    } else if (level === error_ && _console.error) {
+      _console.error(message);
+    } else if (_console.log) {
+      _console.log(message);
+    }
+  };
 
-/**
+  /**
  * Log level for informational logging.
  * @static
  * @const
  * @member gadgets.log
  * @name INFO
  */
-log['INFO'] = info_;
+  log['INFO'] = info_;
 
-/**
+  /**
  * Log level for warning logging.
  * @static
  * @const
  * @member gadgets.log
  * @name WARNING
  */
-log['WARNING'] = warning_;
+  log['WARNING'] = warning_;
 
-/**
+  /**
  * Log level for no logging
  * @static
  * @const
  * @member gadgets.log
  * @name NONE
  */
-log['NONE'] = none_;
+  log['NONE'] = none_;
 
-/**
+  /**
  * Current log level threshold.
  * @type {number}
  * @private
  */
-var logLevelThreshold_ = info_;
+  var logLevelThreshold_ = info_;
 
 
 
-/**
+  /**
  * Console to log to
  * @private
  * @static
  */
-var _console = window.console ? window.console :
-                       window.opera   ? window.opera.postError : undefined;
+  var _console = window.console ? window.console :
+                       window.opera ? window.opera.postError : undefined;
 
-   return log; 
+  return log;
 })();

@@ -38,6 +38,10 @@ class MockContentFilesServlet extends ContentFilesServlet
 
 class FilesServletTest extends PHPUnit_Framework_TestCase
 {
+    public function tearDown() {
+        ob_end_clean();
+    }
+    
     public function testResources() {
         $servlet = new MockResourcesFilesServlet();
         $servlet->uri = 'com/google/caja/plugin/domita-minified.js';

@@ -91,6 +91,7 @@
         <targetPath>files</targetPath>
         <includes>
           <include>container/rpc_relay.html</include>
+          <include>container/cookiebaseduserprefstore.js</include>
         </includes>
       </resource>
     </resources>

@@ -25,12 +25,6 @@
 /**
  * @type {Object}
  */
-shindig.container = {};
-
-
-/**
- * @type {Object}
- */
 shindig.container.util = {};
 
 
@@ -62,6 +56,47 @@ shindig.container.util.mergeJsons = function(json1, json2) {
     result[key] = json2[key];
   }
   return result;
+};
+
+
+shindig.container.util.cloneJson = function(json) {
+	
+};
+
+/**
+ * Construct a JSON request to get gadget metadata. For now, this will request
+ * a super-set of data needed for all CC APIs requiring gadget metadata, since
+ * the caching of response is not additive.
+ * @param {Array} A list of gadget URLs.
+ * @return {Object} the resulting JSON.
+ */
+shindig.container.util.newMetadataRequest = function(gadgetUrls) {
+  return {
+      'container': window.__CONTAINER,
+      'ids': gadgetUrls,
+      'fields': [
+          'iframeUrl',
+          'modulePrefs.*',
+          'needsTokenRefresh',
+          'userPrefs.*',
+          'views.preferredHeight',
+          'views.preferredWidth'
+      ]
+  };
+};
+
+
+/**
+ * Construct a JSON request to get gadget token.
+ * @param {Array} A list of gadget URLs.
+ * @return {Object} the resulting JSON.
+ */
+shindig.container.util.newTokenRequest = function(gadgetUrls) {
+  return {
+      'container': window.__CONTAINER,
+      'ids': gadgetUrls,
+      'fields': [ 'token' ]
+  };
 };
 
 

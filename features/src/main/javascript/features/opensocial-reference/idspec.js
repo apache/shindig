@@ -73,14 +73,14 @@ opensocial.IdSpec.Field = {
    * one of the opensocial.IdSpec.PersonId values.
    * @member opensocial.IdSpec.Field
    */
-  USER_ID : 'userId',
+  USER_ID: 'userId',
 
   /**
    * A string representing the group id or one of the
    * opensocial.IdSpec.GroupId values. Defaults to SELF.
    * @member opensocial.IdSpec.Field
    */
-  GROUP_ID : 'groupId',
+  GROUP_ID: 'groupId',
 
   /**
    * An optional numeric parameter, used to specify how many "hops"
@@ -93,7 +93,7 @@ opensocial.IdSpec.Field = {
    *
    * @member opensocial.IdSpec.Field
    */
-  NETWORK_DISTANCE : 'networkDistance'
+  NETWORK_DISTANCE: 'networkDistance'
 };
 
 
@@ -105,18 +105,18 @@ opensocial.IdSpec.Field = {
  * @name opensocial.IdSpec.PersonId
  */
 opensocial.IdSpec.PersonId = {
- /**
+  /**
   * @member opensocial.IdSpec.PersonId
   */
-  OWNER : 'OWNER',
- /**
+  OWNER: 'OWNER',
+  /**
   * @member opensocial.IdSpec.PersonId
   */
-  VIEWER : 'VIEWER'
+  VIEWER: 'VIEWER'
 };
 
 
- /**
+/**
  * @static
  * @class
  * Constant group IDs available when fetching collections of people.
@@ -124,18 +124,18 @@ opensocial.IdSpec.PersonId = {
  * @name opensocial.IdSpec.GroupId
  */
 opensocial.IdSpec.GroupId = {
- /**
+  /**
   * @member opensocial.IdSpec.GroupId
   */
-  SELF : 'SELF',
- /**
+  SELF: 'SELF',
+  /**
   * @member opensocial.IdSpec.GroupId
   */
-  FRIENDS : 'FRIENDS',
- /**
+  FRIENDS: 'FRIENDS',
+  /**
   * @member opensocial.IdSpec.GroupId
   */
-  ALL : 'ALL'
+  ALL: 'ALL'
 };
 
 
@@ -144,12 +144,12 @@ opensocial.IdSpec.GroupId = {
  *
  * @param {string} key The key to get data for;
  *   see the <a href="opensocial.IdSpec.Field.html">Field</a> class
- * for possible values
+ * for possible values.
  * @param {Object.<opensocial.DataRequest.DataRequestFields, Object>}
  *  opt_params Additional
  *    <a href="opensocial.DataRequest.DataRequestFields.html">params</a>
  *    to pass to the request.
- * @return {string} The data
+ * @return {string} The data.
  * @member opensocial.IdSpec
  */
 opensocial.IdSpec.prototype.getField = function(key, opt_params) {
@@ -160,8 +160,8 @@ opensocial.IdSpec.prototype.getField = function(key, opt_params) {
 /**
  * Sets data for this id spec associated with the given key.
  *
- * @param {string} key The key to set data for
- * @param {string} data The data to set
+ * @param {string} key The key to set data for.
+ * @param {string} data The data to set.
  */
 opensocial.IdSpec.prototype.setField = function(key, data) {
   return (this.fields_[key] = data);

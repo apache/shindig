@@ -24,7 +24,7 @@
 var tamings___ = tamings___ || [];
 tamings___.push(function(imports) {
 
-  ___.tamesTo(osapi.newBatch, ___.markFuncFreeze(function () {
+  ___.tamesTo(osapi.newBatch, ___.markFuncFreeze(function() {
     var result = osapi.newBatch();
     ___.markInnocent(result['add'], 'add');
     ___.markInnocent(result['execute'], 'execute');

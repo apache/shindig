@@ -338,7 +338,7 @@ public final class HttpResponse implements Externalizable {
       String retryAfter = this.getHeader("Retry-After");
       if (retryAfter != null) {
         if (StringUtils.isNumeric(retryAfter)) {
-          return date + Integer.parseInt(retryAfter) * 1000L;
+          return date + Integer.valueOf(retryAfter) * 1000L;
         } else {
           Date expiresDate = DateUtil.parseRfc1123Date(retryAfter);
           if (expiresDate != null)
@@ -442,7 +442,7 @@ public final class HttpResponse implements Externalizable {
           String[] parts = StringUtils.split(directive, '=');
           if (parts.length == 2) {
             try {
-              return Long.parseLong(parts[1]) * 1000;
+              return Long.valueOf(parts[1]) * 1000;
             } catch (NumberFormatException ignore) {
               return -1;
             }

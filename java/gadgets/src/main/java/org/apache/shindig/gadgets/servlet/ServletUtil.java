@@ -101,7 +101,7 @@ public final class ServletUtil {
     for (Map.Entry<String, String> header : response.getHeaders().entries()) {
       servletResponse.addHeader(header.getKey(), header.getValue());
     }
-    HttpUtil.setCachingHeaders(servletResponse, (int)response.getCacheTtl());
+    HttpUtil.setCachingHeaders(servletResponse, (int)(response.getCacheTtl() / 1000L));
     IOUtils.copy(response.getResponse(), servletResponse.getOutputStream());
   }
   

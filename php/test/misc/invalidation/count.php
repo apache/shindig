@@ -19,7 +19,7 @@
  */
 @date_default_timezone_set(@date_default_timezone_get());
 
-$filename = '/tmp/shindig_test_misc_invalidation_count';
+$filename = sys_get_temp_dir() . '/shindig_test_misc_invalidation_count';
 
 if (file_exists($filename)) {
   $count = file_get_contents($filename);

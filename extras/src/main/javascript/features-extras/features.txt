@@ -20,4 +20,4 @@ features-extras/org.jquery.core-1.4.2/feature.xml
 features-extras/wave/feature.xml
 features-extras/opensocial-payment/feature.xml
 features-extras/pubsub-2/feature.xml
-features-extras/org.openajax.hub-2.0.4/feature.xml
+features-extras/org.openajax.hub-2.0.5/feature.xml

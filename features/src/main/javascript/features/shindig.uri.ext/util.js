@@ -40,7 +40,7 @@ shindig.uri = (function() {
 
   /**
    * Fully qualifies this Uri if it is relative, using a given base Uri.
-   * 
+   *
    * @param {Uri} self The base Uri.
    * @param {Uri} base The Uri to resolve.
    */
@@ -53,7 +53,7 @@ shindig.uri = (function() {
     }
     var selfPath = self.getPath();
     if (selfPath == '' || selfPath.charAt(0) != '/') {
-      var basePath = base.getPath(); 
+      var basePath = base.getPath();
       var lastSlash = basePath.lastIndexOf('/');
       if (lastSlash != -1) {
         basePath = basePath.substring(0, lastSlash + 1);

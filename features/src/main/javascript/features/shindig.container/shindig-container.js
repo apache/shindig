@@ -17,7 +17,7 @@
  */
 
 /**
- * @fileoverview Open Gadget Container
+ * @fileoverview Open Gadget Container.
  */
 
 shindig.errors = {};
@@ -33,11 +33,11 @@ shindig.errors.TO_BE_DONE = 'to be done';
  *     function(continuation) {
  *       // compute result asynchronously
  *       continuation(result);
- *     }
+ *     }.
  * @param {Function} continuation Function to call when all results are in.  It
- *     is pass an array of all results of all functions
+ *     is pass an array of all results of all functions.
  * @param {Object} opt_this Optional object used as "this" when calling each
- *     function
+ *     function.
  */
 shindig.callAsyncAndJoin = function(functions, continuation, opt_this) {
   var pending = functions.length;
@@ -71,7 +71,7 @@ shindig.Extensible = function() {
 /**
  * Sets the dependencies.
  * @param {Object} dependencies Object whose properties are set on this
- *     container as dependencies
+ *     container as dependencies.
  */
 shindig.Extensible.prototype.setDependencies = function(dependencies) {
   for (var p in dependencies) {
@@ -81,8 +81,8 @@ shindig.Extensible.prototype.setDependencies = function(dependencies) {
 
 /**
  * Returns a dependency given its name.
- * @param {String} name Name of dependency
- * @return {Object} Dependency with that name or undefined if not found
+ * @param {String} name Name of dependency.
+ * @return {Object} Dependency with that name or undefined if not found.
  */
 shindig.Extensible.prototype.getDependencies = function(name) {
   return this[name];
@@ -102,8 +102,8 @@ shindig.UserPrefStore = function() {
 
 /**
  * Gets all user preferences of a gadget.
- * @param {Object} gadget Gadget object
- * @return {Object} All user preference of given gadget
+ * @param {Object} gadget Gadget object.
+ * @return {Object} All user preference of given gadget.
  */
 shindig.UserPrefStore.prototype.getPrefs = function(gadget) {
   throw Error(shindig.errors.SUBCLASS_RESPONSIBILITY);
@@ -111,8 +111,8 @@ shindig.UserPrefStore.prototype.getPrefs = function(gadget) {
 
 /**
  * Saves user preferences of a gadget in the store.
- * @param {Object} gadget Gadget object
- * @param {Object} prefs User preferences
+ * @param {Object} gadget Gadget object.
+ * @param {Object} prefs User preferences.
  */
 shindig.UserPrefStore.prototype.savePrefs = function(gadget) {
   throw Error(shindig.errors.SUBCLASS_RESPONSIBILITY);
@@ -200,9 +200,9 @@ shindig.IfrGadgetService.prototype.setTitle = function(title) {
 /**
  * Sets one or more user preferences
  * @param {String} editToken
- * @param {String} name Name of user preference
+ * @param {String} name Name of user preference.
  * @param {String} value Value of user preference
- * More names and values may follow
+ * More names and values may follow.
  */
 shindig.IfrGadgetService.prototype.setUserPref = function(editToken, name,
     value) {
@@ -218,23 +218,23 @@ shindig.IfrGadgetService.prototype.setUserPref = function(editToken, name,
  * Requests the container to send a specific message to the specified users.
  * @param {Array.<String>, String} recipients An ID, array of IDs, or a group reference;
  * the supported keys are VIEWER, OWNER, VIEWER_FRIENDS, OWNER_FRIENDS, or a
- * single ID within one of those groups
- * @param {opensocial.Message} message The message to send to the specified users
+ * single ID within one of those groups.
+ * @param {opensocial.Message} message The message to send to the specified users.
  * @param {Function} opt_callback The function to call once the request has been
  * processed; either this callback will be called or the gadget will be reloaded
- * from scratch
+ * from scratch.
  * @param {opensocial.NavigationParameters} opt_params The optional parameters
  * indicating where to send a user when a request is made, or when a request
- * is accepted; options are of type  NavigationParameters.DestinationType
+ * is accepted; options are of type  NavigationParameters.DestinationType.
  */
 shindig.IfrGadgetService.prototype.requestSendMessage = function(recipients,
     message, opt_callback, opt_params) {
-    if (opt_callback) {
-      window.setTimeout(function() {
-        opt_callback(new opensocial.ResponseItem(
-            null, null, opensocial.ResponseItem.Error.NOT_IMPLEMENTED, null));
-      }, 0);
-    }
+  if (opt_callback) {
+    window.setTimeout(function() {
+      opt_callback(new opensocial.ResponseItem(
+          null, null, opensocial.ResponseItem.Error.NOT_IMPLEMENTED, null));
+    }, 0);
+  }
 };
 
 /**
@@ -263,10 +263,9 @@ shindig.IfrGadgetService.prototype.requestNavigateTo = function(view,
  * real containers.
  * TODO: Find a better default for this function
  *
- * @param view The view name to get the url for
+ * @param {string} view The view name to get the url for.
  */
-shindig.IfrGadgetService.prototype.getUrlForView = function(
-    view) {
+shindig.IfrGadgetService.prototype.getUrlForView = function(view) {
   if (view === 'canvas') {
     return '/canvas';
   } else if (view === 'profile') {
@@ -296,8 +295,8 @@ shindig.LayoutManager = function() {
 /**
  * Gets the HTML element that is the chrome of a gadget into which the content
  * of the gadget can be rendered.
- * @param {Object} gadget Gadget instance
- * @return {Object} HTML element that is the chrome for the given gadget
+ * @param {Object} gadget Gadget instance.
+ * @return {Object} HTML element that is the chrome for the given gadget.
  */
 shindig.LayoutManager.prototype.getGadgetChrome = function(gadget) {
   throw Error(shindig.errors.SUBCLASS_RESPONSIBILITY);
@@ -318,7 +317,7 @@ shindig.StaticLayoutManager.inherits(shindig.LayoutManager);
 
 /**
  * Sets chrome ids, whose indexes are gadget instance ids (starting from 0).
- * @param {Array} gadgetChromeIds Gadget id to chrome id map
+ * @param {Array} gadgetChromeIds Gadget id to chrome id map.
  */
 shindig.StaticLayoutManager.prototype.setGadgetChromeIds =
     function(gadgetChromeIds) {
@@ -386,13 +385,13 @@ shindig.FloatLeftLayoutManager.prototype.getGadgetChrome =
  *    "height": height of the gadget
  *    "width": width of the gadget
  *    "debug": send debug=1 to the gadget server, gets us uncompressed
- *        javascript
+ *        javascript.
  */
 shindig.Gadget = function(params) {
   this.userPrefs = {};
 
   if (params) {
-    for (var name in params)  if (params.hasOwnProperty(name)) {
+    for (var name in params) if (params.hasOwnProperty(name)) {
       this[name] = params[name];
     }
   }
@@ -429,16 +428,16 @@ shindig.Gadget.prototype.render = function(chrome) {
 
 shindig.Gadget.prototype.getContent = function(continuation) {
   shindig.callAsyncAndJoin([
-      'getTitleBarContent', 'getUserPrefsDialogContent',
-      'getMainContent'], function(results) {
-        continuation(results.join(''));
-      }, this);
+    'getTitleBarContent', 'getUserPrefsDialogContent',
+    'getMainContent'], function(results) {
+    continuation(results.join(''));
+  }, this);
 };
 
 /**
  * Gets title bar content asynchronously or synchronously.
  * @param {Function} continuation Function that handles title bar content as
- *     the one and only argument
+ *     the one and only argument.
  */
 shindig.Gadget.prototype.getTitleBarContent = function(continuation) {
   throw Error(shindig.errors.SUBCLASS_RESPONSIBILITY);
@@ -447,7 +446,7 @@ shindig.Gadget.prototype.getTitleBarContent = function(continuation) {
 /**
  * Gets user preferences dialog content asynchronously or synchronously.
  * @param {Function} continuation Function that handles user preferences
- *     content as the one and only argument
+ *     content as the one and only argument.
  */
 shindig.Gadget.prototype.getUserPrefsDialogContent = function(continuation) {
   throw Error(shindig.errors.SUBCLASS_RESPONSIBILITY);
@@ -456,7 +455,7 @@ shindig.Gadget.prototype.getUserPrefsDialogContent = function(continuation) {
 /**
  * Gets gadget content asynchronously or synchronously.
  * @param {Function} continuation Function that handles gadget content as
- *     the one and only argument
+ *     the one and only argument.
  */
 shindig.Gadget.prototype.getMainContent = function(continuation) {
   throw Error(shindig.errors.SUBCLASS_RESPONSIBILITY);
@@ -536,7 +535,7 @@ shindig.BaseIfrGadget.prototype.getServerBase = function() {
 shindig.BaseIfrGadget.prototype.getMainContent = function(continuation) {
   // proper sub-class has not been mixed-in yet
   var gadget = this;
-  window.setTimeout( function() {
+  window.setTimeout(function() {
     gadget.getMainContent(continuation);
   }, 0);
 };
@@ -551,7 +550,7 @@ shindig.BaseIfrGadget.prototype.getUserPrefsDialogId = function() {
 
 shindig.BaseIfrGadget.prototype.getUserPrefsParams = function() {
   var params = '';
-  for(var name in this.getUserPrefs()) {
+  for (var name in this.getUserPrefs()) {
     params += '&up_' + encodeURIComponent(name) + '=' +
         encodeURIComponent(this.getUserPrefValue(name));
   }
@@ -569,7 +568,7 @@ shindig.BaseIfrGadget.prototype.handleToggle = function() {
 
 
 shindig.BaseIfrGadget.prototype.hasViewablePrefs_ = function() {
-  for(var name in this.getUserPrefs()) {
+  for (var name in this.getUserPrefs()) {
     var pref = this.userPrefs[name];
     if (pref.type != 'hidden') {
       return true;
@@ -593,7 +592,7 @@ shindig.BaseIfrGadget.prototype.handleOpenUserPrefsDialog = function() {
 
     var script = document.createElement('script');
     script.src = 'http://www.gmodules.com/ig/gadgetsettings?mid=' + this.id +
-        '&output=js' + this.getUserPrefsParams() +  '&url=' + this.specUrl;
+        '&output=js' + this.getUserPrefsParams() + '&url=' + this.specUrl;
     document.body.appendChild(script);
   }
 };
@@ -603,8 +602,8 @@ shindig.BaseIfrGadget.prototype.buildUserPrefsDialog = function(content) {
   userPrefsDialog.innerHTML = content +
       '<div class="' + this.cssClassGadgetUserPrefsDialogActionBar +
       '"><input type="button" value="Save" onclick="shindig.container.getGadget(' +
-      this.id +').handleSaveUserPrefs()"> <input type="button" value="Cancel" onclick="shindig.container.getGadget(' +
-      this.id +').handleCancelUserPrefs()"></div>';
+      this.id + ').handleSaveUserPrefs()"> <input type="button" value="Cancel" onclick="shindig.container.getGadget(' +
+      this.id + ').handleCancelUserPrefs()"></div>';
   userPrefsDialog.childNodes[0].style.display = '';
 };
 
@@ -650,10 +649,10 @@ shindig.BaseIfrGadget.prototype.queryIfrGadgetType_ = function() {
   // the iframe.  Otherwise, we create the iframe ourselves.
   var request = {
     context: {
-      country: "default",
-      language: "default",
-      view: "default",
-      container: "default"
+      country: 'default',
+      language: 'default',
+      view: 'default',
+      container: 'default'
     },
     gadgets: [{
       url: this.specUrl,
@@ -662,25 +661,25 @@ shindig.BaseIfrGadget.prototype.queryIfrGadgetType_ = function() {
   };
 
   var makeRequestParams = {
-    "CONTENT_TYPE" : "JSON",
-    "METHOD" : "POST",
-    "POST_DATA" : gadgets.json.stringify(request)
+    'CONTENT_TYPE' : 'JSON',
+    'METHOD' : 'POST',
+    'POST_DATA' : gadgets.json.stringify(request)
   };
 
-  var url = this.serverBase_+"metadata?st=" + this.secureToken;
+  var url = this.serverBase_ + 'metadata?st=' + this.secureToken;
 
   gadgets.io.makeNonProxiedRequest(url,
-    handleJSONResponse,
-    makeRequestParams,
-    "application/javascript"
+      handleJSONResponse,
+      makeRequestParams,
+      'application/javascript'
   );
-  
+
   var gadget = this;
   function handleJSONResponse(obj) {
     var requiresPubSub2 = false;
     var arr = obj.data.gadgets[0].features;
-    for(var i = 0; i < arr.length; i++) {
-      if (arr[i] === "pubsub-2") {
+    for (var i = 0; i < arr.length; i++) {
+      if (arr[i] === 'pubsub-2') {
         requiresPubSub2 = true;
         break;
       }
@@ -708,15 +707,15 @@ shindig.IfrGadget = {
         (this.width ? ' width="' + this.width + '"' : '') +
         '></iframe></div>');
   },
-  
+
   finishRender: function(chrome) {
     window.frames[this.getIframeId()].location = this.getIframeUrl();
   },
-  
+
   getIframeUrl: function() {
     return this.serverBase_ + 'ifr?' +
         'container=' + this.CONTAINER +
-        '&mid=' +  this.id +
+        '&mid=' + this.id +
         '&nocache=' + shindig.container.nocache_ +
         '&country=' + shindig.container.country_ +
         '&lang=' + shindig.container.language_ +
@@ -730,7 +729,7 @@ shindig.IfrGadget = {
         '&url=' + encodeURIComponent(this.specUrl) +
         '#rpctoken=' + this.rpcToken +
         (this.viewParams ?
-            '&view-params=' +  encodeURIComponent(gadgets.json.stringify(this.viewParams)) : '') +
+            '&view-params=' + encodeURIComponent(gadgets.json.stringify(this.viewParams)) : '') +
         (this.hashData ? '&' + this.hashData : '');
   }
 };
@@ -744,12 +743,12 @@ shindig.OAAIfrGadget = {
     continuation('<div id="' + this.cssClassGadgetContent + '-' + this.id +
         '" class="' + this.cssClassGadgetContent + '"></div>');
   },
-  
+
   finishRender: function(chrome) {
     var iframeAttrs = {
       className: this.cssClassGadget,
-      frameborder: "no",
-      scrolling: "no"
+      frameborder: 'no',
+      scrolling: 'no'
     };
     if (this.height) {
       iframeAttrs.height = this.height;
@@ -757,50 +756,50 @@ shindig.OAAIfrGadget = {
     if (this.width) {
       iframeAttrs.width = this.width;
     }
-    
+
     new OpenAjax.hub.IframeContainer(
-      gadgets.pubsub2router.hub,
-      this.getIframeId(),
-      {
-        Container: {
-          onSecurityAlert: function( source, alertType) {
-                gadgets.error("Security error for container " + source.getClientID() + " : " + alertType);
-                source.getIframe().src = "about:blank"; 
-// for debugging
-   //          },
-   //          onConnect: function( container ) {
-   //            gadgets.log("++ connected: " + container.getClientID());
+        gadgets.pubsub2router.hub,
+        this.getIframeId(),
+        {
+          Container: {
+            onSecurityAlert: function(source, alertType) {
+              gadgets.error('Security error for container ' + source.getClientID() + ' : ' + alertType);
+              source.getIframe().src = 'about:blank';
+              // for debugging
+              //          },
+              //          onConnect: function( container ) {
+              //            gadgets.log("++ connected: " + container.getClientID());
             }
-        },
-        IframeContainer: {
-          parent: document.getElementById(this.cssClassGadgetContent + '-' + this.id),
-          uri: this.getIframeUrl(),
-          tunnelURI: shindig.uri(this.serverBase_ + this.rpcRelay).resolve(shindig.uri(window.location.href)),
-          iframeAttrs: iframeAttrs
+          },
+          IframeContainer: {
+            parent: document.getElementById(this.cssClassGadgetContent + '-' + this.id),
+            uri: this.getIframeUrl(),
+            tunnelURI: shindig.uri(this.serverBase_ + this.rpcRelay).resolve(shindig.uri(window.location.href)),
+            iframeAttrs: iframeAttrs
+          }
         }
-      }
     );
   },
-  
+
   getIframeUrl: function() {
     return this.serverBase_ + 'ifr?' +
         'container=' + this.CONTAINER +
-        '&mid=' +  this.id +
+        '&mid=' + this.id +
         '&nocache=' + shindig.container.nocache_ +
         '&country=' + shindig.container.country_ +
         '&lang=' + shindig.container.language_ +
         '&view=' + shindig.container.view_ +
         (this.specVersion ? '&v=' + this.specVersion : '') +
-   //      (shindig.container.parentUrl_ ? '&parent=' + encodeURIComponent(shindig.container.parentUrl_) : '') +
+        //      (shindig.container.parentUrl_ ? '&parent=' + encodeURIComponent(shindig.container.parentUrl_) : '') +
         (this.debug ? '&debug=1' : '') +
         this.getAdditionalParams() +
         this.getUserPrefsParams() +
         (this.secureToken ? '&st=' + this.secureToken : '') +
         '&url=' + encodeURIComponent(this.specUrl) +
-   //      '#rpctoken=' + this.rpcToken +
+        //      '#rpctoken=' + this.rpcToken +
         (this.viewParams ?
-            '&view-params=' +  encodeURIComponent(gadgets.json.stringify(this.viewParams)) : '') +
-   //      (this.hashData ? '&' + this.hashData : '');
+            '&view-params=' + encodeURIComponent(gadgets.json.stringify(this.viewParams)) : '') +
+        //      (this.hashData ? '&' + this.hashData : '');
         (this.hashData ? '#' + this.hashData : '');
   }
 };
@@ -902,7 +901,7 @@ shindig.Container.prototype.renderGadgets = function() {
 
 /**
  * Renders a gadget.  Gadgets are rendered inside their chrome element.
- * @param {Object} gadget Gadget object
+ * @param {Object} gadget Gadget object.
  */
 shindig.Container.prototype.renderGadget = function(gadget) {
   throw Error(shindig.errors.SUBCLASS_RESPONSIBILITY);
@@ -951,7 +950,7 @@ shindig.IfrContainer.prototype.setParentUrl = function(url) {
 
 /**
  * Renders a gadget using ifr.
- * @param {Object} gadget Gadget object
+ * @param {Object} gadget Gadget object.
  */
 shindig.IfrContainer.prototype.renderGadget = function(gadget) {
   var chrome = this.layoutManager.getGadgetChrome(gadget);

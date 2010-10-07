@@ -80,14 +80,14 @@ opensocial.NavigationParameters.Field = {
    *
    * @member opensocial.NavigationParameters.Field
    */
-  VIEW : 'view',
+  VIEW: 'view',
 
   /**
    * A string representing the owner id.
    *
    * @member opensocial.NavigationParameters.Field
    */
-  OWNER : 'owner',
+  OWNER: 'owner',
 
   /**
    * An optional list of parameters passed to the gadget once the new view,
@@ -96,7 +96,7 @@ opensocial.NavigationParameters.Field = {
    *
    * @member opensocial.NavigationParameters.Field
    */
-  PARAMETERS : 'parameters'
+  PARAMETERS: 'parameters'
 };
 
 
@@ -105,12 +105,12 @@ opensocial.NavigationParameters.Field = {
  *
  * @param {string} key The key to get data for;
  *     see the <a href="opensocial.NavigationParameters.Field.html">Field</a>
- *     class for possible values
+ *     class for possible values.
  * @param {Object.<opensocial.DataRequest.DataRequestFields, Object>}
  *     opt_params Additional
  *     <a href="opensocial.DataRequest.DataRequestFields.html">params</a>
  *     to pass to the request.
- * @return {string} The data
+ * @return {string} The data.
  * @member opensocial.NavigationParameters
  */
 opensocial.NavigationParameters.prototype.getField = function(key, opt_params) {
@@ -121,8 +121,8 @@ opensocial.NavigationParameters.prototype.getField = function(key, opt_params) {
 /**
  * Sets data for this NavigationParameters associated with the given key.
  *
- * @param {string} key The key to set data for
- * @param {Object} data The data to set
+ * @param {string} key The key to set data for.
+ * @param {Object} data The data to set.
  */
 opensocial.NavigationParameters.prototype.setField = function(key, data) {
   return (this.fields_[key] = data);
@@ -141,8 +141,8 @@ opensocial.NavigationParameters.prototype.setField = function(key, data) {
  */
 opensocial.NavigationParameters.DestinationType = {
   /** @member opensocial.NavigationParameters.DestinationType */
-  VIEWER_DESTINATION : "viewerDestination",
+  VIEWER_DESTINATION: 'viewerDestination',
 
   /** @member opensocial.NavigationParameters.DestinationType  */
-  RECIPIENT_DESTINATION : "recipientDestination"
+  RECIPIENT_DESTINATION: 'recipientDestination'
 };

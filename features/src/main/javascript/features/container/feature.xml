@@ -27,6 +27,7 @@ under the License.
   <dependency>osapi</dependency>
   <dependency>rpc</dependency>
   <container>
+    <script src="constant.js"/>
     <script src="util.js"/>
     <script src="service.js"/>
     <script src="gadget_holder.js"/>

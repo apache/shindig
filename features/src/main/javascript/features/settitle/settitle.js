@@ -31,7 +31,7 @@ gadgets.window = gadgets.window || {};
  * @scope gadgets.window
  */
 gadgets.window.setTitle = function(title) {
-  gadgets.rpc.call(null, "set_title", null, title);
+  gadgets.rpc.call(null, 'set_title', null, title);
 };
 
 // Alias for legacy code

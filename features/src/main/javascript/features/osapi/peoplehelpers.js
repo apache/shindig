@@ -30,62 +30,62 @@ gadgets.util.registerOnLoadHandler(function() {
     * Options specifies parameters to the call as outlined in the
     * JSON RPC Opensocial Spec
     * http://www.opensocial.org/Technical-Resources/opensocial-spec-v081/rpc-protocol
-    * @param {object.<JSON>} The JSON object of parameters for the specific request
+    * @param {object.<JSON>} The JSON object of parameters for the specific request.
     */
-       /**
+    /**
       * Function to get Viewer profile.
       * Options specifies parameters to the call as outlined in the
       * JSON RPC Opensocial Spec
       * http://www.opensocial.org/Technical-Resources/opensocial-spec-v081/rpc-protocol
-      * @param {object.<JSON>} The JSON object of parameters for the specific request
+      * @param {object.<JSON>} The JSON object of parameters for the specific request.
       */
-      osapi.people.getViewer = function(options) {
-        options = options || {};
-        options.userId = "@viewer";
-        options.groupId = "@self";
-        return osapi.people.get(options);
-      };
+    osapi.people.getViewer = function(options) {
+      options = options || {};
+      options.userId = '@viewer';
+      options.groupId = '@self';
+      return osapi.people.get(options);
+    };
 
-      /**
+    /**
       * Function to get Viewer's friends'  profiles.
       * Options specifies parameters to the call as outlined in the
       * JSON RPC Opensocial Spec
       * http://www.opensocial.org/Technical-Resources/opensocial-spec-v081/rpc-protocol
-      * @param {object.<JSON>} The JSON object of parameters for the specific request
+      * @param {object.<JSON>} The JSON object of parameters for the specific request.
       */
-      osapi.people.getViewerFriends = function(options) {
-        options = options || {};
-        options.userId = "@viewer";
-        options.groupId = "@friends";
-        return osapi.people.get(options);
-      };
+    osapi.people.getViewerFriends = function(options) {
+      options = options || {};
+      options.userId = '@viewer';
+      options.groupId = '@friends';
+      return osapi.people.get(options);
+    };
 
-      /**
+    /**
       * Function to get Owner profile.
       * Options specifies parameters to the call as outlined in the
       * JSON RPC Opensocial Spec
       * http://www.opensocial.org/Technical-Resources/opensocial-spec-v081/rpc-protocol
-      * @param {object.<JSON>} The JSON object of parameters for the specific request
+      * @param {object.<JSON>} The JSON object of parameters for the specific request.
       */
-      osapi.people.getOwner = function(options) {
-        options = options || {};
-        options.userId = "@owner";
-        options.groupId = "@self";
-        return osapi.people.get(options);
-      };
+    osapi.people.getOwner = function(options) {
+      options = options || {};
+      options.userId = '@owner';
+      options.groupId = '@self';
+      return osapi.people.get(options);
+    };
 
-      /**
+    /**
       * Function to get Owner's friends' profiles.
       * Options specifies parameters to the call as outlined in the
       * JSON RPC Opensocial Spec
       * http://www.opensocial.org/Technical-Resources/opensocial-spec-v081/rpc-protocol
-      * @param {object.<JSON>} The JSON object of parameters for the specific request
+      * @param {object.<JSON>} The JSON object of parameters for the specific request.
       */
-      osapi.people.getOwnerFriends = function(options) {
-        options = options || {};
-        options.userId = "@owner";
-        options.groupId = "@friends";
-        return osapi.people.get(options);
-      };
+    osapi.people.getOwnerFriends = function(options) {
+      options = options || {};
+      options.userId = '@owner';
+      options.groupId = '@friends';
+      return osapi.people.get(options);
+    };
   }
 });

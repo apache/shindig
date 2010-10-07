@@ -54,14 +54,7 @@ shindig.container.GadgetHolder = function(siteId, el) {
    * @type {Object?}
    * @private
    */
-  this.gadgetParams_ = null;
-
-  /**
-   * Whether there are any view parameters.
-   * @type {boolean}
-   * @private
-   */
-  this.hasGadgetParams_ = false;
+  this.viewParams_ = null;
 
   /**
    * Gadget rendering parameters
@@ -76,13 +69,6 @@ shindig.container.GadgetHolder = function(siteId, el) {
    * @private
    */
   this.iframeId_ = null;
-
-  /**
-   * Name of current view being rendered.
-   * @type {string?}
-   * @private
-   */
-  this.view_ = null;
 
   /**
    * A dynamically set social/security token.
@@ -113,7 +99,7 @@ shindig.container.GadgetHolder.prototype.getElement = function() {
 
 
 /**
- * @return {string|null} The unique string ID for gadget iframe.
+ * @return {?string} The unique string ID for gadget iframe.
  */
 shindig.container.GadgetHolder.prototype.getIframeId = function() {
   return this.iframeId_;
@@ -121,7 +107,7 @@ shindig.container.GadgetHolder.prototype.getIframeId = function() {
 
 
 /**
- * @return {Object|null} The metadata of gadget.
+ * @return {?Object} The metadata of gadget.
  */
 shindig.container.GadgetHolder.prototype.getGadgetInfo = function() {
   return this.gadgetInfo_;
@@ -137,7 +123,7 @@ shindig.container.GadgetHolder.prototype.dispose = function() {
 
 
 /**
- * @return {string|null} The URL of current gadget.
+ * @return {?string} The URL of current gadget.
  */
 shindig.container.GadgetHolder.prototype.getUrl = function() {
   return (this.gadgetInfo_) ? this.gadgetInfo_['url'] : null;
@@ -145,10 +131,10 @@ shindig.container.GadgetHolder.prototype.getUrl = function() {
 
 
 /**
- * @return {string|null} The view of current gadget.
+ * @return {?string} The view of current gadget.
  */
 shindig.container.GadgetHolder.prototype.getView = function() {
-  return this.view_;
+  return this.renderParams_[shindig.container.RenderParam.VIEW];
 };
 
 
@@ -173,24 +159,18 @@ shindig.container.GadgetHolder.prototype.setSecurityToken = function(value) {
 /**
  * Render a gadget into the element.
  * @param {Object} gadgetInfo the JSON gadget description.
- * @param {Object} gadgetParams View parameters for the gadget.
+ * @param {Object} viewParams View parameters for the gadget.
  * @param {Object} renderParams Render parameters for the gadget, including:
  *     view, width, height.
  */
 shindig.container.GadgetHolder.prototype.render = function(
-    gadgetInfo, gadgetParams, renderParams) {
+    gadgetInfo, viewParams, renderParams) {
   this.iframeId_ = shindig.container.GadgetHolder.IFRAME_ID_PREFIX_
       + this.siteId_;
   this.gadgetInfo_ = gadgetInfo;
-  this.gadgetParams_ = gadgetParams;
-  this.hasGadgetParams_ = false;
-  for (var key in this.gadgetParams_) {
-    this.hasGadgetParams_ = true;
-    break;
-  }
+  this.viewParams_ = viewParams;
   this.renderParams_ = renderParams;
-  this.view_ = renderParams['view'];
-  if (!this.gadgetInfo_['views'][this.view_]) {
+  if (!this.gadgetInfo_[shindig.container.MetadataResponse.VIEWS][this.getView()]) {
     throw 'View ' + this.view_ + ' unsupported in ' + this.gadgetInfo_['url'];
   }
 
@@ -198,7 +178,8 @@ shindig.container.GadgetHolder.prototype.render = function(
 
   // Set up RPC channel. RPC relay url is on gmodules, relative to base of the
   // container. Assumes container has set up forwarding to gmodules at /gadgets.
-  var iframeUri = shindig.uri(this.gadgetInfo_['iframeUrl']);
+  var iframeUri = shindig.uri(
+      this.gadgetInfo_[shindig.container.MetadataResponse.IFRAME_URL]);
   var relayUri = shindig.uri()
       .setSchema(iframeUri.getSchema())
       .setAuthority(iframeUri.getAuthority())
@@ -228,18 +209,18 @@ shindig.container.GadgetHolder.IFRAME_ID_PREFIX_ = '__gadget_';
  */
 shindig.container.GadgetHolder.prototype.getIframeHtml_ = function() {
   var iframeParams = {
-      'id': this.iframeId_,
-      'name': this.iframeId_,
-      'src': this.getIframeUrl_(),
-      'scrolling': 'no',
-      'marginwidth': '0',
-      'marginheight': '0',
-      'frameborder': '0',
-      'vspace': '0',
-      'hspace': '0',
-      'class': this.renderParams_['class'],
-      'height': this.renderParams_['height'],
-      'width': this.renderParams_['width']
+    'id': this.iframeId_,
+    'name': this.iframeId_,
+    'src': this.getIframeUrl_(),
+    'scrolling': 'no',
+    'marginwidth': '0',
+    'marginheight': '0',
+    'frameborder': '0',
+    'vspace': '0',
+    'hspace': '0',
+    'class': this.renderParams_[shindig.container.RenderParam.CLASS],
+    'height': this.renderParams_[shindig.container.RenderParam.HEIGHT],
+    'width': this.renderParams_[shindig.container.RenderParam.WIDTH]
   };
 
   // Do not use DOM API (createElement(), setAttribute()), since it is slower,
@@ -263,13 +244,14 @@ shindig.container.GadgetHolder.prototype.getIframeHtml_ = function() {
 /**
  * Get the rendering iframe URL.
  * @private
+ * @return {string} the rendering iframe URL.
  */
 shindig.container.GadgetHolder.prototype.getIframeUrl_ = function() {
-  var uri = shindig.uri(this.gadgetInfo_['iframeUrl']);
-  uri.setQP('debug', this.renderParams_['debug'] ? '1' : '0');
-  uri.setQP('nocache', this.renderParams_['nocache'] ? '1' : '0');
-  uri.setQP('testmode', this.renderParams_['testmode'] ? '1' : '0');
-  uri.setQP('view', this.view_);
+  var uri = shindig.uri(this.gadgetInfo_[shindig.container.MetadataResponse.IFRAME_URL]);
+  uri.setQP('debug', this.renderParams_[shindig.container.RenderParam.DEBUG] ? '1' : '0');
+  uri.setQP('nocache', this.renderParams_[shindig.container.RenderParam.NO_CACHE] ? '1' : '0');
+  uri.setQP('testmode', this.renderParams_[shindig.container.RenderParam.TEST_MODE] ? '1' : '0');
+  uri.setQP('view', this.getView());
   this.updateUserPrefParams_(uri);
 
   // TODO: Share this base container logic
@@ -281,11 +263,11 @@ shindig.container.GadgetHolder.prototype.getIframeUrl_ = function() {
   if (this.securityToken_) {
     uri.setExistingP('st', this.securityToken_);
   }
-  
+
   uri.setFP('mid', String(this.siteId_));
 
-  if (this.hasGadgetParams_) {
-    var gadgetParamText = gadgets.json.stringify(this.gadgetParams_);
+  if (this.hasViewParams_()) {
+    var gadgetParamText = gadgets.json.stringify(this.viewParams_);
     uri.setFP('view-params', gadgetParamText);
   }
 
@@ -303,7 +285,7 @@ shindig.container.GadgetHolder.prototype.getIframeUrl_ = function() {
  * @private
  */
 shindig.container.GadgetHolder.prototype.updateUserPrefParams_ = function(uri) {
-  var userPrefs = this.renderParams_['userPrefs'];
+  var userPrefs = this.renderParams_[shindig.container.RenderParam.USER_PREFS];
   if (userPrefs) {
     for (var up in userPrefs) {
       var upKey = 'up_' + up;
@@ -314,4 +296,17 @@ shindig.container.GadgetHolder.prototype.updateUserPrefParams_ = function(uri) {
       uri.setExistingP(upKey, upValue);
     }
   }
+};
+
+
+/**
+ * Return true if this has view parameters.
+ * @private
+ * @return {Boolean}
+ */
+shindig.container.GadgetHolder.prototype.hasViewParams_ = function() {
+  for (var key in this.viewParams_) {
+    return true;
+  }
+  return false;
 };

@@ -1,5 +1,5 @@
 <?php
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -19,7 +19,6 @@
  */
 
 require_once 'src/common/HttpServlet.php';
-require_once 'src/common/JsMin.php';
 require_once 'src/common/SecurityTokenDecoder.php';
 require_once 'src/common/SecurityToken.php';
 require_once 'src/common/BlobCrypter.php';

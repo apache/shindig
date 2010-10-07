@@ -46,9 +46,9 @@
  * This object contains the requested server data mapped to the requested keys.
  *
  * @param {Object.<string, ResponseItem>} responseItems Key/value map of data
- *    response information
+ *    response information.
  * @param {boolean=} opt_globalError Optional field indicating whether there were
- *    any errors generating this data response
+ *    any errors generating this data response.
  * @param {string=} opt_errorMessage
  *
  * @private
@@ -65,7 +65,7 @@ opensocial.DataResponse = function(responseItems, opt_globalError,
 /**
  * Returns true if there was an error in fetching this data from the server.
  *
- * @return {boolean} True if there was an error; otherwise, false
+ * @return {boolean} True if there was an error; otherwise, false.
  * @member opensocial.DataResponse
  */
 opensocial.DataResponse.prototype.hadError = function() {
@@ -88,7 +88,7 @@ opensocial.DataResponse.prototype.getErrorMessage = function() {
  *
  * @return {opensocial.ResponseItem} The requested
  *    <a href="opensocial.ResponseItem.html">response</a> calculated by the
- *    server
+ *    server.
  * @member opensocial.DataResponse
  */
 opensocial.DataResponse.prototype.get = function(key) {

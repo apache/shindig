@@ -1,5 +1,5 @@
 <?php
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -344,6 +344,11 @@ abstract class GadgetBaseRenderer extends GadgetRenderer {
         $key = $data['id'];
         $data = json_encode($data['result']);
         $script .= "opensocial.data.DataContext.putDataSet(\"$key\", $data);\n";
+      }
+    }
+    if ($this->gadget->gadgetSpec->templatesRequireLibraries) {
+      foreach ($this->gadget->gadgetSpec->templatesRequireLibraries as $url => $library) {
+        $script .= "os.Loader.loadContent(" . json_encode($library) . ", '" . $url . "');\n";
       }
     }
     if ($this->gadget->gadgetSpec->templatesDisableAutoProcessing) {

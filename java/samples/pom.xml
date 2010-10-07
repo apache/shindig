@@ -127,10 +127,6 @@
       <groupId>commons-io</groupId>
     </dependency>
     <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
-    </dependency>
-    <dependency>
       <groupId>net.oauth.core</groupId>
       <artifactId>oauth-httpclient4</artifactId>
     </dependency>

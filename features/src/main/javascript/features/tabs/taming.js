@@ -30,7 +30,7 @@ tamings___.push(function(imports) {
     [gadgets.Tab, 'getIndex'],
     [gadgets.Tab, 'getName'],
     [gadgets.Tab, 'getNameContainer'],
-  
+
     [gadgets.TabSet, 'addTab'],
     [gadgets.TabSet, 'alignTabs'],
     [gadgets.TabSet, 'displayTabs'],

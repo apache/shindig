@@ -46,6 +46,7 @@ if (!this.JsUtil) {
   eval(JsUtil.prototype.include(srcDir + '/xhrwrapper/xhrwrapper.js'));
   eval(JsUtil.prototype.include(srcDir + '/opensocial-reference/opensocial.js'));
   eval(JsUtil.prototype.include(srcDir + '/opensocial-reference/activity.js'));
+  eval(JsUtil.prototype.include(srcDir + '/opensocial-reference/album.js'));
   eval(JsUtil.prototype.include(srcDir + '/opensocial-reference/address.js'));
   eval(JsUtil.prototype.include(srcDir + '/opensocial-reference/bodytype.js'));
   eval(JsUtil.prototype.include(srcDir + '/opensocial-reference/collection.js'));
@@ -66,6 +67,8 @@ if (!this.JsUtil) {
   eval(JsUtil.prototype.include(srcDir + '/opensocial-reference/responseitem.js'));
   eval(JsUtil.prototype.include(srcDir + '/opensocial-reference/url.js'));
   eval(JsUtil.prototype.include(srcDir + '/opensocial-base/jsonactivity.js'));
+  eval(JsUtil.prototype.include(srcDir + '/opensocial-base/jsonalbum.js'));
+  eval(JsUtil.prototype.include(srcDir + '/opensocial-base/jsonmediaitem.js'));
   eval(JsUtil.prototype.include(srcDir + '/opensocial-base/jsonperson.js'));
   eval(JsUtil.prototype.include(srcDir + '/opensocial-jsonrpc/jsonrpccontainer.js'));
   eval(JsUtil.prototype.include(srcDir + '/osapi/osapi.js'));
@@ -80,6 +83,8 @@ if (!this.JsUtil) {
   eval(JsUtil.prototype.include(testSrcDir + "/core/prefstest.js"));
   eval(JsUtil.prototype.include(testSrcDir + "/core.io/iotest.js"));
   eval(JsUtil.prototype.include(testSrcDir + "/opensocial-base/jsonactivitytest.js"));
+  eval(JsUtil.prototype.include(testSrcDir + "/opensocial-base/jsonalbumtest.js"));
+  eval(JsUtil.prototype.include(testSrcDir + "/opensocial-base/jsonmediaitemtest.js"));
   eval(JsUtil.prototype.include(testSrcDir + "/opensocial-reference/activitytest.js"));
   eval(JsUtil.prototype.include(testSrcDir + "/opensocial-templates/compiler_test.js"));
   eval(JsUtil.prototype.include(testSrcDir + "/opensocial-templates/container_test.js"));

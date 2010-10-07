@@ -33,6 +33,7 @@
 #svn propset svn:ignore -F etc/svn-ignores java/social-api
 #svn propset svn:ignore -F etc/svn-ignores java/server
 #svn propset svn:ignore -F etc/svn-ignores java/samples
+#svn propset svn:ignore -F etc/svn-ignores php
 
 # Language files
 find . -name "*.java" | grep -v '.svn' | xargs -n 1 svn propset svn:eol-style native

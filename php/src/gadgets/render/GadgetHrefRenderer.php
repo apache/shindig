@@ -1,5 +1,5 @@
 <?php
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -120,7 +120,7 @@ class GadgetHrefRenderer extends GadgetBaseRenderer {
    * @return string the url
    */
   private function buildHref($view, $authz) {
-    $href = $view['href'];
+    $href = RemoteContentRequest::transformRelativeUrl($view['href'], $this->context->getUrl());
     if (empty($href)) {
       throw new Exception("Invalid empty href in the gadget view");
     } // add the required country and lang param to the URL

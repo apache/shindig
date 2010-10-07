@@ -51,7 +51,7 @@ var TYPE_undefined = 'undefined';
  * code and returns null if the eval throws an exception.
  *
  * @param {string} expr
- * @return {Object|null}
+ * @return {?Object}
  */
 function jsEval(expr) {
   try {
@@ -94,11 +94,11 @@ function copyProperties(to, from) {
  * @param {Object|null|undefined} value The possible value to use.
  * @param {Object} defaultValue The default if the value is not set.
  * @return {Object} The value, if it is
- * defined and not null; otherwise the default
+ * defined and not null; otherwise the default.
  */
 function getDefaultObject(value, defaultValue) {
   if (typeof value != TYPE_undefined && value != null) {
-    return /** @type Object */(value);
+    return /** @type {Object} */(value);
   } else {
     return defaultValue;
   }
@@ -108,7 +108,7 @@ function getDefaultObject(value, defaultValue) {
  * Detect if an object looks like an Array.
  * Note that instanceof Array is not robust; for example an Array
  * created in another iframe fails instanceof Array.
- * @param {Object|null} value Object to interrogate
+ * @param {?Object} value Object to interrogate.
  * @return {boolean} Is the object an array?
  */
 function isArray(value) {
@@ -163,12 +163,12 @@ function arrayClear(array) {
 
 
 /**
- * Prebinds "this" within the given method to an object, but ignores all 
+ * Prebinds "this" within the given method to an object, but ignores all
  * arguments passed to the resulting function.
  * I.e. var_args are all the arguments that method is invoked with when
  * invoking the bound function.
  *
- * @param {Object|null} object  The object that the method call targets.
+ * @param {?Object} object  The object that the method call targets.
  * @param {Function} method  The target method.
  * @return {Function}  Method with the target object bound to it and curried by
  *                     the provided arguments.
@@ -224,15 +224,16 @@ function DomTraverser(callback) {
  */
 DomTraverser.prototype.run = function(root) {
   var me = this;
-  me.queue_ = [ root ];
+  me.queue_ = [root];
   while (jsLength(me.queue_)) {
     me.process_(me.queue_.shift());
   }
-}
+};
 
 /**
  * Processes a single node.
  * @param {Element} node  The current node of the traversal.
+ * @private
  */
 DomTraverser.prototype.process_ = function(node) {
   var me = this;
@@ -244,14 +245,14 @@ DomTraverser.prototype.process_ = function(node) {
       me.queue_.push(c);
     }
   }
-}
+};
 
 /**
  * Get an attribute from the DOM.  Simple redirect, exists to compress code.
  *
  * @param {Element} node  Element to interrogate.
  * @param {string} name  Name of parameter to extract.
- * @return {string|null}  Resulting attribute.
+ * @return {?string}  Resulting attribute.
  */
 function domGetAttribute(node, name) {
   return node.getAttribute(name);
@@ -313,13 +314,13 @@ function domCloneElement(element) {
  * itself.
  *
  * @param {Node|null|undefined} node  The node whose ownerDocument is required.
- * @returns {Document}  The owner document or window.document if unsupported.
+ * @return {Document}  The owner document or window.document if unsupported.
  */
 function ownerDocument(node) {
   if (!node) {
     return document;
   } else if (node.nodeType == DOM_DOCUMENT_NODE) {
-    return /** @type Document */(node);
+    return /** @type {Document} */(node);
   } else {
     return node.ownerDocument || document;
   }
@@ -442,7 +443,7 @@ function stringTrim(str) {
  * @return {string}  Trimmed string.
  */
 function stringTrimLeft(str) {
-  return str.replace(/^\s+/, "");
+  return str.replace(/^\s+/, '');
 }
 
 /**
@@ -454,5 +455,5 @@ function stringTrimLeft(str) {
  * @return {string}  Trimmed string.
   */
 function stringTrimRight(str) {
-  return str.replace(/\s+$/, "");
+  return str.replace(/\s+$/, '');
 }

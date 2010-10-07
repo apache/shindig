@@ -131,6 +131,7 @@
                 <source>opensocial-reference/opensocial.js</source>
                 <source>opensocial-reference/activity.js</source>
                 <source>opensocial-reference/address.js</source>
+                <source>opensocial-reference/album.js</source>
                 <source>opensocial-reference/bodytype.js</source>
                 <source>opensocial-reference/collection.js</source>
                 <source>opensocial-reference/container.js</source>
@@ -151,6 +152,8 @@
                 <source>opensocial-reference/url.js</source>
                 <source>opensocial-base/fieldtranslations.js</source>
                 <source>opensocial-base/jsonactivity.js</source>
+                <source>opensocial-base/jsonalbum.js</source>
+                <source>opensocial-base/jsonmediaitem.js</source> 
                 <source>opensocial-base/jsonperson.js</source>
                 <source>opensocial-jsonrpc/jsonrpccontainer.js</source>
                 <source>osapi/osapi.js</source>

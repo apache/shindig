@@ -49,7 +49,7 @@
  * @constructor
  */
 opensocial.Message = function(body_or_params, opt_params) {
-  if (typeof body_or_params  == 'string') {
+  if (typeof body_or_params == 'string') {
     // We have a string
     this.fields_ = opt_params || {};
     this.fields_[opensocial.Message.Field.BODY] = body_or_params;
@@ -87,21 +87,21 @@ opensocial.Message.Field = {
    * @member opensocial.Message.Field
    * @const
    */
-  BODY : 'body',
+  BODY: 'body',
 
   /**
    * The main text of the message as a message template. Specifies the
    * message ID to use in the gadget xml.
    * @member opensocial.Message.Field
    */
-  BODY_ID : 'bodyId',
+  BODY_ID: 'bodyId',
 
 
   /**
    * Collection IDs this Message belongs to
    * @member opensocial.Message.Field
    */
-  COLLECTION_IDS : 'collectionIds',
+  COLLECTION_IDS: 'collectionIds',
 
   /**
    * The Unique ID of this message.
@@ -142,20 +142,20 @@ opensocial.Message.Field = {
    * sanitized by the container.
    * @member opensocial.Message.Field
    */
-  TITLE : 'title',
+  TITLE: 'title',
 
   /**
    * The title of the message as a message template. Specifies the
    * message ID to use in the gadget xml.
    * @member opensocial.Message.Field
    */
-  TITLE_ID : 'titleId',
+  TITLE_ID: 'titleId',
 
   /**
    * The title of the message, specified as an opensocial.Message.Type.
    * @member opensocial.Message.Field
    */
-  TYPE : 'type',
+  TYPE: 'type',
 
   /**
    * The last updated time of this message.
@@ -184,27 +184,27 @@ opensocial.Message.Type = {
    *
    * @member opensocial.Message.Type
    */
-  EMAIL : 'email',
+  EMAIL: 'email',
 
   /**
    * A short private message.
    *
    * @member opensocial.Message.Type
    */
-  NOTIFICATION : 'notification',
+  NOTIFICATION: 'notification',
 
   /**
    * A message to a specific user that can be seen only by that user.
    *
    * @member opensocial.Message.Type
    */
-  PRIVATE_MESSAGE : 'privateMessage',
+  PRIVATE_MESSAGE: 'privateMessage',
 
   /**
    * A message to a specific user that can be seen by more than that user.
    * @member opensocial.Message.Type
    */
-  PUBLIC_MESSAGE : 'publicMessage'
+  PUBLIC_MESSAGE: 'publicMessage'
 };
 
 /**
@@ -239,12 +239,12 @@ opensocial.Message.Status = {
  *
  * @param {string} key The key to get data for;
  *   see the <a href="opensocial.Message.Field.html">Field</a> class
- * for possible values
+ * for possible values.
  * @param {Object.<opensocial.DataRequest.DataRequestFields, Object>}
  *  opt_params Additional
  *    <a href="opensocial.DataRequest.DataRequestFields.html">params</a>
  *    to pass to the request.
- * @return {string} The data
+ * @return {string} The data.
  * @member opensocial.Message
  */
 opensocial.Message.prototype.getField = function(key, opt_params) {
@@ -255,8 +255,8 @@ opensocial.Message.prototype.getField = function(key, opt_params) {
 /**
  * Sets data for this message associated with the given key.
  *
- * @param {string} key The key to set data for
- * @param {string} data The data to set
+ * @param {string} key The key to set data for.
+ * @param {string} data The data to set.
  */
 opensocial.Message.prototype.setField = function(key, data) {
   return (this.fields_[key] = data);

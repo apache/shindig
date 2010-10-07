@@ -34,7 +34,7 @@ opensocial.Container = function() {};
 /**
  * The container instance.
  *
- * @type Container
+ * @type {Container}
  * @private
  */
 opensocial.Container.container_ = null;
@@ -43,7 +43,7 @@ opensocial.Container.container_ = null;
 /**
  * Set the current container object.
  *
- * @param {opensocial.Container} container The container
+ * @param {opensocial.Container} container The container.
  * @private
  */
 opensocial.Container.setContainer = function(container) {
@@ -54,7 +54,7 @@ opensocial.Container.setContainer = function(container) {
 /**
  * Get the current container object.
  *
- * @return {opensocial.Container} container The current container
+ * @return {opensocial.Container} container The current container.
  * @private
  */
 opensocial.Container.get = function() {
@@ -67,7 +67,7 @@ opensocial.Container.get = function() {
  * query things like what profile fields and surfaces are supported by this
  * container, what parameters were passed to the current gadget and so forth.
  *
- * @return {opensocial.Environment} The current environment
+ * @return {opensocial.Environment} The current environment.
  *
  * @private
  */
@@ -81,7 +81,7 @@ opensocial.Container.prototype.getEnvironment = function() {};
  *
  * @param {Array.<string> | string} recipients An ID, array of IDs, or a
  *     group reference; the supported keys are VIEWER, OWNER, VIEWER_FRIENDS,
- *    OWNER_FRIENDS, or a single ID within one of those groups
+ *    OWNER_FRIENDS, or a single ID within one of those groups.
  * @param {opensocial.Message} message The message to send to the specified
  *     users.
  * @param {function(opensocial.ResponseItem)=} opt_callback The function to call once the request has been
@@ -92,15 +92,15 @@ opensocial.Container.prototype.getEnvironment = function() {};
  *    message was sent. If there was an error, you can use the response item's
  *    getErrorCode method to determine how to proceed. The data on the response
  *    item will not be set.
- * @param {Object=} opt_params TODO
+ * @param {Object=} opt_params TODO.
  *
  * @member opensocial
  * @private
  */
 opensocial.Container.prototype.requestSendMessage = function(recipients,
     message, opt_callback, opt_params) {
-    gadgets.rpc.call(null, "requestSendMessage", opt_callback, recipients,
-        message, opt_callback, opt_params);
+  gadgets.rpc.call(null, 'requestSendMessage', opt_callback, recipients,
+      message, opt_callback, opt_params);
 };
 
 
@@ -112,7 +112,7 @@ opensocial.Container.prototype.requestSendMessage = function(recipients,
  *
  * @param {Array.<string> | string} recipients An ID, array of IDs, or a
  *     group reference; the supported keys are VIEWER, OWNER, VIEWER_FRIENDS,
- *    OWNER_FRIENDS, or a single ID within one of those groups
+ *    OWNER_FRIENDS, or a single ID within one of those groups.
  * @param {opensocial.Message} reason The reason the user wants the gadget to
  *     share itself. This reason can be used by the container when prompting the
  *     user for permission to share the app. It may also be ignored.
@@ -124,7 +124,7 @@ opensocial.Container.prototype.requestSendMessage = function(recipients,
  *    sharing request was sent. If there was an error, you can use the response
  *    item's getErrorCode method to determine how to proceed. The data on the
  *    response item will not be set.
- * @param {Object=} opt_params TODO
+ * @param {Object=} opt_params TODO.
  *
  * @member opensocial
  * @private
@@ -169,7 +169,7 @@ opensocial.Container.prototype.requestCreateActivity = function(activity,
  * Returns whether the current gadget has access to the specified
  * permission.
  *
- * @param {opensocial.Permission | string} permission The permission
+ * @param {opensocial.Permission | string} permission The permission.
  * @return {boolean} Whether the gadget has access for the permission.
  *
  * @private
@@ -183,19 +183,19 @@ opensocial.Container.prototype.hasPermission = function(permission) {
  * Requests the user grants access to the specified permissions.
  *
  * @param {Array.<opensocial.Permission>} permissions The permissions to request
- *    access to from the viewer
+ *    access to from the viewer.
  * @param {string} reason Will be displayed to the user as the reason why these
  *    permissions are needed.
  * @param {function(opensocial.ResponseItem)=} opt_callback The function to call once the request has been
  *    processed. This callback will either be called or the gadget will be
- *    reloaded from scratch
+ *    reloaded from scratch.
  *
  * @private
  */
 opensocial.Container.prototype.requestPermission = function(permissions, reason,
     opt_callback) {
   if (opt_callback) {
-    window.setTimeout(function () {
+    window.setTimeout(function() {
       opt_callback(new opensocial.ResponseItem(
           null, null, opensocial.ResponseItem.Error.NOT_IMPLEMENTED, null));
     }, 0);
@@ -208,8 +208,8 @@ opensocial.Container.prototype.requestPermission = function(permissions, reason,
  * asked for in the dataRequest object.
  *
  * @param {opensocial.DataRequest} dataRequest Specifies which data to get from
- *    the server
- * @param {function(opensocial.ResponseItem)} callback Function to call after the data is fetched
+ *    the server.
+ * @param {function(opensocial.ResponseItem)} callback Function to call after the data is fetched.
  * @private
  */
 opensocial.Container.prototype.requestData = function(dataRequest, callback) {};
@@ -221,7 +221,7 @@ opensocial.Container.prototype.requestData = function(dataRequest, callback) {};
  * @param {opensocial.IdSpec} idSpec The ID of the used to specify which people/groups
  *   to create an album for.
  * @param {opensocial.Album} album The album to create.
- * @return {Object} A request object
+ * @return {Object} A request object.
  * @private
  */
 opensocial.Container.prototype.newCreateAlbumRequest = function(idSpec, album) {};
@@ -233,7 +233,7 @@ opensocial.Container.prototype.newCreateAlbumRequest = function(idSpec, album) {
  *   to create an album for.
  * @param {string} albumId The ID of album to add the media item to.
  * @param {openSocial.MediaItem} mediaItem The media item instance to add to the album.
- * @return {Object} A request object
+ * @return {Object} A request object.
  * @private
  */
 opensocial.Container.prototype.newCreateMediaItemRequest = function(idSpec, albumId,
@@ -245,7 +245,7 @@ opensocial.Container.prototype.newCreateMediaItemRequest = function(idSpec, albu
  * @param {opensocial.IdSpec} idSpec The ID of the used to specify which people/groups
  *   to create an album for.
  * @param {string} albumId The ID of the album to create.
- * @return {Object} A request object
+ * @return {Object} A request object.
  * @private
  */
 opensocial.Container.prototype.newDeleteAlbumRequest = function(idSpec, albumId) {};
@@ -259,7 +259,7 @@ opensocial.Container.prototype.newDeleteAlbumRequest = function(idSpec, albumId)
  * @param {Object.<opensocial.DataRequest.PeopleRequestFields, Object>=} opt_params
  *    Additional params to pass to the request. This request supports
  *    PROFILE_DETAILS.
- * @return {Object} a request object
+ * @return {Object} a request object.
  * @private
  */
 opensocial.Container.prototype.newFetchPersonRequest = function(id,
@@ -275,7 +275,7 @@ opensocial.Container.prototype.newFetchPersonRequest = function(id,
  * @param {Object.<opensocial.DataRequest.PeopleRequestFields, Object>=} opt_params
  *    Additional params to pass to the request. This request supports
  *    PROFILE_DETAILS, SORT_ORDER, FILTER, FILTER_OPTIONS, FIRST, and MAX.
- * @return {Object} a request object
+ * @return {Object} a request object.
  * @private
  */
 opensocial.Container.prototype.newFetchPeopleRequest = function(idSpec,
@@ -295,8 +295,8 @@ opensocial.Container.prototype.newFetchPeopleRequest = function(idSpec,
  * @param {Object.<opensocial.DataRequest.DataRequestFields, Object>}
  *  opt_params Additional
  *    <a href="opensocial.DataRequest.DataRequestFields.html">params</a>
- *    to pass to the request
- * @return {Object} a request object
+ *    to pass to the request.
+ * @return {Object} a request object.
  * @private
  */
 opensocial.Container.prototype.newFetchPersonAppDataRequest = function(idSpec,
@@ -310,9 +310,9 @@ opensocial.Container.prototype.newFetchPersonAppDataRequest = function(idSpec,
  * person, per application. Containers supporting this request SHOULD provide
  * at least 10KB of space per user per application for this data.
  *
- * @param {string} key The name of the key
- * @param {string} value The value
- * @return {Object} a request object
+ * @param {string} key The name of the key.
+ * @param {string} value The value.
+ * @return {Object} a request object.
  * @private
  */
 opensocial.Container.prototype.newUpdatePersonAppDataRequest = function(
@@ -325,8 +325,8 @@ opensocial.Container.prototype.newUpdatePersonAppDataRequest = function(
  *
  * @param {Array.<string> | string} keys The keys you want to delete from
  *     the datastore; this can be an array of key names, a single key name,
- *     or "*" to mean "all keys"
- * @return {Object} A request object
+ *     or "*" to mean "all keys".
+ * @return {Object} A request object.
  * @private
  */
 opensocial.Container.prototype.newRemovePersonAppDataRequest = function(
@@ -339,10 +339,10 @@ opensocial.Container.prototype.newRemovePersonAppDataRequest = function(
  * @param {opensocial.IdSpec} idSpec An IdSpec used to specify which people/groups
  *    to own the album.
  * @param {string} albumId The ID of album to update.
- * @param {Object.<opensocial.Album.Field, Object>=} opt_params The album fields to update.
- * @return {Object} A request object
+ * @param {Object.<opensocial.Album.Field, Object>=} fields The album fields to update.
+ * @return {Object} A request object.
  */
-opensocial.Container.prototype.newUpdateAlbumRequest = function(idSpec, albumId, opt_params) {};
+opensocial.Container.prototype.newUpdateAlbumRequest = function(idSpec, albumId, fields) {};
 
 /**
  * Updates the fields for a media item specified in the params.
@@ -352,11 +352,11 @@ opensocial.Container.prototype.newUpdateAlbumRequest = function(idSpec, albumId,
  *    own the album/media item.
  * @param {string} albumId The ID of the album containing the media item to update.
  * @param {string} mediaItemId ID of media item to update.
- * @param {Object.<opensocial.MediaItem.Field, Object>=} opt_params The media item fields to update.
- * @return {Object} A request object
+ * @param {Object.<opensocial.MediaItem.Field, Object>=} fields The media item fields to update.
+ * @return {Object} A request object.
  */
 opensocial.Container.prototype.newUpdateMediaItemRequest = function(idSpec, albumId,
-    mediaItemId, opt_params) {};
+    mediaItemId, fields) {};
 
 /**
  * Used to request an activity stream from the server.
@@ -367,7 +367,7 @@ opensocial.Container.prototype.newUpdateMediaItemRequest = function(idSpec, albu
  *     fetch. See also <a href="opensocial.IdSpec.html">IdSpec</a>.
  * @param {Object.<opensocial.DataRequest.ActivityRequestFields, Object>=} opt_params
  *    Additional params to pass to the request.
- * @return {Object} a request object
+ * @return {Object} a request object.
  * @private
  */
 opensocial.Container.prototype.newFetchActivitiesRequest = function(idSpec,
@@ -375,12 +375,25 @@ opensocial.Container.prototype.newFetchActivitiesRequest = function(idSpec,
 
 opensocial.Container.prototype.newFetchAlbumsRequest = function(idSpec, opt_params) {};
 
+/**
+ * Creates an item to request media items from the container.
+ * 
+ * @param {opensocial.IdSpec}
+ *          idSpec An IdSpec used to specify which media items to fetch.
+ * @param {string}
+ *          albumId The id of the album to fetch MediaItems from.
+ * @param {Object.
+ *          <Object, Object>=} opt_params Additional parameters to pass to the request.
+ * @return {Object} A request object
+ */
+opensocial.Container.prototype.newFetchMediaItemsRequest = function(idSpec, opt_params) {};
+
 opensocial.Container.prototype.newFetchMessageCollectionsRequest = function(idSpec, opt_params) {};
 opensocial.Container.prototype.newFetchMessagesRequest = function(idSpec, msgCollId, opt_params) {};
 
 /**
  * Creates a new collection with caja support if enabled.
- * @return {opensocial.Collection} the collection object
+ * @return {opensocial.Collection} the collection object.
  * @private
  */
 opensocial.Container.prototype.newCollection = function(array, opt_offset,
@@ -391,7 +404,7 @@ opensocial.Container.prototype.newCollection = function(array, opt_offset,
 
 /**
  * Creates a new person with caja support if enabled.
- * @return {opensocial.Person} the person object
+ * @return {opensocial.Person} the person object.
  * @private
  */
 opensocial.Container.prototype.newPerson = function(opt_params, opt_isOwner,
@@ -406,7 +419,7 @@ opensocial.Container.prototype.newPerson = function(opt_params, opt_isOwner,
  * @param {Object.<opensocial.Activity.Field, Object>=} opt_params Any other
  *    fields that should be set on the activity object. All of the defined
  *    Fields are supported.
- * @return {opensocial.Activity} the activity object
+ * @return {opensocial.Activity} the activity object.
  * @private
  */
 opensocial.Container.prototype.newActivity = function(opt_params) {
@@ -421,9 +434,9 @@ opensocial.Container.prototype.newActivity = function(opt_params) {
  *    Any other fields that should be set on the album object;
  *    all of the defined
  *    <a href="opensocial.Album.Field.html">Field</a>s
- *    are supported
+ *    are supported.
  *
- * @return {opensocial.Album} the album object
+ * @return {opensocial.Album} the album object.
  * @private
  */
 opensocial.Container.prototype.newAlbum = function(opt_params) {
@@ -435,13 +448,13 @@ opensocial.Container.prototype.newAlbum = function(opt_params) {
  * Creates a media item. Represents images, movies, and audio.
  * Used when creating activities on the server.
  *
- * @param {string} mimeType of the media
- * @param {string} url where the media can be found
+ * @param {string} mimeType of the media.
+ * @param {string} url where the media can be found.
  * @param {Object.<opensocial.MediaItem.Field, Object>=} opt_params
  *    Any other fields that should be set on the media item object.
  *    All of the defined Fields are supported.
  *
- * @return {opensocial.MediaItem} the media item object
+ * @return {opensocial.MediaItem} the media item object.
  * @private
  */
 opensocial.Container.prototype.newMediaItem = function(mimeType, url,
@@ -460,10 +473,10 @@ opensocial.Container.prototype.newMediaItem = function(mimeType, url,
  *    Any other fields that should be set on the message object;
  *    all of the defined
  *    <a href="opensocial.Message.Field.html">Field</a>s
- *    are supported
+ *    are supported.
  *
  * @return {opensocial.Message} The new
- *    <a href="opensocial.Message.html">message</a> object
+ *    <a href="opensocial.Message.html">message</a> object.
  * @private
  */
 opensocial.Container.prototype.newMessage = function(body, opt_params) {
@@ -477,7 +490,7 @@ opensocial.Container.prototype.newMessage = function(body, opt_params) {
  * @param {Object.<opensocial.IdSpec.Field, Object>} params
  *    Parameters defining the id spec.
  * @return {opensocial.IdSpec} The new
- *     <a href="opensocial.IdSpec.html">IdSpec</a> object
+ *     <a href="opensocial.IdSpec.html">IdSpec</a> object.
  * @private
  */
 opensocial.Container.prototype.newIdSpec = function(params) {
@@ -489,10 +502,10 @@ opensocial.Container.prototype.newIdSpec = function(params) {
  * Creates a NavigationParameters object.
  *
  * @param {Object.<opensocial.NavigationParameters.Field, Object>} params
- *     Parameters defining the navigation
+ *     Parameters defining the navigation.
  * @return {opensocial.NavigationParameters} The new
  *     <a href="opensocial.NavigationParameters.html">NavigationParameters</a>
- *     object
+ *     object.
  * @private
  */
 opensocial.Container.prototype.newNavigationParameters = function(params) {
@@ -502,7 +515,7 @@ opensocial.Container.prototype.newNavigationParameters = function(params) {
 
 /**
  * Creates a new response item with caja support if enabled.
- * @return {opensocial.ResponseItem} the response item object
+ * @return {opensocial.ResponseItem} the response item object.
  * @private
  */
 opensocial.Container.prototype.newResponseItem = function(originalDataRequest,
@@ -514,7 +527,7 @@ opensocial.Container.prototype.newResponseItem = function(originalDataRequest,
 
 /**
  * Creates a new data response with caja support if enabled.
- * @return {opensocial.DataResponse} the data response object
+ * @return {opensocial.DataResponse} the data response object.
  * @private
  */
 opensocial.Container.prototype.newDataResponse = function(responseItems,
@@ -527,7 +540,7 @@ opensocial.Container.prototype.newDataResponse = function(responseItems,
  * Get a data request object to use for sending and fetching data from the
  * server.
  *
- * @return {opensocial.DataRequest} the request object
+ * @return {opensocial.DataRequest} the request object.
  * @private
  */
 opensocial.Container.prototype.newDataRequest = function() {
@@ -538,7 +551,7 @@ opensocial.Container.prototype.newDataRequest = function() {
 /**
  * Get a new environment object.
  *
- * @return {opensocial.Environment} the environment object
+ * @return {opensocial.Environment} the environment object.
  * @private
  */
 opensocial.Container.prototype.newEnvironment = function(domain,
@@ -554,8 +567,8 @@ opensocial.Container.prototype.invalidateCache = function() {
 
 /**
  * Returns true if the specified value is an array
- * @param {Object} val Variable to test
- * @return {boolean} Whether variable is an array
+ * @param {Object} val Variable to test.
+ * @return {boolean} Whether variable is an array.
  * @private
  */
 opensocial.Container.isArray = function(val) {
@@ -572,7 +585,7 @@ opensocial.Container.isArray = function(val) {
  *  opt_params Additional
  *    <a href="opensocial.DataRequest.DataRequestFields.html">params</a>
  *    to pass to the request.
- * @return {string} The data
+ * @return {string} The data.
  * @private
  */
 opensocial.Container.getField = function(fields, key, opt_params) {

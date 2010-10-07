@@ -37,28 +37,28 @@ opensocial.makeRequest = function() {
 };
 
 opensocial.ContentRequestParameters = {
-  METHOD : gadgets.io.RequestParameters.METHOD,
-  CONTENT_TYPE : gadgets.io.RequestParameters.CONTENT_TYPE,
-  AUTHENTICATION : gadgets.io.RequestParameters.AUTHORIZATION,
-  NUM_ENTRIES : gadgets.io.RequestParameters.NUM_ENTRIES,
-  GET_SUMMARIES : gadgets.io.RequestParameters.GET_SUMMARIES
+  METHOD: gadgets.io.RequestParameters.METHOD,
+  CONTENT_TYPE: gadgets.io.RequestParameters.CONTENT_TYPE,
+  AUTHENTICATION: gadgets.io.RequestParameters.AUTHORIZATION,
+  NUM_ENTRIES: gadgets.io.RequestParameters.NUM_ENTRIES,
+  GET_SUMMARIES: gadgets.io.RequestParameters.GET_SUMMARIES
 };
 
 opensocial.ContentRequestParameters.MethodType = {
-  GET : gadgets.io.MethodType.GET,
-  POST : gadgets.io.MethodType.POST
+  GET: gadgets.io.MethodType.GET,
+  POST: gadgets.io.MethodType.POST
 };
 
 opensocial.ContentRequestParameters.ContentType = {
-  HTML : gadgets.io.ContentType.TEXT,
-  XML : gadgets.io.ContentType.DOM,
-  FEED : gadgets.io.ContentType.JSON
+  HTML: gadgets.io.ContentType.TEXT,
+  XML: gadgets.io.ContentType.DOM,
+  FEED: gadgets.io.ContentType.JSON
 };
 
 opensocial.ContentRequestParameters.AuthenticationType = {
-  NONE : gadgets.io.AuthorizationType.NONE,
-  SIGNED : gadgets.io.AuthorizationType.SIGNED,
-  AUTHENTICATED : gadgets.io.AuthorizationType.AUTHENTICATED
+  NONE: gadgets.io.AuthorizationType.NONE,
+  SIGNED: gadgets.io.AuthorizationType.SIGNED,
+  AUTHENTICATED: gadgets.io.AuthorizationType.AUTHENTICATED
 };
 
 
