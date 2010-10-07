@@ -55,13 +55,13 @@ public class ContentRewriterFeature {
   protected static final String EXCLUDE_URL = "exclude-url";
   protected static final String INCLUDE_TAGS = "include-tags";
   protected static final String EXPIRES = "expires";
-  
-  public static final Integer EXPIRES_DEFAULT = -1;  // -1 = Use HTTP.
+
+  public static final Integer EXPIRES_HTTP = -1;  // -1 = Use HTTP.
 
   protected enum PatternOptions {
     ALL, NONE, REGEX, STRINGS
   }
-  
+
   /**
    * Factory for content rewriter features.
    */
@@ -79,7 +79,7 @@ public class ContentRewriterFeature {
     public Config getDefault() {
       return defaultConfig;
     }
-    
+
     public Config get(HttpRequest request) {
       return get(request.getGadget());
     }
@@ -124,7 +124,7 @@ public class ContentRewriterFeature {
           "", false, true);
     }
   }
-  
+
   @Singleton
   public static class DefaultConfig extends Config {
     @Inject
@@ -138,7 +138,7 @@ public class ContentRewriterFeature {
       super(includeUrls, excludeUrls, expires, includeTags, onlyAllowExcludes, enableSplitJsConcat);
     }
   }
-  
+
   public static class Config {
     private final MatchBundle includes;
     private final MatchBundle excludes;
@@ -151,7 +151,7 @@ public class ContentRewriterFeature {
     private final Integer expires;
     private final boolean onlyAllowExcludes;
     private final boolean enableSplitJs;
-    
+
     // Lazily computed
     private Integer fingerprint;
     private static final Pattern COMMA_WHITESPACE_PATTERN = Pattern.compile("\\s*,\\s*");
@@ -159,7 +159,7 @@ public class ContentRewriterFeature {
     /**
      * Constructor which takes a gadget spec and container settings
      * as "raw" input strings.
-     * 
+     *
      * @param defaultInclude As a regex
      * @param defaultExclude As a regex
      * @param defaultExpires Either "HTTP" or a ttl in seconds
@@ -173,7 +173,7 @@ public class ContentRewriterFeature {
       // Set up includes from defaultInclude param
       this.includes = getMatchBundle(paramTrim(defaultInclude),
           Collections.<String>emptyList());
-      
+
       // Set up excludes from defaultExclude param
       this.excludes = getMatchBundle(paramTrim(defaultExclude),
           Collections.<String>emptyList());
@@ -186,26 +186,26 @@ public class ContentRewriterFeature {
         }
       }
       this.includeTags = includeTagsBuilder.build();
-      
+
       // Parse expires field
-      int expiresVal = EXPIRES_DEFAULT;
+      int expiresVal = EXPIRES_HTTP;
       try {
         expiresVal = Integer.parseInt(paramTrim(defaultExpires));
       } catch (NumberFormatException e) {
         // Fall through to default.
       }
       this.expires = expiresVal;
-      
+
       // Save config for onlyAllowExcludes
       this.onlyAllowExcludes = onlyAllowExcludes;
       this.enableSplitJs = enableSplitJs;
     }
-    
+
     Config(GadgetSpec spec, Config defaultConfig) {
       this.onlyAllowExcludes = defaultConfig.onlyAllowExcludes;
-      
+
       Feature f = spec.getModulePrefs().getFeatures().get("content-rewrite");
-      
+
       // Include overrides.
       // Note: Shindig originally supported the plural versions with regular
       // expressions. But the OpenSocial specification v0.9 allows for singular
@@ -224,7 +224,7 @@ public class ContentRewriterFeature {
         }
       }
       this.includes = getMatchBundle(includeRegex, includeUrls);
-      
+
       // Exclude overrides. Only use the exclude regex specified by the
       // gadget spec if !onlyAllowExcludes.
       String excludeRegex = defaultConfig.excludes.param;
@@ -239,7 +239,7 @@ public class ContentRewriterFeature {
         }
       }
       this.excludes = getMatchBundle(excludeRegex, excludeUrls);
-      
+
       // Spec-specified include tags.
       Set<String> tagsVal = null;
       if (f != null && f.getParams().containsKey(INCLUDE_TAGS)) {
@@ -264,31 +264,32 @@ public class ContentRewriterFeature {
       if (f != null && f.getParams().containsKey(EXPIRES)) {
         try {
           int overrideVal = Integer.parseInt(f.getParam(EXPIRES));
-          expiresVal = Math.min(overrideVal, expiresVal);
+          expiresVal = (expiresVal == EXPIRES_HTTP || overrideVal < expiresVal) ?
+              overrideVal : expiresVal;
         } catch (NumberFormatException e) {
           // Falls through to default.
           if ("HTTP".equalsIgnoreCase(f.getParam(EXPIRES).trim())) {
-            expiresVal = EXPIRES_DEFAULT;
+            expiresVal = EXPIRES_HTTP;
           }
         }
       }
       this.expires = expiresVal;
       this.enableSplitJs = defaultConfig.enableSplitJs;
     }
-    
+
     private String paramTrim(String param) {
       if (param == null) {
         return param;
       }
-      
+
       return param.trim();
     }
-    
+
     private MatchBundle getMatchBundle(String regex, Collection<String> matches) {
       MatchBundle bundle = new MatchBundle();
       bundle.param = regex;
       bundle.matches = matches;
-      
+
       if (bundle.matches.isEmpty() && StringUtils.isEmpty(bundle.param)) {
         bundle.options = PatternOptions.NONE;
       } else if (bundle.matches.size() == 1) {
@@ -312,7 +313,7 @@ public class ContentRewriterFeature {
       }
       return bundle;
     }
-    
+
     private static class MatchBundle {
       private String param;
       private PatternOptions options;
@@ -327,7 +328,7 @@ public class ContentRewriterFeature {
     protected boolean shouldExclude(String url) {
       return matcherMatches(url, excludes);
     }
-    
+
     private static boolean matcherMatches(String url, MatchBundle bundle) {
       switch (bundle.options) {
       case NONE:
@@ -374,7 +375,7 @@ public class ContentRewriterFeature {
     public Integer getExpires() {
       return expires;
     }
-    
+
     public boolean isSplitJsEnabled() {
       return enableSplitJs;
     }

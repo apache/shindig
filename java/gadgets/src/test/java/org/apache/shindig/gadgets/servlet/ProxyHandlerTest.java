@@ -23,6 +23,7 @@ import com.google.common.collect.Maps;
 
 import org.apache.shindig.common.EasyMockTestCase;
 import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.common.util.FakeTimeSource;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetException;
@@ -59,10 +60,10 @@ public class ProxyHandlerTest extends EasyMockTestCase {
   public ResponseRewriterRegistry rewriterRegistry
       = new DefaultResponseRewriterRegistry(Arrays.<ResponseRewriter>asList(rewriter), null);
   private ProxyUriManager.ProxyUri request;
-  
+
   private final ProxyHandler proxyHandler
       = new ProxyHandler(pipeline, rewriterRegistry, true);
-  
+
   private void expectGetAndReturnData(String url, byte[] data) throws Exception {
     HttpRequest req = new HttpRequest(Uri.parse(url));
     HttpResponse resp = new HttpResponseBuilder().setResponse(data).create();
@@ -75,7 +76,7 @@ public class ProxyHandlerTest extends EasyMockTestCase {
     HttpResponse resp = new HttpResponseBuilder().addAllHeaders(headers).create();
     expect(pipeline.execute(req)).andReturn(resp);
   }
-  
+
   private void setupProxyRequestMock(String host, String url,
       boolean noCache, int refresh, String rewriteMime, String fallbackUrl) throws Exception {
     request = new ProxyUriManager.ProxyUri(
@@ -93,12 +94,14 @@ public class ProxyHandlerTest extends EasyMockTestCase {
   private ResponseRewriter getResponseRewriterThatThrowsExceptions(
       final StringBuilder stringBuilder) {
     return new DomWalker.Rewriter() {
+      @Override
       public void rewrite(Gadget gadget, MutableContent content)
           throws RewritingException {
         stringBuilder.append("exceptionThrown");
         throw new RewritingException("sad", 404);
       }
 
+      @Override
       public void rewrite(HttpRequest request, HttpResponseBuilder builder)
           throws RewritingException {
         stringBuilder.append("exceptionThrown");
@@ -140,7 +143,7 @@ public class ProxyHandlerTest extends EasyMockTestCase {
   public void testLockedDomainEmbed() throws Exception {
     setupNoArgsProxyRequestMock("www.example.com", URL_ONE);
     expectGetAndReturnData(URL_ONE, DATA_ONE.getBytes());
-   
+
     replay();
     HttpResponse response = proxyHandler.fetch(request);
     verify();
@@ -201,7 +204,7 @@ public class ProxyHandlerTest extends EasyMockTestCase {
     assertEquals(magicGarbage, response.getHeader("X-Magic-Garbage"));
     assertTrue(rewriter.responseWasRewritten());
   }
-  
+
   @Test
   public void testOctetSetOnNullContentType() throws Exception {
     String url = "http://example.org/file.evil";
@@ -218,7 +221,7 @@ public class ProxyHandlerTest extends EasyMockTestCase {
     assertNotNull(response.getHeader("Content-Disposition"));
     assertTrue(rewriter.responseWasRewritten());
   }
-  
+
   @Test
   public void testNoContentDispositionForFlash() throws Exception {
     // Some headers may be blacklisted. These are OK.
@@ -238,7 +241,7 @@ public class ProxyHandlerTest extends EasyMockTestCase {
     assertNull(response.getHeader("Content-Disposition"));
     assertTrue(rewriter.responseWasRewritten());
   }
-  
+
   @Test
   public void testGetFallback() throws Exception {
     String url = "http://example.org/file.evil";
@@ -379,15 +382,18 @@ public class ProxyHandlerTest extends EasyMockTestCase {
   public void testWithCache() throws Exception {
     String url = "http://example.org/file.evil";
     String domain = "example.org";
+    HttpResponse.setTimeSource(new FakeTimeSource());
 
     setupProxyRequestMock(domain, url, false, 120, null, null);
-    
+
     HttpRequest req = new HttpRequestCache(Uri.parse(url)).setCacheTtl(120).setIgnoreCache(false);
-    HttpResponse resp = new HttpResponse("Hello");
-    expect(pipeline.execute(req)).andReturn(resp);
+    HttpResponseBuilder resp = new HttpResponseBuilder().setCacheTtl(1234);
+    resp.setContent("Hello");
+    expect(pipeline.execute(req)).andReturn(resp.create());
 
     replay();
-    proxyHandler.fetch(request);
+    HttpResponse proxyResp = proxyHandler.fetch(request);
+    assertEquals(120, proxyResp.getCacheTtl() / 1000);
     verify();
   }
 
@@ -395,15 +401,18 @@ public class ProxyHandlerTest extends EasyMockTestCase {
   public void testWithBadTtl() throws Exception {
     String url = "http://example.org/file.evil";
     String domain = "example.org";
+    HttpResponse.setTimeSource(new FakeTimeSource());
 
     setupProxyRequestMock(domain, url, false, -1, null, null);
-    
+
     HttpRequest req = new HttpRequestCache(Uri.parse(url)).setCacheTtl(-1).setIgnoreCache(false);
-    HttpResponse resp = new HttpResponse("Hello");
-    expect(pipeline.execute(req)).andReturn(resp);
+    HttpResponseBuilder resp = new HttpResponseBuilder().setCacheTtl(1234);
+    resp.setContent("Hello");
+    expect(pipeline.execute(req)).andReturn(resp.create());
 
     replay();
-    proxyHandler.fetch(request);
+    HttpResponse proxyResp = proxyHandler.fetch(request);
+    assertEquals(1234, proxyResp.getCacheTtl() / 1000);
     verify();
   }
 
@@ -414,7 +423,7 @@ public class ProxyHandlerTest extends EasyMockTestCase {
     String domain = "example.org";
 
     setupProxyRequestMock(domain, url, false, -1, expectedMime, null);
-    
+
     HttpRequest req = new HttpRequest(Uri.parse(url))
         .setRewriteMimeType(expectedMime);
 
@@ -424,11 +433,11 @@ public class ProxyHandlerTest extends EasyMockTestCase {
       .create();
 
     expect(pipeline.execute(req)).andReturn(resp);
-    
+
     replay();
     HttpResponse response = proxyHandler.fetch(request);
     verify();
-    
+
     assertEquals(outputMime, response.getHeader("Content-Type"));
     reset();
   }

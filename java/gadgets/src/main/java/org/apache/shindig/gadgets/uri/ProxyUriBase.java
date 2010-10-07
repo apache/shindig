@@ -45,7 +45,7 @@ public class ProxyUriBase {
   private String rewriteMimeType = null;
   private boolean sanitizeContent = false;
   private boolean cajoleContent = false;
-  
+
   protected ProxyUriBase(Gadget gadget) {
     this(null,  // Meaningless in "context" mode. translateStatusRefresh invalid here.
          getIntegerValue(gadget.getContext().getParameter(Param.REFRESH.getKey())),
@@ -54,7 +54,7 @@ public class ProxyUriBase {
          gadget.getContext().getContainer(),
          gadget.getSpec().getUrl().toString());
   }
-  
+
   protected ProxyUriBase(UriStatus status, Uri origUri) {
     this.status = status;
     setFromUri(origUri);
@@ -89,8 +89,8 @@ public class ProxyUriBase {
       gadget = uri.getQueryParameter(Param.GADGET.getKey());
       rewriteMimeType = uri.getQueryParameter(Param.REWRITE_MIME_TYPE.getKey());
       sanitizeContent = getBooleanValue(uri.getQueryParameter(Param.SANITIZE.getKey()));
-      cajoleContent = getBooleanValue(uri.getQueryParameter(Param.CAJOLE.getKey()));      
-    }  
+      cajoleContent = getBooleanValue(uri.getQueryParameter(Param.CAJOLE.getKey()));
+    }
   }
 
   @Override
@@ -99,7 +99,7 @@ public class ProxyUriBase {
       return true;
     }
     if (!(obj instanceof ProxyUriBase)) {
-      return false; 
+      return false;
     }
     ProxyUriBase objUri = (ProxyUriBase) obj;
     return (Objects.equal(this.status, objUri.status)
@@ -124,7 +124,7 @@ public class ProxyUriBase {
     this.rewriteMimeType = type;
     return this;
   }
-  
+
   public ProxyUriBase setSanitizeContent(boolean sanitize) {
     this.sanitizeContent = sanitize;
     return this;
@@ -134,7 +134,7 @@ public class ProxyUriBase {
     this.cajoleContent = cajole;
     return this;
   }
-  
+
   public UriStatus getStatus() {
     return status;
   }
@@ -162,7 +162,7 @@ public class ProxyUriBase {
   public String getRewriteMimeType() {
     return rewriteMimeType;
   }
-  
+
   public boolean sanitizeContent() {
     return sanitizeContent;
   }
@@ -195,20 +195,20 @@ public class ProxyUriBase {
       req.setRewriteMimeType(getRewriteMimeType());
     }
     req.setSanitizationRequested(sanitizeContent());
-    req.setCajaRequested(cajoleContent());    
+    req.setCajaRequested(cajoleContent());
 
     return req;
   }
 
   /**
-   * Construct the query parameters for proxy url  
-   * @param forcedRefresh optional overwrite the refresh time 
+   * Construct the query parameters for proxy url
+   * @param forcedRefresh optional overwrite the refresh time
    * @param version optional version
    * @return Url with only query parameters set
    */
   public UriBuilder makeQueryParams(Integer forcedRefresh, String version) {
     UriBuilder queryBuilder = new UriBuilder();
-    
+
     // Add all params common to both chained and query syntax.
     String container = getContainer();
     queryBuilder.addQueryParameter(Param.CONTAINER.getKey(), container);
@@ -219,7 +219,7 @@ public class ProxyUriBase {
       if (forcedRefresh != null && forcedRefresh >= 0) {
         queryBuilder.addQueryParameter(Param.REFRESH.getKey(), forcedRefresh.toString());
       } else if (getRefresh() != null) {
-        queryBuilder.addQueryParameter(Param.REFRESH.getKey(), getRefresh().toString());      
+        queryBuilder.addQueryParameter(Param.REFRESH.getKey(), getRefresh().toString());
       }
     }
 
@@ -238,7 +238,19 @@ public class ProxyUriBase {
     return queryBuilder;
   }
 
-  public Integer translateStatusRefresh(int longVal, int defaultVal)
+  /**
+   * Calculate cache time for a resource url. Provide long period for versioned resource,
+   * use original value for unversioned resource, and no cache for invalid versions.
+   * Invalid version can happen in multiple instances environemnt where the url can be
+   * created on one server and the actually retreival is done on another that have an older version
+   * of resource in cache. In that case no caching will cause the user browser to try again next
+   * time and hopefully getting the newer version.
+   * @param longVal long expiry for versioned resource
+   * @param originalResourceTtl original resource ttl, to be served fro unversion resource
+   * @return the calculated expiry to the Uri according to status
+   * @throws GadgetException
+   */
+  public Integer translateStatusRefresh(int longVal, int originalResourceTtl)
       throws GadgetException {
     Integer retRefresh = 0;
     switch (getStatus()) {
@@ -246,7 +258,7 @@ public class ProxyUriBase {
       retRefresh = longVal;
       break;
     case VALID_UNVERSIONED:
-      retRefresh = defaultVal;
+      retRefresh = originalResourceTtl;
       break;
     case INVALID_VERSION:
       retRefresh = 0;
@@ -275,7 +287,7 @@ public class ProxyUriBase {
   protected static boolean getBooleanValue(String str) {
     return str != null && "1".equals(str);
   }
-  
+
   protected static Integer getIntegerValue(String str) {
     Integer val = null;
     try {

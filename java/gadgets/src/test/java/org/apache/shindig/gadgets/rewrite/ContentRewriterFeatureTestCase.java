@@ -136,7 +136,39 @@ public class ContentRewriterFeatureTestCase extends BaseRewriterTestCase {
     defaultRewriterFeature = new ContentRewriterFeature.Config(
         createSpecWithRewrite("test\\.com", "testx", "htTp ", tags),
         new ContentRewriterFeature.DefaultConfig("", "", "12345", TAGS, false, false));
-    assertEquals(ContentRewriterFeature.EXPIRES_DEFAULT, defaultRewriterFeature.getExpires());
+    assertEquals(ContentRewriterFeature.EXPIRES_HTTP, defaultRewriterFeature.getExpires());
+  }
+
+  @Test
+  public void testExpiresOverwriteTooBig() throws Exception {
+    defaultRewriterFeature = new ContentRewriterFeature.Config(
+        createSpecWithRewrite("test\\.com", "testx", "20000", tags),
+        new ContentRewriterFeature.DefaultConfig("", "", "12345", TAGS, false, false));
+    assertEquals(12345, defaultRewriterFeature.getExpires().intValue());
+  }
+
+  @Test
+  public void testExpiresBadValue() throws Exception {
+    defaultRewriterFeature = new ContentRewriterFeature.Config(
+        createSpecWithRewrite("test\\.com", "testx", "X", tags),
+        new ContentRewriterFeature.DefaultConfig("", "", "12345", TAGS, false, false));
+    assertEquals(12345, defaultRewriterFeature.getExpires().intValue());
+  }
+
+  @Test
+  public void testExpiresOverwrite() throws Exception {
+    defaultRewriterFeature = new ContentRewriterFeature.Config(
+        createSpecWithRewrite("test\\.com", "testx", "10", tags),
+        new ContentRewriterFeature.DefaultConfig("", "", "12345", TAGS, false, false));
+    assertEquals(10, defaultRewriterFeature.getExpires().intValue());
+  }
+
+  @Test
+  public void testExpiresOverwriteDefault() throws Exception {
+    defaultRewriterFeature = new ContentRewriterFeature.Config(
+        createSpecWithRewrite("test\\.com", "testx", "10", tags),
+        new ContentRewriterFeature.DefaultConfig("", "", "-1", TAGS, false, false));
+    assertEquals(10, defaultRewriterFeature.getExpires().intValue());
   }
 
   @Test
@@ -187,14 +219,14 @@ public class ContentRewriterFeatureTestCase extends BaseRewriterTestCase {
     assertTrue(defaultRewriterFeature.shouldRewriteURL("http://www.foobar.com"));
     assertFalse(defaultRewriterFeature.shouldRewriteURL("http://www.test.com"));
   }
-  
+
   @Test
   public void testSplitJsSupported() throws Exception {
     defaultRewriterFeature =
         new ContentRewriterFeature.DefaultConfig("", "test", "0", TAGS, false, true);
     assertTrue(defaultRewriterFeature.isSplitJsEnabled());
   }
-  
+
   @Test
   public void testSplitJsNotSupported() throws Exception {
     defaultRewriterFeature =

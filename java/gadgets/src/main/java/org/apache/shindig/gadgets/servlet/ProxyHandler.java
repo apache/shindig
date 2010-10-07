@@ -45,7 +45,6 @@ import java.io.IOException;
 public class ProxyHandler {
   // TODO: parameterize these.
   static final Integer LONG_LIVED_REFRESH = (365 * 24 * 60 * 60);  // 1 year
-  static final Integer DEFAULT_REFRESH = (60 * 60);                // 1 hour
 
   private final RequestPipeline requestPipeline;
   private final ResponseRewriterRegistry contentRewriterRegistry;
@@ -109,7 +108,8 @@ public class ProxyHandler {
 
     try {
       ServletUtil.setCachingHeaders(response,
-          proxyUri.translateStatusRefresh(LONG_LIVED_REFRESH, DEFAULT_REFRESH), false);
+          proxyUri.translateStatusRefresh(LONG_LIVED_REFRESH, (int) (results.getCacheTtl() / 1000)),
+          false);
     } catch (GadgetException gex) {
       return ServletUtil.errorResponse(gex);
     }
