@@ -85,7 +85,7 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
   private $allMessageCollections = null;
 
   protected function getDbFilename() {
-    return sys_get_temp_dir() . '/' . 'ShindigDb' + getenv("BUILD_TAG") . '.json';
+    return sys_get_temp_dir() . '/' . 'ShindigDb' . getenv('BUILD_TAG') . '.json';
   }
 
   public function getDb() {
