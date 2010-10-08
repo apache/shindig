@@ -1427,14 +1427,6 @@
         <type>test-jar</type>
       </dependency>
 
-      <!-- external dependencies -->
-      <dependency>
-        <groupId>com.google.code.findbugs</groupId>
-        <artifactId>jsr305</artifactId>
-        <version>1.3.9</version>
-        <!-- cannot be provided scope, guice uses @Nullable at runtime -->
-      </dependency>
-
       <dependency> 
         <groupId>com.google.inject</groupId> 
         <artifactId>guice</artifactId> 
