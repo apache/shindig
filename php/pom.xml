@@ -22,7 +22,7 @@
   <parent>
     <groupId>org.apache.shindig</groupId>
     <artifactId>shindig-project</artifactId>
-    <version>2.0.1</version>
+    <version>2.0.1-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
@@ -33,9 +33,9 @@
   <description>PHP tests</description>
 
   <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/shindig/tags/shindig-project-2.0.1/php</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/shindig/tags/shindig-project-2.0.1/php</developerConnection>
-    <url>http://svn.apache.org/viewvc/shindig/tags/shindig-project-2.0.1/php</url>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/shindig/trunk/php</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/shindig/trunk/php</developerConnection>
+    <url>http://svn.apache.org/viewvc/shindig/trunk/php</url>
   </scm>
 
   <!-- common params -->
@@ -120,10 +120,11 @@
                 <mkdir dir="${coverage.report}" />
 		<mkdir dir="target/tmp" />
                 <exec executable="phpunit" dir=".">
-                  <arg value="--verbose" />
-		  <env key="TMPDIR" value="${basedir}/target/tmp" />
+                  <arg value="--verbose"/>
+		  <env key="TMPDIR" value="${basedir}/target/tmp"/>
                 </exec>
-                <xslt in="${surefire.reports}/phpunit-testresults.xml" out="${surefire.reports}/xslt.info" style="test/config/phpunit_to_surefire.xslt">
+                <xslt in="${surefire.reports}/phpunit-testresults.xml" out="${surefire.reports}/xslt.info"
+                    style="test/config/phpunit_to_surefire.xslt">
                   <param name="outputDir" expression="." />
                 </xslt>
               </target>
