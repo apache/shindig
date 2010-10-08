@@ -32,7 +32,8 @@ import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.uri.UriCommon.Param;
 
-import javax.annotation.Nullable;
+// Temporary replacement of javax.annotation.Nullable
+import org.apache.shindig.common.Nullable;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;

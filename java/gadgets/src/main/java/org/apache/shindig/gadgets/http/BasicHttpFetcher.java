@@ -86,7 +86,8 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;
 
-import javax.annotation.Nullable;
+// Temporary replacement of javax.annotation.Nullable
+import org.apache.shindig.common.Nullable;
 import javax.servlet.http.HttpServletResponse;
 
 /**

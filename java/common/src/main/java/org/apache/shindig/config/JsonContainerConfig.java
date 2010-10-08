@@ -47,7 +47,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
-import javax.annotation.Nullable;
+// Temporary replacement of javax.annotation.Nullable
+import org.apache.shindig.common.Nullable;
+
 import javax.el.ELContext;
 import javax.el.ELException;
 import javax.el.ValueExpression;
