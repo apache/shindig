@@ -717,18 +717,19 @@
                 <exclude>**/.git/**/*</exclude>
                 <exclude>**/README*</exclude>
                 <exclude>**/target/**</exclude>
-                <exclude>**/php/external/**</exclude>
+                <exclude>**/external/**</exclude>
                 <exclude>**/features/swfobject/swfobject.js</exclude>
                 <exclude>**/features/swfobject/swfobject.opt.js</exclude>
                 <exclude>etc/svn-ignores</exclude>
                 <exclude>etc/svn-props</exclude>
                 <exclude>etc/eclipse/shindig.importorder</exclude>
-                <exclude>php/src/common/JsMin.php</exclude>
-                <exclude>php/test/misc/rewriter*.css</exclude>
-                <exclude>php/test/misc/rewriter*.js</exclude>
-                <exclude>php/test/misc/*.html</exclude>
-                <exclude>php/test/misc/*.xml</exclude>
-                <exclude>php/test/certs/*</exclude>
+                <exclude>JsMin.php</exclude>
+                <exclude>**/test/misc/rewriter*.css</exclude>
+                <exclude>**/test/misc/rewriter*.js</exclude>
+                <exclude>**/test/misc/*.html</exclude>
+                <exclude>**/test/misc/*.xml</exclude>
+                <exclude>**/test/certs/*</exclude>
+                <exclude>phpunit.xml.dist</exclude>
                 <exclude>BUILD-JAVA</exclude>
                 <exclude>COMMITTERS</exclude>
                 <exclude>UPGRADING</exclude>
@@ -1195,18 +1196,19 @@
               <exclude>**/.git/**/*</exclude>
               <exclude>**/README*</exclude>
               <exclude>**/target/**</exclude>
-              <exclude>**/php/external/**</exclude>
+              <exclude>**/external/**</exclude>
               <exclude>**/features/swfobject/swfobject.js</exclude>
               <exclude>**/features/swfobject/swfobject.opt.js</exclude>
               <exclude>etc/svn-ignores</exclude>
               <exclude>etc/svn-props</exclude>
               <exclude>etc/eclipse/shindig.importorder</exclude>
-              <exclude>php/src/common/JsMin.php</exclude>
-              <exclude>php/test/misc/rewriter*.css</exclude>
-              <exclude>php/test/misc/rewriter*.js</exclude>
-              <exclude>php/test/misc/*.html</exclude>
-              <exclude>php/test/misc/*.xml</exclude>
-              <exclude>php/test/certs/*</exclude>
+              <exclude>JsMin.php</exclude>
+              <exclude>**/test/misc/rewriter*.css</exclude>
+              <exclude>**/test/misc/rewriter*.js</exclude>
+              <exclude>**/test/misc/*.html</exclude>
+              <exclude>**/test/misc/*.xml</exclude>
+              <exclude>**/test/certs/*</exclude>
+              <exclude>phpunit.xml.dist</exclude>
               <exclude>BUILD-JAVA</exclude>
               <exclude>COMMITTERS</exclude>
               <exclude>UPGRADING</exclude>
