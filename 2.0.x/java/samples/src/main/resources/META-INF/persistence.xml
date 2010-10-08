@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+-->
+<persistence version="1.0" 
+  xmlns="http://java.sun.com/xml/ns/persistence" 
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+  xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_1_0.xsd"
+  >
+  
+  <persistence-unit name="hibernate" transaction-type="RESOURCE_LOCAL">
+  	<provider>org.hibernate.ejb.HibernatePersistence</provider>
+
+     <properties>
+		<property name="hibernate.hbm2ddl.auto" value="create"/>
+		<property name="hibernate.show_sql" value="false"/>
+		<property name="hibernate.connection.driver_class" value="org.apache.derby.jdbc.EmbeddedDriver"/>
+		<property name="hibernate.connection.password" value=""/>
+		<property name="hibernate.connection.url" value="jdbc:derby:target/hibernatedb;create=true"/>
+		<property name="hibernate.connection.username" value="sa"/>
+		<property name="hibernate.dialect" value="org.hibernate.dialect.DerbyDialect"/>
+     </properties>
+  </persistence-unit>
+  
+  <persistence-unit name="hibernate_spi_testing" transaction-type="RESOURCE_LOCAL">
+  	<provider>org.hibernate.ejb.HibernatePersistence</provider>
+
+     <properties>
+		<property name="hibernate.hbm2ddl.auto" value="create"/>
+		<property name="hibernate.show_sql" value="false"/>
+		<property name="hibernate.connection.driver_class" value="org.apache.derby.jdbc.EmbeddedDriver"/>
+		<property name="hibernate.connection.password" value=""/>
+		<property name="hibernate.connection.url" value="jdbc:derby:target/hibernatedb;create=true"/>
+		<property name="hibernate.connection.username" value="sa"/>
+		<property name="hibernate.dialect" value="org.hibernate.dialect.DerbyDialect"/>
+     </properties>
+  </persistence-unit>
+  
+ <persistence-unit name="default" transaction-type="RESOURCE_LOCAL">
+  <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
+ 
+  <!-- By default your mappings can be defined in orm.xml file, -->
+  <!-- which is discovered automatically.                        -->                                     
+  <exclude-unlisted-classes>true</exclude-unlisted-classes>
+ 
+  <!--  properties are set in Bootstrap no here  -->
+  <properties>
+     <property name="eclipselink.jdbc.driver" value="org.apache.derby.jdbc.EmbeddedDriver"/>
+     <property name="eclipselink.jdbc.url" value="jdbc:derby:target/eclipselinkdb;create=true"/>
+     <property name="eclipselink.jdbc.user" value="sa"/>
+     <property name="eclipselink.jdbc.password" value=" "/>
+     <property name="eclipselink.target-server" value="None"/>
+     
+     <property name="eclipselink.jdbc.write-connections.min" value="1"/>
+     <property name="eclipselink.jdbc.read-connections.min" value="1"/>
+     <property name="eclipselink.logging.level" value="INFO" />
+     <property name="eclipselink.logging.logger" value="JavaLogger"/>
+     <property name="eclipselink.logging.timestamp" value="false" />
+     <property name="eclipselink.logging.session" value="false" />
+     <property name="eclipselink.logging.thread" value="false" />
+     <property name="eclipselink.logging.exceptions" value="false" />
+     <property name="eclipselink.ddl-generation" value="drop-and-create-tables"/>
+     <property name="eclipselink.ddl-generation.output-mode" value="both"/>
+  </properties>
+</persistence-unit>
+
+<persistence-unit name="cayenne">
+  <provider>org.apache.cayenne.jpa.Provider</provider>
+ 
+  <!-- By default your mappings can be defined in orm.xml file, -->
+  <!-- which is discovered automatically.                        -->                                     
+  <exclude-unlisted-classes>true</exclude-unlisted-classes>
+    <properties>
+      <property name="org.apache.cayenne.datasource.jdbc.driver" value="org.apache.derby.jdbc.EmbeddedDriver"/>
+      <property name="org.apache.cayenne.datasource.jdbc.url" value="jdbc:derby:cayennedb;create=true"/>
+      <property name="org.apache.cayenne.datasource.jdbc.username" value="sa"/>
+      <property name="org.apache.cayenne.datasource.jdbc.password" value=" "/>
+      <property name="org.apache.cayenne.datasource.jdbc.minConnections" value="1"/>
+      <property name="org.apache.cayenne.datasource.jdbc.maxConnections" value="2"/>
+      <property name="org.apache.cayenne.schema.create" value="true"/>
+    </properties>
+  </persistence-unit>
+<persistence-unit name="openjpa">
+  <provider>org.apache.openjpa.persistence.PersistenceProviderImpl</provider>
+ 
+  <!-- By default your mappings can be defined in orm.xml file, -->
+  <!-- which is discovered automatically.                        -->                                     
+  <exclude-unlisted-classes>true</exclude-unlisted-classes>
+    <properties>
+      <property name="openjpa.ConnectionURL" value="jdbc:derby:openjpa;create=true"/>
+      <property name="openjpa.ConnectionDriverName" value="org.apache.derby.jdbc.EmbeddedDriver"/>
+      <property name="openjpa.ConnectionUserName" value="sa"/>
+      <property name="openjpa.ConnectionPassword" value=""/>
+      <property name="openjpa.Log" value="DefaultLevel=WARN, Tool=INFO"/>
+    </properties>
+  </persistence-unit>
+</persistence>

@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one
+  or more contributor license agreements. See the NOTICE file
+  distributed with this work for additional information
+  regarding copyright ownership. The ASF licenses this file
+  to you under the Apache License, Version 2.0 (the
+  "License"); you may not use this file except in compliance
+  with the License. You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing,
+  software distributed under the License is distributed on an
+  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  KIND, either express or implied. See the License for the
+  specific language governing permissions and limitations under the License.
+-->
+<feature>
+  <!--
+    Core is simply an aggregating feature of all the core.* libraries. It is
+    included in a gadget render that doesn't signal its awareness of "split-core"
+    dependencies (which afford better precision in code inclusion) by including
+    core.* libs.
+  -->
+  <name>core</name>
+  <dependency>shindig.auth</dependency>
+  <dependency>core.config</dependency>
+  <dependency>core.json</dependency>
+  <dependency>core.legacy</dependency>
+  <dependency>core.log</dependency>
+  <dependency>core.io</dependency>
+  <dependency>core.prefs</dependency>
+  <dependency>core.util</dependency>
+  <gadget>
+    <!-- for html_sanitize -->
+    <script src="res://com/google/caja/plugin/html-sanitizer-minified.js"></script>
+  </gadget>
+</feature>

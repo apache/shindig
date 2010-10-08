@@ -1,0 +1,31 @@
+Apache Shindig
+Copyright 2010 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+-----------------------------------------------------------
+This product includes software (Gadget Server, Gadget Container)
+originally developed by Google Inc. (http://code.google.com/) and licensed
+to the ASF as initial contribution for Shindig.
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+This product includes software (opensocial-resources) developed by
+The OpenSocial Foundation (http://opensocial-resources.googlecode.com/svn/spec/0.8/)
+
+This product includes software (Zend) developed by
+Zend Technologies Ltd (http://framework.zend.com/).
+
+This product includes software (PHPUnit) developed by 
+Sebastian Bergmann (http://www.phpunit.de/).
+
+This product includes software (JSMin) developed by
+Douglas Crockford  (http://www.crockford.com/). 
+
+This product includes software (OAuth.php) developed by 
+Andy Smith (http://oauth.googlecode.com/svn/code/php/LICENSE.txt)
+
+This product includes software (Caja) developed by
+Google Inc. (http://code.google.com/p/google-caja/).

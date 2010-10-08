@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one
+  or more contributor license agreements.  See the NOTICE file
+  distributed with this work for additional information
+  regarding copyright ownership.  The ASF licenses this file
+  to you under the Apache License, Version 2.0 (the
+  "License"); you may not use this file except in compliance
+  with the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing,
+  software distributed under the License is distributed on an
+  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  KIND, either express or implied.  See the License for the
+  specific language governing permissions and limitations
+  under the License.
+-->
+<Module>
+  <ModulePrefs title="OSLite EndToEndTest">
+    <Require feature="osapi"/>
+  </ModulePrefs>
+  <Content type="html">
+    <![CDATA[
+      <script type="text/javascript" src="/testframework.js"></script>
+      <script type="text/javascript">
+        var assertFriends = function(response) {
+          assertEquals('Wrong friend count', 4, response.totalResults);
+          assertEquals('Should be Johnny', 'Johnny', response.list[0].displayName);
+          assertEquals('Should be Janey', 'Janey', response.list[1].displayName);
+          assertEquals('Should be Georgey', 'Georgey', response.list[2].displayName);
+          assertEquals('Should be Maija', 'Maija', response.list[3].displayName);
+        };
+
+        var tests = {
+          /** Test simple batch, fetching the owner's friends */
+          fetchBatchWithOneOwnerFriendsRequest: function() {
+
+            function receivedData(response) {
+              assertFalse('Data error', response.error);
+              assertFriends(response.self);
+              finished();
+            }
+
+            var batch = osapi.newBatch().
+                add('self', osapi.people.getOwnerFriends({fields : ["id", "displayName"]})).execute(receivedData);
+          },
+
+          /** Test batch with two friends requests */
+          fetchBatchWithTwoPeopleCalls: function() {
+            function receivedData(response) {
+              assertFalse('Data error', response.error);
+              assertTrue('Jane is true - ' + gadgets.json.stringify(response), response.jane);
+              assertTrue('John is true - ' + gadgets.json.stringify(response), response.john);
+//              assertFriends(response.jane.concat(response.john));
+              finished();
+            }
+            var batch = osapi.newBatch()
+               .add('john', osapi.people.get({userId : ['john.doe'], groupId : '@friends', fields : ["id", "displayName"]}))
+               .add('jane', osapi.people.get({userId : ['jane.doe'], groupId : '@friends', fields : ["id", "displayName"]}))
+               .execute(receivedData);
+          },
+
+          /** Test batch with activity and friends requests */
+          fetchBatchWithMixedCalls: function() {
+            function receivedData(response) {
+              assertFalse("Should not have error", response.error);
+              var activityResponse = response.activities;
+              assertEquals("Should have 1 activity", 1, activityResponse.totalResults);
+              assertEquals("Titles don't match", "yellow", activityResponse.list[0].title);
+              assertEquals("Body doesn't match", "what a color!", activityResponse.list[0].body);
+
+              var peopleResponse = response.people;
+              assertFriends(peopleResponse);
+              finished();
+            }
+
+            var batch = osapi.newBatch().add('activities', osapi.activities.get()).
+                add('people', osapi.people.getOwnerFriends({fields : ["id", "displayName"]})).execute(receivedData);
+          }
+        };
+      </script>
+    ]]>
+  </Content>
+</Module>

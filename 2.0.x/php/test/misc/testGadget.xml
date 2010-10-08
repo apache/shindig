@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+-->
+<Module>
+	<ModulePrefs title="example title" author="example author"
+		author_email="test@example.org" description="description"
+		directory_title="example directory title" screenshot="http://example.org/screenshot.gif"
+		thumbnail="http://example.org/thumbnail.gif" title_url="http://example.org"
+		author_affiliation="example org" author_location="example location"
+		author_photo="example photo" author_aboutme="example about me"
+		author_quote="example quote" author_link="example link" show_stats="true"
+		show_in_directory="true" width="200" height="100" category="example category"
+		category2="example category2" singleton="true" render_inline="true"
+		scaling="true" scrolling="false">
+		
+		<Icon>http://example.org/favicon.ico</Icon>
+		
+		<Require feature="opensocial-0.7" />
+		<Require feature="dynamic-height" />
+		<Require feature="views" />
+		<Require feature="tabs" />
+		<Require feature="flash" />
+		<Require feature="setprefs" />
+		<Optional feature="missing-feature" />
+
+        <Optional feature="content-rewrite">
+	        <Param name="expires">86400</Param>
+	        <Param name="include-url">*</Param>
+	        <Param name="exclude-url">.jpeg</Param>
+	        <Param name="minify-css">true</Param>
+	        <Param name="minify-js">true</Param>
+	        <Param name="minify-html">true</Param>
+        </Optional>
+
+	    <OAuth>
+	      <Service name="google">
+	        <Access url="https://www.google.com/accounts/OAuthGetAccessToken" method="GET" /> 
+	        <Request url="https://www.google.com/accounts/OAuthGetRequestToken?scope=http://www.google.com/m8/feeds/" method="GET" /> 
+	        <Authorization url="https://www.google.com/accounts/OAuthAuthorizeToken?oauth_callback=http://oauth.gmodules.com/gadgets/oauthcallback" /> 
+	      </Service>
+	    </OAuth>
+
+		<Locale messages="http://www.labpixies.com/campaigns/todo/i19/all_all.xml"/>
+		<Locale lang="nl" messages="http://www.labpixies.com/campaigns/todo/i19/nl_all.xml"/>
+		<Locale lang="nl" country="BE" messages="http://www.labpixies.com/campaigns/todo/i19/nl_be.xml"/>
+		<Locale lang="en" county="US">
+			<messagebundle>
+				<msg name="foo">foo</msg>
+				<msg name="bar">bar</msg>
+			</messagebundle>
+		</Locale>
+		
+		<Preload href='http://test.chabotc.com/ok.html'/>
+		
+	</ModulePrefs>
+	
+	<UserPref name='testEnum' display_name='testEnum' datatype='enum' default_value='foo'>
+		<EnumValue value='foo' display_value='foo' />
+		<EnumValue value='bar' display_value='bar' />
+	</UserPref>
+	<UserPref name='testString' display_name='testString' datatype='string' default_value='testString' required='true' />
+	<UserPref name='testBool' display_name='testBool' datatype='bool' default_value='false' />
+	<UserPref name='testHidden' display_name='testHidden' datatype='hidden' default_value='testHidden' />
+	<UserPref name="__MSG_title__" display_name="__MSG_title__" datatype="string" default_value="__MSG_title__" />
+	
+	<link rel="event" href="http://www.example.com/pingme" method="POST" />
+	<link rel="event.addapp" href="http://www.example.com/add" />
+	<link rel="event.removeapp" href="http://www.example.com/remove" />
+	
+	<Content type="html" view="profile" prefered_height="400" prefered_width="300" quirks="true"><![CDATA[
+<style type="text/css"> @import url( rewriter1.css ); </style>
+<link rel="stylesheet" type="text/css" href="rewriter2.css"/>
+<p>A simple gadget to demonstrate the content rewriter</p>
+<div>
+  This is a URL in content that was not rewritten http://www.notrewritten.com
+</div>
+<div id="backgrdiv">
+  This div has a background <br/> image from imported CSS
+</div>
+<div id="backgrdiv2">
+  This div has a background <br/> image from linked CSS
+</div>
+<p> This <img id="rewriteimg" src="feather.png" alt="If you can read this there is a problem"/> is an image tag that was rewritten</p>
+<p id="jstarget1">If you can read this there is a problem</p>
+<p id="jstarget2">If you can read this there is a problem</p>
+<script type="text/javascript" src="rewriter1.js"></script>
+<script type="text/javascript" src="rewriter2.js"></script>
+<script>
+gadgets.window.adjustHeight();
+</script>
+]]></Content>
+	
+	<Content type="url" view="canvas" href="http://example.com/foo.html" prefered_height="400" prefered_width="300" quirks="true"></Content>
+	
+	<Content view="home" href="http://www.example.com/myapp/home/index.html"></Content>
+	
+</Module>
