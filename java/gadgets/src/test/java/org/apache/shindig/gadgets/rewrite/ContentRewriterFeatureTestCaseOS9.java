@@ -35,7 +35,7 @@ public class ContentRewriterFeatureTestCaseOS9 extends BaseRewriterTestCase {
       throws Exception {
     defaultRewriterFeature = new ContentRewriterFeature.Config(
         createSpecWithRewriteOS9(new String[] { "" }, new String[] { "*" }, "0", tags),
-        new ContentRewriterFeature.DefaultConfig(".*", "", "0", TAGS, false, false));
+        new ContentRewriterFeature.DefaultConfig(".*", "", "0", TAGS, false, false, false));
     assertFalse(defaultRewriterFeature.isRewriteEnabled());
     assertFalse(defaultRewriterFeature.shouldRewriteURL("http://www.test.com"));
   }
@@ -45,7 +45,7 @@ public class ContentRewriterFeatureTestCaseOS9 extends BaseRewriterTestCase {
       throws Exception {
     defaultRewriterFeature = new ContentRewriterFeature.Config(
         createSpecWithRewriteOS9(null, new String[] { "foo", "bar" }, "0", tags),
-        new ContentRewriterFeature.DefaultConfig(".*", "", "0", TAGS, false, false));
+        new ContentRewriterFeature.DefaultConfig(".*", "", "0", TAGS, false, false, false));
     assertTrue(defaultRewriterFeature.isRewriteEnabled());
     assertTrue(defaultRewriterFeature.shouldRewriteURL("http://www.test.com"));
     assertFalse(defaultRewriterFeature.shouldRewriteURL("http://www.foo.com"));
@@ -57,7 +57,7 @@ public class ContentRewriterFeatureTestCaseOS9 extends BaseRewriterTestCase {
       throws Exception {
     defaultRewriterFeature = new ContentRewriterFeature.Config(
         createSpecWithRewriteOS9(null, new String[] { "*" }, null, null),
-        new ContentRewriterFeature.DefaultConfig(".*", "", "0", TAGS, false, false));
+        new ContentRewriterFeature.DefaultConfig(".*", "", "0", TAGS, false, false, false));
     assertFalse(defaultRewriterFeature.isRewriteEnabled());
     assertFalse(defaultRewriterFeature.shouldRewriteURL("http://www.test.com"));
   }
@@ -67,7 +67,7 @@ public class ContentRewriterFeatureTestCaseOS9 extends BaseRewriterTestCase {
       throws Exception {
     defaultRewriterFeature = new ContentRewriterFeature.Config(
         createSpecWithRewriteOS9(new String[] { "*" }, new String[] { "" }, "0", tags),
-        new ContentRewriterFeature.DefaultConfig("", ".*", "0", TAGS, false, false));
+        new ContentRewriterFeature.DefaultConfig("", ".*", "0", TAGS, false, false, false));
     assertTrue(defaultRewriterFeature.isRewriteEnabled());
     assertTrue(defaultRewriterFeature.shouldRewriteURL("http://www.test.com"));
   }
@@ -76,7 +76,7 @@ public class ContentRewriterFeatureTestCaseOS9 extends BaseRewriterTestCase {
   public void testExcludeOverridesInclude() throws Exception {
     defaultRewriterFeature = new ContentRewriterFeature.Config(
         createSpecWithRewriteOS9(new String[] { "test.com" }, new String[] { "test" }, "0", tags),
-        new ContentRewriterFeature.DefaultConfig("", "", "0", TAGS, false, false));
+        new ContentRewriterFeature.DefaultConfig("", "", "0", TAGS, false, false, false));
     assertTrue(defaultRewriterFeature.isRewriteEnabled());
     assertFalse(defaultRewriterFeature.shouldRewriteURL("http://www.test.com"));
   }
@@ -85,7 +85,7 @@ public class ContentRewriterFeatureTestCaseOS9 extends BaseRewriterTestCase {
   public void testIncludeOnlyMatch() throws Exception {
     defaultRewriterFeature = new ContentRewriterFeature.Config(
         createSpecWithRewriteOS9(new String[] { "test.com" }, new String[] { "testx" }, "0", tags),
-        new ContentRewriterFeature.DefaultConfig("", "", "0", TAGS, false, false));
+        new ContentRewriterFeature.DefaultConfig("", "", "0", TAGS, false, false, false));
     assertTrue(defaultRewriterFeature.isRewriteEnabled());
     assertTrue(defaultRewriterFeature.shouldRewriteURL("http://www.test.com"));
     assertFalse(defaultRewriterFeature
@@ -96,7 +96,7 @@ public class ContentRewriterFeatureTestCaseOS9 extends BaseRewriterTestCase {
   public void testSpecEmptyContainerWithExclude() throws Exception {
     defaultRewriterFeature = new ContentRewriterFeature.Config(
         createSpecWithRewriteOS9(null, null, null, null),
-        new ContentRewriterFeature.DefaultConfig(".*", "test", "0", TAGS, false, false));
+        new ContentRewriterFeature.DefaultConfig(".*", "test", "0", TAGS, false, false, false));
     assertTrue(defaultRewriterFeature.isRewriteEnabled());
     assertTrue(defaultRewriterFeature.shouldRewriteURL("http://www.foobar.com"));
     assertFalse(defaultRewriterFeature.shouldRewriteURL("http://www.test.com"));
@@ -107,7 +107,7 @@ public class ContentRewriterFeatureTestCaseOS9 extends BaseRewriterTestCase {
       throws Exception {
     defaultRewriterFeature = new ContentRewriterFeature.Config(
         createSpecWithRewriteOS9(null, new String[] { "" }, null, null),
-        new ContentRewriterFeature.DefaultConfig(".*", "test", "0", TAGS, false, false));
+        new ContentRewriterFeature.DefaultConfig(".*", "test", "0", TAGS, false, false, false));
     assertTrue(defaultRewriterFeature.isRewriteEnabled());
     assertTrue(defaultRewriterFeature.shouldRewriteURL("http://www.foobar.com"));
     assertTrue(defaultRewriterFeature.shouldRewriteURL("http://www.test.com"));
@@ -118,7 +118,7 @@ public class ContentRewriterFeatureTestCaseOS9 extends BaseRewriterTestCase {
       throws Exception {
     defaultRewriterFeature = new ContentRewriterFeature.Config(
         createSpecWithRewriteOS9(null, null, null, null),
-        new ContentRewriterFeature.DefaultConfig("", "test", "0", TAGS, false, false));
+        new ContentRewriterFeature.DefaultConfig("", "test", "0", TAGS, false, false, false));
     assertFalse(defaultRewriterFeature.isRewriteEnabled());
     assertFalse(defaultRewriterFeature
         .shouldRewriteURL("http://www.foobar.com"));
@@ -130,7 +130,7 @@ public class ContentRewriterFeatureTestCaseOS9 extends BaseRewriterTestCase {
       throws Exception {
     defaultRewriterFeature = new ContentRewriterFeature.Config(
         createSpecWithRewriteOS9(new String[] { "*" }, null, null, null),
-        new ContentRewriterFeature.DefaultConfig("", "test", "0", TAGS, false, false));
+        new ContentRewriterFeature.DefaultConfig("", "test", "0", TAGS, false, false, false));
     assertTrue(defaultRewriterFeature.isRewriteEnabled());
     assertTrue(defaultRewriterFeature.shouldRewriteURL("http://www.foobar.com"));
     assertFalse(defaultRewriterFeature.shouldRewriteURL("http://www.test.com"));
@@ -141,7 +141,7 @@ public class ContentRewriterFeatureTestCaseOS9 extends BaseRewriterTestCase {
       throws Exception {
     defaultRewriterFeature = new ContentRewriterFeature.Config(
         createSpecWithRewriteOS9(new String[] { "foo", "bar" }, null, null, null),
-        new ContentRewriterFeature.DefaultConfig("", "test", "0", TAGS, false, false));
+        new ContentRewriterFeature.DefaultConfig("", "test", "0", TAGS, false, false, false));
     assertTrue(defaultRewriterFeature.isRewriteEnabled());
     assertTrue(defaultRewriterFeature.shouldRewriteURL("http://www.foo.com"));
     assertTrue(defaultRewriterFeature.shouldRewriteURL("http://www.bar.com"));
@@ -153,7 +153,7 @@ public class ContentRewriterFeatureTestCaseOS9 extends BaseRewriterTestCase {
       throws Exception {
     defaultRewriterFeature = new ContentRewriterFeature.Config(
         createSpecWithRewriteOS9(new String[] { "foo", "bar" }, null, null, null),
-        new ContentRewriterFeature.DefaultConfig("*", "test", "0", TAGS, false, false));
+        new ContentRewriterFeature.DefaultConfig("*", "test", "0", TAGS, false, false, false));
     assertTrue(defaultRewriterFeature.isRewriteEnabled());
     assertTrue(defaultRewriterFeature.shouldRewriteURL("http://www.foo.com"));
     assertTrue(defaultRewriterFeature.shouldRewriteURL("http://www.bar.com"));
@@ -164,7 +164,7 @@ public class ContentRewriterFeatureTestCaseOS9 extends BaseRewriterTestCase {
   public void testSpecExcludeDisallowOverrideIncludeUrls() throws Exception {
     defaultRewriterFeature = new ContentRewriterFeature.Config(
         createSpecWithRewrite("norewrite", null, null, null),
-        new ContentRewriterFeature.DefaultConfig("^http://www.include.com", "def", "3600", TAGS, true, false));
+        new ContentRewriterFeature.DefaultConfig("^http://www.include.com", "def", "3600", TAGS, true, false, false));
     assertTrue(defaultRewriterFeature.isRewriteEnabled());
     assertTrue(defaultRewriterFeature
         .shouldRewriteURL("http://www.include.com/abc"));
@@ -178,7 +178,7 @@ public class ContentRewriterFeatureTestCaseOS9 extends BaseRewriterTestCase {
   public void testSpecExcludeOverrideExcludeUrls() throws Exception {
     defaultRewriterFeature = new ContentRewriterFeature.Config(
         createSpecWithRewrite(null, "abc", null, null),
-        new ContentRewriterFeature.DefaultConfig("^http://www.include.com", "def", "3600", TAGS, true, false));
+        new ContentRewriterFeature.DefaultConfig("^http://www.include.com", "def", "3600", TAGS, true, false, false));
     assertTrue(defaultRewriterFeature.isRewriteEnabled());
     assertFalse(defaultRewriterFeature
         .shouldRewriteURL("http://www.include.com/abc"));
@@ -192,7 +192,7 @@ public class ContentRewriterFeatureTestCaseOS9 extends BaseRewriterTestCase {
   public void testSpecExcludeDisallowOverrideIncludeUrlOS9() throws Exception {
     defaultRewriterFeature = new ContentRewriterFeature.Config(
         createSpecWithRewriteOS9(new String[] { "abc" }, null, null, null),
-        new ContentRewriterFeature.DefaultConfig("^http://www.include.com", "", "3600", TAGS, true, false));
+        new ContentRewriterFeature.DefaultConfig("^http://www.include.com", "", "3600", TAGS, true, false, false));
     assertTrue(defaultRewriterFeature.isRewriteEnabled());
     assertTrue(defaultRewriterFeature
         .shouldRewriteURL("http://www.include.com/abc"));
@@ -204,7 +204,7 @@ public class ContentRewriterFeatureTestCaseOS9 extends BaseRewriterTestCase {
   public void testSpecExcludeDisallowOverrideExcludeUrlOS9() throws Exception {
     defaultRewriterFeature = new ContentRewriterFeature.Config(
         createSpecWithRewriteOS9(null, new String[] { "def" }, null, null),
-        new ContentRewriterFeature.DefaultConfig("^http://www.include.com", "", "3600", TAGS, true, false));
+        new ContentRewriterFeature.DefaultConfig("^http://www.include.com", "", "3600", TAGS, true, false, false));
     assertTrue(defaultRewriterFeature.isRewriteEnabled());
     assertTrue(defaultRewriterFeature
         .shouldRewriteURL("http://www.include.com/abc"));
@@ -218,7 +218,7 @@ public class ContentRewriterFeatureTestCaseOS9 extends BaseRewriterTestCase {
   public void testSpecExcludeDisallowOverrideDefaultExpires() throws Exception {
     defaultRewriterFeature = new ContentRewriterFeature.Config(
         createSpecWithRewrite("test\\.com", "testx", "3000", tags),
-        new ContentRewriterFeature.DefaultConfig("", "", "", TAGS, true, false));
+        new ContentRewriterFeature.DefaultConfig("", "", "", TAGS, true, false, false));
     assertNotNull(defaultRewriterFeature.getExpires());
     assertNotNull(defaultRewriterFeature.getExpires() == 3000);
   }
@@ -227,7 +227,7 @@ public class ContentRewriterFeatureTestCaseOS9 extends BaseRewriterTestCase {
   public void testSpecExcludeDisallowOverrideExpiresGreater() throws Exception {
     defaultRewriterFeature = new ContentRewriterFeature.Config(
         createSpecWithRewrite("test\\.com", "testx", "8000", tags),
-        new ContentRewriterFeature.DefaultConfig("", "", "3000", TAGS, true, false));
+        new ContentRewriterFeature.DefaultConfig("", "", "3000", TAGS, true, false, false));
     assertNotNull(defaultRewriterFeature.getExpires());
     assertNotNull(defaultRewriterFeature.getExpires() == 3000);
   }
@@ -236,7 +236,7 @@ public class ContentRewriterFeatureTestCaseOS9 extends BaseRewriterTestCase {
   public void testSpecExcludeDisallowOverrideExpiresLesser() throws Exception {
     defaultRewriterFeature = new ContentRewriterFeature.Config(
         createSpecWithRewrite("test\\.com", "testx", "2000", tags),
-        new ContentRewriterFeature.DefaultConfig("", "", "3000", TAGS, true, false));
+        new ContentRewriterFeature.DefaultConfig("", "", "3000", TAGS, true, false, false));
     assertNotNull(defaultRewriterFeature.getExpires());
     assertNotNull(defaultRewriterFeature.getExpires() == 2000);
   }
@@ -245,7 +245,7 @@ public class ContentRewriterFeatureTestCaseOS9 extends BaseRewriterTestCase {
   public void testSpecExcludeDisallowOverrideTagsSubset() throws Exception {
     defaultRewriterFeature = new ContentRewriterFeature.Config(
         createSpecWithRewrite("test\\.com", "testx", "0", Sets.newHashSet("img")),
-        new ContentRewriterFeature.DefaultConfig("", "", "0", "img,script", true, false));
+        new ContentRewriterFeature.DefaultConfig("", "", "0", "img,script", true, false, false));
     assertFalse(defaultRewriterFeature.shouldRewriteTag("IFRAME"));
     assertTrue(defaultRewriterFeature.shouldRewriteTag("img"));
     assertFalse(defaultRewriterFeature.shouldRewriteTag("ScripT"));
@@ -255,7 +255,7 @@ public class ContentRewriterFeatureTestCaseOS9 extends BaseRewriterTestCase {
   public void testSpecExcludeDisallowOverrideTagsSuperset() throws Exception {
     defaultRewriterFeature = new ContentRewriterFeature.Config(
         createSpecWithRewrite( "test\\.com", "testx", "0", Sets.newHashSet("img", "script", "link")),
-        new ContentRewriterFeature.DefaultConfig("", "", "0", "img,script", true, false));
+        new ContentRewriterFeature.DefaultConfig("", "", "0", "img,script", true, false, false));
     assertFalse(defaultRewriterFeature.shouldRewriteTag("IFRAME"));
     assertTrue(defaultRewriterFeature.shouldRewriteTag("img"));
     assertTrue(defaultRewriterFeature.shouldRewriteTag("ScripT"));

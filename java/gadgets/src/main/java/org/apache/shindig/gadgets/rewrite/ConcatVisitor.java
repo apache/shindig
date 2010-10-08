@@ -58,6 +58,7 @@ public class ConcatVisitor implements DomWalker.Visitor {
   private final ConcatUriManager.Type type;
   private final ContentRewriterFeature.Config config;
   private final boolean split;
+  private final boolean singleResourceConcat;
 
   private ConcatVisitor(ContentRewriterFeature.Config config,
       ConcatUriManager uriManager, ConcatUriManager.Type type) {
@@ -65,6 +66,7 @@ public class ConcatVisitor implements DomWalker.Visitor {
     this.type = type;
     this.config = config;
     this.split = (type == ConcatUriManager.Type.JS && config.isSplitJsEnabled());
+    this.singleResourceConcat = config.isSingleResourceConcatEnabled();
   }
 
   public VisitStatus visit(Gadget gadget, Node node) throws RewritingException {
@@ -77,7 +79,7 @@ public class ConcatVisitor implements DomWalker.Visitor {
 
     Element element = (Element)node;
     if (isRewritableExternData(element)) {
-      if (split ||
+      if (split || singleResourceConcat ||
           isRewritableExternData(getSibling(element, true)) ||
           isRewritableExternData(getSibling(element, false))) {
         return VisitStatus.RESERVE_NODE;

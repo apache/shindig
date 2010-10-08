@@ -57,7 +57,7 @@ public class SanitizingResponseRewriterTest extends RewriterTestBase {
     ContentRewriterFeature.Factory rewriterFeatureFactory =
         new ContentRewriterFeature.Factory(null,
           new ContentRewriterFeature.DefaultConfig(
-            ".*", "", "HTTP", "embed,img,script,link,style", false, false));
+            ".*", "", "HTTP", "embed,img,script,link,style", false, false, false));
     return new SanitizingResponseRewriter(rewriterFeatureFactory,
         new CajaCssSanitizer(new CajaCssParser()), new PassthruManager());
   }

@@ -121,7 +121,7 @@ public class ContentRewriterFeature {
     public Config createRewriteAllFeature(int ttl) {
       return new Config(
           ".*", "", (ttl == -1) ? "HTTP" : Integer.toString(ttl),
-          "", false, true);
+          "", false, true, false);
     }
   }
 
@@ -134,8 +134,11 @@ public class ContentRewriterFeature {
         @Named("shindig.content-rewrite.expires")String expires,
         @Named("shindig.content-rewrite.include-tags")String includeTags,
         @Named("shindig.content-rewrite.only-allow-excludes")boolean onlyAllowExcludes,
-        @Named("shindig.content-rewrite.enable-split-js-concat")boolean enableSplitJsConcat) {
-      super(includeUrls, excludeUrls, expires, includeTags, onlyAllowExcludes, enableSplitJsConcat);
+        @Named("shindig.content-rewrite.enable-split-js-concat")boolean enableSplitJsConcat,
+        @Named("shindig.content-rewrite.enable-single-resource-concat")boolean
+            enableSingleResourceConcatenation) {
+      super(includeUrls, excludeUrls, expires, includeTags, onlyAllowExcludes,
+            enableSplitJsConcat, enableSingleResourceConcatenation);
     }
   }
 
@@ -151,6 +154,7 @@ public class ContentRewriterFeature {
     private final Integer expires;
     private final boolean onlyAllowExcludes;
     private final boolean enableSplitJs;
+    private final boolean enableSingleResourceConcatenation;
 
     // Lazily computed
     private Integer fingerprint;
@@ -166,10 +170,11 @@ public class ContentRewriterFeature {
      * @param defaultTags Set of default tags that can be rewritten
      * @param onlyAllowExcludes If includes are always implicitly "all"
      * @param enableSplitJs If split-JS technique is enabled
+     * @param enableSingleResourceConcatenation If single resource can be concatenated with itself
      */
     Config(String defaultInclude,
         String defaultExclude, String defaultExpires, String defaultTags,
-        boolean onlyAllowExcludes, boolean enableSplitJs) {
+        boolean onlyAllowExcludes, boolean enableSplitJs, boolean enableSingleResourceConcatenation) {
       // Set up includes from defaultInclude param
       this.includes = getMatchBundle(paramTrim(defaultInclude),
           Collections.<String>emptyList());
@@ -199,6 +204,7 @@ public class ContentRewriterFeature {
       // Save config for onlyAllowExcludes
       this.onlyAllowExcludes = onlyAllowExcludes;
       this.enableSplitJs = enableSplitJs;
+      this.enableSingleResourceConcatenation = enableSingleResourceConcatenation;
     }
 
     Config(GadgetSpec spec, Config defaultConfig) {
@@ -275,6 +281,7 @@ public class ContentRewriterFeature {
       }
       this.expires = expiresVal;
       this.enableSplitJs = defaultConfig.enableSplitJs;
+      this.enableSingleResourceConcatenation = defaultConfig.enableSingleResourceConcatenation;
     }
 
     private String paramTrim(String param) {
@@ -378,6 +385,10 @@ public class ContentRewriterFeature {
 
     public boolean isSplitJsEnabled() {
       return enableSplitJs;
+    }
+
+    public boolean isSingleResourceConcatEnabled() {
+      return enableSingleResourceConcatenation;
     }
 
     /**

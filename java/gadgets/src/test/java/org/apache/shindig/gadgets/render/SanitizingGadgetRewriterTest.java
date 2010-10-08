@@ -121,7 +121,7 @@ public class SanitizingGadgetRewriterTest extends RewriterTestBase {
     ContentRewriterFeature.Factory rewriterFeatureFactory =
         new ContentRewriterFeature.Factory(null,
           new ContentRewriterFeature.DefaultConfig(
-            ".*", "", "HTTP", "embed,img,script,link,style", false, false));
+            ".*", "", "HTTP", "embed,img,script,link,style", false, false, false));
     return new SanitizingGadgetRewriter(newTags, attributes, rewriterFeatureFactory,
         new CajaCssSanitizer(new CajaCssParser()), new PassthruManager("host.com", "/proxy"));
   }

@@ -27,6 +27,7 @@ import static org.junit.Assert.assertFalse;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import org.apache.commons.lang.StringUtils;
 
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
@@ -128,28 +129,41 @@ public class ConcatVisitorTest extends DomWalkerTestBase {
 
   @Test
   public void dontVisitSingleJs() throws Exception {
-    assertEquals(VisitStatus.BYPASS, getVisitStatusJs(js1, null, false));
+    assertEquals(VisitStatus.BYPASS, getVisitStatusJs(js1, null, false, false));
   }
 
   @Test
   public void dontVisitSingleCss() throws Exception {
-    assertEquals(VisitStatus.BYPASS, getVisitStatusCss(css1, null));
+    assertEquals(VisitStatus.BYPASS, getVisitStatusCss(css1, null, false));
+  }
+
+  @Test
+  public void visitSingleJsWhenSingleResourceEnabled() throws Exception {
+    assertEquals(VisitStatus.RESERVE_NODE, getVisitStatusJs(js1, null, false, true));
+  }
+
+  @Test
+  public void visitSingleCssWhenSingleResourceEnabled() throws Exception {
+    assertEquals(VisitStatus.RESERVE_NODE, getVisitStatusCss(css1, null, true));
   }
 
   @Test
   public void dontVisitJsWithoutSrc() throws Exception {
-    assertEquals(VisitStatus.BYPASS, getVisitStatusJs(elem("script"), null, false));
+    assertEquals(VisitStatus.BYPASS, getVisitStatusJs(elem("script"), null, false, false));
+    assertEquals(VisitStatus.BYPASS, getVisitStatusJs(elem("script"), null, false, true));
   }
 
   @Test
   public void dontVisitUnknown() throws Exception {
-    assertEquals(VisitStatus.BYPASS, getVisitStatusJs(elem("div"), null, true));
-    assertEquals(VisitStatus.BYPASS, getVisitStatusCss(elem("div"), null));
+    assertEquals(VisitStatus.BYPASS, getVisitStatusJs(elem("div"), null, true, false));
+    assertEquals(VisitStatus.BYPASS, getVisitStatusJs(elem("div"), null, true, true));
+    assertEquals(VisitStatus.BYPASS, getVisitStatusCss(elem("div"), null, false));
+    assertEquals(VisitStatus.BYPASS, getVisitStatusCss(elem("div"), null, true));
   }
 
   @Test
   public void dontVisitContigJsMiddleNotRewritable() throws Exception {
-    ContentRewriterFeature.Config config = config(".*two.*", false);
+    ContentRewriterFeature.Config config = config(".*two.*", false, false);
     seqNodes(js1, js2, js3);
     assertEquals(VisitStatus.BYPASS, getVisitStatusJs(config, js1));
     assertEquals(VisitStatus.BYPASS, getVisitStatusJs(config, js2));
@@ -157,8 +171,17 @@ public class ConcatVisitorTest extends DomWalkerTestBase {
   }
 
   @Test
+  public void visitJsButNotMiddleWhenNotRewritable() throws Exception {
+    ContentRewriterFeature.Config config = config(".*two.*", false, true);
+    seqNodes(js1, js2, js3);
+    assertEquals(VisitStatus.RESERVE_NODE, getVisitStatusJs(config, js1));
+    assertEquals(VisitStatus.BYPASS, getVisitStatusJs(config, js2));
+    assertEquals(VisitStatus.RESERVE_NODE, getVisitStatusJs(config, js3));
+  }
+
+  @Test
   public void dontVisitContigCssMiddleNotRewritable() throws Exception {
-    ContentRewriterFeature.Config config = config(".*two.*", true);
+    ContentRewriterFeature.Config config = config(".*two.*", true, false);
     seqNodes(css1, css2, css3);
     assertEquals(VisitStatus.BYPASS, getVisitStatusCss(config, css1));
     assertEquals(VisitStatus.BYPASS, getVisitStatusCss(config, css2));
@@ -166,8 +189,17 @@ public class ConcatVisitorTest extends DomWalkerTestBase {
   }
 
   @Test
+  public void visitCssButNotMiddleWhenNotRewritable() throws Exception {
+    ContentRewriterFeature.Config config = config(".*two.*", true, true);
+    seqNodes(css1, css2, css3);
+    assertEquals(VisitStatus.RESERVE_NODE, getVisitStatusCss(config, css1));
+    assertEquals(VisitStatus.BYPASS, getVisitStatusCss(config, css2));
+    assertEquals(VisitStatus.RESERVE_NODE, getVisitStatusCss(config, css3));
+  }
+
+  @Test
   public void dontVisitSeparatedJsNotSplit() throws Exception {
-    ContentRewriterFeature.Config config = config(null, false);
+    ContentRewriterFeature.Config config = config(null, false, false);
     Node sep1 = elem("div");
     Node sep2 = elem("span");
     seqNodes(js1, sep1, js2, sep2, js3);
@@ -183,7 +215,8 @@ public class ConcatVisitorTest extends DomWalkerTestBase {
     Node textNode = doc.createTextNode("");
     Node node = elem("link", "type", "text/css", "rel", "stylesheet", "href", CSS1_URL_STR);
     seqNodes(node, textNode, css1);
-    assertEquals(VisitStatus.RESERVE_NODE, getVisitStatusCss(node, null));
+    assertEquals(VisitStatus.RESERVE_NODE, getVisitStatusCss(node, null, false));
+    assertEquals(VisitStatus.RESERVE_NODE, getVisitStatusCss(node, null, true));
   }
 
   @Test
@@ -191,7 +224,8 @@ public class ConcatVisitorTest extends DomWalkerTestBase {
     Node textNode = doc.createTextNode("Data\n");
     Node node = elem("link", "type", "text/css", "rel", "stylesheet", "href", CSS1_URL_STR);
     seqNodes(node, textNode, css1);
-    assertEquals(VisitStatus.RESERVE_NODE, getVisitStatusCss(node, null));
+    assertEquals(VisitStatus.RESERVE_NODE, getVisitStatusCss(node, null, false));
+    assertEquals(VisitStatus.RESERVE_NODE, getVisitStatusCss(node, null, true));
   }
 
   @Test
@@ -199,7 +233,8 @@ public class ConcatVisitorTest extends DomWalkerTestBase {
     Node commentNode = doc.createComment("This is a comment");
     Node node = elem("link", "type", "text/css", "rel", "stylesheet", "href", CSS1_URL_STR);
     seqNodes(node, commentNode, css1);
-    assertEquals(VisitStatus.RESERVE_NODE, getVisitStatusCss(node, null));
+    assertEquals(VisitStatus.RESERVE_NODE, getVisitStatusCss(node, null, false));
+    assertEquals(VisitStatus.RESERVE_NODE, getVisitStatusCss(node, null, true));
   }
 
   @Test
@@ -207,79 +242,117 @@ public class ConcatVisitorTest extends DomWalkerTestBase {
     Node commentNode = doc.createComment("[if IE]");
     Node node = elem("link", "type", "text/css", "rel", "stylesheet", "href", CSS1_URL_STR);
     seqNodes(node, commentNode, css1);
-    assertEquals(VisitStatus.BYPASS, getVisitStatusCss(node, null));
+    assertEquals(VisitStatus.BYPASS, getVisitStatusCss(node, null, false));
   }
 
   @Test
-  public void dontVisitRelFreeCss() throws Exception {
+  public void visitCssSeperatedByConditionalCommentWhenSingleResourceConcatEnabled()
+      throws Exception {
+    Node commentNode = doc.createComment("[if IE]");
+    Node node = elem("link", "type", "text/css", "rel", "stylesheet", "href", CSS1_URL_STR);
+    seqNodes(node, commentNode, css1);
+    assertEquals(VisitStatus.RESERVE_NODE, getVisitStatusCss(node, null, true));
+  }
+
+
+  @Test
+  public void dontVisitCssWithoutRelAttrib() throws Exception {
     Node node = elem("link", "type", "text/css", "href", CSS1_URL_STR);
     seqNodes(node, css1);
-    assertEquals(VisitStatus.BYPASS, getVisitStatusCss(node, null));
+    assertEquals(VisitStatus.BYPASS, getVisitStatusCss(node, null, false));
+    assertEquals(VisitStatus.BYPASS, getVisitStatusCss(node, null, true));
   }
 
   @Test
-  public void dontVisitTypeCssFreeCss() throws Exception {
+  public void dontVisitCssWithoutTypeAttribAsCss() throws Exception {
     Node node = elem("link", "rel", "stylesheet", "href", CSS1_URL_STR);
     seqNodes(node, css1);
-    assertEquals(VisitStatus.BYPASS, getVisitStatusCss(node, null));
+    assertEquals(VisitStatus.BYPASS, getVisitStatusCss(node, null, false));
+    assertEquals(VisitStatus.BYPASS, getVisitStatusCss(node, null, true));
   }
 
   @Test
   public void dontVisitTypeCssWrongRelAttributes() throws Exception {
     Node node = elem("link", "rel", "alternate", "type", "text/css", "href", CSS1_URL_STR);
     seqNodes(node, css1);
-    assertEquals(VisitStatus.BYPASS, getVisitStatusCss(node, null));
+    assertEquals(VisitStatus.BYPASS, getVisitStatusCss(node, null, false));
+    assertEquals(VisitStatus.BYPASS, getVisitStatusCss(node, null, true));
   }
 
   @Test
   public void dontVisitTypeCssWrongTypeAttributes() throws Exception {
     Node node = elem("link", "rel", "stylesheet", "type", "text/javascript", "href", CSS1_URL_STR);
     seqNodes(node, css1);
-    assertEquals(VisitStatus.BYPASS, getVisitStatusCss(node, null));
+    assertEquals(VisitStatus.BYPASS, getVisitStatusCss(node, null, false));
+    assertEquals(VisitStatus.BYPASS, getVisitStatusCss(node, null, true));
   }
 
   @Test
   public void dontVisitCssWithoutAttribs() throws Exception {
     Node node = elem("link", "href", CSS1_URL_STR);
     seqNodes(node, css1);
-    assertEquals(VisitStatus.BYPASS, getVisitStatusCss(node, null));
+    assertEquals(VisitStatus.BYPASS, getVisitStatusCss(node, null, false));
+    assertEquals(VisitStatus.BYPASS, getVisitStatusCss(node, null, true));
   }
 
   @Test
   public void visitContigJs() throws Exception {
     seqNodes(js1, js2, js3);
-    assertEquals(VisitStatus.RESERVE_NODE, getVisitStatusJs(js1, null, false));
-    assertEquals(VisitStatus.RESERVE_NODE, getVisitStatusJs(js2, null, false));
-    assertEquals(VisitStatus.RESERVE_NODE, getVisitStatusJs(js3, null, false));
+    assertEquals(VisitStatus.RESERVE_NODE, getVisitStatusJs(js1, null, false, false));
+    assertEquals(VisitStatus.RESERVE_NODE, getVisitStatusJs(js2, null, false, false));
+    assertEquals(VisitStatus.RESERVE_NODE, getVisitStatusJs(js3, null, false, false));
   }
 
   @Test
   public void visitContigCss() throws Exception {
     seqNodes(css1, css2, css3);
-    assertEquals(VisitStatus.RESERVE_NODE, getVisitStatusCss(css1, null));
-    assertEquals(VisitStatus.RESERVE_NODE, getVisitStatusCss(css2, null));
-    assertEquals(VisitStatus.RESERVE_NODE, getVisitStatusCss(css3, null));
+    assertEquals(VisitStatus.RESERVE_NODE, getVisitStatusCss(css1, null, false));
+    assertEquals(VisitStatus.RESERVE_NODE, getVisitStatusCss(css2, null, false));
+    assertEquals(VisitStatus.RESERVE_NODE, getVisitStatusCss(css3, null, false));
   }
 
   @Test
   public void visitSplitJsSingle() throws Exception {
-    assertEquals(VisitStatus.RESERVE_NODE, getVisitStatusJs(js1, null, true));
+    assertEquals(VisitStatus.RESERVE_NODE, getVisitStatusJs(js1, null, true, false));
   }
 
   @Test
   public void visitSplitJsSeparated() throws Exception {
     seqNodes(js1, elem("span"), js2, elem("div"), js3);
-    assertEquals(VisitStatus.RESERVE_NODE, getVisitStatusJs(js1, null, true));
-    assertEquals(VisitStatus.RESERVE_NODE, getVisitStatusJs(js2, null, true));
-    assertEquals(VisitStatus.RESERVE_NODE, getVisitStatusJs(js3, null, true));
+    assertEquals(VisitStatus.RESERVE_NODE, getVisitStatusJs(js1, null, true, false));
+    assertEquals(VisitStatus.RESERVE_NODE, getVisitStatusJs(js2, null, true, false));
+    assertEquals(VisitStatus.RESERVE_NODE, getVisitStatusJs(js3, null, true, false));
   }
 
   @Test
   public void visitSplitJsContiguous() throws Exception {
     seqNodes(js1, js2, js3);
-    assertEquals(VisitStatus.RESERVE_NODE, getVisitStatusJs(js1, null, true));
-    assertEquals(VisitStatus.RESERVE_NODE, getVisitStatusJs(js2, null, true));
-    assertEquals(VisitStatus.RESERVE_NODE, getVisitStatusJs(js3, null, true));
+    assertEquals(VisitStatus.RESERVE_NODE, getVisitStatusJs(js1, null, true, false));
+    assertEquals(VisitStatus.RESERVE_NODE, getVisitStatusJs(js2, null, true, false));
+    assertEquals(VisitStatus.RESERVE_NODE, getVisitStatusJs(js3, null, true, false));
+  }
+
+  @Test
+  public void concatSingleJs() throws Exception {
+    List<Node> nodes = seqNodes(js1);
+    Node parent = js1.getParentNode();
+
+    // Sanity check.
+    assertEquals(1, parent.getChildNodes().getLength());
+
+    SimpleConcatUriManager mgr = simpleMgr();
+    ConcatVisitor.Js rewriter = new ConcatVisitor.Js(config(null, false, true), mgr);
+    assertTrue(rewriter.revisit(gadget(), nodes));
+
+    // There should be one JS node child which is rewritten.
+    assertEquals(1, parent.getChildNodes().getLength());
+    Element concatNode = (Element)parent.getChildNodes().item(0);
+    Uri concatUri = Uri.parse(concatNode.getAttribute("src"));
+    assertEquals(CONCAT_BASE_URI.getScheme(), concatUri.getScheme());
+    assertEquals(CONCAT_BASE_URI.getAuthority(), concatUri.getAuthority());
+    assertEquals(CONCAT_BASE_URI.getPath(), concatUri.getPath());
+    assertEquals(JS1_URL_STR, concatUri.getQueryParameter("1"));
+    assertNull(concatUri.getQueryParameter("2"));
   }
 
   @Test
@@ -291,7 +364,7 @@ public class ConcatVisitorTest extends DomWalkerTestBase {
     assertEquals(3, parent.getChildNodes().getLength());
 
     SimpleConcatUriManager mgr = simpleMgr();
-    ConcatVisitor.Js rewriter = new ConcatVisitor.Js(config(null, false), mgr);
+    ConcatVisitor.Js rewriter = new ConcatVisitor.Js(config(null, false, false), mgr);
     assertTrue(rewriter.revisit(gadget(), nodes));
 
     // Should be left with a single JS node child to parent.
@@ -307,6 +380,29 @@ public class ConcatVisitorTest extends DomWalkerTestBase {
   }
 
   @Test
+  public void concatSingleCss() throws Exception {
+    List<Node> nodes = seqNodes(css1);
+    Node parent = css1.getParentNode();
+
+    // Sanity check.
+    assertEquals(1, parent.getChildNodes().getLength());
+
+    SimpleConcatUriManager mgr = simpleMgr();
+    ConcatVisitor.Css rewriter = new ConcatVisitor.Css(config(null, false, true), mgr);
+    assertTrue(rewriter.revisit(gadget(), nodes));
+
+    // There should be one CSS node child which is rewritten.
+    assertEquals(1, parent.getChildNodes().getLength());
+    Element concatNode = (Element)parent.getChildNodes().item(0);
+    Uri concatUri = Uri.parse(concatNode.getAttribute("href"));
+    assertEquals(CONCAT_BASE_URI.getScheme(), concatUri.getScheme());
+    assertEquals(CONCAT_BASE_URI.getAuthority(), concatUri.getAuthority());
+    assertEquals(CONCAT_BASE_URI.getPath(), concatUri.getPath());
+    assertEquals(CSS1_URL_STR, concatUri.getQueryParameter("1"));
+    assertNull(concatUri.getQueryParameter("2"));
+  }
+
+  @Test
   public void concatSingleBatchCss() throws Exception {
     List<Node> nodes = seqNodes(css1, css2, css3);
     Node parent = css1.getParentNode();
@@ -315,10 +411,10 @@ public class ConcatVisitorTest extends DomWalkerTestBase {
     assertEquals(3, parent.getChildNodes().getLength());
 
     SimpleConcatUriManager mgr = simpleMgr();
-    ConcatVisitor.Css rewriter = new ConcatVisitor.Css(config(null, false), mgr);
+    ConcatVisitor.Css rewriter = new ConcatVisitor.Css(config(null, false, false), mgr);
     assertTrue(rewriter.revisit(gadget(), nodes));
 
-    // Should be left with a single JS node child to parent.
+    // Should be left with a single CSS node child to parent.
     assertEquals(1, parent.getChildNodes().getLength());
     Element concatNode = (Element)parent.getChildNodes().item(0);
     Uri concatUri = Uri.parse(concatNode.getAttribute("href"));
@@ -358,7 +454,7 @@ public class ConcatVisitorTest extends DomWalkerTestBase {
     assertEquals(3, parent.getChildNodes().getLength());
 
     SimpleConcatUriManager mgr = simpleMgr();
-    ConcatVisitor.Css rewriter = new ConcatVisitor.Css(config(null, false), mgr);
+    ConcatVisitor.Css rewriter = new ConcatVisitor.Css(config(null, false, false), mgr);
     assertTrue(rewriter.revisit(gadget(), nodes));
 
     // Should be left with a single JS node child to parent.
@@ -396,7 +492,7 @@ public class ConcatVisitorTest extends DomWalkerTestBase {
     assertEquals(2, js3.getParentNode().getChildNodes().getLength());
 
     SimpleConcatUriManager mgr = simpleMgr();
-    ConcatVisitor.Js rewriter = new ConcatVisitor.Js(config(null, false), mgr);
+    ConcatVisitor.Js rewriter = new ConcatVisitor.Js(config(null, false, false), mgr);
     assertTrue(rewriter.revisit(gadget(), fullListJs));
 
     // Should have been independently concatenated.
@@ -422,6 +518,42 @@ public class ConcatVisitorTest extends DomWalkerTestBase {
   }
 
   @Test
+  public void concatMultiBatchJsWithSingleResource() throws Exception {
+    List<Node> fullListJs = Lists.newArrayList();
+    fullListJs.addAll(seqNodes(js1, js2));
+    Node parent1 = js1.getParentNode();
+    assertEquals(2, parent1.getChildNodes().getLength());
+
+    fullListJs.addAll(seqNodes(js3));
+    Node parent2 = js3.getParentNode();
+    assertEquals(1, js3.getParentNode().getChildNodes().getLength());
+
+    SimpleConcatUriManager mgr = simpleMgr();
+    ConcatVisitor.Js rewriter = new ConcatVisitor.Js(config(null, false, true), mgr);
+    assertTrue(rewriter.revisit(gadget(), fullListJs));
+
+    // Should have been independently concatenated.
+    assertEquals(1, parent1.getChildNodes().getLength());
+    Element cn1 = (Element)parent1.getChildNodes().item(0);
+    Uri concatUri1 = Uri.parse(cn1.getAttribute("src"));
+    assertEquals(CONCAT_BASE_URI.getScheme(), concatUri1.getScheme());
+    assertEquals(CONCAT_BASE_URI.getAuthority(), concatUri1.getAuthority());
+    assertEquals(CONCAT_BASE_URI.getPath(), concatUri1.getPath());
+    assertEquals(JS1_URL_STR, concatUri1.getQueryParameter("1"));
+    assertEquals(JS2_URL_STR, concatUri1.getQueryParameter("2"));
+    assertNull(concatUri1.getQueryParameter("3"));
+
+    assertEquals(1, parent2.getChildNodes().getLength());
+    Element cn2 = (Element)parent2.getChildNodes().item(0);
+    Uri concatUri2 = Uri.parse(cn2.getAttribute("src"));
+    assertEquals(CONCAT_BASE_URI.getScheme(), concatUri2.getScheme());
+    assertEquals(CONCAT_BASE_URI.getAuthority(), concatUri2.getAuthority());
+    assertEquals(CONCAT_BASE_URI.getPath(), concatUri2.getPath());
+    assertEquals(JS3_URL_STR, concatUri2.getQueryParameter("1"));
+    assertNull(concatUri2.getQueryParameter("2"));
+  }
+
+  @Test
   public void concatMultiBatchCss() throws Exception {
     List<Node> fullListCss = Lists.newArrayList();
     fullListCss.addAll(seqNodes(css1, css2));
@@ -433,7 +565,7 @@ public class ConcatVisitorTest extends DomWalkerTestBase {
     assertEquals(7, css3.getParentNode().getChildNodes().getLength());
 
     SimpleConcatUriManager mgr = simpleMgr();
-    ConcatVisitor.Css rewriter = new ConcatVisitor.Css(config(null, false), mgr);
+    ConcatVisitor.Css rewriter = new ConcatVisitor.Css(config(null, false, false), mgr);
     assertTrue(rewriter.revisit(gadget(), fullListCss));
 
     // Should have been independently concatenated.
@@ -485,7 +617,7 @@ public class ConcatVisitorTest extends DomWalkerTestBase {
     assertEquals(10, parent1.getChildNodes().getLength());
 
     SimpleConcatUriManager mgr = simpleMgr();
-    ConcatVisitor.Css rewriter = new ConcatVisitor.Css(config(null, false), mgr);
+    ConcatVisitor.Css rewriter = new ConcatVisitor.Css(config(null, false, false), mgr);
     assertTrue(rewriter.revisit(gadget(), fullListCss));
 
     // Should have been split across 'all' media type and then batches should be independently
@@ -555,6 +687,42 @@ public class ConcatVisitorTest extends DomWalkerTestBase {
   }
 
   @Test
+  public void concatMultiBatchCssWithSingleResource() throws Exception {
+    List<Node> fullListCss = Lists.newArrayList();
+    fullListCss.addAll(seqNodes(css1, css2));
+    Node parent1 = css1.getParentNode();
+    assertEquals(2, parent1.getChildNodes().getLength());
+
+    fullListCss.addAll(seqNodes(css3));
+    Node parent2 = css3.getParentNode();
+    assertEquals(1, css3.getParentNode().getChildNodes().getLength());
+
+    SimpleConcatUriManager mgr = simpleMgr();
+    ConcatVisitor.Css rewriter = new ConcatVisitor.Css(config(null, false, true), mgr);
+    assertTrue(rewriter.revisit(gadget(), fullListCss));
+
+    // Should have been independently concatenated.
+    assertEquals(1, parent1.getChildNodes().getLength());
+    Element cn1 = (Element)parent1.getChildNodes().item(0);
+    Uri concatUri1 = Uri.parse(cn1.getAttribute("href"));
+    assertEquals(CONCAT_BASE_URI.getScheme(), concatUri1.getScheme());
+    assertEquals(CONCAT_BASE_URI.getAuthority(), concatUri1.getAuthority());
+    assertEquals(CONCAT_BASE_URI.getPath(), concatUri1.getPath());
+    assertEquals(CSS1_URL_STR, concatUri1.getQueryParameter("1"));
+    assertEquals(CSS2_URL_STR, concatUri1.getQueryParameter("2"));
+    assertNull(concatUri1.getQueryParameter("3"));
+
+    assertEquals(1, parent2.getChildNodes().getLength());
+    Element cn2 = (Element)parent2.getChildNodes().item(0);
+    Uri concatUri2 = Uri.parse(cn2.getAttribute("href"));
+    assertEquals(CONCAT_BASE_URI.getScheme(), concatUri2.getScheme());
+    assertEquals(CONCAT_BASE_URI.getAuthority(), concatUri2.getAuthority());
+    assertEquals(CONCAT_BASE_URI.getPath(), concatUri2.getPath());
+    assertEquals(CSS3_URL_STR, concatUri2.getQueryParameter("1"));
+    assertNull(concatUri2.getQueryParameter("2"));
+  }
+
+  @Test
   public void concatMultiBatchJsBadBatch() throws Exception {
     List<Node> fullListJs = Lists.newArrayList();
     fullListJs.addAll(seqNodes(js1, js2));
@@ -570,7 +738,7 @@ public class ConcatVisitorTest extends DomWalkerTestBase {
     assertEquals(2, js3.getParentNode().getChildNodes().getLength());
 
     SimpleConcatUriManager mgr = simpleMgr();
-    ConcatVisitor.Js rewriter = new ConcatVisitor.Js(config(null, false), mgr);
+    ConcatVisitor.Js rewriter = new ConcatVisitor.Js(config(null, false, false), mgr);
     assertTrue(rewriter.revisit(gadget(), fullListJs));
 
     // Should have been independently concatenated. Batches #1 and #2 are OK. Middle skipped.
@@ -604,7 +772,7 @@ public class ConcatVisitorTest extends DomWalkerTestBase {
     assertEquals(2, parent.getChildNodes().getLength());
 
     SimpleConcatUriManager mgr = simpleMgr();
-    ConcatVisitor.Js rewriter = new ConcatVisitor.Js(config(null, true), mgr);
+    ConcatVisitor.Js rewriter = new ConcatVisitor.Js(config(null, true, false), mgr);
     assertTrue(rewriter.revisit(gadget(), nodes));
 
     // Same number of nodes. Now the second JS node is a new script node eval'ing JS.
@@ -646,7 +814,7 @@ public class ConcatVisitorTest extends DomWalkerTestBase {
     assertEquals(6, parent.getChildNodes().getLength());
 
     SimpleConcatUriManager mgr = simpleMgr();
-    ConcatVisitor.Js rewriter = new ConcatVisitor.Js(config(null, true), mgr);
+    ConcatVisitor.Js rewriter = new ConcatVisitor.Js(config(null, true, false), mgr);
     assertTrue(rewriter.revisit(gadget(), nodes));
 
     // Same number of nodes. Now the second JS node is a new script node eval'ing JS.
@@ -680,9 +848,10 @@ public class ConcatVisitorTest extends DomWalkerTestBase {
     return new ConcatVisitor.Js(config, null).visit(gadget(), node);
   }
 
-  private VisitStatus getVisitStatusJs(Node node, String rewriteRegex, boolean splitJs)
+  private VisitStatus getVisitStatusJs(
+      Node node, String rewriteRegex, boolean splitJs, boolean singleResouce)
       throws Exception {
-    ContentRewriterFeature.Config config = config(rewriteRegex, splitJs);
+    ContentRewriterFeature.Config config = config(rewriteRegex, splitJs, singleResouce);
     return getVisitStatusJs(config, node);
   }
 
@@ -691,16 +860,17 @@ public class ConcatVisitorTest extends DomWalkerTestBase {
     return new ConcatVisitor.Css(config, null).visit(gadget(), node);
   }
 
-  private VisitStatus getVisitStatusCss(Node node, String rewriteRegex)
+  private VisitStatus getVisitStatusCss(Node node, String rewriteRegex, boolean singleResource)
       throws Exception {
     // True, but never used (splitJS support)
-    ContentRewriterFeature.Config config = config(rewriteRegex, true);
+    ContentRewriterFeature.Config config = config(rewriteRegex, true, singleResource);
     return getVisitStatusCss(config, node);
   }
 
-  private ContentRewriterFeature.Config config(String exclude, boolean splitJs) {
+  private ContentRewriterFeature.Config config(
+      String exclude, boolean splitJs, boolean singleResourceConcat) {
     return new ContentRewriterFeature.DefaultConfig(".*", exclude == null ? "" : exclude,
-        "0", "", false, splitJs);
+        "0", "", false, splitJs, singleResourceConcat);
   }
 
   private List<Node> seqNodes(Node... nodes) {
