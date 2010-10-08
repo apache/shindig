@@ -20,7 +20,10 @@ package org.apache.shindig.gadgets.http;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
-import javax.annotation.Nullable;
+
+// Temporary replacement of javax.annotation.Nullable
+import org.apache.shindig.common.Nullable;
+
 import com.google.inject.name.Named;
 
 import org.apache.shindig.common.util.Utf8UrlCoder;

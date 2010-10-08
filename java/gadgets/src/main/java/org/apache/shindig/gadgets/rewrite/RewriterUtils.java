@@ -23,7 +23,8 @@ import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.uri.UriCommon;
 
-import javax.annotation.Nullable;
+// Temporary replacement of javax.annotation.Nullable
+import org.apache.shindig.common.Nullable;
 
 /**
  * Various utility functions used by rewriters
