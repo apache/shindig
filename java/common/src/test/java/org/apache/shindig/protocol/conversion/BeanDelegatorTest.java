@@ -27,6 +27,7 @@ import org.apache.shindig.protocol.conversion.BeanFilter.Unfiltered;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
 
@@ -222,4 +223,26 @@ public class BeanDelegatorTest extends Assert {
   public void tesValidate() throws Exception {
     beanDelegator.validate();
   }
+
+  @Test
+  public void testValidateGoodBean() throws Exception {
+    TokenInter p = beanDelegator.createDelegator(null, TokenInter.class,
+        ImmutableMap.<String, Object>of("container", "open", "id", "test"));
+    BeanDelegator.validateDelegator(p);
+  }
+
+  @Test(expected = InvocationTargetException.class)
+  public void testValidateWrongtype() throws Exception {
+    TokenInter p = beanDelegator.createDelegator(null, TokenInter.class,
+        ImmutableMap.<String, Object>of("container", "open", "id", new Integer(5)));
+    BeanDelegator.validateDelegator(p);
+  }
+
+  @Test(expected = InvocationTargetException.class)
+  public void testValidateMissingField() throws Exception {
+    TokenInter p = beanDelegator.createDelegator(null, TokenInter.class,
+        ImmutableMap.<String, Object>of("container", "open"));
+    BeanDelegator.validateDelegator(p);
+  }
+
 }

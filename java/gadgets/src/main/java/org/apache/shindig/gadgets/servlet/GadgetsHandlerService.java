@@ -249,14 +249,15 @@ public class GadgetsHandlerService {
   public GadgetsHandlerApi.BaseResponse createErrorResponse(Uri url, int code, String error) {
     GadgetsHandlerApi.Error errorBean = beanDelegator.createDelegator(
         null, GadgetsHandlerApi.Error.class, ImmutableMap.<String, Object>of(
-          "message", error, "code", code));
+          "message", BeanDelegator.nullable(error), "code", code));
 
     return beanDelegator.createDelegator(error, GadgetsHandlerApi.BaseResponse.class,
         ImmutableMap.<String, Object>of("url", BeanDelegator.nullable(url), "error", errorBean,
             "responsetimems", BeanDelegator.NULL, "expiretimems", BeanDelegator.NULL));
   }
 
-  private GadgetsHandlerApi.MetadataResponse createMetadataResponse(
+  @VisibleForTesting
+  GadgetsHandlerApi.MetadataResponse createMetadataResponse(
       Uri url, GadgetSpec spec, String iframeUrl, Boolean needsTokenRefresh,
       Set<String> fields, Long expireTime) {
     return (GadgetsHandlerApi.MetadataResponse) beanFilter.createFilteredBean(
@@ -271,7 +272,8 @@ public class GadgetsHandlerService {
         fields);
   }
 
-  private GadgetsHandlerApi.TokenResponse createTokenResponse(
+  @VisibleForTesting
+  GadgetsHandlerApi.TokenResponse createTokenResponse(
       Uri url, String token, Set<String> fields, Long tokenExpire) {
     return (GadgetsHandlerApi.TokenResponse) beanFilter.createFilteredBean(
         beanDelegator.createDelegator("empty", GadgetsHandlerApi.TokenResponse.class,

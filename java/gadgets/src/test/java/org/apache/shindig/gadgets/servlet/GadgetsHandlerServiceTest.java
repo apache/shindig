@@ -19,6 +19,7 @@
 package org.apache.shindig.gadgets.servlet;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 
 import org.apache.shindig.auth.SecurityToken;
@@ -29,6 +30,7 @@ import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.util.FakeTimeSource;
 import org.apache.shindig.gadgets.features.FeatureRegistry;
 import org.apache.shindig.gadgets.process.ProcessingException;
+import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.protocol.conversion.BeanDelegator;
 import org.apache.shindig.protocol.conversion.BeanFilter;
 import org.easymock.EasyMock;
@@ -38,7 +40,7 @@ import org.junit.Test;
 import java.util.List;
 import java.util.Map;
 
-public class GadgetHandlerServiceTest extends EasyMockTestCase {
+public class GadgetsHandlerServiceTest extends EasyMockTestCase {
 
   private static final String TOKEN = "<token data>";
   private static final String OWNER = "<owner>";
@@ -228,6 +230,69 @@ public class GadgetHandlerServiceTest extends EasyMockTestCase {
     assertEquals(TOKEN, response.getToken());
     assertNull(CONTAINER, tokenCodec.tokenData);
     verify();
+  }
+
+  @Test
+  public void testCreateErrorResponse() throws Exception {
+    GadgetsHandlerApi.BaseResponse res = gadgetHandler.createErrorResponse(null, 404, null);
+    assertEquals(404, res.getError().getCode());
+    assertNull(res.getError().getMessage());
+    assertNull(res.getUrl());
+    BeanDelegator.validateDelegator(res);
+    res = gadgetHandler.createErrorResponse(Uri.parse("url"), 500, "error");
+    assertEquals("error", res.getError().getMessage());
+    assertEquals("url", res.getUrl().toString());
+    BeanDelegator.validateDelegator(res);
+  }
+
+  @Test
+  public void testCreateErrorResponseFromException() throws Exception {
+    GadgetsHandlerApi.BaseResponse res = gadgetHandler.createErrorResponse(
+        Uri.parse("url"), new RuntimeException("test"), "error");
+    assertEquals("error", res.getError().getMessage());
+    assertEquals("url", res.getUrl().toString());
+    assertEquals(500, res.getError().getCode());
+    BeanDelegator.validateDelegator(res);
+    res = gadgetHandler.createErrorResponse(
+        Uri.parse("url"), new ProcessingException("test", 404), "error");
+    assertEquals("test", res.getError().getMessage());
+    assertEquals("url", res.getUrl().toString());
+    assertEquals(404, res.getError().getCode());
+    BeanDelegator.validateDelegator(res);
+  }
+
+  @Test
+  public void testCreateMetadataResponse() throws Exception {
+    GadgetsHandlerApi.MetadataResponse res = gadgetHandler.createMetadataResponse(
+        Uri.parse("gadgeturl"), new GadgetSpec(Uri.parse("#"), FakeProcessor.SPEC_XML),
+        null, null, ImmutableSet.of("*"), null);
+    assertNull(res.getIframeUrl());
+    assertNull(res.getNeedsTokenRefresh());
+    assertNull(res.getExpireTimeMs());
+    assertEquals(FakeProcessor.SPEC_TITLE, res.getModulePrefs().getTitle());
+    BeanDelegator.validateDelegator(res);
+    res = gadgetHandler.createMetadataResponse(
+        Uri.parse("gadgeturl"), new GadgetSpec(Uri.parse("#"), FakeProcessor.SPEC_XML),
+        "iframeurl", true, ImmutableSet.of("*"), 3L);
+    assertEquals("iframeurl", res.getIframeUrl());
+    assertEquals(true, res.getNeedsTokenRefresh().booleanValue());
+    assertEquals(3L, res.getExpireTimeMs().longValue());
+    BeanDelegator.validateDelegator(res);
+  }
+
+  @Test
+  public void testCreateTokenResponse() throws Exception {
+    GadgetsHandlerApi.TokenResponse res = gadgetHandler.createTokenResponse(Uri.parse("#"), null,
+        ImmutableSet.of("*"), null);
+    BeanDelegator.validateDelegator(res);
+    assertNull(res.getToken());
+    assertNull(res.getExpireTimeMs());
+    res = gadgetHandler.createTokenResponse(Uri.parse("#"), "token",
+        ImmutableSet.of("*"), 100L);
+    BeanDelegator.validateDelegator(res);
+    assertEquals("token", res.getToken());
+    assertEquals(100L, res.getExpireTimeMs().longValue());
+
   }
 
   private GadgetsHandlerApi.TokenData createTokenData(String ownerId, String viewerId) {

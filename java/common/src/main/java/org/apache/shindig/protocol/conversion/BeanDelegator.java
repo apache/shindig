@@ -319,6 +319,19 @@ public class BeanDelegator {
     return (delegatedClasses.get(dataType) == interfaceType);
   }
 
+  /**
+   * Validate a delegator object has all fields defined.
+   * With the field list option, classes can be delegated without being complete.
+   * This helper method should be used to verify that no field was missed.
+   */
+  public static void validateDelegator(Object o)
+      throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
+    for (Method method : o.getClass().getInterfaces()[0].getMethods()) {
+      if (method.getName().startsWith("get")) {
+        Object val = method.invoke(o);
+      }
+    }
+  }
 
   /**
    * Utility function to auto generate mapping between two enums that have same values (toString)
