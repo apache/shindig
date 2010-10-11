@@ -134,7 +134,6 @@ public class GadgetsHandler {
   }
 
   private abstract class AbstractExecutor {
-    @SuppressWarnings("unchecked")
     public Map<String, GadgetsHandlerApi.BaseResponse> execute(BaseRequestItem request) {
       Set<String> gadgetUrls = ImmutableSet.copyOf(request.getListParameter("ids"));
       if (gadgetUrls.isEmpty()) {
