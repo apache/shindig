@@ -199,7 +199,7 @@ public class CajaContentRewriter implements GadgetRewriter {
     }
   }
 
-  protected boolean cajaEnabled(Gadget gadget) {
+  private boolean cajaEnabled(Gadget gadget) {
     return (gadget.getAllFeatures().contains("caja") ||
         "1".equals(gadget.getContext().getParameter("caja")));
   }

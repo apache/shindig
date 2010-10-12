@@ -81,7 +81,6 @@ public class GadgetHandlerServiceTest extends EasyMockTestCase {
     replay();
     GadgetsHandlerApi.MetadataResponse response = gadgetHandler.getMetadata(request);
     assertEquals(FakeIframeUriManager.DEFAULT_IFRAME_URI.toString(), response.getIframeUrl());
-    assertTrue(response.getNeedsTokenRefresh());
     assertEquals(1, response.getViews().size());
     assertTrue(response.getViews().get("default").getContent().contains("Hello, world" ));
     assertEquals(FakeProcessor.SPEC_TITLE, response.getModulePrefs().getTitle());

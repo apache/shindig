@@ -72,7 +72,6 @@ public class GadgetsHandlerApi {
     public ModulePrefs getModulePrefs();
     public Map<String, UserPref> getUserPrefs();
     public Map<String, View> getViews();
-    public Boolean getNeedsTokenRefresh();
   }
 
   public enum ViewContentType {
