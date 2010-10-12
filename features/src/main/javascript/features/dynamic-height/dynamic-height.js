@@ -69,12 +69,43 @@ gadgets.window = gadgets.window || {};
       var elem = queue.shift();
       var children = elem.childNodes;
 
+      /*
+       * Here, we are checking if we are a container that clips its overflow wit h
+       * a specific height, because if so, we should ignore children
+       */
+
+      // check that elem is actually an element, could be a text node otherwise
+      if (typeof elem.style !== 'undefined') {
+        // Get the overflowY value, looking in the computed style if necessary
+        var overflowY = elem.style['overflowY'];
+        if (!overflowY) {
+          var css = document.defaultView.getComputedStyle(elem, null);
+          overflowY = css ? css['overflowY'] : null;
+        }
+
+        // The only non-clipping values of overflow is 'visible'. We assume that 'inherit'
+        // is also non-clipping at the moment, but should we check this?
+        if (overflowY != 'visible' && overflowY != 'inherit') {
+          // Make sure this element explicitly specifies a height
+          var height = elem.style['height'];
+          if (!height) {
+            var css = document.defaultView.getComputedStyle(elem, null);
+            height = css ? css['height'] : '';
+          }
+          if (height.length > 0 && height != 'auto') {
+            // We can safely ignore the children of this element,
+            // so move onto the next in the queue
+            continue;
+          }
+        }
+      }
+
       for (var i = 0; i < children.length; i++) {
         var child = children[i];
         if (typeof child.offsetTop !== 'undefined' &&
-            typeof child.scrollHeight !== 'undefined') {
-          // scrollHeight already accounts for border-bottom, padding-bottom.
-          var bottom = child.offsetTop + child.scrollHeight +
+            typeof child.offsetHeight  !== 'undefined') {
+          // offsetHeight already accounts for border-bottom, padding-bottom.
+          var bottom = child.offsetTop + child.offsetHeight +
               parseIntFromElemPxAttribute(child, 'margin-bottom');
           result = Math.max(result, bottom);
         }
