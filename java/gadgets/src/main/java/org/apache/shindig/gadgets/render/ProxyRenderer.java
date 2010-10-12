@@ -120,7 +120,7 @@ public class ProxyRenderer {
    * Creates a proxy request by fetching pipelined data and adding it to an existing request.
    *
    */
-  private HttpRequest createPipelinedProxyRequest(Gadget gadget, HttpRequest original) {
+  protected HttpRequest createPipelinedProxyRequest(Gadget gadget, HttpRequest original) {
     HttpRequest request = new HttpRequest(original);
     request.setIgnoreCache(true);
 
