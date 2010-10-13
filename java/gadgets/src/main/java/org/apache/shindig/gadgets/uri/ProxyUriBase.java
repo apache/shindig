@@ -24,6 +24,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
+import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpRequest;
@@ -40,7 +41,7 @@ public class ProxyUriBase {
   private Integer refresh = null;
   private boolean debug = false;
   private boolean noCache = false;
-  private String container = null;
+  private String container = ContainerConfig.DEFAULT_CONTAINER;
   private String gadget = null;
   private String rewriteMimeType = null;
   private boolean sanitizeContent = false;
@@ -81,10 +82,14 @@ public class ProxyUriBase {
       refresh = getIntegerValue(uri.getQueryParameter(Param.REFRESH.getKey()));
       debug = getBooleanValue(uri.getQueryParameter(Param.DEBUG.getKey()));
       noCache = getBooleanValue(uri.getQueryParameter(Param.NO_CACHE.getKey()));
-      container = uri.getQueryParameter(Param.CONTAINER.getKey());
-      if (container == null) {
+      String newContainer = uri.getQueryParameter(Param.CONTAINER.getKey());
+      if (newContainer == null) {
         // Support "synd" for legacy purposes.
-        container = uri.getQueryParameter(Param.SYND.getKey());
+        newContainer = uri.getQueryParameter(Param.SYND.getKey());
+      }
+      // Preserve "default" container.
+      if (newContainer != null) {
+        container = newContainer;
       }
       gadget = uri.getQueryParameter(Param.GADGET.getKey());
       rewriteMimeType = uri.getQueryParameter(Param.REWRITE_MIME_TYPE.getKey());

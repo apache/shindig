@@ -149,7 +149,7 @@ public class RenderingGadgetRewriterTest {
   @Test
   public void defaultOutput() throws Exception {
     Gadget gadget = makeDefaultGadget();
-    
+
     String rewritten = rewrite(gadget, BODY_CONTENT);
 
     Matcher matcher = DOCUMENT_SPLIT_PATTERN.matcher(rewritten);
@@ -277,7 +277,7 @@ public class RenderingGadgetRewriterTest {
         ImmutableList.of(fooResource),
         libs,
         ImmutableList.of(fooResource, inline("bar-c", "bar-d"), inline("baz-c", "baz-d")));
-    
+
     String rewritten = rewrite(gadget, "");
 
     Set<String> actual = getInjectedScript(rewritten);
@@ -305,7 +305,7 @@ public class RenderingGadgetRewriterTest {
 
     assertTrue("Requested scripts not inlined.", rewritten.contains("foo_content();"));
   }
-  
+
   @Test
   public void featuresNotInjectedWhenRemoved() throws Exception {
     String gadgetXml =
@@ -345,7 +345,7 @@ public class RenderingGadgetRewriterTest {
         ImmutableList.of(inline("foo_content();", "foo_content_dbg();")),
         ImmutableSet.<String>of(),
         ImmutableList.<FeatureResource>of());
-    
+
     String rewritten = rewrite(gadget, "");
 
     assertTrue("Added script not inlined.", rewritten.contains("foo_content();"));
@@ -423,7 +423,7 @@ public class RenderingGadgetRewriterTest {
         ImmutableList.of(inline("foo_content();", "foo_content_debug();")),
         ImmutableSet.<String>of(),
         ImmutableList.<FeatureResource>of());
-    
+
     String rewritten = rewrite(gadget, BODY_CONTENT);
 
     Matcher matcher = DOCUMENT_SPLIT_PATTERN.matcher(rewritten);
@@ -463,13 +463,13 @@ public class RenderingGadgetRewriterTest {
     };
 
     Gadget gadget = makeGadgetWithSpec(gadgetXml).setContext(context);
-    
+
     expectFeatureCalls(gadget,
         ImmutableList.of(inline("foo_content();", "foo_content_debug();"),
                          extern("http://example.org/external.js", "dbg")),
         ImmutableSet.of("baz"),
         ImmutableList.of(inline("does-not-matter", "dbg")));
-    
+
     String rewritten = rewrite(gadget, "");
 
     Set<String> actual = getInjectedScript(rewritten);
@@ -498,12 +498,12 @@ public class RenderingGadgetRewriterTest {
       "</Module>";
 
     Gadget gadget = makeGadgetWithSpec(gadgetXml);
-    
+
     expectFeatureCalls(gadget,
         ImmutableList.of(inline("foo", "dbg")),
         ImmutableSet.<String>of(),
         ImmutableList.<FeatureResource>of());
-    
+
     config.data.put(FEATURES_KEY, ImmutableMap.of("foo", "blah"));
 
     String rewritten = rewrite(gadget, "");
@@ -537,7 +537,7 @@ public class RenderingGadgetRewriterTest {
         ImmutableList.of(inline("foo", "foo-dbg")),
         ImmutableSet.of("bar"),
         ImmutableList.of(inline("bar", "bar-dbg")));
-    
+
     config.data.put(FEATURES_KEY, ImmutableMap.of(
         "foo", "blah",
         "bar", "baz"
@@ -568,7 +568,7 @@ public class RenderingGadgetRewriterTest {
       "</Module>";
 
     Gadget gadget = makeGadgetWithSpec(gadgetXml);
-    
+
     expectFeatureCalls(gadget,
         ImmutableList.of(inline("foo", "foo-dbg"), inline("foo2", "foo2-dbg")),
         ImmutableSet.<String>of(),
@@ -580,7 +580,7 @@ public class RenderingGadgetRewriterTest {
 
     JSONObject json = getConfigJson(rewritten);
     assertEquals("blah", json.get("foo"));
-    
+
     JSONObject util = json.getJSONObject("core.util");
     JSONObject foo = util.getJSONObject("foo");
     assertEquals("baz", foo.get("bar"));
@@ -646,7 +646,7 @@ public class RenderingGadgetRewriterTest {
         "No shindig.xhrwrapper.oauthTokenName configuration present in rewritten HTML.",
         "oauth", "serviceName", "tokenName");
   }
-  
+
   private void checkXhrWrapperConfigurationInjection(String message, String auth, String oauthService, String oauthToken)
       throws Exception {
     String oAuthBlock = "";
@@ -676,21 +676,21 @@ public class RenderingGadgetRewriterTest {
       "</ModulePrefs>" +
       "<Content type='html' href='http://foo.com/bar/baz.html'" + authzAttr + " />" +
       "</Module>";
-    
+
     String expected = '{' +
         (oauthService == null ? "" : "\"oauthService\":\"serviceName\",") +
         "\"contentUrl\":\"http://foo.com/bar/baz.html\"" +
         (auth == null ? "" : ",\"authorization\":\"" + auth + '\"') +
         (oauthToken == null ? "" : ",\"oauthTokenName\":\"tokenName\"") +
         '}';
-    
+
     Gadget gadget = makeGadgetWithSpec(gadgetXml);
     gadget.setCurrentView(gadget.getSpec().getView("default"));
     String rewritten = rewrite(gadget, BODY_CONTENT);
-    
+
     assertXhrConfigContains(message, expected, rewritten);
   }
-  
+
   private void assertXhrConfigContains(String message, String expected, String content) throws Exception {
     // TODO: make this test a little more robust. This check ensures that ordering is not taken
     // into account during config comparison.
@@ -712,12 +712,12 @@ public class RenderingGadgetRewriterTest {
       "<Module><ModulePrefs title='' />" +
       "<Content type='html' href='http://foo.com/bar/baz.html' />" +
       "</Module>";
-    
+
     Gadget gadget = makeGadgetWithSpec(gadgetXml);
     gadget.setCurrentView(gadget.getSpec().getView("default"));
-    
+
     String rewritten = rewrite(gadget, BODY_CONTENT);
-    
+
     boolean containsConfig = rewritten.contains("\"shindig.xhrwrapper\"");
     assertFalse("shindig.xhrwrapper configuration present in rewritten HTML.", containsConfig);
   }
@@ -732,7 +732,7 @@ public class RenderingGadgetRewriterTest {
       "</Module>";
 
     Gadget gadget = makeGadgetWithSpec(gadgetXml);
-    
+
     reset(featureRegistry);
     expect(featureRegistry.getFeatureResources(same(gadget.getContext()),
         eq(ImmutableSet.<String>of()), eq(Lists.<String>newArrayList())))
@@ -751,7 +751,7 @@ public class RenderingGadgetRewriterTest {
 
     rewrite(gadget, "");
   }
-  
+
   @Test
   public void unsupportedExternFeatureDoesNotThrow() throws Exception {
     String gadgetXml =
@@ -759,7 +759,7 @@ public class RenderingGadgetRewriterTest {
       "</ModulePrefs>" +
       "<Content type='html'/>" +
       "</Module>";
-    
+
     GadgetContext context = new GadgetContext() {
       @Override
       public String getParameter(String name) {
@@ -769,9 +769,9 @@ public class RenderingGadgetRewriterTest {
         return null;
       }
     };
-    
+
     Gadget gadget = makeGadgetWithSpec(gadgetXml).setContext(context);
-    
+
     reset(featureRegistry);
     expect(featureRegistry.getFeatureResources(same(gadget.getContext()),
         eq(ImmutableSet.<String>of("bar")), eq(Lists.<String>newArrayList())))
@@ -791,7 +791,7 @@ public class RenderingGadgetRewriterTest {
     expect(featureRegistry.getFeatures(eq(ImmutableList.of("core"))))
         .andReturn(ImmutableList.of("core"));
     replay(featureRegistry);
-    
+
     rewrite(gadget, "");
   }
 
@@ -941,7 +941,7 @@ public class RenderingGadgetRewriterTest {
     assertFalse("Didn't rewrite when sanitize was '0'.",
         BODY_CONTENT.equals(rewrite(gadget, BODY_CONTENT)));
   }
-  
+
   private void expectFeatureCalls(Gadget gadget,
                                   List<FeatureResource> gadgetResources,
                                   Set<String> externLibs,
@@ -966,11 +966,11 @@ public class RenderingGadgetRewriterTest {
         andReturn(ImmutableSet.of("foo", "foo2", "core.util")).anyTimes();
     replay(featureRegistry);
   }
-  
+
   private FeatureResource inline(String content, String debugContent) {
     return new FeatureResource.Simple(content, debugContent);
   }
-  
+
   private FeatureResource extern(String content, String debugContent) {
     return new FeatureResource.Simple(content, debugContent) {
       @Override
@@ -999,7 +999,7 @@ public class RenderingGadgetRewriterTest {
   }
 
   private static class FakeJsUriManager implements JsUriManager {
-    public Uri makeExternJsUri(Gadget gadget, Collection<String> extern) {
+    public Uri makeExternJsUri(GadgetContext ctx, Collection<String> extern) {
       return Uri.parse("/js/" + Join.join(":", extern));
     }
 

@@ -22,8 +22,10 @@ import java.util.Collection;
 import java.util.Collections;
 
 import org.apache.shindig.common.uri.Uri;
-import org.apache.shindig.gadgets.Gadget;
+import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.RenderingContext;
+import org.apache.shindig.gadgets.uri.UriCommon.Param;
 
 import com.google.inject.ImplementedBy;
 
@@ -32,11 +34,11 @@ import com.google.inject.ImplementedBy;
  */
 public interface JsUriManager {
   /**
-   * @param gadget The gadget in which the requested JS will be externed.
+   * @param ctx The gadget context in which the requested JS will be externed.
    * @param extern The list of features that js is needed for.
    * @return The uri for the externed javascript that includes all listed extern libraries.
    */
-  Uri makeExternJsUri(Gadget gadget, Collection<String> extern);
+  Uri makeExternJsUri(GadgetContext ctx, Collection<String> extern);
 
   /**
    * Processes the inbound URL, for use by serving code in determining which JS to serve
@@ -47,28 +49,53 @@ public interface JsUriManager {
    */
   JsUri processExternJsUri(Uri uri) throws GadgetException;
 
-  public static class JsUri {
-    private final UriStatus status;
+  public static class JsUri extends ProxyUriBase {
     private final Collection<String> libs;
+    private final String onload;
+    private final boolean jsload;
+    private final RenderingContext context;
 
-    public JsUri(UriStatus status, Collection<String> libs) {
-      this.status = status;
+    public JsUri(UriStatus status, Uri origUri, Collection<String> libs) {
+      super(status, origUri);
+      if (origUri != null) {
+        this.context = "1".equals(origUri.getQueryParameter(Param.CONTAINER_MODE.getKey())) ?
+            RenderingContext.CONTAINER : RenderingContext.GADGET;
+        this.jsload = "1".equals(origUri.getQueryParameter(Param.JSLOAD.getKey()));
+        this.onload = origUri.getQueryParameter(Param.ONLOAD.getKey());
+      } else {
+        this.context = RenderingContext.GADGET;
+        this.jsload = false;
+        this.onload = null;
+      }
       this.libs = libs;
     }
 
-    public UriStatus getStatus() {
-      return status;
+    public JsUri(UriStatus status, Collection<String> libs) {
+      this(status, null, libs);
     }
 
     public Collection<String> getLibs() {
       return Collections.unmodifiableCollection(libs);
+    }
+
+    public RenderingContext getContext() {
+      return context;
+    }
+
+    public String getOnload() {
+      return onload;
+    }
+
+    public boolean isJsload() {
+      return jsload;
     }
   }
 
   @ImplementedBy(DefaultJsVersioner.class)
   public interface Versioner {
     /**
-     * @param gadgeUri Gadget for which extern Uri was generated.
+     * @param gadgetUri Gadget for which extern Uri was generated.
+     * @param container The container for this gadget.
      * @param extern Collection of libs externed.
      * @return Version string for the Uri.
      */

@@ -70,7 +70,10 @@ public class DefaultGuiceModule extends AbstractModule {
     bind(ExecutorService.class).toInstance(service);
     bind(ExecutorService.class).annotatedWith(Names.named("shindig.concat.executor")).toInstance(service);
 
+    bindConstant().annotatedWith(Names.named("shindig.jsload.ttl-secs")).to(60 * 60); // 1 hour
+
     Runtime.getRuntime().addShutdownHook(new Thread() {
+        @Override
         public void run() {
             service.shutdownNow();
         }

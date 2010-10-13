@@ -228,7 +228,8 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
     }
 
     if (!externForcedLibs.isEmpty()) {
-      String jsUrl = jsUriManager.makeExternJsUri(gadget, externForcedLibs).toString();
+      String jsUrl = jsUriManager.makeExternJsUri(gadget.getContext(), externForcedLibs)
+          .toString();
       Element libsTag = headTag.getOwnerDocument().createElement("script");
       libsTag.setAttribute("src", jsUrl);
       headTag.insertBefore(libsTag, firstHeadChild);
@@ -270,7 +271,8 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
       externGadgetLibs.removeAll(externForcedLibs);
 
       if (!externGadgetLibs.isEmpty()) {
-        String jsUrl = jsUriManager.makeExternJsUri(gadget, externGadgetLibs).toString();
+        String jsUrl = jsUriManager.makeExternJsUri(gadget.getContext(), externGadgetLibs)
+            .toString();
         Element libsTag = headTag.getOwnerDocument().createElement("script");
         libsTag.setAttribute("src", jsUrl);
         headTag.insertBefore(libsTag, firstHeadChild);

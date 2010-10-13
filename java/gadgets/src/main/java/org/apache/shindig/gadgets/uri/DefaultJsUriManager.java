@@ -25,7 +25,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.config.ContainerConfig;
-import org.apache.shindig.gadgets.Gadget;
+import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.RenderingContext;
 import org.apache.shindig.gadgets.GadgetException.Code;
@@ -49,14 +49,13 @@ public class DefaultJsUriManager implements JsUriManager {
   private final Versioner versioner;
 
   @Inject
-  public DefaultJsUriManager(ContainerConfig config,
-                             Versioner versioner) {
+  public DefaultJsUriManager(ContainerConfig config, Versioner versioner) {
     this.config = config;
     this.versioner = versioner;
   }
 
-  public Uri makeExternJsUri(Gadget gadget, Collection<String> extern) {
-    String container = gadget.getContext().getContainer();
+  public Uri makeExternJsUri(GadgetContext ctx, Collection<String> extern) {
+    String container = ctx.getContainer();
     String jsHost = getReqConfig(container, JS_HOST_PARAM);
     String jsPathBase = getReqConfig(container, JS_PATH_PARAM);
 
@@ -77,24 +76,24 @@ public class DefaultJsUriManager implements JsUriManager {
 
     // Pass through nocache param for dev purposes.
     uri.addQueryParameter(Param.NO_CACHE.getKey(),
-        gadget.getContext().getIgnoreCache() ? "1" : "0");
+        ctx.getIgnoreCache() ? "1" : "0");
 
     // Pass through debug param for debugging use.
     uri.addQueryParameter(Param.DEBUG.getKey(),
-        gadget.getContext().getDebug() ? "1" : "0");
-    
+        ctx.getDebug() ? "1" : "0");
+
     uri.addQueryParameter(Param.CONTAINER_MODE.getKey(),
-        gadget.getContext().getRenderingContext() == RenderingContext.CONTAINER ? "1" : "0");
+        ctx.getRenderingContext() == RenderingContext.CONTAINER ? "1" : "0");
 
     // Pass through gadget Uri
     if (addGadgetUri()) {
-      uri.addQueryParameter(Param.URL.getKey(), gadget.getSpec().getUrl().toString());
+      uri.addQueryParameter(Param.URL.getKey(), ctx.getUrl().toString());
     }
 
     // Finally, version it, but only if !nocache.
-    if (versioner != null && !gadget.getContext().getIgnoreCache()) {
+    if (versioner != null && !ctx.getIgnoreCache()) {
       uri.addQueryParameter(Param.VERSION.getKey(),
-          versioner.version(gadget.getContext().getUrl(), container, extern));
+          versioner.version(ctx.getUrl(), container, extern));
     }
 
     return uri.toUri();
@@ -132,12 +131,12 @@ public class DefaultJsUriManager implements JsUriManager {
       return INVALID_URI;
     }
     path = path.substring(jsPrefix.length());
-    
+
     // Convenience suffix: pull off .js if present; leave alone otherwise.
     if (path.endsWith(JS_SUFFIX)) {
       path = path.substring(0, path.length() - JS_SUFFIX.length());
     }
-    
+
     while (path.startsWith("/")) {
       path = path.substring(1);
     }
@@ -154,7 +153,7 @@ public class DefaultJsUriManager implements JsUriManager {
       status = versioner.validate(gadgetUri, container, libs, version);
     }
 
-    return new JsUri(status, libs);
+    return new JsUri(status, uri, libs);
   }
 
   static String addJsLibs(Collection<String> extern) {

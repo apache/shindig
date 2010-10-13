@@ -17,18 +17,25 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.shindig.common.servlet.HttpUtil;
 import org.apache.shindig.common.servlet.InjectedServlet;
+import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
+import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.RenderingContext;
 import org.apache.shindig.gadgets.uri.JsUriManager;
 import org.apache.shindig.gadgets.uri.UriStatus;
-
-import com.google.inject.Inject;
+import org.apache.shindig.gadgets.uri.JsUriManager.JsUri;
+import org.apache.shindig.gadgets.uri.UriCommon.Param;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
@@ -39,19 +46,43 @@ import javax.servlet.http.HttpServletResponse;
  * Used by type=URL gadgets in loading JavaScript resources.
  */
 public class JsServlet extends InjectedServlet {
-  
   private static final long serialVersionUID = 6255917470412008175L;
 
+  @VisibleForTesting
+  static final String JSLOAD_ONLOAD_ERROR = "jsload must require onload";
+
+  @VisibleForTesting
   static final String ONLOAD_JS_TPL = "(function() {" +
       "var nm='%s';" +
       "if (typeof window[nm]==='function') {" +
       "window[nm]();" +
       '}' +
       "})();";
+
+  @VisibleForTesting
+  static final String JSLOAD_JS_TPL = "(function() {" +
+      "document.write('<scr' + 'ipt type=\"text/javascript\" src=\"%s\"></scr' + 'ipt>');" +
+      "})();"; // Concatenated to avoid some browsers do dynamic script injection.
+
   private static final Pattern ONLOAD_FN_PATTERN = Pattern.compile("[a-zA-Z0-9_]+");
 
   private transient JsHandler jsHandler;
   private transient JsUriManager jsUriManager;
+  private int jsloadTtlSecs;
+  private CachingSetter cachingSetter;
+
+  @VisibleForTesting
+  static class CachingSetter {
+    public void setCachingHeaders(HttpServletResponse resp, int ttl, boolean noProxy) {
+      HttpUtil.setCachingHeaders(resp, ttl, false);
+    }
+  }
+
+  @Inject
+  @VisibleForTesting
+  void setCachingSetter(CachingSetter util) {
+    this.cachingSetter = util;
+  }
 
   @Inject
   public void setJsHandler(JsHandler jsHandler) {
@@ -64,22 +95,37 @@ public class JsServlet extends InjectedServlet {
     checkInitialized();
     this.jsUriManager = jsUriManager;
   }
-  
+
+  @Inject
+  public void setJsloadTtlSecs(@Named("shindig.jsload.ttl-secs") int jsloadTtlSecs) {
+    this.jsloadTtlSecs = jsloadTtlSecs;
+  }
+
   @Override
   protected void doGet(HttpServletRequest req, HttpServletResponse resp)
       throws IOException {
+
+    JsUri jsUri = null;
+    try {
+      jsUri = jsUriManager.processExternJsUri(new UriBuilder(req).toUri());
+    } catch (GadgetException e) {
+      resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+      return;
+    }
+
+    // Don't emit the JS itself; instead emit JS loader script that loads
+    // versioned JS. The loader script is much smaller and cacheable for a
+    // configurable amount of time.
+    if (jsUri.isJsload()) {
+      doJsload(jsUri, resp);
+      return;
+    }
+
     // If an If-Modified-Since header is ever provided, we always say
     // not modified. This is because when there actually is a change,
     // cache busting should occur.
-    UriStatus vstatus = null;
-    try {
-      vstatus = jsUriManager.processExternJsUri(new UriBuilder(req).toUri()).getStatus();
-    } catch (GadgetException e) {
-      resp.sendError(e.getHttpStatusCode(), e.getMessage());
-      return;
-    }
     if (req.getHeader("If-Modified-Since") != null &&
-        vstatus == UriStatus.VALID_VERSIONED) {
+        jsUri.getStatus() == UriStatus.VALID_VERSIONED) {
       resp.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
       return;
     }
@@ -90,13 +136,13 @@ public class JsServlet extends InjectedServlet {
     boolean isProxyCacheable = handlerResponse.isProxyCacheable();
 
     // Add onload handler to add callback function.
-    String onloadStr = req.getParameter("onload");
+    String onloadStr = req.getParameter(Param.ONLOAD.getKey());
     if (onloadStr != null) {
       if (!ONLOAD_FN_PATTERN.matcher(onloadStr).matches()) {
         resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid onload callback specified");
         return;
       }
-      jsData.append(String.format(ONLOAD_JS_TPL, StringEscapeUtils.escapeJavaScript(onloadStr)));
+      jsData.append(createOnloadScript(onloadStr));
     }
 
     if (jsData.length() == 0) {
@@ -105,7 +151,7 @@ public class JsServlet extends InjectedServlet {
     }
 
     // post JavaScript content fetching
-    postJsContentProcessing(resp, vstatus, isProxyCacheable);
+    postJsContentProcessing(resp, jsUri.getStatus(), isProxyCacheable);
 
     resp.setContentType("text/javascript; charset=utf-8");
     byte[] response = jsData.toString().getBytes("UTF-8");
@@ -113,10 +159,62 @@ public class JsServlet extends InjectedServlet {
     resp.getOutputStream().write(response);
   }
 
+  private void doJsload(JsUri jsUri, HttpServletResponse resp)
+      throws IOException, UnsupportedEncodingException {
+    String onloadStr = jsUri.getOnload();
+
+    // Require users to specify &onload=. This ensures a reliable continuation of JS
+    // execution. IE asynchronously loads script, before it loads source-scripted and
+    // inlined JS.
+    if (onloadStr == null) {
+      resp.sendError(HttpServletResponse.SC_BAD_REQUEST, JSLOAD_ONLOAD_ERROR);
+      return;
+    }
+
+    GadgetContext ctx = makeContextObject(jsUri);
+
+    Uri incUri = jsUriManager.makeExternJsUri(ctx, jsUri.getLibs());
+    UriBuilder uriBuilder = new UriBuilder(incUri);
+    uriBuilder.putQueryParameter(Param.ONLOAD.getKey(), onloadStr);
+    uriBuilder.putQueryParameter(Param.NO_CACHE.getKey(), jsUri.isNoCache() ? "1" : "0");
+    incUri = uriBuilder.toUri();
+
+    int refresh = getCacheTtlSecs(jsUri);
+    cachingSetter.setCachingHeaders(resp, refresh, false);
+
+    resp.setContentType("text/javascript; charset=utf-8");
+    byte[] incBytes = createJsloadScript(incUri).getBytes("UTF-8");
+    resp.setContentLength(incBytes.length);
+    resp.getOutputStream().write(incBytes);
+  }
+
+  private int getCacheTtlSecs(JsUri jsUri) {
+    int refresh;
+    if (jsUri.isNoCache()) {
+      return 0;
+    } else {
+      Integer jsUriRefresh = jsUri.getRefresh();
+      return (jsUriRefresh != null && jsUriRefresh >= 0)
+          ? jsUriRefresh : jsloadTtlSecs;
+    }
+  }
+
+
+  @VisibleForTesting
+  String createOnloadScript(String function) {
+    return String.format(ONLOAD_JS_TPL, StringEscapeUtils.escapeJavaScript(function));
+  }
+
+  @VisibleForTesting
+  String createJsloadScript(Uri uri) {
+    String uriString = uri.toString();
+    return String.format(JSLOAD_JS_TPL, uriString, uriString);
+  }
+
   /**
    * Provides post JavaScript content processing. The default behavior will check the UriStatus and
    * update the response header with cache option.
-   * 
+   *
    * @param resp The HttpServeltResponse object.
    * @param vstatus The UriStatus object.
    * @param isProxyCacheable boolean true if content is cacheable and false otherwise.
@@ -138,5 +236,34 @@ public class JsServlet extends InjectedServlet {
         HttpUtil.setNoCache(resp);
         break;
     }
+  }
+
+  private GadgetContext makeContextObject(final JsUri jsUri) {
+    return new GadgetContext() {
+      @Override
+      public RenderingContext getRenderingContext() {
+        return jsUri.getContext();
+      }
+
+      @Override
+      public String getContainer() {
+        return jsUri.getContainer();
+      }
+
+      @Override
+      public Uri getUrl() {
+        return jsUri.getGadget() != null ? Uri.parse(jsUri.getGadget()) : null;
+      }
+
+      @Override
+      public boolean getIgnoreCache() {
+        return jsUri.isNoCache();
+      }
+
+      @Override
+      public boolean getDebug() {
+        return jsUri.isDebug();
+      }
+    };
   }
 }

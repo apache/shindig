@@ -53,25 +53,25 @@ public class DefaultJsUriManagerTest {
   public void makeMissingHostConfig() {
     ContainerConfig config = mockConfig(null, "/gadgets/js");
     DefaultJsUriManager manager = makeManager(config, null);
-    Gadget gadget = mockGadget(false, false);
-    manager.makeExternJsUri(gadget, null);
+    GadgetContext ctx = mockGadgetContext(false, false);
+    manager.makeExternJsUri(ctx, null);
   }
 
   @Test(expected = RuntimeException.class)
   public void makeMissingPathConfig() {
     ContainerConfig config = mockConfig("foo", null);
     DefaultJsUriManager manager = makeManager(config, null);
-    Gadget gadget = mockGadget(false, false);
-    manager.makeExternJsUri(gadget, null);
+    GadgetContext ctx = mockGadgetContext(false, false);
+    manager.makeExternJsUri(ctx, null);
   }
 
   @Test
   public void makeJsUriNoPathSlashNoVersion() {
     ContainerConfig config = mockConfig("http://www.js.org", "/gadgets/js/");
     TestDefaultJsUriManager manager = makeManager(config, null);
-    Gadget gadget = mockGadget(false, false);
+    GadgetContext ctx = mockGadgetContext(false, false);
     List<String> extern = Lists.newArrayList("feature");
-    Uri jsUri = manager.makeExternJsUri(gadget, extern);
+    Uri jsUri = manager.makeExternJsUri(ctx, extern);
     assertFalse(manager.hadError());
     assertEquals("http", jsUri.getScheme());
     assertEquals("www.js.org", jsUri.getAuthority());
@@ -86,9 +86,9 @@ public class DefaultJsUriManagerTest {
   public void makeJsUriAddPathSlashNoVersion() {
     ContainerConfig config = mockConfig("http://www.js.org", "/gadgets/js");
     TestDefaultJsUriManager manager = makeManager(config, null);
-    Gadget gadget = mockGadget(false, false);
+    GadgetContext ctx = mockGadgetContext(false, false);
     List<String> extern = Lists.newArrayList("feature");
-    Uri jsUri = manager.makeExternJsUri(gadget, extern);
+    Uri jsUri = manager.makeExternJsUri(ctx, extern);
     assertFalse(manager.hadError());
     assertEquals("http", jsUri.getScheme());
     assertEquals("www.js.org", jsUri.getAuthority());
@@ -102,12 +102,12 @@ public class DefaultJsUriManagerTest {
   @Test
   public void makeJsUriAddPathSlashVersioned() {
     ContainerConfig config = mockConfig("http://www.js.org", "/gadgets/js");
-    Gadget gadget = mockGadget(false, false);
+    GadgetContext ctx = mockGadgetContext(false, false);
     List<String> extern = Lists.newArrayList("feature");
     String version = "verstring";
     Versioner versioner = this.mockVersioner(extern, version, version);
     TestDefaultJsUriManager manager = makeManager(config, versioner);
-    Uri jsUri = manager.makeExternJsUri(gadget, extern);
+    Uri jsUri = manager.makeExternJsUri(ctx, extern);
     assertFalse(manager.hadError());
     assertEquals("http", jsUri.getScheme());
     assertEquals("www.js.org", jsUri.getAuthority());
@@ -122,12 +122,12 @@ public class DefaultJsUriManagerTest {
   @Test
   public void makeJsUriWithVersionerNoVersionOnIgnoreCache() {
     ContainerConfig config = mockConfig("http://www.js.org", "/gadgets/js");
-    Gadget gadget = mockGadget(true, false);  // no cache
+    GadgetContext ctx = mockGadgetContext(true, false);  // no cache
     List<String> extern = Lists.newArrayList("feature");
     String version = "verstring";
     Versioner versioner = this.mockVersioner(extern, version, version);
     TestDefaultJsUriManager manager = makeManager(config, versioner);
-    Uri jsUri = manager.makeExternJsUri(gadget, extern);
+    Uri jsUri = manager.makeExternJsUri(ctx, extern);
     assertFalse(manager.hadError());
     assertEquals("http", jsUri.getScheme());
     assertEquals("www.js.org", jsUri.getAuthority());
@@ -139,14 +139,14 @@ public class DefaultJsUriManagerTest {
     assertEquals("0", jsUri.getQueryParameter(Param.DEBUG.getKey()));
     assertEquals("0", jsUri.getQueryParameter(Param.CONTAINER_MODE.getKey()));
   }
-  
+
   @Test
   public void makeJsUriWithContainerContext() {
     ContainerConfig config = mockConfig("http://www.js.org", "/gadgets/js/");
     TestDefaultJsUriManager manager = makeManager(config, null);
-    Gadget gadget = mockGadget(false, false, true);
+    GadgetContext ctx = mockGadgetContext(false, false, true);
     List<String> extern = Lists.newArrayList("feature", "another");
-    Uri jsUri = manager.makeExternJsUri(gadget, extern);
+    Uri jsUri = manager.makeExternJsUri(ctx, extern);
     assertFalse(manager.hadError());
     assertEquals("http", jsUri.getScheme());
     assertEquals("www.js.org", jsUri.getAuthority());
@@ -278,12 +278,12 @@ public class DefaultJsUriManagerTest {
   public void makeAndProcessSymmetric() throws GadgetException {
     // Make...
     ContainerConfig config = mockConfig("http://www.js.org", "/gadgets/js");
-    Gadget gadget = mockGadget(false, false);
+    GadgetContext ctx = mockGadgetContext(false, false);
     List<String> extern = Lists.newArrayList("feature1", "feature2", "feature3");
     String version = "verstring";
     Versioner versioner = mockVersioner(extern, version, version);
     TestDefaultJsUriManager manager = makeManager(config, versioner);
-    Uri jsUri = manager.makeExternJsUri(gadget, extern);
+    Uri jsUri = manager.makeExternJsUri(ctx, extern);
     assertFalse(manager.hadError());
     assertEquals("http", jsUri.getScheme());
     assertEquals("www.js.org", jsUri.getAuthority());
@@ -349,11 +349,11 @@ public class DefaultJsUriManagerTest {
     return versioner;
   }
 
-  private Gadget mockGadget(boolean nocache, boolean debug) {
-    return mockGadget(nocache, debug, false);
+  private GadgetContext mockGadgetContext(boolean nocache, boolean debug) {
+    return mockGadgetContext(nocache, debug, false);
   }
-  
-  private Gadget mockGadget(boolean nocache, boolean debug, boolean isContainer) {
+
+  private GadgetContext mockGadgetContext(boolean nocache, boolean debug, boolean isContainer) {
     GadgetContext context = createMock(GadgetContext.class);
     expect(context.getContainer()).andReturn(CONTAINER).anyTimes();
     expect(context.getIgnoreCache()).andReturn(nocache).anyTimes();
@@ -362,7 +362,7 @@ public class DefaultJsUriManagerTest {
     expect(context.getRenderingContext()).andReturn(
         isContainer ? RenderingContext.CONTAINER : RenderingContext.GADGET).anyTimes();
     replay(context);
-    return new Gadget().setContext(context);
+    return context;
   }
 
   private TestDefaultJsUriManager makeManager(ContainerConfig config, Versioner versioner) {

@@ -43,9 +43,13 @@ public interface UriCommon {
     TYPE("type"),
     REWRITE_MIME_TYPE("rewriteMime"),
     SANITIZE("sanitize"),
-    CAJOLE("cajole"),    
+    CAJOLE("cajole"),
+
+    // JS request params
     CONTAINER_MODE("c"),
-    
+    JSLOAD("jsload"),
+    ONLOAD("onload"),
+
     // Proxy resize params:
     RESIZE_HEIGHT("resize_h"),
     RESIZE_WIDTH("resize_w"),
@@ -61,12 +65,12 @@ public interface UriCommon {
     // This is a legacy param, superseded by container.
     @Deprecated
     SYND("synd");
-   
+
     private final String key;
     private Param(String key) {
       this.key = key;
     }
-    
+
     public String getKey() {
       return key;
     }
