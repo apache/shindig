@@ -18,10 +18,10 @@
  */
 package org.apache.shindig.auth;
 
-import org.apache.shindig.config.ContainerConfig;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
+import org.apache.shindig.config.ContainerConfig;
 
 import java.util.Map;
 
@@ -73,5 +73,9 @@ public class DefaultSecurityTokenCodec implements SecurityTokenCodec {
       return null;
     }
     return codec.encodeToken(token);
+  }
+
+  public Long getTokenExpiration(SecurityToken token) throws SecurityTokenException {
+    return codec.getTokenExpiration(token);
   }
 }

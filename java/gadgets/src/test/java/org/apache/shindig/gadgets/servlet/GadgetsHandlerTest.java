@@ -57,6 +57,8 @@ public class GadgetsHandlerTest extends EasyMockTestCase {
   private static final String GADGET2_URL = FakeProcessor.SPEC_URL2 .toString();
   private static final String CONTAINER = "container";
   private static final String TOKEN = "_nekot_";
+  private static final Long SPEC_REFRESH_INTERVAL = 123L;
+  private static final Long EXPIRY_TIME_MS = 456L;
 
   private final FakeTimeSource timeSource = new FakeTimeSource();
   private final FakeProcessor processor = new FakeProcessor();
@@ -78,8 +80,8 @@ public class GadgetsHandlerTest extends EasyMockTestCase {
 
   private void registerGadgetsHandler(SecurityTokenCodec codec) {
     BeanFilter beanFilter = new BeanFilter();
-    GadgetsHandlerService service =
-        new GadgetsHandlerService(timeSource, processor, urlGenerator, codec, beanFilter);
+    GadgetsHandlerService service = new GadgetsHandlerService(timeSource, processor,
+        urlGenerator, codec, SPEC_REFRESH_INTERVAL, beanFilter);
     GadgetsHandler handler =
         new GadgetsHandler(new TestExecutorService(), service, beanFilter);
     registry = new DefaultHandlerRegistry(
@@ -215,6 +217,8 @@ public class GadgetsHandlerTest extends EasyMockTestCase {
     SecurityTokenCodec codec = EasyMock.createMock(SecurityTokenCodec.class);
     Capture<SecurityToken> tokenCapture = new Capture<SecurityToken>();
     EasyMock.expect(codec.encodeToken(EasyMock.capture(tokenCapture))).andReturn(TOKEN).anyTimes();
+    EasyMock.expect(codec.getTokenExpiration(EasyMock.capture(tokenCapture)))
+        .andReturn(EXPIRY_TIME_MS).anyTimes();
     replay(codec);
 
     registerGadgetsHandler(codec);
@@ -292,6 +296,8 @@ public class GadgetsHandlerTest extends EasyMockTestCase {
         .andReturn(TOKEN);
     EasyMock.expect(codec.encodeToken(EasyMock.isA(SecurityToken.class)))
         .andThrow(new SecurityTokenException("blah"));
+    EasyMock.expect(codec.getTokenExpiration(EasyMock.isA(SecurityToken.class)))
+        .andReturn(EXPIRY_TIME_MS).anyTimes();
     replay(codec);
 
     registerGadgetsHandler(codec);

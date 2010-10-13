@@ -19,11 +19,11 @@
 package org.apache.shindig.auth;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import org.apache.shindig.config.AbstractContainerConfig;
-import org.apache.shindig.config.ContainerConfigException;
 
 import com.google.common.collect.Lists;
 
@@ -41,7 +41,7 @@ public class DefaultSecurityTokenCodecTest {
   private static class FakeContainerConfig extends AbstractContainerConfig {
     private final String tokenType;
 
-    public FakeContainerConfig(String tokenType) throws ContainerConfigException {
+    public FakeContainerConfig(String tokenType) {
       this.tokenType = tokenType;
     }
 
@@ -75,6 +75,7 @@ public class DefaultSecurityTokenCodecTest {
     assertEquals("v", st.getViewerId());
     assertEquals("appurl", st.getAppUrl());
     assertEquals("container", st.getContainer());
+    assertNull(codec.getTokenExpiration(st));
   }
 
   @Test

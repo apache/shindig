@@ -153,7 +153,8 @@ public class FakeGadgetToken extends AbstractSecurityToken implements SecurityTo
   public boolean isAnonymous() {
     return false;
   }
-  
+
+  @Override
   public String getActiveUrl() {
     return activeUrl;
   }
@@ -218,6 +219,10 @@ public class FakeGadgetToken extends AbstractSecurityToken implements SecurityTo
     }
 
     public String encodeToken(SecurityToken token) throws SecurityTokenException {
+      return null; // NOT USED
+    }
+
+    public Long getTokenExpiration(SecurityToken token) throws SecurityTokenException {
       return null; // NOT USED
     }
   }

@@ -99,6 +99,11 @@ public class BasicSecurityTokenCodec implements SecurityTokenCodec {
     }
   }
 
+  public Long getTokenExpiration(SecurityToken token) {
+    // TODO: Support and/or implement this operation.
+    return null;
+  }
+
   /**
    * Creates a signer with 24 hour token expiry
    */

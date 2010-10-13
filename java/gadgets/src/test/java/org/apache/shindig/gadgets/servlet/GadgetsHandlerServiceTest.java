@@ -19,7 +19,6 @@
 package org.apache.shindig.gadgets.servlet;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 
 import org.apache.shindig.auth.SecurityToken;
@@ -30,7 +29,6 @@ import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.util.FakeTimeSource;
 import org.apache.shindig.gadgets.features.FeatureRegistry;
 import org.apache.shindig.gadgets.process.ProcessingException;
-import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.protocol.conversion.BeanDelegator;
 import org.apache.shindig.protocol.conversion.BeanFilter;
 import org.easymock.EasyMock;
@@ -46,11 +44,15 @@ public class GadgetsHandlerServiceTest extends EasyMockTestCase {
   private static final String OWNER = "<owner>";
   private static final String VIEWER = "<viewer>";
   private static final String CONTAINER = "container";
+  private static final Long CURRENT_TIME_MS = 123L;
+  private static final Long SPEC_REFRESH_INTERVAL_MS = 456L;
+  private static final Long METADATA_EXPIRY_TIME_MS = CURRENT_TIME_MS + SPEC_REFRESH_INTERVAL_MS;
+  private static final Long TOKEN_EXPIRY_TIME_MS = CURRENT_TIME_MS + 789L;
 
   private final BeanDelegator delegator = new BeanDelegator(
     GadgetsHandlerService.apiClasses, GadgetsHandlerService.enumConversionMap);
 
-  private final FakeTimeSource timeSource = new FakeTimeSource();
+  private final FakeTimeSource timeSource = new FakeTimeSource(CURRENT_TIME_MS);
   private final FeatureRegistry mockRegistry = mock(FeatureRegistry.class);
   private final FakeProcessor processor = new FakeProcessor(mockRegistry);
   private final FakeIframeUriManager urlGenerator = new FakeIframeUriManager();
@@ -62,7 +64,7 @@ public class GadgetsHandlerServiceTest extends EasyMockTestCase {
   public void setUp() {
     tokenCodec = new FakeSecurityTokenCodec();
     gadgetHandler = new GadgetsHandlerService(timeSource, processor, urlGenerator,
-        tokenCodec, new BeanFilter());
+        tokenCodec, SPEC_REFRESH_INTERVAL_MS, new BeanFilter());
   }
 
   // Next test verify that the API data classes are configured correctly.
@@ -97,6 +99,8 @@ public class GadgetsHandlerServiceTest extends EasyMockTestCase {
     assertEquals(1, response.getUserPrefs().size());
     assertEquals("up_one", response.getUserPrefs().get("up_one").getDisplayName());
     assertEquals(4, response.getUserPrefs().get("up_one").getEnumValues().size());
+    assertEquals(CURRENT_TIME_MS, response.getResponseTimeMs());
+    assertEquals(METADATA_EXPIRY_TIME_MS, response.getExpireTimeMs());
     verify();
   }
 
@@ -174,11 +178,14 @@ public class GadgetsHandlerServiceTest extends EasyMockTestCase {
         createTokenData(OWNER, VIEWER), ImmutableList.of("*"));
     replay();
     tokenCodec.encodedToken = TOKEN;
+    tokenCodec.tokenExpiryTimeMs = TOKEN_EXPIRY_TIME_MS;
     GadgetsHandlerApi.TokenResponse response = gadgetHandler.getToken(request);
     assertEquals(TOKEN, response.getToken());
-    assertEquals(OWNER, tokenCodec.tokenData.getOwnerId());
-    assertEquals(VIEWER, tokenCodec.tokenData.getViewerId());
-    assertEquals(CONTAINER, tokenCodec.tokenData.getContainer());
+    assertEquals(CURRENT_TIME_MS, response.getResponseTimeMs());
+    assertEquals(TOKEN_EXPIRY_TIME_MS, response.getExpireTimeMs());
+    assertEquals(OWNER, tokenCodec.inputToken.getOwnerId());
+    assertEquals(VIEWER, tokenCodec.inputToken.getViewerId());
+    assertEquals(CONTAINER, tokenCodec.inputToken.getContainer());
     verify();
   }
 
@@ -228,71 +235,8 @@ public class GadgetsHandlerServiceTest extends EasyMockTestCase {
     tokenCodec.encodedToken = TOKEN;
     GadgetsHandlerApi.TokenResponse response = gadgetHandler.getToken(request);
     assertEquals(TOKEN, response.getToken());
-    assertNull(CONTAINER, tokenCodec.tokenData);
+    assertNull(CONTAINER, tokenCodec.inputToken);
     verify();
-  }
-
-  @Test
-  public void testCreateErrorResponse() throws Exception {
-    GadgetsHandlerApi.BaseResponse res = gadgetHandler.createErrorResponse(null, 404, null);
-    assertEquals(404, res.getError().getCode());
-    assertNull(res.getError().getMessage());
-    assertNull(res.getUrl());
-    BeanDelegator.validateDelegator(res);
-    res = gadgetHandler.createErrorResponse(Uri.parse("url"), 500, "error");
-    assertEquals("error", res.getError().getMessage());
-    assertEquals("url", res.getUrl().toString());
-    BeanDelegator.validateDelegator(res);
-  }
-
-  @Test
-  public void testCreateErrorResponseFromException() throws Exception {
-    GadgetsHandlerApi.BaseResponse res = gadgetHandler.createErrorResponse(
-        Uri.parse("url"), new RuntimeException("test"), "error");
-    assertEquals("error", res.getError().getMessage());
-    assertEquals("url", res.getUrl().toString());
-    assertEquals(500, res.getError().getCode());
-    BeanDelegator.validateDelegator(res);
-    res = gadgetHandler.createErrorResponse(
-        Uri.parse("url"), new ProcessingException("test", 404), "error");
-    assertEquals("test", res.getError().getMessage());
-    assertEquals("url", res.getUrl().toString());
-    assertEquals(404, res.getError().getCode());
-    BeanDelegator.validateDelegator(res);
-  }
-
-  @Test
-  public void testCreateMetadataResponse() throws Exception {
-    GadgetsHandlerApi.MetadataResponse res = gadgetHandler.createMetadataResponse(
-        Uri.parse("gadgeturl"), new GadgetSpec(Uri.parse("#"), FakeProcessor.SPEC_XML),
-        null, null, ImmutableSet.of("*"), null);
-    assertNull(res.getIframeUrl());
-    assertNull(res.getNeedsTokenRefresh());
-    assertNull(res.getExpireTimeMs());
-    assertEquals(FakeProcessor.SPEC_TITLE, res.getModulePrefs().getTitle());
-    BeanDelegator.validateDelegator(res);
-    res = gadgetHandler.createMetadataResponse(
-        Uri.parse("gadgeturl"), new GadgetSpec(Uri.parse("#"), FakeProcessor.SPEC_XML),
-        "iframeurl", true, ImmutableSet.of("*"), 3L);
-    assertEquals("iframeurl", res.getIframeUrl());
-    assertEquals(true, res.getNeedsTokenRefresh().booleanValue());
-    assertEquals(3L, res.getExpireTimeMs().longValue());
-    BeanDelegator.validateDelegator(res);
-  }
-
-  @Test
-  public void testCreateTokenResponse() throws Exception {
-    GadgetsHandlerApi.TokenResponse res = gadgetHandler.createTokenResponse(Uri.parse("#"), null,
-        ImmutableSet.of("*"), null);
-    BeanDelegator.validateDelegator(res);
-    assertNull(res.getToken());
-    assertNull(res.getExpireTimeMs());
-    res = gadgetHandler.createTokenResponse(Uri.parse("#"), "token",
-        ImmutableSet.of("*"), 100L);
-    BeanDelegator.validateDelegator(res);
-    assertEquals("token", res.getToken());
-    assertEquals(100L, res.getExpireTimeMs().longValue());
-
   }
 
   private GadgetsHandlerApi.TokenData createTokenData(String ownerId, String viewerId) {
@@ -328,12 +272,13 @@ public class GadgetsHandlerServiceTest extends EasyMockTestCase {
   }
 
   private class FakeSecurityTokenCodec implements SecurityTokenCodec {
+    public SecurityToken inputToken = null;
     public SecurityTokenException exc = null;
-    public SecurityToken tokenData = null;
     public String encodedToken = null;
+    public Long tokenExpiryTimeMs = null;
 
     public String encodeToken(SecurityToken token) throws SecurityTokenException {
-      tokenData = token;
+      inputToken = token;
       if (exc != null) {
         throw exc;
       }
@@ -345,7 +290,15 @@ public class GadgetsHandlerServiceTest extends EasyMockTestCase {
       if (exc != null) {
         throw exc;
       }
-      return tokenData;
+      return inputToken;
+    }
+
+    public Long getTokenExpiration(SecurityToken token) throws SecurityTokenException {
+      inputToken = token;
+      if (exc != null) {
+        throw exc;
+      }
+      return tokenExpiryTimeMs;
     }
   }
 }

@@ -19,6 +19,7 @@
 package org.apache.shindig.auth;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -31,6 +32,8 @@ import org.apache.shindig.config.ContainerConfig;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+
+import junit.framework.Assert;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -231,5 +234,10 @@ public class BlobCrypterSecurityTokenCodecTest {
     } catch (RuntimeException e) {
       assertTrue(e.getMessage(), e.getMessage().contains("Load failed"));
     }
+  }
+
+  @Test
+  public void testGetTokenExpiration() throws Exception {
+    Assert.assertNull(codec.getTokenExpiration(null));
   }
 }

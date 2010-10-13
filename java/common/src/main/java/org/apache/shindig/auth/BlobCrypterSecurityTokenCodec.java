@@ -133,4 +133,9 @@ public class BlobCrypterSecurityTokenCodec implements SecurityTokenCodec {
       throw new SecurityTokenException(e);
     }
   }
+
+  public Long getTokenExpiration(SecurityToken token) {
+    // TODO: Support and/or implement this operation.
+    return null;
+  }
 }

@@ -35,7 +35,7 @@ public interface SecurityTokenCodec {
    * parameters can be passed as seen fit.
    */
   String SECURITY_TOKEN_NAME = "token";
-  
+
   /**
    * Active URL for the request.  Must include protocol, host, and port.  May include path
    * and may include query.
@@ -53,4 +53,7 @@ public interface SecurityTokenCodec {
       throws SecurityTokenException;
 
   String encodeToken(SecurityToken token) throws SecurityTokenException;
+
+  Long getTokenExpiration(SecurityToken token) throws SecurityTokenException;
+
 }

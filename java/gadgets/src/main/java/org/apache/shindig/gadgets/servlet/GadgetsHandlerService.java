@@ -21,6 +21,7 @@ package org.apache.shindig.gadgets.servlet;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.auth.SecurityTokenCodec;
@@ -88,18 +89,20 @@ public class GadgetsHandlerService {
   protected final Processor processor;
   protected final IframeUriManager iframeUriManager;
   protected final SecurityTokenCodec securityTokenCodec;
-
   protected final BeanDelegator beanDelegator;
+  protected final long specRefreshInterval;
   protected final BeanFilter beanFilter;
 
   @Inject
   public GadgetsHandlerService(TimeSource timeSource, Processor processor,
       IframeUriManager iframeUriManager, SecurityTokenCodec securityTokenCodec,
+      @Named("shindig.cache.xml.refreshInterval") long specRefreshInterval,
       BeanFilter beanFilter) {
     this.timeSource = timeSource;
     this.processor = processor;
     this.iframeUriManager = iframeUriManager;
     this.securityTokenCodec = securityTokenCodec;
+    this.specRefreshInterval = specRefreshInterval;
     this.beanFilter = beanFilter;
 
     this.beanDelegator = new BeanDelegator(apiClasses, enumConversionMap);
@@ -129,12 +132,11 @@ public class GadgetsHandlerService {
     String iframeUrl =
         isFieldIncluded(fields, "iframeurl")  ?
             iframeUriManager.makeRenderingUri(gadget).toString() : null;
-    // TODO: Figure out url expiration time
     Boolean needsTokenRefresh =
         isFieldIncluded(fields, "needstokenrefresh") ?
             gadget.getAllFeatures().contains("auth-refresh") : null;
     return createMetadataResponse(context.getUrl(), gadget.getSpec(), iframeUrl,
-        needsTokenRefresh, fields, null);
+        needsTokenRefresh, fields, timeSource.currentTimeMillis() + specRefreshInterval);
   }
 
   private boolean isFieldIncluded(Set<String> fields, String name) {
@@ -162,8 +164,8 @@ public class GadgetsHandlerService {
     SecurityToken tokenData = convertToken(request.getToken(), request.getContainer(),
         request.getUrl().toString());
     String token = securityTokenCodec.encodeToken(tokenData);
-    // TODO: Calculate token expiration in response
-    return createTokenResponse(request.getUrl(), token, fields, null);
+    Long expiryTimeMs = securityTokenCodec.getTokenExpiration(tokenData);
+    return createTokenResponse(request.getUrl(), token, fields, expiryTimeMs);
   }
 
   /**
@@ -277,7 +279,9 @@ public class GadgetsHandlerService {
       Uri url, String token, Set<String> fields, Long tokenExpire) {
     return (GadgetsHandlerApi.TokenResponse) beanFilter.createFilteredBean(
         beanDelegator.createDelegator("empty", GadgetsHandlerApi.TokenResponse.class,
-            ImmutableMap.<String, Object>of("url", url, "error", BeanDelegator.NULL,
+            ImmutableMap.<String, Object>of(
+                "url", url,
+                "error", BeanDelegator.NULL,
                 "token", BeanDelegator.nullable(token),
                 "responsetimems", timeSource.currentTimeMillis(),
                 "expiretimems", BeanDelegator.nullable(tokenExpire))),
