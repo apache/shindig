@@ -30,6 +30,7 @@ import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.UserPrefs;
+import org.apache.shindig.gadgets.spec.Feature;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.ModulePrefs;
 import org.apache.shindig.gadgets.spec.UserPref;
@@ -46,21 +47,21 @@ public class UriManagerTestBase {
   protected static final String VIEW = "theview";
   protected static final String LANG = "en";
   protected static final String COUNTRY = "US";
-  
+
   // Used for "feature-focused" tests, eg. security token and locked domain
   protected Gadget mockGadget(String... features) {
     Map<String, String> prefs = Maps.newHashMap();
     return mockGadget(SPEC_URI.toString(), false, false, false, prefs, prefs, false,
         Lists.newArrayList(features));
   }
-  
+
   // Used for prefs-focused tests
   protected Gadget mockGadget(boolean prefsForRendering, Map<String, String> specPrefs,
       Map<String, String> inPrefs) {
     return mockGadget(SPEC_URI.toString(), false, false, false, specPrefs, inPrefs,
         prefsForRendering, Lists.<String>newArrayList());
   }
-  
+
   // Used for "base" tests.
   protected Gadget mockGadget(String targetUrl, boolean isTypeUrl, boolean isDebug,
       boolean ignoreCache, Map<String, String> specPrefs, Map<String, String> inPrefs,
@@ -68,14 +69,14 @@ public class UriManagerTestBase {
     return mockGadget(targetUrl, isTypeUrl, VIEW, LANG, COUNTRY, isDebug, ignoreCache,
         specPrefs, inPrefs, needsPrefSubst, features);
   }
-  
+
   // Used for tests that don't care much about prefs or gadget type.
   protected Gadget mockGadget(boolean isDebug, boolean ignoreCache) {
     return mockGadget(SPEC_URI.toString(), false, isDebug, ignoreCache,
         Maps.<String, String>newHashMap(), Maps.<String, String>newHashMap(),
         false, Lists.<String>newArrayList());
   }
-  
+
   // Actually generates the mock gadget. Used for error (null value) tests.
   protected Gadget mockGadget(String targetUrl, boolean isTypeUrl, String viewStr, String lang,
       String country, boolean isDebug, boolean ignoreCache, Map<String, String> specPrefs,
@@ -85,7 +86,7 @@ public class UriManagerTestBase {
     GadgetSpec spec = createMock(GadgetSpec.class);
     GadgetContext context = createMock(GadgetContext.class);
     Gadget gadget = createMock(Gadget.class);
-    
+
     // Base URL/view.
     Uri targetUri = Uri.parse(targetUrl);
     if (isTypeUrl) {
@@ -96,7 +97,7 @@ public class UriManagerTestBase {
       expect(spec.getUrl()).andReturn(targetUri).anyTimes();
     }
     expect(view.getName()).andReturn(viewStr).anyTimes();
-    
+
     // Basic context info
     Locale locale = new Locale(lang, country);
     expect(context.getUrl()).andReturn(SPEC_URI).anyTimes();
@@ -105,12 +106,17 @@ public class UriManagerTestBase {
     expect(context.getDebug()).andReturn(isDebug).anyTimes();
     expect(context.getIgnoreCache()).andReturn(ignoreCache).anyTimes();
     expect(context.getToken()).andReturn(null).anyTimes();
-    
+
     // All Features (doesn't distinguish between transitive and not)
     expect(gadget.getAllFeatures()).andReturn(features).anyTimes();
-    
+    Map<String, Feature> featureMap = Maps.newLinkedHashMap();
+    for (String feature : features) {
+      featureMap.put(feature, null);
+    }
+    expect(modulePrefs.getFeatures()).andReturn(featureMap).anyTimes();
+
     // User prefs
-    Map<String,UserPref> specPrefMap = Maps.newLinkedHashMap();
+    Map<String, UserPref> specPrefMap = Maps.newLinkedHashMap();
     for (Map.Entry<String, String> specPref : specPrefs.entrySet()) {
       UserPref up = createMock(UserPref.class);
       expect(up.getName()).andReturn(specPref.getKey()).anyTimes();
@@ -123,16 +129,16 @@ public class UriManagerTestBase {
     expect(context.getUserPrefs()).andReturn(ctxPrefs).anyTimes();
     expect(context.getParameter(Param.REFRESH.getKey())).andReturn(null).anyTimes();
     expect(view.needsUserPrefSubstitution()).andReturn(needsPrefSubst).anyTimes();
-    
+
     // Link all the mocks together
     expect(spec.getModulePrefs()).andReturn(modulePrefs).anyTimes();
     expect(gadget.getCurrentView()).andReturn(view).anyTimes();
     expect(gadget.getSpec()).andReturn(spec).anyTimes();
     expect(gadget.getContext()).andReturn(context).anyTimes();
-    
+
     // Replay all
     replay(view, modulePrefs, spec, context, gadget);
-   
+
     // Return the gadget
     return gadget;
   }

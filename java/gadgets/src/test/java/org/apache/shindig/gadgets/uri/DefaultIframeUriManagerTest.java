@@ -60,9 +60,9 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
   private static final String LD_SUFFIX = ".lockeddomain.com";
   private static final String LD_SUFFIX_ALT = ".altld.com";
   private static final String UNLOCKED_DOMAIN = "unlockeddomain.com";
-  private static final int TYPE_URL_NUM_BASE_PARAMS = 6;
-  private static final int TYPE_HTML_NUM_BASE_PARAMS = TYPE_URL_NUM_BASE_PARAMS + 1;
-  
+  private static final int TYPE_URL_NUM_BASE_PARAMS = 7;
+  private static final int TYPE_HTML_NUM_BASE_PARAMS = 7;
+
   private static final LockedDomainPrefixGenerator prefixGen = new LockedDomainPrefixGenerator() {
     public String getLockedDomainPrefix(Uri gadgetUri) {
       return LD_PREFIX;
@@ -70,7 +70,7 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
   };
 
   private static final SecurityTokenCodec tokenCodec = new BasicSecurityTokenCodec();
-  
+
   @Test
   public void typeHtmlBasicOptions() {
     String prefKey = "prefKey";
@@ -78,7 +78,7 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
     Map<String, String> prefs = Maps.newHashMap();
     prefs.put(prefKey, prefVal);
     List<String> features = Lists.newArrayList();
-    
+
     // Make the gadget.
     Gadget gadget = mockGadget(
         SPEC_URI.toString(),
@@ -89,16 +89,16 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
         prefs,  // prefs supplied by the requester, same k/v as spec w/ default val for simplicity
         false,  // no pref substitution needed, ergo prefs in fragment
         features);
-    
+
     // Generate a default-option manager
     TestDefaultIframeUriManager manager = makeManager(
         false,   // security token beacon not required
         false);  // locked domain not required
-    
+
     // Generate URI, turn into UriBuilder for validation
     Uri result = manager.makeRenderingUri(gadget);
     assertNotNull(result);
-    
+
     UriBuilder uri = new UriBuilder(result);
     assertEquals("", uri.getScheme());
     assertEquals(UNLOCKED_DOMAIN, uri.getAuthority());
@@ -111,17 +111,17 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
     assertEquals("0", uri.getQueryParameter(Param.DEBUG.getKey()));
     assertEquals("0", uri.getQueryParameter(Param.NO_CACHE.getKey()));
     assertEquals(prefVal, uri.getFragmentParameter("up_" + prefKey));
-    
+
     // Only the params that are needed.
     assertEquals(TYPE_HTML_NUM_BASE_PARAMS, uri.getQueryParameters().size());
     assertEquals(1, uri.getFragmentParameters().size());
-    
+
     assertFalse(manager.tokenForRenderingCalled());
     assertTrue(manager.schemeCalled());
     assertTrue(manager.ldExclusionCalled());
     assertTrue(manager.addExtrasCalled());
   }
-    
+
   @Test
   public void typeHtmlBasicOptionsTpl() {
     String prefKey = "prefKey";
@@ -129,7 +129,7 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
     Map<String, String> prefs = Maps.newHashMap();
     prefs.put(prefKey, prefVal);
     List<String> features = Lists.newArrayList();
-    
+
     // Make the gadget.
     Gadget gadget = mockGadget(
         SPEC_URI.toString(),
@@ -140,17 +140,17 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
         prefs,  // prefs supplied by the requester, same k/v as spec w/ default val for simplicity
         false,  // no pref substitution needed, ergo prefs in fragment
         features);
-    
+
     // Create another manager, this time templatized.
     TestDefaultIframeUriManager managerTpl = makeManager(
         false,   // security token beacon not required
         false);  // locked domain not required
     managerTpl.setTemplatingSignal(tplSignal(true));
-    
+
     // Templatized results.
     Uri resultTpl = managerTpl.makeRenderingUri(gadget);
     assertNotNull(resultTpl);
-    
+
     UriBuilder uriTpl = new UriBuilder(resultTpl);
     assertEquals("", uriTpl.getScheme());
     assertEquals(UNLOCKED_DOMAIN, uriTpl.getAuthority());
@@ -164,17 +164,17 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
     assertEquals(tplKey(Param.NO_CACHE.getKey()),
         uriTpl.getQueryParameter(Param.NO_CACHE.getKey()));
     assertEquals(tplKey("up_" + prefKey), uriTpl.getFragmentParameter("up_" + prefKey));
-    
+
     // Only the params that are needed.
     assertEquals(TYPE_HTML_NUM_BASE_PARAMS, uriTpl.getQueryParameters().size());
     assertEquals(1, uriTpl.getFragmentParameters().size());
-    
+
     assertFalse(managerTpl.tokenForRenderingCalled());
     assertTrue(managerTpl.schemeCalled());
     assertTrue(managerTpl.ldExclusionCalled());
     assertTrue(managerTpl.addExtrasCalled());
   }
-  
+
   @Test
   public void typeUrlDefaultOptions() {
     String gadgetSite = "http://example.com/gadget";
@@ -182,8 +182,8 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
     String prefVal = "prefVal";
     Map<String, String> prefs = Maps.newHashMap();
     prefs.put(prefKey, prefVal);
-    List<String> features = Lists.newArrayList();
-    
+    List<String> features = Lists.newArrayList("rpc", "setprefs");
+
     // Make the gadget.
     Gadget gadget = mockGadget(
         gadgetSite,
@@ -194,16 +194,16 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
         prefs,  // prefs supplied by the requester, same k/v as spec w/ default val for simplicity
         false,  // no pref substitution needed, ergo prefs in fragment
         features);
-    
+
     // Generate a default-option manager
     TestDefaultIframeUriManager manager = makeManager(
         false,   // security token beacon not required
         false);  // locked domain not required
-    
+
     // Generate URI, turn into UriBuilder for validation
     Uri result = manager.makeRenderingUri(gadget);
     assertNotNull(result);
-    
+
     UriBuilder uri = new UriBuilder(result);
     assertEquals("http", uri.getScheme());
     assertEquals("example.com", uri.getAuthority());
@@ -212,20 +212,21 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
     assertEquals(VIEW, uri.getQueryParameter(Param.VIEW.getKey()));
     assertEquals(LANG, uri.getQueryParameter(Param.LANG.getKey()));
     assertEquals(COUNTRY, uri.getQueryParameter(Param.COUNTRY.getKey()));
+    assertEquals("rpc:setprefs", uri.getQueryParameter(Param.LIBS.getKey()));
     assertEquals("1", uri.getQueryParameter(Param.DEBUG.getKey()));
     assertEquals("1", uri.getQueryParameter(Param.NO_CACHE.getKey()));
     assertEquals(prefVal, uri.getFragmentParameter("up_" + prefKey));
-    
+
     // Only the params that are needed.
     assertEquals(TYPE_URL_NUM_BASE_PARAMS, uri.getQueryParameters().size());
     assertEquals(1, uri.getFragmentParameters().size());
-    
+
     assertFalse(manager.tokenForRenderingCalled());
     assertFalse(manager.schemeCalled());
     assertFalse(manager.ldExclusionCalled());
     assertTrue(manager.addExtrasCalled());
   }
-  
+
   @Test
   public void typeUrlDefaultOptionsTpl() {
     String gadgetSite = "http://example.com/gadget";
@@ -234,7 +235,7 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
     Map<String, String> prefs = Maps.newHashMap();
     prefs.put(prefKey, prefVal);
     List<String> features = Lists.newArrayList();
-    
+
     // Make the gadget.
     Gadget gadget = mockGadget(
         gadgetSite,
@@ -245,22 +246,23 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
         prefs,  // prefs supplied by the requester, same k/v as spec w/ default val for simplicity
         false,  // no pref substitution needed, ergo prefs in fragment
         features);
-    
+
     // Generate a default-option manager
     TestDefaultIframeUriManager managerTpl = makeManager(
         false,   // security token beacon not required
         false);  // locked domain not required
     managerTpl.setTemplatingSignal(tplSignal(true));
-    
+
     // Generate URI, turn into UriBuilder for validation
     Uri resultTpl = managerTpl.makeRenderingUri(gadget);
     assertNotNull(resultTpl);
-    
+
     UriBuilder uriTpl = new UriBuilder(resultTpl);
     assertEquals("http", uriTpl.getScheme());
     assertEquals("example.com", uriTpl.getAuthority());
     assertEquals("/gadget", uriTpl.getPath());
     assertEquals(CONTAINER, uriTpl.getQueryParameter(Param.CONTAINER.getKey()));
+    assertEquals("", uriTpl.getQueryParameter(Param.LIBS.getKey()));
     assertEquals(tplKey(Param.VIEW.getKey()), uriTpl.getQueryParameter(Param.VIEW.getKey()));
     assertEquals(tplKey(Param.LANG.getKey()), uriTpl.getQueryParameter(Param.LANG.getKey()));
     assertEquals(tplKey(Param.COUNTRY.getKey()), uriTpl.getQueryParameter(Param.COUNTRY.getKey()));
@@ -268,17 +270,17 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
     assertEquals(tplKey(Param.NO_CACHE.getKey()),
         uriTpl.getQueryParameter(Param.NO_CACHE.getKey()));
     assertEquals(tplKey("up_" + prefKey), uriTpl.getFragmentParameter("up_" + prefKey));
-    
+
     // Only the params that are needed.
     assertEquals(TYPE_URL_NUM_BASE_PARAMS, uriTpl.getQueryParameters().size());
     assertEquals(1, uriTpl.getFragmentParameters().size());
-    
+
     assertFalse(managerTpl.tokenForRenderingCalled());
     assertFalse(managerTpl.schemeCalled());
     assertFalse(managerTpl.ldExclusionCalled());
     assertTrue(managerTpl.addExtrasCalled());
   }
-  
+
   @Test
   public void securityTokenAddedWhenGadgetNeedsItFragment() {
     Gadget gadget = mockGadget(SECURITY_TOKEN_FEATURE_NAME);
@@ -293,7 +295,7 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
         uri.getFragmentParameter(Param.SECURITY_TOKEN.getKey()));
     assertTrue(manager.tokenForRenderingCalled());
   }
-  
+
   @Test
   public void securityTokenAddedWhenGadgetNeedsItQuery() {
     Gadget gadget = mockGadget(SECURITY_TOKEN_FEATURE_NAME);
@@ -308,7 +310,7 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
         uri.getQueryParameter(Param.SECURITY_TOKEN.getKey()));
     assertTrue(manager.tokenForRenderingCalled());
   }
-  
+
   @Test
   public void securityTokenAddedWhenForced() {
     Gadget gadget = mockGadget("foo", "bar");
@@ -323,93 +325,93 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
         uri.getFragmentParameter(Param.SECURITY_TOKEN.getKey()));
     assertTrue(manager.tokenForRenderingCalled());
   }
-  
+
   @Test
   public void ldAddedGadgetRequests() {
     Gadget gadget = mockGadget(LOCKED_DOMAIN_FEATURE_NAME);
-    
+
     TestDefaultIframeUriManager manager = makeManager(
         false,   // security token beacon not required
         false);  // locked domain not (always) required
-    
+
     Uri result = manager.makeRenderingUri(gadget);
     assertNotNull(result);
-    
+
     UriBuilder uri = new UriBuilder(result);
     assertEquals("", uri.getScheme());
     assertEquals(LD_PREFIX + LD_SUFFIX, uri.getAuthority());
     assertEquals(IFRAME_PATH, uri.getPath());
-    
+
     // Basic sanity checks on params
     assertEquals(TYPE_HTML_NUM_BASE_PARAMS, uri.getQueryParameters().size());
     assertEquals(0, uri.getFragmentParameters().size());
   }
-  
+
   @Test
   public void ldAddedForcedAlways() {
     Gadget gadget = mockGadget();
-    
+
     TestDefaultIframeUriManager manager = makeManager(
         false,   // security token beacon not required
         true);   // locked domain always required
-    
+
     Uri result = manager.makeRenderingUri(gadget);
     assertNotNull(result);
-    
+
     UriBuilder uri = new UriBuilder(result);
     assertEquals("", uri.getScheme());
     assertEquals(LD_PREFIX + LD_SUFFIX, uri.getAuthority());
     assertEquals(IFRAME_PATH, uri.getPath());
-    
+
     // Basic sanity checks on params
     assertEquals(TYPE_HTML_NUM_BASE_PARAMS, uri.getQueryParameters().size());
     assertEquals(0, uri.getFragmentParameters().size());
   }
-  
+
   @Test
   public void ldNotAddedIfDisabled() {
     Gadget gadget = mockGadget(LOCKED_DOMAIN_FEATURE_NAME);
-    
+
     TestDefaultIframeUriManager manager = makeManager(
         false,   // security token beacon not required
         true);   // locked domain always required
     manager.setLockedDomainEnabled(false);  // but alas, not enabled in the 1st place
-    
+
     Uri result = manager.makeRenderingUri(gadget);
     assertNotNull(result);
-    
+
     UriBuilder uri = new UriBuilder(result);
     assertEquals("", uri.getScheme());
     assertEquals(UNLOCKED_DOMAIN, uri.getAuthority());
     assertEquals(IFRAME_PATH, uri.getPath());
-    
+
     // Basic sanity checks on params
     assertEquals(TYPE_HTML_NUM_BASE_PARAMS, uri.getQueryParameters().size());
     assertEquals(0, uri.getFragmentParameters().size());
   }
-  
+
   @Test
   public void ldNotAddedWithExclusion() {
     Gadget gadget = mockGadget(LOCKED_DOMAIN_FEATURE_NAME);
-    
+
     TestDefaultIframeUriManager manager = makeManager(
         false,   // security token beacon not required
         true);   // locked domain always required
     manager.setLdExclusion(true);  // but alas, excluded
-    
+
     Uri result = manager.makeRenderingUri(gadget);
     assertNotNull(result);
-    
+
     UriBuilder uri = new UriBuilder(result);
     assertEquals("", uri.getScheme());
     assertEquals(UNLOCKED_DOMAIN, uri.getAuthority());
     assertEquals(IFRAME_PATH, uri.getPath());
-    
+
     // Basic sanity checks on params
     assertEquals(TYPE_HTML_NUM_BASE_PARAMS, uri.getQueryParameters().size());
     assertEquals(0, uri.getFragmentParameters().size());
   }
-  
+
   @Test
   public void versionAddedWithVersioner() {
     String version = "abcdlkjwef";
@@ -422,7 +424,7 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
     assertEquals(TYPE_HTML_NUM_BASE_PARAMS + 1, uri.getQueryParameters().size());
     assertEquals(version, uri.getQueryParameter(Param.VERSION.getKey()));
   }
-  
+
   @Test
   public void userPrefsAddedQuery() {
     // Scenario exercises all prefs cases: overridden/known key, unknown key, missing key
@@ -432,20 +434,20 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
     Map<String, String> inPrefs = Maps.newHashMap();
     inPrefs.put("specKey1", "inVal1");
     inPrefs.put("otherKey1", "inVal2");
-    
+
     Gadget gadget = mockGadget(true, specPrefs, inPrefs);
     TestDefaultIframeUriManager manager = makeManager(false, false);
     Uri result = manager.makeRenderingUri(gadget);
     assertNotNull(result);
     UriBuilder uri = new UriBuilder(result);
-    
+
     // otherKey1/inVal2 pair ignored; not known by the gadget
     assertEquals(TYPE_HTML_NUM_BASE_PARAMS + 2, uri.getQueryParameters().size());
     assertEquals(0, uri.getFragmentParameters().size());
     assertEquals("inVal1", uri.getQueryParameter("up_specKey1"));
     assertEquals("specDefault2", uri.getQueryParameter("up_specKey2"));
   }
-  
+
   @Test
   public void userPrefsAddedFragment() {
     // Scenario exercises all prefs cases: overridden/known key, unknown key, missing key
@@ -455,20 +457,20 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
     Map<String, String> inPrefs = Maps.newHashMap();
     inPrefs.put("specKey1", "inVal1");
     inPrefs.put("otherKey1", "inVal2");
-    
+
     Gadget gadget = mockGadget(false, specPrefs, inPrefs);
     TestDefaultIframeUriManager manager = makeManager(false, false);
     Uri result = manager.makeRenderingUri(gadget);
     assertNotNull(result);
     UriBuilder uri = new UriBuilder(result);
-    
+
     // otherKey1/inVal2 pair ignored; not known by the gadget
     assertEquals(TYPE_HTML_NUM_BASE_PARAMS, uri.getQueryParameters().size());
     assertEquals(2, uri.getFragmentParameters().size());
     assertEquals("inVal1", uri.getFragmentParameter("up_specKey1"));
     assertEquals("specDefault2", uri.getFragmentParameter("up_specKey2"));
   }
-  
+
   @Test
   public void honorSchemeOverride() {
     String scheme = "file";
@@ -480,7 +482,7 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
     UriBuilder uri = new UriBuilder(result);
     assertEquals(scheme, uri.getScheme());
   }
-  
+
   @Test
   public void badUriValidatingUri() {
     Uri uri = new UriBuilder().addQueryParameter(Param.URL.getKey(), "^':   bad:").toUri();
@@ -488,21 +490,21 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
     UriStatus status = manager.validateRenderingUri(uri);
     assertEquals(UriStatus.BAD_URI, status);
   }
-  
+
   @Test
   public void invalidLockedDomainValidSuffix() {
     Uri uri = makeValidationTestUri(LD_PREFIX + LD_SUFFIX_ALT, null);
     DefaultIframeUriManager manager = makeManager(false, false);
     assertEquals(UriStatus.INVALID_DOMAIN, manager.validateRenderingUri(uri));
   }
-  
+
   @Test
   public void invalidLockedDomainInvalidSuffix() {
     Uri uri = makeValidationTestUri(LD_PREFIX + ".bad." + LD_SUFFIX, null);
     DefaultIframeUriManager manager = makeManager(false, false);
     assertEquals(UriStatus.INVALID_DOMAIN, manager.validateRenderingUri(uri));
   }
-  
+
   @Test
   public void invalidLockedDomainValidSuffixExclusionBypass() {
     Uri uri = makeValidationTestUri(LD_PREFIX + LD_SUFFIX_ALT, null);
@@ -510,7 +512,7 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
     manager.setLdExclusion(true);
     assertEquals(UriStatus.VALID_UNVERSIONED, manager.validateRenderingUri(uri));
   }
-  
+
   @Test
   public void invalidLockedDomainInvalidSuffixExclusionBypass() {
     Uri uri = makeValidationTestUri(LD_PREFIX + ".bad." + LD_SUFFIX, null);
@@ -518,7 +520,7 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
     manager.setLdExclusion(true);
     assertEquals(UriStatus.VALID_UNVERSIONED, manager.validateRenderingUri(uri));
   }
-  
+
   @Test
   public void invalidLockedDomainValidSuffixLdDisabled() {
     Uri uri = makeValidationTestUri(LD_PREFIX + LD_SUFFIX_ALT, null);
@@ -526,7 +528,7 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
     manager.setLockedDomainEnabled(false);
     assertEquals(UriStatus.VALID_UNVERSIONED, manager.validateRenderingUri(uri));
   }
-  
+
   @Test
   public void invalidLockedDomainInvalidSuffixLdDisabled() {
     Uri uri = makeValidationTestUri(LD_PREFIX + ".bad." + LD_SUFFIX, null);
@@ -534,14 +536,14 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
     manager.setLockedDomainEnabled(false);
     assertEquals(UriStatus.VALID_UNVERSIONED, manager.validateRenderingUri(uri));
   }
-  
+
   @Test
   public void validUnversionedNoVersioner() {
     Uri uri = makeValidationTestUri(LD_PREFIX + LD_SUFFIX, "version");
     DefaultIframeUriManager manager = makeManager(false, false);
     assertEquals(UriStatus.VALID_UNVERSIONED, manager.validateRenderingUri(uri));
   }
-  
+
   @Test
   public void validUnversionedNoVersion() {
     Uri uri = makeValidationTestUri(LD_PREFIX + LD_SUFFIX, null);
@@ -549,7 +551,7 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
     manager.setVersioner(this.mockVersioner("version", false));  // Invalid, if present.
     assertEquals(UriStatus.VALID_UNVERSIONED, manager.validateRenderingUri(uri));
   }
-  
+
   @Test
   public void versionerVersionInvalid() {
     Uri uri = makeValidationTestUri(LD_PREFIX + LD_SUFFIX, "in-version");
@@ -557,7 +559,7 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
     manager.setVersioner(mockVersioner("test-version", false));  // Invalid, if present.
     assertEquals(UriStatus.INVALID_VERSION, manager.validateRenderingUri(uri));
   }
-  
+
   @Test
   public void versionerVersionMatch() {
     String version = "abcdefg";
@@ -566,7 +568,7 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
     manager.setVersioner(mockVersioner(version, true));
     assertEquals(UriStatus.VALID_VERSIONED, manager.validateRenderingUri(uri));
   }
-  
+
   private Uri makeValidationTestUri(String domain, String version) {
     UriBuilder uri = new UriBuilder();
     uri.setAuthority(domain);
@@ -578,7 +580,7 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
     }
     return uri.toUri();
   }
-    
+
   private TestDefaultIframeUriManager makeManager(boolean alwaysToken, boolean ldRequired) {
     ContainerConfig config = createMock(ContainerConfig.class);
     String altContainer = CONTAINER + "-alt";
@@ -594,7 +596,7 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
     replay(config);
     return new TestDefaultIframeUriManager(config);
   }
-  
+
   private IframeUriManager.Versioner mockVersioner(String version, boolean valid) {
     IframeUriManager.Versioner versioner = createMock(IframeUriManager.Versioner.class);
     expect(versioner.version(isA(Uri.class), isA(String.class))).andReturn(version).anyTimes();
@@ -603,14 +605,14 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
     replay(versioner);
     return versioner;
   }
-  
+
   private DefaultIframeUriManager.TemplatingSignal tplSignal(boolean value) {
     DefaultIframeUriManager.DefaultTemplatingSignal tplSignal =
         new DefaultIframeUriManager.DefaultTemplatingSignal();
     tplSignal.setUseTemplates(value);
     return tplSignal;
   }
-  
+
   private static final class TestDefaultIframeUriManager extends DefaultIframeUriManager {
     private boolean ldExclusion = false;
     private boolean ldExclusionCalled = false;
@@ -619,62 +621,62 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
     private boolean tokenForRendering = true;
     private boolean tokenForRenderingCalled = false;
     private boolean addExtrasCalled = false;
-    
+
     private TestDefaultIframeUriManager(ContainerConfig config) {
       super(config, prefixGen, tokenCodec);
     }
-    
+
     private TestDefaultIframeUriManager setLdExclusion(boolean ldExclusion) {
       this.ldExclusion = ldExclusion;
       return this;
     }
-    
+
     private TestDefaultIframeUriManager setScheme(String scheme) {
       this.scheme = scheme;
       return this;
     }
-    
+
     private TestDefaultIframeUriManager setTokenForRendering(boolean tokenForRendering) {
       this.tokenForRendering = tokenForRendering;
       return this;
     }
-    
+
     /** Overridden methods for custom behavior */
     @Override
     protected boolean lockedDomainExclusion() {
       this.ldExclusionCalled = true;
       return ldExclusion;
     }
-    
+
     private boolean ldExclusionCalled() {
       return ldExclusionCalled;
     }
-    
+
     @Override
     protected String getScheme(Gadget gadget, String container) {
       this.schemeCalled = true;
       return scheme;
     }
-    
+
     private boolean schemeCalled() {
       return schemeCalled;
     }
-    
+
     @Override
     protected boolean isTokenNeededForRendering(Gadget gadget) {
       this.tokenForRenderingCalled = true;
       return tokenForRendering;
     }
-    
+
     private boolean tokenForRenderingCalled() {
       return tokenForRenderingCalled;
     }
-    
+
     @Override
-    protected void addExtras(UriBuilder uri) {
+    protected void addExtras(UriBuilder uri, Gadget gadget) {
       this.addExtrasCalled = true;
     }
-    
+
     private boolean addExtrasCalled() {
       return addExtrasCalled;
     }
