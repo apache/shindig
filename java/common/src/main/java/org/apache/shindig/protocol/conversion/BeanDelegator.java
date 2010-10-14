@@ -58,7 +58,25 @@ public class BeanDelegator {
     return (o != null ? o : NULL);
   }
 
-  private static final Map<String, Object> EMPTY_FIELDS = ImmutableMap.of();
+  /**
+   * Convert field names to common name - no underscore and lower case
+   */
+  public static String normalizeName(String name) {
+    return name.replaceAll("_", "").toLowerCase();
+  }
+
+  /**
+   * Convert map of fields to common names and nullable values
+   */
+  public static Map<String, Object> normalizeFields(Map<String, Object> original) {
+    ImmutableMap.Builder<String, Object> builder = ImmutableMap.builder();
+    if (original != null) {
+      for (Map.Entry<String, Object> entry : original.entrySet()) {
+        builder.put(normalizeName(entry.getKey()), nullable(entry.getValue()));
+      }
+    }
+    return builder.build();
+  }
 
   /** List of Classes that are considered primitives and are not proxied **/
   public static final ImmutableSet<Class<?>> PRIMITIVE_TYPE_CLASSES = ImmutableSet.of(
@@ -100,14 +118,15 @@ public class BeanDelegator {
 
   @SuppressWarnings("unchecked")
   public <T> T createDelegator(Object source, Class<T> apiInterface) {
-    return createDelegator(source, apiInterface, EMPTY_FIELDS);
+    return createDelegator(source, apiInterface, null);
   }
 
   @SuppressWarnings("unchecked")
   public <T> T createDelegator(Object source, Class<T> apiInterface,
                                Map<String, Object> extraFields) {
 
-    if (source == null && extraFields != null && extraFields.size() > 0) {
+    extraFields = normalizeFields(extraFields);
+    if (source == null && extraFields.size() > 0) {
       // Create delegator that is based only on fields, so use dummy object
       source = new NullClass();
     }
@@ -164,7 +183,7 @@ public class BeanDelegator {
     if (enumConvertionMap.containsKey(value)) {
       return enumConvertionMap.get(value);
     }
-    throw new UnsupportedOperationException("Unknown enum value " + value.toString());
+    throw new UnsupportedOperationException("Unknown enum value " + value.name());
   }
 
   protected class DelegateInvocationHandler implements InvocationHandler {
@@ -181,7 +200,7 @@ public class BeanDelegator {
       Preconditions.checkNotNull(source);
 
       this.source = source;
-      this.extraFields = (extraFields == null ? EMPTY_FIELDS : extraFields);
+      this.extraFields = extraFields;
     }
 
     /**
@@ -334,23 +353,23 @@ public class BeanDelegator {
   }
 
   /**
-   * Utility function to auto generate mapping between two enums that have same values (toString)
+   * Utility function to auto generate mapping between two enums that have same values (name)
    * All values in the sourceEnum must have values in targetEnum,
    *  otherwise {@link RuntimeException} is thrown
    */
   public static Map<Enum<?>, Enum<?>> createDefaultEnumMap(
       Class<? extends Enum<?>> sourceEnum, Class<? extends Enum<?>> targetEnum) {
    Map<String, Enum<?>> values2Map = Maps.newHashMap();
-   for (Object val2 : targetEnum.getEnumConstants()) {
-     values2Map.put(val2.toString(), (Enum<?>) val2);
+   for (Enum<?> val2 : targetEnum.getEnumConstants()) {
+     values2Map.put(val2.name(), val2);
    }
    Enum<?>[] values1 = sourceEnum.getEnumConstants();
    ImmutableMap.Builder<Enum<?>, Enum<?>> mapBuilder = ImmutableMap.builder();
    for (Enum<?> val1 : sourceEnum.getEnumConstants()) {
-     if (values2Map.containsKey(val1.toString())) {
-       mapBuilder.put(val1, values2Map.get(val1.toString()));
+     if (values2Map.containsKey(val1.name())) {
+       mapBuilder.put(val1, values2Map.get(val1.name()));
      } else {
-       throw new RuntimeException("Missing enum value " + val1.toString()
+       throw new RuntimeException("Missing enum value " + val1.name()
            + " for enum " + targetEnum.getName());
      }
    }
@@ -358,5 +377,5 @@ public class BeanDelegator {
   }
 
   /** Fake class that does not have fields or method for field base delegator */
-  static class NullClass {}
+  public static class NullClass {}
 }

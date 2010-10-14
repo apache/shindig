@@ -58,6 +58,8 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class GadgetsHandlerService {
 
+  private static final Locale DEFAULT_LOCALE = new Locale("all", "all");
+
   // Map shindig data class to API interfaces
   @VisibleForTesting
   static final Map<Class<?>, Class<?>> apiClasses =
@@ -204,7 +206,7 @@ public class GadgetsHandlerService {
 
     @Override
     public Locale getLocale() {
-      return request.getLocale();
+      return (request.getLocale() == null ? DEFAULT_LOCALE : request.getLocale());
     }
 
     @Override

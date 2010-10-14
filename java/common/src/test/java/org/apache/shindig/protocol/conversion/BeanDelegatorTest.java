@@ -218,6 +218,17 @@ public class BeanDelegatorTest extends Assert {
     assertSame(container, p.getContainer());
   }
 
+  @Test
+  public void testExtraFieldsBadCase() {
+    TokenData data = new TokenData();
+    String container = "data";
+    TokenInter p = beanDelegator.createDelegator(data, TokenInter.class,
+        ImmutableMap.<String, Object>of("Cont_Ainer", container));
+
+    assertSame(data.getId(), p.getId());
+    assertSame(container, p.getContainer());
+  }
+
   // Make sure validate will actually fail
   @Test(expected = NoSuchMethodException.class)
   public void tesValidate() throws Exception {
