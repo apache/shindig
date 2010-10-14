@@ -43,15 +43,15 @@ public class OptimizerConfig {
     this.jpegConversionAllowed = jpegConversionAllowed;
     // Constrain jpeg compression to between 0.9 and 0.5 so its not pointless
     // to attempt nor is it too lossy.
-    this.jpegCompression = Math.max(0.9f,Math.min(0.5f, jpegCompression));
+    this.jpegCompression = Math.min(0.9f,Math.max(0.5f, jpegCompression));
     this.minThresholdBytes = minThresholdBytes;
   }
 
   /**
-   * Defaults
+   * Defaults for usuage in tests.
    */
   public OptimizerConfig() {
-    this(1024 * 1024, 256, true, 0.75f, 200);
+    this(1024 * 1024, 256, true, 0.90f, 200);
   }
 
   /**
