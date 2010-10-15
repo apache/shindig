@@ -50,8 +50,8 @@ public class GadgetRenderingServlet extends InjectedServlet {
 
   private static final Logger LOG = Logger.getLogger(GadgetRenderingServlet.class.getName());
 
-  private transient Renderer renderer;
-  private transient IframeUriManager iframeUriManager;
+  protected transient Renderer renderer;
+  protected transient IframeUriManager iframeUriManager;
 
   @Inject
   public void setRenderer(Renderer renderer) {

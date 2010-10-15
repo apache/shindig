@@ -21,6 +21,10 @@ package org.apache.shindig.common.servlet;
 import com.google.common.base.Preconditions;
 import com.google.inject.Injector;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -57,5 +61,34 @@ public abstract class InjectedServlet extends HttpServlet {
    */
   protected void checkInitialized() {
     Preconditions.checkState(!initialized, "Servlet already initialized");
+  }
+
+  /**
+   * Writes the state of this InjectedServlet during serialization.
+   *
+   * @param out The stream to which to save the state
+   *
+   * @throws IOException if an error occurs
+   */
+  private void writeObject(ObjectOutputStream out) throws IOException {
+    out.defaultWriteObject();
+  }
+
+  /**
+   * Restores the state of this InjectedServlet during deserialization.
+   *
+   * <p>Upon deserialization, this InjectedServlet will not be functional
+   * until after its init method was called, which will cause all necessary
+   * injection to happen.
+   *
+   * @param in The stream from which to restore the state
+   *
+   * @throws IOException if an error occurs
+   * @throws ClassNotFoundException if a class cannot be found
+   */
+  private void readObject(ObjectInputStream in)
+          throws IOException, ClassNotFoundException {
+    in.defaultReadObject();
+    initialized = false;
   }
 }
