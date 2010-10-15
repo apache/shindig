@@ -20,10 +20,12 @@ package org.apache.shindig.gadgets.uri;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.Gadget;
+import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.rewrite.DomWalker;
@@ -44,12 +46,21 @@ public class DefaultAccelUriManager implements AccelUriManager {
   public DefaultAccelUriManager(ContainerConfig config,
                                 ProxyUriManager proxyUriManager) {
     this.proxyUriManager = proxyUriManager;
-    accelHost = config.getString(CONTAINER, PROXY_HOST_PARAM);
-    accelPath = config.getString(CONTAINER, PROXY_PATH_PARAM);
+    accelHost = config.getString(AccelUriManager.CONTAINER, PROXY_HOST_PARAM);
+    accelPath = config.getString(AccelUriManager.CONTAINER, PROXY_PATH_PARAM);
   }
 
   public Uri parseAndNormalize(HttpRequest httpRequest) throws GadgetException {
+    // Make a gadget object with the accel container.
     Gadget gadget = DomWalker.makeGadget(httpRequest);
+    gadget.setContext(new GadgetContext(gadget.getContext()) {
+      @Override
+      public String getContainer() {
+        return AccelUriManager.CONTAINER;
+      }
+    });
+
+    // Normalize the request url to proxy uri form.
     ProxyUriManager.ProxyUri proxied = looksLikeAccelUri(httpRequest.getUri()) ?
         proxyUriManager.process(httpRequest.getUri()) : new ProxyUriManager.ProxyUri(
         gadget, httpRequest.getUri());

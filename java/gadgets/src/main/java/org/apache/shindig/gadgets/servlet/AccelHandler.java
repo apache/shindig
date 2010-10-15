@@ -165,13 +165,13 @@ public class AccelHandler {
   /**
    * Build an HttpRequest object encapsulating the request details as requested
    * by the user.
-   * @param request The http request.
+   * @param httpRequest The http request.
    * @param uriToProxyOrRewrite The parsed uri to proxy or rewrite through
    *   accel servlet.
    * @return Remote content request based on the parameters sent from the client.
    * @throws GadgetException In case the data could not be fetched.
    */
-  protected HttpRequest buildHttpRequest(HttpRequest request,
+  protected HttpRequest buildHttpRequest(HttpRequest httpRequest,
                                          ProxyUriManager.ProxyUri uriToProxyOrRewrite)
       throws GadgetException {
     Uri tgt = uriToProxyOrRewrite.getResource();
@@ -182,14 +182,21 @@ public class AccelHandler {
     }
 
     // Copy the post body if it exists.
-    UriUtils.copyRequestData(request, req);
+    UriUtils.copyRequestData(httpRequest, req);
 
     // Set and copy headers.
-    ServletUtil.setXForwardedForHeader(request, req);
+    ServletUtil.setXForwardedForHeader(httpRequest, req);
     
     UriUtils.copyRequestHeaders(
-        request, req,
-        UriUtils.DisallowedHeaders.POST_INCOMPATIBLE_DIRECTIVES);
+        httpRequest, req,
+        UriUtils.DisallowedHeaders.POST_INCOMPATIBLE_DIRECTIVES,
+        UriUtils.DisallowedHeaders.HOST_HEADER);
+
+    // Since the Host header of httpRequest could be pointing to the shindig
+    // host (in case of a normalized request), we do not copy the Host header
+    // as is. Instead we explicitly set it to the authority of the resource
+    // being fetched as shown below.
+    req.setHeader("Host", tgt.getAuthority());
 
     req.setFollowRedirects(false);
     return req;

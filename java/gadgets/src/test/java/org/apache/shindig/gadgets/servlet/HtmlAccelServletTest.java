@@ -145,11 +145,12 @@ public class HtmlAccelServletTest extends ServletTestFixture {
 
   @Test
   public void testHtmlAccelNoData() throws Exception {
-    String url = "http://example.org/data.html";
+    Uri url = Uri.parse("http://example.org/data.html");
 
-    HttpRequest req = new HttpRequest(Uri.parse(url));
+    HttpRequest req = new HttpRequest(url);
+    req.addHeader("Host", url.getAuthority());
     expect(pipeline.execute(req)).andReturn(null).once();
-    expectRequest("", url);
+    expectRequest("", url.toString());
     replay();
 
     servlet.doGet(request, recorder);
@@ -166,6 +167,7 @@ public class HtmlAccelServletTest extends ServletTestFixture {
 
     ((FakeCaptureRewriter) rewriter).setContentToRewrite(REWRITE_CONTENT);
     HttpRequest req = new HttpRequest(Uri.parse(url));
+    req.addHeader("Host", Uri.parse(url).getAuthority());
     HttpResponse resp = new HttpResponseBuilder()
         .setResponse(data.getBytes())
         .setHeader("Content-Type", "text/html")
@@ -190,6 +192,7 @@ public class HtmlAccelServletTest extends ServletTestFixture {
 
     ((FakeCaptureRewriter) rewriter).setContentToRewrite(data);
     HttpRequest req = new HttpRequest(Uri.parse(url));
+    req.addHeader("Host", Uri.parse(url).getAuthority());
     HttpResponse resp = new HttpResponseBuilder()
         .setResponse(data.getBytes())
         .setHeader("Content-Type", "text/html")
@@ -215,6 +218,7 @@ public class HtmlAccelServletTest extends ServletTestFixture {
 
     ((FakeCaptureRewriter) rewriter).setContentToRewrite(REWRITE_CONTENT);
     HttpRequest req = new HttpRequest(Uri.parse(url));
+    req.addHeader("Host", Uri.parse(url).getAuthority());
     HttpResponse resp = new HttpResponseBuilder()
         .setResponse(data.getBytes())
         .setHeader("Content-Type", "text/html")
@@ -238,6 +242,7 @@ public class HtmlAccelServletTest extends ServletTestFixture {
 
     ((FakeCaptureRewriter) rewriter).setContentToRewrite(data);
     HttpRequest req = new HttpRequest(Uri.parse(url));
+    req.addHeader("Host", Uri.parse(url).getAuthority());
     HttpResponse resp = new HttpResponseBuilder()
         .setResponse(data.getBytes())
         .setHeader("Content-Type", "text/html")
@@ -285,6 +290,7 @@ public class HtmlAccelServletTest extends ServletTestFixture {
 
     ((FakeCaptureRewriter) rewriter).setContentToRewrite(data);
     HttpRequest req = new HttpRequest(Uri.parse(url));
+    req.addHeader("Host", Uri.parse(url).getAuthority());
     HttpResponse resp = new HttpResponseBuilder()
         .setResponse(data.getBytes())
         .setHeader("Content-Type", "text/html")

@@ -62,7 +62,9 @@ public final class UriUtils {
     // Headers that the fetcher itself would like to fill. For example,
     // httpclient library crashes if Content-Length header is set in the
     // request being fetched.
-    POST_INCOMPATIBLE_DIRECTIVES(ImmutableSet.of("content-length"));
+    POST_INCOMPATIBLE_DIRECTIVES(ImmutableSet.of("content-length")),
+
+    HOST_HEADER(ImmutableSet.of("host"));
 
     // Miscellaneous headers we should take care of, but are left for now.
     // "set-cookie", "content-length", "content-encoding", "etag",
