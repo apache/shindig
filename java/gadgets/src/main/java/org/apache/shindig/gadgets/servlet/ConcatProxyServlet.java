@@ -42,8 +42,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.Executor;
 import java.util.concurrent.FutureTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -62,27 +61,33 @@ public class ConcatProxyServlet extends InjectedServlet {
 
   public static final String JSON_PARAM = Param.JSON.getKey();
   private static final Pattern JSON_PARAM_PATTERN = Pattern.compile("^\\w*$");
-  
+
   // TODO: parameterize these.
   static final Integer LONG_LIVED_REFRESH = (365 * 24 * 60 * 60);  // 1 year
   static final Integer DEFAULT_REFRESH = (60 * 60);                // 1 hour
 
-  private static final Logger LOG 
+  private static final Logger LOG
       = Logger.getLogger(ConcatProxyServlet.class.getName());
-  
+
   private transient RequestPipeline requestPipeline;
   private transient ConcatUriManager concatUriManager;
   private transient ResponseRewriterRegistry contentRewriterRegistry;
 
   // Sequential version of 'execute' by default.
-  private transient ExecutorService executor = Executors.newSingleThreadExecutor();
+  private transient Executor executor = new Executor() {
+    // Execute the comman within current thread
+    public void execute(Runnable run) {
+      run.run();
+    }
+
+  };
 
   @Inject
   public void setRequestPipeline(RequestPipeline requestPipeline) {
     checkInitialized();
     this.requestPipeline = requestPipeline;
   }
-  
+
   @Inject
   public void setConcatUriManager(ConcatUriManager concatUriManager) {
     checkInitialized();
@@ -94,9 +99,9 @@ public class ConcatProxyServlet extends InjectedServlet {
     checkInitialized();
     this.contentRewriterRegistry = contentRewriterRegistry;
   }
-  
+
   @Inject
-  public void setExecutor(@Named("shindig.concat.executor") ExecutorService executor) {
+  public void setExecutor(@Named("shindig.concat.executor") Executor executor) {
     checkInitialized();
     // Executor is independently named to allow separate configuration of
     // concat fetch parallelism and other Shindig job execution.
@@ -127,7 +132,7 @@ public class ConcatProxyServlet extends InjectedServlet {
       response.sendError(HttpResponse.SC_BAD_REQUEST, formatError(gex, uri));
       return;
     }
-    
+
     // Throughout this class, wherever output is generated it's done as a UTF8 String.
     // As such, we affirmatively state that UTF8 is being returned here.
     response.setHeader("Content-Type", concatType.getMimeType() + "; charset=UTF8");
@@ -150,7 +155,7 @@ public class ConcatProxyServlet extends InjectedServlet {
       ConcatUriManager.ConcatUri concatUri) throws IOException {
     // Check for json concat and set output stream.
     ConcatOutputStream cos = null;
-    
+
     String jsonVar = concatUri.getSplitParam();
     if (jsonVar != null) {
       // JSON-concat mode.
@@ -263,16 +268,16 @@ public class ConcatProxyServlet extends InjectedServlet {
     LOG.log(Level.INFO, "Concat proxy request failed", err);
     return err.toString();
   }
-  
+
   private static abstract class ConcatOutputStream extends ServletOutputStream {
     private final ServletOutputStream wrapped;
-    
+
     protected ConcatOutputStream(ServletOutputStream wrapped) {
       this.wrapped = wrapped;
     }
-    
+
     protected abstract void outputJs(Uri uri, String data) throws IOException;
-    
+
     public void output(Uri uri, HttpResponse resp) throws IOException {
       if (resp.getHttpStatusCode() != HttpServletResponse.SC_OK) {
         println(formatHttpError(resp.getHttpStatusCode(), resp.getResponseAsString(), uri));
@@ -280,7 +285,7 @@ public class ConcatProxyServlet extends InjectedServlet {
         outputJs(uri, resp.getResponseAsString());
       }
     }
-    
+
     public boolean outputError(Uri uri, GadgetException e)
         throws IOException {
       print(formatError(e, uri));
@@ -301,25 +306,25 @@ public class ConcatProxyServlet extends InjectedServlet {
     public void write(byte b[]) throws IOException {
       wrapped.write(b);
     }
-    
+
     @Override
     public void close() throws IOException {
       wrapped.close();
     }
-    
+
     @Override
     public void print(String data) throws IOException {
       write(data.getBytes("UTF8"));
     }
-    
+
     @Override
     public void println(String data) throws IOException {
       print(data);
       write("\r\n".getBytes("UTF8"));
     }
   }
-  
-  private static class VerbatimConcatOutputStream extends ConcatOutputStream {    
+
+  private static class VerbatimConcatOutputStream extends ConcatOutputStream {
     public VerbatimConcatOutputStream(ServletOutputStream wrapped) {
       super(wrapped);
     }
@@ -331,8 +336,8 @@ public class ConcatProxyServlet extends InjectedServlet {
       println("/* ---- End " + uri.toString() + " ---- */");
     }
   }
-  
-  private static class JsonConcatOutputStream extends ConcatOutputStream {    
+
+  private static class JsonConcatOutputStream extends ConcatOutputStream {
     public JsonConcatOutputStream(ServletOutputStream wrapped, String tok) throws IOException {
       super(wrapped);
       this.println(tok + "={");
@@ -346,20 +351,20 @@ public class ConcatProxyServlet extends InjectedServlet {
       print(StringEscapeUtils.escapeJavaScript(data));
       println("\",");
     }
-    
+
     @Override
     public void close() throws IOException {
       println("};");
       super.close();
     }
-    
+
   }
-  
+
   // Encapsulates the response context of a single resource fetch.
   private static class RequestContext {
-    private HttpRequest httpReq;
-    private HttpResponse httpResp;
-    private GadgetException gadgetException;
+    private final HttpRequest httpReq;
+    private final HttpResponse httpResp;
+    private final GadgetException gadgetException;
 
     public HttpRequest getHttpReq() {
       return httpReq;
@@ -382,12 +387,12 @@ public class ConcatProxyServlet extends InjectedServlet {
 
   // Worker class responsible for fetching a single resource.
   public class HttpFetchCallable implements Callable<RequestContext> {
-    private HttpRequest httpReq;
+    private final HttpRequest httpReq;
 
     public HttpFetchCallable(HttpRequest httpReq) {
       this.httpReq = httpReq;
     }
-    
+
     public RequestContext call() {
       HttpResponse httpResp = null;
       GadgetException gEx = null;
@@ -398,6 +403,6 @@ public class ConcatProxyServlet extends InjectedServlet {
       }
       return new RequestContext(httpReq, httpResp, gEx);
     }
-  }  
+  }
 }
 
