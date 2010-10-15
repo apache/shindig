@@ -47,7 +47,7 @@ public class CajaCssSanitizerTest extends EasyMockTestCase {
   public static final String MOCK_CONTAINER = "mockContainer";
 
   private static class FakeContainerConfig extends AbstractContainerConfig {
-    private Map<String, Map<String, Object>> containers =
+    private final Map<String, Map<String, Object>> containers =
         new HashMap<String, Map<String, Object>>();
 
     private FakeContainerConfig() {
@@ -64,7 +64,7 @@ public class CajaCssSanitizerTest extends EasyMockTestCase {
     public Object getProperty(String container, String name) {
       Map<String, Object> data = containers.get(container);
 
-      // Inherit from default if there is no value for this key. 
+      // Inherit from default if there is no value for this key.
       if (!data.containsKey(name)) {
         data = containers.get(ContainerConfig.DEFAULT_CONTAINER);
       }
@@ -104,6 +104,23 @@ public class CajaCssSanitizerTest extends EasyMockTestCase {
     CssTree.StyleSheet styleSheet = parser.parseDom(css);
     sanitizer.sanitize(styleSheet, DUMMY, gadgetContext, importRewriter, imageRewriter);
     assertStyleEquals(".xyz {}", styleSheet);
+  }
+
+  @Test
+  public void testSanitizeBadField() throws Exception {
+    String css = ".xyz { iamevil: 1; }";
+    CssTree.StyleSheet styleSheet = parser.parseDom(css);
+    sanitizer.sanitize(styleSheet, DUMMY, gadgetContext, importRewriter, imageRewriter);
+    assertStyleEquals(".xyz {}", styleSheet);
+  }
+
+  @Test
+  public void testSanitizeCleanToParent() throws Exception {
+    String css = ".q_action:hover, #questionsDIV li:nth-child(even) .q_action:hover, .stream li:nth-child(even) .q_action:hover {" +
+    		" background: #d0ebfe; text-decoration: none; }";
+    CssTree.StyleSheet styleSheet = parser.parseDom(css);
+    sanitizer.sanitize(styleSheet, DUMMY, gadgetContext, importRewriter, imageRewriter);
+    assertStyleEquals(css, styleSheet);
   }
 
   @Test

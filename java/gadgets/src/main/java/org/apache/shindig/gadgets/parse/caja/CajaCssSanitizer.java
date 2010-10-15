@@ -180,7 +180,7 @@ public class CajaCssSanitizer {
       }
     }, null);
   }
-  
+
   private static String rewriteUri(ProxyUriManager proxyUriManager, String input,
                                    final Uri context, GadgetContext gadgetContext) {
     Uri inboundUri = null;
@@ -223,6 +223,9 @@ public class CajaCssSanitizer {
    * @param chain chain of nodes
    */
   private static void clean(AncestorChain<?> chain) {
+    if (chain == null) {
+      return;
+    }
     if (chain.node instanceof CssTree.Declaration ||
         chain.node instanceof CssTree.Import) {
       if (chain.getParentNode() instanceof CssTree.UserAgentHack) {
