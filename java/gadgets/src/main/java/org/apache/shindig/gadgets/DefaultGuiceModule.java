@@ -50,6 +50,7 @@ import org.apache.shindig.gadgets.variables.SubstituterModule;
 
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -68,7 +69,7 @@ public class DefaultGuiceModule extends AbstractModule {
 
     final ExecutorService service = Executors.newCachedThreadPool(DAEMON_THREAD_FACTORY);
     bind(ExecutorService.class).toInstance(service);
-    bind(ExecutorService.class).annotatedWith(Names.named("shindig.concat.executor")).toInstance(service);
+    bind(Executor.class).annotatedWith(Names.named("shindig.concat.executor")).toInstance(service);
 
     bindConstant().annotatedWith(Names.named("shindig.jsload.ttl-secs")).to(60 * 60); // 1 hour
 
