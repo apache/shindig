@@ -74,8 +74,10 @@ public class DefaultIframeUriManager implements IframeUriManager {
 
     Collection<String> containers = config.getContainers();
     List<String> ldSuffixes = Lists.newArrayListWithCapacity(containers.size());
-    for (String container : containers) {
-      ldSuffixes.add(getReqVal(container, LOCKED_DOMAIN_SUFFIX_KEY));
+    if (ldEnabled) {
+      for (String container : containers) {
+        ldSuffixes.add(getReqVal(container, LOCKED_DOMAIN_SUFFIX_KEY));
+      }
     }
     this.ldSuffixes = Collections.unmodifiableList(ldSuffixes);
   }
