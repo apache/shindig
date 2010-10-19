@@ -95,7 +95,6 @@ public class ImageAttributeRewriter extends DomWalker.Rewriter {
       return VisitStatus.BYPASS;
     }
 
-    @Override
     public boolean revisit(Gadget gadget, List<Node> nodes) throws RewritingException {
       if (nodes.size() == 0) {
         return false;
