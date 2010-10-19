@@ -48,6 +48,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 
 /**
  * An alternate implementation of the Http proxy service using the standard API dispatcher for REST
@@ -96,12 +97,15 @@ public class HttpRequestHandler {
 
   private final RequestPipeline requestPipeline;
   private final ResponseRewriterRegistry contentRewriterRegistry;
+  private final Provider<FeedProcessor> feedProcessorProvider;
 
   @Inject
   public HttpRequestHandler(RequestPipeline requestPipeline,
-      ResponseRewriterRegistry contentRewriterRegistry) {
+      ResponseRewriterRegistry contentRewriterRegistry,
+      Provider<FeedProcessor> feedProcessorProvider) {
     this.requestPipeline = requestPipeline;
     this.contentRewriterRegistry = contentRewriterRegistry;
+	this.feedProcessorProvider = feedProcessorProvider;
   }
 
 
@@ -298,7 +302,7 @@ public class HttpRequestHandler {
   /** Processes a feed (RSS or Atom) using FeedProcessor. */
   protected Object processFeed(HttpApiRequest req, String responseBody)
       throws GadgetException {
-    return new FeedProcessor().process(req.href.toString(), responseBody, req.summarize,
+    return feedProcessorProvider.get().process(req.href.toString(), responseBody, req.summarize,
         req.entryCount);
   }
 

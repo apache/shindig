@@ -32,6 +32,8 @@ import org.apache.shindig.common.JsonAssert;
 import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.AuthType;
+import org.apache.shindig.gadgets.FeedProcessor;
+import org.apache.shindig.gadgets.FeedProcessorImpl;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
@@ -60,6 +62,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.Provider;
 
 /**
  * Has coverage for all tests in MakeRequestHandlerTest and should be maintained in sync  until
@@ -82,6 +85,12 @@ public class HttpRequestHandlerTest extends EasyMockTestCase {
 
   private final Map<String,FormDataItem> emptyFormItems = Collections.emptyMap();
 
+  private final Provider<FeedProcessor> feedProcessorProvider = new Provider<FeedProcessor>() {
+        public FeedProcessor get() {
+            return new FeedProcessorImpl();
+        }
+  };
+  
   @Before
   public void setUp() throws Exception {
     token = new FakeGadgetToken();
@@ -90,7 +99,7 @@ public class HttpRequestHandlerTest extends EasyMockTestCase {
     Injector injector = Guice.createInjector();
     converter = new BeanJsonConverter(injector);
 
-    HttpRequestHandler handler = new HttpRequestHandler(pipeline, rewriterRegistry);
+    HttpRequestHandler handler = new HttpRequestHandler(pipeline, rewriterRegistry, feedProcessorProvider);
     registry = new DefaultHandlerRegistry(injector, converter,
         new HandlerExecutionListener.NoOpHandler());
     registry.addHandlers(ImmutableSet.<Object>of(handler));

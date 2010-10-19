@@ -26,9 +26,9 @@ import org.json.JSONObject;
 import org.junit.Test;
 
 /**
- * Tests for FeedProcessor
+ * Tests for FeedProcessorImpl
  */
-public class FeedProcessorTest {
+public class FeedProcessorImplTest {
 
   private final static String FEED_TITLE = "Example Feed";
   private final static String FEED_AUTHOR = "John Doe";
@@ -162,10 +162,10 @@ public class FeedProcessorTest {
   private final static String BAD_XML = "broken xml !!!! & ><";
   private final static String INVALID_XML = "<data><foo/></data>";
 
-  private final FeedProcessor processor;
+  private final FeedProcessorImpl processor;
 
-  public FeedProcessorTest() {
-    processor = new FeedProcessor();
+  public FeedProcessorImplTest() {
+    processor = new FeedProcessorImpl();
   }
 
   @Test

@@ -51,7 +51,7 @@ public class MakeRequestServletTest extends ServletTestFixture {
       = Collections.enumeration(Collections.<String>emptyList());
 
   private final MakeRequestServlet servlet = new MakeRequestServlet();
-  private final MakeRequestHandler handler = new MakeRequestHandler(pipeline, null);
+  private final MakeRequestHandler handler = new MakeRequestHandler(pipeline, null, feedProcessorProvider);
 
   private final HttpRequest internalRequest = new HttpRequest(REQUEST_URL);
   private final HttpResponse internalResponse = new HttpResponse(RESPONSE_BODY);
