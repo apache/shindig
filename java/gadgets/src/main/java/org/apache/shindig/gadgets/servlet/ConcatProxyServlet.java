@@ -20,6 +20,7 @@ package org.apache.shindig.gadgets.servlet;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
+import com.google.common.collect.Lists;
 
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
@@ -31,6 +32,8 @@ import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.http.MultipleResourceHttpFetcher;
+import org.apache.shindig.gadgets.http.MultipleResourceHttpFetcher.RequestContext;
 import org.apache.shindig.gadgets.http.RequestPipeline;
 import org.apache.shindig.gadgets.rewrite.ResponseRewriterRegistry;
 import org.apache.shindig.gadgets.rewrite.RewritingException;
@@ -38,9 +41,7 @@ import org.apache.shindig.gadgets.uri.ConcatUriManager;
 import org.apache.shindig.gadgets.uri.UriCommon.Param;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.FutureTask;
@@ -172,17 +173,12 @@ public class ConcatProxyServlet extends InjectedServlet {
       cos = new VerbatimConcatOutputStream(response.getOutputStream());
     }
 
-    List<Pair<Uri, FutureTask<RequestContext>>> futureTasks =
-        new ArrayList<Pair<Uri, FutureTask<RequestContext>>>();
+    List<HttpRequest> requests = Lists.newArrayList();
 
     try {
       for (Uri resourceUri : concatUri.getBatch()) {
         try {
-          HttpRequest httpReq = concatUri.makeHttpRequest(resourceUri);
-          FutureTask<RequestContext> httpFetcher =
-                  new FutureTask<RequestContext>(new HttpFetchCallable(httpReq));
-          futureTasks.add(Pair.of(httpReq.getUri(), httpFetcher));
-          executor.execute(httpFetcher);
+          requests.add(concatUri.makeHttpRequest(resourceUri));
         } catch (GadgetException ge) {
           if (cos.outputError(resourceUri, ge)) {
             // True returned from outputError indicates a terminal error.
@@ -190,6 +186,10 @@ public class ConcatProxyServlet extends InjectedServlet {
           }
         }
       }
+
+      MultipleResourceHttpFetcher parallelFetcher =
+          new MultipleResourceHttpFetcher(requestPipeline, executor);
+      List<Pair<Uri, FutureTask<RequestContext>>> futureTasks = parallelFetcher.fetchAll(requests);
 
       for (Pair<Uri, FutureTask<RequestContext>> futureTask : futureTasks) {
         RequestContext requestCxt = null;
@@ -358,51 +358,6 @@ public class ConcatProxyServlet extends InjectedServlet {
       super.close();
     }
 
-  }
-
-  // Encapsulates the response context of a single resource fetch.
-  private static class RequestContext {
-    private final HttpRequest httpReq;
-    private final HttpResponse httpResp;
-    private final GadgetException gadgetException;
-
-    public HttpRequest getHttpReq() {
-      return httpReq;
-    }
-
-    public HttpResponse getHttpResp() {
-      return httpResp;
-    }
-
-    public GadgetException getGadgetException() {
-      return gadgetException;
-    }
-
-    public RequestContext(HttpRequest httpReq, HttpResponse httpResp, GadgetException ge) {
-      this.httpReq = httpReq;
-      this.httpResp = httpResp;
-      this.gadgetException = ge;
-    }
-  }
-
-  // Worker class responsible for fetching a single resource.
-  public class HttpFetchCallable implements Callable<RequestContext> {
-    private final HttpRequest httpReq;
-
-    public HttpFetchCallable(HttpRequest httpReq) {
-      this.httpReq = httpReq;
-    }
-
-    public RequestContext call() {
-      HttpResponse httpResp = null;
-      GadgetException gEx = null;
-      try {
-        httpResp = requestPipeline.execute(httpReq);
-      } catch (GadgetException ge){
-        gEx = ge;
-      }
-      return new RequestContext(httpReq, httpResp, gEx);
-    }
   }
 }
 
