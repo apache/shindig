@@ -57,7 +57,7 @@ public class MutableContent {
   private HttpResponse contentSource;
 
   private Document document;
-  private int numChanges;
+  private int numChanges = 0;
   private final GadgetHtmlParser contentParser;
   private Map<String, Object> pipelinedData;
 
@@ -77,7 +77,6 @@ public class MutableContent {
   public MutableContent(GadgetHtmlParser contentParser, String content) {
     this.contentParser = contentParser;
     this.content = content;
-    this.numChanges = 0;
     this.contentEncoding = Charsets.UTF_8;
   }
 
