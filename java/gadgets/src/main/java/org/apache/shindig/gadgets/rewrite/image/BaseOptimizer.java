@@ -26,6 +26,8 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.base.Objects;
 
+import com.sun.imageio.plugins.jpeg.JPEGImageWriter;
+
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -38,6 +40,7 @@ import javax.imageio.ImageIO;
 import javax.imageio.ImageTypeSpecifier;
 import javax.imageio.ImageWriteParam;
 import javax.imageio.ImageWriter;
+import javax.imageio.plugins.jpeg.JPEGImageWriteParam;
 import javax.imageio.metadata.IIOMetadata;
 
 /**
@@ -74,6 +77,10 @@ abstract class BaseOptimizer {
       if (getOriginalFormatName().equals("jpeg")) {
         param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
         param.setCompressionQuality(config.getJpegCompression());
+        if (param instanceof JPEGImageWriteParam) {
+          ((JPEGImageWriteParam) param).setOptimizeHuffmanTables(
+                config.getJpegHuffmanOptimization());
+        }
       }
       return new ImageIOOutputter(writer, param);
     }
@@ -161,11 +168,26 @@ abstract class BaseOptimizer {
         baos.reset();
       }
       writer.setOutput(ImageIO.createImageOutputStream(baos));
+      
       // Create a new empty metadata set
+      ImageWriteParam metaImageWriteParam = writeParam;
+      if (writer instanceof JPEGImageWriter) {
+        // There is an issue in the javax code because of which function call
+        // writer.getDefaultImageMetadata(new ImageTypeSpecifier(image.getColorModel(),
+        //    image.getSampleModel()), writeParam);
+        //
+        // does buggy processing for compression ratio parameter in ImageWriteParam. 
+        // Hence passing null as ImageWriteParam here to ignore this processing and
+        // passing the ImageWriteParam later in the writer.write() call.
+        metaImageWriteParam = null;
+      }
+
       IIOMetadata metadata = writer.getDefaultImageMetadata(
           new ImageTypeSpecifier(image.getColorModel(), image.getSampleModel()),
-          writeParam);
-      writer.write(new IIOImage(image, Collections.<BufferedImage>emptyList(), metadata));
+          metaImageWriteParam);
+      writer.write(null, new IIOImage(image, Collections.<BufferedImage>emptyList(), metadata),
+                   metaImageWriteParam == null ? writeParam : null);
+
       return baos.toByteArray();
     }
   }

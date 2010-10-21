@@ -89,11 +89,9 @@ class PNGOptimizer extends BaseOptimizer {
             bufferedImage.getHeight(),
             BufferedImage.TYPE_INT_RGB);
         rgbOnlyImage.getGraphics().drawImage(bufferedImage, 0, 0, null);
-        ImageWriter writer = ImageIO.getImageWritersByFormatName("jpeg").next();
-        ImageWriteParam param = writer.getDefaultWriteParam();
-        param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
-        param.setCompressionQuality(config.getJpegCompression());
-        outputter = new ImageIOOutputter(writer, param);
+
+        JPEGOptimizer jpegOptimizer = new JPEGOptimizer(config, response);
+        outputter = jpegOptimizer.getOutputter();
         write(rgbOnlyImage);
         // Only use JPEG if it offers a significant reduction over other methods
         if (reductionPct > prevReductionPct + 20) {

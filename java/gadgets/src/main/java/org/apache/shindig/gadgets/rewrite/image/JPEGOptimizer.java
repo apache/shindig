@@ -62,7 +62,7 @@ public class JPEGOptimizer extends BaseOptimizer {
     // Create a new optimizer config and disable JPEG conversion
     OptimizerConfig pngConfig = new OptimizerConfig(config.getMaxInMemoryBytes(),
         config.getMaxPaletteSize(), false, config.getJpegCompression(),
-        config.getMinThresholdBytes());
+        config.getMinThresholdBytes(), config.getJpegHuffmanOptimization());
 
     // Output the image as PNG
     PNGOptimizer pngOptimizer = new PNGOptimizer(pngConfig, response);

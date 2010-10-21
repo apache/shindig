@@ -30,6 +30,7 @@ public class OptimizerConfig {
   private final boolean jpegConversionAllowed;
   private final float jpegCompression;
   private final int minThresholdBytes;
+  private final boolean jpegHuffmanOptimization;
 
   @Inject
   public OptimizerConfig(
@@ -37,7 +38,8 @@ public class OptimizerConfig {
       @Named("shindig.image-rewrite.max-palette-size") int maxPaletteSize,
       @Named("shindig.image-rewrite.allow-jpeg-conversion") boolean jpegConversionAllowed,
       @Named("shindig.image-rewrite.jpeg-compression") float jpegCompression,
-      @Named("shindig.image-rewrite.min-threshold-bytes") int minThresholdBytes) {
+      @Named("shindig.image-rewrite.min-threshold-bytes") int minThresholdBytes,
+      @Named("shindig.image-rewrite.jpeg-huffman-optimization") boolean jpegHuffmanOptimization) {
     this.maxInMemoryBytes = maxInMemoryBytes;
     this.maxPaletteSize = maxPaletteSize;
     this.jpegConversionAllowed = jpegConversionAllowed;
@@ -45,13 +47,14 @@ public class OptimizerConfig {
     // to attempt nor is it too lossy.
     this.jpegCompression = Math.min(0.9f,Math.max(0.5f, jpegCompression));
     this.minThresholdBytes = minThresholdBytes;
+    this.jpegHuffmanOptimization = jpegHuffmanOptimization;
   }
 
   /**
-   * Defaults for usuage in tests.
+   * Defaults for usage in tests.
    */
   public OptimizerConfig() {
-    this(1024 * 1024, 256, true, 0.90f, 200);
+    this(1024 * 1024, 256, true, 0.90f, 200, false);
   }
 
   /**
@@ -91,5 +94,12 @@ public class OptimizerConfig {
    */
   public int getMinThresholdBytes() {
     return minThresholdBytes;
+  }
+
+  /**
+   * Indicate if we want to do huffman optimization while enocding the jpeg's.
+   */
+  public boolean getJpegHuffmanOptimization() {
+    return jpegHuffmanOptimization;
   }
 }

@@ -29,19 +29,19 @@ public class OptimizerConfigTest {
 
   @Test
   public void testForHighJpegCompression() {
-    OptimizerConfig config = new OptimizerConfig(1024 * 1024, 256, true, 1.00f, 200);
+    OptimizerConfig config = new OptimizerConfig(1024 * 1024, 256, true, 1.00f, 200, false);
     assertEquals(0.9f, config.getJpegCompression(), 0.0001);
   }
 
   @Test
   public void testForLowJpegCompression() {
-    OptimizerConfig config = new OptimizerConfig(1024 * 1024, 256, true, 0.10f, 200);
+    OptimizerConfig config = new OptimizerConfig(1024 * 1024, 256, true, 0.10f, 200, false);
     assertEquals(0.5f, config.getJpegCompression() , 0.0001);
   }
 
   @Test
   public void testForAcceptableJpegCompression() {
-    OptimizerConfig config = new OptimizerConfig(1024 * 1024, 256, true, 0.85f, 200);
+    OptimizerConfig config = new OptimizerConfig(1024 * 1024, 256, true, 0.85f, 200, false);
     assertEquals(0.85f, config.getJpegCompression(), 0.0001);
   }
 }
