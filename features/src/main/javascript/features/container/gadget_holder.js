@@ -160,7 +160,7 @@ shindig.container.GadgetHolder.prototype.setSecurityToken = function(value) {
  * Render a gadget into the element.
  * @param {Object} gadgetInfo the JSON gadget description.
  * @param {Object} viewParams Look at shindig.container.ViewParam.
- * @param {Object} renderParams. Look at shindig.container.RenderParam.
+ * @param {Object} renderParams Look at shindig.container.RenderParam.
  */
 shindig.container.GadgetHolder.prototype.render = function(
     gadgetInfo, viewParams, renderParams) {
@@ -179,8 +179,8 @@ shindig.container.GadgetHolder.prototype.render = function(
       .setSchema(iframeUri.getSchema())
       .setAuthority(iframeUri.getAuthority())
       .setPath('/gadgets/files/container/rpc_relay.html');
-  gadgets.rpc.setRelayUrl(this.iframeId_, relayUri.toString());
-  gadgets.rpc.setAuthToken(this.iframeId_, iframeUri.getFP('rpctoken'));
+  gadgets.rpc.setupReceiver(this.iframeId_, relayUri.toString(),
+      iframeUri.getFP('rpctoken'));
 };
 
 
