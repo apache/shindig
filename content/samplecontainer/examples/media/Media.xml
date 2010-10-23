@@ -21,6 +21,18 @@
     <ModulePrefs title="Albums and MediaItems">
         <Require feature="osapi"/>
         <Require feature="dynamic-height"/>
+        <Require feature="pubsub-2">
+		  <Param name="topics">
+		    <![CDATA[ 
+		    <Topic title="MediaItem Created" name="org.apache.shindig.mediaItem.created" description="Publishes MediaItem created events." type="org.opensocial.data.mediaItem" publish="true"/>
+		    <Topic title="MediaItem Updated" name="org.apache.shindig.mediaItem.updated" description="Publishes MediaItem updated events." type="org.opensocial.data.mediaItem" publish="true"/>
+		    <Topic title="MediaItem Deleted" name="org.apache.shindig.mediaItem.deleted" description="Publishes MediaItem deleted events." type="org.opensocial.data.mediaItem" publish="true"/>
+		    <Topic title="Album Created" name="org.apache.shindig.album.created" description="Publishes Album created events." type="org.opensocial.data.album" publish="true">
+		    <Topic title="Album Updated" name="org.apache.shindig.album.updated" description="Publishes Album updated events." type="org.opensocial.data.album" publish="true">
+		    <Topic title="Album Deleted" name="org.apache.shindig.album.deleted" description="Publishes Album deleted events." type="org.opensocial.data.album" publish="true">
+		    ]]>
+		  </Param>
+		</Require>
     </ModulePrefs>
     
     <Content type="html"><![CDATA[

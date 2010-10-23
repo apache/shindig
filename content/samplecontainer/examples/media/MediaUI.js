@@ -346,11 +346,13 @@ function MediaUI(social) {
             };
             if (album == null) {
                 social.createAlbum(viewer.id, newAlbum, function(response) {
+                	publish("org.apache.shindig.album.created", newAlbum);
                     console.log('created album response: ' + JSON.stringify(response));
                     renderAlbumsByUser(viewer.id);
                 });
             } else {
                 social.updateAlbum(viewer.id, album.id, newAlbum, function(response) {
+                	publish("org.apache.shindig.album.updated", newAlbum);
                     console.log('updated album response: ' + JSON.stringify(response));
                     renderAlbumsByUser(viewer.id);
                 });
@@ -468,6 +470,7 @@ function MediaUI(social) {
             if (newMediaItem.type == null || newMediaItem.type == "") newMediaItem.type = "image";
             if (mediaItem == null) {
                 social.createMediaItem(viewer.id, albumId, newMediaItem, function(response) {
+                	publish("org.apache.shindig.mediaItem.created", newMediaItem);
                     console.log('created MediaItem response: ' + JSON.stringify(response));
                     social.getMediaItemsByAlbum(viewer.id, album.id, function(response) {
                         renderMediaItems(album, response.list);
@@ -475,6 +478,7 @@ function MediaUI(social) {
                 });
             } else {
                 social.updateMediaItem(viewer.id, albumId, mediaItem.id, newMediaItem, function(response) {
+                	publish("org.apache.shindig.mediaItem.updated", newMediaItem);
                     console.log('updated MediaItem response: ' + JSON.stringify(response));
                     social.getMediaItemsByAlbum(viewer.id, album.id, function(response) {
                         renderMediaItems(album, response.list);
@@ -500,6 +504,7 @@ function MediaUI(social) {
         console.log('deleteAlbumPopup');
         if (confirm("Delete '" + album.title + "'?")) {
             social.deleteAlbum(viewer.id, album.id, function(response) {
+            	publish("org.apache.shindig.album.deleted", album);
                 console.log('delete album response: ' + JSON.stringify(response));
                 renderAlbumsByUser(viewer.id);
             });
@@ -514,11 +519,19 @@ function MediaUI(social) {
         var albumId = mediaItem.albumId;
         if (confirm("Delete '" + mediaItem.title + "'?")) {
             social.deleteMediaItem(viewer.id, albumId, mediaItem.id, function(response) {
+            	publish("org.apache.shindig.mediaItem.deleted", mediaItem);
                 console.log('delete mediaItem response: ' + JSON.stringify(response));
                 social.getMediaItemsByAlbum(viewer.id, albumId, function(response) {
                     renderMediaItems(album, response.list);
                 });
             });
         }
+    }
+    
+    /*
+     * Publishers.
+     */
+    function publish(topic, payload) {
+    	gadgets.Hub.publish(topic, payload);
     }
 }
