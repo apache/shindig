@@ -19,6 +19,7 @@
 package org.apache.shindig.gadgets.servlet;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
 import org.apache.commons.lang.StringUtils;
@@ -72,12 +73,15 @@ public class MakeRequestHandler {
 
   private final RequestPipeline requestPipeline;
   private final ResponseRewriterRegistry contentRewriterRegistry;
+  private final Provider<FeedProcessor> feedProcessorProvider;
 
   @Inject
   public MakeRequestHandler(RequestPipeline requestPipeline,
-      ResponseRewriterRegistry contentRewriterRegistry) {
+      ResponseRewriterRegistry contentRewriterRegistry,
+      Provider<FeedProcessor> feedProcessorProvider) {
     this.requestPipeline = requestPipeline;
     this.contentRewriterRegistry = contentRewriterRegistry;
+	this.feedProcessorProvider = feedProcessorProvider;
   }
 
   /**
@@ -273,7 +277,7 @@ public class MakeRequestHandler {
       throw new GadgetException(GadgetException.Code.INVALID_PARAMETER,
           "numEntries paramater is not a number", HttpResponse.SC_BAD_REQUEST);
     }
-    return new FeedProcessor().process(url, xml, getSummaries, numEntries).toString();
+    return feedProcessorProvider.get().process(url, xml, getSummaries, numEntries).toString();
   }
 
   /**

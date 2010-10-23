@@ -26,9 +26,9 @@ import org.json.JSONObject;
 import org.junit.Test;
 
 /**
- * Tests for FeedProcessor
+ * Tests for FeedProcessorImpl
  */
-public class FeedProcessorTest {
+public class FeedProcessorImplTest {
 
   private final static String FEED_TITLE = "Example Feed";
   private final static String FEED_AUTHOR = "John Doe";
@@ -154,8 +154,8 @@ public class FeedProcessorTest {
 
   private final FeedProcessor processor;
 
-  public FeedProcessorTest() {
-    processor = new FeedProcessor();
+  public FeedProcessorImplTest() {
+    processor = new FeedProcessorImpl();
   }
 
   @Test
