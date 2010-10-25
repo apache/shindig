@@ -88,9 +88,10 @@ public class PersonHandlerTest extends EasyMockTestCase {
     converter = mock(BeanJsonConverter.class);
     personService = mock(PersonService.class);
     JSONObject config = new JSONObject('{' + ContainerConfig.DEFAULT_CONTAINER + ':' +
-            "{'gadgets.features':{opensocial:" +
-               "{supportedFields: {person: ['id', {name: 'familyName'}]}}" +
-             "}}}");
+        "{'gadgets.container': ['default']," +
+         "'gadgets.features':{opensocial:" +
+           "{supportedFields: {person: ['id', {name: 'familyName'}]}}" +
+         "}}}");
 
     containerConfig = new JsonContainerConfig(config, Expressions.forTesting());
     handler = new PersonHandler(personService, containerConfig);

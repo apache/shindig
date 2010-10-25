@@ -25,7 +25,11 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Base class for container configurations.
+ * Base class for fake objects in tests involving container configurations.
+ *
+ * @deprecated Please create and populate {@link BasicContainerConfig} or
+ *             {@link ExpressionContainerConfig} objects instead of subclassing
+ *             {@link AbstractContainerConfig}.
  */
 public abstract class AbstractContainerConfig implements ContainerConfig {
   public String getString(String container, String property) {
@@ -70,6 +74,10 @@ public abstract class AbstractContainerConfig implements ContainerConfig {
     return Collections.emptyMap();
   }
 
+  public Transaction newTransaction() {
+    throw new UnsupportedOperationException();
+  }
+  
   public Collection<String> getContainers() {
     throw new UnsupportedOperationException();
   }

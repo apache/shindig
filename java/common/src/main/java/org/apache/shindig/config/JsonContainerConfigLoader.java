@@ -1,0 +1,289 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+package org.apache.shindig.config;
+
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
+
+import org.apache.commons.lang.StringUtils;
+import org.apache.shindig.common.util.ResourceLoader;
+import org.apache.shindig.config.ContainerConfig.Transaction;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.regex.Pattern;
+
+/**
+ * A class to build container configurations from JSON notation.
+ *
+ * See config/container.js for an example configuration.
+ *
+ * We use a cascading model, so you only have to specify attributes in your
+ * config that you actually want to change.
+ *
+ * String values may use expressions. The variable context defaults to the
+ * 'current' container, but parent values may be accessed through the special
+ * "parent" property.
+ */
+public class JsonContainerConfigLoader {
+
+  private static final Logger LOG = Logger.getLogger(JsonContainerConfigLoader.class.getName());
+  private static final Pattern CRLF_PATTERN = Pattern.compile("[\r\n]+");
+
+  public static final char FILE_SEPARATOR = ',';
+  public static final String SERVER_PORT = "SERVER_PORT";
+  public static final String SERVER_HOST = "SERVER_HOST";
+
+  private JsonContainerConfigLoader() {
+  }
+
+  /**
+   * Creates a transaction to append the contents of one or more files or
+   * resources to an existing configuration.
+   *
+   * @param containers The comma-separated list of files or resources to load
+   *        the container configurations from.
+   * @param host The hostname where Shindig is running.
+   * @param port The port number where Shindig is receiving requests.
+   * @param containerConfig The container configuration to add the contents of
+   *        the file to.
+   * @return A transaction to add the new containers to the configuration.
+   * @throws ContainerConfigException If there was a problem reading the files.
+   */
+  public static Transaction getTransactionFromFile(
+      String containers, String host, String port, ContainerConfig containerConfig)
+      throws ContainerConfigException {
+    return addToTransactionFromFile(containers, host, port, containerConfig.newTransaction());
+  }
+
+  /**
+   * Appends the contents of one or more files or resources to an transaction.
+   *
+   * @param containers The comma-separated list of files or resources to load
+   *        the container configurations from.
+   * @param host The hostname where Shindig is running.
+   * @param port The port number where Shindig is receiving requests.
+   * @param transaction The transaction to add the contents of the file to.
+   * @return The transaction, to allow chaining.
+   * @throws ContainerConfigException If there was a problem reading the files.
+   */
+  public static Transaction addToTransactionFromFile(
+      String containers, String host, String port, Transaction transaction)
+      throws ContainerConfigException {
+    List<Map<String, Object>> config = loadContainers(containers);
+    addHostAndPortToDefaultContainer(config, host, port);
+    addContainersToTransaction(transaction, config);
+    return transaction;
+  }
+
+  /**
+   * Parses a container in JSON notation.
+   *
+   * @param json The container configuration in JSON notation.
+   * @return A parsed container configuration.
+   */
+  public static Map<String, Object> parseJsonContainer(JSONObject json) {
+    return jsonToMap(json);
+  }
+
+  /**
+   * Parses a container in JSON notation.
+   *
+   * @param json The container configuration in JSON notation.
+   * @return A parsed container configuration.
+   * @throws JSONException If there was a problem parsing the container.
+   */
+  public static Map<String, Object> parseJsonContainer(String json) throws JSONException {
+    return parseJsonContainer(new JSONObject(json));
+  }
+
+  /**
+   * Loads containers from the specified resource. Follows the same rules as
+   * {@code JsFeatureLoader.loadFeatures} for locating resources.
+   *
+   * @param path
+   * @throws ContainerConfigException
+   */
+  private static List<Map<String, Object>> loadContainers(String path)
+      throws ContainerConfigException {
+    List<Map<String, Object>> all = Lists.newArrayList();
+    try {
+      for (String location : StringUtils.split(path, FILE_SEPARATOR)) {
+        if (location.startsWith("res://")) {
+          location = location.substring(6);
+          LOG.info("Loading resources from: " + location);
+          if (path.endsWith(".txt")) {
+            loadResources(CRLF_PATTERN.split(ResourceLoader.getContent(location)), all);
+          } else {
+            loadResources(new String[] {location}, all);
+          }
+        } else {
+          LOG.info("Loading files from: " + location);
+          File file = new File(location);
+          loadFiles(new File[] {file}, all);
+        }
+      }
+
+      return all;
+    } catch (IOException e) {
+      throw new ContainerConfigException(e);
+    }
+  }
+
+  /**
+   * Loads containers from directories recursively.
+   *
+   * Only files with a .js or .json extension will be loaded.
+   *
+   * @param files The files to examine.
+   * @throws ContainerConfigException
+   */
+  private static void loadFiles(File[] files, List<Map<String, Object>> all)
+      throws ContainerConfigException {
+    for (File file : files) {
+      try {
+        if (file == null) continue;
+        LOG.info("Reading container config: " + file.getName());
+        if (file.isDirectory()) {
+          loadFiles(file.listFiles(), all);
+        } else if (file.getName().toLowerCase(Locale.ENGLISH).endsWith(".js")
+            || file.getName().toLowerCase(Locale.ENGLISH).endsWith(".json")) {
+          if (!file.exists()) {
+            throw new ContainerConfigException(
+                "The file '" + file.getAbsolutePath() + "' doesn't exist.");
+          }
+          all.add(loadFromString(ResourceLoader.getContent(file)));
+        } else {
+          if (LOG.isLoggable(Level.FINEST))
+            LOG.finest(file.getAbsolutePath() + " doesn't seem to be a JS or JSON file.");
+        }
+      } catch (IOException e) {
+        throw new ContainerConfigException(
+            "The file '" + file.getAbsolutePath() + "' has errors", e);
+      }
+    }
+  }
+
+  /**
+   * Loads resources recursively.
+   *
+   * @param files The base paths to look for container.xml
+   * @throws ContainerConfigException
+   */
+  private static void loadResources(String[] files, List<Map<String, Object>> all)
+      throws ContainerConfigException {
+    try {
+      for (String entry : files) {
+        LOG.info("Reading container config: " + entry);
+        String content = ResourceLoader.getContent(entry);
+        if (content == null || content.length() == 0)
+          throw new IOException("The file " + entry + "is empty");
+        all.add(loadFromString(content));
+      }
+    } catch (IOException e) {
+      throw new ContainerConfigException(e);
+    }
+  }
+
+  /**
+   * Processes a container file.
+   *
+   * @param json
+   * @throws ContainerConfigException
+   */
+  private static Map<String, Object> loadFromString(String json) throws ContainerConfigException {
+    try {
+      return jsonToMap(new JSONObject(json));
+    } catch (JSONException e) {
+      LOG.warning("Trouble parsing " + json);
+      throw new ContainerConfigException("Trouble parsing " + json, e);
+    }
+  }
+
+  /**
+   * Convert a JSON value to a configuration value.
+   */
+  private static Object jsonToConfig(Object json) {
+    if (JSONObject.NULL.equals(json)) {
+      return null;
+    } else if (json instanceof CharSequence) {
+      return json.toString();
+    } else if (json instanceof JSONArray) {
+      JSONArray jsonArray = (JSONArray) json;
+      List<Object> values = new ArrayList<Object>(jsonArray.length());
+      for (int i = 0, j = jsonArray.length(); i < j; ++i) {
+        values.add(jsonToConfig(jsonArray.opt(i)));
+      }
+      return Collections.unmodifiableList(values);
+    } else if (json instanceof JSONObject) {
+      return jsonToMap((JSONObject) json);
+    }
+
+    // A (boxed) primitive.
+    return json;
+  }
+
+  private static Map<String, Object> jsonToMap(JSONObject json) {
+    Map<String, Object> values = new HashMap<String, Object>(json.length(), 1);
+    for (String key : JSONObject.getNames(json)) {
+      Object val = jsonToConfig(json.opt(key));
+      if (val != null) {
+        values.put(key, val);
+      }
+    }
+    return Collections.unmodifiableMap(values);
+  }
+
+  private static void addHostAndPortToDefaultContainer(
+      List<Map<String, Object>> config, String host, String port) {
+    for (int i = 0, j = config.size(); i < j; ++i) {
+      Map<String, Object> container = config.get(i);
+      @SuppressWarnings("unchecked")
+      List<String> names = (List<String>) container.get(ContainerConfig.CONTAINER_KEY);
+      if (names != null && names.contains(ContainerConfig.DEFAULT_CONTAINER)) {
+        container = ImmutableMap
+            .<String, Object>builder()
+            .putAll(container)
+            .put(SERVER_PORT, port)
+            .put(SERVER_HOST, host)
+            .build();
+        config.set(i, container);
+      }
+    }
+  }
+
+  private static void addContainersToTransaction(
+      Transaction transaction, List<Map<String, Object>> config) {
+    for (Map<String, Object> container : config) {
+      transaction.addContainer(container);
+    }
+  }
+}

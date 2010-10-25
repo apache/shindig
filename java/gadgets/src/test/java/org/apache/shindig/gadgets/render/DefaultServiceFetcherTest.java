@@ -24,6 +24,7 @@ import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
 
 import org.apache.shindig.common.EasyMockTestCase;
+import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.config.JsonContainerConfig;
 import org.apache.shindig.expressions.Expressions;
 import org.apache.shindig.expressions.Functions;
@@ -82,6 +83,7 @@ public class DefaultServiceFetcherTest extends EasyMockTestCase {
     endpoints.put(DefaultServiceFetcher.OSAPI_BASE_ENDPOINTS,
         new JSONArray(ImmutableList.of(endPoint1, endPoint2)));
     features.put(DefaultServiceFetcher.OSAPI_FEATURE_CONFIG, endpoints);
+    container.put(ContainerConfig.CONTAINER_KEY, new JSONArray("['default']"));
     container.put(DefaultServiceFetcher.GADGETS_FEATURES_CONFIG, features);
 
     config.put("default", container);

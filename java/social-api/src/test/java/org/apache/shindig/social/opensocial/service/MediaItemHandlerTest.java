@@ -51,9 +51,10 @@ public class MediaItemHandlerTest extends EasyMockTestCase {
     converter = mock(BeanJsonConverter.class);
     mediaService = mock(MediaItemService.class);
     JSONObject config = new JSONObject('{' + ContainerConfig.DEFAULT_CONTAINER + ':' +
-            "{'gadgets.features':{opensocial:" +
-               "{supportedFields: {mediaItem: ['id', 'language', 'title']}}" +
-             "}}}");
+        "{'gadgets.container': ['default']," +
+         "'gadgets.features':{opensocial:" +
+           "{supportedFields: {mediaItem: ['id', 'language', 'title']}}" +
+         "}}}");
 
     containerConfig = new JsonContainerConfig(config, Expressions.forTesting());
     handler = new MediaItemHandler(mediaService, containerConfig);

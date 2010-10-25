@@ -52,9 +52,10 @@ public class AlbumHandlerTest extends EasyMockTestCase {
     converter = mock(BeanJsonConverter.class);
     albumService = mock(AlbumService.class);
     JSONObject config = new JSONObject('{' + ContainerConfig.DEFAULT_CONTAINER + ':' +
-            "{'gadgets.features':{opensocial:" +
-               "{supportedFields: {album: ['id', 'title', 'location']}}" +
-             "}}}");
+        "{'gadgets.container': ['default']," +
+         "'gadgets.features':{opensocial:" +
+           "{supportedFields: {album: ['id', 'title', 'location']}}" +
+         "}}}");
 
     containerConfig = new JsonContainerConfig(config, Expressions.forTesting());
     handler = new AlbumHandler(albumService, containerConfig);
