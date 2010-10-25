@@ -41,13 +41,17 @@ tamings___.push(function(imports) {
   ___.grantRead(opensocial.Enum, 'Gender');
   ___.grantRead(opensocial.Enum, 'LookingFor');
   ___.grantRead(opensocial.Enum, 'Presence');
+  ___.grantRead(opensocial.Environment, 'ObjectType');
   ___.grantRead(opensocial.IdSpec, 'Field');
   ___.grantRead(opensocial.IdSpec, 'GroupId');
   ___.grantRead(opensocial.IdSpec, 'PersonId');
   ___.grantRead(opensocial.MediaItem, 'Field');
+  ___.grantRead(opensocial.MediaItem, 'Type');
   ___.grantRead(opensocial.Message, 'Field');
+  ___.grantRead(opensocial.Message, 'Type');
   ___.grantRead(opensocial.MessageCollection, 'Field');
   ___.grantRead(opensocial.Name, 'Field');
+  ___.grantRead(opensocial.NavigationParameters, 'DestinationType');
   ___.grantRead(opensocial.NavigationParameters, 'Field');
   ___.grantRead(opensocial.Organization, 'Field');
   ___.grantRead(opensocial.Person, 'Field');
