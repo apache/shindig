@@ -18,14 +18,14 @@
 package org.apache.shindig.gadgets.spec;
 
 import com.google.common.base.Objects;
-import org.apache.shindig.common.uri.Uri;
-import org.apache.shindig.common.xml.XmlUtil;
-import org.apache.shindig.gadgets.AuthType;
-import org.apache.shindig.gadgets.variables.Substitutions;
-
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 
+import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.common.uri.UriBuilder;
+import org.apache.shindig.common.xml.XmlUtil;
+import org.apache.shindig.gadgets.AuthType;
+import org.apache.shindig.gadgets.variables.Substitutions;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -160,6 +160,12 @@ public class View implements RequestAuthenticationInfo {
     content = substituter.substituteString(view.content);
     base = view.base;
     href = base.resolve(substituter.substituteUri(view.href));
+    
+    // Facilitates type=url support of dual-schema endpoints.
+    if (view.getType() == ContentType.URL && view.href.getScheme() == null) {
+      href = new UriBuilder(href).setScheme(null).toUri();
+    }
+    
     Map<String, String> attributes = Maps.newHashMap();
     for (Map.Entry<String, String> entry : view.attributes.entrySet()) {
       attributes.put(entry.getKey(), substituter.substituteString(entry.getValue()));

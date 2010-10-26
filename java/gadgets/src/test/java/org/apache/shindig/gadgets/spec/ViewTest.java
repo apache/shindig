@@ -19,17 +19,17 @@
 
 package org.apache.shindig.gadgets.spec;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.xml.XmlUtil;
 import org.apache.shindig.expressions.Expressions;
 import org.apache.shindig.expressions.RootELResolver;
 import org.apache.shindig.gadgets.variables.Substitutions;
 import org.apache.shindig.gadgets.variables.Substitutions.Type;
-
 import org.junit.Assert;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -195,9 +195,18 @@ public class ViewTest {
 
     View view = new View("test", Arrays.asList(XmlUtil.parse(xml)), SPEC_URL);
     view = view.substitute(substituter);
-    assertEquals(SPEC_URL.resolve(Uri.parse("/bar")), view.getHref());
+    assertEquals(Uri.parse("//example.org/bar"), view.getHref());
   }
 
+  @Test
+  public void testHrefWithoutSchemaResolution() throws Exception {
+    String href = "//xyz.com/gadget.xml";
+    String xml = "<Content type=\"url\" href=\"" + href + "\"/>";
+
+    View view = new View("test", Arrays.asList(XmlUtil.parse(xml)), SPEC_URL);
+    assertEquals(Uri.parse(href), view.getHref());
+  }
+  
   @Test
   public void authAttributes() throws Exception {
     String xml = "<Content type='html' sign_owner='false' sign_viewer='false' foo='bar' " +
