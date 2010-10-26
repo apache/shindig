@@ -39,6 +39,9 @@ import java.util.Set;
 
 public class SanitizingResponseRewriterTest extends RewriterTestBase {
   private static final Uri CONTENT_URI = Uri.parse("http://www.example.org/content");
+  private static final String PROXY_HOST = "proxy.com";
+  private static final String PROXY_PATH = "/gadgets/proxy";
+  private static final String PROXY_BASE = PROXY_HOST + PROXY_PATH;
 
   private String rewrite(HttpRequest request, HttpResponse response) throws Exception {
     request.setSanitizationRequested(true);
@@ -59,7 +62,7 @@ public class SanitizingResponseRewriterTest extends RewriterTestBase {
           new ContentRewriterFeature.DefaultConfig(
             ".*", "", "HTTP", "embed,img,script,link,style", false, false, false));
     return new SanitizingResponseRewriter(rewriterFeatureFactory,
-        new CajaCssSanitizer(new CajaCssParser()), new PassthruManager());
+        new CajaCssSanitizer(new CajaCssParser()), new PassthruManager(PROXY_HOST, PROXY_PATH));
   }
 
   @Test
@@ -82,7 +85,8 @@ public class SanitizingResponseRewriterTest extends RewriterTestBase {
     String sanitized = 
       // Resultant URL is just the "sanitized" version of same, since we're using
       // PassthruUriManager for testing purposes.
-      "@import url('http://www.evil.com/more.css?sanitize=1&rewriteMime=text%2Fcss');\n"
+      "@import url('http://" + PROXY_BASE + "?url="
+        + "http%3A%2F%2Fwww.evil.com%2Fmore.css&sanitize=1&rewriteMime=text%2Fcss');\n"
         + "A {\n"
         + "  font: BOLD\n"
         + '}';
@@ -100,7 +104,8 @@ public class SanitizingResponseRewriterTest extends RewriterTestBase {
     // The caja css sanitizer does *not* remove the initial colon in urls
     // since this does not work in IE
     String sanitized = 
-      "@import url('http://www.evil.com/more.css?sanitize=1&rewriteMime=text%2Fcss');\n"
+      "@import url('http://" + PROXY_BASE + "?url="
+        + "http%3A%2F%2Fwww.evil.com%2Fmore.css&sanitize=1&rewriteMime=text%2Fcss');\n"
         + "A {\n"
         + "  font: BOLD\n"
         + '}';

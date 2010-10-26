@@ -25,14 +25,12 @@ import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.gadgets.uri.ProxyUriManager;
 import org.apache.shindig.gadgets.uri.ProxyUriManager.ProxyUri;
-import org.apache.shindig.gadgets.uri.UriCommon.Param;
 import org.easymock.Capture;
 
 import org.junit.Before;
@@ -78,6 +76,8 @@ public class SanitizingProxyUriManagerTest {
     expect(uriManager.make(capture(uriCapture), capture(intCapture)))
         .andReturn(output).once();
     replay(uriManager);
+    expect(proxyUri.setSanitizeContent(true)).andReturn(proxyUri).once();
+    replay(proxyUri);
     
     SanitizingProxyUriManager rewriter = makeRewriter(null);
     List<Uri> returned = rewriter.make(input, refresh);
@@ -86,8 +86,7 @@ public class SanitizingProxyUriManagerTest {
     assertSame(uriCapture.getValue(), input);
     assertSame(intCapture.getValue(), refresh);
     assertEquals(1, returned.size());
-    assertEquals("1", returned.get(0).getQueryParameter(Param.SANITIZE.getKey()));
-    assertNull(returned.get(0).getQueryParameter(Param.REWRITE_MIME_TYPE.getKey()));
+    verify(proxyUri);
   }
   
   @Test
@@ -101,6 +100,9 @@ public class SanitizingProxyUriManagerTest {
     expect(uriManager.make(capture(uriCapture), capture(intCapture)))
         .andReturn(output).once();
     replay(uriManager);
+    expect(proxyUri.setSanitizeContent(true)).andReturn(proxyUri).once();
+    expect(proxyUri.setRewriteMimeType(mime)).andReturn(proxyUri).once();
+    replay(proxyUri);
     
     SanitizingProxyUriManager rewriter = makeRewriter(mime);
     List<Uri> returned = rewriter.make(input, refresh);
@@ -109,15 +111,15 @@ public class SanitizingProxyUriManagerTest {
     assertSame(uriCapture.getValue(), input);
     assertSame(intCapture.getValue(), refresh);
     assertEquals(1, returned.size());
-    assertEquals("1", returned.get(0).getQueryParameter(Param.SANITIZE.getKey()));
-    assertEquals(mime, returned.get(0).getQueryParameter(Param.REWRITE_MIME_TYPE.getKey()));
+    verify(proxyUri);
   }
   
   @Test
   public void makeList() throws Exception {
     Capture<List<ProxyUri>> uriCapture = new Capture<List<ProxyUri>>();
     Capture<Integer> intCapture = new Capture<Integer>();
-    List<ProxyUri> input = Lists.newArrayList(proxyUri);
+    ProxyUri proxyUri2 = createMock(ProxyUri.class);
+    List<ProxyUri> input = Lists.newArrayList(proxyUri, proxyUri2);
     Uri uri2 = new UriBuilder().toUri();
     List<Uri> output = Lists.newArrayList(uri, uri2);
     Integer refresh = new Integer(0);
@@ -125,6 +127,11 @@ public class SanitizingProxyUriManagerTest {
     expect(uriManager.make(capture(uriCapture), capture(intCapture)))
         .andReturn(output).once();
     replay(uriManager);
+    expect(proxyUri.setSanitizeContent(true)).andReturn(proxyUri).once();
+    expect(proxyUri.setRewriteMimeType(mime)).andReturn(proxyUri).once();
+    expect(proxyUri2.setSanitizeContent(true)).andReturn(proxyUri2).once();
+    expect(proxyUri2.setRewriteMimeType(mime)).andReturn(proxyUri2).once();
+    replay(proxyUri, proxyUri2);
     
     SanitizingProxyUriManager rewriter = makeRewriter(mime);
     List<Uri> returned = rewriter.make(input, refresh);
@@ -133,10 +140,7 @@ public class SanitizingProxyUriManagerTest {
     assertSame(uriCapture.getValue(), input);
     assertSame(intCapture.getValue(), refresh);
     assertEquals(2, returned.size());
-    assertEquals("1", returned.get(0).getQueryParameter(Param.SANITIZE.getKey()));
-    assertEquals(mime, returned.get(0).getQueryParameter(Param.REWRITE_MIME_TYPE.getKey()));
-    assertEquals("1", returned.get(1).getQueryParameter(Param.SANITIZE.getKey()));
-    assertEquals(mime, returned.get(1).getQueryParameter(Param.REWRITE_MIME_TYPE.getKey()));
+    verify(proxyUri, proxyUri2);
   }
   
   private SanitizingProxyUriManager makeRewriter(String mime) {

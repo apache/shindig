@@ -48,17 +48,25 @@ public class PassthruManager implements ProxyUriManager {
   public List<Uri> make(List<ProxyUri> resource, Integer forcedRefresh) {
     List<Uri> ctx = Lists.newArrayListWithCapacity(resource.size());
     for (ProxyUri res : resource) {
-      ctx.add(getUri(res.getResource()));
+      ctx.add(getUri(res));
     }
     return ImmutableList.copyOf(ctx);
   }
   
-  private Uri getUri(Uri src) {
+  private Uri getUri(ProxyUri src) {
     if (!doProxy) {
-      return src;
+      return src.getResource();
     }
-    return new UriBuilder().setScheme("http").setAuthority(proxyHost).setPath(proxyPath)
-        .addQueryParameter(Param.URL.getKey(), src.toString()).toUri();
+    UriBuilder builder =
+        new UriBuilder().setScheme("http").setAuthority(proxyHost).setPath(proxyPath)
+          .addQueryParameter(Param.URL.getKey(), src.getResource().toString());
+    if (src.sanitizeContent()) {
+      builder.addQueryParameter(Param.SANITIZE.getKey(), "1");
+    }
+    if (src.getRewriteMimeType() != null) {
+      builder.addQueryParameter(Param.REWRITE_MIME_TYPE.getKey(), src.getRewriteMimeType());
+    }
+    return builder.toUri();
   }
 
   public ProxyUri process(Uri uri) throws GadgetException {

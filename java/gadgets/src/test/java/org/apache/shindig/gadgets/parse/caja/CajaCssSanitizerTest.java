@@ -146,8 +146,8 @@ public class CajaCssSanitizerTest extends EasyMockTestCase {
     sanitizer.sanitize(styleSheet, DUMMY, gadgetContext, importRewriter, imageRewriter);
     assertStyleEquals(".xyz { " +
         "background: url('//www.mock.com/dir/proxy?container=mockContainer&gadget=http%3A%2F%2Fwww.example.org%2Fbase" +
-        "&debug=0&nocache=0&url=http%3A%2F%2Fwww.example.org%2Fimg.gif&" +
-        "sanitize=1&rewriteMime=image%2F%2a');}", styleSheet);
+        "&debug=0&nocache=0&rewriteMime=image%2F%2a&sanitize=1&" +
+        "url=http%3A%2F%2Fwww.example.org%2Fimg.gif');}", styleSheet);
   }
 
   @Test
@@ -157,8 +157,8 @@ public class CajaCssSanitizerTest extends EasyMockTestCase {
     sanitizer.sanitize(styleSheet, DUMMY, gadgetContext, importRewriter, imageRewriter);
     assertEquals(".xyz{" +
         "background:url('//www.mock.com/dir/proxy?container=mockContainer&gadget=http%3A%2F%2Fwww.example.org%2Fbase" +
-        "&debug=0&nocache=0&url=http%3A%2F%2Fwww.example.org%2Fimg.gif" +
-        "&sanitize=1&rewriteMime=image%2F%2a');}",
+        "&debug=0&nocache=0&rewriteMime=image%2F%2a&sanitize=1" +
+        "&url=http%3A%2F%2Fwww.example.org%2Fimg.gif');}",
         parser.serialize(styleSheet).replaceAll("\\s", ""));
   }
 
@@ -176,8 +176,8 @@ public class CajaCssSanitizerTest extends EasyMockTestCase {
     sanitizer.sanitize(styleSheet, DUMMY, gadgetContext, importRewriter, imageRewriter);
     assertEquals(".xyz{" +
         "background:url('//www.test.com/dir/proxy?container=default&gadget=http%3A%2F%2Fwww.example.org%2Fbase" +
-        "&debug=0&nocache=0&url=http%3A%2F%2Fwww.example.org%2Fimg.gif" +
-        "&sanitize=1&rewriteMime=image%2F%2a');}",
+        "&debug=0&nocache=0&rewriteMime=image%2F%2a&sanitize=1" +
+        "&url=http%3A%2F%2Fwww.example.org%2Fimg.gif');}",
         parser.serialize(styleSheet).replaceAll("\\s", ""));
   }
 
