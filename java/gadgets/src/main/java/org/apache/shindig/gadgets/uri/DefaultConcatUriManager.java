@@ -38,7 +38,7 @@ import java.util.Map;
 
 /**
  * Default implementation of a ConcatUriManager
- * 
+ *
  * @since 2.0.0
  */
 public class DefaultConcatUriManager implements ConcatUriManager {
@@ -46,21 +46,21 @@ public class DefaultConcatUriManager implements ConcatUriManager {
   public static final String CONCAT_PATH_PARAM = "gadgets.uri.concat.path";
   public static final String CONCAT_JS_SPLIT_PARAM = "gadgets.uri.concat.js.splitToken";
   public static final String CONCAT_JS_EVAL_TPL = "eval(%s['%s']);";
-  
+
   private static final ConcatUri BAD_URI =
       new ConcatUri(UriStatus.BAD_URI, null, null, null, null);
   private static final Integer START_INDEX = 1;
-  
+
   private final ContainerConfig config;
   private final Versioner versioner;
   private boolean strictParsing;
-  
+
   @Inject
   public DefaultConcatUriManager(ContainerConfig config, @Nullable Versioner versioner) {
     this.config = config;
     this.versioner = versioner;
   }
-  
+
   @Inject(optional = true)
   public void setUseStrictParsing(
       @Named("shindig.uri.concat.use-strict-parsing") boolean useStrict) {
@@ -70,45 +70,45 @@ public class DefaultConcatUriManager implements ConcatUriManager {
   public List<ConcatData> make(List<ConcatUri> resourceUris,
       boolean isAdjacent) {
     List<ConcatData> concatUris = Lists.newArrayListWithCapacity(resourceUris.size());
-    
+
     if (resourceUris.isEmpty()) {
       return concatUris;
     }
 
     ConcatUri exemplar = resourceUris.get(0);
     String container = exemplar.getContainer();
-    
+
     List<String> versions = null;
     List<List<Uri>> batches = Lists.newArrayListWithCapacity(resourceUris.size());
     for (ConcatUri ctx : resourceUris) {
       batches.add(ctx.getBatch());
     }
-    
+
     if (versioner != null) {
       versions = versioner.version(batches, container);
     }
-    
+
     Iterator<String> versionIt = versions != null ? versions.iterator() : null;
     for (ConcatUri ctx : resourceUris) {
       String version = versionIt != null ? versionIt.next() : null;
       concatUris.add(
           makeConcatUri(ctx, isAdjacent, version));
     }
-    
+
     return concatUris;
   }
-  
+
   private ConcatData makeConcatUri(ConcatUri ctx, boolean isAdjacent, String version) {
     // TODO: Consider per-bundle isAdjacent plus first-bundle direct evaluation
-    
+
     if (!isAdjacent && ctx.getType() != Type.JS) {
       // Split-concat is only supported for JS at the moment.
       // This situation should never occur due to ConcatLinkRewriter's implementation.
       throw new UnsupportedOperationException("Split concatenation only supported for JS");
     }
-    
+
     UriBuilder uriBuilder = ctx.makeQueryParams(null, version);
-    
+
     String concatHost = getReqVal(ctx.getContainer(), CONCAT_HOST_PARAM);
     String concatPath = getReqVal(ctx.getContainer(), CONCAT_PATH_PARAM);
     uriBuilder.setAuthority(concatHost);
@@ -117,7 +117,7 @@ public class DefaultConcatUriManager implements ConcatUriManager {
     uriBuilder.addQueryParameter(Param.TYPE.getKey(), ctx.getType().getType());
     List<Uri> resourceUris = ctx.getBatch();
     Map<Uri, String> snippets = Maps.newHashMapWithExpectedSize(resourceUris.size());
-    
+
     String splitParam = config.getString(ctx.getContainer(), CONCAT_JS_SPLIT_PARAM);
     boolean doSplit = false;
     if (!isAdjacent && splitParam != null && !"false".equalsIgnoreCase(splitParam)) {
@@ -133,15 +133,15 @@ public class DefaultConcatUriManager implements ConcatUriManager {
         snippets.put(resource, getJsSnippet(splitParam, resource));
       }
     }
-    
+
     return new ConcatData(uriBuilder.toUri(), snippets);
   }
-  
+
   static String getJsSnippet(String splitParam, Uri resource) {
     return String.format(CONCAT_JS_EVAL_TPL, splitParam,
         StringEscapeUtils.escapeJavaScript(resource.toString()));
   }
-  
+
   private String getReqVal(String container, String key) {
     String val = config.getString(container, key);
     if (val == null) {
@@ -156,7 +156,7 @@ public class DefaultConcatUriManager implements ConcatUriManager {
     if (strictParsing && container == null) {
       return BAD_URI;
     }
-    
+
     if (strictParsing) {
       String concatHost = getReqVal(container, CONCAT_HOST_PARAM);
       String concatPath = getReqVal(container, CONCAT_PATH_PARAM);
@@ -165,7 +165,7 @@ public class DefaultConcatUriManager implements ConcatUriManager {
         return BAD_URI;
       }
     }
-    
+
     // At this point the Uri is at least concat.
     UriStatus status = UriStatus.VALID_UNVERSIONED;
     List<Uri> uris = Lists.newLinkedList();
@@ -178,26 +178,31 @@ public class DefaultConcatUriManager implements ConcatUriManager {
       }
     }
     String splitParam = type == Type.JS ? uri.getQueryParameter(Param.JSON.getKey()) : null;
-    
+
     Integer i = Integer.valueOf(START_INDEX);
     String uriStr = null;
     while ((uriStr = uri.getQueryParameter(i.toString())) != null) {
       try {
-        uris.add(Uri.parse(uriStr));
+        Uri concatUri = Uri.parse(uriStr);
+        if (concatUri.getScheme() == null) {
+          // For non schema url, use the request schema:
+          concatUri = new UriBuilder(concatUri).setScheme(uri.getScheme()).toUri();
+        }
+        uris.add(concatUri);
       } catch (IllegalArgumentException e) {
         // Malformed inbound Uri. Don't process.
         return BAD_URI;
       }
       i++;
     }
-    
+
     if (versioner != null) {
       String version = uri.getQueryParameter(Param.VERSION.getKey());
       if (version != null) {
         status = versioner.validate(uris, container, version);
       }
     }
-    
+
     return new ConcatUri(status, uris, splitParam, type, uri);
   }
 

@@ -199,6 +199,10 @@ public class DefaultProxyUriManager implements ProxyUriManager {
             if (chainedChunks.length == 2 && chainedChunks[1].length() > 0) {
               endToken = chainedChunks[1];
             }
+            if (!endToken.endsWith("/")) {
+              // add suffix '/' that was added by the creator
+              endToken = endToken + "/";
+            }
 
             // Pull URI out of original inUri's full representation.
             String fullProxyUri = uriIn.toString();
@@ -211,10 +215,6 @@ public class DefaultProxyUriManager implements ProxyUriManager {
               }
               queryUri = new UriBuilder().setQuery(chainedQuery).toUri();
               uriStr = fullProxyUri.substring(endIx + endToken.length());
-              while (uriStr.startsWith("/")) {
-                uriStr = uriStr.substring(1);
-              }
-
             }
           }
         }
@@ -246,6 +246,10 @@ public class DefaultProxyUriManager implements ProxyUriManager {
 
     try {
       uri = Uri.parse(uriStr);
+      if (uri.getScheme() == null) {
+        // For non schema url, use the proxy schema:
+        uri = new UriBuilder(uri).setScheme(uriIn.getScheme()).toUri();
+      }
     } catch (Exception e) {
       // NullPointerException or InvalidArgumentException.
       throw new GadgetException(GadgetException.Code.INVALID_PARAMETER,

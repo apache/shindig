@@ -40,6 +40,7 @@ public class DefaultProxyUriManagerTest extends UriManagerTestBase {
   private static final Uri RESOURCE_1 = Uri.parse("http://example.com/one.dat?param=value");
   private static final Uri RESOURCE_2 = Uri.parse("http://gadgets.com/two.dat");
   private static final Uri RESOURCE_3 = Uri.parse("http://foobar.com/three.dat");
+  private static final Uri RESOURCE_4 = Uri.parse("//foobar.com/three.dat");
 
   @Test
   public void basicProxyQueryStyle() throws Exception {
@@ -58,6 +59,21 @@ public class DefaultProxyUriManagerTest extends UriManagerTestBase {
     List<Uri> uris = makeAndGet(host, path, debug, noCache, resources, version);
     assertEquals(1, uris.size());
     verifyQueryUri(RESOURCE_1, uris.get(0), debug, noCache, version, host, path);
+  }
+
+  @Test
+  public void testSchemaLessProxy() throws Exception {
+    boolean debug = false;
+    boolean noCache = false;
+    String version = "ver";
+    String host = "host.com";
+    String path = "/proxy/path";
+    List<Uri> resources = ImmutableList.<Uri>of(RESOURCE_4);
+    List<Uri> uris = makeAndGet(host, path, debug, noCache, resources, version);
+    assertEquals(1, uris.size());
+    verifyQueryUri(new UriBuilder(RESOURCE_4).setScheme("http").toUri(),
+        new UriBuilder(uris.get(0)).setScheme("http").toUri(),
+        debug, noCache, version, host, path);
   }
 
   @Test
