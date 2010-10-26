@@ -246,6 +246,26 @@ shindig.container.Container.prototype.getGadgetMetadata = function(
 
 
 /**
+ * @param {string} service name of RPC service to register.
+ * @param {Function} callback post-RPC function to call, with RPC-related
+ *                   arguments (with the calling GadgetSite augmented) and the
+ *                   callback response itself.
+ */
+shindig.container.Container.prototype.rpcRegister = function(service, callback) {
+  var self = this;
+  gadgets.rpc.register(service, function() {
+    // this['f'] is set by calling iframe via gadgets.rpc.
+    this[shindig.container.GadgetSite.RPC_ARG_KEY] = self.getGadgetSite(this['f']);
+    var argsCopy = [ this ];
+    for (var i = 0; i < arguments.length; ++i) {
+      argsCopy.push(arguments[i]);
+    }
+    callback.apply(self, argsCopy);
+  });
+};
+
+
+/**
  * Callback that occurs after instantiation/construction of this. Override to
  * provide your specific functionalities.
  * @param {Object=} opt_config Configuration JSON.
@@ -399,11 +419,11 @@ shindig.container.Container.prototype.isRefreshTokensEnabled_ = function() {
  * @private
  */
 shindig.container.Container.prototype.registerRpcServices_ = function() {
-  var self = this;
-  gadgets.rpc.register('resize_iframe', function(height) {
-    // this['f'] is set by calling iframe via gadgets.rpc.
-    var site = self.getGadgetSite(this['f']);
-    site.setHeight(height);
+  this.rpcRegister('resize_iframe', function(rpcArgs, data) {
+    var site = rpcArgs[shindig.container.GadgetSite.RPC_ARG_KEY];
+    if (site) { // Check if site is not already closed.
+      site.setHeight(data);
+    }
   });
 };
 
@@ -450,7 +470,6 @@ shindig.container.Container.prototype.getTokenRefreshableGadgetUrls_ =
 
   return shindig.container.util.toArrayOfJsonKeys(result);
 };
-
 
 
 /**

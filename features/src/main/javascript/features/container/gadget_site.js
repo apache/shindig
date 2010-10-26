@@ -195,7 +195,7 @@ shindig.container.GadgetSite.prototype.getParentId = function() {
  * Render a gadget in the site, by URI of the gadget XML.
  * @param {string} gadgetUrl The absolute URL to gadget.
  * @param {Object} viewParams Look at shindig.container.ViewParam.
- * @param {Object} renderParams. Look at shindig.container.RenderParam.
+ * @param {Object} renderParams Look at shindig.container.RenderParam.
  * @param {function(Object)=} opt_callback Function called with gadget info
  *     after navigation has occurred.
  */
@@ -222,7 +222,7 @@ shindig.container.GadgetSite.prototype.navigateTo = function(
  * Render a gadget in this site, using a JSON gadget description.
  * @param {Object} gadgetInfo the JSON gadget description.
  * @param {Object} viewParams Look at shindig.container.ViewParam.
- * @param {Object} renderParams. Look at shindig.container.RenderParam.
+ * @param {Object} renderParams Look at shindig.container.RenderParam.
  */
 shindig.container.GadgetSite.prototype.render = function(
     gadgetInfo, viewParams, renderParams) {
@@ -251,18 +251,11 @@ shindig.container.GadgetSite.prototype.render = function(
     throw [ 'Unsupported view ', view, ' for gadget ', gadgetInfo_['url'], '.' ].join('');
   }
 
-  var delayLoad = this.getFeature('loadstate', gadgetInfo) ||
-      this.getFeature('shell', gadgetInfo);
-
   var localRenderParams = {};
   for (var key in renderParams) {
     localRenderParams[key] = renderParams[key];
   }
 
-  // Delay load for now means we autosize.
-  if (delayLoad) {
-    localRenderParams[shindig.container.RenderParam.HEIGHT] = '0';
-  }
   localRenderParams[shindig.container.RenderParam.VIEW] = view;
   localRenderParams[shindig.container.RenderParam.HEIGHT]
       = renderParams[shindig.container.RenderParam.HEIGHT]
@@ -279,14 +272,26 @@ shindig.container.GadgetSite.prototype.render = function(
 
   this.loadingGadgetHolder_.render(gadgetInfo, viewParams, localRenderParams);
 
-  this.loaded_ = false;
+  this.onRender(gadgetInfo, viewParams, renderParams);
+};
 
-  // Resize on load only if load is delayed. If immediate, height is 0
-  this.resizeOnLoad_ = delayLoad;
 
-  if (!delayLoad) {
-    this.setLoadState_('loaded');
+/**
+ * Called when a gadget loads in the site. Uses double buffer, if present.
+ * @param {Object} gadgetInfo the JSON gadget description.
+ * @param {Object} viewParams Look at shindig.container.ViewParam.
+ * @param {Object} renderParams Look at shindig.container.RenderParam.
+ */
+shindig.container.GadgetSite.prototype.onRender = function(
+    gadgetInfo, viewParams, renderParams) {
+  this.swapBuffers_();
+
+  if (this.currentGadgetHolder_) {
+    this.currentGadgetHolder_.dispose();
   }
+
+  this.currentGadgetHolder_ = this.loadingGadgetHolder_;
+  this.loadingGadgetHolder_ = null;
 };
 
 
@@ -309,7 +314,7 @@ shindig.container.GadgetSite.prototype.rpcCall = function(
  * If token has been fetched at least once, set the token to the most recent
  * one. Otherwise, leave it.
  * @param {Object} gadgetInfo The gadgetInfo used to update security token.
- * @param {Object} renderParams. Look at shindig.container.RenderParam.
+ * @param {Object} renderParams Look at shindig.container.RenderParam.
  */
 shindig.container.GadgetSite.prototype.updateSecurityToken_
     = function(gadgetInfo, renderParams) {
@@ -351,46 +356,6 @@ shindig.container.GadgetSite.nextUniqueId_ = 0;
 
 
 /**
- * Sets the load state of the currently loading / visible gadget.
- * @param {string} state The current state.
- * @private
- */
-shindig.container.GadgetSite.prototype.setLoadState_ = function(state) {
-  if (!this.loaded_ && state == 'loaded') {
-    this.onload_();
-  }
-};
-
-
-/**
- * Called when a gadget loads in the site. Uses double buffer, if present.
- * @private
- */
-shindig.container.GadgetSite.prototype.onload_ = function() {
-  this.loaded_ = true;
-  try {
-    gadgets.rpc.call(this.loadingGadgetHolder_.getIframeId(), 'onLoad', null);
-    if (this.resizeOnLoad_) {
-      // TODO need a value for setHeight
-      this.setHeight();
-    }
-  } catch (e) {
-    // This can throw for same domain, although it shouldn't
-    gadgets.log(e);
-  }
-
-  this.swapBuffers_();
-
-  if (this.currentGadgetHolder_) {
-    this.currentGadgetHolder_.dispose();
-  }
-
-  this.currentGadgetHolder_ = this.loadingGadgetHolder_;
-  this.loadingGadgetHolder_ = null;
-};
-
-
-/**
  * Swap the double buffer elements, if there is a double buffer.
  * @private
  */
@@ -408,6 +373,13 @@ shindig.container.GadgetSite.prototype.swapBuffers_ = function() {
     this.loadingGadgetEl_ = oldCur;
   }
 };
+
+
+/**
+ * Key to identify the calling gadget site.
+ * @type {string}
+ */
+shindig.container.GadgetSite.RPC_ARG_KEY = 'gs';
 
 
 /**
