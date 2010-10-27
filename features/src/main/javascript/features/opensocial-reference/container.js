@@ -377,13 +377,13 @@ opensocial.Container.prototype.newFetchAlbumsRequest = function(idSpec, opt_para
 
 /**
  * Creates an item to request media items from the container.
- * 
+ *
  * @param {opensocial.IdSpec}
  *          idSpec An IdSpec used to specify which media items to fetch.
  * @param {string}
  *          albumId The id of the album to fetch MediaItems from.
  * @param {Object.<Object, Object>=} opt_params Additional parameters to pass to the request.
- * @return {Object} A request object
+ * @return {Object} A request object.
  */
 opensocial.Container.prototype.newFetchMediaItemsRequest = function(idSpec, opt_params) {};
 

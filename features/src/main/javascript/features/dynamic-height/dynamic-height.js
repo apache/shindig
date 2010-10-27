@@ -103,7 +103,7 @@ gadgets.window = gadgets.window || {};
       for (var i = 0; i < children.length; i++) {
         var child = children[i];
         if (typeof child.offsetTop !== 'undefined' &&
-            typeof child.offsetHeight  !== 'undefined') {
+            typeof child.offsetHeight !== 'undefined') {
           // offsetHeight already accounts for border-bottom, padding-bottom.
           var bottom = child.offsetTop + child.offsetHeight +
               parseIntFromElemPxAttribute(child, 'margin-bottom');

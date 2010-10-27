@@ -49,7 +49,7 @@
       // In case script URI is relative, resolve (make absolute) with container.
       window.__API_URI.resolve(window.__CONTAINER_URI);
     }
-    
+
     window.__CONTAINER = window.__API_URI
         ? window.__API_URI.getQP('container')
         : 'default';

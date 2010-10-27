@@ -215,8 +215,8 @@ opensocial.data.RequestDescriptor.prototype.register_ = function() {
  * @return {Object} The result of evaluation.
  */
 opensocial.data.DataContext.evalExpression = function(expr) {
-  return (new Function("context",
-      "with (context) return " + expr))(opensocial.data.DataContext.getData());
+  return (new Function('context',
+      'with (context) return ' + expr))(opensocial.data.DataContext.getData());
 };
 
 

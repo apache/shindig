@@ -177,8 +177,8 @@ shindig.container.Container.prototype.navigateGadget = function(
     // TODO: Should display error without doing a standard navigate.
     // TODO: Bad if the error gadget fails to load.
     if (gadgetInfo.error) {
-      throw [ 'Failed to possibly schedule token refresh for gadget ',
-          holder.getUrl(), '.' ].join('');
+      throw ['Failed to possibly schedule token refresh for gadget ',
+          holder.getUrl(), '.'].join('');
     }
     if (gadgetInfo[shindig.container.MetadataResponse.NEEDS_TOKEN_REFRESH]) {
       self.scheduleRefreshTokens_();
@@ -221,7 +221,7 @@ shindig.container.Container.prototype.preloadGadgets = function(gadgetUrls) {
   this.service_.getGadgetMetadata(request, function(response) {
     for (var id in response) {
       if (response[id].error) {
-        throw [ 'Failed to preload gadget ', id, '.' ].join('');
+        throw ['Failed to preload gadget ', id, '.'].join('');
       }
       self.addPreloadedGadgetUrl_(id);
       if (response[id][shindig.container.MetadatResponse.NEEDS_TOKEN_REFRESH]) {
@@ -256,7 +256,7 @@ shindig.container.Container.prototype.rpcRegister = function(service, callback) 
   gadgets.rpc.register(service, function() {
     // this['f'] is set by calling iframe via gadgets.rpc.
     this[shindig.container.GadgetSite.RPC_ARG_KEY] = self.getGadgetSite(this['f']);
-    var argsCopy = [ this ];
+    var argsCopy = [this];
     for (var i = 0; i < arguments.length; ++i) {
       argsCopy.push(arguments[i]);
     }
@@ -492,7 +492,7 @@ shindig.container.Container.prototype.refreshTokens_ = function() {
       if (gadgetInfo[shindig.container.MetadataResponse.NEEDS_TOKEN_REFRESH]) {
         var tokenInfo = response[holder.getUrl()];
         if (tokenInfo.error) {
-          throw [ 'Failed to get token for gadget ', holder.getUrl(), '.' ].join('');
+          throw ['Failed to get token for gadget ', holder.getUrl(), '.'].join('');
         }
         gadgets.rpc.call(holder.getIframeId(), 'update_security_token', null,
             tokenInfo[shindig.container.TokenResponse.TOKEN]);

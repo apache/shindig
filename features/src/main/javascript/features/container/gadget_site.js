@@ -207,7 +207,7 @@ shindig.container.GadgetSite.prototype.navigateTo = function(
   this.service_.getGadgetMetadata(request, function(response) {
     var gadgetInfo = response[gadgetUrl];
     if (gadgetInfo.error) {
-      var message = [ 'Failed to navigate for gadget ', gadgetUrl, '.' ].join(''); 
+      var message = ['Failed to navigate for gadget ', gadgetUrl, '.'].join('');
       shindig.container.util.warn(message);
     } else {
       self.render(gadgetInfo, viewParams, renderParams);
@@ -248,7 +248,7 @@ shindig.container.GadgetSite.prototype.render = function(
     viewInfo = gadgetInfo[shindig.container.MetadataResponse.VIEWS][view];
   }
   if (!viewInfo) {
-    throw [ 'Unsupported view ', view, ' for gadget ', gadgetInfo_['url'], '.' ].join('');
+    throw ['Unsupported view ', view, ' for gadget ', gadgetInfo_['url'], '.'].join('');
   }
 
   var localRenderParams = {};

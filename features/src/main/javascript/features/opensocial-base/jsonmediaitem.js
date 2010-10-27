@@ -20,7 +20,7 @@
 var JsonMediaItem = function(opt_params) {
   opt_params = opt_params || {};
 
-  opensocial.MediaItem.call(this, opt_params["mimeType"], opt_params["url"], opt_params);
+  opensocial.MediaItem.call(this, opt_params['mimeType'], opt_params['url'], opt_params);
 };
 
 JsonMediaItem.inherits(opensocial.MediaItem);

@@ -20,7 +20,7 @@
 var JsonAlbum = function(opt_params) {
   opt_params = opt_params || {};
 
-  JsonAlbum.constructObject(opt_params, "location", opensocial.Address);
+  JsonAlbum.constructObject(opt_params, 'location', opensocial.Address);
 
   opensocial.Album.call(this, opt_params);
 };

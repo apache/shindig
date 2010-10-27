@@ -79,7 +79,7 @@ opensocial.Album.Field = {
    *
    * @member opensocial.Album.Field
    */
-  MEDIA_ITEM_COUNT : 'mediaItemCount',
+  MEDIA_ITEM_COUNT: 'mediaItemCount',
 
 
   /**
@@ -87,7 +87,7 @@ opensocial.Album.Field = {
    *
    * @member opensocial.Album.Field
    */
-  MEDIA_MIME_TYPE : 'mediaMimeType',
+  MEDIA_MIME_TYPE: 'mediaMimeType',
 
 
   /**
@@ -95,7 +95,7 @@ opensocial.Album.Field = {
    *
    * @member opensocial.Album.Field
    */
-  MEDIA_TYPE : 'mediaType',
+  MEDIA_TYPE: 'mediaType',
 
 
   /**

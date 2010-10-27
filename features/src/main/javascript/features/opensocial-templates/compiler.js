@@ -580,7 +580,7 @@ os.processTextContent_ = function(fromNode, toNode) {
       !toNode.getAttribute(os.ATT_customtag) &&
       fromNode.firstChild.nodeType == DOM_TEXT_NODE) {
     var substitution = os.parseAttribute_(fromNode.firstChild.data);
-    if (toNode.nodeName == "SCRIPT") {
+    if (toNode.nodeName == 'SCRIPT') {
       toNode.text = os.trimWhitespaceForIE_(fromNode.firstChild.data, true, true);
     } if (substitution) {
       toNode.setAttribute(ATT_content, substitution);

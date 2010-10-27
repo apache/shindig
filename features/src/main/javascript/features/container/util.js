@@ -91,7 +91,7 @@ shindig.container.util.newTokenRequest = function(gadgetUrls) {
   return {
       'container': window.__CONTAINER,
       'ids': gadgetUrls,
-      'fields': [ 'token' ]
+      'fields': ['token']
   };
 };
 
@@ -131,4 +131,4 @@ shindig.container.util.warn = function(message) {
   if (console && console.warn) {
     console.warn(message);
   }
-}
+};

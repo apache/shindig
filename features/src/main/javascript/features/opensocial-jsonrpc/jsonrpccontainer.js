@@ -421,11 +421,11 @@ var JsonRpcRequestItem = function(rpc, opt_processData) {
   JsonRpcContainer.prototype.newActivity = function(opt_params) {
     return new JsonActivity(opt_params, true);
   };
-  
+
   JsonRpcContainer.prototype.newAlbum = function(opt_params) {
 	  return new JsonAlbum(opt_params);
   };
-  
+
   JsonRpcContainer.prototype.newMediaItem = function(mimeType, url, opt_params) {
     opt_params = opt_params || {};
     opt_params['mimeType'] = mimeType;
@@ -508,32 +508,32 @@ JsonRpcContainer.prototype.newFetchMessagesRequest = function(idSpec, msgCollId,
 };
 
 JsonRpcContainer.prototype.newCreateAlbumRequest = function(idSpec, album) {
-  var rpc = { method : "albums.create" };
+  var rpc = { method: 'albums.create' };
   rpc.params = this.translateIdSpec(idSpec);
-  rpc.params.appId = "@app"; 
+  rpc.params.appId = '@app';
   rpc.params.album = album.toJsonObject();
-  
-  return new JsonRpcRequestItem(rpc);	
+
+  return new JsonRpcRequestItem(rpc);
 };
 
 JsonRpcContainer.prototype.newDeleteAlbumRequest = function(idSpec, albumId) {
-  var rpc = { method : "albums.delete" };
+  var rpc = { method: 'albums.delete' };
   rpc.params = this.translateIdSpec(idSpec);
-  rpc.params.appId = "@app"; 	
+  rpc.params.appId = '@app';
   rpc.params.albumId = albumId;
-  
+
   return new JsonRpcRequestItem(rpc);
 };
 
 JsonRpcContainer.prototype.newFetchAlbumsRequest = function(idSpec, opt_params) {
-  var rpc = { method : "albums.get" };
+  var rpc = { method: 'albums.get' };
   rpc.params = this.translateIdSpec(idSpec);
-  rpc.params.appId = "@app";
+  rpc.params.appId = '@app';
 
   return new JsonRpcRequestItem(rpc, function(rawJson) {
     rawJson = rawJson['list'];
     var albums = [];
-    for ( var i = 0; i < rawJson.length; i++) {
+    for (var i = 0; i < rawJson.length; i++) {
       albums.push(new JsonAlbum(rawJson[i]));
     }
 
@@ -542,25 +542,25 @@ JsonRpcContainer.prototype.newFetchAlbumsRequest = function(idSpec, opt_params) 
 };
 
 JsonRpcContainer.prototype.newCreateMediaItemRequest = function(idSpec, albumId, mediaItem) {
-  var rpc = { method : "mediaItems.create" };
+  var rpc = { method: 'mediaItems.create' };
   rpc.params = this.translateIdSpec(idSpec);
-  rpc.params.appId = "@app"; 
+  rpc.params.appId = '@app';
   rpc.params.albumId = albumId;
   rpc.params.mediaItem = mediaItem.toJsonObject();
-  
+
   return new JsonRpcRequestItem(rpc);
 };
 
 JsonRpcContainer.prototype.newFetchMediaItemsRequest = function(idSpec, albumId, opt_params) {
-  var rpc = { method : "mediaItems.get" };
+  var rpc = { method: 'mediaItems.get' };
   rpc.params = this.translateIdSpec(idSpec);
-  rpc.params.appId = "@app";
+  rpc.params.appId = '@app';
   rpc.params.albumId = albumId;
 
   return new JsonRpcRequestItem(rpc, function(rawJson) {
     rawJson = rawJson['list'];
     var mediaItems = [];
-    for ( var i = 0; i < rawJson.length; i++) {
+    for (var i = 0; i < rawJson.length; i++) {
       mediaItems.push(new JsonMediaItem(rawJson[i]));
     }
 

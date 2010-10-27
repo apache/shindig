@@ -93,129 +93,129 @@ opensocial.MediaItem.Type = {
  * @name opensocial.MediaItem.Field
  */
 opensocial.MediaItem.Field = {
-		
+
   /**
    * The album to which the media item belongs, specified as a String.
    * @member opensocial.MediaItem.Field
    */
-  ALBUM_ID : 'albumId',
- 	
+  ALBUM_ID: 'albumId',
+
   /**
    * The creation time associated with the media item - assigned by container in UTC, specified as a String.
    * @member opensocial.MediaItem.Field
   */
-  CREATED : 'created',
-  	
+  CREATED: 'created',
+
   /**
    * The description of the media item, specified as a String.
-   * 
+   *
    * @member opensocial.MediaItem.Field
    */
-  DESCRIPTION : 'description',
-  	
+  DESCRIPTION: 'description',
+
   /**
    * An integer specified for audio/video clips - playtime length in seconds, set to -1/not defined if unknown.
    * @member opensocial.MediaItem.Field
    */
-  DURATION : 'duration',
-  	
+  DURATION: 'duration',
+
   /**
    * A long specified the number of bytes (set to -1/undefined if unknown).
    * @member opensocial.MediaItem.Field
    */
-  FILE_SIZE : 'fileSize',
-  	
+  FILE_SIZE: 'fileSize',
+
   /**
    * An id associated with the media item, specified as a String.
    * @member opensocial.MediaItem.Field
    */
-  ID : 'id',
+  ID: 'id',
 
   /**
-   * A language associated with the media item in ISO 639-3 format, specified as a String. 
+   * A language associated with the media item in ISO 639-3 format, specified as a String.
    * @member opensocial.MediaItem.Field
    */
-  LANGUAGE : 'language',
+  LANGUAGE: 'language',
 
   /**
    * An update time associated with the media item - assigned by container in UTC, specified as a String.
    * @member opensocial.MediaItem.Field
    */
-  LAST_UPDATED : 'lastUpdated',
+  LAST_UPDATED: 'lastUpdated',
 
   /**
    * A location corresponding to the media item, specified as a <a href="opensocial.MediaItem.html"> object.
    * @member opensocial.MediaItem.Field
    */
-  LOCATION : 'location',
-			
+  LOCATION: 'location',
+
   /**
    * The MIME type of media, specified as a String.
    * @member opensocial.MediaItem.Field
    */
   MIME_TYPE: 'mimeType',
-  
+
   /**
    * A number of comments on the photo, specified as a integer.
    * @member opensocial.MediaItem.Field
    */
-  NUM_COMMENTS : 'numComments',
-  
+  NUM_COMMENTS: 'numComments',
+
   /**
    * A number of views for the media item, specified as a integer.
    * @member opensocial.MediaItem.Field
    */
-  NUM_VIEWS : 'numViews',
-  
+  NUM_VIEWS: 'numViews',
+
   /**
    * A number of votes received for voting, specified as a integer.
    * @member opensocial.MediaItem.Field
    */
-  NUM_VOTES : 'numVotes',
-  
+  NUM_VOTES: 'numVotes',
+
   /**
    * An average rating of the media item on a scale of 0-10, specified as a integer.
    * @member opensocial.MediaItem.Field
    */
-  RATING : 'rating',
-  
+  RATING: 'rating',
+
   /**
    * A string specified for streaming/live content - time when the content is available.
    * @member opensocial.MediaItem.Field
    */
-  START_TIME : 'startTime',
-  
+  START_TIME: 'startTime',
+
   /**
    * An array of string (IDs) of people tagged in the media item, specified as an array of Strings.
    * @member opensocial.MediaItem.Field
    */
-  TAGGED_PEOPLE : 'taggedPeople',
-  
+  TAGGED_PEOPLE: 'taggedPeople',
+
   /**
    * Tags associated with this media item, specified as an array of Strings.
    * @member opensocial.MediaItem.Field
    */
-  TAGS : 'tags',
-  
+  TAGS: 'tags',
+
   /**
    * URL to a thumbnail image of the media item, specified as a String.
    * @member opensocial.MediaItem.Field
    */
-  THUMBNAIL_URL : 'thumbnailUrl',
-  
+  THUMBNAIL_URL: 'thumbnailUrl',
+
   /**
    * A string describing the media item, specified as a String.
    * @member opensocial.MediaItem.Field
    */
-  TITLE : 'title',
-	  
+  TITLE: 'title',
+
   /**
    * The type of media, specified as a
    * <a href="opensocial.MediaItem.Type.html">
    * <code>MediaItem.Type</code></a> object.
    * @member opensocial.MediaItem.Field
    */
-  TYPE : 'type',
+  TYPE: 'type',
 
   /**
    * A string specifying the URL where the media can be found.

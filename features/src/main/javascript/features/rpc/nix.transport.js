@@ -110,7 +110,7 @@ gadgets.rpctx.nix = function() {
     // "in" works because it merely checks for the prescence of
     // the key, rather than actually accessing the object's property.
     // This is just a sanity check, not a validity check.
-    if (!handler && window.opener && "GetAuthToken" in window.opener) {
+    if (!handler && window.opener && 'GetAuthToken' in window.opener) {
       handler = window.opener;
 
       // Create the channel to the parent/container.
