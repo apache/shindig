@@ -68,7 +68,7 @@ public class AccelHandler {
     this.remapInternalServerError = remapInternalServerError;
   }
 
-  protected HttpResponse fetch(HttpRequest request) throws IOException, GadgetException {
+  public HttpResponse fetch(HttpRequest request) throws IOException, GadgetException {
     // TODO: Handle if modified since headers.
 
     // Parse and normalize to get a proxied request uri.
