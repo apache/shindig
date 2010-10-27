@@ -393,7 +393,7 @@ opensocial.data.extractJson_ = function(responseItem, key) {
 /**
  * Registers a tag as a data request handler.
  * @param {string} name Prefixed tag name.
- * @param {function} handler Method to call when this tag is invoked.
+ * @param {function(DataResponse)} handler Method to call when this tag is invoked.
  *
  * TODO: Store these tag handlers separately from the ones for UI tags.
  * TODO: Formalize the callback interface.

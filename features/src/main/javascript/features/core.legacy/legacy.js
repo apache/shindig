@@ -375,7 +375,7 @@ function _exportSymbols(name, sym) {
  * @deprecated
  * @param {Object} src
  * @param {string} etype
- * @param {function} func
+ * @param {function()} func
  * TODO - implement.
  */
 function _IG_AddDOMEventHandler(src, etype, func) {

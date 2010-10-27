@@ -216,7 +216,7 @@ shindig.IfrGadgetService.prototype.setUserPref = function(editToken, name,
 
 /**
  * Requests the container to send a specific message to the specified users.
- * @param {Array.<String>, String} recipients An ID, array of IDs, or a group reference;
+ * @param {Array.<String>|String} recipients An ID, array of IDs, or a group reference;
  * the supported keys are VIEWER, OWNER, VIEWER_FRIENDS, OWNER_FRIENDS, or a
  * single ID within one of those groups.
  * @param {opensocial.Message} message The message to send to the specified users.

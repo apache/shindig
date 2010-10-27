@@ -664,8 +664,7 @@ opensocial.DataRequest.prototype.newFetchAlbumsRequest = function(idSpec, opt_pa
  *          idSpec An IdSpec used to specify which media items to fetch.
  * @param {string}
  *          albumId The id of the album to fetch media items from.
- * @param {Object.
- *          <Object, Object>=} opt_params Additional parameters to pass to the request.
+ * @param {Object.<Object, Object>=} opt_params Additional parameters to pass to the request.
  * @return {Object} A request object
  */
 opensocial.DataRequest.prototype.newFetchMediaItemsRequest = function(idSpec, albumId, opt_params) {
