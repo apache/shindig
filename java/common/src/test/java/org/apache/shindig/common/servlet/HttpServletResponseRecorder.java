@@ -29,6 +29,7 @@ import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.Map;
+import java.util.TreeMap;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
@@ -40,7 +41,7 @@ import javax.servlet.http.HttpServletResponseWrapper;
 public class HttpServletResponseRecorder extends HttpServletResponseWrapper {
   protected final ByteArrayOutputStream baos = new ByteArrayOutputStream();
   private PrintWriter writer;
-  private final Map<String, String> headers = Maps.newTreeMap(String.CASE_INSENSITIVE_ORDER);
+  private final Map<String, String> headers = new TreeMap<String,String>(String.CASE_INSENSITIVE_ORDER);
   private int httpStatusCode = HttpServletResponse.SC_OK;
   private String encoding = Charset.defaultCharset().name();
 
