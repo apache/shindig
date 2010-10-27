@@ -105,7 +105,7 @@ public class ConcatVisitorTest extends DomWalkerTestBase {
 
   @Override
   @Before
-  public void setUp() {
+  public void setUp() throws Exception {
     super.setUp();
     js1 = elem("script", "src", JS1_URL_STR);
     js2 = elem("script", "src", JS2_URL_STR);

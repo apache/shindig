@@ -23,7 +23,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import org.apache.shindig.common.uri.Uri;
-import org.apache.shindig.config.AbstractContainerConfig;
+import org.apache.shindig.config.BasicContainerConfig;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
@@ -170,7 +170,7 @@ public class RendererTest {
     assertEquals(RenderingResults.Status.ERROR, results.getStatus());
   }
 
-  private static class FakeContainerConfig extends AbstractContainerConfig {
+  private static class FakeContainerConfig extends BasicContainerConfig {
     protected final Map<String, Object> data = Maps.newHashMap();
 
     @Override

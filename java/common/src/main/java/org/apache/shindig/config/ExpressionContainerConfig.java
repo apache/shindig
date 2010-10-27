@@ -46,7 +46,7 @@ import javax.el.ValueExpression;
 @Singleton
 public class ExpressionContainerConfig extends BasicContainerConfig {
 
-  protected final Map<String, Map<String, Object>> rawConfig;
+  protected Map<String, Map<String, Object>> rawConfig;
   private final Expressions expressions;
 
   public ExpressionContainerConfig(Expressions expressions) {
@@ -65,7 +65,7 @@ public class ExpressionContainerConfig extends BasicContainerConfig {
   }
 
   @Override
-  public Object doGetProperty(String container, String property) {
+  public Object getProperty(String container, String property) {
     if (property.startsWith("${")) {
       // An expression!
       try {
@@ -76,7 +76,7 @@ public class ExpressionContainerConfig extends BasicContainerConfig {
       }
     }
 
-    return super.doGetProperty(container, property);
+    return super.getProperty(container, property);
   }
 
   protected Expressions getExpressions() {
@@ -93,8 +93,8 @@ public class ExpressionContainerConfig extends BasicContainerConfig {
     protected BasicContainerConfig getTemporaryConfig(boolean copyValues) {
       ExpressionContainerConfig tmp = new ExpressionContainerConfig(getExpressions());
       if (copyValues) {
-        tmp.rawConfig.putAll(rawConfig);
-        tmp.config.putAll(config);
+        tmp.rawConfig = deepCopyConfig(rawConfig);
+        tmp.config = deepCopyConfig(config);
       }
       return tmp;
     }
@@ -126,10 +126,8 @@ public class ExpressionContainerConfig extends BasicContainerConfig {
     @Override
     protected void setNewConfig(BasicContainerConfig newConfig) {
       ExpressionContainerConfig tmp = (ExpressionContainerConfig) newConfig;
-      rawConfig.clear();
-      rawConfig.putAll(tmp.rawConfig);
-      config.clear();
-      config.putAll(tmp.config);
+      rawConfig = tmp.rawConfig;
+      config = tmp.config;
     }
 
     private Object parseAll(Object value, ELContext context) {

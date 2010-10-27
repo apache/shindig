@@ -34,8 +34,9 @@ import static org.junit.Assert.assertEquals;
 public class ContentTypeCharsetRemoverRewriterTest extends DomWalkerTestBase {
   private CajaHtmlParser htmlParser;
 
+  @Override
   @Before
-  public void setUp() {
+  public void setUp() throws Exception {
     super.setUp();
     ParseModule.DOMImplementationProvider domImpl =
         new ParseModule.DOMImplementationProvider();

@@ -25,7 +25,6 @@ import com.google.inject.Injector;
 import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.PropertiesModule;
 import org.apache.shindig.common.uri.Uri;
-import org.apache.shindig.config.AbstractContainerConfig;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.DefaultGuiceModule;
 import org.apache.shindig.gadgets.Gadget;
@@ -42,9 +41,6 @@ import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -52,39 +48,20 @@ import static org.junit.Assert.assertEquals;
  */
 public class StyleTagProxyEmbeddedUrlsVisitorTest extends DomWalkerTestBase {
   protected static final String MOCK_CONTAINER = "mock";
-
-  private static class FakeContainerConfig extends AbstractContainerConfig {
-    private Map<String, Map<String, Object>> containers = new HashMap<String, Map<String, Object>>();
-
-    private FakeContainerConfig(ContainerConfig defaultContainerConfig) {
-      containers.put(ContainerConfig.DEFAULT_CONTAINER,
-          defaultContainerConfig.getProperties(ContainerConfig.DEFAULT_CONTAINER));
-
-      containers.put(MOCK_CONTAINER, ImmutableMap.<String, Object>builder()
-          .put(DefaultProxyUriManager.PROXY_HOST_PARAM, "www.mock.com")
-          .build());
-    }
-
-    @Override
-    public Object getProperty(String container, String name) {
-      Map<String, Object> data = containers.get(container);
-
-      //if there is no value by this key inherit from default
-      if (!data.containsKey(name)) {
-        data = containers.get(ContainerConfig.DEFAULT_CONTAINER);
-      }
-
-      return data.get(name);
-    }
-  }
+  private static final ImmutableMap<String, Object> MOCK_CONTAINER_CONFIG = ImmutableMap
+      .<String, Object>builder()
+      .put(ContainerConfig.CONTAINER_KEY, ImmutableList.of("mock"))
+      .put(DefaultProxyUriManager.PROXY_HOST_PARAM, "www.mock.com")
+      .build();
 
   private Injector injector;
   private CajaHtmlParser htmlParser;
   private CajaHtmlSerializer serializer;
   private ProxyUriManager proxyUriManager;
 
+  @Override
   @Before
-  public void setUp() {
+  public void setUp() throws Exception {
     super.setUp();
     injector = Guice.createInjector(
         new PropertiesModule(), new DefaultGuiceModule(), new OAuthModule());
@@ -92,7 +69,8 @@ public class StyleTagProxyEmbeddedUrlsVisitorTest extends DomWalkerTestBase {
         new ParseModule.DOMImplementationProvider();
     htmlParser = new CajaHtmlParser(domImpl.get());
     serializer = new CajaHtmlSerializer();
-    ContainerConfig config = new FakeContainerConfig(injector.getInstance(ContainerConfig.class));
+    ContainerConfig config = injector.getInstance(ContainerConfig.class);
+    config.newTransaction().addContainer(MOCK_CONTAINER_CONFIG).commit();
     proxyUriManager = new DefaultProxyUriManager(config, null);
   }
 

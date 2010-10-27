@@ -19,7 +19,6 @@
 package org.apache.shindig.auth;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -27,11 +26,11 @@ import org.apache.shindig.common.crypto.BasicBlobCrypter;
 import org.apache.shindig.common.crypto.BlobCrypter;
 import org.apache.shindig.common.util.CharsetUtil;
 import org.apache.shindig.common.util.FakeTimeSource;
-import org.apache.shindig.config.AbstractContainerConfig;
+import org.apache.shindig.config.BasicContainerConfig;
 import org.apache.shindig.config.ContainerConfig;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
 
 import junit.framework.Assert;
 
@@ -40,7 +39,6 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.Map;
 
 /**
@@ -53,26 +51,25 @@ public class BlobCrypterSecurityTokenCodecTest {
 
   @Before
   public void setUp() throws Exception {
-    ContainerConfig config = new AbstractContainerConfig() {
-      @Override
-      public Object getProperty(String container, String name) {
-        if (BlobCrypterSecurityTokenCodec.SECURITY_TOKEN_KEY_FILE.equals(name)) {
-          return getContainerKey(container);
-        }
-        if (BlobCrypterSecurityTokenCodec.SIGNED_FETCH_DOMAIN.equals(name)) {
-          return container + ".com";
-        }
-        throw new RuntimeException("Mock not smart enough, unknown name " + name);
-      }
-
-      @Override
-      public Collection<String> getContainers() {
-        return Lists.newArrayList("container", "example");
-      }
-    };
+    ContainerConfig config = new BasicContainerConfig();
+    config
+        .newTransaction()
+        .addContainer(makeContainer("default"))
+        .addContainer(makeContainer("container"))
+        .addContainer(makeContainer("example"))
+        .commit();
     codec = new CodecWithLoadStubbedOut(config);
   }
-
+  
+  protected Map<String, Object> makeContainer(String container) {
+    return ImmutableMap.<String, Object>of(ContainerConfig.CONTAINER_KEY,
+        ImmutableList.of(container),
+        BlobCrypterSecurityTokenCodec.SECURITY_TOKEN_KEY_FILE,
+        getContainerKey(container),
+        BlobCrypterSecurityTokenCodec.SIGNED_FETCH_DOMAIN,
+        container + ".com");
+  }
+  
   protected String getContainerKey(String container) {
     return "KEY FOR CONTAINER " + container;
   }
@@ -210,23 +207,14 @@ public class BlobCrypterSecurityTokenCodecTest {
 
   @Test
   public void testLoadFailure() throws Exception {
-    ContainerConfig config = new AbstractContainerConfig() {
-      @Override
-      public Object getProperty(String container, String name) {
-        if (BlobCrypterSecurityTokenCodec.SECURITY_TOKEN_KEY_FILE.equals(name)) {
-          return getContainerKey(container);
-        }
-        if (BlobCrypterSecurityTokenCodec.SIGNED_FETCH_DOMAIN.equals(name)) {
-          return container + ".com";
-        }
-        throw new RuntimeException("Mock not smart enough, unknown name " + name);
-      }
-
-      @Override
-      public Collection<String> getContainers() {
-        return Lists.newArrayList("container", "example", "failure");
-      }
-    };
+    ContainerConfig config = new BasicContainerConfig();
+    config
+        .newTransaction()
+        .addContainer(makeContainer("default"))
+        .addContainer(makeContainer("container"))
+        .addContainer(makeContainer("example"))
+        .addContainer(makeContainer("failure"))
+        .commit();
 
     try {
       new CodecWithLoadStubbedOut(config);

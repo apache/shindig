@@ -20,7 +20,7 @@ package org.apache.shindig.gadgets.rewrite;
 
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.xml.XmlUtil;
-import org.apache.shindig.config.AbstractContainerConfig;
+import org.apache.shindig.config.BasicContainerConfig;
 import org.apache.shindig.expressions.Expressions;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
@@ -65,7 +65,7 @@ public class TemplateRewriterTest {
   private Gadget gadget;
   private MutableContent content;
   private TemplateRewriter rewriter;
-  private final Map<String, Object> config = Maps.newHashMap();
+  private final Map<String, Object> data = Maps.newHashMap();
   
   private static final Uri GADGET_URI = Uri.parse("http://example.org/gadget.php");
   
@@ -219,7 +219,7 @@ public class TemplateRewriterTest {
     // inline tags: tag1 inline1 tag2 inline2 tag3 inline3
     // External tags: tag1 external1 tag2 external2 tag3 external3 tag4 external4
     
-    config.put("${Cur['gadgets.features'].osml.library}",
+    data.put("${Cur['gadgets.features'].osml.library}",
         "org/apache/shindig/gadgets/rewrite/OSML_test.xml");
 
     setupGadget(getGadgetXmlWithLibrary(CONTENT_TESTING_PRECEDENCE_RULES));
@@ -237,7 +237,7 @@ public class TemplateRewriterTest {
     // Default handlers: tag1 default1
     // OSML: tag1 osml1 tag2 osml2
 
-    config.put("${Cur['gadgets.features'].osml.library}",
+    data.put("${Cur['gadgets.features'].osml.library}",
         "org/apache/shindig/gadgets/rewrite/OSML_test.xml");
 
     setupGadget(getGadgetXmlWithLibrary(CONTENT_TESTING_PRECEDENCE_RULES, "osml"));
@@ -257,7 +257,7 @@ public class TemplateRewriterTest {
     // External tags: tag1 external1 tag2 external2 tag3 external3 tag4 external4
 
     // Explicitly don't support OSML
-    config.put("${Cur['gadgets.features'].osml.library}", "");
+    data.put("${Cur['gadgets.features'].osml.library}", "");
 
     setupGadget(getGadgetXmlWithLibrary(CONTENT_TESTING_PRECEDENCE_RULES));
     rewriter.rewrite(gadget, content);
@@ -386,10 +386,10 @@ public class TemplateRewriterTest {
     }
   }
   
-  private class FakeContainerConfig extends AbstractContainerConfig {
+  private class FakeContainerConfig extends BasicContainerConfig {
     @Override
     public Object getProperty(String container, String name) {
-      return config.get(name);
+      return data.get(name);
     }
     
   }

@@ -19,6 +19,7 @@
 
 package org.apache.shindig.config;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
@@ -28,13 +29,12 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * Basic container configuration class, without expression support.
- * 
+ *
  * We use a cascading model, so you only have to specify attributes in
  * your config that you actually want to change.
  *
@@ -43,34 +43,22 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  */
 public class BasicContainerConfig implements ContainerConfig {
 
-  protected final ReadWriteLock lock = new ReentrantReadWriteLock();
-  protected final Map<String, Map<String, Object>> config = Maps.newHashMap();
-  
-  public final Collection<String> getContainers() {
-    lock.readLock().lock();
-    try {
-      return doGetContainers();
-    } finally {
-      lock.readLock().unlock();
-    }
+  protected Map<String, Map<String, Object>> config = Maps.newHashMap();
+
+  public Collection<String> getContainers() {
+    return Collections.unmodifiableSet(config.keySet());
   }
 
-  public final Map<String, Object> getProperties(String container) {
-    lock.readLock().lock();
-    try {
-      return doGetProperties(container);
-    } finally {
-      lock.readLock().unlock();
-    }
+  public Map<String, Object> getProperties(String container) {
+    return config.get(container);
   }
 
-  public final Object getProperty(String container, String name) {
-    lock.readLock().lock();
-    try {
-      return doGetProperty(container, name);
-    } finally {
-      lock.readLock().unlock();
+  public Object getProperty(String container, String name) {
+    Map<String, Object> containerData = config.get(container);
+    if (containerData == null) {
+      return null;
     }
+    return containerData.get(name);
   }
 
   public String getString(String container, String property) {
@@ -121,33 +109,12 @@ public class BasicContainerConfig implements ContainerConfig {
     return new BasicTransaction();
   }
 
-  protected Collection<String> doGetContainers() {
-    return Collections.unmodifiableSet(config.keySet());
-  }
-
-  protected Map<String, Object> doGetProperties(String container) {
-    return config.get(container);
-  }
-
-  protected Object doGetProperty(String container, String name) {
-    Map<String, Object> containerData = config.get(container);
-    if (containerData == null) {
-      return null;
-    }
-    return containerData.get(name);
-  }
-  
   @Override
   public String toString() {
-    lock.readLock().lock();
-    try {
-      return JsonSerializer.serialize(config);
-    } finally {
-      lock.readLock().unlock();
-    }
+    return JsonSerializer.serialize(config);
   }
-  
-  protected class BasicTransaction implements Transaction {    
+
+  protected class BasicTransaction implements Transaction {
     protected boolean clear = false;
     protected Map<String, Map<String, Object>> setContainers = Maps.newHashMap();
     protected Set<String> removeContainers = Sets.newHashSet();
@@ -179,20 +146,17 @@ public class BasicContainerConfig implements ContainerConfig {
     }
 
     public void commit() throws ContainerConfigException {
-      Set<String> removed = Sets.newHashSet();
-      Set<String> changed = Sets.newHashSet();
-      if (throwException != null) {
-        throw throwException;
-      }
-      lock.writeLock().lock();
-      try {
+      synchronized (BasicContainerConfig.this) {
+        Set<String> removed = Sets.newHashSet();
+        Set<String> changed = Sets.newHashSet();
+        if (throwException != null) {
+          throw throwException;
+        }
         BasicContainerConfig tmpConfig = getTemporaryConfig(!clear);
         changeContainersInConfig(tmpConfig, setContainers, removeContainers);
         // This point will not be reached if an exception was thrown.
         diffConfiguration(tmpConfig, changed, removed);
         setNewConfig(tmpConfig);
-      } finally {
-        lock.writeLock().unlock();
       }
     }
 
@@ -210,7 +174,7 @@ public class BasicContainerConfig implements ContainerConfig {
     protected BasicContainerConfig getTemporaryConfig(boolean copyValues) {
       BasicContainerConfig tmp = new BasicContainerConfig();
       if (copyValues) {
-        tmp.config.putAll(config);
+        tmp.config = deepCopyConfig(config);
       }
       return tmp;
     }
@@ -243,8 +207,7 @@ public class BasicContainerConfig implements ContainerConfig {
      * @param newConfig The map that contains the new configuration.
      */
     protected void setNewConfig(BasicContainerConfig newConfig) {
-      config.clear();
-      config.putAll(newConfig.config);
+      config = newConfig.config;
     }
 
     /**
@@ -259,8 +222,8 @@ public class BasicContainerConfig implements ContainerConfig {
      *   'user': 'anne',
      *   'colour': 'green',
      *   'map': { 'longitude': 130 } }
-     *   
-     * It would in a merged "new" container that looks like this:
+     *
+     * It would result in a merged "new" container that looks like this:
      * { 'gadgets.container': ['new'],
      *   'base': '/gadgets/foo',
      *   'user': 'anne',
@@ -315,7 +278,7 @@ public class BasicContainerConfig implements ContainerConfig {
       }
       return clone;
     }
-    
+
     /**
      * Calculates the difference between the current and new configurations.
      *
@@ -332,6 +295,38 @@ public class BasicContainerConfig implements ContainerConfig {
         if (!newConfig.config.get(container).equals(config.get(container))) {
           changed.add(container);
         }
+      }
+    }
+
+    /**
+     * Returns a deep copy of a configuration object.
+     *
+     * @param config The configuration object to copy.
+     * @return A copy of the configuration object.
+     */
+    @SuppressWarnings("unchecked")
+    protected Map<String, Map<String, Object>> deepCopyConfig(
+        Map<String, Map<String, Object>> config) {
+      return (Map<String, Map<String, Object>>) deepCopyObject(config);
+    }
+
+    private Object deepCopyObject(Object obj) {
+      if (obj instanceof Map<?, ?>) {
+        Map<?, ?> objMap = (Map<?, ?>) obj;
+        Map<Object, Object> map = Maps.newHashMap();
+        for (Entry<?, ?> entry : objMap.entrySet()) {
+          map.put(entry.getKey(), deepCopyObject(entry.getValue()));
+        }
+        return map;
+      } else if (obj instanceof List<?>) {
+        List<?> objList = (List<?>) obj;
+        List<Object> list = Lists.newArrayList();
+        for (Object elem : objList) {
+          list.add(deepCopyObject(elem));
+        }
+        return list;
+      } else {
+        return obj;
       }
     }
   }

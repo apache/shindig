@@ -20,7 +20,7 @@ package org.apache.shindig.gadgets.uri;
 
 import com.google.common.collect.ImmutableMap;
 import org.apache.shindig.common.uri.Uri;
-import org.apache.shindig.config.AbstractContainerConfig;
+import org.apache.shindig.config.BasicContainerConfig;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.junit.Before;
@@ -34,33 +34,25 @@ import static org.junit.Assert.*;
  * Tests for DefaultAccelUriManager.
  */
 public class DefaultAccelUriManagerTest {
-  private static class FakeContainerConfig extends AbstractContainerConfig {
-    protected final Map<String, Object> defaultConfig = ImmutableMap.<String, Object>builder()
-        .put(AccelUriManager.PROXY_HOST_PARAM, "apache.org")
-        .put(AccelUriManager.PROXY_PATH_PARAM, "/gadgets/proxy")
-        .build();
-    protected final Map<String, Object> accelConfig = ImmutableMap.<String, Object>builder()
-        .put(AccelUriManager.PROXY_HOST_PARAM, "apache.org")
-        .put(AccelUriManager.PROXY_PATH_PARAM, "/gadgets/accel")
-        .build();
-
-    protected final Map<String, Map<String, Object>> data =
-        ImmutableMap.<String, Map<String, Object>>builder()
-            .put("default", defaultConfig)
-            .put("accel", accelConfig)
-            .build();
-
-    @Override
-    public Object getProperty(String container, String name) {
-      return data.get(container) != null ? data.get(container).get(name) : null;
-    }
-  }
-
   DefaultAccelUriManager uriManager;
 
+  private Map<String, Object> makeConfig(String name, String path) {
+    return ImmutableMap
+        .<String, Object>builder()
+        .put(ContainerConfig.CONTAINER_KEY, name)
+        .put(AccelUriManager.PROXY_HOST_PARAM, "apache.org")
+        .put(AccelUriManager.PROXY_PATH_PARAM, path)
+        .build();
+  }
+  
   @Before
   public void setUp() throws Exception {
-    ContainerConfig config = new FakeContainerConfig();
+    ContainerConfig config = new BasicContainerConfig();
+    config
+    .newTransaction()
+    .addContainer(makeConfig("default", "/gadgets/proxy"))
+    .addContainer(makeConfig("accel", "/gadgets/accel"))
+    .commit();
     uriManager = new DefaultAccelUriManager(config, new DefaultProxyUriManager(
         config, null));
   }

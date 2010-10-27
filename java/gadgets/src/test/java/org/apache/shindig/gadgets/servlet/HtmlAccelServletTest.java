@@ -21,7 +21,7 @@ package org.apache.shindig.gadgets.servlet;
 import com.google.common.collect.ImmutableMap;
 import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.uri.Uri;
-import org.apache.shindig.config.AbstractContainerConfig;
+import org.apache.shindig.config.BasicContainerConfig;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
@@ -49,7 +49,7 @@ import static org.easymock.EasyMock.expect;
 
 public class HtmlAccelServletTest extends ServletTestFixture {
 
-  private static class FakeContainerConfig extends AbstractContainerConfig {
+  private static class FakeContainerConfig extends BasicContainerConfig {
     protected final Map<String, Object> data = ImmutableMap.<String, Object>builder()
         .put(AccelUriManager.PROXY_HOST_PARAM, "apache.org")
         .put(AccelUriManager.PROXY_PATH_PARAM, "/gadgets/accel")

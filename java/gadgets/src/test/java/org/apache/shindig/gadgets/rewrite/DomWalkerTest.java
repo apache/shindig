@@ -19,6 +19,7 @@
 package org.apache.shindig.gadgets.rewrite;
 
 import com.google.common.collect.Lists;
+
 import org.apache.shindig.gadgets.Gadget;
 import org.junit.Before;
 import org.junit.Test;
@@ -41,7 +42,7 @@ public class DomWalkerTest extends DomWalkerTestBase {
 
   @Override
   @Before
-  public void setUp() {
+  public void setUp() throws Exception {
     super.setUp();
 
     // Create a base document with structure:

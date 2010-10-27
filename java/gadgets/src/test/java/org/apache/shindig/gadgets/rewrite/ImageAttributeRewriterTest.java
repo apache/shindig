@@ -54,7 +54,8 @@ public class ImageAttributeRewriterTest extends DomWalkerTestBase {
   private static final String IMG_JPG_LARGE_URL =
       "org/apache/shindig/gadgets/rewrite/image/large.jpg";
 
-  public void setUp() {
+  @Override
+  public void setUp() throws Exception {
     super.setUp();
 
     control = EasyMock.createControl();

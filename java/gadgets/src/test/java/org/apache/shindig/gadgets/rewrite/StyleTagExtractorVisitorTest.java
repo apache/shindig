@@ -52,8 +52,9 @@ import java.util.List;
 public class StyleTagExtractorVisitorTest extends DomWalkerTestBase {
   private ProxyUriManager proxyUriManager;
   
+  @Override
   @Before
-  public void setUp() {
+  public void setUp() throws Exception {
     super.setUp();
     proxyUriManager = new PassthruManager();
   }

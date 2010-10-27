@@ -17,12 +17,13 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.uri.Uri;
-import org.apache.shindig.config.AbstractContainerConfig;
+import org.apache.shindig.config.BasicContainerConfig;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.http.HttpRequest;
@@ -36,9 +37,7 @@ import org.junit.Test;
 
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 
@@ -46,32 +45,17 @@ import static org.junit.Assert.assertEquals;
  * Tests for CssResponseRewriter.
  */
 public class CssResponseRewriterTest extends RewriterTestBase {
-  private static class FakeContainerConfig extends AbstractContainerConfig {
-    private Map<String, Map<String, Object>> containers = new HashMap<String, Map<String, Object>>();
-
-    private FakeContainerConfig() {
-      containers.put(ContainerConfig.DEFAULT_CONTAINER, ImmutableMap.<String, Object>builder()
-        .put(DefaultProxyUriManager.PROXY_HOST_PARAM, "www.test.com")
-        .put(DefaultProxyUriManager.PROXY_PATH_PARAM, "/dir/proxy")
-        .build());
-
-      containers.put(MOCK_CONTAINER, ImmutableMap.<String, Object>builder()
-        .put(DefaultProxyUriManager.PROXY_HOST_PARAM, "www.mock.com")
-        .build());
-    }
-
-    @Override
-    public Object getProperty(String container, String name) {
-      Map<String, Object> data = containers.get(container);
-
-      //if there is no value by this key inherit from default
-      if (!data.containsKey(name)) {
-        data = containers.get(ContainerConfig.DEFAULT_CONTAINER);
-      }
-
-      return data.get(name);
-    }
-  }
+  private static final ImmutableMap<String, Object> DEFAULT_CONTAINER_CONFIG = ImmutableMap
+      .<String, Object>builder()
+      .put(ContainerConfig.CONTAINER_KEY, ImmutableList.of("default"))
+      .put(DefaultProxyUriManager.PROXY_HOST_PARAM, "www.test.com")
+      .put(DefaultProxyUriManager.PROXY_PATH_PARAM, "/dir/proxy")
+      .build();
+  private static final ImmutableMap<String, Object> MOCK_CONTAINER_CONFIG = ImmutableMap
+      .<String, Object>builder()
+      .put(ContainerConfig.CONTAINER_KEY, ImmutableList.of(MOCK_CONTAINER))
+      .put(DefaultProxyUriManager.PROXY_HOST_PARAM, "www.mock.com")
+      .build();
 
   private CssResponseRewriter rewriter;
   private CssResponseRewriter rewriterNoOverrideExpires;
@@ -93,7 +77,12 @@ public class CssResponseRewriterTest extends RewriterTestBase {
             return overrideFeatureNoOverrideExpires;
           }
         };
-    ContainerConfig config = new FakeContainerConfig();
+    ContainerConfig config = new BasicContainerConfig();
+    config
+        .newTransaction()
+        .addContainer(DEFAULT_CONTAINER_CONFIG)
+        .addContainer(MOCK_CONTAINER_CONFIG)
+        .commit();
     proxyUriManager = new DefaultProxyUriManager(config, null);
     rewriterNoOverrideExpires = new CssResponseRewriter(new CajaCssParser(),
         proxyUriManager, factoryNoOverrideExpires);

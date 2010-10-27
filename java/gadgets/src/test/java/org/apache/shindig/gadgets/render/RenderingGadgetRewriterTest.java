@@ -38,7 +38,7 @@ import org.apache.shindig.common.JsonAssert;
 import org.apache.shindig.common.PropertiesModule;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.xml.XmlUtil;
-import org.apache.shindig.config.AbstractContainerConfig;
+import org.apache.shindig.config.BasicContainerConfig;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
@@ -989,7 +989,7 @@ public class RenderingGadgetRewriterTest {
     }
   }
 
-  private static class FakeContainerConfig extends AbstractContainerConfig {
+  private static class FakeContainerConfig extends BasicContainerConfig {
     protected final Map<String, Object> data = Maps.newHashMap();
 
     @Override

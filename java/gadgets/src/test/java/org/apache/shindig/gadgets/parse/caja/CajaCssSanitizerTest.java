@@ -18,11 +18,12 @@
 package org.apache.shindig.gadgets.parse.caja;
 
 import com.google.caja.parser.css.CssTree;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
 import org.apache.shindig.common.EasyMockTestCase;
 import org.apache.shindig.common.uri.Uri;
-import org.apache.shindig.config.AbstractContainerConfig;
+import org.apache.shindig.config.BasicContainerConfig;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.render.SanitizingProxyUriManager;
@@ -30,9 +31,6 @@ import org.apache.shindig.gadgets.uri.DefaultProxyUriManager;
 import org.apache.shindig.gadgets.uri.ProxyUriManager;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Tests for CajaCssSanitizer.
@@ -45,39 +43,25 @@ public class CajaCssSanitizerTest extends EasyMockTestCase {
   private SanitizingProxyUriManager imageRewriter;
   private GadgetContext gadgetContext;
   public static final String MOCK_CONTAINER = "mockContainer";
-
-  private static class FakeContainerConfig extends AbstractContainerConfig {
-    private final Map<String, Map<String, Object>> containers =
-        new HashMap<String, Map<String, Object>>();
-
-    private FakeContainerConfig() {
-      containers.put(ContainerConfig.DEFAULT_CONTAINER, ImmutableMap.<String, Object>builder()
-          .put(DefaultProxyUriManager.PROXY_HOST_PARAM, "www.test.com")
-          .put(DefaultProxyUriManager.PROXY_PATH_PARAM, "/dir/proxy")
-          .build());
-      containers.put(MOCK_CONTAINER, ImmutableMap.<String, Object>builder()
-          .put(DefaultProxyUriManager.PROXY_HOST_PARAM, "www.mock.com")
-          .build());
-    }
-
-    @Override
-    public Object getProperty(String container, String name) {
-      Map<String, Object> data = containers.get(container);
-
-      // Inherit from default if there is no value for this key.
-      if (!data.containsKey(name)) {
-        data = containers.get(ContainerConfig.DEFAULT_CONTAINER);
-      }
-      return data.get(name);
-    }
-  }
+  private static final ImmutableMap<String, Object> DEFAULT_CONTAINER_CONFIG = ImmutableMap
+      .<String, Object>builder()
+      .put(ContainerConfig.CONTAINER_KEY, ImmutableList.of("default"))
+      .put(DefaultProxyUriManager.PROXY_HOST_PARAM, "www.test.com")
+      .put(DefaultProxyUriManager.PROXY_PATH_PARAM, "/dir/proxy")
+      .build();
+  private static final ImmutableMap<String, Object> MOCK_CONTAINER_CONFIG = ImmutableMap
+      .<String, Object>builder()
+      .put(ContainerConfig.CONTAINER_KEY, ImmutableList.of(MOCK_CONTAINER))
+      .put(DefaultProxyUriManager.PROXY_HOST_PARAM, "www.mock.com")
+      .build();
 
   @Before
   public void setUp() throws Exception {
     parser = new CajaCssParser();
     sanitizer = new CajaCssSanitizer(parser);
 
-    ContainerConfig config = new FakeContainerConfig();
+    ContainerConfig config = new BasicContainerConfig();
+    config.newTransaction().addContainer(DEFAULT_CONTAINER_CONFIG).addContainer(MOCK_CONTAINER_CONFIG).commit();
     ProxyUriManager proxyUriManager = new DefaultProxyUriManager(config, null);
 
     importRewriter = new SanitizingProxyUriManager(proxyUriManager, "text/css");

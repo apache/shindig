@@ -23,7 +23,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import org.apache.shindig.config.AbstractContainerConfig;
+import org.apache.shindig.config.BasicContainerConfig;
 
 import com.google.common.collect.Lists;
 
@@ -38,7 +38,7 @@ import java.util.Map;
  */
 public class DefaultSecurityTokenCodecTest {
 
-  private static class FakeContainerConfig extends AbstractContainerConfig {
+  private static class FakeContainerConfig extends BasicContainerConfig {
     private final String tokenType;
 
     public FakeContainerConfig(String tokenType) {

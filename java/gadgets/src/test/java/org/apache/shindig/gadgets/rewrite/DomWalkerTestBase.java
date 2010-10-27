@@ -49,7 +49,7 @@ public class DomWalkerTestBase {
   protected Document doc;
 
   @Before
-  public void setUp() {
+  public void setUp() throws Exception {
     Injector injector = Guice.createInjector(Modules.override(new ParseModule())
         .with(new AbstractModule() {
           @Override
