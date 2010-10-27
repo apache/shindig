@@ -64,7 +64,7 @@ public class DefaultAccelUriManagerTest {
     assertEquals(Uri.parse("//apache.org/gadgets/accel?container=accel"
                  + "&gadget=http%3A%2F%2Fwww.example.org%2Findex.html"
                  + "&debug=0&nocache=0&refresh=0"
-                 + "&url=http%3A%2F%2Fwww.example.org%2Findex.html"),
+                 + "&rooe=1&url=http%3A%2F%2Fwww.example.org%2Findex.html"),
                  uriManager.parseAndNormalize(req));
 
     uri = Uri.parse("http://www.example.org/index.html");
@@ -73,7 +73,7 @@ public class DefaultAccelUriManagerTest {
     assertEquals(Uri.parse("//apache.org/gadgets/accel?container=accel"
                  + "&gadget=http%3A%2F%2Fwww.example.org%2Findex.html"
                  + "&debug=0&nocache=0&refresh=0"
-                 + "&url=http%3A%2F%2Fwww.example.org%2Findex.html"),
+                 + "&rooe=1&url=http%3A%2F%2Fwww.example.org%2Findex.html"),
                  uriManager.parseAndNormalize(req));
   }
 

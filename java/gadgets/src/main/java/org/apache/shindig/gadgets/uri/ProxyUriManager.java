@@ -56,7 +56,8 @@ public interface ProxyUriManager {
 
     // If "true" then the original content should be returned to the user
     // instead of internal server errors.
-    private String returnOriginalContentOnError;
+    @VisibleForTesting
+    String returnOriginalContentOnError;
 
     // The html tag that requested this ProxyUri.
     private String htmlTagContext;
@@ -64,12 +65,18 @@ public interface ProxyUriManager {
     public ProxyUri(Gadget gadget, Uri resource) {
       super(gadget);
       this.resource = resource;
+      if (AccelUriManager.CONTAINER.equals(gadget.getContext().getContainer())) {
+        setReturnOriginalContentOnError(true);
+      }
     }
 
     public ProxyUri(Integer refresh, boolean debug, boolean noCache,
         String container, String gadget, Uri resource) {
       super(UriStatus.VALID_UNVERSIONED, refresh, debug, noCache, container, gadget);
       this.resource = resource;
+      if (AccelUriManager.CONTAINER.equals(container)) {
+        setReturnOriginalContentOnError(true);
+      }
     }
 
     public ProxyUri(UriStatus status, Uri resource, Uri base) {
