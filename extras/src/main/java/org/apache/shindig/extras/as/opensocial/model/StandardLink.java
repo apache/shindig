@@ -18,36 +18,32 @@
 package org.apache.shindig.extras.as.opensocial.model;
 
 import org.apache.shindig.protocol.model.Exportablebean;
-import org.apache.shindig.extras.as.core.model.MediaLinkImpl;
+import org.apache.shindig.extras.as.core.model.StandardLinkImpl;
+
 import com.google.inject.ImplementedBy;
 
 /*
  * TODO: comment this class.
  */
-/**
- * <p>MediaLink interface.</p>
- *
- */
-@ImplementedBy(MediaLinkImpl.class)
+@ImplementedBy(StandardLinkImpl.class)
 @Exportablebean
-public interface MediaLink {
+public interface StandardLink {
 
-  /**
-   * Fields that represent the JSON elements.
+  /*
+   * Fields that represent JSON elements for an activity entry.
    */
   public static enum Field {
-    URL("url"),
-    TYPE("type"),
-    WIDTH("width"),
-    HEIGHT("height"),
-    DURATION("duration");
-    
-    /**
+    HREF("href"),
+    REL("rel"),
+    INLINE("inline"),
+    TYPE("type");
+
+    /*
      * The name of the JSON element.
      */
     private final String jsonString;
-    
-    /**
+
+    /*
      * Constructs the field base for the JSON element.
      * 
      * @param jsonString the name of the element
@@ -55,8 +51,8 @@ public interface MediaLink {
     private Field(String jsonString) {
       this.jsonString = jsonString;
     }
-    
-    /**
+
+    /*
      * Returns the name of the JSON element.
      * 
      * @return String the name of the JSON element
@@ -65,74 +61,20 @@ public interface MediaLink {
       return jsonString;
     }
   }
-  
-  /**
-   * Returns the target URL of this MediaLink
-   *
-   * @return a target
-   */
-  String getUrl();
 
-  /**
-   * Sets the target URL for this MediaLink
-   *
-   * @param target a target link
-   */
-  void setUrl(String url);
+  String getHref();
+
+  void setHref(String href);
+
+  String getRel();
+
+  void setRel(String rel);
   
-  /**
-   * Returns the Media's type.
-   * 
-   * @return String indicates the target Media's type
-   */
+  String getInline();
+
+  void setInline(String inline);
+
   String getType();
-  
-  /**
-   * Sets the Media's type.
-   * 
-   * @param type is target Media's type
-   */
+
   void setType(String type);
-
-  /**
-   * <p>getWidth</p>
-   *
-   * @return a {@link java.lang.String} object.
-   */
-  String getWidth();
-
-  /**
-   * Sets the Width of this mediaLink
-   *
-   * @param width a width
-   */
-  void setWidth(String width);
-
-  /**
-   * Sets the Height of this mediaLink
-   *
-   * @return a height
-   */
-  String getHeight();
-
-  /**
-   * Sets the Height of this mediaLink
-   *
-   * @param height a height
-   */
-  void setHeight(String height);
-
-  /**
-   * Returns the duration of this mediaLink
-   *
-   * @return a duration
-   */
-  String getDuration();
-
-  /**
-   * Sets the duration of this mediaLink
-   *
-   * @param duration a duration
-   */
-  void setDuration(String duration);
 }

@@ -22,40 +22,33 @@ import java.util.List;
 
 import org.apache.shindig.extras.as.opensocial.model.ActivityEntry;
 import org.apache.shindig.extras.as.opensocial.model.ActivityObject;
+import org.apache.shindig.extras.as.opensocial.model.StandardLink;
 
 /**
  * A simple bean implementation of an ActivityStream Entry.
- *
+ * 
  */
 public class ActivityEntryImpl implements ActivityEntry {
 
   private String icon;
-  private String time;
+  private String postedTime;
   private ActivityObject actor;
-  private List<String> verb;
+  private String verb;
   private ActivityObject object;
   private ActivityObject target;
   private ActivityObject generator;
-  private ActivityObject serviceProvider;
+  private ActivityObject provider;
   private String title;
   private String body;
-  private List<String> standardLink;
-  
+  private List<StandardLink> standardLinks;
+  private List<String> to;
+  private List<String> cc;
+  private List<String> bcc;
+
   /**
    * Create a new empty ActivityEntry
    */
   public ActivityEntryImpl() {
-    this.icon = null;
-    this.time = null;
-    this.actor = null;
-    this.verb = null;
-    this.object = null;
-    this.target = null;
-    this.generator = null;
-    this.serviceProvider = null;
-    this.title = null;
-    this.body = null;
-    this.standardLink = null;
   }
 
   /** {@inheritDoc} */
@@ -69,13 +62,13 @@ public class ActivityEntryImpl implements ActivityEntry {
   }
 
   /** {@inheritDoc} */
-  public String getTime() {
-    return time;
+  public String getPostedTime() {
+    return postedTime;
   }
 
   /** {@inheritDoc} */
-  public void setTime(String time) {
-    this.time = time;
+  public void setPostedTime(String postedTime) {
+    this.postedTime = postedTime;
   }
 
   /** {@inheritDoc} */
@@ -89,12 +82,12 @@ public class ActivityEntryImpl implements ActivityEntry {
   }
 
   /** {@inheritDoc} */
-  public List<String> getVerb() {
+  public String getVerb() {
     return verb;
   }
 
   /** {@inheritDoc} */
-  public void setVerb(List<String> verb) {
+  public void setVerb(String verb) {
     this.verb = verb;
   }
 
@@ -129,13 +122,13 @@ public class ActivityEntryImpl implements ActivityEntry {
   }
 
   /** {@inheritDoc} */
-  public ActivityObject getServiceProvider() {
-    return serviceProvider;
+  public ActivityObject getProvider() {
+    return provider;
   }
 
   /** {@inheritDoc} */
-  public void setServiceProvider(ActivityObject serviceProvider) {
-    this.serviceProvider = serviceProvider;
+  public void setProvider(ActivityObject provider) {
+    this.provider = provider;
   }
 
   /** {@inheritDoc} */
@@ -159,12 +152,42 @@ public class ActivityEntryImpl implements ActivityEntry {
   }
 
   /** {@inheritDoc} */
-  public List<String> getStandardLink() {
-    return standardLink;
+  public List<StandardLink> getStandardLinks() {
+    return standardLinks;
   }
 
   /** {@inheritDoc} */
-  public void setStandardLink(List<String> standardLink) {
-    this.standardLink = standardLink;
+  public void setStandardLinks(List<StandardLink> standardLinks) {
+    this.standardLinks = standardLinks;
+  }
+  
+  /** {@inheritDoc} */
+  public List<String> getTo() {
+    return to;
+  }
+  
+  /** {@inheritDoc} */
+  public void setTo(List<String> to) {
+    this.to = to;
+  }
+  
+  /** {@inheritDoc} */
+  public List<String> getCC() {
+    return cc;
+  }
+  
+  /** {@inheritDoc} */
+  public void setCC(List<String> cc) {
+    this.cc = cc;
+  }
+
+  /** {@inheritDoc} */
+  public List<String> getBCC() {
+    return bcc;
+  }
+  
+  /** {@inheritDoc} */
+  public void setBCC(List<String> bcc) {
+    this.bcc = bcc;
   }
 }

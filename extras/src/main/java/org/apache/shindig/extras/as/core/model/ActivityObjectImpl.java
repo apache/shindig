@@ -23,6 +23,7 @@ import java.util.List;
 import org.apache.shindig.extras.as.opensocial.model.ActionLink;
 import org.apache.shindig.extras.as.opensocial.model.ActivityObject;
 import org.apache.shindig.extras.as.opensocial.model.MediaLink;
+import org.apache.shindig.extras.as.opensocial.model.StandardLink;
 
 /**
  * <p>ActivityObjectImpl class.</p>
@@ -31,38 +32,24 @@ import org.apache.shindig.extras.as.opensocial.model.MediaLink;
 public class ActivityObjectImpl implements ActivityObject {
   
   private String id;
-  private String name;
+  private String displayName;
   private String summary;
   private MediaLink media;
-  private String permalink;
-  private List<String> type;
+  private String link;
+  private String objectType;
   private ActivityObject inReplyTo;
-  private List<ActivityObject> attached;
-  private List<ActivityObject> reply;
-  private List<ActivityObject> reaction;
-  private ActionLink action;
-  private List<String> upstreamDuplicateId;
-  private List<String> downstreamDuplicateId;
-  private String standardLink;
+  private List<ActivityObject> attachedObjects;
+  private List<ActivityObject> replies;
+  private List<ActivityObject> reactions;
+  private List<ActionLink> actionLinks;
+  private List<String> upstreamDuplicates;
+  private List<String> downstreamDuplicates;
+  private List<StandardLink> standardLinks;
   
   /**
    * A simple implementation of an ActivtyObject
    */
   public ActivityObjectImpl() {
-    this.id = null;
-    this.name = null;
-    this.summary = null;
-    this.media = null;
-    this.permalink = null;
-    this.type = null;
-    this.inReplyTo = null;
-    this.attached = null;
-    this.reply = null;
-    this.reaction = null;
-    this.action = null;
-    this.upstreamDuplicateId = null;
-    this.downstreamDuplicateId = null;
-    this.standardLink = null;
   }
 
   /** {@inheritDoc} */
@@ -76,13 +63,13 @@ public class ActivityObjectImpl implements ActivityObject {
   }
 
   /** {@inheritDoc} */
-  public String getName() {
-    return name;
+  public String getDisplayName() {
+    return displayName;
   }
 
   /** {@inheritDoc} */
-  public void setName(String name) {
-    this.name = name;
+  public void setDisplayName(String displayName) {
+    this.displayName = displayName;
   }
 
   /** {@inheritDoc} */
@@ -106,23 +93,23 @@ public class ActivityObjectImpl implements ActivityObject {
   }
 
   /** {@inheritDoc} */
-  public String getPermalink() {
-    return permalink;
+  public String getLink() {
+    return link;
   }
 
   /** {@inheritDoc} */
-  public void setPermalink(String permalink) {
-    this.permalink = permalink;
+  public void setLink(String link) {
+    this.link = link;
   }
 
   /** {@inheritDoc} */
-  public List<String> getType() {
-    return type;
+  public String getObjectType() {
+    return objectType;
   }
 
   /** {@inheritDoc} */
-  public void setType(List<String> type) {
-    this.type = type;
+  public void setObjectType(String objectType) {
+    this.objectType = objectType;
   }
 
   /** {@inheritDoc} */
@@ -136,72 +123,72 @@ public class ActivityObjectImpl implements ActivityObject {
   }
 
   /** {@inheritDoc} */
-  public List<ActivityObject> getAttached() {
-    return attached;
+  public List<ActivityObject> getAttachedObjects() {
+    return attachedObjects;
   }
 
   /** {@inheritDoc} */
-  public void setAttached(List<ActivityObject> attached) {
-    this.attached = attached;
+  public void setAttachedObjects(List<ActivityObject> attachedObjects) {
+    this.attachedObjects = attachedObjects;
   }
 
   /** {@inheritDoc} */
-  public List<ActivityObject> getReply() {
-    return reply;
+  public List<ActivityObject> getReplies() {
+    return replies;
   }
 
   /** {@inheritDoc} */
-  public void setReply(List<ActivityObject> reply) {
-    this.reply = reply;
+  public void setReplies(List<ActivityObject> replies) {
+    this.replies = replies;
   }
 
   /** {@inheritDoc} */
-  public List<ActivityObject> getReaction() {
-    return reaction;
+  public List<ActivityObject> getReactions() {
+    return reactions;
   }
 
   /** {@inheritDoc} */
-  public void setReaction(List<ActivityObject> reaction) {
-    this.reaction = reaction;
+  public void setReactions(List<ActivityObject> reactions) {
+    this.reactions = reactions;
   }
 
   /** {@inheritDoc} */
-  public ActionLink getAction() {
-    return action;
+  public List<ActionLink> getActionLinks() {
+    return actionLinks;
   }
 
   /** {@inheritDoc} */
-  public void setAction(ActionLink action) {
-    this.action = action;
+  public void setActionLinks(List<ActionLink> actionLinks) {
+    this.actionLinks = actionLinks;
   }
 
   /** {@inheritDoc} */
-  public List<String> getUpstreamDuplicateId() {
-    return upstreamDuplicateId;
+  public List<String> getUpstreamDuplicates() {
+    return upstreamDuplicates;
   }
 
   /** {@inheritDoc} */
-  public void setUpstreamDuplicateId(List<String> upstreamDuplicateId) {
-    this.upstreamDuplicateId = upstreamDuplicateId;
+  public void setUpstreamDuplicates(List<String> upstreamDuplicates) {
+    this.upstreamDuplicates = upstreamDuplicates;
   }
 
   /** {@inheritDoc} */
-  public List<String> getDownstreamDuplicateId() {
-    return downstreamDuplicateId;
+  public List<String> getDownstreamDuplicates() {
+    return downstreamDuplicates;
   }
 
   /** {@inheritDoc} */
-  public void setDownstreamDuplicateId(List<String> downstreamDuplicateId) {
-    this.downstreamDuplicateId = downstreamDuplicateId;
+  public void setDownstreamDuplicates(List<String> downstreamDuplicates) {
+    this.downstreamDuplicates = downstreamDuplicates;
   }
 
   /** {@inheritDoc} */
-  public String getStandardLink() {
-    return standardLink;
+  public List<StandardLink> getStandardLinks() {
+    return standardLinks;
   }
 
   /** {@inheritDoc} */
-  public void setStandardLink(String standardLink) {
-    this.standardLink = standardLink;
+  public void setStandardLinks(List<StandardLink> standardLinks) {
+    this.standardLinks = standardLinks;
   }
 }

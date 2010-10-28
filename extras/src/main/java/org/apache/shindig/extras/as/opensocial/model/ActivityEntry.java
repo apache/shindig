@@ -41,16 +41,19 @@ public interface ActivityEntry {
    */
   public static enum Field {
     ICON("icon"),
-    TIME("time"),
+    POSTED_TIME("postedTime"),
     ACTOR("actor"),
     VERB("verb"),
     OBJECT("object"),
     TARGET("target"),
     GENERATOR("generator"),
-    SERVICE_PROVIDER("serviceProvider"),
+    PROVIDER("provider"),
     TITLE("title"),
     BODY("body"),
-    STANDARD_LINK("standardLink");
+    STANDARD_LINKS("standardLinks"),
+    TO("to"),
+    CC("cc"),
+    BCC("bcc");
     
     /**
      * The name of the JSON element.
@@ -131,18 +134,18 @@ public interface ActivityEntry {
   void setIcon(String icon);
 
   /**
-   * <p>getTime</p>
+   * <p>getPostedTime</p>
    *
    * @return a {@link java.lang.String} object.
    */
-  String getTime();
+  String getPostedTime();
 
   /**
-   * <p>setTime</p>
+   * <p>setPostedTime</p>
    *
-   * @param time a {@link java.lang.String} object.
+   * @param postedTime a {@link java.lang.String} object.
    */
-  void setTime(String time);
+  void setPostedTime(String postedTime);
 
   /**
    * <p>getActor</p>
@@ -163,14 +166,14 @@ public interface ActivityEntry {
    *
    * @return a {@link java.util.List} object.
    */
-  List<String> getVerb();
+  String getVerb();
 
   /**
    * <p>setVerb</p>
    *
    * @param verb a {@link java.util.List} object.
    */
-  void setVerb(List<String> verb);
+  void setVerb(String verb);
 
   /**
    * <p>getObject</p>
@@ -215,18 +218,18 @@ public interface ActivityEntry {
   void setGenerator(ActivityObject generator);
 
   /**
-   * <p>getServiceProvider</p>
+   * <p>getProvider</p>
    *
    * @return a {@link org.apache.shindig.extras.as.opensocial.model.ActivityObject} object.
    */
-  ActivityObject getServiceProvider();
+  ActivityObject getProvider();
 
   /**
    * <p>setServiceProvider</p>
    *
-   * @param serviceProvider a {@link org.apache.shindig.extras.as.opensocial.model.ActivityObject} object.
+   * @param provider a {@link org.apache.shindig.extras.as.opensocial.model.ActivityObject} object.
    */
-  void setServiceProvider(ActivityObject serviceProvider);
+  void setProvider(ActivityObject provider);
 
   /**
    * <p>getTitle</p>
@@ -257,16 +260,58 @@ public interface ActivityEntry {
   void setBody(String body);
 
   /**
-   * <p>getStandardLink</p>
+   * <p>getStandardLinks</p>
    *
    * @return a {@link java.util.List} object.
    */
-  List<String> getStandardLink();
+  List<StandardLink> getStandardLinks();
 
   /**
-   * <p>setStandardLink</p>
+   * <p>setStandardLinks</p>
    *
-   * @param standardLink a {@link java.util.List} object.
+   * @param standardLinks a {@link java.util.List} object.
    */
-  void setStandardLink(List<String> standardLink);
+  void setStandardLinks(List<StandardLink> standardLinks);
+  
+  /**
+   * <p>getTo</p>
+   *
+   * @return a List<String> of target recipients
+   */
+  List<String> getTo();
+  
+  /**
+   * <p>setTo</p>
+   *
+   * @param to is the list of target recipients
+   */
+  void setTo(List<String> to);
+  
+  /**
+   * <p>getCC</p>
+   *
+   * @return a List<String> of carbon-copy recipients
+   */
+  List<String> getCC();
+  
+  /**
+   * <p>setCC</p>
+   *
+   * @param cc is the list of carbon-copy recipients
+   */
+  void setCC(List<String> cc);
+  
+  /**
+   * <p>getBCC</p>
+   *
+   * @return a List<String> of BCC recipients
+   */
+  List<String> getBCC();
+  
+  /**
+   * <p>setBCC</p>
+   *
+   * @param bcc is the list of BCC recipients
+   */
+  void setBCC(List<String> bcc);
 }

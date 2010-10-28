@@ -17,34 +17,53 @@
  */
 package org.apache.shindig.extras.as.core.model;
 
-import org.apache.shindig.extras.as.opensocial.model.MediaLink;
+import org.apache.shindig.extras.as.opensocial.model.StandardLink;
 
 /**
  * <p>MediaLinkImpl class.</p>
  *
  */
-public class MediaLinkImpl implements MediaLink {
+public class StandardLinkImpl implements StandardLink {
   
-  private String url;
+  private String href;
+  private String rel;
+  private String inline;
   private String type;
-  private String width;
-  private String height;
-  private String duration;
   
   /**
    * Create a new MediaLink
    */
-  public MediaLinkImpl() {
+  public StandardLinkImpl() {
   }
 
   /** {@inheritDoc} */
-  public String getUrl() {
-    return url;
+  public String getHref() {
+    return href;
   }
 
   /** {@inheritDoc} */
-  public void setUrl(String url) {
-    this.url = url;
+  public void setHref(String href) {
+    this.href = href;
+  }
+  
+  /** {@inheritDoc} */
+  public String getRel() {
+    return rel;
+  }
+
+  /** {@inheritDoc} */
+  public void setRel(String rel) {
+    this.rel = rel;
+  }
+  
+  /** {@inheritDoc} */
+  public String getInline() {
+    return inline;
+  }
+
+  /** {@inheritDoc} */
+  public void setInline(String inline) {
+    this.inline = inline;
   }
   
   /** {@inheritDoc} */
@@ -55,35 +74,5 @@ public class MediaLinkImpl implements MediaLink {
   /** {@inheritDoc} */
   public void setType(String type) {
     this.type = type;
-  }
-
-  /** {@inheritDoc} */
-  public String getWidth() {
-    return width;
-  }
-
-  /** {@inheritDoc} */
-  public void setWidth(String width) {
-    this.width = width;
-  }
-
-  /** {@inheritDoc} */
-  public String getHeight() {
-    return height;
-  }
-
-  /** {@inheritDoc} */
-  public void setHeight(String height) {
-    this.height = height;
-  }
-
-  /** {@inheritDoc} */
-  public String getDuration() {
-    return duration;
-  }
-
-  /** {@inheritDoc} */
-  public void setDuration(String duration) {
-    this.duration = duration;
   }
 }

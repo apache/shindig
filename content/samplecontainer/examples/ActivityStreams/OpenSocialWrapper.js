@@ -100,18 +100,18 @@ function OpenSocialWrapper() {
 			groupId: '@self',
 			activityEntry: {
 				standardLink: [standardLink],
-				time: '2010-04-27T06:02:36+0000',
+				postedTime: '2010-04-27T06:02:36+0000',
 				title: title,
 				body: body,
 				actor: {
 					id: actorId,
-					name: actorName
+					displayName: actorName
 				},
 				verb: verbs,
 				object: {
 					id: 'entryId123',
-					name: objectName,
-					permalink: objectPermalink,
+					displayName: objectName,
+					link: objectPermalink,
 					type: objectTypes,
 					media: {
 						target: 'http://myvideos.com/raftingtrip/raftingvideo.avi',

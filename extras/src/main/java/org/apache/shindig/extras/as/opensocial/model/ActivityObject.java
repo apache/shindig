@@ -37,19 +37,19 @@ public interface ActivityObject {
    */
   public static enum Field {
     ID("id"),
-    NAME("name"),
+    DISPLAY_NAME("displayName"),
     SUMMARY("summary"),
     MEDIA("media"),
-    PERMALINK("permalink"),
-    TYPE("type"),
+    LINK("link"),
+    OBJECT_TYPE("objectType"),
     IN_REPLY_TO("inReplyTo"),
-    ATTACHED("attached"),
-    REPLY("reply"),
-    REACTION("reaction"),
-    ACTION("action"),
-    UPSTREAM_DUPLICATE_ID("upstreamDuplicateId"),
-    DOWNSTREAM_DUPLICATE_ID("downstreamDuplicateId"),
-    STANDARD_LINK("standardLink");
+    ATTACHED_OBJECTS("attachedObjects"),
+    REPLIES("replies"),
+    REACTIONS("reactions"),
+    ACTION_LINKS("actionLinks"),
+    UPSTREAM_DUPLICATES("upstreamDuplicates"),
+    DOWNSTREAM_DUPLICATES("downstreamDuplicates"),
+    STANDARD_LINKS("standardLinks");
     
     /*
      * The name of the JSON element.
@@ -92,13 +92,13 @@ public interface ActivityObject {
   /**
    * @return the human-readable name fo the object
    */
-  String getName();
+  String getDisplayName();
 
   /**
    * Sets the name
    * @param name a human-readable name
    */
-  void setName(String name);
+  void setDisplayName(String displayName);
 
   /**
    * Gets the human-readable summary for this object.
@@ -132,28 +132,28 @@ public interface ActivityObject {
    *
    * @return a permalink string, possibly null
    */
-  String getPermalink();
+  String getLink();
 
   /**
    * Set the permanent link
    *
    * @param permalink a permalink string, possibly null
    */
-  void setPermalink(String permalink);
+  void setLink(String link);
 
   /**
-   * Returns a list of Type strings
+   * Returns the ActivityObject's object type.
    *
-   * @return a list of Type strings
+   * @return String representing the object type
    */
-  List<String> getType();
+  String getObjectType();
 
   /**
-   * set the list of Type strings
+   * Set's the ActivityObject's object type.
    *
-   * @param type a list of Type strings
+   * @param objectType is the object type
    */
-  void setType(List<String> type);
+  void setObjectType(String objectType);
 
   /**
    * Get the Activity this item is a response to
@@ -174,96 +174,96 @@ public interface ActivityObject {
    *
    * @return a list of ActivityObjects
    */
-  List<ActivityObject> getAttached();
+  List<ActivityObject> getAttachedObjects();
 
   /**
    * Sets the list of Attached Activities for this entry
    *
-   * @param attached a list of ActivityObjects
+   * @param attachedObjects a list of ActivityObjects
    */
-  void setAttached(List<ActivityObject> attached);
+  void setAttachedObjects(List<ActivityObject> attachedObjects);
 
   /**
    * Gets the list of reply Activities for this entry
    *
    * @return a list of ActivityObjects
    */
-  List<ActivityObject> getReply();
+  List<ActivityObject> getReplies();
 
   /**
    * Sets the list of reply Activities for this entry
    *
-   * @param reply a list of ActivityObjects
+   * @param replies a list of ActivityObjects
    */
-  void setReply(List<ActivityObject> reply);
+  void setReplies(List<ActivityObject> replies);
 
   /**
    * Gets the list of reaction Activities for this entry
    *
    * @return a list of ActivityObjects
    */
-  List<ActivityObject> getReaction();
+  List<ActivityObject> getReactions();
 
   /**
    * Sets the list of reaction Activities for this entry
    *
-   * @param reaction a list of ActivityObjects
+   * @param reactions a list of ActivityObjects
    */
-  void setReaction(List<ActivityObject> reaction);
+  void setReactions(List<ActivityObject> reactions);
 
   /**
-   * Returns an ActionLink for this object
+   * Returns the ActionLinks for this object
    *
-   * @return a {@link org.apache.shindig.extras.as.opensocial.model.ActionLink} object.
+   * @return List<ActionLink> is the list of ActionLink objects
    */
-  ActionLink getAction();
+  List<ActionLink> getActionLinks();
 
   /**
-   * Sets the ActionLink for this object
+   * Sets the ActionLinks for this object
    *
-   * @param action a {@link org.apache.shindig.extras.as.opensocial.model.ActionLink} object.
+   * @param actionLinks is the list of ActionLinks
    */
-  void setAction(ActionLink action);
+  void setActionLinks(List<ActionLink> actionLinks);
 
   /**
-   * Get the list of upstream duplicate Ids
-   *
-   * @return a list of strings
-   */
-  List<String> getUpstreamDuplicateId();
-
-  /**
-   * Set the list of upstream duplicate Ids
-   *
-   * @param upstreamDuplicateId a list of strings containing duplicate Ids
-   */
-  void setUpstreamDuplicateId(List<String> upstreamDuplicateId);
-
-  /**
-   * Get the list of downstream duplicate Ids
+   * Get the list of upstream duplicates.
    *
    * @return a list of strings
    */
-  List<String> getDownstreamDuplicateId();
+  List<String> getUpstreamDuplicates();
 
   /**
-   * Set the list of downstream duplicate Ids
+   * Set the list of upstream duplicates.
    *
-   * @param downstreamDuplicateId a list of strings containing duplicate Ids
+   * @param upstreamDuplicates a list of strings containing duplicate IDs
    */
-  void setDownstreamDuplicateId(List<String> downstreamDuplicateId);
+  void setUpstreamDuplicates(List<String> upstreamDuplicates);
 
   /**
-   * Return a standard link string
+   * Get the list of downstream duplicates.
    *
-   * @return the standard link
+   * @return a list of strings
    */
-  String getStandardLink();
+  List<String> getDownstreamDuplicates();
+
+  /**
+   * Set the list of downstream duplicates
+   *
+   * @param downstreamDuplicates a list of strings containing duplicate IDs
+   */
+  void setDownstreamDuplicates(List<String> downstreamDuplicates);
+
+  /**
+   * Return the Object's StandardLinks
+   *
+   * @return List<StandardLink> is the list of StandardLinks
+   */
+  List<StandardLink> getStandardLinks();
 
   /**
    * Set the standard link string
    *
-   * @param standardLink the standard link
+   * @param standardLinks the standard link
    */
-  void setStandardLink(String standardLink);
+  void setStandardLinks(List<StandardLink> standardLinks);
 }

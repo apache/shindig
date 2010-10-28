@@ -31,8 +31,6 @@ public class ActionLinkImpl implements ActionLink {
    * Construct an empty ActionLinkImpl.
    */
   public ActionLinkImpl() {
-    this.target = null;
-    this.caption = null;
   }
 
   /** {@inheritDoc} */
