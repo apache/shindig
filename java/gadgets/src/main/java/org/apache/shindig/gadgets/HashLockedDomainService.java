@@ -41,7 +41,7 @@ import java.util.logging.Logger;
  * Other domain locking schemes are possible as well.
  */
 @Singleton
-public class HashLockedDomainService implements LockedDomainService {
+public class HashLockedDomainService implements LockedDomainService, ContainerConfig.ConfigObserver {
   private static final Logger LOG = Logger.getLogger(HashLockedDomainService.class.getName());
   private final boolean enabled;
   private boolean lockSecurityTokens = false;
@@ -62,18 +62,25 @@ public class HashLockedDomainService implements LockedDomainService {
     this.enabled = enabled;
     lockedSuffixes = Maps.newHashMap();
     required = Maps.newHashMap();
-    Collection<String> containers = config.getContainers();
     if (enabled) {
-      for (String container : containers) {
-        String suffix = config.getString(container, LOCKED_DOMAIN_SUFFIX_KEY);
-        if (suffix == null) {
-          LOG.warning("No locked domain configuration for " + container);
-        } else {
-          lockedSuffixes.put(container, suffix);
-        }
+      config.addConfigObserver(this, true);
+    }
+  }
 
-        required.put(container, config.getBool(container, LOCKED_DOMAIN_REQUIRED_KEY));
-      }
+  public void containersChanged(
+      ContainerConfig config, Collection<String> changed, Collection<String> removed) {
+    for (String container : changed) {
+      String suffix = config.getString(container, LOCKED_DOMAIN_SUFFIX_KEY);
+      if (suffix == null) {
+        LOG.warning("No locked domain configuration for " + container);
+      } else {
+        lockedSuffixes.put(container, suffix);
+      }    
+      required.put(container, config.getBool(container, LOCKED_DOMAIN_REQUIRED_KEY));
+    }
+    for (String container : removed) {
+      lockedSuffixes.remove(container);
+      required.remove(container);
     }
   }
   

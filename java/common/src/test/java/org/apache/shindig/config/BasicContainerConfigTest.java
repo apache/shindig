@@ -26,6 +26,8 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
 import com.google.common.collect.ImmutableSet;
 
+import org.apache.shindig.config.ContainerConfig.ConfigObserver;
+import org.easymock.EasyMock;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -136,39 +138,74 @@ public class BasicContainerConfigTest {
 
   @Test
   public void testAddNewContainer() throws Exception {
+    ConfigObserver observer = EasyMock.createMock(ContainerConfig.ConfigObserver.class);
+    observer.containersChanged(EasyMock.isA(ContainerConfig.class),
+        EasyMock.eq(ImmutableSet.of("extra")), EasyMock.eq(ImmutableSet.<String>of()));
+    EasyMock.replay(observer);
+    config.addConfigObserver(observer, false);
+
     config.newTransaction().addContainer(EXTRA_CONTAINER).commit();
     assertTrue(config.getContainers().contains("extra"));
     assertEquals("yes", config.getString("extra", "inherited"));
+    EasyMock.verify(observer);
   }
 
   @Test
   public void testReplaceContainer() throws Exception {
     config.newTransaction().addContainer(EXTRA_CONTAINER).commit();
 
+    ConfigObserver observer = EasyMock.createMock(ContainerConfig.ConfigObserver.class);
+    observer.containersChanged(EasyMock.isA(ContainerConfig.class),
+        EasyMock.eq(ImmutableSet.of("extra")), EasyMock.eq(ImmutableSet.<String>of()));
+    EasyMock.replay(observer);
+    config.addConfigObserver(observer, false);
+
     config.newTransaction().addContainer(MODIFIED_EXTRA_CONTAINER).commit();
     assertTrue(config.getContainers().contains("extra"));
     assertEquals("no", config.getString("extra", "inherited"));
+    EasyMock.verify(observer);
   }
 
   @Test
   public void testReadSameContainer() throws Exception {
     config.newTransaction().addContainer(EXTRA_CONTAINER).commit();
 
+    ConfigObserver observer = EasyMock.createMock(ContainerConfig.ConfigObserver.class);
+    observer.containersChanged(EasyMock.isA(ContainerConfig.class),
+        EasyMock.eq(ImmutableSet.<String>of()), EasyMock.eq(ImmutableSet.<String>of()));
+    EasyMock.replay(observer);
+    config.addConfigObserver(observer, false);
+
+
     config.newTransaction().addContainer(EXTRA_CONTAINER).commit();
     assertTrue(config.getContainers().contains("extra"));
     assertEquals("yes", config.getString("extra", "inherited"));
+    EasyMock.verify(observer);
   }
 
   @Test
   public void testRemoveContainer() throws Exception {
     config.newTransaction().addContainer(EXTRA_CONTAINER).commit();
 
+    config.newTransaction().addContainer(EXTRA_CONTAINER).commit();
+
+    ConfigObserver observer = EasyMock.createMock(ContainerConfig.ConfigObserver.class);
+    observer.containersChanged(EasyMock.isA(ContainerConfig.class),
+        EasyMock.eq(ImmutableSet.<String>of()), EasyMock.eq(ImmutableSet.of("extra")));
+    EasyMock.replay(observer);
+    config.addConfigObserver(observer, false);
+
     config.newTransaction().removeContainer("extra").commit();
     assertFalse(config.getContainers().contains("extra"));
+    EasyMock.verify(observer);
   }
   
   @Test
   public void testClearContainerConfig() throws Exception {
+    ConfigObserver observer = EasyMock.createMock(ContainerConfig.ConfigObserver.class);
+    observer.containersChanged(EasyMock.isA(ContainerConfig.class),
+        EasyMock.eq(ImmutableSet.of("additional")), EasyMock.eq(ImmutableSet.of("extra")));
+    EasyMock.replay(observer);
     config = new BasicContainerConfig();
     config
         .newTransaction()
@@ -176,7 +213,8 @@ public class BasicContainerConfigTest {
         .addContainer(DEFAULT_CONTAINER)
         .addContainer(EXTRA_CONTAINER)
         .commit();
-
+    config.addConfigObserver(observer, false);
+    
     config
         .newTransaction()
         .clearContainers()
@@ -186,6 +224,26 @@ public class BasicContainerConfigTest {
 
     assertFalse(config.getContainers().contains("extra"));
     assertTrue(config.getContainers().contains("additional"));
+    
+    EasyMock.verify(observer);
+  }
+  
+  @Test
+  public void testAddObserverNotifiesImmediately() throws Exception {
+    ConfigObserver observer = EasyMock.createMock(ContainerConfig.ConfigObserver.class);
+    observer.containersChanged(EasyMock.isA(ContainerConfig.class),
+        EasyMock.eq(ImmutableSet.of("default", "extra")), EasyMock.eq(ImmutableSet.<String>of()));
+    EasyMock.replay(observer);
+    
+    config = new BasicContainerConfig();
+    config
+        .newTransaction()
+        .addContainer(DEFAULT_CONTAINER)
+        .addContainer(EXTRA_CONTAINER)
+        .commit();
+    config.addConfigObserver(observer, true);
+    
+    EasyMock.verify(observer);
   }
   
   @Test

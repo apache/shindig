@@ -28,14 +28,21 @@ import java.util.Map;
 /**
  * Represents a container configuration.
  *
- * Container configurations are used to support multiple, independent configurations in the same
- * server instance. Global configuration values are handled via traditional mechanisms such as
- * properties files or command-line flags bound through Guice's @Named annotation.
+ * Container configurations are used to support multiple, independent
+ * configurations in the same server instance. Global configuration values are
+ * handled via traditional mechanisms such as properties files or command-line
+ * flags bound through Guice's @Named annotation.
  *
- * The default container configuration implementation is intended to be shared with the code found
- * in the PHP implementation of Shindig. It uses a simple JSON format intended for easy readability.
+ * This interface is implemented by two classes:
  *
- * get* can take either a simple property name (foo), or an EL expression (${foo.bar}).
+ * - {@link BasicContainerConfig} provides configuration inheritance;
+ * - {@link ExpressionContainerConfig} extends {@link BasicContainerConfig} and
+ * also provides expression evaluation in string values and properties.
+ *
+ * Container configurations are stored by default in JSON format, for easy
+ * sharing with the code found in the PHP implementation of Shindig, and for
+ * easy readability. They can be loaded with the methods in
+ * {@link JsonContainerConfigLoader}.
  */
 @ImplementedBy(JsonContainerConfig.class)
 public interface ContainerConfig {
@@ -56,38 +63,40 @@ public interface ContainerConfig {
   Map<String, Object> getProperties(String container);
 
   /**
-   * @return The configuration property stored under the given name for the given container.
+   * @return The configuration property stored under the given name for the
+   *         given container.
    */
   Object getProperty(String container, String name);
 
   /**
-   * @return The configuration property stored under the given name for the given container, or null
-   * if it is not defined or not a string.
+   * @return The configuration property stored under the given name for the
+   *         given container, or null if it is not defined or not a string.
    */
   String getString(String container, String name);
 
   /**
-   * @return The configuration property stored under the given name for the given container, or 0
-   * if it is not defined or not a number.
+   * @return The configuration property stored under the given name for the
+   *         given container, or 0 if it is not defined or not a number.
    */
   int getInt(String container, String name);
 
 
   /**
-   * @return The configuration property stored under the given name for the given container, or
-   * false if it is not defined or not a boolean.
+   * @return The configuration property stored under the given name for the
+   *         given container, or false if it is not defined or not a boolean.
    */
   boolean getBool(String container, String name);
 
   /**
-   * @return The configuration property stored under the given name for the given container, or an
-   * empty list if it is not defined or not a list.
+   * @return The configuration property stored under the given name for the
+   *         given container, or an empty list if it is not defined or not a
+   *         list.
    */
   <T> List<T> getList(String container, String name);
 
   /**
-   * @return The configuration property stored under the given name for the given container, or an
-   * empty map if it is not defined or not a map.
+   * @return The configuration property stored under the given name for the
+   *         given container, or an empty map if it is not defined or not a map.
    */
   <T> Map<String, T> getMap(String container, String name);
 
@@ -97,6 +106,15 @@ public interface ContainerConfig {
    * @return The new transaction object.
    */
   Transaction newTransaction();
+
+  /**
+   * Adds an observer that will be notified when the configuration changes.
+   *
+   * @param observer The observer to be notified.
+   * @param notifyNow If true, the observer will receive an immediate
+   *        notification for the current configuration.
+   */
+  void addConfigObserver(ConfigObserver observer, boolean notifyNow);
 
   /**
    * A transaction object allows to create, modify and remove one or more
@@ -118,7 +136,7 @@ public interface ContainerConfig {
      * A container's names are specified in the gadgets.container property. If
      * it is an array, a copy of the container will be created for each name in
      * that property.
-     * 
+     *
      * @param container The container's new configuration, as a map from
      *        property name to property contents.
      * @return The transaction object, to allow chaining operations.
@@ -141,5 +159,25 @@ public interface ContainerConfig {
      *         configuration will not be modified.
      */
     void commit() throws ContainerConfigException;
+  }
+
+  /**
+   * Interface for objects that get notified when container configurations are
+   * changed.
+   */
+  interface ConfigObserver {
+
+    /**
+     * Notifies the object that some container configurations have been added or
+     * modified.
+     *
+     * @param config The ContainerConfig object where the configuration was
+     *        changed.
+     * @param changed The names of the containers that have been added or
+     *        modified.
+     * @param removed The names of the containers that have been removed.
+     */
+    void containersChanged(
+        ContainerConfig config, Collection<String> changed, Collection<String> removed);
   }
 }

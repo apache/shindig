@@ -30,15 +30,17 @@ import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.rewrite.DomWalker;
 
+import java.util.Collection;
+
 /**
  * Default UriManager for Accel servlet.
  * TODO: Add support for multiple accel hosts.
  *
  * @since 2.0.0
  */
-public class DefaultAccelUriManager implements AccelUriManager {
-  final String accelHost;
-  final String accelPath;
+public class DefaultAccelUriManager implements AccelUriManager, ContainerConfig.ConfigObserver {
+  String accelHost;
+  String accelPath;
 
   ProxyUriManager proxyUriManager;
 
@@ -46,6 +48,11 @@ public class DefaultAccelUriManager implements AccelUriManager {
   public DefaultAccelUriManager(ContainerConfig config,
                                 ProxyUriManager proxyUriManager) {
     this.proxyUriManager = proxyUriManager;
+    config.addConfigObserver(this, true);
+  }
+  
+  public void containersChanged(
+      ContainerConfig config, Collection<String> changed, Collection<String> removed) {
     accelHost = config.getString(AccelUriManager.CONTAINER, PROXY_HOST_PARAM);
     accelPath = config.getString(AccelUriManager.CONTAINER, PROXY_PATH_PARAM);
   }

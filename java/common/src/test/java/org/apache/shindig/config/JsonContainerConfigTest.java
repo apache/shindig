@@ -108,7 +108,7 @@ public class JsonContainerConfigTest {
     File childFile = createContainer(json);
 
     ContainerConfig config = new JsonContainerConfig(childFile.getAbsolutePath() +
-        JsonContainerConfig.FILE_SEPARATOR + parentFile.getAbsolutePath(), Expressions.forTesting());
+        JsonContainerConfigLoader.FILE_SEPARATOR + parentFile.getAbsolutePath(), Expressions.forTesting());
 
     assertEquals(NESTED_VALUE, config.getString(CONTAINER_A, NESTED_KEY));
     assertEquals(NESTED_VALUE, config.getString(CONTAINER_B, NESTED_KEY));
@@ -130,7 +130,7 @@ public class JsonContainerConfigTest {
     File childFile = createContainer(json);
     File parentFile = createDefaultContainer();
     ContainerConfig config = new JsonContainerConfig(childFile.getAbsolutePath() +
-        JsonContainerConfig.FILE_SEPARATOR + parentFile.getAbsolutePath(), Expressions.forTesting());
+        JsonContainerConfigLoader.FILE_SEPARATOR + parentFile.getAbsolutePath(), Expressions.forTesting());
 
     String value = config.getString(CHILD_CONTAINER, TOP_LEVEL_NAME);
     assertEquals(TOP_LEVEL_VALUE, value);
@@ -233,7 +233,7 @@ public class JsonContainerConfigTest {
     File childFile = createContainer(json);
     File parentFile = createDefaultContainer();
     ContainerConfig config = new JsonContainerConfig(childFile.getAbsolutePath() +
-        JsonContainerConfig.FILE_SEPARATOR + parentFile.getAbsolutePath(), Expressions.forTesting());
+        JsonContainerConfigLoader.FILE_SEPARATOR + parentFile.getAbsolutePath(), Expressions.forTesting());
 
     assertEquals(TOP_LEVEL_VALUE, config.getString(CHILD_CONTAINER, "parentExpression"));
   }

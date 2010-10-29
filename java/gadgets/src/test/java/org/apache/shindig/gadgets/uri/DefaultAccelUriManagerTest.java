@@ -35,6 +35,7 @@ import static org.junit.Assert.*;
  */
 public class DefaultAccelUriManagerTest {
   DefaultAccelUriManager uriManager;
+  private ContainerConfig config;
 
   private Map<String, Object> makeConfig(String name, String path) {
     return ImmutableMap
@@ -47,12 +48,12 @@ public class DefaultAccelUriManagerTest {
   
   @Before
   public void setUp() throws Exception {
-    ContainerConfig config = new BasicContainerConfig();
+    config = new BasicContainerConfig();
     config
-    .newTransaction()
-    .addContainer(makeConfig("default", "/gadgets/proxy"))
-    .addContainer(makeConfig("accel", "/gadgets/accel"))
-    .commit();
+        .newTransaction()
+        .addContainer(makeConfig("default", "/gadgets/proxy"))
+        .addContainer(makeConfig("accel", "/gadgets/accel"))
+        .commit();
     uriManager = new DefaultAccelUriManager(config, new DefaultProxyUriManager(
         config, null));
   }
@@ -99,5 +100,31 @@ public class DefaultAccelUriManagerTest {
 
     uri = Uri.parse("http://www.example.org/index.html");
     assertFalse(uriManager.looksLikeAccelUri(uri));
+  }
+
+  @Test
+  public void testContainersChange() throws Exception {
+    String beforeUrl = "//apache.org/gadgets/accel?container=accel"
+        + "&gadget=http%3A%2F%2Fwww.example.org%2Findex.html"
+        + "&debug=0&nocache=0&refresh=0&rooe=1&url=http%3A%2F%2Fwww.example.org%2Findex.html";
+    String afterUrl = "//apache.org/random/url?container=accel"
+        + "&gadget=http%3A%2F%2Fwww.example.org%2Findex.html"
+        + "&debug=0&nocache=0&refresh=0&rooe=1&url=http%3A%2F%2Fwww.example.org%2Findex.html";
+
+    Uri uri = Uri.parse("http://www.example.org/index.html");
+    HttpRequest req = new HttpRequest(uri);
+    req.setContainer("accel");
+    assertEquals(Uri.parse(beforeUrl), uriManager.parseAndNormalize(req));
+    assertTrue(uriManager.looksLikeAccelUri(Uri.parse(beforeUrl)));
+    assertFalse(uriManager.looksLikeAccelUri(Uri.parse(afterUrl)));
+
+    config.newTransaction().addContainer(makeConfig("accel", "/random/url")).commit();
+
+    uri = Uri.parse("http://www.example.org/index.html");
+    req = new HttpRequest(uri);
+    req.setContainer("accel");
+    assertEquals(Uri.parse(afterUrl), uriManager.parseAndNormalize(req));
+    assertFalse(uriManager.looksLikeAccelUri(Uri.parse(beforeUrl)));
+    assertTrue(uriManager.looksLikeAccelUri(Uri.parse(afterUrl)));
   }
 }

@@ -45,10 +45,6 @@ import org.apache.shindig.common.Nullable;
 @Singleton
 public class JsonContainerConfig extends ExpressionContainerConfig {
 
-  public static final char FILE_SEPARATOR = ',';
-  public static final String SERVER_PORT = "SERVER_PORT";
-  public static final String SERVER_HOST = "SERVER_HOST";
-
   // Used by tests
   public JsonContainerConfig(String containers, Expressions expressions) throws ContainerConfigException {
     this(containers, "localhost", "8080", expressions);

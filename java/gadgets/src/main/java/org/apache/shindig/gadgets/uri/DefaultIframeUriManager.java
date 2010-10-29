@@ -44,7 +44,7 @@ import java.util.Set;
 /**
  * Default implementation of an IframeUriManager which references the /ifr endpoint.
  */
-public class DefaultIframeUriManager implements IframeUriManager {
+public class DefaultIframeUriManager implements IframeUriManager, ContainerConfig.ConfigObserver {
   // By default, fills in values that could otherwise be templated for client population.
   private static final boolean DEFAULT_USE_TEMPLATES = false;
   static final String IFRAME_BASE_PATH_KEY = "gadgets.uri.iframe.basePath";
@@ -62,7 +62,7 @@ public class DefaultIframeUriManager implements IframeUriManager {
   private final LockedDomainPrefixGenerator ldGen;
   private final SecurityTokenCodec securityTokenCodec;
 
-  private final List<String> ldSuffixes;
+  private List<String> ldSuffixes;
 
   @Inject
   public DefaultIframeUriManager(ContainerConfig config,
@@ -72,12 +72,17 @@ public class DefaultIframeUriManager implements IframeUriManager {
     this.ldGen = ldGen;
     this.securityTokenCodec = securityTokenCodec;
 
+    if (ldEnabled) {
+      config.addConfigObserver(this, true);
+    }
+  }
+
+  public void containersChanged(
+      ContainerConfig config, Collection<String> changed, Collection<String> removed) {
     Collection<String> containers = config.getContainers();
     List<String> ldSuffixes = Lists.newArrayListWithCapacity(containers.size());
-    if (ldEnabled) {
-      for (String container : containers) {
-        ldSuffixes.add(getReqVal(container, LOCKED_DOMAIN_SUFFIX_KEY));
-      }
+    for (String container : containers) {
+      ldSuffixes.add(getReqVal(container, LOCKED_DOMAIN_SUFFIX_KEY));
     }
     this.ldSuffixes = Collections.unmodifiableList(ldSuffixes);
   }

@@ -48,10 +48,11 @@ public class BlobCrypterSecurityTokenCodecTest {
 
   private BlobCrypterSecurityTokenCodec codec;
   private final FakeTimeSource timeSource = new FakeTimeSource();
+  private ContainerConfig config;
 
   @Before
   public void setUp() throws Exception {
-    ContainerConfig config = new BasicContainerConfig();
+    config = new BasicContainerConfig();
     config
         .newTransaction()
         .addContainer(makeContainer("default"))
@@ -207,14 +208,7 @@ public class BlobCrypterSecurityTokenCodecTest {
 
   @Test
   public void testLoadFailure() throws Exception {
-    ContainerConfig config = new BasicContainerConfig();
-    config
-        .newTransaction()
-        .addContainer(makeContainer("default"))
-        .addContainer(makeContainer("container"))
-        .addContainer(makeContainer("example"))
-        .addContainer(makeContainer("failure"))
-        .commit();
+    config.newTransaction().addContainer(makeContainer("failure")).commit();
 
     try {
       new CodecWithLoadStubbedOut(config);
@@ -225,6 +219,38 @@ public class BlobCrypterSecurityTokenCodecTest {
   }
 
   @Test
+  public void testChangingContainers() throws Exception {
+    String newContainer = "newcontainer";
+    BlobCrypterSecurityToken t = new BlobCrypterSecurityToken(
+        getBlobCrypter(getContainerKey(newContainer)), newContainer, null);
+    t.setAppUrl("http://www.example.com/gadget.xml");
+    t.setModuleId(12345L);
+    t.setOwnerId("owner");
+    t.setViewerId("viewer");
+    t.setTrustedJson("trusted");
+    String encrypted = t.encrypt();
+
+    // fails when trying to create a token for a non-existing container
+    try {
+      codec.createToken(ImmutableMap.of(SecurityTokenCodec.SECURITY_TOKEN_NAME, encrypted));
+      fail("Should have thrown a SecurityTokenException");
+    } catch (SecurityTokenException e) {
+      // pass
+    }
+    // add the container, now it should succeed
+    config.newTransaction().addContainer(makeContainer(newContainer)).commit();
+    codec.createToken(ImmutableMap.of(SecurityTokenCodec.SECURITY_TOKEN_NAME, encrypted));
+    // remove the token, now it should fail again
+    config.newTransaction().removeContainer(newContainer).commit();
+    try {
+      codec.createToken(ImmutableMap.of(SecurityTokenCodec.SECURITY_TOKEN_NAME, encrypted));
+      fail("Should have thrown a SecurityTokenException");
+    } catch (SecurityTokenException e) {
+      // pass
+    }
+  }
+
+ @Test
   public void testGetTokenExpiration() throws Exception {
     Assert.assertNull(codec.getTokenExpiration(null));
   }

@@ -30,7 +30,10 @@ import com.google.inject.Singleton;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Provides security token decoding services.  Configuration is via containers.js.  Each container
@@ -48,7 +51,8 @@ import java.util.Map;
  * @since 2.0.0
  */
 @Singleton
-public class BlobCrypterSecurityTokenCodec implements SecurityTokenCodec {
+public class BlobCrypterSecurityTokenCodec implements SecurityTokenCodec, ContainerConfig.ConfigObserver {
+  private static final Logger LOG = Logger.getLogger(BlobCrypterSecurityTokenCodec.class.getName());
 
   public static final String SECURITY_TOKEN_KEY_FILE = "gadgets.securityTokenKeyFile";
 
@@ -57,29 +61,56 @@ public class BlobCrypterSecurityTokenCodec implements SecurityTokenCodec {
   /**
    * Keys are container ids, values are crypters
    */
-  protected final Map<String, BlobCrypter> crypters = Maps.newHashMap();
+  protected Map<String, BlobCrypter> crypters = Maps.newHashMap();
 
   /**
    * Keys are container ids, values are domains used for signed fetch.
    */
-  protected final Map<String, String> domains = Maps.newHashMap();
+  protected Map<String, String> domains = Maps.newHashMap();
 
   @Inject
   public BlobCrypterSecurityTokenCodec(ContainerConfig config) {
     try {
-      for (String container : config.getContainers()) {
-        String keyFile = config.getString(container, SECURITY_TOKEN_KEY_FILE);
-        if (keyFile != null) {
-          BlobCrypter crypter = loadCrypterFromFile(new File(keyFile));
-          crypters.put(container, crypter);
-        }
-        String domain = config.getString(container, SIGNED_FETCH_DOMAIN);
-        domains.put(container, domain);
-      }
+      config.addConfigObserver(this, false);
+      loadContainers(config, config.getContainers(), crypters, domains);
     } catch (IOException e) {
       // Someone specified securityTokenKeyFile, but we couldn't load the key.  That merits killing
       // the server.
       throw new RuntimeException(e);
+    }
+  }
+
+  public void containersChanged(
+      ContainerConfig config, Collection<String> changed, Collection<String> removed) {
+    Map<String, BlobCrypter> newCrypters = Maps.newHashMap(crypters);
+    Map<String, String> newDomains = Maps.newHashMap(domains);
+    try {
+      loadContainers(config, changed, newCrypters, newDomains);
+      for (String container : removed) {
+        newCrypters.remove(container);
+        newDomains.remove(container);
+      }
+    } catch (IOException e) {
+      // Someone specified securityTokenKeyFile, but we couldn't load the key.
+      // Keep the old configuration.
+      LOG.log(Level.WARNING, "There was an error loading an updated container configuration. "
+          + "Keeping old configuration.", e);
+      return;
+    }
+    crypters = newCrypters;
+    domains = newDomains;
+  }
+  
+  private void loadContainers(ContainerConfig config, Collection<String> containers,
+      Map<String, BlobCrypter> crypters, Map<String, String> domains) throws IOException {
+    for (String container : containers) {
+      String keyFile = config.getString(container, SECURITY_TOKEN_KEY_FILE);
+      if (keyFile != null) {
+        BlobCrypter crypter = loadCrypterFromFile(new File(keyFile));
+        crypters.put(container, crypter);
+      }
+      String domain = config.getString(container, SIGNED_FETCH_DOMAIN);
+      domains.put(container, domain);
     }
   }
 

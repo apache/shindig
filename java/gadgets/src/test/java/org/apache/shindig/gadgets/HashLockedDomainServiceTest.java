@@ -20,32 +20,35 @@ package org.apache.shindig.gadgets;
 
 import static org.apache.shindig.gadgets.HashLockedDomainService.LOCKED_DOMAIN_REQUIRED_KEY;
 import static org.apache.shindig.gadgets.HashLockedDomainService.LOCKED_DOMAIN_SUFFIX_KEY;
-import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.isA;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 
 import org.apache.shindig.common.EasyMockTestCase;
 import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.config.BasicContainerConfig;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.features.FeatureRegistry;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 public class HashLockedDomainServiceTest extends EasyMockTestCase {
+
   private HashLockedDomainService lockedDomainService;
   private Gadget wantsLocked = null;
   private Gadget notLocked = null;
   private Gadget wantsSecurityToken = null;
   private Gadget wantsBoth = null;
-  private final ContainerConfig requiredConfig = mock(ContainerConfig.class);
-  private final ContainerConfig enabledConfig = mock(ContainerConfig.class);
+  private ContainerConfig requiredConfig;
+  private ContainerConfig enabledConfig;
 
   @SuppressWarnings("unchecked")
   private Gadget makeGadget(boolean wantsLocked, boolean wantsSecurityToken, String url) {
@@ -79,24 +82,22 @@ public class HashLockedDomainServiceTest extends EasyMockTestCase {
 
   @Before
   public void setUp() throws Exception {
-    expect(requiredConfig.getString(ContainerConfig.DEFAULT_CONTAINER,
-        LOCKED_DOMAIN_SUFFIX_KEY)).andReturn("-a.example.com:8080").anyTimes();
-    expect(requiredConfig.getBool(ContainerConfig.DEFAULT_CONTAINER,
-        LOCKED_DOMAIN_REQUIRED_KEY)).andReturn(true).anyTimes();
-    expect(requiredConfig.getContainers())
-        .andReturn(Arrays.asList(ContainerConfig.DEFAULT_CONTAINER)).anyTimes();
+    requiredConfig = new BasicContainerConfig();
+    requiredConfig.newTransaction().addContainer(
+        makeContainer(ContainerConfig.DEFAULT_CONTAINER, LOCKED_DOMAIN_SUFFIX_KEY,
+            "-a.example.com:8080", LOCKED_DOMAIN_REQUIRED_KEY, true)).commit();
 
-    expect(enabledConfig.getString(ContainerConfig.DEFAULT_CONTAINER,
-        LOCKED_DOMAIN_SUFFIX_KEY)).andReturn("-a.example.com:8080").anyTimes();
-    expect(enabledConfig.getContainers())
-        .andReturn(Arrays.asList(ContainerConfig.DEFAULT_CONTAINER)).anyTimes();
+    enabledConfig = new BasicContainerConfig();
+    enabledConfig.newTransaction().addContainer(
+        makeContainer(ContainerConfig.DEFAULT_CONTAINER, LOCKED_DOMAIN_SUFFIX_KEY,
+            "-a.example.com:8080")).commit();
+
     wantsLocked = makeGadget(true, false, "http://somehost.com/somegadget.xml");
     notLocked = makeGadget(false, false, "not-locked");
     wantsSecurityToken = makeGadget(false, true, "http://somehost.com/securitytoken.xml");
     wantsBoth =
         makeGadget(true, true, "http://somehost.com/tokenandlocked.xml");
   }
-
 
   @Test
   public void testDisabledGlobally() {
@@ -204,10 +205,8 @@ public class HashLockedDomainServiceTest extends EasyMockTestCase {
 
   @Test
   public void testMissingConfig() throws Exception {
-    ContainerConfig containerMissingConfig = mock(ContainerConfig.class);
-    expect(containerMissingConfig.getContainers())
-      .andReturn(Arrays.asList(ContainerConfig.DEFAULT_CONTAINER));
-    replay();
+    ContainerConfig containerMissingConfig = new BasicContainerConfig();
+    containerMissingConfig.newTransaction().addContainer(makeContainer(ContainerConfig.DEFAULT_CONTAINER)).commit();
 
     lockedDomainService = new HashLockedDomainService(containerMissingConfig, true);
     assertFalse(lockedDomainService.gadgetCanRender("www.example.com", wantsLocked, "default"));
@@ -216,19 +215,62 @@ public class HashLockedDomainServiceTest extends EasyMockTestCase {
 
   @Test
   public void testMultiContainer() throws Exception {
-    ContainerConfig inheritsConfig  = mock(ContainerConfig.class);
-    expect(inheritsConfig.getContainers())
-        .andReturn(Arrays.asList(ContainerConfig.DEFAULT_CONTAINER, "other"));
-    expect(inheritsConfig.getBool(isA(String.class), eq(LOCKED_DOMAIN_REQUIRED_KEY)))
-        .andReturn(true).anyTimes();
-    expect(inheritsConfig.getString(isA(String.class), eq(LOCKED_DOMAIN_SUFFIX_KEY)))
-        .andReturn("-a.example.com:8080").anyTimes();
-    replay();
+    ContainerConfig inheritsConfig = new BasicContainerConfig();
+    inheritsConfig
+        .newTransaction()
+        .addContainer(
+            makeContainer(ContainerConfig.DEFAULT_CONTAINER, LOCKED_DOMAIN_SUFFIX_KEY,
+                "-a.example.com:8080", LOCKED_DOMAIN_REQUIRED_KEY, true))
+        .addContainer(makeContainer("other"))
+        .commit();
 
     lockedDomainService = new HashLockedDomainService(inheritsConfig, true);
     assertFalse(lockedDomainService.gadgetCanRender("www.example.com", wantsLocked, "other"));
     assertFalse(lockedDomainService.gadgetCanRender("www.example.com", notLocked, "other"));
     assertTrue(lockedDomainService.gadgetCanRender(
         "8uhr00296d2o3sfhqilj387krjmgjv3v-a.example.com:8080", wantsLocked, "other"));
+  }
+  
+  @Test
+  public void testConfigurationChanged() throws Exception {
+    ContainerConfig config = new BasicContainerConfig();
+    config
+        .newTransaction()
+        .addContainer(makeContainer(ContainerConfig.DEFAULT_CONTAINER))
+        .addContainer(
+            makeContainer("container", LOCKED_DOMAIN_REQUIRED_KEY, true, LOCKED_DOMAIN_SUFFIX_KEY,
+                "-a.example.com:8080"))
+        .commit();
+
+    lockedDomainService = new HashLockedDomainService(config, true);
+    assertTrue(lockedDomainService.gadgetCanRender(
+        "8uhr00296d2o3sfhqilj387krjmgjv3v-a.example.com:8080", wantsLocked, "container"));
+    assertFalse(lockedDomainService.gadgetCanRender(
+        "8uhr00296d2o3sfhqilj387krjmgjv3v-a.example.com:8080", wantsLocked, "other"));
+
+    config.newTransaction().addContainer(makeContainer(
+        "other", LOCKED_DOMAIN_REQUIRED_KEY, true, LOCKED_DOMAIN_SUFFIX_KEY, "-a.example.com:8080"))
+        .commit();
+    lockedDomainService.containersChanged(
+        config, ImmutableSet.of("other"), ImmutableSet.<String>of());
+    assertTrue(lockedDomainService.gadgetCanRender(
+        "8uhr00296d2o3sfhqilj387krjmgjv3v-a.example.com:8080", wantsLocked, "container"));
+    assertTrue(lockedDomainService.gadgetCanRender(
+        "8uhr00296d2o3sfhqilj387krjmgjv3v-a.example.com:8080", wantsLocked, "other"));
+
+    config.newTransaction().removeContainer("container").commit();
+    assertFalse(lockedDomainService.gadgetCanRender(
+        "8uhr00296d2o3sfhqilj387krjmgjv3v-a.example.com:8080", wantsLocked, "container"));
+    assertTrue(lockedDomainService.gadgetCanRender(
+        "8uhr00296d2o3sfhqilj387krjmgjv3v-a.example.com:8080", wantsLocked, "other"));
+  }
+  
+  private Map<String, Object> makeContainer(String name, Object... props) {
+    ImmutableMap.Builder<String, Object> builder =
+        ImmutableMap.<String, Object>builder().put(ContainerConfig.CONTAINER_KEY, name);
+    for (int i = 0; i < props.length; i += 2) {
+      builder.put((String) props[i], props[i + 1]);
+    }
+    return builder.build();
   }
 }

@@ -19,6 +19,7 @@
 
 package org.apache.shindig.config;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -31,18 +32,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.WeakHashMap;
 
 /**
  * Basic container configuration class, without expression support.
  *
- * We use a cascading model, so you only have to specify attributes in
- * your config that you actually want to change.
+ * We use a cascading model, so you only have to specify attributes in your
+ * config that you actually want to change.
  *
  * Configurations can be added/modified/removed using transactions. The
  * configuration is protected with a read/write lock.
  */
 public class BasicContainerConfig implements ContainerConfig {
 
+  protected final Set<ConfigObserver> observers =
+      Sets.newSetFromMap(new WeakHashMap<ConfigObserver, Boolean>());
   protected Map<String, Map<String, Object>> config = Maps.newHashMap();
 
   public Collection<String> getContainers() {
@@ -105,8 +109,28 @@ public class BasicContainerConfig implements ContainerConfig {
     return Collections.emptyMap();
   }
 
+  public void addConfigObserver(ConfigObserver observer, boolean notifyNow) {
+    observers.add(observer);
+    if (notifyNow) {
+      notifyObservers(getContainers(), ImmutableSet.<String>of());
+    }
+  }
+
   public Transaction newTransaction() {
     return new BasicTransaction();
+  }
+
+  /**
+   * Notifies the configuration observers that some containers' configurations
+   * have been changed.
+   *
+   * @param changed The names of the containers that have been added or changed.
+   * @param removed The names of the containers that have been removed.
+   */
+  protected void notifyObservers(Collection<String> changed, Collection<String> removed) {
+    for (ConfigObserver observer : observers) {
+      observer.containersChanged(this, changed, removed);
+    }
   }
 
   @Override
@@ -146,18 +170,19 @@ public class BasicContainerConfig implements ContainerConfig {
     }
 
     public void commit() throws ContainerConfigException {
+      if (throwException != null) {
+        throw throwException;
+      }
+      Set<String> removed = Sets.newHashSet();
+      Set<String> changed = Sets.newHashSet();
       synchronized (BasicContainerConfig.this) {
-        Set<String> removed = Sets.newHashSet();
-        Set<String> changed = Sets.newHashSet();
-        if (throwException != null) {
-          throw throwException;
-        }
         BasicContainerConfig tmpConfig = getTemporaryConfig(!clear);
         changeContainersInConfig(tmpConfig, setContainers, removeContainers);
         // This point will not be reached if an exception was thrown.
         diffConfiguration(tmpConfig, changed, removed);
         setNewConfig(tmpConfig);
       }
+      notifyObservers(changed, removed);
     }
 
     /**

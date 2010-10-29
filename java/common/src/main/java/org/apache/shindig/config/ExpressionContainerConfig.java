@@ -37,11 +37,15 @@ import javax.el.ValueExpression;
 /**
  * Represents a container configuration that uses expressions in values.
  *
- * We use a cascading model, so you only have to specify attributes in
- * your config that you actually want to change.
+ * We use a cascading model, so you only have to specify attributes in your
+ * config that you actually want to change.
  *
- * String values may use expressions. The variable context defaults to the 'current' container,
- * but parent values may be accessed through the special "parent" property.
+ * String values may use expressions. The variable context defaults to the
+ * 'current' container, but parent values may be accessed through the special
+ * "parent" property.
+ *
+ * get* can take either a simple property name (foo), or an EL expression
+ * (${foo.bar}).
  */
 @Singleton
 public class ExpressionContainerConfig extends BasicContainerConfig {
