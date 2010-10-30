@@ -203,9 +203,10 @@ shindig.container.Container.prototype.closeGadget = function(site) {
 /**
  * Pre-load one gadget metadata information. More details on preloadGadgets().
  * @param {string} gadgetUrl gadget URI to preload.
+ * @param {function(Object)=} opt_callback function to call upon data receive.
  */
-shindig.container.Container.prototype.preloadGadget = function(gadgetUrl) {
-  this.preloadGadgets([gadgetUrl]);
+shindig.container.Container.prototype.preloadGadget = function(gadgetUrl, opt_callback) {
+  this.preloadGadgets([gadgetUrl], opt_callback);
 };
 
 
@@ -214,8 +215,10 @@ shindig.container.Container.prototype.preloadGadget = function(gadgetUrl) {
  * and making an immediate call to fetch metadata of gadgets fully specified at
  * gadgetUrls. This will not render, and do additional callback operations.
  * @param {Array} gadgetUrls gadgets URIs to preload.
+ * @param {function(Object)=} opt_callback function to call upon data receive.
  */
-shindig.container.Container.prototype.preloadGadgets = function(gadgetUrls) {
+shindig.container.Container.prototype.preloadGadgets = function(gadgetUrls, opt_callback) {
+  var callback = opt_callback || function() {};
   var request = shindig.container.util.newMetadataRequest(gadgetUrls);
   var self = this;
   this.service_.getGadgetMetadata(request, function(response) {
@@ -224,11 +227,12 @@ shindig.container.Container.prototype.preloadGadgets = function(gadgetUrls) {
         throw ['Failed to preload gadget ', id, '.'].join('');
       }
       self.addPreloadedGadgetUrl_(id);
-      if (response[id][shindig.container.MetadatResponse.NEEDS_TOKEN_REFRESH]) {
+      if (response[id][shindig.container.MetadataResponse.NEEDS_TOKEN_REFRESH]) {
         // Safe to re-schedule many times.
         self.scheduleRefreshTokens_();
       }
     }
+    callback(response);
   });
 };
 
