@@ -103,6 +103,22 @@ if (!gadgets.rpctx.wpm) {  // make lib resilient to double-inclusion
       process(rpc);
     }
 
+    function getTargetOrigin(id, parentUrl) {
+      var siblingId = gadgets.rpc._parseSiblingId(id);
+      if (siblingId) {
+        // sibling
+        return siblingId.origin;
+      }
+
+      if (id == '..') {
+        // parent
+        return parentUrl;
+      } else {
+        // child
+        return document.getElementById(id).src;
+      }
+    }
+
     return {
       getCode: function() {
         return 'wpm';
@@ -154,7 +170,7 @@ if (!gadgets.rpctx.wpm) {  // make lib resilient to double-inclusion
         var targetWin = gadgets.rpc._getTargetWin(targetId);
         // targetOrigin = canonicalized relay URL
         var origRelay = gadgets.rpc.getRelayUrl(targetId) ||
-            gadgets.util.getUrlParameters()['parent'];
+            getTargetOrigin(targetId, gadgets.util.getUrlParameters()['parent']);
         var origin = gadgets.rpc.getOrigin(origRelay);
         if (origin) {
           postMessage(targetWin, gadgets.json.stringify(rpc), origin);

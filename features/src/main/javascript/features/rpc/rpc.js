@@ -28,7 +28,7 @@
  * to the core gadgets.rpc library by various build rules.
  *
  * Transports used by core gadgets.rpc code to actually pass messages.
- * each transport implements the same interface exposing hooks that
+ * Each transport implements the same interface exposing hooks that
  * the core library calls at strategic points to set up and use
  * the transport.
  *
@@ -92,6 +92,12 @@ if (!gadgets.rpc) { // make lib resilient to double-inclusion
    * @private
    */
     var SETUP_FRAME_MAX_TRIES = 10;
+
+    /**
+     * @const
+     * @private
+     */
+    var ID_ORIGIN_DELIMITER = '|';
 
     var services = {};
     var relayUrl = {};
@@ -359,10 +365,37 @@ if (!gadgets.rpc) { // make lib resilient to double-inclusion
       return protocol + '://' + host + portStr;
     }
 
+    /*
+     * Makes a sibling id in the format of "/<siblingFrameId>|<siblingOrigin>".
+     */
+    function makeSiblingId(id, opt_origin) {
+      return '/' + id + (opt_origin ? ID_ORIGIN_DELIMITER + opt_origin : '');
+    }
+
+    /*
+     * Parses an iframe id.  Returns null if not a sibling id or
+     *   {id: <siblingId>, origin: <siblingOrigin>} otherwise.
+     */
+    function parseSiblingId(id) {
+      if (id[0] == '/') {
+        var delimiter = id.indexOf(ID_ORIGIN_DELIMITER);
+        var siblingId = delimiter > 0 ? id.substring(1, delimiter) : id.substring(1);
+        var origin = delimiter > 0 ? id.substring(delimiter + 1) : null;
+        return {id: siblingId, origin: origin};
+      } else {
+        return null;
+      }
+    }
+
     function getTargetWin(id) {
       if (typeof id === 'undefined' ||
           id === '..') {
         return window.parent;
+      }
+
+      var siblingId = parseSiblingId(id);
+      if (siblingId) {
+        return window.top.frames[siblingId.id];
       }
 
       // Cast to a String to avoid an index lookup.
@@ -416,7 +449,7 @@ if (!gadgets.rpc) { // make lib resilient to double-inclusion
         setup[frameId] = 0;
       }
 
-      var tgtFrame = document.getElementById(frameId);
+      var tgtFrame = getTargetWin(frameId);
       if (frameId === '..' || tgtFrame != null) {
         if (transport.setup(frameId, token, forcesecure) === true) {
           setup[frameId] = true;
@@ -596,13 +629,16 @@ if (!gadgets.rpc) { // make lib resilient to double-inclusion
     }
 
     function setupChildIframe(gadgetId, opt_frameurl, opt_authtoken, opt_forcesecure) {
-      if (!gadgets.util) {
-        return;
-      }
-      var childIframe = document.getElementById(gadgetId);
-      if (!childIframe) {
-        throw new Error('Cannot set up gadgets.rpc receiver with ID: ' + gadgetId +
-            ', element not found.');
+      if (gadgetId[0] != '/') {
+        // only set up child (and not sibling) iframe
+        if (!gadgets.util) {
+          return;
+        }
+        var childIframe = document.getElementById(gadgetId);
+        if (!childIframe) {
+          throw new Error('Cannot set up gadgets.rpc receiver with ID: ' + gadgetId +
+              ', element not found.');
+        }
       }
 
       // The "relay URL" can either be explicitly specified or is set as
@@ -611,7 +647,7 @@ if (!gadgets.rpc) { // make lib resilient to double-inclusion
       setRelayUrl(gadgetId, relayUrl);
 
       // The auth token is parsed from child params (rpctoken) or overridden.
-      var childParams = gadgets.util.getUrlParameters(childIframe.src);
+      var childParams = gadgets.util.getUrlParameters(relayUrl);
       var rpctoken = opt_authtoken || childParams.rpctoken;
       var forcesecure = opt_forcesecure || childParams.forcesecure;
       setAuthToken(gadgetId, rpctoken, forcesecure);
@@ -774,6 +810,9 @@ if (!gadgets.rpc) { // make lib resilient to double-inclusion
 
         if (targetId === '..') {
           from = rpcId;
+        } else if (targetId[0] == '/') {
+          // sending to sibling
+          from = makeSiblingId(rpcId, gadgets.rpc.getOrigin(location.href));
         }
 
         ++callId;
@@ -946,6 +985,9 @@ if (!gadgets.rpc) { // make lib resilient to double-inclusion
 
       /** Returns the window keyed by the ID. null/".." for parent, else child */
       _getTargetWin: getTargetWin,
+
+      /** Parses a sibling id into {id: <siblingId>, origin: <siblingOrigin>} */
+      _parseSiblingId: parseSiblingId,
 
       /** Create an iframe for loading the relay URL. Used by child only. */
       _createRelayIframe: function(token, data) {
