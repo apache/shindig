@@ -62,7 +62,7 @@ class GadgetFeatureRegistry {
       return '';
     }
     $ret = '';
-    if (Config::get('compress_javascript')) {
+    if (Config::get('compress_javascript') && ! isset($_GET['debug'])) {
       $featureCache = Cache::createCache(Config::get('feature_cache'), 'FeatureCache');
       if (($featureContent = $featureCache->get(md5('features:'.$featureName.$isGadgetContext)))) {
         return $featureContent;
@@ -87,7 +87,7 @@ class GadgetFeatureRegistry {
           break;
       }
     }
-    if (Config::get('compress_javascript')) {
+    if (Config::get('compress_javascript') && ! isset($_GET['debug'])) {
       $ret = JsMin::minify($ret);
       $featureCache->set(md5('features:'.$featureName.$isGadgetContext), $ret);
     }

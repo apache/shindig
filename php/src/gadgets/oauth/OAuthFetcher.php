@@ -19,7 +19,7 @@
  */
 
 // For TokenInfo
-require 'src/gadgets/oauth/OAuthStore.php';
+require_once 'src/gadgets/oauth/OAuthStore.php';
 
 /**
  * Implements the OAuth dance (http://oauth.net/core/1.0/) for gadgets.

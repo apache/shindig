@@ -34,11 +34,13 @@ class GadgetSpecParser {
    * @param string $xmlContent
    */
   public function parse($xmlContent, GadgetContext $context) {
+    $this->context = $context;
     libxml_use_internal_errors(true);
     $doc = new DOMDocument();
     if (! $doc->loadXML($xmlContent, LIBXML_NOCDATA)) {
       throw new GadgetSpecException("Error parsing gadget xml:\n" . XmlError::getErrors($xmlContent));
     }
+ 
     //TODO: we could do a XSD schema validation here, but both the schema and most of the gadgets seem to have some form of schema
     // violatons, so it's not really practical yet (and slow)
     // $doc->schemaValidate('gadget.xsd');
@@ -190,6 +192,18 @@ class GadgetSpecParser {
     $this->parsePreloads($modulePrefs, $gadget);
     $this->parseLocales($modulePrefs, $gadget);
     $this->parseOAuth($modulePrefs, $gadget);
+    $this->parseContainerSpecific($modulePrefs, $gadget);
+  }
+ 
+ /**
+  * Parses optional container specific moduleprefs
+  * override if needed
+  *
+  * @param DOMElement $modulePrefs
+  * @param Gadget $gadget
+  */
+  protected function parseContainerSpecific(DOMElement &$modulePrefs, GadgetSpec &$gadget) {
+ 
   }
 
   /**
