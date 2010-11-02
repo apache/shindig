@@ -54,9 +54,6 @@ class MakeRequestHandler extends ProxyBase {
     $responseArray = array_merge($responseArray, $result->getMetadatas());
     $json = array($params->getHref() => $responseArray);
     $json = json_encode($json);
-    if (strpos($json, '\u')) {
-      $json = $this->makeRequest->decodeUtf8($json);
-    }
     $output = UNPARSEABLE_CRUFT . $json;
     if ($responseArray['rc'] == 200) {
       // only set caching headers if the result was 'OK'
