@@ -429,6 +429,16 @@
       </roles>
     </developer>
     <!--Committers-->
+    <!--Emeritus-->
+    <developer>
+      <id>henning</id>
+      <name>Henning Schmiedehausen</name>
+      <email>henning@apache.org</email>
+      <organization>ASF</organization>
+      <roles>
+        <role>Emeritus</role>
+      </roles>
+    </developer>
   </developers>
 
   <!-- ====================================================================== -->
