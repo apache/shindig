@@ -34,7 +34,7 @@ class DataPipelining {
     $dataTags = $viewNode->getElementsByTagName('*');
     if ($dataTags->length > 0) {
       $dataPipeliningTags = array();
-      $namespaceErrorTags = array('httprequest', 'datarequest', 'peoplerequest', 'viewerrequest', 'ownerrequest', 'activitiesrequest');
+      $namespaceErrorTags = array('httprequest', 'datarequest', 'peoplerequest', 'personappdatarequest', 'viewerrequest', 'ownerrequest', 'activitiesrequest');
       foreach ($dataTags as $dataTag) {
         $tag = array();
         $tag['type'] = $dataTag->tagName;
@@ -58,12 +58,16 @@ class DataPipelining {
             $tag['type'] = 'os:DataRequest';
             $tag['method'] = 'people.get';
             break;
+          case 'os:PersonAppDataRequest':
+            $tag['type'] = 'os:DataRequest';
+            $tag['method'] = 'appdata.get';
+            break;
           case 'os:ViewerRequest':
           case 'os:OwnerRequest':
-            $tag['type'] = 'os:DataRequest';
             $tag['method'] = 'people.get';
-            $tag['userId'] = $tag['type'] == 'osViewerRequest' ? '@viewer' : '@owner';
+            $tag['userId'] = $tag['type'] == 'os:ViewerRequest' ? '@viewer' : '@owner';
             $tag['groupId'] = '@self';
+            $tag['type'] = 'os:DataRequest';
             break;
           case 'os:ActivitiesRequest':
             $tag['type'] = 'os:DataRequest';
