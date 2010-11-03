@@ -111,7 +111,7 @@
     <dependency>
       <groupId>org.apache.derby</groupId>
       <artifactId>derby</artifactId>
-      <version>10.4.2.0</version>
+      <version>10.6.2.1</version>
     </dependency>
     <dependency>
       <groupId>commons-dbcp</groupId>
@@ -162,7 +162,7 @@
     <dependency>
       <groupId>org.hibernate</groupId>
       <artifactId>ejb3-persistence</artifactId>
-      <version>1.0.1.GA</version>
+      <version>1.0.2.GA</version>
     </dependency>
 
     <!-- test -->
