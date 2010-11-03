@@ -32,11 +32,7 @@ class OutputJsonConverter extends OutputConverter {
     }
     // several service calls return a null value
     if (! is_null($response)) {
-      if (Config::get('debug')) {
-        echo self::json_format(json_encode($response)); // TODO: add a query option to pretty-print json output
-      } else {
-        echo json_encode($response);
-      }
+        $this->encodeAndSendResponse($response);
     }
   }
 
@@ -51,7 +47,25 @@ class OutputJsonConverter extends OutputConverter {
   }
 
   function outputJsonBatch(Array $responses, SecurityToken $token) {
-    echo json_encode(array("responses" => $responses, "error" => false));
+    $this->encodeAndSendResponse(array("responses" => $responses, "error" => false));
+  }
+
+  /**
+   * encodes data to json, adds jsonp callback if requested and sends response
+   * to client
+   *
+   * @param array $data
+   */
+  private function encodeAndSendResponse($data) {
+    if (isset($_GET['callback']) && preg_match('/^[a-zA-Z0-9\_\.]*$/', $_GET['callback'])) {
+        echo $_GET['callback'] . '(' . json_encode($data) . ')';
+        return;
+    }
+    if (Config::get('debug')) {
+        echo self::json_format(json_encode($data)); // TODO: add a query option to pretty-print json output
+    } else {
+        echo json_encode($data);
+    }
   }
 
   /**

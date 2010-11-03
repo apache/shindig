@@ -86,7 +86,7 @@ class JsonRpcServlet extends ApiServlet {
       $responseItem = $this->getJSONResponse($key, $this->getResponseItem($responses[$i]));
       $result[] = $responseItem;
     }
-    echo json_encode($result);
+    $this->encodeAndSendResponse($result);
   }
 
   public function dispatch($request, $token) {
@@ -99,7 +99,7 @@ class JsonRpcServlet extends ApiServlet {
     // TODO: should use shared deadline across each request
     $response = $this->getResponseItem($this->handleRequestItem($requestItem));
     $result = $this->getJSONResponse($key, $response);
-    echo json_encode($result);
+    $this->encodeAndSendResponse($result);
   }
 
   private function getJSONResponse($key, ResponseItem $responseItem) {
@@ -136,9 +136,25 @@ class JsonRpcServlet extends ApiServlet {
     return $error;
   }
 
+  /**
+   * encodes data to json, adds jsonp callback if requested and sends response
+   * to client
+   * 
+   * @param array $data
+   */
+  private function encodeAndSendResponse($data) {
+    // TODO: Refactor this class to use the OutputJsonConverter, so that we do not have to duplicate
+    // encoding and JSONP handling here
+    if (isset($_GET['callback']) && preg_match('/^[a-zA-Z0-9\_\.]*$/', $_GET['callback'])) {
+        echo $_GET['callback'] . '(' . json_encode($data) . ')';
+        return;
+    }
+    echo json_encode($data);
+  }
+
   public function sendError(ResponseItem $responseItem) {
     $error = $this->getErrorJson($responseItem);
-    echo json_encode($error);
+    $this->encodeAndSendResponse($error);
   }
 
   private function sendBadRequest($t, $response) {

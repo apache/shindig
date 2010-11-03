@@ -74,5 +74,44 @@ class OutputJsonConverterTest extends PHPUnit_Framework_TestCase {
     $this->assertEquals($expectedJson, $outputJson);
   }
 
+  public function testOutputJsonPResponse() {
+    $_GET['callback'] = 'cb';
+    $outputConverter = new OutputJsonConverter();
+    $servletRequest = array('url' => '/people/1/@self');
+    $token = BasicSecurityToken::createFromValues('owner', 'viewer', 'app', 'domain', 'appUrl', '1', 'default');
+    $requestItem = RestRequestItem::createWithRequest($servletRequest, $token, 'convertJson', $outputConverter);
+    $requestItem->applyUrlTemplate("/people/{userId}/{groupId}/{personId}");
+    $response = array(
+        'entry' => array('isOwner' => false, 'isViewer' => false, 'displayName' => '1 1',
+            'id' => '1'));
+    $responseItem = new ResponseItem(null, null, $response);
+    ob_start();
+    $outputConverter->outputResponse($responseItem, $requestItem);
+    $output = ob_get_clean();
+    $expected = 'cb({"entry":{"isOwner":false,"isViewer":false,"displayName":"1 1","id":"1"}})';
+    unset($_GET['callback']);
+    $this->assertEquals($expected, $output);
+  }
+
+  public function testOutputJsonPResponseWithInvalidCallback() {
+    $_GET['callback'] = 'alert(1);cb';
+    $outputConverter = new OutputJsonConverter();
+    $servletRequest = array('url' => '/people/1/@self');
+    $token = BasicSecurityToken::createFromValues('owner', 'viewer', 'app', 'domain', 'appUrl', '1', 'default');
+    $requestItem = RestRequestItem::createWithRequest($servletRequest, $token, 'convertJson', $outputConverter);
+    $requestItem->applyUrlTemplate("/people/{userId}/{groupId}/{personId}");
+    $response = array(
+        'entry' => array('isOwner' => false, 'isViewer' => false, 'displayName' => '1 1',
+            'id' => '1'));
+    $responseItem = new ResponseItem(null, null, $response);
+    ob_start();
+    $outputConverter->outputResponse($responseItem, $requestItem);
+    $output = ob_get_clean();
+    $expected = '{"entry":{"isOwner":false,"isViewer":false,"displayName":"1 1","id":"1"}}';
+    unset($_GET['callback']);
+    $outputJson = json_decode($output);
+    $expectedJson = json_decode($expected);
+    $this->assertEquals($expectedJson, $outputJson);
+  }
 }
 
