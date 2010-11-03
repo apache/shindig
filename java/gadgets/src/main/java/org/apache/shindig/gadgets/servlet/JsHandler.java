@@ -60,7 +60,7 @@ public class JsHandler {
    * @param needed Set of requested feature names.
    * @return JsHandlerResponse object that contains JavaScript data and cacheable flag.
    */
-  protected Response getJsContent(final JsUri jsUri, String host) {
+  public Response getJsContent(final JsUri jsUri, String host) {
     GadgetContext ctx = new JsGadgetContext(jsUri);
     StringBuilder jsData = new StringBuilder();
     Collection<String> needed = jsUri.getLibs();
