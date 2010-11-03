@@ -653,7 +653,7 @@ public final class HttpResponse implements Externalizable {
     }
   }
   public static Multimap<String,String> newHeaderMultimap() {
-    TreeMap<String,Collection<String>> map = Maps.newTreeMap(String.CASE_INSENSITIVE_ORDER);
+    TreeMap<String,Collection<String>> map = new TreeMap<String,Collection<String>>(String.CASE_INSENSITIVE_ORDER);
     return Multimaps.newMultimap(map, HEADER_COLLECTION_SUPPLIER);
   }
 }
