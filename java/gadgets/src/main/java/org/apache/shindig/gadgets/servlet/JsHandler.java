@@ -17,7 +17,6 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.JsonSerializer;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.GadgetContext;
@@ -25,13 +24,11 @@ import org.apache.shindig.gadgets.RenderingContext;
 import org.apache.shindig.gadgets.config.ConfigContributor;
 import org.apache.shindig.gadgets.features.FeatureRegistry;
 import org.apache.shindig.gadgets.features.FeatureResource;
+import org.apache.shindig.gadgets.uri.JsUriManager.JsUri;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.Collection;
 import java.util.Map;
-import java.util.Set;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -54,62 +51,6 @@ public class JsHandler {
     this.containerConfig = containerConfig;
     this.configContributors = configContributors;
   }
-  
-  /**
-   * Get the JavaScript content from the feature name aliases.
-   *
-   * @param req the HttpRequest object.
-   * @return JsHandlerResponse object that contains JavaScript data and cacheable flag.
-   */
-  public JsHandlerResponse getJsContent(final HttpServletRequest req) {   
-    // get the Set of features needed from request
-    Set<String> needed = getFeaturesNeeded(req);
-
-    // get the GadgetContext instance
-    GadgetContext ctx = getGadgetContext(req);
-
-    // get js data from feature resoources.
-    return getFeatureResourcesContent(req, ctx, needed);
-  }
-
-  /**
-   * Get the Set of feature names from the request.
-   *
-   * @param req the HttpServletRequest object.
-   * @return Set of names of needed JavaScript as feature aliases from the request.
-   */
-  protected Set<String> getFeaturesNeeded(final HttpServletRequest req) {
-    // Use the last component as filename; prefix is ignored
-    String uri = req.getRequestURI();
-    // We only want the file name part. There will always be at least 1 slash
-    // (the server root), so this is always safe.
-    String resourceName = uri.substring(uri.lastIndexOf('/') + 1);
-    if (resourceName.endsWith(".js")) {
-      // Lop off the suffix for lookup purposes
-      resourceName = resourceName.substring(0, resourceName.length() - ".js".length());
-    }
-
-    Set<String> needed = ImmutableSet.copyOf(StringUtils.split(resourceName, ':'));
-    return needed;
-  }
-
-  /**
-   * Get the GadgetContext to be used when calling FeatureRegistry.getFeatureResources.
-   * 
-   * @param req the HttpServletRequest object.
-   * @return GadgetContext instance.
-   */
-  protected GadgetContext getGadgetContext(final HttpServletRequest req) {
-    String containerParam = req.getParameter("container");
-    String containerStr = req.getParameter("c");
-
-    final RenderingContext context = "1".equals(containerStr) ?
-        RenderingContext.CONTAINER : RenderingContext.GADGET;
-    final String container =
-        containerParam != null ? containerParam : ContainerConfig.DEFAULT_CONTAINER;
-
-    return new JsGadgetContext(context, container);
-  }
 
   /**
    * Get the content of the feature resources and push it to jsData.
@@ -119,18 +60,17 @@ public class JsHandler {
    * @param needed Set of requested feature names.
    * @return JsHandlerResponse object that contains JavaScript data and cacheable flag.
    */
-  protected JsHandlerResponse getFeatureResourcesContent(final HttpServletRequest req,
-      final GadgetContext ctx, Set<String> needed) {
+  protected Response getJsContent(final JsUri jsUri, String host) {
+    GadgetContext ctx = new JsGadgetContext(jsUri);
     StringBuilder jsData = new StringBuilder();
+    Collection<String> needed = jsUri.getLibs();
     Collection<? extends FeatureResource> resources =
         registry.getFeatureResources(ctx, needed, null);
-    String debugStr = req.getParameter("debug");
-    boolean debug = "1".equals(debugStr);
     String container = ctx.getContainer();
     boolean isProxyCacheable = true;
 
     for (FeatureResource featureResource : resources) {
-      String content = debug ? featureResource.getDebugContent() : featureResource.getContent();
+      String content = jsUri.isDebug() ? featureResource.getDebugContent() : featureResource.getContent();
       if (!featureResource.isExternal()) {
         jsData.append(content);
       } else {
@@ -157,23 +97,23 @@ public class JsHandler {
           }
           ConfigContributor contributor = configContributors.get(name);
           if (contributor != null) {
-            contributor.contribute(config, container, req.getHeader("Host"));
+            contributor.contribute(config, container, host);
           }
         }
         jsData.append("gadgets.config.init(").append(JsonSerializer.serialize(config)).append(");\n");
       }
     }
-    return new JsHandlerResponse(jsData, isProxyCacheable);
+    return new Response(jsData, isProxyCacheable);
   }
 
   /**
    * Define the response data from JsHandler.
    */
-  public static class JsHandlerResponse {
+  public static class Response {
     private final boolean isProxyCacheable;
     private final StringBuilder jsData;
 
-    public JsHandlerResponse (StringBuilder jsData, boolean isProxyCacheable) {
+    public Response(StringBuilder jsData, boolean isProxyCacheable) {
       this.jsData = jsData;
       this.isProxyCacheable = isProxyCacheable;
     }
@@ -194,9 +134,9 @@ public class JsHandler {
     private final RenderingContext renderingContext;
     private final String container;
 
-    public JsGadgetContext(RenderingContext renderingContext, String container) {
-      this.renderingContext = renderingContext;
-      this.container = container;
+    public JsGadgetContext(JsUri ctx) {
+      this.renderingContext = ctx.getContext();
+      this.container = ctx.getContainer();
     }
     
     @Override

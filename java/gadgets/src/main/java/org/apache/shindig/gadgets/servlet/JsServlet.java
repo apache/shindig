@@ -131,7 +131,8 @@ public class JsServlet extends InjectedServlet {
     }
 
     // Get JavaScript content from features aliases request.
-    JsHandler.JsHandlerResponse handlerResponse = jsHandler.getJsContent(req);
+    JsHandler.Response handlerResponse =
+        jsHandler.getJsContent(jsUri, req.getHeader("Host"));
     StringBuilder jsData = handlerResponse.getJsData();
     boolean isProxyCacheable = handlerResponse.isProxyCacheable();
 
@@ -189,7 +190,6 @@ public class JsServlet extends InjectedServlet {
   }
 
   private int getCacheTtlSecs(JsUri jsUri) {
-    int refresh;
     if (jsUri.isNoCache()) {
       return 0;
     } else {
