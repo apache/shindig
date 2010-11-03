@@ -41,9 +41,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.List;
+import java.util.TreeMap;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -491,7 +492,7 @@ public class HttpRequestHandler {
      */
     public HttpApiResponse(HttpResponse response, Object content, HttpApiRequest httpApiRequest) {
       this.status = response.getHttpStatusCode();
-      this.headers = Maps.newTreeMap(String.CASE_INSENSITIVE_ORDER);
+      this.headers = new TreeMap<String, Collection<String>>(String.CASE_INSENSITIVE_ORDER);
 
       if (response.getHeaders().containsKey("set-cookie")) {
         this.headers.put("set-cookie", response.getHeaders("set-cookie"));

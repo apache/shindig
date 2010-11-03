@@ -23,7 +23,6 @@ import static org.easymock.EasyMock.capture;
 import static org.easymock.EasyMock.expect;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 
 import org.apache.shindig.auth.AuthInfo;
 import org.apache.shindig.auth.SecurityToken;
@@ -50,6 +49,7 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -522,7 +522,7 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
 
   @Test
   public void testSetResponseHeadersNoCache() throws Exception {
-    Map<String, List<String>> headers = Maps.newTreeMap(String.CASE_INSENSITIVE_ORDER);
+    Map<String, List<String>> headers = new TreeMap<String,List<String>>(String.CASE_INSENSITIVE_ORDER);
     headers.put("Pragma", Arrays.asList("no-cache"));
     HttpResponse results = new HttpResponseBuilder()
         .addHeader("Pragma", "no-cache")
