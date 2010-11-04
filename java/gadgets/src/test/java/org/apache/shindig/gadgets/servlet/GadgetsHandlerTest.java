@@ -22,6 +22,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.auth.SecurityTokenCodec;
 import org.apache.shindig.auth.SecurityTokenException;
@@ -29,9 +30,14 @@ import org.apache.shindig.common.EasyMockTestCase;
 import org.apache.shindig.common.JsonAssert;
 import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.common.testing.TestExecutorService;
+import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.util.FakeTimeSource;
+import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.process.ProcessingException;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
+import org.apache.shindig.gadgets.uri.JsUriManager;
+import org.apache.shindig.gadgets.uri.ProxyUriManager;
+import org.apache.shindig.gadgets.uri.ProxyUriManager.ProxyUri;
 import org.apache.shindig.protocol.DefaultHandlerRegistry;
 import org.apache.shindig.protocol.HandlerExecutionListener;
 import org.apache.shindig.protocol.HandlerRegistry;
@@ -48,6 +54,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
@@ -64,6 +71,9 @@ public class GadgetsHandlerTest extends EasyMockTestCase {
   private final FakeProcessor processor = new FakeProcessor();
   private final FakeIframeUriManager urlGenerator = new FakeIframeUriManager();
   private final Map<String, FormDataItem> emptyFormItems = Collections.emptyMap();
+  private final ProxyUriManager proxyUriManager = mock(ProxyUriManager.class);
+  private final JsUriManager jsUriManager = mock(JsUriManager.class);
+  private final ProxyHandler proxyHandler = mock(ProxyHandler.class);
 
   private Injector injector;
   private BeanJsonConverter converter;
@@ -81,7 +91,8 @@ public class GadgetsHandlerTest extends EasyMockTestCase {
   private void registerGadgetsHandler(SecurityTokenCodec codec) {
     BeanFilter beanFilter = new BeanFilter();
     GadgetsHandlerService service = new GadgetsHandlerService(timeSource, processor,
-        urlGenerator, codec, SPEC_REFRESH_INTERVAL, beanFilter);
+        urlGenerator, codec, proxyUriManager, jsUriManager, proxyHandler,
+        SPEC_REFRESH_INTERVAL, beanFilter);
     GadgetsHandler handler =
         new GadgetsHandler(new TestExecutorService(), service, beanFilter);
     registry = new DefaultHandlerRegistry(
@@ -196,19 +207,16 @@ public class GadgetsHandlerTest extends EasyMockTestCase {
     JSONObject userPrefData = userPrefs.getJSONObject("up_one");
     assertNotNull(userPrefData);
 
-    JSONObject upEnums = userPrefData.getJSONObject("enumValues");
-    assertNotNull(upEnums);
-    assertEquals("disp1", upEnums.get("val1"));
-    assertEquals("disp2", upEnums.get("abc"));
-    assertEquals("disp3", upEnums.get("z_xabc"));
-    assertEquals("disp4", upEnums.get("foo"));
-
     JSONArray orderedEnums = userPrefData.getJSONArray("orderedEnumValues");
     assertNotNull(orderedEnums);
     assertEquals(4, orderedEnums.length());
+    assertEquals("disp1", orderedEnums.getJSONObject(0).getString("displayValue"));
     assertEquals("val1", orderedEnums.getJSONObject(0).getString("value"));
+    assertEquals("disp2", orderedEnums.getJSONObject(1).getString("displayValue"));
     assertEquals("abc", orderedEnums.getJSONObject(1).getString("value"));
+    assertEquals("disp3", orderedEnums.getJSONObject(2).getString("displayValue"));
     assertEquals("z_xabc", orderedEnums.getJSONObject(2).getString("value"));
+    assertEquals("disp4", orderedEnums.getJSONObject(3).getString("displayValue"));
     assertEquals("foo", orderedEnums.getJSONObject(3).getString("value"));
   }
 
@@ -338,4 +346,106 @@ public class GadgetsHandlerTest extends EasyMockTestCase {
     assertEquals(HttpServletResponse.SC_BAD_REQUEST,
         gadget2.getJSONObject("error").getInt("code"));
   }
+
+  private JSONObject makeSimpleProxyRequest(String fields, String... uris) throws JSONException {
+    JSONObject params = new JSONObject().put("ids", ImmutableList.copyOf(uris))
+        .put("container", CONTAINER);
+    if (fields != null) {
+      params.put("fields", fields);
+    }
+    JSONObject req =
+        new JSONObject().put("method", "gadgets.proxy").put("id", "req1").put("params", params);
+    return req;
+  }
+
+  @Test
+  public void testSimpleProxy() throws Exception {
+    registerGadgetsHandler(null);
+    String resUri = "http://example.com/data";
+    String proxyUri = "http://shindig.com/gadgets/proxy?url=" + resUri;
+    JSONObject request = makeSimpleProxyRequest(null, resUri);
+    Capture<List<ProxyUri>> captureProxyUri = new Capture<List<ProxyUri>>();
+    EasyMock.expect(proxyUriManager.make(EasyMock.capture(captureProxyUri),
+        EasyMock.isNull(Integer.class))).andReturn(ImmutableList.<Uri>of(Uri.parse(proxyUri)));
+    replay();
+    RpcHandler operation = registry.getRpcHandler(request);
+    Object responseObj = operation.execute(emptyFormItems, token, converter).get();
+    JSONObject response = new JSONObject(converter.convertToString(responseObj));
+
+    JSONObject gadget1 = response.getJSONObject(resUri);
+    assertEquals(proxyUri, gadget1.getString("proxyUrl"));
+    ProxyUri pUri = captureProxyUri.getValue().get(0);
+    ProxyUri expectedUri = new ProxyUri(null, false, false, CONTAINER, null, Uri.parse(resUri));
+    assertTrue(expectedUri.equals(pUri));
+    assertFalse(gadget1.has("error"));
+    verify();
+  }
+
+  @Test
+  public void testSimpleProxyData() throws Exception {
+    registerGadgetsHandler(null);
+    String resUri = "http://example.com/data";
+    String proxyUri = "http://shindig.com/gadgets/proxy?url=" + resUri;
+    JSONObject request = makeSimpleProxyRequest("*", resUri);
+    Capture<List<ProxyUri>> captureProxyUri = new Capture<List<ProxyUri>>();
+    EasyMock.expect(proxyUriManager.make(EasyMock.capture(captureProxyUri),
+        EasyMock.isNull(Integer.class))).andReturn(ImmutableList.<Uri>of(Uri.parse(proxyUri)));
+    String responseData = "response data";
+    HttpResponse httpResponse = new HttpResponse(responseData);
+    EasyMock.expect(proxyHandler.fetch(EasyMock.isA(ProxyUri.class))).andReturn(httpResponse);
+    replay();
+
+    RpcHandler operation = registry.getRpcHandler(request);
+    Object responseObj = operation.execute(emptyFormItems, token, converter).get();
+    JSONObject response = new JSONObject(converter.convertToString(responseObj));
+
+    JSONObject gadget1 = response.getJSONObject(resUri);
+    assertEquals(proxyUri, gadget1.getString("proxyUrl"));
+    ProxyUri pUri = captureProxyUri.getValue().get(0);
+    ProxyUri expectedUri = new ProxyUri(null, false, false, CONTAINER, null, Uri.parse(resUri));
+    assertTrue(expectedUri.equals(pUri));
+    assertEquals(responseData, new String(Base64.decodeBase64(((JSONObject)
+        gadget1.get("proxyContent")).getString("contentBase64").getBytes())));
+    assertFalse(gadget1.has("error"));
+    verify();
+  }
+
+  private JSONObject makeComplexProxyRequest(String... uris) throws JSONException {
+    JSONObject req =
+        new JSONObject().put("method", "gadgets.proxy").put("id", "req1").put("params",
+            new JSONObject().put("ids", ImmutableList.copyOf(uris)).put("container", CONTAINER)
+                .put("ignoreCache", "1").put("debug", "1").put("sanitize", "true")
+                .put("cajole", "true").put("gadget", GADGET1_URL).put("refresh", "333")
+                .put("rewriteMime", "text/xml").put("fallback_url", uris[0])
+                .put("no_expand", "true").put("resize_h", "444").put("resize_w", "555")
+                .put("resize_q", "88")
+                );
+    return req;
+  }
+
+  @Test
+  public void testComplexProxy() throws Exception {
+    registerGadgetsHandler(null);
+    String resUri = "http://example.com/data";
+    String proxyUri = "http://shindig.com/gadgets/proxy?url=" + resUri;
+    JSONObject request = makeComplexProxyRequest(resUri);
+    Capture<List<ProxyUri>> captureProxyUri = new Capture<List<ProxyUri>>();
+    EasyMock.expect(proxyUriManager.make(EasyMock.capture(captureProxyUri),
+        EasyMock.isNull(Integer.class))).andReturn(ImmutableList.<Uri>of(Uri.parse(proxyUri)));
+    replay();
+    RpcHandler operation = registry.getRpcHandler(request);
+    Object responseObj = operation.execute(emptyFormItems, token, converter).get();
+    JSONObject response = new JSONObject(converter.convertToString(responseObj));
+
+    JSONObject gadget1 = response.getJSONObject(resUri);
+    assertEquals(proxyUri, gadget1.getString("proxyUrl"));
+    ProxyUri pUri = captureProxyUri.getValue().get(0);
+    ProxyUri expectedUri = new ProxyUri(333, true, true, CONTAINER, GADGET1_URL, Uri.parse(resUri));
+    expectedUri.setCajoleContent(true).setRewriteMimeType("text/xml").setSanitizeContent(true);
+    expectedUri.setFallbackUrl(resUri).setResize(555, 444, 88, true);
+    assertTrue(expectedUri.equals(pUri));
+    assertFalse(gadget1.has("error"));
+    verify();
+  }
+
 }

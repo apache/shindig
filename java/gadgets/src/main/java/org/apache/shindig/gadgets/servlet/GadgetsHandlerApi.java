@@ -54,8 +54,10 @@ public class GadgetsHandlerApi {
     @Unfiltered
     public Error getError();
     /** The response expiration time (miliseconds since epoch), -1 for no caching */
+    @Unfiltered
     public Long getExpireTimeMs();
     /** The response time (miliseconds since epoch) - usefull for misconfigured client time */
+    @Unfiltered
     public Long getResponseTimeMs();
   }
 
@@ -100,10 +102,8 @@ public class GadgetsHandlerApi {
     public Uri getHref();
     public boolean getQuirks();
     public String getContent();
-    public int getPreferredHeight();
-    public int getPreferredWidth();
-    public boolean needsUserPrefSubstitution();
-    public Map<String, String> getAttributes();
+    public int getPreferredHeight(); // Default to 0
+    public int getPreferredWidth();  // Default to 0
   }
 
   public enum UserPrefDataType {
@@ -116,7 +116,6 @@ public class GadgetsHandlerApi {
     public String getDefaultValue();
     public boolean getRequired();
     public UserPrefDataType getDataType();
-    public Map<String, String> getEnumValues();
     public List<EnumValuePair> getOrderedEnumValues();
   }
 
@@ -171,5 +170,51 @@ public class GadgetsHandlerApi {
 
   public interface TokenResponse extends BaseResponse {
     public String getToken();
+  }
+
+  public interface ProxyRequest extends BaseRequest {
+    // The BaseRequest.url store the resource to proxy
+    public String getGadget();
+    public Integer getRefresh();
+    public boolean getDebug();
+    public boolean getIgnoreCahce();
+    public String getFallbackUrl();
+    public String getRewriteMimeType();
+    public boolean getSanitize();
+    public boolean getCajole();
+    public ImageParams getImageParams();
+  }
+
+  public interface ImageParams {
+    public Integer getHeight();
+    public Integer getWidth();
+    public Integer getQuality();
+    public Boolean getDoNotExpand();
+  }
+
+  public interface ProxyResponse extends BaseResponse {
+    public Uri getProxyUrl();
+    public HttpResponse getProxyContent();
+  }
+
+  public interface HttpResponse {
+    public int getCode();
+    public String getEncoding();
+    public String getContentBase64();
+    public List<NameValuePair> getHeaders();
+  }
+
+  public interface NameValuePair {
+    public String getName();
+    public String getValue();
+  }
+
+  public interface JsRequest extends BaseRequest {
+    public List<String> getFeatures();
+    public boolean getForContainer();
+  }
+
+  public interface JsResponse extends BaseResponse {
+    public Uri getJsUrl();
   }
 }

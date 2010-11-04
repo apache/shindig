@@ -217,7 +217,9 @@ public class ProxyUriBase {
     // Add all params common to both chained and query syntax.
     String container = getContainer();
     queryBuilder.addQueryParameter(Param.CONTAINER.getKey(), container);
-    queryBuilder.addQueryParameter(Param.GADGET.getKey(), getGadget());
+    if (getGadget() != null) {
+      queryBuilder.addQueryParameter(Param.GADGET.getKey(), getGadget());
+    }
     queryBuilder.addQueryParameter(Param.DEBUG.getKey(), isDebug() ? "1" : "0");
     queryBuilder.addQueryParameter(Param.NO_CACHE.getKey(), isNoCache() ? "1" : "0");
     if (!isNoCache()) {

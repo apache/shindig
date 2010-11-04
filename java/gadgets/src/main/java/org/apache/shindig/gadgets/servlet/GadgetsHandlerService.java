@@ -19,10 +19,13 @@
 package org.apache.shindig.gadgets.servlet;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
+import org.apache.commons.codec.binary.Base64InputStream;
+import org.apache.commons.io.IOUtils;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.auth.SecurityTokenCodec;
 import org.apache.shindig.auth.SecurityTokenException;
@@ -30,6 +33,7 @@ import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.util.TimeSource;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
+import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.RenderingContext;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.process.ProcessingException;
@@ -42,12 +46,19 @@ import org.apache.shindig.gadgets.spec.UserPref;
 import org.apache.shindig.gadgets.spec.View;
 import org.apache.shindig.gadgets.spec.UserPref.EnumValuePair;
 import org.apache.shindig.gadgets.uri.IframeUriManager;
+import org.apache.shindig.gadgets.uri.JsUriManager;
+import org.apache.shindig.gadgets.uri.ProxyUriManager;
+import org.apache.shindig.gadgets.uri.ProxyUriManager.ProxyUri;
 import org.apache.shindig.protocol.conversion.BeanDelegator;
 import org.apache.shindig.protocol.conversion.BeanFilter;
 
+import java.io.IOException;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -59,6 +70,8 @@ import javax.servlet.http.HttpServletResponse;
 public class GadgetsHandlerService {
 
   private static final Locale DEFAULT_LOCALE = new Locale("all", "all");
+
+  private static final Logger LOG = Logger.getLogger(GadgetsHandler.class.getName());
 
   // Map shindig data class to API interfaces
   @VisibleForTesting
@@ -91,6 +104,9 @@ public class GadgetsHandlerService {
   protected final Processor processor;
   protected final IframeUriManager iframeUriManager;
   protected final SecurityTokenCodec securityTokenCodec;
+  protected final ProxyUriManager proxyUriManager;
+  protected final JsUriManager jsUriManager;
+  protected final ProxyHandler proxyHandler;
   protected final BeanDelegator beanDelegator;
   protected final long specRefreshInterval;
   protected final BeanFilter beanFilter;
@@ -98,12 +114,16 @@ public class GadgetsHandlerService {
   @Inject
   public GadgetsHandlerService(TimeSource timeSource, Processor processor,
       IframeUriManager iframeUriManager, SecurityTokenCodec securityTokenCodec,
+      ProxyUriManager proxyUriManager, JsUriManager jsUriManager, ProxyHandler proxyHandler,
       @Named("shindig.cache.xml.refreshInterval") long specRefreshInterval,
       BeanFilter beanFilter) {
     this.timeSource = timeSource;
     this.processor = processor;
     this.iframeUriManager = iframeUriManager;
     this.securityTokenCodec = securityTokenCodec;
+    this.proxyUriManager = proxyUriManager;
+    this.jsUriManager = jsUriManager;
+    this.proxyHandler = proxyHandler;
     this.specRefreshInterval = specRefreshInterval;
     this.beanFilter = beanFilter;
 
@@ -168,6 +188,57 @@ public class GadgetsHandlerService {
     String token = securityTokenCodec.encodeToken(tokenData);
     Long expiryTimeMs = securityTokenCodec.getTokenExpiration(tokenData);
     return createTokenResponse(request.getUrl(), token, fields, expiryTimeMs);
+  }
+
+  public GadgetsHandlerApi.ProxyResponse getProxy(GadgetsHandlerApi.ProxyRequest request)
+      throws ProcessingException {
+    if (request.getContainer() == null) {
+      throw new ProcessingException("Missing container paramater", HttpResponse.SC_BAD_REQUEST);
+    }
+    if (request.getUrl() == null) {
+      throw new ProcessingException("Missing proxy url paramater", HttpResponse.SC_BAD_REQUEST);
+    }
+    if (request.getFields() == null) {
+      throw new ProcessingException("Missing fields paramater", HttpResponse.SC_BAD_REQUEST);
+    }
+    Set<String> fields = beanFilter.processBeanFields(request.getFields());
+
+    ProxyUri proxyUri = createProxyUri(request);
+    List<Uri> uris = proxyUriManager.make(ImmutableList.of(proxyUri), null);
+
+    HttpResponse httpResponse = null;
+    try {
+      if (isFieldIncluded(fields, "proxyContent")) {
+        httpResponse = proxyHandler.fetch(proxyUri);
+      }
+    } catch (IOException e) {
+      LOG.log(Level.INFO, "Failed to fetch resource " + proxyUri.getResource().toString(), e);
+      throw new ProcessingException("Error getting response content", HttpResponse.SC_BAD_GATEWAY);
+    } catch (GadgetException e) {
+      // TODO: Clean this log if it is too spammy
+      LOG.log(Level.INFO, "Failed to fetch resource " + proxyUri.getResource().toString(), e);
+      throw new ProcessingException("Error getting response content", HttpResponse.SC_BAD_GATEWAY);
+    }
+
+    try {
+      return createProxyResponse(uris.get(0), httpResponse, fields,
+          getProxyExpireMs(proxyUri, httpResponse));
+    } catch (IOException e) {
+      // Should never happen!
+      LOG.log(Level.WARNING, "Error creating proxy response", e);
+      throw new ProcessingException("Error getting response content",
+          HttpResponse.SC_INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  protected Long getProxyExpireMs(ProxyUri proxyUri, HttpResponse httpResponse) {
+    Long expireMs = null;
+    if (httpResponse != null) {
+      expireMs = httpResponse.getCacheExpiration();
+    } else if (proxyUri.getRefresh() != null) {
+      expireMs = timeSource.currentTimeMillis() + proxyUri.getRefresh() * 1000;
+    }
+    return expireMs;
   }
 
   /**
@@ -247,6 +318,7 @@ public class GadgetsHandlerService {
       return createErrorResponse(uri, processingExc.getHttpStatusCode(),
           processingExc.getMessage());
     }
+    LOG.log(Level.WARNING, "Error handling request: " + (uri != null ? uri.toString() : ""), e);
     return createErrorResponse(uri, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, defaultMsg);
   }
 
@@ -288,5 +360,65 @@ public class GadgetsHandlerService {
                 "responsetimems", timeSource.currentTimeMillis(),
                 "expiretimems", BeanDelegator.nullable(tokenExpire))),
         fields);
+  }
+
+  @VisibleForTesting
+  ProxyUri createProxyUri(GadgetsHandlerApi.ProxyRequest request) {
+    ProxyUriManager.ProxyUri proxyUri = new ProxyUriManager.ProxyUri(request.getRefresh(),
+        request.getDebug(), request.getIgnoreCahce(), request.getContainer(),
+        request.getGadget(), request.getUrl());
+
+    proxyUri.setFallbackUrl(request.getFallbackUrl())
+        .setRewriteMimeType(request.getRewriteMimeType())
+        .setSanitizeContent(request.getSanitize())
+        .setCajoleContent(request.getCajole());
+
+    GadgetsHandlerApi.ImageParams image = request.getImageParams();
+    if (image != null) {
+      proxyUri.setResize( image.getWidth(), image.getHeight(),
+          image.getQuality(), image.getDoNotExpand());
+    }
+    return proxyUri;
+  }
+
+  @VisibleForTesting
+  GadgetsHandlerApi.ProxyResponse createProxyResponse(Uri uri, HttpResponse httpResponse,
+      Set<String> fields, Long expireMs) throws IOException {
+
+    GadgetsHandlerApi.HttpResponse beanHttp = null;
+    if (httpResponse != null) {
+      // Stream out the base64-encoded data.
+      // Ctor args indicate to encode w/o line breaks.
+      Base64InputStream b64input = new Base64InputStream(httpResponse.getResponse(), true, 0, null);
+      String content = IOUtils.toString(b64input);
+
+      ImmutableList.Builder<GadgetsHandlerApi.NameValuePair> headersBuilder =
+          ImmutableList.builder();
+      for (final Map.Entry<String, String> entry : httpResponse.getHeaders().entries()) {
+        headersBuilder.add(
+            beanDelegator.createDelegator(null, GadgetsHandlerApi.NameValuePair.class,
+                ImmutableMap.<String, Object>of("name", entry.getKey(), "value", entry.getValue()))
+        );
+      }
+
+      beanHttp = beanDelegator.createDelegator(null, GadgetsHandlerApi.HttpResponse.class,
+          ImmutableMap.<String, Object>of(
+              "code", httpResponse.getHttpStatusCode(),
+              "encoding", httpResponse.getEncoding(),
+              "contentbase64", content,
+              "headers", headersBuilder.build()));
+    }
+
+    return (GadgetsHandlerApi.ProxyResponse) beanFilter.createFilteredBean(
+      beanDelegator.createDelegator(null, GadgetsHandlerApi.ProxyResponse.class,
+          ImmutableMap.<String, Object>builder()
+              .put("proxyurl", uri)
+              .put("proxycontent", BeanDelegator.nullable(beanHttp))
+              .put("url", BeanDelegator.NULL)
+              .put("error", BeanDelegator.NULL)
+              .put("responsetimems", timeSource.currentTimeMillis())
+              .put("expiretimems", BeanDelegator.nullable(expireMs))
+              .build()),
+      fields);
   }
 }

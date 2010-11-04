@@ -46,6 +46,7 @@ import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
+import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -60,11 +61,17 @@ public class GadgetsHandler {
   static final String FAILURE_METADATA = "Failed to get gadget metadata.";
   @VisibleForTesting
   static final String FAILURE_TOKEN = "Failed to get gadget token.";
+  @VisibleForTesting
+  static final String FAILURE_PROXY = "Failed to get proxy data.";
 
   private static final List<String> DEFAULT_METADATA_FIELDS =
       ImmutableList.of("iframeUrl", "userPrefs.*", "modulePrefs.*", "views.*");
 
   private static final List<String> DEFAULT_TOKEN_FIELDS = ImmutableList.of("token");
+
+  private static final List<String> DEFAULT_PROXY_FIELDS = ImmutableList.of("proxyUrl");
+
+  private static final Logger LOG = Logger.getLogger(GadgetsHandler.class.getName());
 
   protected final ExecutorService executor;
   protected final GadgetsHandlerService handlerService;
@@ -106,6 +113,18 @@ public class GadgetsHandler {
     }.execute(request);
   }
 
+  @Operation(httpMethods = {"POST", "GET"}, path = "proxy.get")
+  public Map<String, GadgetsHandlerApi.BaseResponse> proxy(BaseRequestItem request)
+      throws ProtocolException {
+    return new AbstractExecutor() {
+      @Override
+      protected Callable<CallableData> createJob(String url, BaseRequestItem request)
+          throws ProcessingException {
+        return createProxyJob(url, request);
+      }
+    }.execute(request);
+  }
+
   @Operation(httpMethods = "GET", path = "/@metadata.supportedFields")
   public Set<String> supportedFields(RequestItem request) {
     return ImmutableSet.copyOf(beanFilter
@@ -116,6 +135,12 @@ public class GadgetsHandler {
   public Set<String> tokenSupportedFields(RequestItem request) {
     return ImmutableSet.copyOf(
         beanFilter.getBeanFields(GadgetsHandlerApi.TokenResponse.class, 5));
+  }
+
+  @Operation(httpMethods = "GET", path = "/@proxy.supportedFields")
+  public Set<String> proxySupportedFields(RequestItem request) {
+    return ImmutableSet.copyOf(
+        beanFilter.getBeanFields(GadgetsHandlerApi.ProxyResponse.class, 5));
   }
 
   /**
@@ -214,6 +239,23 @@ public class GadgetsHandler {
     };
   }
 
+  // Hook to override in sub-class.
+  protected Callable<CallableData> createProxyJob(final String url,
+      BaseRequestItem request) throws ProcessingException {
+    final ProxyRequestData proxyRequest = new ProxyRequestData(url, request);
+    return new Callable<CallableData>() {
+      public CallableData call() throws Exception {
+        try {
+          return new CallableData(url, handlerService.getProxy(proxyRequest));
+        } catch (Exception e) {
+          return new CallableData(url,
+            handlerService.createErrorResponse(null, e, FAILURE_PROXY));
+        }
+      }
+    };
+  }
+
+
   /**
    * Gadget context classes used to translate JSON BaseRequestItem into a more
    * meaningful model objects that Java can work with.
@@ -236,6 +278,29 @@ public class GadgetsHandler {
       this.fields = processFields(request, defaultFields);
     }
 
+    protected Boolean getBooleanParam(BaseRequestItem request, String field) {
+      String val = request.getParameter(field);
+      if (val != null) {
+        return "1".equals(val) || Boolean.valueOf(val);
+      }
+      return false;
+    }
+
+    protected Integer getIntegerParam(BaseRequestItem request, String field)
+        throws ProcessingException {
+      String val = request.getParameter(field);
+      Integer intVal = null;
+      if (val != null) {
+        try {
+          intVal = Integer.valueOf(val);
+        } catch (NumberFormatException e) {
+          throw new ProcessingException("Error parsing " + field + " parameter",
+              HttpServletResponse.SC_BAD_REQUEST);
+        }
+      }
+      return intVal;
+    }
+
     public Uri getUrl() {
       return uri;
     }
@@ -254,6 +319,87 @@ public class GadgetsHandler {
     }
   }
 
+  protected class ProxyRequestData extends AbstractRequest
+      implements GadgetsHandlerApi.ProxyRequest {
+
+    private final String gadget;
+    private final Integer refresh;
+    private final boolean debug;
+    private final boolean ignoreCache;
+    private final String fallbackUrl;
+    private final String mimetype;
+    private final boolean sanitize;
+    private final boolean cajole;
+    private final GadgetsHandlerApi.ImageParams imageParams;
+
+    public ProxyRequestData(String url, BaseRequestItem request) throws ProcessingException {
+      super(url, request, DEFAULT_PROXY_FIELDS);
+      this.ignoreCache = getBooleanParam(request, "ignoreCache");
+      this.debug = getBooleanParam(request, "debug");
+      this.sanitize = getBooleanParam(request, "sanitize");
+      this.cajole = getBooleanParam(request, "cajole");
+      this.gadget = request.getParameter("gadget");
+      this.fallbackUrl = request.getParameter("fallback_url");
+      this.mimetype = request.getParameter("rewriteMime");
+      this.refresh = getIntegerParam(request, "refresh");
+      imageParams = getImageParams(request);
+    }
+
+    private GadgetsHandlerApi.ImageParams getImageParams(BaseRequestItem request)
+        throws ProcessingException {
+      GadgetsHandlerApi.ImageParams params = null;
+      Boolean doNotExpand = getBooleanParam(request, "no_expand");
+      Integer height = getIntegerParam(request, "resize_h");
+      Integer width = getIntegerParam(request, "resize_w");
+      Integer quality = getIntegerParam(request, "resize_q");
+
+      if (height != null || width != null) {
+        return beanDelegator.createDelegator(null, GadgetsHandlerApi.ImageParams.class,
+            ImmutableMap.<String, Object>of(
+                "height", BeanDelegator.nullable(height),
+                "width", BeanDelegator.nullable(width),
+                "quality", BeanDelegator.nullable(quality),
+                "donotexpand", BeanDelegator.nullable(doNotExpand)));
+      }
+      return params;
+    }
+
+    public boolean getDebug() {
+      return debug;
+    }
+
+    public String getFallbackUrl() {
+      return fallbackUrl;
+    }
+
+    public boolean getIgnoreCahce() {
+      return ignoreCache;
+    }
+
+    public GadgetsHandlerApi.ImageParams getImageParams() {
+      return imageParams;
+    }
+
+    public Integer getRefresh() {
+      return refresh;
+    }
+
+    public String getRewriteMimeType() {
+      return mimetype;
+    }
+
+    public boolean getSanitize() {
+      return sanitize;
+    }
+
+    public boolean getCajole() {
+      return cajole;
+    }
+
+    public String getGadget() {
+      return gadget;
+    }
+  }
 
   protected class TokenRequestData extends AbstractRequest
       implements GadgetsHandlerApi.TokenRequest {
@@ -284,8 +430,8 @@ public class GadgetsHandler {
       this.locale =
           (lang != null && country != null) ? new Locale(lang, country) : (lang != null)
               ? new Locale(lang) : GadgetSpec.DEFAULT_LOCALE;
-      this.ignoreCache = Boolean.valueOf(request.getParameter("ignoreCache"));
-      this.debug = Boolean.valueOf(request.getParameter("debug"));
+      this.ignoreCache = getBooleanParam(request, "ignoreCache");
+      this.debug = getBooleanParam(request, "debug");
     }
 
     public int getModuleId() {

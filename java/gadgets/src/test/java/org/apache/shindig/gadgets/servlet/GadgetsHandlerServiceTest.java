@@ -18,23 +18,37 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.capture;
+
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.auth.SecurityTokenCodec;
 import org.apache.shindig.auth.SecurityTokenException;
 import org.apache.shindig.common.EasyMockTestCase;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.util.FakeTimeSource;
+import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.GadgetException.Code;
 import org.apache.shindig.gadgets.features.FeatureRegistry;
+import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.process.ProcessingException;
+import org.apache.shindig.gadgets.uri.JsUriManager;
+import org.apache.shindig.gadgets.uri.ProxyUriManager;
+import org.apache.shindig.gadgets.uri.ProxyUriManager.ProxyUri;
 import org.apache.shindig.protocol.conversion.BeanDelegator;
 import org.apache.shindig.protocol.conversion.BeanFilter;
+import org.easymock.Capture;
 import org.easymock.EasyMock;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
 
@@ -48,6 +62,8 @@ public class GadgetsHandlerServiceTest extends EasyMockTestCase {
   private static final Long SPEC_REFRESH_INTERVAL_MS = 456L;
   private static final Long METADATA_EXPIRY_TIME_MS = CURRENT_TIME_MS + SPEC_REFRESH_INTERVAL_MS;
   private static final Long TOKEN_EXPIRY_TIME_MS = CURRENT_TIME_MS + 789L;
+  private static final Uri RESOURCE = Uri.parse("http://example.com/data");
+  private static final String FALLBACK = "http://example.com/data2";
 
   private final BeanDelegator delegator = new BeanDelegator(
     GadgetsHandlerService.apiClasses, GadgetsHandlerService.enumConversionMap);
@@ -56,6 +72,9 @@ public class GadgetsHandlerServiceTest extends EasyMockTestCase {
   private final FeatureRegistry mockRegistry = mock(FeatureRegistry.class);
   private final FakeProcessor processor = new FakeProcessor(mockRegistry);
   private final FakeIframeUriManager urlGenerator = new FakeIframeUriManager();
+  private final ProxyUriManager proxyUriManager = mock(ProxyUriManager.class);
+  private final JsUriManager jsUriManager = mock(JsUriManager.class);
+  private final ProxyHandler proxyHandler = mock(ProxyHandler.class);
 
   private FakeSecurityTokenCodec tokenCodec;
   private GadgetsHandlerService gadgetHandler;
@@ -64,7 +83,8 @@ public class GadgetsHandlerServiceTest extends EasyMockTestCase {
   public void setUp() {
     tokenCodec = new FakeSecurityTokenCodec();
     gadgetHandler = new GadgetsHandlerService(timeSource, processor, urlGenerator,
-        tokenCodec, SPEC_REFRESH_INTERVAL_MS, new BeanFilter());
+        tokenCodec, proxyUriManager, jsUriManager, proxyHandler,
+        SPEC_REFRESH_INTERVAL_MS, new BeanFilter());
   }
 
   // Next test verify that the API data classes are configured correctly.
@@ -98,7 +118,7 @@ public class GadgetsHandlerServiceTest extends EasyMockTestCase {
         response.getModulePrefs().getLinks().get(FakeProcessor.LINK_REL).getRel());
     assertEquals(1, response.getUserPrefs().size());
     assertEquals("up_one", response.getUserPrefs().get("up_one").getDisplayName());
-    assertEquals(4, response.getUserPrefs().get("up_one").getEnumValues().size());
+    assertEquals(4, response.getUserPrefs().get("up_one").getOrderedEnumValues().size());
     assertEquals(CURRENT_TIME_MS, response.getResponseTimeMs());
     assertEquals(METADATA_EXPIRY_TIME_MS, response.getExpireTimeMs());
     verify();
@@ -239,6 +259,150 @@ public class GadgetsHandlerServiceTest extends EasyMockTestCase {
     verify();
   }
 
+  @Test
+  public void testCreateProxyUri() throws Exception {
+    GadgetsHandlerApi.ImageParams image = mock(GadgetsHandlerApi.ImageParams.class);
+    expect(image.getDoNotExpand()).andStubReturn(true);
+    expect(image.getHeight()).andStubReturn(120);
+    expect(image.getWidth()).andStubReturn(210);
+    expect(image.getQuality()).andStubReturn(77);
+
+    GadgetsHandlerApi.ProxyRequest request = mock(GadgetsHandlerApi.ProxyRequest.class);
+    expect(request.getContainer()).andStubReturn(CONTAINER);
+    expect(request.getUrl()).andStubReturn(RESOURCE);
+    expect(request.getCajole()).andStubReturn(true);
+    expect(request.getRefresh()).andStubReturn(new Integer(333));
+    expect(request.getDebug()).andStubReturn(true);
+    expect(request.getFallbackUrl()).andStubReturn(FALLBACK);
+    expect(request.getGadget()).andStubReturn(FakeProcessor.SPEC_URL.toString());
+    expect(request.getIgnoreCahce()).andStubReturn(true);
+    expect(request.getImageParams()).andStubReturn(image);
+    expect(request.getRewriteMimeType()).andStubReturn("image/png");
+    expect(request.getSanitize()).andStubReturn(true);
+    replay();
+    ProxyUri pUri = gadgetHandler.createProxyUri(request);
+
+    ProxyUri expectedUri = new ProxyUri(333, true, true, CONTAINER,
+        FakeProcessor.SPEC_URL.toString(), RESOURCE);
+    expectedUri.setCajoleContent(true).setRewriteMimeType("image/png").setSanitizeContent(true);
+    expectedUri.setResize(210, 120, 77, true).setFallbackUrl(FALLBACK);
+    assertEquals(pUri, expectedUri);
+    verify();
+  }
+
+  @Test
+  public void testValidateProxyResponse() throws Exception {
+    GadgetsHandlerApi.ProxyResponse response =
+        gadgetHandler.createProxyResponse(RESOURCE, null, ImmutableSet.<String>of("*"), 1000001L);
+
+    BeanDelegator.validateDelegator(response);
+    assertEquals(RESOURCE, response.getProxyUrl());
+    assertNull(response.getProxyContent());
+  }
+
+  @Test
+  public void testCreateProxyResponse() throws Exception {
+    HttpResponseBuilder httpResponse = new HttpResponseBuilder();
+    httpResponse.setContent("Content");
+    httpResponse.addHeader("header", "hval");
+    httpResponse.setEncoding(Charset.forName("UTF8"));
+    httpResponse.setHttpStatusCode(404);
+
+    GadgetsHandlerApi.ProxyResponse response = gadgetHandler.createProxyResponse(
+        RESOURCE, httpResponse.create(), ImmutableSet.<String>of("*"), 1000001L);
+    BeanDelegator.validateDelegator(response);
+    assertEquals("Content",
+        new String(Base64.decodeBase64(response.getProxyContent().getContentBase64())));
+    assertEquals(404, response.getProxyContent().getCode());
+    assertEquals(2, response.getProxyContent().getHeaders().size());
+    assertEquals("Date", response.getProxyContent().getHeaders().get(0).getName());
+    assertEquals("header", response.getProxyContent().getHeaders().get(1).getName());
+    assertEquals("hval", response.getProxyContent().getHeaders().get(1).getValue());
+  }
+
+  @Test
+  public void testFilterProxyResponse() throws Exception {
+    HttpResponse httpResponse = new HttpResponse("data");
+    GadgetsHandlerApi.ProxyResponse response = gadgetHandler.createProxyResponse(
+        RESOURCE, httpResponse, ImmutableSet.<String>of("proxyurl"), 1000001L);
+    assertNull(response.getProxyContent());
+    assertEquals(RESOURCE, response.getProxyUrl());
+  }
+
+  @Test
+  public void testGetProxySimple() throws Exception {
+    List<String> fields = ImmutableList.of("proxyurl");
+    Uri resUri = Uri.parse("server.com/gadgets/proxy?url=" + RESOURCE);
+    GadgetsHandlerApi.ProxyRequest request = createProxyRequest(RESOURCE, CONTAINER, fields);
+    Capture<List<ProxyUri>> uriCapture = new Capture<List<ProxyUri>>();
+    expect(proxyUriManager.make(capture(uriCapture), EasyMock.anyInt()))
+        .andReturn(ImmutableList.of(resUri));
+    replay();
+    GadgetsHandlerApi.ProxyResponse response = gadgetHandler.getProxy(request);
+    assertEquals(1, uriCapture.getValue().size());
+    ProxyUri pUri = uriCapture.getValue().get(0);
+    assertEquals(CONTAINER, pUri.getContainer());
+    assertEquals(resUri, response.getProxyUrl());
+    assertNull(response.getProxyContent());
+    verify();
+  }
+
+  @Test(expected = ProcessingException.class)
+  public void testGetProxyNoContainer() throws Exception {
+    List<String> fields = ImmutableList.of("*");
+    GadgetsHandlerApi.ProxyRequest request = createProxyRequest(RESOURCE, null, fields);
+    GadgetsHandlerApi.ProxyResponse response = gadgetHandler.getProxy(request);
+  }
+
+  @Test(expected = ProcessingException.class)
+  public void testGetProxyNoResource() throws Exception {
+    List<String> fields = ImmutableList.of("*");
+    GadgetsHandlerApi.ProxyRequest request = createProxyRequest(null, CONTAINER, fields);
+    GadgetsHandlerApi.ProxyResponse response = gadgetHandler.getProxy(request);
+  }
+
+  @Test(expected = ProcessingException.class)
+  public void testGetProxyNoFields() throws Exception {
+    GadgetsHandlerApi.ProxyRequest request = createProxyRequest(RESOURCE, CONTAINER, null);
+    GadgetsHandlerApi.ProxyResponse response = gadgetHandler.getProxy(request);
+  }
+
+  @Test
+  public void testGetProxyData() throws Exception {
+    List<String> fields = ImmutableList.of("proxycontent.*");
+    Uri resUri = Uri.parse("server.com/gadgets/proxy?url=" + RESOURCE);
+    GadgetsHandlerApi.ProxyRequest request = createProxyRequest(RESOURCE, CONTAINER, fields);
+    Capture<List<ProxyUri>> uriCapture = new Capture<List<ProxyUri>>();
+    expect(proxyUriManager.make(capture(uriCapture), EasyMock.anyInt()))
+        .andReturn(ImmutableList.of(resUri));
+    HttpResponse httpResponse = new HttpResponse("response");
+    expect(proxyHandler.fetch(EasyMock.isA(ProxyUri.class))).andReturn(httpResponse);
+    replay();
+    GadgetsHandlerApi.ProxyResponse response = gadgetHandler.getProxy(request);
+    assertEquals(1, uriCapture.getValue().size());
+    ProxyUri pUri = uriCapture.getValue().get(0);
+    assertEquals(CONTAINER, pUri.getContainer());
+    assertNull(response.getProxyUrl());
+    assertEquals("response",
+        new String(Base64.decodeBase64(response.getProxyContent().getContentBase64())));
+    verify();
+  }
+
+  @Test(expected = ProcessingException.class)
+  public void testGetProxyDataFail() throws Exception {
+    List<String> fields = ImmutableList.of("proxycontent.*");
+    Uri resUri = Uri.parse("server.com/gadgets/proxy?url=" + RESOURCE);
+    GadgetsHandlerApi.ProxyRequest request = createProxyRequest(RESOURCE, CONTAINER, fields);
+    Capture<List<ProxyUri>> uriCapture = new Capture<List<ProxyUri>>();
+    expect(proxyUriManager.make(capture(uriCapture), EasyMock.anyInt()))
+        .andReturn(ImmutableList.of(resUri));
+    HttpResponse httpResponse = new HttpResponse("response");
+    expect(proxyHandler.fetch(EasyMock.isA(ProxyUri.class)))
+        .andThrow(new GadgetException(Code.FAILED_TO_RETRIEVE_CONTENT));
+    replay();
+    GadgetsHandlerApi.ProxyResponse response = gadgetHandler.getProxy(request);
+  }
+
   private GadgetsHandlerApi.TokenData createTokenData(String ownerId, String viewerId) {
     GadgetsHandlerApi.TokenData token = mock(GadgetsHandlerApi.TokenData.class);
     if (ownerId != null) {
@@ -271,6 +435,14 @@ public class GadgetsHandlerServiceTest extends EasyMockTestCase {
     return request;
   }
 
+  private GadgetsHandlerApi.ProxyRequest createProxyRequest(Uri url, String container,
+      List<String> fields) {
+    GadgetsHandlerApi.ProxyRequest request = mock(GadgetsHandlerApi.ProxyRequest.class);
+    EasyMock.expect(request.getFields()).andStubReturn(fields);
+    EasyMock.expect(request.getContainer()).andStubReturn(container);
+    EasyMock.expect(request.getUrl()).andStubReturn(url);
+    return request;
+  }
   private class FakeSecurityTokenCodec implements SecurityTokenCodec {
     public SecurityToken inputToken = null;
     public SecurityTokenException exc = null;
