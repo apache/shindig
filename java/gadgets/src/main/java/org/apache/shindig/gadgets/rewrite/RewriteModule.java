@@ -18,12 +18,8 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
-import com.google.common.collect.ImmutableList;
-import com.google.inject.AbstractModule;
-import com.google.inject.Provides;
-import com.google.inject.Singleton;
-import com.google.inject.name.Named;
-import com.google.inject.name.Names;
+import java.util.List;
+
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
 import org.apache.shindig.gadgets.render.CajaResponseRewriter;
 import org.apache.shindig.gadgets.render.OpenSocialI18NGadgetRewriter;
@@ -33,7 +29,13 @@ import org.apache.shindig.gadgets.render.SanitizingResponseRewriter;
 import org.apache.shindig.gadgets.rewrite.image.BasicImageRewriter;
 import org.apache.shindig.gadgets.servlet.CajaContentRewriter;
 
-import java.util.List;
+import com.google.common.collect.ImmutableList;
+import com.google.inject.AbstractModule;
+import com.google.inject.Provides;
+import com.google.inject.Singleton;
+import com.google.inject.multibindings.Multibinder;
+import com.google.inject.name.Named;
+import com.google.inject.name.Names;
 
 /**
  * Guice bindings for the rewrite package.
@@ -45,25 +47,23 @@ public class RewriteModule extends AbstractModule {
     bind(ResponseRewriterRegistry.class)
         .annotatedWith(Names.named("shindig.accelerate.response.rewriter.registry"))
         .to(AccelResponseRewriterRegistry.class);
+    
+    configureRewriters();
+
   }
 
-  @Provides
-  @Singleton
-  @Named("shindig.rewriters.gadget")
-  protected List<GadgetRewriter> provideGadgetRewriters(
-      PipelineDataGadgetRewriter pipelineRewriter,
-      TemplateRewriter templateRewriter,
-      AbsolutePathReferenceRewriter absolutePathRewriter,
-      StyleTagExtractorContentRewriter styleTagExtractorRewriter,
-      StyleAdjacencyContentRewriter styleAdjacencyRewriter,
-      ProxyingContentRewriter proxyingRewriter,
-      CajaContentRewriter cajaRewriter,
-      SanitizingGadgetRewriter sanitizedRewriter,
-      RenderingGadgetRewriter renderingRewriter,
-      OpenSocialI18NGadgetRewriter i18nRewriter) {
-    return ImmutableList.of(pipelineRewriter, templateRewriter,
-        absolutePathRewriter, styleTagExtractorRewriter, styleAdjacencyRewriter, proxyingRewriter,
-        cajaRewriter, sanitizedRewriter, renderingRewriter, i18nRewriter);
+  private void configureRewriters() {
+    Multibinder<GadgetRewriter> multibinder = Multibinder.newSetBinder(binder(), GadgetRewriter.class, Names.named("shindig.rewriters.gadget"));       
+    multibinder.addBinding().to(PipelineDataGadgetRewriter.class);
+    multibinder.addBinding().to(TemplateRewriter.class);
+    multibinder.addBinding().to(AbsolutePathReferenceRewriter.class);
+    multibinder.addBinding().to(StyleTagExtractorContentRewriter.class);
+    multibinder.addBinding().to(StyleAdjacencyContentRewriter.class);
+    multibinder.addBinding().to(ProxyingContentRewriter.class);
+    multibinder.addBinding().to(CajaContentRewriter.class);
+    multibinder.addBinding().to(SanitizingGadgetRewriter.class);
+    multibinder.addBinding().to(RenderingGadgetRewriter.class);
+    multibinder.addBinding().to(OpenSocialI18NGadgetRewriter.class);
   }
 
   @Provides
