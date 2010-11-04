@@ -33,7 +33,7 @@ class GadgetSpecParser {
    *
    * @param string $xmlContent
    */
-  public function parse($xmlContent, GadgetContext $context) {
+  public function parse($xmlContent, GadgetContext $context = null) {
     $this->context = $context;
     libxml_use_internal_errors(true);
     $doc = new DOMDocument();
