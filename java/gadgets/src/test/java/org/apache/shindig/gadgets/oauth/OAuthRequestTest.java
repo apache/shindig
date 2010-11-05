@@ -117,6 +117,7 @@ public class OAuthRequestTest {
         logRecords.add(arg0);
       }
     });
+    logger.setLevel(Level.FINE);
   }
 
   private OAuthCallbackGenerator createNullCallbackGenerator() {

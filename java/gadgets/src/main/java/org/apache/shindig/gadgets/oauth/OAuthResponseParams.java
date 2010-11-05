@@ -98,8 +98,10 @@ public class OAuthResponseParams {
    * Log a warning message that includes the details of the request.
    */
   public void logDetailedWarning(String note) {
-    if (LOG.isLoggable(Level.WARNING)) {
-      LOG.log(Level.WARNING, note + '\n' + getDetails(null));
+    if (LOG.isLoggable(Level.FINE)) {
+      LOG.log(Level.FINE, note + '\n' + getDetails(null));
+    } else if (LOG.isLoggable(Level.WARNING)) {
+      LOG.log(Level.WARNING, note);
     }
   }
 
@@ -107,14 +109,18 @@ public class OAuthResponseParams {
    * Log a warning message that includes the details of the request and the thrown exception.
    */
   public void logDetailedWarning(String note, Throwable e) {
-    if (LOG.isLoggable(Level.WARNING)) {
-      LOG.log(Level.WARNING, note + '\n' + getDetails(e), e);
+    if (LOG.isLoggable(Level.FINE)) {
+      LOG.log(Level.FINE, note + '\n' + getDetails(e), e);
+    } else if (LOG.isLoggable(Level.WARNING)) {
+      LOG.log(Level.WARNING, note + ": " + e.getMessage());
     }
   }
   
   public void logDetailedInfo(String note, Throwable e) {
-    if (LOG.isLoggable(Level.INFO)) {    
-      LOG.log(Level.INFO, note + '\n' + getDetails(e), e);
+    if (LOG.isLoggable(Level.FINE)) {
+      LOG.log(Level.FINE, note + '\n' + getDetails(e), e);
+    } else if (LOG.isLoggable(Level.INFO)) {
+      LOG.log(Level.INFO, note + ": " + e.getMessage());
     }
   }
 
