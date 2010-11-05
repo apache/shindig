@@ -62,8 +62,8 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
   private static final String LD_SUFFIX = ".lockeddomain.com";
   private static final String LD_SUFFIX_ALT = ".altld.com";
   private static final String UNLOCKED_DOMAIN = "unlockeddomain.com";
-  private static final int TYPE_URL_NUM_BASE_PARAMS = 7;
-  private static final int TYPE_HTML_NUM_BASE_PARAMS = 7;
+  private static final int TYPE_URL_NUM_BASE_PARAMS = 8;
+  private static final int TYPE_HTML_NUM_BASE_PARAMS = 8;
 
   private static final LockedDomainPrefixGenerator prefixGen = new LockedDomainPrefixGenerator() {
     public String getLockedDomainPrefix(Uri gadgetUri) {
@@ -87,6 +87,7 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
         false,  // not type=url
         false,  // isDebug
         false,  // ignoreCache
+        false,  // sanitize
         prefs,  // spec-contained prefs
         prefs,  // prefs supplied by the requester, same k/v as spec w/ default val for simplicity
         false,  // no pref substitution needed, ergo prefs in fragment
@@ -112,6 +113,7 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
     assertEquals(COUNTRY, uri.getQueryParameter(Param.COUNTRY.getKey()));
     assertEquals("0", uri.getQueryParameter(Param.DEBUG.getKey()));
     assertEquals("0", uri.getQueryParameter(Param.NO_CACHE.getKey()));
+    assertEquals("0", uri.getQueryParameter(Param.SANITIZE.getKey()));
     assertEquals(prefVal, uri.getFragmentParameter("up_" + prefKey));
 
     // Only the params that are needed.
@@ -138,6 +140,7 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
         false,  // not type=url
         false,  // isDebug
         false,  // ignoreCache
+        false,  // sanitize
         prefs,  // spec-contained prefs
         prefs,  // prefs supplied by the requester, same k/v as spec w/ default val for simplicity
         false,  // no pref substitution needed, ergo prefs in fragment
@@ -165,6 +168,8 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
     assertEquals(tplKey(Param.DEBUG.getKey()), uriTpl.getQueryParameter(Param.DEBUG.getKey()));
     assertEquals(tplKey(Param.NO_CACHE.getKey()),
         uriTpl.getQueryParameter(Param.NO_CACHE.getKey()));
+    assertEquals(tplKey(Param.SANITIZE.getKey()),
+        uriTpl.getQueryParameter(Param.SANITIZE.getKey()));
     assertEquals(tplKey("up_" + prefKey), uriTpl.getFragmentParameter("up_" + prefKey));
 
     // Only the params that are needed.
@@ -192,6 +197,7 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
         true,   // type=url
         true,   // isDebug
         true,   // ignoreCache
+        true,   // sanitize
         prefs,  // spec-contained prefs
         prefs,  // prefs supplied by the requester, same k/v as spec w/ default val for simplicity
         false,  // no pref substitution needed, ergo prefs in fragment
@@ -217,6 +223,7 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
     assertEquals("rpc:setprefs", uri.getQueryParameter(Param.LIBS.getKey()));
     assertEquals("1", uri.getQueryParameter(Param.DEBUG.getKey()));
     assertEquals("1", uri.getQueryParameter(Param.NO_CACHE.getKey()));
+    assertEquals("1", uri.getQueryParameter(Param.SANITIZE.getKey()));
     assertEquals(prefVal, uri.getFragmentParameter("up_" + prefKey));
 
     // Only the params that are needed.
@@ -244,6 +251,7 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
         true,   // type=url
         true,   // isDebug
         true,   // ignoreCache
+        true,   // sanitize
         prefs,  // spec-contained prefs
         prefs,  // prefs supplied by the requester, same k/v as spec w/ default val for simplicity
         false,  // no pref substitution needed, ergo prefs in fragment

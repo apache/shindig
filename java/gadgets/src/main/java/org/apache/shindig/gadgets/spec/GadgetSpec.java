@@ -21,6 +21,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.util.HashUtil;
 import org.apache.shindig.common.xml.XmlUtil;
+import org.apache.shindig.gadgets.spec.View.ContentType;
 import org.apache.shindig.gadgets.variables.Substitutions;
 
 import com.google.common.collect.ImmutableMap;
@@ -232,6 +233,23 @@ public class GadgetSpec {
     }
     spec.views = viewMap.build();
 
+    return spec;
+  }
+  
+  /**
+   * Returns a copy of the spec with all type=url views removed.
+   */
+  public GadgetSpec removeUrlViews() {
+    GadgetSpec spec = new GadgetSpec(this);
+    spec.modulePrefs = modulePrefs;
+    spec.userPrefs = userPrefs;
+    ImmutableMap.Builder<String, View> viewMap = ImmutableMap.builder();
+    for (View view : views.values()) {
+      if (view.getType() != ContentType.URL) {
+        viewMap.put(view.getName(), view);
+      }
+    }
+    spec.views = viewMap.build();
     return spec;
   }
 

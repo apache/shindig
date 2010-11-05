@@ -139,4 +139,11 @@ public class GadgetContext {
   public String getUserAgent() {
     return delegate == null ? null : delegate.getUserAgent();
   }
+  
+  /**
+   * @return Whether the gadget output should be sanitized.
+   */
+  public boolean getSanitize() {
+    return delegate == null ? false : delegate.getSanitize();
+  }
 }

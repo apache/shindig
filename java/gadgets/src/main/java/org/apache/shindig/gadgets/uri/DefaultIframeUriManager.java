@@ -150,6 +150,7 @@ public class DefaultIframeUriManager implements IframeUriManager, ContainerConfi
     addParam(uri, Param.COUNTRY.getKey(), context.getLocale().getCountry(), useTpl, false);
     addParam(uri, Param.DEBUG.getKey(), context.getDebug() ? "1" : "0", useTpl, false);
     addParam(uri, Param.NO_CACHE.getKey(), context.getIgnoreCache() ? "1" : "0", useTpl, false);
+    addParam(uri, Param.SANITIZE.getKey(), context.getSanitize() ? "1" : "0", useTpl, false);
 
     // Add all UserPrefs
     UserPrefs prefs = context.getUserPrefs();

@@ -89,6 +89,10 @@ public class Processor {
     try {
       GadgetSpec spec = gadgetSpecFactory.getGadgetSpec(context);
       spec = substituter.substitute(context, spec);
+      
+      if (context.getSanitize()) {
+        spec = spec.removeUrlViews();
+      }
 
       return new Gadget()
           .setContext(context)

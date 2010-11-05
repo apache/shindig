@@ -75,7 +75,7 @@ public class ProcessorTest {
     processor = new Processor(gadgetSpecFactory, substituter, containerConfig, blacklist, null);
   }
 
-  private GadgetContext makeContext(final String view, final Uri specUrl) {
+  private GadgetContext makeContext(final String view, final Uri specUrl, final boolean sanitize) {
     return new GadgetContext() {
       @Override
       public Uri getUrl() {
@@ -89,11 +89,16 @@ public class ProcessorTest {
       public String getView() {
         return view;
       }
+      
+      @Override
+      public boolean getSanitize() {
+        return sanitize;
+      }
     };
   }
 
   private GadgetContext makeContext(final String view) {
-    return makeContext(view, SPEC_URL);
+    return makeContext(view, SPEC_URL, false);
   }
 
   @Test
@@ -153,7 +158,7 @@ public class ProcessorTest {
   @Test
   public void nullUrlThrows() throws Exception {
     try {
-      processor.process(makeContext("html", null));
+      processor.process(makeContext("html", null, false));
       fail("expected ProcessingException");
     } catch (ProcessingException e) {
       assertEquals(HttpServletResponse.SC_BAD_REQUEST, e.getHttpStatusCode());
@@ -163,11 +168,19 @@ public class ProcessorTest {
   @Test
   public void nonHttpOrHttpsThrows() throws Exception {
     try {
-      processor.process(makeContext("html", Uri.parse("file://foo")));
+      processor.process(makeContext("html", Uri.parse("file://foo"), false));
       fail("expected ProcessingException");
     } catch (ProcessingException e) {
       assertEquals(HttpServletResponse.SC_FORBIDDEN, e.getHttpStatusCode());
     }
+  }
+  
+  @Test
+  public void typeUrlViewsAreSkippedForSanitizedGadget() throws Exception {
+    Gadget gadget = processor.process(makeContext("url", SPEC_URL, true));
+    assertNull(gadget.getCurrentView());
+    gadget = processor.process(makeContext("html", SPEC_URL, true));
+    assertEquals(BASIC_HTML_CONTENT, gadget.getCurrentView().getContent());
   }
 
   private static class FakeBlacklist implements GadgetBlacklist {
