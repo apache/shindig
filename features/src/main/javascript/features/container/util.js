@@ -91,7 +91,9 @@ shindig.container.util.newTokenRequest = function(gadgetUrls) {
   return {
       'container': window.__CONTAINER,
       'ids': gadgetUrls,
-      'fields': ['token']
+      'fields': [
+          'token'
+      ]
   };
 };
 
@@ -131,4 +133,12 @@ shindig.container.util.warn = function(message) {
   if (console && console.warn) {
     console.warn(message);
   }
+};
+
+
+/**
+ * @return {number} current time in ms.
+ */
+shindig.container.util.getCurrentTimeMs = function() {
+  return new Date().getTime();
 };

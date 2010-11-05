@@ -54,6 +54,30 @@ shindig.container.TokenResponse.TOKEN = 'token';
 
 
 /**
+ * Constants to key into timing response JSON.
+ * @type {string}
+ */
+shindig.container.NavigateTiming = {};
+// The gadget URL reporting this timing information.
+shindig.container.NavigateTiming.URL = 'url';
+// The gadget site ID reporting this timing information.
+shindig.container.NavigateTiming.ID = 'id';
+// Absolute time (ms) when gadget navigation is requested.
+shindig.container.NavigateTiming.START = 'start';
+// Time (ms) to receive XHR response time. In CC, for metadata and token.
+shindig.container.NavigateTiming.XRT = 'xrt';
+// Time (ms) to receive first byte. Typically timed at start of page.
+shindig.container.NavigateTiming.SRT = 'srt';
+// Time (ms) to load the DOM. Typically timed at end of page.
+shindig.container.NavigateTiming.DL = 'dl';
+// Time (ms) when body onload is called. 
+shindig.container.NavigateTiming.OL = 'ol';
+// Time (ms) when page is ready for use. Typically happen after data XHR (ex:
+// calendar, email) is received/presented to users. Overridable by user.
+shindig.container.NavigateTiming.PRT = 'prt';
+
+
+/**
  * Constants to key into request renderParam JSON.
  * @enum {string}
  */

@@ -84,6 +84,14 @@ shindig.container.Container = function(opt_config) {
       30 * 60 * 1000));
 
   /**
+   * @type {number}
+   * @private
+   */
+  this.navigateCallback_ = String(shindig.container.util.getSafeJsonValue(
+      config, shindig.container.ContainerConfig.NAVIGATE_CALLBACK,
+      null));
+  
+  /**
    * @type {shindig.container.Service}
    * @private
    */
@@ -110,8 +118,13 @@ shindig.container.Container = function(opt_config) {
  */
 shindig.container.Container.prototype.newGadgetSite = function(
     gadgetEl, opt_bufferEl) {
-  var site = new shindig.container.GadgetSite(
-      this.service_, gadgetEl, opt_bufferEl);
+  var bufferEl = opt_bufferEl || null;
+  var site = new shindig.container.GadgetSite({
+      'service' : this.service_,
+      'navigateCallback' : this.navigateCallback_,
+      'gadgetEl' : gadgetEl,
+      'bufferEl' : bufferEl    
+  });
   this.sites_[site.getId()] = site;
   return site;
 };
@@ -313,6 +326,13 @@ shindig.container.ContainerConfig.RENDER_TEST = 'renderTest';
  * @const
  */
 shindig.container.ContainerConfig.TOKEN_REFRESH_INTERVAL = 'tokenRefreshInterval';
+/**
+ * Globally-defined callback function upon gadget navigation. Useful to
+ * broadcast timing and stat information back to container.
+ * @type {string}
+ * @const
+ */
+shindig.container.ContainerConfig.NAVIGATE_CALLBACK = 'navigateCallback';
 
 
 /**

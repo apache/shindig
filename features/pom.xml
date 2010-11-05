@@ -116,6 +116,12 @@
                 <source>core.prefs/prefs.js</source>
                 <source>core.log/log.js</source>
                 <source>core.io/io.js</source>
+                <source>container/constant.js</source>
+                <source>container/util.js</source>
+                <source>container/service.js</source>
+                <source>container/gadget_holder.js</source>
+                <source>container/gadget_site.js</source>
+                <source>container/container.js</source>
                 <source>i18n/currencycodemap.js</source>
                 <source>i18n/datetimeformat.js</source>
                 <source>i18n/datetimeparse.js</source>

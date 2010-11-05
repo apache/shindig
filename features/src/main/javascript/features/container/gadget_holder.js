@@ -259,7 +259,8 @@ shindig.container.GadgetHolder.prototype.getIframeUrl_ = function() {
     uri.setExistingP('st', this.securityToken_);
   }
 
-  uri.setFP('mid', String(this.siteId_));
+  // Uniquely identify possibly-same gadgets on a page. 
+  uri.setQP('mid', String(this.siteId_));
 
   if (!shindig.container.util.isEmptyJson(this.viewParams_)) {
     var gadgetParamText = gadgets.json.stringify(this.viewParams_);

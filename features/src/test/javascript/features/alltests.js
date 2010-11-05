@@ -77,6 +77,12 @@ if (!this.JsUtil) {
   eval(JsUtil.prototype.include(srcDir + '/osapi/gadgetsrpctransport.js'));
   eval(JsUtil.prototype.include(srcDir + '/osapi/peoplehelpers.js'));
   eval(JsUtil.prototype.include(srcDir + '/shindig.uri/uri.js'));
+  eval(JsUtil.prototype.include(srcDir + '/container/constant.js'));
+  eval(JsUtil.prototype.include(srcDir + '/container/util.js'));
+  eval(JsUtil.prototype.include(srcDir + '/container/service.js'));
+  eval(JsUtil.prototype.include(srcDir + '/container/gadget_holder.js'));
+  eval(JsUtil.prototype.include(srcDir + '/container/gadget_site.js'));
+  eval(JsUtil.prototype.include(srcDir + '/container/container.js'));
   eval(JsUtil.prototype.include(testToolsDir + "/JsUnit.js"));
   eval(JsUtil.prototype.include(testSrcDir + "/core/authtest.js"));
   eval(JsUtil.prototype.include(testSrcDir + "/core/config-test.js"));
@@ -99,6 +105,11 @@ if (!this.JsUtil) {
   eval(JsUtil.prototype.include(testSrcDir + "/views/urltemplatetest.js"));
   eval(JsUtil.prototype.include(testSrcDir + "/xhrwrapper/xhrwrappertest.js"));
   eval(JsUtil.prototype.include(testSrcDir + '/shindig.uri/uritest.js'));
+  eval(JsUtil.prototype.include(testSrcDir + '/container/util_test.js'));
+  eval(JsUtil.prototype.include(testSrcDir + '/container/service_test.js'));
+  eval(JsUtil.prototype.include(testSrcDir + '/container/gadget_holder_test.js'));
+  eval(JsUtil.prototype.include(testSrcDir + '/container/gadget_site_test.js'));
+  eval(JsUtil.prototype.include(testSrcDir + '/container/container_test.js'));
 }
 
 function AllTests() {

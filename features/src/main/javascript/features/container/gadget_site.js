@@ -25,32 +25,37 @@
 
 
 /**
- * @param {shindig.container.Service} service To fetch gadgets metadata, token.
- * @param {Element} gadgetEl Element into which to render the gadget.
- * @param {Element=} opt_bufferEl Optional element for double buffering.
+ * @param {Object} args containing:
+ *        {shindig.container.Service} service to fetch gadgets metadata, token.
+ *        {string} navigateCallback name of callback function on navigateTo().
+ *        {Element} gadgetEl Element into which to render the gadget.
+ *        {Element} bufferEl Optional element for double buffering.
  * @constructor
  */
-shindig.container.GadgetSite = function(service, gadgetEl, opt_bufferEl) {
+shindig.container.GadgetSite = function(args) {
   /**
-   * Service to fetch gadgets metadata and token.
    * @type {shindig.container.Service}
    * @private
    */
-  this.service_ = service;
+  this.service_ = args['service'];
 
   /**
-   * Element holding the current gadget.
+   * @type {string}
+   * @private
+   */
+  this.navigateCallback_ = args['navigateCallback'];
+
+  /**
    * @type {Element}
    * @private
    */
-  this.currentGadgetEl_ = gadgetEl;
+  this.currentGadgetEl_ = args['gadgetEl'];
 
   /**
-   * Element holding the loading gadget for 2x buffering.
-   * @type {Element?}
+   * @type {Element}
    * @private
    */
-  this.loadingGadgetEl_ = opt_bufferEl || null;
+  this.loadingGadgetEl_ = args['bufferEl'];
 
   /**
    * Unique ID of this site.
@@ -201,10 +206,13 @@ shindig.container.GadgetSite.prototype.getParentId = function() {
  */
 shindig.container.GadgetSite.prototype.navigateTo = function(
     gadgetUrl, viewParams, renderParams, opt_callback) {
+  var start = shindig.container.util.getCurrentTimeMs();
+  var cached = this.service_.getCachedGadgetMetadata(gadgetUrl);
   var callback = opt_callback || function() {};
   var request = shindig.container.util.newMetadataRequest([gadgetUrl]);
   var self = this;
   this.service_.getGadgetMetadata(request, function(response) {
+    var xrt = (!cached) ? (shindig.container.util.getCurrentTimeMs() - start) : 0;
     var gadgetInfo = response[gadgetUrl];
     if (gadgetInfo.error) {
       var message = ['Failed to navigate for gadget ', gadgetUrl, '.'].join('');
@@ -212,9 +220,32 @@ shindig.container.GadgetSite.prototype.navigateTo = function(
     } else {
       self.render(gadgetInfo, viewParams, renderParams);
     }
+
+    // Return metadata server response time.
+    var timingInfo = {};
+    timingInfo[shindig.container.NavigateTiming.URL] = gadgetUrl;
+    timingInfo[shindig.container.NavigateTiming.ID] = self.id_;
+    timingInfo[shindig.container.NavigateTiming.START] = start;
+    timingInfo[shindig.container.NavigateTiming.XRT] = xrt;
+    self.onNavigateTo(timingInfo);    
+    
     // Possibly with an error. Leave to user to deal with raw response.
     callback(gadgetInfo);
   });
+};
+
+
+/**
+ * Provide overridable callback invoked when navigateTo is completed.
+ * @param {Object} data the statistic/timing information to return.
+ */
+shindig.container.GadgetSite.prototype.onNavigateTo = function(data) {
+  if (this.navigateCallback_) {
+    var func = window[this.navigateCallback_];
+    if (typeof func === 'function') {
+      func(data);
+    }
+  }
 };
 
 
