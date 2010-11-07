@@ -81,14 +81,13 @@
             <dependency>
                 <groupId>rhino</groupId>
                 <artifactId>js</artifactId>
-                <version>1.7R1</version>
+                <version>1.7R2</version>
             </dependency>
           </dependencies>
         </plugin>
         <plugin>
           <groupId>net.sf.alchim</groupId>
           <artifactId>yuicompressor-maven-plugin</artifactId>
-          <version>0.7.1</version>
         </plugin>
       </plugins>
     </pluginManagement>

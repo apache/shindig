@@ -91,7 +91,7 @@ AuthTest.prototype.testAddParamsToToken_normal = function() {
   };
   var auth = new shindig.Auth();
   this.assertEquals(
-      't=abcd&url=http%3a%2f%2fwww.example.com%2fgadget.xml',
+      't=abcd&url=http%3A%2F%2Fwww.example.com%2Fgadget.xml',
       auth.getSecurityToken());
   auth.updateSecurityToken('newtoken');
   this.assertEquals('newtoken', auth.getSecurityToken());
@@ -109,7 +109,7 @@ AuthTest.prototype.testAddParamsToToken_blankvalue = function() {
   };
   var auth = new shindig.Auth();
   this.assertEquals(
-      't=abcd&url=http%3a%2f%2fwww.example.com%2fgadget.xml&url=',
+      't=abcd&url=http%3A%2F%2Fwww.example.com%2Fgadget.xml&url=',
       auth.getSecurityToken());
 };
 
@@ -125,8 +125,8 @@ AuthTest.prototype.testAddParamsToToken_dupname = function() {
   };
   var auth = new shindig.Auth();
   this.assertEquals(
-      't=abcd&url=http%3a%2f%2fwww.example.com%2fgadget.xml&url=' + 
-          'http%3a%2f%2fwww.example.com%2fgadget.xml',
+      't=abcd&url=http%3A%2F%2Fwww.example.com%2Fgadget.xml&url=' + 
+          'http%3A%2F%2Fwww.example.com%2Fgadget.xml',
       auth.getSecurityToken());
 };
 
@@ -142,7 +142,7 @@ AuthTest.prototype.testAddParamsToToken_blankname = function() {
   };
   var auth = new shindig.Auth();
   this.assertEquals(
-      't=abcd&=&url=http%3a%2f%2fwww.example.com%2fgadget.xml',
+      't=abcd&=&url=http%3A%2F%2Fwww.example.com%2Fgadget.xml',
       auth.getSecurityToken());
 };
 
@@ -158,7 +158,7 @@ AuthTest.prototype.testAddParamsToToken_nonpaired = function() {
   };
   var auth = new shindig.Auth();
   this.assertEquals(
-      't=abcd&foo&url=http%3a%2f%2fwww.example.com%2fgadget.xml',
+      't=abcd&foo&url=http%3A%2F%2Fwww.example.com%2Fgadget.xml',
       auth.getSecurityToken());
 };
 
@@ -174,7 +174,7 @@ AuthTest.prototype.testAddParamsToToken_extraequals = function() {
   };
   var auth = new shindig.Auth();
   this.assertEquals(
-      't=abcd&foo=$bar$=$baz$&url=http%3a%2f%2fwww.example.com%2fgadget.xml',
+      't=abcd&foo=$bar$=$baz$&url=http%3A%2F%2Fwww.example.com%2Fgadget.xml',
       auth.getSecurityToken());
 };
 
