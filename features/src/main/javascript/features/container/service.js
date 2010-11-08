@@ -58,7 +58,7 @@ shindig.container.Service = function(opt_config) {
    */
   this.cachedTokens_ = {};
 
-  this.initializeOsapi_();
+  this.registerOsapiServices();
 
   this.onConstructed(config);
 };
@@ -98,7 +98,7 @@ shindig.container.Service.prototype.getGadgetMetadata = function(
   } else {
     var self = this;
     request = shindig.container.util.newMetadataRequest(uncachedUrls);
-    osapi.gadgets.metadata.get(request).execute(function(response) {
+    osapi.gadgets.metadata(request).execute(function(response) {
 
       // If response entirely fails, augment individual errors.
       if (response.error) {
@@ -131,7 +131,7 @@ shindig.container.Service.prototype.getGadgetToken = function(
 
   // Do not check against cache. Always do a server fetch.
   var self = this;
-  osapi.gadgets.token.get(request).execute(function(response) {
+  osapi.gadgets.token(request).execute(function(response) {
     var finalResponse = {};
 
     // If response entirely fails, augment individual errors.
@@ -174,16 +174,15 @@ shindig.container.Service.prototype.getCachedGadgetToken = function(url) {
 
 /**
  * Initialize OSAPI endpoint methods/interfaces.
- * @private
  */
-shindig.container.Service.prototype.initializeOsapi_ = function() {
+shindig.container.Service.prototype.registerOsapiServices = function() {
   var endPoint = this.apiHost_ + this.apiPath_;
 
   var osapiServicesConfig = {};
   osapiServicesConfig['gadgets.rpc'] = ['container.listMethods'];
   osapiServicesConfig[endPoint] = [
-    'gadgets.metadata.get',
-    'gadgets.token.get'
+    'gadgets.metadata',
+    'gadgets.token'
   ];
 
   gadgets.config.init({

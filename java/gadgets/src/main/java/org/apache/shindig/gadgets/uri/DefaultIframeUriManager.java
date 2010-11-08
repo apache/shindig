@@ -23,6 +23,7 @@ import com.google.inject.ImplementedBy;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.auth.SecurityTokenCodec;
 import org.apache.shindig.auth.SecurityTokenException;
@@ -131,10 +132,16 @@ public class DefaultIframeUriManager implements IframeUriManager, ContainerConfi
       } else {
         host = getReqVal(container, UNLOCKED_DOMAIN_KEY);
       }
-      uri.setAuthority(host);
 
-      // 3. Set protocol/schema.
-      uri.setScheme(getScheme(gadget, container));
+      // 3. Set host/authority and protocol/schema.
+      Uri gadgetUri = Uri.parse(host);
+      if (StringUtils.isBlank(gadgetUri.getScheme())) {
+        uri.setAuthority(host);
+        uri.setScheme(getScheme(gadget, container));
+      } else {
+        uri.setAuthority(gadgetUri.getAuthority());
+        uri.setScheme(gadgetUri.getScheme());
+      }      
 
       // 4. Add the URL.
       uri.addQueryParameter(Param.URL.getKey(), context.getUrl().toString());

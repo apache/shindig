@@ -170,6 +170,12 @@ shindig.container.GadgetHolder.prototype.render = function(
   this.viewParams_ = viewParams;
   this.renderParams_ = renderParams;
   this.el_.innerHTML = this.getIframeHtml_();
+  
+  if (this.hasFeature_(gadgetInfo, 'pubsub-2')) {
+    this.doOAAIframeHtml_();
+  } else {
+    this.el_.innerHTML = this.getIframeHtml_();
+  }
 
   // Set up RPC channel. RPC relay url is on gmodules, relative to base of the
   // container. Assumes container has set up forwarding to gmodules at /gadgets.
@@ -195,6 +201,55 @@ shindig.container.GadgetHolder.prototype.render = function(
  * @private
  */
 shindig.container.GadgetHolder.IFRAME_ID_PREFIX_ = '__gadget_';
+
+
+/**
+ * @private
+ */
+shindig.container.GadgetHolder.prototype.doOAAIframeHtml_ = function() {
+  var iframeAttrs = {
+      frameborder: 'no',
+      scrolling: 'no'
+  };
+  new OpenAjax.hub.IframeContainer(
+      gadgets.pubsub2router.hub,
+      this.iframeId_,
+      {
+        Container: {
+          onSecurityAlert: function(source, alertType) {
+            gadgets.error(['Security error for container ', source.getClientID(), ' : ', alertType].join(''));
+            source.getIframe().src = 'about:blank';
+          },
+          onConnect: function(container) {
+            gadgets.log("++ connected: " + container.getClientID());
+          }
+        },
+        IframeContainer: {
+          parent: this.el_,
+          uri: this.getIframeUrl_(),
+          tunnelURI: shindig.uri('/gadgets/' + '../container/rpc_relay.html').resolve(shindig.uri(window.location.href)),
+          iframeAttrs: iframeAttrs
+        }
+      }
+  );
+};
+
+
+/**
+ * @param {Object} gadgetInfo the JSON gadget description.
+ * @param {string} feature the feature to look for.
+ * @private
+ */
+shindig.container.GadgetHolder.prototype.hasFeature_ = function(gadgetInfo, feature) {
+  var modulePrefs = gadgetInfo[shindig.container.MetadataResponse.MODULE_PREFS];
+  if (modulePrefs) {
+    var features = modulePrefs[shindig.container.MetadataResponse.FEATURES];
+    if (features && features[feature]) {
+      return true;
+    }
+  }
+  return false;
+};
 
 
 /**

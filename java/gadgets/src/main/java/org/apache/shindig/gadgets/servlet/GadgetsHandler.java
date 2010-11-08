@@ -46,7 +46,6 @@ import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
-import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -71,7 +70,6 @@ public class GadgetsHandler {
 
   private static final List<String> DEFAULT_PROXY_FIELDS = ImmutableList.of("proxyUrl");
 
-  private static final Logger LOG = Logger.getLogger(GadgetsHandler.class.getName());
 
   protected final ExecutorService executor;
   protected final GadgetsHandlerService handlerService;
@@ -89,7 +87,7 @@ public class GadgetsHandler {
     this.beanDelegator = new BeanDelegator();
   }
 
-  @Operation(httpMethods = {"POST", "GET"}, path = "metadata.get")
+  @Operation(httpMethods = {"POST", "GET"}, path = "metadata")
   public Map<String, GadgetsHandlerApi.BaseResponse> metadata(BaseRequestItem request)
       throws ProtocolException {
     return new AbstractExecutor() {
@@ -101,7 +99,7 @@ public class GadgetsHandler {
     }.execute(request);
   }
 
-  @Operation(httpMethods = {"POST", "GET"}, path = "token.get")
+  @Operation(httpMethods = {"POST", "GET"}, path = "token")
   public Map<String, GadgetsHandlerApi.BaseResponse> token(BaseRequestItem request)
       throws ProtocolException {
     return new AbstractExecutor() {
@@ -113,7 +111,7 @@ public class GadgetsHandler {
     }.execute(request);
   }
 
-  @Operation(httpMethods = {"POST", "GET"}, path = "proxy.get")
+  @Operation(httpMethods = {"POST", "GET"}, path = "proxy")
   public Map<String, GadgetsHandlerApi.BaseResponse> proxy(BaseRequestItem request)
       throws ProtocolException {
     return new AbstractExecutor() {

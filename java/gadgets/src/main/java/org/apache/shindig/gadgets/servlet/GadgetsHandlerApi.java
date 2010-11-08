@@ -72,6 +72,8 @@ public class GadgetsHandlerApi {
   public interface TokenData {
     public String getOwnerId();
     public String getViewerId();
+    public String getDomain();
+    public long getModuleId();
   }
 
   public interface MetadataResponse extends BaseResponse {
