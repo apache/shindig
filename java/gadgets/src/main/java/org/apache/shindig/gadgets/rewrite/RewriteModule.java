@@ -19,6 +19,7 @@
 package org.apache.shindig.gadgets.rewrite;
 
 import java.util.List;
+import java.util.Set;
 
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
 import org.apache.shindig.gadgets.render.CajaResponseRewriter;
@@ -47,13 +48,14 @@ public class RewriteModule extends AbstractModule {
     bind(ResponseRewriterRegistry.class)
         .annotatedWith(Names.named("shindig.accelerate.response.rewriter.registry"))
         .to(AccelResponseRewriterRegistry.class);
-    
+
     configureRewriters();
 
   }
 
   private void configureRewriters() {
-    Multibinder<GadgetRewriter> multibinder = Multibinder.newSetBinder(binder(), GadgetRewriter.class, Names.named("shindig.rewriters.gadget"));       
+    Multibinder<GadgetRewriter> multibinder = Multibinder.newSetBinder(binder(),
+        GadgetRewriter.class, Names.named("shindig.rewriters.gadget.set"));
     multibinder.addBinding().to(PipelineDataGadgetRewriter.class);
     multibinder.addBinding().to(TemplateRewriter.class);
     multibinder.addBinding().to(AbsolutePathReferenceRewriter.class);
@@ -68,13 +70,22 @@ public class RewriteModule extends AbstractModule {
 
   @Provides
   @Singleton
+  @Named("shindig.rewriters.gadget")
+  protected List<GadgetRewriter> provideGadgetRewriters(
+      @Named("shindig.rewriters.gadget.set") Set<GadgetRewriter> gadgetRewritersSet) {
+    // Multibinding promise order within a binding module
+    return ImmutableList.copyOf(gadgetRewritersSet);
+  }
+
+  @Provides
+  @Singleton
   @Named("shindig.rewriters.accelerate")
   protected List<GadgetRewriter> provideAccelRewriters(
       ProxyingContentRewriter proxyingContentRewriter,
       CajaContentRewriter cajaRewriter) {
     return ImmutableList.of(proxyingContentRewriter, cajaRewriter);
   }
-  
+
   // TODO: Clean this up. Ideally we would let the ResponseRewriterRegistry
   // binding create the concrete object instance.
   @Provides

@@ -19,7 +19,7 @@
 
 package org.apache.shindig.gadgets.render;
 
-import java.util.Set;
+import java.util.List;
 
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.rewrite.GadgetRewriter;
@@ -34,14 +34,15 @@ import com.google.inject.name.Named;
  * @since 2.0.0
  */
 public class GadgetRewritersProvider {
-  private final Set<GadgetRewriter> renderRewriters;
+  private final List<GadgetRewriter> renderRewriters;
 
   @Inject
-  public GadgetRewritersProvider(@Named("shindig.rewriters.gadget") Set<GadgetRewriter> renderRewriters) {
+  public GadgetRewritersProvider(
+      @Named("shindig.rewriters.gadget") List<GadgetRewriter> renderRewriters) {
     this.renderRewriters = renderRewriters;
   }
 
-  public Set<GadgetRewriter> getRewriters(GadgetContext context) {
+  public List<GadgetRewriter> getRewriters(GadgetContext context) {
     return renderRewriters;
   }
 }
