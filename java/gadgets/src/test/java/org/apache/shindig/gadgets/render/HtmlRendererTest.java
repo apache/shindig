@@ -42,7 +42,6 @@ import java.util.Collection;
 import java.util.concurrent.Callable;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 
 /**
  * Tests for HtmlRenderer
@@ -85,11 +84,11 @@ public class HtmlRendererTest {
   @Before
   public void setUp() throws Exception {
     renderer = new HtmlRenderer(preloaderService, proxyRenderer,
-        new GadgetRewritersProvider(ImmutableSet.of((GadgetRewriter) captureRewriter)),
+        new GadgetRewritersProvider(ImmutableList.of((GadgetRewriter) captureRewriter)),
         null);
-    
+
   }
-  
+
   @Test
   public void renderPlainTypeHtml() throws Exception {
     String content = renderer.render(makeGadget(BASIC_HTML_CONTENT));
@@ -124,7 +123,7 @@ public class HtmlRendererTest {
       return PROXIED_HTML_CONTENT;
     }
   }
-  
+
   private static class FakePreloaderService implements PreloaderService {
     protected boolean wasPreloaded;
     protected Collection<PreloadedData> preloads;
@@ -142,5 +141,5 @@ public class HtmlRendererTest {
       return preloads;
     }
   }
-  
+
 }
