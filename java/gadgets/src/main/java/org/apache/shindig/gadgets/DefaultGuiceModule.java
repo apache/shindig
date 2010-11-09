@@ -23,18 +23,13 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
-import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 
 import org.apache.commons.lang.StringUtils;
 
-import org.apache.shindig.gadgets.config.ConfigContributor;
-import org.apache.shindig.gadgets.config.CoreUtilConfigContributor;
-import org.apache.shindig.gadgets.config.OsapiServicesConfigContributor;
-import org.apache.shindig.gadgets.config.ShindigAuthConfigContributor;
-import org.apache.shindig.gadgets.config.XhrwrapperConfigContributor;
+import org.apache.shindig.gadgets.config.DefaultConfigContributorModule;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.InvalidationHandler;
 import org.apache.shindig.gadgets.parse.ParseModule;
@@ -80,6 +75,7 @@ public class DefaultGuiceModule extends AbstractModule {
         }
     });
 
+    install(new DefaultConfigContributorModule());
     install(new ParseModule());
     install(new PreloadModule());
     install(new RenderModule());
@@ -94,7 +90,6 @@ public class DefaultGuiceModule extends AbstractModule {
     requestStaticInjection(HttpResponse.class);
 
     registerGadgetHandlers();
-    registerConfigContributors();
     registerFeatureHandlers();
   }
 
@@ -107,15 +102,7 @@ public class DefaultGuiceModule extends AbstractModule {
     handlerBinder.addBinding().to(HttpRequestHandler.class);
     handlerBinder.addBinding().to(GadgetsHandler.class);
   }
-
-  protected void registerConfigContributors() {
-    MapBinder<String, ConfigContributor> configBinder = MapBinder.newMapBinder(binder(), String.class, ConfigContributor.class);
-    configBinder.addBinding("core.util").to(CoreUtilConfigContributor.class);
-    configBinder.addBinding("osapi").to(OsapiServicesConfigContributor.class);
-    configBinder.addBinding("shindig.auth").to(ShindigAuthConfigContributor.class);
-    configBinder.addBinding("shindig.xhrwrapper").to(XhrwrapperConfigContributor.class);
-
-  }
+  
   /**
    * Sets up the multibinding for extended feature resources
    */
