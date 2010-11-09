@@ -24,14 +24,11 @@ import static org.easymock.EasyMock.isA;
 import com.google.caja.util.Lists;
 
 import org.apache.shindig.common.uri.Uri;
-import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.RenderingContext;
 import org.apache.shindig.gadgets.uri.JsUriManager;
 import org.apache.shindig.gadgets.uri.JsUriManager.JsUri;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.util.Collection;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -84,47 +81,39 @@ public class JsServletTest extends ServletTestFixture {
   @Test
   @SuppressWarnings("unchecked")
   public void testDoJsloadNormal() throws Exception {
-    String url = "http://localhost/gadgets/js/feature.js?v=abc";
+    String url = "http://localhost/gadgets/js/feature.js?v=abc&nocache=0&onload=" + ONLOAD_PARAM;
     JsUri jsUri = mockJsUri(CONTAINER_PARAM, RenderingContext.CONTAINER, true, true, false,
         ONLOAD_PARAM, REFRESH_INTERVAL_SEC);
 
     expect(jsUriManagerMock.processExternJsUri(isA(Uri.class))).andReturn(jsUri);
-    expect(jsUriManagerMock.makeExternJsUri(isA(GadgetContext.class),
-        isA(Collection.class))).andReturn(Uri.parse(url));
+    expect(jsUriManagerMock.makeExternJsUri(isA(JsUri.class)))
+        .andReturn(Uri.parse(url + "&jsload=1"));
     httpUtilMock.setCachingHeaders(recorder, REFRESH_INTERVAL_SEC, false);
     replay();
 
     servlet.doGet(request, recorder);
     assertEquals(HttpServletResponse.SC_OK, recorder.getHttpStatusCode());
-    assertEquals(
-        String.format(JsServlet.JSLOAD_JS_TPL, url
-            + "&onload=" + ONLOAD_PARAM
-            + "&nocache=0"),
-        recorder.getResponseAsString());
+    assertEquals(String.format(JsServlet.JSLOAD_JS_TPL, url), recorder.getResponseAsString());
     verify();
   }
 
   @Test
   @SuppressWarnings("unchecked")
   public void testDoJsloadWithJsLoadTimeout() throws Exception {
-    String url = "http://localhost/gadgets/js/feature.js?v=abc";
+    String url = "http://localhost/gadgets/js/feature.js?v=abc&nocache=0&onload=" + ONLOAD_PARAM;
     JsUri jsUri = mockJsUri(CONTAINER_PARAM, RenderingContext.CONTAINER, true, true,
         false, ONLOAD_PARAM, -1); // Disable refresh interval.
 
     expect(jsUriManagerMock.processExternJsUri(isA(Uri.class))).andReturn(jsUri);
-    expect(jsUriManagerMock.makeExternJsUri(isA(GadgetContext.class),
-        isA(Collection.class))).andReturn(Uri.parse(url));
+    expect(jsUriManagerMock.makeExternJsUri(isA(JsUri.class)))
+        .andReturn(Uri.parse(url + "&jsload=1"));
     servlet.setJsloadTtlSecs(TIMEOUT_SEC); // Enable JS load timeout.
     httpUtilMock.setCachingHeaders(recorder, TIMEOUT_SEC, false);
     replay();
 
     servlet.doGet(request, recorder);
     assertEquals(HttpServletResponse.SC_OK, recorder.getHttpStatusCode());
-    assertEquals(
-        String.format(JsServlet.JSLOAD_JS_TPL, url
-            + "&onload=" + ONLOAD_PARAM
-            + "&nocache=0"),
-        recorder.getResponseAsString());
+    assertEquals(String.format(JsServlet.JSLOAD_JS_TPL, url), recorder.getResponseAsString());
     verify();
   }
 
@@ -144,24 +133,20 @@ public class JsServletTest extends ServletTestFixture {
 
   @Test
   public void testDoJsloadNoCache() throws Exception {
-    String url = "http://localhost/gadgets/js/feature.js?v=abc";
+    String url = "http://localhost/gadgets/js/feature.js?v=abc&nocache=1&onload=" + ONLOAD_PARAM;
     JsUri jsUri = mockJsUri(CONTAINER_PARAM, RenderingContext.CONTAINER, true, true,
         true, // Set to no cache.
         ONLOAD_PARAM, REFRESH_INTERVAL_SEC);
 
     expect(jsUriManagerMock.processExternJsUri(isA(Uri.class))).andReturn(jsUri);
-    expect(jsUriManagerMock.makeExternJsUri(isA(GadgetContext.class),
-        isA(Collection.class))).andReturn(Uri.parse(url));
+    expect(jsUriManagerMock.makeExternJsUri(isA(JsUri.class)))
+        .andReturn(Uri.parse(url + "&jsload=1"));
     httpUtilMock.setCachingHeaders(recorder, 0, false); // TTL of 0 is set.
     replay();
 
     servlet.doGet(request, recorder);
     assertEquals(HttpServletResponse.SC_OK, recorder.getHttpStatusCode());
-    assertEquals(
-        String.format(JsServlet.JSLOAD_JS_TPL, url
-            + "&onload=" + ONLOAD_PARAM
-            + "&nocache=1"),
-        recorder.getResponseAsString());
+    assertEquals(String.format(JsServlet.JSLOAD_JS_TPL, url), recorder.getResponseAsString());
     verify();
   }
 }

@@ -32,7 +32,6 @@ import static org.easymock.EasyMock.same;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertNull;
 
 import org.apache.shindig.common.JsonAssert;
 import org.apache.shindig.common.PropertiesModule;
@@ -955,8 +954,8 @@ public class RenderingGadgetRewriterTest {
     List<String> emptyList = Lists.newArrayList();
     expect(featureRegistry.getFeatureResources(same(gadgetContext), eq(externLibs), eq(emptyList)))
         .andReturn(externResources);
-    expect(featureRegistry.getFeatureResources(same(gadgetContext), eq(gadgetFeatures), eq(emptyList)))
-        .andReturn(gadgetResources);
+    expect(featureRegistry.getFeatureResources(same(gadgetContext), eq(gadgetFeatures),
+        eq(emptyList))).andReturn(gadgetResources);
     expect(featureRegistry.getFeatures(eq(allFeatures)))
         .andReturn(allFeatures);
     expect(featureRegistry.getFeatures(eq(allFeaturesAndLibs)))
@@ -999,8 +998,8 @@ public class RenderingGadgetRewriterTest {
   }
 
   private static class FakeJsUriManager implements JsUriManager {
-    public Uri makeExternJsUri(GadgetContext ctx, Collection<String> extern) {
-      return Uri.parse("/js/" + Join.join(":", extern));
+    public Uri makeExternJsUri(JsUri ctx) {
+      return Uri.parse("/js/" + Join.join(":", ctx.getLibs()));
     }
 
     public JsUri processExternJsUri(Uri uri) {

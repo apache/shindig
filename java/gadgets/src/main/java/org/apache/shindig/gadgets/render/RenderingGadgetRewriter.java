@@ -40,6 +40,7 @@ import org.apache.shindig.gadgets.spec.MessageBundle;
 import org.apache.shindig.gadgets.spec.UserPref;
 import org.apache.shindig.gadgets.spec.View;
 import org.apache.shindig.gadgets.uri.JsUriManager;
+import org.apache.shindig.gadgets.uri.JsUriManager.JsUri;
 import org.apache.commons.lang.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -228,7 +229,7 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
     }
 
     if (!externForcedLibs.isEmpty()) {
-      String jsUrl = jsUriManager.makeExternJsUri(gadget.getContext(), externForcedLibs)
+      String jsUrl = jsUriManager.makeExternJsUri(new JsUri(gadget, externForcedLibs))
           .toString();
       Element libsTag = headTag.getOwnerDocument().createElement("script");
       libsTag.setAttribute("src", jsUrl);
@@ -271,7 +272,7 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
       externGadgetLibs.removeAll(externForcedLibs);
 
       if (!externGadgetLibs.isEmpty()) {
-        String jsUrl = jsUriManager.makeExternJsUri(gadget.getContext(), externGadgetLibs)
+        String jsUrl = jsUriManager.makeExternJsUri(new JsUri(gadget, externGadgetLibs))
             .toString();
         Element libsTag = headTag.getOwnerDocument().createElement("script");
         libsTag.setAttribute("src", jsUrl);

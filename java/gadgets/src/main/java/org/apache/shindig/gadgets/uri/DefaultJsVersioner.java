@@ -20,7 +20,6 @@ package org.apache.shindig.gadgets.uri;
 
 import java.util.Collection;
 
-import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.util.HashUtil;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.RenderingContext;
@@ -42,54 +41,54 @@ import java.util.Map;
 public class DefaultJsVersioner implements Versioner {
   private final FeatureRegistry registry;
   private final Map<List<FeatureResource>, String> versionCache;
-  
+
   @Inject
   public DefaultJsVersioner(FeatureRegistry registry) {
     this.registry = registry;
     this.versionCache = Maps.newHashMap();
   }
 
-  public String version(Uri gadgetUri, final String container, Collection<String> extern) {
+  public String version(String gadgetUri, final String container, Collection<String> extern) {
     GadgetContext ctx = new GadgetContext() {
       @Override
       public String getContainer() {
         return container;
       }
-      
+
       @Override
       public RenderingContext getRenderingContext() {
         return RenderingContext.GADGET;
       }
     };
-    
+
     // Registry itself will cache these requests.
     List<FeatureResource> resources = registry.getFeatureResources(ctx, extern, null);
     if (versionCache.containsKey(resources)) {
       return versionCache.get(resources);
     }
-    
+
     StringBuilder jsBuf = new StringBuilder();
     for (FeatureResource resource : resources) {
       jsBuf.append(resource.getContent()).append(resource.getDebugContent());
     }
-    
+
     String checksum = HashUtil.checksum(jsBuf.toString().getBytes());
     versionCache.put(resources, checksum);
     return checksum;
   }
-  
-  public UriStatus validate(Uri gadgetUri, String container,
+
+  public UriStatus validate(String gadgetUri, String container,
       Collection<String> extern, String version) {
     if (version == null || version.length() == 0) {
       return UriStatus.VALID_UNVERSIONED;
     }
-    
+
     // Punt up to version(), utilizing its cache.
     String expectedVersion = version(gadgetUri, container, extern);
     if (version.equals(expectedVersion)) {
       return UriStatus.VALID_VERSIONED;
     }
-    
+
     return UriStatus.INVALID_VERSION;
   }
 

@@ -25,7 +25,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.config.ContainerConfig;
-import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.RenderingContext;
 import org.apache.shindig.gadgets.GadgetException.Code;
@@ -54,7 +53,7 @@ public class DefaultJsUriManager implements JsUriManager {
     this.versioner = versioner;
   }
 
-  public Uri makeExternJsUri(GadgetContext ctx, Collection<String> extern) {
+  public Uri makeExternJsUri(JsUri ctx) {
     String container = ctx.getContainer();
     String jsHost = getReqConfig(container, JS_HOST_PARAM);
     String jsPathBase = getReqConfig(container, JS_PATH_PARAM);
@@ -67,7 +66,7 @@ public class DefaultJsUriManager implements JsUriManager {
     if (!jsPathBase.endsWith("/")) {
       jsPath.append('/');
     }
-    jsPath.append(addJsLibs(extern));
+    jsPath.append(addJsLibs(ctx.getLibs()));
     jsPath.append(JS_SUFFIX);
     uri.setPath(jsPath.toString());
 
@@ -76,24 +75,32 @@ public class DefaultJsUriManager implements JsUriManager {
 
     // Pass through nocache param for dev purposes.
     uri.addQueryParameter(Param.NO_CACHE.getKey(),
-        ctx.getIgnoreCache() ? "1" : "0");
+        ctx.isNoCache() ? "1" : "0");
 
     // Pass through debug param for debugging use.
     uri.addQueryParameter(Param.DEBUG.getKey(),
-        ctx.getDebug() ? "1" : "0");
+        ctx.isDebug() ? "1" : "0");
 
     uri.addQueryParameter(Param.CONTAINER_MODE.getKey(),
-        ctx.getRenderingContext() == RenderingContext.CONTAINER ? "1" : "0");
+        ctx.getContext() == RenderingContext.CONTAINER ? "1" : "0");
 
     // Pass through gadget Uri
     if (addGadgetUri()) {
-      uri.addQueryParameter(Param.URL.getKey(), ctx.getUrl().toString());
+      uri.addQueryParameter(Param.URL.getKey(), ctx.getGadget());
+    }
+
+    if (ctx.getOnload() != null) {
+      uri.addQueryParameter(Param.ONLOAD.getKey(), ctx.getOnload());
+    }
+
+    if (ctx.isJsload()) {
+      uri.addQueryParameter(Param.JSLOAD.getKey(), "1");
     }
 
     // Finally, version it, but only if !nocache.
-    if (versioner != null && !ctx.getIgnoreCache()) {
+    if (versioner != null && !ctx.isNoCache()) {
       uri.addQueryParameter(Param.VERSION.getKey(),
-          versioner.version(ctx.getUrl(), container, extern));
+          versioner.version(ctx.getGadget(), container, ctx.getLibs()));
     }
 
     return uri.toUri();
@@ -145,12 +152,8 @@ public class DefaultJsUriManager implements JsUriManager {
     UriStatus status = UriStatus.VALID_UNVERSIONED;
     String version = uri.getQueryParameter(Param.VERSION.getKey());
     if (version != null && versioner != null) {
-      Uri gadgetUri = null;
       String gadgetParam = uri.getQueryParameter(Param.URL.getKey());
-      if (gadgetParam != null) {
-        gadgetUri = Uri.parse(gadgetParam);
-      }
-      status = versioner.validate(gadgetUri, container, libs, version);
+      status = versioner.validate(gadgetParam, container, libs, version);
     }
 
     return new JsUri(status, uri, libs);

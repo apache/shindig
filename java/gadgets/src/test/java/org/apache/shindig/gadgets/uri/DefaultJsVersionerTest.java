@@ -31,7 +31,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 
 import com.google.common.collect.Lists;
-import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.features.FeatureRegistry;
 import org.apache.shindig.gadgets.features.FeatureResource;
@@ -49,9 +48,9 @@ import java.util.List;
  * gets appropriately cached and differs when JS content differs.
  */
 public class DefaultJsVersionerTest {
-  private static final Uri URI = Uri.parse("http://apache.org/gadget.xml");
+  private static final String URI = "http://apache.org/gadget.xml";
   private static final String CONTAINER = "container";
-  
+
   private DefaultJsVersioner versioner;
   private FeatureRegistry registry;
 
@@ -60,7 +59,7 @@ public class DefaultJsVersionerTest {
     registry = createMock(FeatureRegistry.class);
     versioner = new DefaultJsVersioner(registry);
   }
-  
+
   @Test
   public void versionCached() {
     String feature = "feature1";
@@ -73,7 +72,7 @@ public class DefaultJsVersionerTest {
     assertSame(version, versionAgain);
     verify(registry);
   }
-  
+
   @Test
   public void versionDifferentForDifferentFeatures() {
     String feature1 = "feature1";
@@ -90,7 +89,7 @@ public class DefaultJsVersionerTest {
     assertFalse(version1.equals(version2));
     verify(registry);
   }
-  
+
   @Test
   public void validateMismatch() {
     String feature = "feature1";
@@ -103,7 +102,7 @@ public class DefaultJsVersionerTest {
     assertEquals(UriStatus.INVALID_VERSION, status);
     verify(registry);
   }
-  
+
   @Test
   public void validateNull() {
     String feature = "feature1";
@@ -116,7 +115,7 @@ public class DefaultJsVersionerTest {
     assertEquals(UriStatus.VALID_UNVERSIONED, status);
     verify(registry);
   }
-  
+
   @Test
   public void validateEmpty() {
     String feature = "feature1";
@@ -129,7 +128,7 @@ public class DefaultJsVersionerTest {
     assertEquals(UriStatus.VALID_UNVERSIONED, status);
     verify(registry);
   }
-  
+
   @Test
   public void createAndValidateVersion() {
     String feature = "feature1";
@@ -142,7 +141,7 @@ public class DefaultJsVersionerTest {
     assertEquals(UriStatus.VALID_VERSIONED, status);
     verify(registry);
   }
-  
+
   private void expectReq(String feature, String content) {
     FeatureResource resource = new FeatureResource.Simple(content, "");
     Collection<String> libs = Lists.newArrayList(feature);

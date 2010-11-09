@@ -26,9 +26,7 @@ import org.apache.shindig.common.servlet.HttpUtil;
 import org.apache.shindig.common.servlet.InjectedServlet;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
-import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
-import org.apache.shindig.gadgets.RenderingContext;
 import org.apache.shindig.gadgets.uri.JsUriManager;
 import org.apache.shindig.gadgets.uri.UriStatus;
 import org.apache.shindig.gadgets.uri.JsUriManager.JsUri;
@@ -172,12 +170,10 @@ public class JsServlet extends InjectedServlet {
       return;
     }
 
-    GadgetContext ctx = makeContextObject(jsUri);
-
-    Uri incUri = jsUriManager.makeExternJsUri(ctx, jsUri.getLibs());
+    Uri incUri = jsUriManager.makeExternJsUri(jsUri);
+    // Remove the JsLoad param so we want get here again
     UriBuilder uriBuilder = new UriBuilder(incUri);
-    uriBuilder.putQueryParameter(Param.ONLOAD.getKey(), onloadStr);
-    uriBuilder.putQueryParameter(Param.NO_CACHE.getKey(), jsUri.isNoCache() ? "1" : "0");
+    uriBuilder.removeQueryParameter(Param.JSLOAD.getKey());
     incUri = uriBuilder.toUri();
 
     int refresh = getCacheTtlSecs(jsUri);
@@ -236,34 +232,5 @@ public class JsServlet extends InjectedServlet {
         HttpUtil.setNoCache(resp);
         break;
     }
-  }
-
-  private GadgetContext makeContextObject(final JsUri jsUri) {
-    return new GadgetContext() {
-      @Override
-      public RenderingContext getRenderingContext() {
-        return jsUri.getContext();
-      }
-
-      @Override
-      public String getContainer() {
-        return jsUri.getContainer();
-      }
-
-      @Override
-      public Uri getUrl() {
-        return jsUri.getGadget() != null ? Uri.parse(jsUri.getGadget()) : null;
-      }
-
-      @Override
-      public boolean getIgnoreCache() {
-        return jsUri.isNoCache();
-      }
-
-      @Override
-      public boolean getDebug() {
-        return jsUri.isDebug();
-      }
-    };
   }
 }
