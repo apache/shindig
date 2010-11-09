@@ -86,7 +86,7 @@
           </dependencies>
         </plugin>
         <plugin>
-          <groupId>net.sf.alchim</groupId>
+          <groupId>net.alchim31.maven</groupId>
           <artifactId>yuicompressor-maven-plugin</artifactId>
         </plugin>
       </plugins>
