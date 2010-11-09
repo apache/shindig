@@ -24,7 +24,6 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.Stage;
-import com.google.inject.tools.jmx.Manager;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.List;
@@ -46,7 +45,6 @@ public class GuiceServletContextListener implements ServletContextListener {
   
   //HNN- constant name matched system.properties <contextparam> specified in the web.xml
   private static final String SYSTEM_PROPERTIES = "system.properties";
-  private boolean jmxInitialized = false;
 
   public void contextInitialized(ServletContextEvent event) {
     ServletContext context = event.getServletContext();
@@ -73,14 +71,6 @@ public class GuiceServletContextListener implements ServletContextListener {
     Injector injector = Guice.createInjector(Stage.PRODUCTION, modules);
     context.setAttribute(INJECTOR_ATTRIBUTE, injector);
 
-    try {
-      if (!jmxInitialized) {
-        Manager.manage("ShindigGuiceContext", injector);
-        jmxInitialized = true;
-      }
-    } catch (Exception e) {
-      // Ignore errors
-    }
   }
 
   public void contextDestroyed(ServletContextEvent event) {
