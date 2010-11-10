@@ -48,6 +48,7 @@
  *
  * @private
  * @constructor
+ * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.30
  */
 opensocial.IdSpec = function(opt_params) {
   this.fields_ = opt_params || {};
@@ -66,6 +67,7 @@ opensocial.IdSpec = function(opt_params) {
  * </p>
  *
  * @name opensocial.IdSpec.Field
+ * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.31
  */
 opensocial.IdSpec.Field = {
   /**
@@ -103,6 +105,7 @@ opensocial.IdSpec.Field = {
  * Constant person IDs available when fetching person information.
  *
  * @name opensocial.IdSpec.PersonId
+ * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.33
  */
 opensocial.IdSpec.PersonId = {
   /**
@@ -122,6 +125,7 @@ opensocial.IdSpec.PersonId = {
  * Constant group IDs available when fetching collections of people.
  *
  * @name opensocial.IdSpec.GroupId
+ * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.32
  */
 opensocial.IdSpec.GroupId = {
   /**
@@ -151,6 +155,7 @@ opensocial.IdSpec.GroupId = {
  *    to pass to the request.
  * @return {string} The data.
  * @member opensocial.IdSpec
+ * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.30.1.1
  */
 opensocial.IdSpec.prototype.getField = function(key, opt_params) {
   return opensocial.Container.getField(this.fields_, key, opt_params);
@@ -162,6 +167,7 @@ opensocial.IdSpec.prototype.getField = function(key, opt_params) {
  *
  * @param {string} key The key to set data for.
  * @param {string} data The data to set.
+ * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.30.1.2
  */
 opensocial.IdSpec.prototype.setField = function(key, data) {
   return (this.fields_[key] = data);

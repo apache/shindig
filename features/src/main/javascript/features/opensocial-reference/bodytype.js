@@ -37,6 +37,7 @@
  *
  * @private
  * @constructor
+ * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.8
  */
 opensocial.BodyType = function(opt_params) {
   this.fields_ = opt_params || {};
@@ -51,6 +52,7 @@ opensocial.BodyType = function(opt_params) {
  * method.
  *
  * @name opensocial.BodyType.Field
+ * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.9
  */
 opensocial.BodyType.Field = {
   /**
@@ -101,6 +103,7 @@ opensocial.BodyType.Field = {
  *    <a href="opensocial.DataRequest.DataRequestFields.html">params</a>
  *    to pass to the request.
  * @return {string} The data.
+ * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.8.1.1
  */
 opensocial.BodyType.prototype.getField = function(key, opt_params) {
   return opensocial.Container.getField(this.fields_, key, opt_params);

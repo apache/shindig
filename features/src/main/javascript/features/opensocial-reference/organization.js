@@ -37,6 +37,7 @@
  *
  * @private
  * @constructor
+ * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.43
  */
 opensocial.Organization = function(opt_params) {
   this.fields_ = opt_params || {};
@@ -51,6 +52,7 @@ opensocial.Organization = function(opt_params) {
  * Organization.getField()</a> method.
  *
  * @name opensocial.Organization.Field
+ * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.44
  */
 opensocial.Organization.Field = {
   /**
@@ -144,6 +146,7 @@ opensocial.Organization.Field = {
  *    <a href="opensocial.DataRequest.DataRequestFields.html">params</a>
  *    to pass to the request.
  * @return {string} The data.
+ * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.43.1.1
  */
 opensocial.Organization.prototype.getField = function(key, opt_params) {
   return opensocial.Container.getField(this.fields_, key, opt_params);

@@ -53,6 +53,7 @@
  *
  * @private
  * @constructor
+ * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.20
  */
 opensocial.DataResponse = function(responseItems, opt_globalError,
     opt_errorMessage) {
@@ -67,6 +68,7 @@ opensocial.DataResponse = function(responseItems, opt_globalError,
  *
  * @return {boolean} True if there was an error; otherwise, false.
  * @member opensocial.DataResponse
+ * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.20.1.3
  */
 opensocial.DataResponse.prototype.hadError = function() {
   return !!this.globalError_;
@@ -77,6 +79,7 @@ opensocial.DataResponse.prototype.hadError = function() {
  * If the entire request had a batch level error, returns the error message.
  *
  * @return {string} A human-readable description of the error that occurred.
+ * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.20.1.2
  */
 opensocial.DataResponse.prototype.getErrorMessage = function() {
   return this.errorMessage_;
@@ -90,6 +93,7 @@ opensocial.DataResponse.prototype.getErrorMessage = function() {
  *    <a href="opensocial.ResponseItem.html">response</a> calculated by the
  *    server.
  * @member opensocial.DataResponse
+ * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.20.1.1
  */
 opensocial.DataResponse.prototype.get = function(key) {
   return this.responseItems_[key];

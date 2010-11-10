@@ -40,6 +40,7 @@
  *
  * @private
  * @constructor
+ * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.49
  */
 opensocial.ResponseItem = function(originalDataRequest, data,
     opt_errorCode, opt_errorMessage) {
@@ -54,6 +55,7 @@ opensocial.ResponseItem = function(originalDataRequest, data,
  * Returns true if there was an error in fetching this data from the server.
  *
  * @return {boolean} True if there was an error; otherwise, false.
+ * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.49.1.5
  */
 opensocial.ResponseItem.prototype.hadError = function() {
   return !!this.errorCode_;
@@ -67,6 +69,7 @@ opensocial.ResponseItem.prototype.hadError = function() {
  * Error codes that a response item can return.
  *
  * @name opensocial.ResponseItem.Error
+ * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.50
  */
 opensocial.ResponseItem.Error = {
   /**
@@ -126,6 +129,7 @@ opensocial.ResponseItem.Error = {
  * <a href="opensocial.ResponseItem.Error.html"><code>Error</code></a>.
  *
  * @return {string} The error code, or null if no error occurred.
+ * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.49.1.2
  */
 opensocial.ResponseItem.prototype.getErrorCode = function() {
   return this.errorCode_;
@@ -137,6 +141,7 @@ opensocial.ResponseItem.prototype.getErrorCode = function() {
  *
  * @return {string} A human-readable description of the error that occurred;
  *    can be null, even if an error occurred.
+ * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.49.1.3
  */
 opensocial.ResponseItem.prototype.getErrorMessage = function() {
   return this.errorMessage_;
@@ -148,6 +153,7 @@ opensocial.ResponseItem.prototype.getErrorMessage = function() {
  *
  * @return {opensocial.DataRequest} The data request used to fetch this data
  *    response.
+ * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.49.1.4
  */
 opensocial.ResponseItem.prototype.getOriginalDataRequest = function() {
   return this.originalDataRequest_;
@@ -159,6 +165,7 @@ opensocial.ResponseItem.prototype.getOriginalDataRequest = function() {
  *
  * @return {Object} The requested value calculated by the server; the type of
  *    this value is defined by the type of request that was made.
+ * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.49.1.1
  */
 opensocial.ResponseItem.prototype.getData = function() {
   return this.data_;
