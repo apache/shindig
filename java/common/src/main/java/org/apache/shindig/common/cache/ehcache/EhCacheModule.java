@@ -22,6 +22,9 @@ import org.apache.shindig.common.cache.CacheProvider;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Scopes;
+import org.apache.shindig.common.servlet.GuiceServletContextListener;
+
+import java.util.concurrent.Callable;
 
 /**
  * Creates a module to supply a EhCache Provider

@@ -23,6 +23,7 @@ import com.google.common.collect.Lists;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
+import com.google.inject.Singleton;
 import com.google.inject.Stage;
 import org.apache.commons.lang.StringUtils;
 
@@ -75,21 +76,28 @@ public class GuiceServletContextListener implements ServletContextListener {
 
   public void contextDestroyed(ServletContextEvent event) {
     ServletContext context = event.getServletContext();
+    Injector injector = (Injector) context.getAttribute(INJECTOR_ATTRIBUTE);
+    if (injector != null) {
+        CleanupHandler cleanups = injector.getInstance(CleanupHandler.class);
+        cleanups.cleanup();
+    }
+
     context.removeAttribute(INJECTOR_ATTRIBUTE);
   }
-  
+
+
   /**
    * This method sets all the (key,value) properties specified in the web.xml <contextparam> system.properties element
    * if they are not empty.
-   * @param context
+   * @param context the ServletContext
    */
   private void setSystemProperties(ServletContext context){
     String systemProperties = context.getInitParameter(SYSTEM_PROPERTIES);
     String key=null;
     String value=null;
     if(systemProperties!=null && systemProperties.trim().length()>0){
-      for (String aProperty : StringUtils.split(systemProperties, '\n')){
-      String[] keyAndvalue = StringUtils.split(aProperty.trim(), "=",2);
+      for (String prop : StringUtils.split(systemProperties, '\n')){
+      String[] keyAndvalue = StringUtils.split(prop.trim(), "=",2);
         if(keyAndvalue.length==2){
         key=keyAndvalue[0];
           value=keyAndvalue[1];
@@ -100,6 +108,42 @@ public class GuiceServletContextListener implements ServletContextListener {
         }
       }
     }
-  }  
+  }
+
+
+  /**
+   * Interface for classes that need to run cleanup code without
+   * using Runtime ShutdownHooks (which leaks memory on redeploys)
+   */
+  public interface CleanupCapable {
+    /** Execute the cleanup code. */
+    void cleanup();
+  }
+
+  /**
+   * Injectable handler that allows Guice classes to make themselves cleanup capable.
+   */
+  @Singleton
+  public static class CleanupHandler {
+    private List<CleanupCapable> cleanupHandlers = Lists.newArrayList();
+
+    public CleanupHandler() { }
+    /**
+     * Add a new class instance for running cleanup code.
+     *
+     * Best way
+     *
+     * @param cleanupCapable class instance implementing CleanupCapable.
+     */
+    public void register(CleanupCapable cleanupCapable) {
+      cleanupHandlers.add(cleanupCapable);
+    }
+
+    public void cleanup() {
+      for (CleanupCapable cleanupHandler : cleanupHandlers) {
+        cleanupHandler.cleanup();
+      }
+    }
+  }
 }
 

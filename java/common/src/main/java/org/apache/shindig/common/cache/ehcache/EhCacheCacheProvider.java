@@ -21,6 +21,7 @@ package org.apache.shindig.common.cache.ehcache;
 import com.google.common.base.Preconditions;
 import org.apache.shindig.common.cache.Cache;
 import org.apache.shindig.common.cache.CacheProvider;
+import org.apache.shindig.common.servlet.GuiceServletContextListener;
 import org.apache.shindig.common.util.ResourceLoader;
 
 import com.google.common.collect.MapMaker;
@@ -43,7 +44,7 @@ import java.util.logging.Logger;
  * Cache interface based on ehcache
  * @see <a href="http://www.ehcache.org">http://www.ehcache.org</a>
  */
-public class EhCacheCacheProvider implements CacheProvider {
+public class EhCacheCacheProvider implements CacheProvider, GuiceServletContextListener.CleanupCapable {
   private static final Logger LOG = Logger.getLogger(EhCacheCacheProvider.class.getName());
   private final CacheManager cacheManager;
   private final ConcurrentMap<String, Cache<?, ?>> caches = new MapMaker().makeMap();
@@ -51,10 +52,12 @@ public class EhCacheCacheProvider implements CacheProvider {
   @Inject
   public EhCacheCacheProvider(@Named("shindig.cache.ehcache.config") String configPath,
                               @Named("shindig.cache.ehcache.jmx.enabled") boolean jmxEnabled,
-                              @Named("shindig.cache.ehcache.jmx.stats") boolean withCacheStats)
+                              @Named("shindig.cache.ehcache.jmx.stats") boolean withCacheStats,
+                              GuiceServletContextListener.CleanupHandler cleanupHandler)
       throws IOException {
     cacheManager = new CacheManager(getConfiguration(configPath));
     create(jmxEnabled, withCacheStats);
+    cleanupHandler.register(this);
   }
 
   /**
@@ -71,23 +74,8 @@ public class EhCacheCacheProvider implements CacheProvider {
   }
 
   public void create(boolean jmxEnabled, boolean withCacheStats) {
-    /*
-     * Add in a shutdown hook
-     */
-    Runtime.getRuntime().addShutdownHook(new Thread() {
-      @Override
-      public void run() {
-        try {
-          shutdown();
-        } catch (Throwable t) {
-          // I really do want to swallow this, and make the shutdown clean for
-          // others
-        }
-      }
-    });
-
-    // register the cache manager with JMX
     if (jmxEnabled) {
+      // register the cache manager with JMX
       MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
       ManagementService.registerMBeans(cacheManager, mBeanServer, true, true, true, withCacheStats);
     }
@@ -96,7 +84,7 @@ public class EhCacheCacheProvider implements CacheProvider {
   /**
    * perform a shutdown
    */
-  public void shutdown() {
+  public void cleanup() {
     cacheManager.shutdown();
   }
 

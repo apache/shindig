@@ -21,6 +21,7 @@ package org.apache.shindig.gadgets;
 import com.google.common.collect.ImmutableList;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.Inject;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.multibindings.Multibinder;
@@ -29,6 +30,7 @@ import com.google.inject.name.Names;
 
 import org.apache.commons.lang.StringUtils;
 
+import org.apache.shindig.common.servlet.GuiceServletContextListener;
 import org.apache.shindig.gadgets.config.DefaultConfigContributorModule;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.InvalidationHandler;
@@ -45,10 +47,7 @@ import org.apache.shindig.gadgets.variables.SubstituterModule;
 
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.*;
 
 /**
  * Creates a module to supply all of the core gadget classes.
@@ -62,18 +61,10 @@ public class DefaultGuiceModule extends AbstractModule {
   @Override
   protected void configure() {
 
-    final ExecutorService service = Executors.newCachedThreadPool(DAEMON_THREAD_FACTORY);
-    bind(ExecutorService.class).toInstance(service);
-    bind(Executor.class).annotatedWith(Names.named("shindig.concat.executor")).toInstance(service);
+    bind(ExecutorService.class).to(ShindigExecutorService.class);
+    bind(Executor.class).annotatedWith(Names.named("shindig.concat.executor")).to(ShindigExecutorService.class);
 
     bindConstant().annotatedWith(Names.named("shindig.jsload.ttl-secs")).to(60 * 60); // 1 hour
-
-    Runtime.getRuntime().addShutdownHook(new Thread() {
-        @Override
-        public void run() {
-            service.shutdownNow();
-        }
-    });
 
     install(new DefaultConfigContributorModule());
     install(new ParseModule());
@@ -125,6 +116,9 @@ public class DefaultGuiceModule extends AbstractModule {
     return ImmutableList.<String>builder().addAll(extended).add(StringUtils.split(features, ',')).build();
   }
 
+  /**
+   * A thread factory that sets the daemon flag to allow for clean servlet shutdown.
+   */
   public static final ThreadFactory DAEMON_THREAD_FACTORY =
     new ThreadFactory() {
         private final ThreadFactory factory = Executors.defaultThreadFactory();
@@ -135,4 +129,24 @@ public class DefaultGuiceModule extends AbstractModule {
             return t;
         }
     };
+
+  /**
+   * An Executor service that mimics Executors.newCachedThreadPool(DAEMON_THREAD_FACTORY);
+   * Registers a cleanup handler to shutdown the thread.
+   */
+  @Singleton
+  public static class ShindigExecutorService extends ThreadPoolExecutor implements GuiceServletContextListener.CleanupCapable {
+    @Inject
+    public ShindigExecutorService(GuiceServletContextListener.CleanupHandler cleanupHandler) {
+      super(0, Integer.MAX_VALUE, 60L, TimeUnit.SECONDS,
+          new SynchronousQueue<Runnable>(),
+          DAEMON_THREAD_FACTORY);
+          cleanupHandler.register(this);
+    }
+
+    public void cleanup() {
+      this.shutdown();
+    }
+  }
+
 }

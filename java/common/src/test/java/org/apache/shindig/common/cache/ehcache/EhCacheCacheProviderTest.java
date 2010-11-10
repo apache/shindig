@@ -21,6 +21,7 @@ package org.apache.shindig.common.cache.ehcache;
 import org.apache.shindig.common.cache.Cache;
 import org.apache.shindig.common.cache.CacheProvider;
 
+import org.apache.shindig.common.servlet.GuiceServletContextListener;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -34,7 +35,8 @@ public class EhCacheCacheProviderTest {
   @BeforeClass
   public static void setup() throws Exception {
     defaultProvider = new EhCacheCacheProvider(
-        "res://org/apache/shindig/common/cache/ehcache/ehcacheConfig.xml", true, true);
+        "res://org/apache/shindig/common/cache/ehcache/ehcacheConfig.xml", true, true,
+        new GuiceServletContextListener.CleanupHandler());
   }
 
   @Test
