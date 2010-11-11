@@ -829,7 +829,9 @@ if (!gadgets.rpc) { // make lib resilient to double-inclusion
           l: useLegacyProtocol[targetId]
         };
 
-        if (targetId !== '..' && !document.getElementById(targetId)) {
+        if (targetId !== '..' &&
+            parseSiblingId(targetId) == null &&  // sibling never in the document
+            !document.getElementById(targetId)) {
           // The target has been removed from the DOM. Don't even try.
           gadgets.log('WARNING: attempted send to nonexistent frame: ' + targetId);
           return;
@@ -843,7 +845,9 @@ if (!gadgets.rpc) { // make lib resilient to double-inclusion
         // Attempt to make call via a cross-domain transport.
         // Retrieve the transport for the given target - if one
         // target is misconfigured, it won't affect the others.
-        var channel = receiverTx[targetId];
+        // In the case of a sibling relay, channel is not found
+        // in the receiverTx map but in the transport itself.
+        var channel = receiverTx[targetId] || transport;
 
         if (!channel) {
           // Not set up yet. Enqueue the rpc for such time as it is.
