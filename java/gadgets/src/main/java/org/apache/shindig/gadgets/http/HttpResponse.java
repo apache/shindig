@@ -129,10 +129,6 @@ public final class HttpResponse implements Externalizable {
 
   static final Charset DEFAULT_ENCODING = Charset.forName("UTF-8");
 
-  // At what point you don't trust remote server date stamp on response (in milliseconds)
-  // (Should be less then DEFAULT_TTL)
-  static final long DEFAULT_DRIFT_LIMIT_MS = 3L * 60L * 1000L;
-
   @Inject(optional = true) @Named("shindig.cache.http.negativeCacheTtl")
   private static long negativeCacheTtl = DEFAULT_NEGATIVE_CACHE_TTL;
 
@@ -146,9 +142,6 @@ public final class HttpResponse implements Externalizable {
   @Inject(optional = true)
   private static EncodingDetector.FallbackEncodingDetector customEncodingDetector =
       new EncodingDetector.FallbackEncodingDetector();
-
-  @Inject(optional = true) @Named("shindig.http.date-drift-limit-ms")
-  private static long responseDateDriftLimit = DEFAULT_DRIFT_LIMIT_MS;
 
   public static void setTimeSource(TimeSource timeSource) {
     HttpUtil.setTimeSource(timeSource);
@@ -468,10 +461,6 @@ public final class HttpResponse implements Externalizable {
       Date d = DateUtil.parseRfc1123Date(dates.iterator().next());
       if (d != null) {
         timestamp = d.getTime();
-        if (Math.abs(currentTime - timestamp) > responseDateDriftLimit) {
-          // Do not trust the date from response if it is too old (server time out of sync)
-          timestamp = -1;
-        }
       }
     }
     if (timestamp == -1) {

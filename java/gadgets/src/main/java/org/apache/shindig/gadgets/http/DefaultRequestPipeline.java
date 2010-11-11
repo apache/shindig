@@ -26,11 +26,16 @@ import org.apache.shindig.common.Nullable;
 
 import com.google.inject.name.Named;
 
+import org.apache.shindig.common.servlet.HttpUtil;
+import org.apache.shindig.common.util.DateUtil;
 import org.apache.shindig.common.util.Utf8UrlCoder;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.oauth.OAuthRequest;
 import org.apache.shindig.gadgets.rewrite.ResponseRewriterRegistry;
 import org.apache.shindig.gadgets.rewrite.RewritingException;
+
+import java.util.Collection;
+import java.util.Date;
 
 /**
  * A standard implementation of a request pipeline. Performs request caching and
@@ -44,6 +49,13 @@ public class DefaultRequestPipeline implements RequestPipeline {
   private final ResponseRewriterRegistry responseRewriterRegistry;
   private final InvalidationService invalidationService;
   private final HttpResponseMetadataHelper metadataHelper;
+
+  // At what point you don't trust remote server date stamp on response (in milliseconds)
+  // (Should be less then DEFAULT_TTL)
+  static final long DEFAULT_DRIFT_LIMIT_MS = 3L * 60L * 1000L;
+
+  @Inject(optional = true) @Named("shindig.http.date-drift-limit-ms")
+  private static long responseDateDriftLimit = DEFAULT_DRIFT_LIMIT_MS;
 
   @Inject
   public DefaultRequestPipeline(HttpFetcher httpFetcher,
@@ -107,10 +119,12 @@ public class DefaultRequestPipeline implements RequestPipeline {
 
     if (fetchedResponse.getHttpStatusCode() >= 500 && staleResponse != null) {
       // If we have trouble accessing the remote server,
-      // Lets try the latest good but staled result 
+      // Lets try the latest good but staled result
       return staleResponse;
     }
-    
+
+    fetchedResponse = maybeFixDriftTime(fetchedResponse);
+
     if (!fetchedResponse.isError() && !request.getIgnoreCache() && request.getCacheTtl() != 0) {
       try {
         fetchedResponse = responseRewriterRegistry.rewriteHttpResponse(request, fetchedResponse);
@@ -118,7 +132,7 @@ public class DefaultRequestPipeline implements RequestPipeline {
         throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, e, e.getHttpStatusCode());
       }
     }
-    
+
     // Set response hash value in metadata (used for url versioning)
     fetchedResponse = HttpResponseMetadataHelper.updateHash(fetchedResponse, metadataHelper);
     if (!request.getIgnoreCache()) {
@@ -144,5 +158,33 @@ public class DefaultRequestPipeline implements RequestPipeline {
             "; only \"http\" and \"https\" supported.",
             HttpResponse.SC_BAD_REQUEST);
     }
+  }
+
+  /**
+   * Verify response time, and if response time is off from current time by more then
+   * speficied time change response time to be current time.
+   * The function resolve cases that remote server time is wrong, which can cause
+   * resources to expire prematurly or served after they should be expired.
+   * The allowd drift time is configured by responseDateDriftLimit.
+   * @param response the response to fix
+   * @return new response with fix date or original reesponse
+   */
+  public static HttpResponse maybeFixDriftTime(HttpResponse response) {
+    Collection<String> dates = response.getHeaders("Date");
+
+    if (!dates.isEmpty()) {
+      Date d = DateUtil.parseRfc1123Date(dates.iterator().next());
+      if (d != null) {
+        long timestamp = d.getTime();
+        long currentTime = HttpUtil.getTimeSource().currentTimeMillis();
+        if (Math.abs(currentTime - timestamp) > responseDateDriftLimit) {
+          // Do not trust the date from response if it is too old (server time out of sync)
+          HttpResponseBuilder builder = new HttpResponseBuilder(response);
+          builder.setHeader("Date", DateUtil.formatRfc1123Date(currentTime));
+          response = builder.create();
+        }
+      }
+    }
+    return response;
   }
 }

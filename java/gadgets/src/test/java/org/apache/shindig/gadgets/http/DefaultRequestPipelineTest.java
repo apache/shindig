@@ -18,15 +18,18 @@
 package org.apache.shindig.gadgets.http;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
 
 import com.google.common.collect.Maps;
 import com.google.inject.Provider;
 
 import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.common.util.DateUtil;
 import org.apache.shindig.gadgets.AuthType;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.oauth.OAuthRequest;
 import org.apache.shindig.gadgets.rewrite.DefaultResponseRewriterRegistry;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Map;
@@ -46,6 +49,11 @@ public class DefaultRequestPipelineTest {
   };
   private final RequestPipeline pipeline = new DefaultRequestPipeline(fetcher, cache, oauth,
       new DefaultResponseRewriterRegistry(null, null), new NoOpInvalidationService(), helper);
+
+  @Before
+  public void setUp() {
+    HttpResponseTest.setHttpTimeSource();
+  }
 
   @Test
   public void authTypeNoneNotCached() throws Exception {
@@ -72,7 +80,14 @@ public class DefaultRequestPipelineTest {
     HttpRequest request = new HttpRequest(DEFAULT_URI)
         .setAuthType(AuthType.NONE);
 
-    fetcher.response = new HttpResponse("response");
+    int time = roundToSeconds(HttpResponseTest.timeSource.currentTimeMillis()) - 10;
+    String date = DateUtil.formatRfc1123Date(1000L * time);
+    HttpResponseBuilder builder = new HttpResponseBuilder()
+        .setCacheTtl(100)
+        .addHeader("Date", date);
+    builder.setContent("response");
+
+    fetcher.response = builder.create();
 
     RequestPipeline pipeline = new DefaultRequestPipeline(fetcher, cache, oauth,
         new DefaultResponseRewriterRegistry(null, null), new NoOpInvalidationService(),
@@ -81,7 +96,34 @@ public class DefaultRequestPipelineTest {
     assertEquals(1, response.getMetadata().size());
     assertEquals("q7u8tbpmidtu1gtqhjv0kb0rvo",
         response.getMetadata().get(HttpResponseMetadataHelper.DATA_HASH));
+    assertEquals(date, response.getHeader("Date"));
+    assertEquals(roundToSeconds(90000 - 1), roundToSeconds(response.getCacheTtl() - 1));
   }
+
+  @Test
+  public void verifyFixedDate() throws Exception {
+    HttpRequest request = new HttpRequest(DEFAULT_URI)
+        .setAuthType(AuthType.NONE);
+
+    int time = roundToSeconds(HttpResponseTest.timeSource.currentTimeMillis());
+    String date = DateUtil.formatRfc1123Date(1000L * time
+        - 1000 - DefaultRequestPipeline.DEFAULT_DRIFT_LIMIT_MS);
+    HttpResponseBuilder builder = new HttpResponseBuilder()
+        .setCacheTtl(100)
+        .addHeader("Date", date);
+    builder.setContent("response");
+
+    fetcher.response = builder.create();
+
+    RequestPipeline pipeline = new DefaultRequestPipeline(fetcher, cache, oauth,
+        new DefaultResponseRewriterRegistry(null, null), new NoOpInvalidationService(),
+        new HttpResponseMetadataHelper());
+    HttpResponse response = pipeline.execute(request);
+    // Verify time is current time instead of expired
+    assertEquals(DateUtil.formatRfc1123Date(1000L * time), response.getHeader("Date"));
+    assertEquals(roundToSeconds(100000 - 1), roundToSeconds(response.getCacheTtl() - 1));
+  }
+
 
   @Test
   public void authTypeNoneWasCached() throws Exception {
@@ -218,6 +260,55 @@ public class DefaultRequestPipelineTest {
     assertEquals(0, fetcher.fetchCount);
     assertEquals(1, cache.readCount);
     assertEquals(0, cache.writeCount);
+  }
+
+  private static int roundToSeconds(long ts) {
+    return (int)(ts / 1000);
+  }
+
+  @Test
+  public void testFixedDateOk() throws Exception {
+    int time = roundToSeconds(HttpResponseTest.timeSource.currentTimeMillis());
+    HttpResponse response = new HttpResponseBuilder()
+        .addHeader("Date", DateUtil.formatRfc1123Date(1000L * time
+            + 1000 - DefaultRequestPipeline.DEFAULT_DRIFT_LIMIT_MS))
+        .setCacheTtl(100)
+        .create();
+
+    HttpResponse newResponse = DefaultRequestPipeline.maybeFixDriftTime(response);
+    assertSame(response, newResponse);
+  }
+
+  @Test
+  public void testFixedDateOld() throws Exception {
+    int time = roundToSeconds(HttpResponseTest.timeSource.currentTimeMillis());
+    HttpResponse response = new HttpResponseBuilder()
+        .addHeader("Date", DateUtil.formatRfc1123Date(1000L * time
+            - 1000 - DefaultRequestPipeline.DEFAULT_DRIFT_LIMIT_MS))
+        .setCacheTtl(100)
+        .create();
+
+    response = DefaultRequestPipeline.maybeFixDriftTime(response);
+    // Verify that the old time is ignored:
+    assertEquals(time + 100, roundToSeconds(response.getCacheExpiration()));
+    assertEquals(DateUtil.formatRfc1123Date(HttpResponseTest.timeSource.currentTimeMillis()),
+        response.getHeader("Date"));
+  }
+
+  @Test
+  public void testFixedDateNew() throws Exception {
+    int time = roundToSeconds(HttpResponseTest.timeSource.currentTimeMillis());
+    HttpResponse response = new HttpResponseBuilder()
+        .addHeader("Date", DateUtil.formatRfc1123Date(1000L * time
+            + 1000 + DefaultRequestPipeline.DEFAULT_DRIFT_LIMIT_MS))
+        .setCacheTtl(100)
+        .create();
+
+    response = DefaultRequestPipeline.maybeFixDriftTime(response);
+    // Verify that the old time is ignored:
+    assertEquals(time + 100, roundToSeconds(response.getCacheExpiration()));
+    assertEquals(DateUtil.formatRfc1123Date(HttpResponseTest.timeSource.currentTimeMillis()),
+        response.getHeader("Date"));
   }
 
   public static class FakeHttpFetcher implements HttpFetcher {

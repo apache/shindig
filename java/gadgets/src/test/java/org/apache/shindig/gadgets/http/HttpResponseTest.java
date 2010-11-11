@@ -56,10 +56,13 @@ public class HttpResponseTest extends Assert {
     return (int)(ts / 1000);
   }
 
-  private static FakeTimeSource timeSource = new FakeTimeSource(System.currentTimeMillis());
+  public static FakeTimeSource timeSource = new FakeTimeSource(System.currentTimeMillis());
+  public static void setHttpTimeSource() {
+    HttpResponse.setTimeSource(timeSource);
+  }
   @Before
   public void setUp() {
-    HttpResponse.setTimeSource(timeSource);
+    setHttpTimeSource();
   }
 
   @Test
@@ -370,34 +373,6 @@ public class HttpResponseTest extends Assert {
         roundToSeconds(response.getCacheExpiration()));
     assertEquals(DateUtil.formatRfc1123Date(timeSource.currentTimeMillis()),
         response.getHeader("Date"));
-    assertTtlOk(roundToSeconds(response.getDefaultTtl()), response);
-  }
-
-  @Test
-  public void testFixedDateOld() throws Exception {
-    int time = roundToSeconds(timeSource.currentTimeMillis());
-    HttpResponse response = new HttpResponseBuilder()
-        .addHeader("Date", DateUtil.formatRfc1123Date(1000L * time
-            - 1000 - HttpResponse.DEFAULT_DRIFT_LIMIT_MS))
-        .create();
-    // Verify that the old time is ignored:
-    assertEquals(time + roundToSeconds(response.getDefaultTtl()),
-        roundToSeconds(response.getCacheExpiration()));
-    assertEquals(DateUtil.formatRfc1123Date(timeSource.currentTimeMillis()),
-        response.getHeader("Date"));
-    assertTtlOk(roundToSeconds(response.getDefaultTtl()), response);
-  }
-
-  @Test
-  public void testFixedDateNew() throws Exception {
-    int time = roundToSeconds(timeSource.currentTimeMillis());
-    HttpResponse response = new HttpResponseBuilder()
-        .addHeader("Date", DateUtil.formatRfc1123Date(1000L * time
-            + 1000 + HttpResponse.DEFAULT_DRIFT_LIMIT_MS))
-        .create();
-    // Verify that the old time is ignored:
-    assertEquals(time + roundToSeconds(response.getDefaultTtl()),
-        roundToSeconds(response.getCacheExpiration()));
     assertTtlOk(roundToSeconds(response.getDefaultTtl()), response);
   }
 
