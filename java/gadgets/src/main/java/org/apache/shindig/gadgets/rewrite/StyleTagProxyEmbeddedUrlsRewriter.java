@@ -19,6 +19,7 @@
 package org.apache.shindig.gadgets.rewrite;
 
 import com.google.inject.Inject;
+
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.uri.ProxyUriManager;
@@ -33,22 +34,21 @@ import java.util.List;
  * @since 2.0.0
  */
 public class StyleTagProxyEmbeddedUrlsRewriter extends DomWalker.Rewriter {
-  private final ContentRewriterFeature.Factory featureConfigFactory;
+  private final ContentRewriterFeature.Config config;
   private final ProxyUriManager proxyUriManager;
   private final CssResponseRewriter cssRewriter;
 
   @Inject
-  public StyleTagProxyEmbeddedUrlsRewriter(ContentRewriterFeature.Factory featureConfigFactory,
+  public StyleTagProxyEmbeddedUrlsRewriter(ContentRewriterFeature.DefaultConfig config,
                                            ProxyUriManager proxyUriManager,
                                            CssResponseRewriter cssRewriter) {
-    this.featureConfigFactory = featureConfigFactory;
+    this.config = config;
     this.proxyUriManager = proxyUriManager;
     this.cssRewriter = cssRewriter;
   }
 
   @Override
   protected List<DomWalker.Visitor> makeVisitors(Gadget context, Uri gadgetUri) {
-    ContentRewriterFeature.Config config = featureConfigFactory.get(gadgetUri);
     return Arrays.<DomWalker.Visitor>asList(
         new StyleTagProxyEmbeddedUrlsVisitor(config, proxyUriManager,
                                              cssRewriter));
