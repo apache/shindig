@@ -19,13 +19,13 @@
 
 package org.apache.shindig.config;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Singleton;
 
 import org.apache.shindig.expressions.Expressions;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -139,17 +139,17 @@ public class ExpressionContainerConfig extends BasicContainerConfig {
         return new DynamicConfigProperty((String) value, expressions, context);
       } else if (value instanceof Map<?, ?>) {
         Map<?, ?> mapValue = (Map<?, ?>) value;
-        ImmutableMap.Builder<Object, Object> newMap = ImmutableMap.builder();
+        Map<Object, Object> newMap = Maps.newHashMap();
         for (Map.Entry<?, ?> entry : mapValue.entrySet()) {
           newMap.put(entry.getKey(), parseAll(entry.getValue(), context));
         }
-        return newMap.build();
+        return Collections.unmodifiableMap(newMap);
       } else if (value instanceof List<?>) {
-        ImmutableList.Builder<Object> newList = ImmutableList.builder();
+        List<Object> newList = Lists.newArrayList();
         for (Object entry : (List<?>) value) {
           newList.add(parseAll(entry, context));
         }
-        return newList.build();
+        return Collections.unmodifiableList(newList);
       } else {
         return value;
       }
@@ -160,17 +160,17 @@ public class ExpressionContainerConfig extends BasicContainerConfig {
         return value.toString();
       } else if (value instanceof Map<?, ?>) {
         Map<?, ?> mapValue = (Map<?, ?>) value;
-        ImmutableMap.Builder<Object, Object> newMap = ImmutableMap.builder();
+        Map<Object, Object> newMap = Maps.newHashMap();
         for (Map.Entry<?, ?> entry : mapValue.entrySet()) {
           newMap.put(entry.getKey(), evaluateAll(entry.getValue()));
         }
-        return newMap.build();
+        return Collections.unmodifiableMap(newMap);
       } else if (value instanceof List<?>) {
-        ImmutableList.Builder<Object> newList = ImmutableList.builder();
+        List<Object> newList = Lists.newArrayList();
         for (Object entry : (List<?>) value) {
           newList.add(evaluateAll(entry));
         }
-        return newList.build();
+        return Collections.unmodifiableList(newList);
       } else {
         return value;
       }

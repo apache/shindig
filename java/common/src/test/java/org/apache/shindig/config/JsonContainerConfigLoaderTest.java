@@ -254,4 +254,15 @@ public class JsonContainerConfigLoaderTest {
     createConfigForTest(createContainer(json).getAbsolutePath());
     assertNull(config.getMap("default", "features").get("osapi"));
   }
+  
+  @Test
+  public void testNullEntriesOverrideEntriesInParent() throws Exception {
+    // We use JSON Objects here to guarantee that we're well formed up front.
+    JSONObject parent = new JSONObject("{ 'gadgets.container' : ['default'], features : { osapi : 'foo' }}");    
+    JSONObject child = new JSONObject("{ 'gadgets.container' : ['child'], features : null}");    
+    createConfigForTest(createContainer(parent).getAbsolutePath());
+    createConfigForTest(createContainer(child).getAbsolutePath());
+    assertEquals("foo", config.getMap("default", "features").get("osapi"));
+    assertNull(config.getProperty("child", "features"));
+  }
 }

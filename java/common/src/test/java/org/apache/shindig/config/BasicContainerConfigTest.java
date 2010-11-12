@@ -23,14 +23,15 @@ import static org.junit.Assert.*;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMap.Builder;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
 
 import org.apache.shindig.config.ContainerConfig.ConfigObserver;
 import org.easymock.EasyMock;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -50,21 +51,23 @@ public class BasicContainerConfigTest {
   protected ContainerConfig config;
 
   protected static Map<String, Object> makeContainer(String name, Object... values) {
-    Builder<String, Object> newCtr = ImmutableMap.builder();
+    // Not using ImmutableMap to allow null values
+    Map<String, Object> newCtr = Maps.newHashMap();
     newCtr.put("gadgets.container", ImmutableList.of(name));
     for (int i = 0; i < values.length / 2; ++i) {
       newCtr.put(values[i * 2].toString(), values[i * 2 + 1]);
     }
-    return newCtr.build();
+    return Collections.unmodifiableMap(newCtr);
   }
 
   protected static Map<String, Object> makeContainer(List<String> name, Object... values) {
-    Builder<String, Object> newCtr = ImmutableMap.builder();
+    // Not using ImmutableMap to allow null values
+    Map<String, Object> newCtr = Maps.newHashMap();
     newCtr.put("gadgets.container", name);
     for (int i = 0; i < values.length / 2; ++i) {
       newCtr.put(values[i * 2].toString(), values[i * 2 + 1]);
     }
-    return newCtr.build();
+    return Collections.unmodifiableMap(newCtr);
   }
 
   @Before
@@ -122,11 +125,13 @@ public class BasicContainerConfigTest {
     Map<String, Object> defaultContainer = makeContainer("default",
         "base", "/gadgets/foo",
         "user", "peter",
-        "map", ImmutableMap.of("latitude", 42, "longitude", -8));
+        "map", ImmutableMap.of("latitude", 42, "longitude", -8),
+        "data", ImmutableList.of("foo", "bar"));
     Map<String, Object> newContainer = makeContainer("new",
         "user", "anne",
         "colour", "green",
-        "map", ImmutableMap.of("longitude", 130));
+        "map", ImmutableMap.of("longitude", 130),
+        "data", null);
     Map<String, Object> expectedContainer = makeContainer("new",
         "base", "/gadgets/foo",
         "user", "anne",

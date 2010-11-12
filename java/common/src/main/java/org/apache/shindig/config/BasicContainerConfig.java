@@ -242,11 +242,13 @@ public class BasicContainerConfig implements ContainerConfig {
      * { 'gadgets.container': ['default'],
      *   'base': '/gadgets/foo',
      *   'user': 'peter',
-     *   'map': { 'latitude': 42, 'longitude': -8 } }
+     *   'map': { 'latitude': 42, 'longitude': -8 },
+     *   'data': [ 'foo', 'bar' ] }
      * { 'gadgets.container': ['new'],
      *   'user': 'anne',
      *   'colour': 'green',
-     *   'map': { 'longitude': 130 } }
+     *   'map': { 'longitude': 130 },
+     *   'data': null }
      *
      * It would result in a merged "new" container that looks like this:
      * { 'gadgets.container': ['new'],
@@ -298,7 +300,11 @@ public class BasicContainerConfig implements ContainerConfig {
               (Map<String, Object>) fromParents, (Map<String, Object>) fromContainer));
         } else {
           // Otherwise we just overwrite it.
-          clone.put(field, fromContainer);
+          if (fromContainer == null) {
+            clone.remove(field);
+          } else {
+            clone.put(field, fromContainer);
+          }
         }
       }
       return clone;

@@ -19,8 +19,8 @@
 
 package org.apache.shindig.config;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.util.ResourceLoader;
@@ -255,9 +255,7 @@ public class JsonContainerConfigLoader {
     Map<String, Object> values = new HashMap<String, Object>(json.length(), 1);
     for (String key : JSONObject.getNames(json)) {
       Object val = jsonToConfig(json.opt(key));
-      if (val != null) {
-        values.put(key, val);
-      }
+      values.put(key, val);
     }
     return Collections.unmodifiableMap(values);
   }
@@ -269,13 +267,11 @@ public class JsonContainerConfigLoader {
       @SuppressWarnings("unchecked")
       List<String> names = (List<String>) container.get(ContainerConfig.CONTAINER_KEY);
       if (names != null && names.contains(ContainerConfig.DEFAULT_CONTAINER)) {
-        container = ImmutableMap
-            .<String, Object>builder()
-            .putAll(container)
-            .put(SERVER_PORT, port)
-            .put(SERVER_HOST, host)
-            .build();
-        config.set(i, container);
+        Map<String, Object> newContainer = Maps.newHashMap();
+        newContainer.putAll(container);
+        newContainer.put(SERVER_PORT, port);
+        newContainer.put(SERVER_HOST, host);
+        config.set(i, Collections.unmodifiableMap(newContainer));
       }
     }
   }
