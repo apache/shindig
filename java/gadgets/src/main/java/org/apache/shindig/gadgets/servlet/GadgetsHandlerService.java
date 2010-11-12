@@ -188,9 +188,10 @@ public class GadgetsHandlerService {
     verifyBaseParams(request, false);
     Set<String> fields = beanFilter.processBeanFields(request.getFields());
 
-    RenderingContext context =
+    RenderingContext context = (RenderingContext)
         (request.getContext() != null ?
-            (RenderingContext) beanDelegator.convertEnum(request.getContext())
+            // TODO: Figure out why maven complain about casting and clean the dummy cast
+            (Object) beanDelegator.convertEnum(request.getContext())
             : RenderingContext.GADGET);
     JsUri jsUri = new JsUri(request.getRefresh(), request.getDebug(), request.getIgnoreCache(),
         request.getContainer(), request.getGadget(), request.getFeatures(), request.getOnload(),
