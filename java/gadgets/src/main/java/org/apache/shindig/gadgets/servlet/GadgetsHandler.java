@@ -27,7 +27,9 @@ import com.google.inject.Inject;
 import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.Uri.UriException;
+import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.process.ProcessingException;
+import org.apache.shindig.gadgets.servlet.GadgetsHandlerApi.RenderingContext;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.protocol.BaseRequestItem;
 import org.apache.shindig.protocol.Operation;
@@ -47,6 +49,9 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import javax.servlet.http.HttpServletResponse;
 
 /**
@@ -62,6 +67,8 @@ public class GadgetsHandler {
   static final String FAILURE_TOKEN = "Failed to get gadget token.";
   @VisibleForTesting
   static final String FAILURE_PROXY = "Failed to get proxy data.";
+  @VisibleForTesting
+  static final String FAILURE_JS = "Failed to get js data.";
 
   private static final List<String> DEFAULT_METADATA_FIELDS =
       ImmutableList.of("iframeUrl", "userPrefs.*", "modulePrefs.*", "views.*");
@@ -70,6 +77,9 @@ public class GadgetsHandler {
 
   private static final List<String> DEFAULT_PROXY_FIELDS = ImmutableList.of("proxyUrl");
 
+  private static final List<String> DEFAULT_JS_FIELDS = ImmutableList.of("jsUrl");
+
+  private static final Logger LOG = Logger.getLogger(GadgetsHandler.class.getName());
 
   protected final ExecutorService executor;
   protected final GadgetsHandlerService handlerService;
@@ -111,6 +121,24 @@ public class GadgetsHandler {
     }.execute(request);
   }
 
+  @Operation(httpMethods = {"POST", "GET"}, path = "js")
+  public GadgetsHandlerApi.BaseResponse js(BaseRequestItem request)
+      throws ProtocolException {
+    // No need for threading since it is one request
+    GadgetsHandlerApi.BaseResponse response;
+    try {
+      JsRequestData jsRequest = new JsRequestData(request);
+      response = handlerService.getJs(jsRequest);
+    } catch (ProcessingException e) {
+      response = handlerService.createErrorResponse(null, e.getHttpStatusCode(), e.getMessage());
+    } catch (Exception e) {
+      LOG.log(Level.INFO, "Error fetching JS", e);
+      response = handlerService.createErrorResponse(null, HttpResponse.SC_INTERNAL_SERVER_ERROR,
+          FAILURE_JS);
+    }
+    return response;
+  }
+
   @Operation(httpMethods = {"POST", "GET"}, path = "proxy")
   public Map<String, GadgetsHandlerApi.BaseResponse> proxy(BaseRequestItem request)
       throws ProtocolException {
@@ -133,6 +161,12 @@ public class GadgetsHandler {
   public Set<String> tokenSupportedFields(RequestItem request) {
     return ImmutableSet.copyOf(
         beanFilter.getBeanFields(GadgetsHandlerApi.TokenResponse.class, 5));
+  }
+
+  @Operation(httpMethods = "GET", path = "/@js.supportedFields")
+  public Set<String> jsSupportedFields(RequestItem request) {
+    return ImmutableSet.copyOf(
+        beanFilter.getBeanFields(GadgetsHandlerApi.JsResponse.class, 5));
   }
 
   @Operation(httpMethods = "GET", path = "/@proxy.supportedFields")
@@ -267,7 +301,7 @@ public class GadgetsHandler {
     public AbstractRequest(String url, BaseRequestItem request, List<String> defaultFields)
         throws ProcessingException {
       try {
-        this.uri = Uri.parse(url);
+        this.uri = (url != null ? Uri.parse(url) : null);
       } catch (UriException e) {
         throw new ProcessingException("Bad url - " + url, HttpServletResponse.SC_BAD_REQUEST);
       }
@@ -315,6 +349,36 @@ public class GadgetsHandler {
       List<String> value = request.getListParameter(BaseRequestItem.FIELDS);
       return ((value == null || value.size() == 0) ? defaultList : value);
     }
+  }
+
+  protected class JsRequestData extends AbstractRequest implements GadgetsHandlerApi.JsRequest {
+    private final Integer refresh;
+    private final boolean debug;
+    private final boolean ignoreCache;
+    private final List<String> features;
+    private final RenderingContext context;
+    private final String onload;
+    private final String gadget;
+
+    public JsRequestData(BaseRequestItem request) throws ProcessingException {
+      super(null, request, DEFAULT_JS_FIELDS);
+      this.ignoreCache = getBooleanParam(request, "ignoreCache");
+      this.debug = getBooleanParam(request, "debug");
+      this.refresh = getIntegerParam(request, "refresh");
+      this.features = request.getListParameter("features");
+      this.context = (getBooleanParam(request, "c") ?
+          RenderingContext.CONTAINER : RenderingContext.GADGET);
+      this.onload = request.getParameter("onload");
+      this.gadget = request.getParameter("gadget");
+    }
+
+    public RenderingContext getContext() { return context; }
+    public boolean getDebug() { return debug; }
+    public List<String> getFeatures() { return features; }
+    public boolean getIgnoreCache() { return ignoreCache; }
+    public String getOnload() { return onload; }
+    public Integer getRefresh() { return refresh; }
+    public String getGadget() { return gadget; }
   }
 
   protected class ProxyRequestData extends AbstractRequest

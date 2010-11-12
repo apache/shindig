@@ -19,6 +19,7 @@
 package org.apache.shindig.gadgets.servlet;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
@@ -29,6 +30,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.auth.SecurityTokenCodec;
 import org.apache.shindig.auth.SecurityTokenException;
+import org.apache.shindig.common.servlet.HttpUtil;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.util.TimeSource;
 import org.apache.shindig.gadgets.Gadget;
@@ -48,6 +50,7 @@ import org.apache.shindig.gadgets.spec.UserPref.EnumValuePair;
 import org.apache.shindig.gadgets.uri.IframeUriManager;
 import org.apache.shindig.gadgets.uri.JsUriManager;
 import org.apache.shindig.gadgets.uri.ProxyUriManager;
+import org.apache.shindig.gadgets.uri.JsUriManager.JsUri;
 import org.apache.shindig.gadgets.uri.ProxyUriManager.ProxyUri;
 import org.apache.shindig.protocol.conversion.BeanDelegator;
 import org.apache.shindig.protocol.conversion.BeanFilter;
@@ -86,6 +89,7 @@ public class GadgetsHandlerService {
           // Enums
           .put(View.ContentType.class, GadgetsHandlerApi.ViewContentType.class)
           .put(UserPref.DataType.class, GadgetsHandlerApi.UserPrefDataType.class)
+          .put(GadgetsHandlerApi.RenderingContext.class, RenderingContext.class)
           .build();
 
   // Provide mapping for internal enums to api enums
@@ -98,6 +102,8 @@ public class GadgetsHandlerService {
           // UserPref.DataType mapping
           .putAll(BeanDelegator.createDefaultEnumMap(UserPref.DataType.class,
               GadgetsHandlerApi.UserPrefDataType.class))
+          .putAll(BeanDelegator.createDefaultEnumMap(GadgetsHandlerApi.RenderingContext.class,
+              RenderingContext.class))
           .build();
 
   protected final TimeSource timeSource;
@@ -106,6 +112,7 @@ public class GadgetsHandlerService {
   protected final SecurityTokenCodec securityTokenCodec;
   protected final ProxyUriManager proxyUriManager;
   protected final JsUriManager jsUriManager;
+  protected final JsHandler jsHandler;
   protected final ProxyHandler proxyHandler;
   protected final BeanDelegator beanDelegator;
   protected final long specRefreshInterval;
@@ -115,6 +122,7 @@ public class GadgetsHandlerService {
   public GadgetsHandlerService(TimeSource timeSource, Processor processor,
       IframeUriManager iframeUriManager, SecurityTokenCodec securityTokenCodec,
       ProxyUriManager proxyUriManager, JsUriManager jsUriManager, ProxyHandler proxyHandler,
+      JsHandler jsHandler,
       @Named("shindig.cache.xml.refreshInterval") long specRefreshInterval,
       BeanFilter beanFilter) {
     this.timeSource = timeSource;
@@ -124,6 +132,7 @@ public class GadgetsHandlerService {
     this.proxyUriManager = proxyUriManager;
     this.jsUriManager = jsUriManager;
     this.proxyHandler = proxyHandler;
+    this.jsHandler = jsHandler;
     this.specRefreshInterval = specRefreshInterval;
     this.beanFilter = beanFilter;
 
@@ -138,15 +147,7 @@ public class GadgetsHandlerService {
    */
   public GadgetsHandlerApi.MetadataResponse getMetadata(GadgetsHandlerApi.MetadataRequest request)
       throws ProcessingException {
-    if (request.getUrl() == null) {
-      throw new ProcessingException("Missing url paramater", HttpResponse.SC_BAD_REQUEST);
-    }
-    if (request.getContainer() == null) {
-      throw new ProcessingException("Missing container paramater", HttpResponse.SC_BAD_REQUEST);
-    }
-    if (request.getFields() == null) {
-      throw new ProcessingException("Missing fields paramater", HttpResponse.SC_BAD_REQUEST);
-    }
+    verifyBaseParams(request, true);
     Set<String> fields = beanFilter.processBeanFields(request.getFields());
 
     GadgetContext context = new MetadataGadgetContext(request);
@@ -172,15 +173,7 @@ public class GadgetsHandlerService {
    */
   public GadgetsHandlerApi.TokenResponse getToken(GadgetsHandlerApi.TokenRequest request)
       throws SecurityTokenException, ProcessingException {
-    if (request.getUrl() == null) {
-      throw new ProcessingException("Missing url paramater", HttpResponse.SC_BAD_REQUEST);
-    }
-    if (request.getContainer() == null) {
-      throw new ProcessingException("Missing container paramater", HttpResponse.SC_BAD_REQUEST);
-    }
-    if (request.getFields() == null) {
-      throw new ProcessingException("Missing fields paramater", HttpResponse.SC_BAD_REQUEST);
-    }
+    verifyBaseParams(request, true);
     Set<String> fields = beanFilter.processBeanFields(request.getFields());
 
     SecurityToken tokenData = convertToken(request.getToken(), request.getContainer(),
@@ -190,17 +183,41 @@ public class GadgetsHandlerService {
     return createTokenResponse(request.getUrl(), token, fields, expiryTimeMs);
   }
 
+  public GadgetsHandlerApi.JsResponse getJs(GadgetsHandlerApi.JsRequest request)
+      throws ProcessingException {
+    verifyBaseParams(request, false);
+    Set<String> fields = beanFilter.processBeanFields(request.getFields());
+
+    RenderingContext context =
+        (request.getContext() != null ?
+            (RenderingContext) beanDelegator.convertEnum(request.getContext())
+            : RenderingContext.GADGET);
+    JsUri jsUri = new JsUri(request.getRefresh(), request.getDebug(), request.getIgnoreCache(),
+        request.getContainer(), request.getGadget(), request.getFeatures(), request.getOnload(),
+        false, context);
+
+    Uri servedUri = jsUriManager.makeExternJsUri(jsUri);
+
+    String content = null;
+    Long expireMs = null;
+    if (isFieldIncluded(fields, "content")) {
+      JsHandler.Response response = jsHandler.getJsContent(jsUri, servedUri.getAuthority());
+      content = response.getJsData().toString();
+      if (content.length() == 0) {
+        // No content, meaning no such feature
+        throw new ProcessingException("Feature(s) " + Joiner.on(",").join(jsUri.getLibs())
+            + " not found", HttpResponse.SC_NOT_FOUND);
+      }
+      if (response.isProxyCacheable()) {
+        expireMs = timeSource.currentTimeMillis() + (HttpUtil.getDefaultTtl() * 1000);
+      }
+    }
+    return createJsResponse(request.getUrl(), servedUri, content, fields, expireMs);
+  }
+
   public GadgetsHandlerApi.ProxyResponse getProxy(GadgetsHandlerApi.ProxyRequest request)
       throws ProcessingException {
-    if (request.getContainer() == null) {
-      throw new ProcessingException("Missing container paramater", HttpResponse.SC_BAD_REQUEST);
-    }
-    if (request.getUrl() == null) {
-      throw new ProcessingException("Missing proxy url paramater", HttpResponse.SC_BAD_REQUEST);
-    }
-    if (request.getFields() == null) {
-      throw new ProcessingException("Missing fields paramater", HttpResponse.SC_BAD_REQUEST);
-    }
+    verifyBaseParams(request, true);
     Set<String> fields = beanFilter.processBeanFields(request.getFields());
 
     ProxyUri proxyUri = createProxyUri(request);
@@ -228,6 +245,22 @@ public class GadgetsHandlerService {
       LOG.log(Level.WARNING, "Error creating proxy response", e);
       throw new ProcessingException("Error getting response content",
           HttpResponse.SC_INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  /**
+   * Verify request parameter are defined.
+   */
+  protected void verifyBaseParams(GadgetsHandlerApi.BaseRequest request, boolean checkUrl)
+      throws ProcessingException {
+    if (checkUrl && request.getUrl() == null) {
+      throw new ProcessingException("Missing url paramater", HttpResponse.SC_BAD_REQUEST);
+    }
+    if (request.getContainer() == null) {
+      throw new ProcessingException("Missing container paramater", HttpResponse.SC_BAD_REQUEST);
+    }
+    if (request.getFields() == null) {
+      throw new ProcessingException("Missing fields paramater", HttpResponse.SC_BAD_REQUEST);
     }
   }
 
@@ -352,13 +385,28 @@ public class GadgetsHandlerService {
   GadgetsHandlerApi.TokenResponse createTokenResponse(
       Uri url, String token, Set<String> fields, Long tokenExpire) {
     return (GadgetsHandlerApi.TokenResponse) beanFilter.createFilteredBean(
-        beanDelegator.createDelegator("empty", GadgetsHandlerApi.TokenResponse.class,
+        beanDelegator.createDelegator(null, GadgetsHandlerApi.TokenResponse.class,
             ImmutableMap.<String, Object>of(
                 "url", url,
                 "error", BeanDelegator.NULL,
                 "token", BeanDelegator.nullable(token),
                 "responsetimems", timeSource.currentTimeMillis(),
                 "expiretimems", BeanDelegator.nullable(tokenExpire))),
+        fields);
+  }
+
+  @VisibleForTesting
+  GadgetsHandlerApi.JsResponse createJsResponse(
+      Uri url, Uri jsUri, String content, Set<String> fields, Long expireMs) {
+    return (GadgetsHandlerApi.JsResponse) beanFilter.createFilteredBean(
+        beanDelegator.createDelegator(null, GadgetsHandlerApi.JsResponse.class,
+            ImmutableMap.<String, Object>builder()
+                .put("url", BeanDelegator.nullable(url))
+                .put("error", BeanDelegator.NULL)
+                .put("jsurl", jsUri)
+                .put("jscontent", BeanDelegator.nullable(content))
+                .put("responsetimems", timeSource.currentTimeMillis())
+                .put("expiretimems", BeanDelegator.nullable(expireMs)).build()),
         fields);
   }
 

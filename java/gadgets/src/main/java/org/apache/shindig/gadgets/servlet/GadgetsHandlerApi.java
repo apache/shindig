@@ -212,11 +212,21 @@ public class GadgetsHandlerApi {
   }
 
   public interface JsRequest extends BaseRequest {
+    public String getGadget();
+    public Integer getRefresh();
+    public boolean getDebug();
+    public boolean getIgnoreCache();
     public List<String> getFeatures();
-    public boolean getForContainer();
+    public String getOnload();
+    public RenderingContext getContext();
+  }
+
+  public enum RenderingContext {
+    GADGET, CONTAINER
   }
 
   public interface JsResponse extends BaseResponse {
     public Uri getJsUrl();
+    public String getJsContent();
   }
 }

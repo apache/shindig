@@ -32,11 +32,13 @@ import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.common.testing.TestExecutorService;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.util.FakeTimeSource;
+import org.apache.shindig.gadgets.RenderingContext;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.process.ProcessingException;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.uri.JsUriManager;
 import org.apache.shindig.gadgets.uri.ProxyUriManager;
+import org.apache.shindig.gadgets.uri.JsUriManager.JsUri;
 import org.apache.shindig.gadgets.uri.ProxyUriManager.ProxyUri;
 import org.apache.shindig.protocol.DefaultHandlerRegistry;
 import org.apache.shindig.protocol.HandlerExecutionListener;
@@ -74,6 +76,7 @@ public class GadgetsHandlerTest extends EasyMockTestCase {
   private final ProxyUriManager proxyUriManager = mock(ProxyUriManager.class);
   private final JsUriManager jsUriManager = mock(JsUriManager.class);
   private final ProxyHandler proxyHandler = mock(ProxyHandler.class);
+  private final JsHandler jsHandler = mock(JsHandler.class);
 
   private Injector injector;
   private BeanJsonConverter converter;
@@ -91,7 +94,7 @@ public class GadgetsHandlerTest extends EasyMockTestCase {
   private void registerGadgetsHandler(SecurityTokenCodec codec) {
     BeanFilter beanFilter = new BeanFilter();
     GadgetsHandlerService service = new GadgetsHandlerService(timeSource, processor,
-        urlGenerator, codec, proxyUriManager, jsUriManager, proxyHandler,
+        urlGenerator, codec, proxyUriManager, jsUriManager, proxyHandler, jsHandler,
         SPEC_REFRESH_INTERVAL, beanFilter);
     GadgetsHandler handler =
         new GadgetsHandler(new TestExecutorService(), service, beanFilter);
@@ -378,6 +381,109 @@ public class GadgetsHandlerTest extends EasyMockTestCase {
     ProxyUri expectedUri = new ProxyUri(null, false, false, CONTAINER, null, Uri.parse(resUri));
     assertTrue(expectedUri.equals(pUri));
     assertFalse(gadget1.has("error"));
+    verify();
+  }
+
+  private JSONObject makeSimpleJsRequest(String fields, List<String> features)
+      throws JSONException {
+    JSONObject params = new JSONObject().put("gadget", GADGET1_URL)
+        .put("container", CONTAINER).put("features", features);
+    if (fields != null) {
+      params.put("fields", fields);
+    }
+    JSONObject req =
+        new JSONObject().put("method", "gadgets.js").put("id", "req1").put("params", params);
+    return req;
+  }
+
+  @Test
+  public void testJsSimple() throws Exception {
+    registerGadgetsHandler(null);
+    List<String> features = ImmutableList.of("rpc","io");
+    Uri jsUri = Uri.parse("http://shindig.com/gadgets/js/rpc:io");
+    JSONObject request = makeSimpleJsRequest(null, features);
+    Capture<JsUri> captureUri = new Capture<JsUri>();
+    EasyMock.expect(jsUriManager.makeExternJsUri(EasyMock.capture(captureUri)))
+        .andReturn(jsUri);
+    replay();
+
+    RpcHandler operation = registry.getRpcHandler(request);
+    Object responseObj = operation.execute(emptyFormItems, token, converter).get();
+    JSONObject results = new JSONObject(converter.convertToString(responseObj));
+    assertEquals(jsUri.toString(), results.getString("jsUrl"));
+    JsUri expectedUri = new JsUri(null, false, false, CONTAINER, GADGET1_URL,
+        features, null, false, RenderingContext.GADGET);
+    assertEquals(expectedUri, captureUri.getValue());
+    assertFalse(results.has("error"));
+    assertFalse(results.has("jsContent"));
+    verify();
+  }
+
+  private JSONObject makeComplexJsRequest(List<String> features, String onload)
+      throws JSONException {
+    JSONObject params = new JSONObject().put("gadget", GADGET1_URL)
+        .put("container", CONTAINER).put("features", features)
+        .put("fields", "*").put("refresh", "123").put("debug", "1")
+        .put("ignoreCache", "1").put("onload",onload)
+        .put("c", "1");
+    JSONObject request =
+        new JSONObject().put("method", "gadgets.js").put("id", "req1").put("params", params);
+    return request;
+  }
+
+  @Test
+  public void testJsData() throws Exception {
+    registerGadgetsHandler(null);
+    List<String> features = ImmutableList.of("rpc","io");
+    Uri jsUri = Uri.parse("http://shindig.com/gadgets/js/rpc:io");
+    String onload = "do \"this\";";
+
+    JSONObject request = makeComplexJsRequest(features, onload);
+
+    Capture<JsUri> captureUri = new Capture<JsUri>();
+    EasyMock.expect(jsUriManager.makeExternJsUri(EasyMock.capture(captureUri)))
+        .andReturn(jsUri);
+    String jsContent = "var b=\"123\";";
+    EasyMock.expect(jsHandler.getJsContent(
+        EasyMock.isA(JsUri.class), EasyMock.eq(jsUri.getAuthority())))
+        .andReturn(new JsHandler.Response(new StringBuilder(jsContent), true));
+    replay();
+
+    RpcHandler operation = registry.getRpcHandler(request);
+    Object responseObj = operation.execute(emptyFormItems, token, converter).get();
+    JSONObject results = new JSONObject(converter.convertToString(responseObj));
+    assertEquals(jsUri.toString(), results.getString("jsUrl"));
+    JsUri expectedUri = new JsUri(123, true, true, CONTAINER, GADGET1_URL,
+        features, onload, false, RenderingContext.CONTAINER);
+    assertEquals(expectedUri, captureUri.getValue());
+    assertFalse(results.has("error"));
+    assertEquals(jsContent, results.getString("jsContent"));
+    verify();
+  }
+
+  @Test
+  public void testJsFailure() throws Exception {
+    registerGadgetsHandler(null);
+    List<String> features = ImmutableList.of("rpc2");
+    Uri jsUri = Uri.parse("http://shindig.com/gadgets/js/rpc:io");
+    String onload = "do \"this\";";
+
+    JSONObject request = makeComplexJsRequest(features, onload);
+
+    Capture<JsUri> captureUri = new Capture<JsUri>();
+    EasyMock.expect(jsUriManager.makeExternJsUri(EasyMock.capture(captureUri)))
+        .andReturn(jsUri);
+    EasyMock.expect(jsHandler.getJsContent(
+        EasyMock.isA(JsUri.class), EasyMock.eq(jsUri.getAuthority())))
+        .andReturn(new JsHandler.Response(new StringBuilder(""), true));
+    replay();
+
+    RpcHandler operation = registry.getRpcHandler(request);
+    Object responseObj = operation.execute(emptyFormItems, token, converter).get();
+    JSONObject results = new JSONObject(converter.convertToString(responseObj));
+    assertFalse(results.has("jsUrl"));
+    assertEquals(HttpResponse.SC_NOT_FOUND, results.getJSONObject("error").getInt("code"));
+    assertTrue(results.getJSONObject("error").getString("message").contains("not found"));
     verify();
   }
 
