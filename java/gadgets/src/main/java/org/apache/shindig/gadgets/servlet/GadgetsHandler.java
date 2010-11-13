@@ -434,7 +434,7 @@ public class GadgetsHandler {
       return fallbackUrl;
     }
 
-    public boolean getIgnoreCahce() {
+    public boolean getIgnoreCache() {
       return ignoreCache;
     }
 

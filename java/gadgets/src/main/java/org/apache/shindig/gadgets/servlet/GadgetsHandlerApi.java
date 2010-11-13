@@ -179,7 +179,7 @@ public class GadgetsHandlerApi {
     public String getGadget();
     public Integer getRefresh();
     public boolean getDebug();
-    public boolean getIgnoreCahce();
+    public boolean getIgnoreCache();
     public String getFallbackUrl();
     public String getRewriteMimeType();
     public boolean getSanitize();

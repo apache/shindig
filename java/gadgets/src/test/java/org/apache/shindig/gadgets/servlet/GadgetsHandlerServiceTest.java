@@ -344,7 +344,7 @@ public class GadgetsHandlerServiceTest extends EasyMockTestCase {
     expect(request.getDebug()).andStubReturn(true);
     expect(request.getFallbackUrl()).andStubReturn(FALLBACK);
     expect(request.getGadget()).andStubReturn(FakeProcessor.SPEC_URL.toString());
-    expect(request.getIgnoreCahce()).andStubReturn(true);
+    expect(request.getIgnoreCache()).andStubReturn(true);
     expect(request.getImageParams()).andStubReturn(image);
     expect(request.getRewriteMimeType()).andStubReturn("image/png");
     expect(request.getSanitize()).andStubReturn(true);

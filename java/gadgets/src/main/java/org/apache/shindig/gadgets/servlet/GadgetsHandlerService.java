@@ -414,7 +414,7 @@ public class GadgetsHandlerService {
   @VisibleForTesting
   ProxyUri createProxyUri(GadgetsHandlerApi.ProxyRequest request) {
     ProxyUriManager.ProxyUri proxyUri = new ProxyUriManager.ProxyUri(request.getRefresh(),
-        request.getDebug(), request.getIgnoreCahce(), request.getContainer(),
+        request.getDebug(), request.getIgnoreCache(), request.getContainer(),
         request.getGadget(), request.getUrl());
 
     proxyUri.setFallbackUrl(request.getFallbackUrl())
