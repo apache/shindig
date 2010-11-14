@@ -72,6 +72,9 @@ public class AbsolutePathReferenceVisitor implements Visitor {
   // Map of tag name -> attribute type describing uris to make absolute.
   private final Map<String, String> tagsToMakeAbsolute;
 
+  // The base Uri used to absolutify relative uris in the document being visited.
+  private Uri baseUri;
+
   @Inject
   public AbsolutePathReferenceVisitor(Tags... resourceTags) {
     Map<String, String> tagsToMakeAbsolute = new HashMap<String, String>();
@@ -151,9 +154,12 @@ public class AbsolutePathReferenceVisitor implements Visitor {
    * @return The uri to resolve non absolute uri's relative to.
    */
   private Uri getBaseResolutionUri(Gadget gadget, Node node) {
-    Uri pageUri = gadget.getSpec().getUrl();
-    Uri baseUri = getBaseUri(node.getOwnerDocument());
-    return baseUri != null ? baseUri : pageUri;
+    if (baseUri == null) {
+      Uri pageUri = gadget.getSpec().getUrl();
+      Uri baseTagUri = getBaseUri(node.getOwnerDocument());
+      baseUri = baseTagUri != null ? baseTagUri : pageUri;
+    }
+    return baseUri;
   }
 
   /**

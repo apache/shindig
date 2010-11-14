@@ -18,7 +18,13 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
+import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
+
+import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.gadgets.Gadget;
+
+import java.util.List;
 
 /**
  * Rewriter that converts all url's to absolute.
@@ -27,7 +33,11 @@ import com.google.inject.Inject;
  */
 public class AbsolutePathReferenceRewriter extends DomWalker.Rewriter {
   @Inject
-  public AbsolutePathReferenceRewriter() {
-    super(new AbsolutePathReferenceVisitor(AbsolutePathReferenceVisitor.Tags.RESOURCES));
+  public AbsolutePathReferenceRewriter() {}
+
+  @Override
+  protected List<DomWalker.Visitor> makeVisitors(Gadget context, Uri gadgetUri) {
+    return ImmutableList.<DomWalker.Visitor>of(
+        new AbsolutePathReferenceVisitor(AbsolutePathReferenceVisitor.Tags.RESOURCES));
   }
 }
