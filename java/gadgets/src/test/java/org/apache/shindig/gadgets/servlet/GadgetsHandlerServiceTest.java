@@ -303,7 +303,7 @@ public class GadgetsHandlerServiceTest extends EasyMockTestCase {
 
   @Test
   public void testGetJsData() throws Exception {
-    List<String> fields = ImmutableList.of("*");
+    List<String> fields = ImmutableList.of("jscontent");
     List<String> features = ImmutableList.of("rpc");
     Uri resUri = Uri.parse("http://server.com/gadgets/js/rpc");
     Capture<JsUri> uriCapture = new Capture<JsUri>();
@@ -322,12 +322,13 @@ public class GadgetsHandlerServiceTest extends EasyMockTestCase {
     JsUri expectedUri = new JsUri(null, false, false, CONTAINER, FakeProcessor.SPEC_URL.toString(),
         features, onload, false, RenderingContext.CONTAINER);
     assertEquals(expectedUri, uriCapture.getValue());
-    assertEquals(resUri, response.getJsUrl());
+    assertNull(response.getJsUrl());
     assertEquals(jsContent, response.getJsContent());
     assertEquals(timeSource.currentTimeMillis() + HttpUtil.getDefaultTtl() * 1000,
         response.getExpireTimeMs().longValue());
     verify();
   }
+
   @Test
   public void testCreateProxyUri() throws Exception {
     GadgetsHandlerApi.ImageParams image = mock(GadgetsHandlerApi.ImageParams.class);

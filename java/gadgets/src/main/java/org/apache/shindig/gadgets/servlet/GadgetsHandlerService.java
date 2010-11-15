@@ -201,7 +201,7 @@ public class GadgetsHandlerService {
 
     String content = null;
     Long expireMs = null;
-    if (isFieldIncluded(fields, "content")) {
+    if (isFieldIncluded(fields, "jsContent")) {
       JsHandler.Response response = jsHandler.getJsContent(jsUri, servedUri.getAuthority());
       content = response.getJsData().toString();
       if (content.length() == 0) {
