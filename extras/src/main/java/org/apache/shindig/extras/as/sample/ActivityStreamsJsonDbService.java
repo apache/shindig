@@ -164,7 +164,6 @@ public class ActivityStreamsJsonDbService implements ActivityStreamService {
       CollectionOptions options, SecurityToken token)
       throws ProtocolException {
       List<ActivityEntry> result = Lists.newArrayList();
-      
     try {
       Set<String> idSet = jsonDb.getIdSet(userIds, groupId, token);
       for (String id : idSet) {
@@ -188,18 +187,25 @@ public class ActivityStreamsJsonDbService implements ActivityStreamService {
       UserId userId, GroupId groupId, String appId, Set<String> fields,
       CollectionOptions options, Set<String> activityIds, SecurityToken token)
       throws ProtocolException {
-    List<ActivityEntry> result = Lists.newArrayList();
+    List<ActivityEntry> result = Lists.newArrayList();    
     try {
       String user = userId.getUserId(token);
       if (db.getJSONObject(ACTIVITYSTREAMS_TABLE).has(user)) {
         JSONArray activityEntries = db.getJSONObject(ACTIVITYSTREAMS_TABLE).getJSONArray(user);
-        for (int i = 0; i < activityEntries.length(); i++) {
-          JSONObject activityEntry = activityEntries.getJSONObject(i);
-          JSONObject actor = new JSONObject(activityEntry.get(ActivityEntry.Field.ACTOR.toString()));
-          String actorId = actor.get(ActivityObject.Field.ID.toString()).toString();
-          if (actorId.equals(user)
-            && activityIds.contains(activityEntry.getJSONObject(ActivityEntry.Field.OBJECT.toString()).getString(ActivityObject.Field.ID.toString()).toString())) {
-            result.add(jsonDb.filterFields(activityEntry, fields, ActivityEntry.class));
+        for(String activityId : activityIds) {
+          boolean found = false;
+          for (int i = 0; i < activityEntries.length(); i++) {
+            JSONObject activityEntry = activityEntries.getJSONObject(i);
+            String actorId = activityEntry.getJSONObject(ActivityEntry.Field.ACTOR.toString()).getString(ActivityObject.Field.ID.toString());
+            String objectId = activityEntry.getJSONObject(ActivityEntry.Field.OBJECT.toString()).getString(ActivityObject.Field.ID.toString());
+            if (actorId.equals(user) && objectId.equals(activityId)) {
+              result.add(jsonDb.filterFields(activityEntry, fields, ActivityEntry.class));
+              found = true;
+              break;
+            }
+          }
+          if (!found) {
+            throw new ProtocolException(HttpServletResponse.SC_NOT_FOUND, "ActivityEntry not found: " + activityId);
           }
         }
       }
