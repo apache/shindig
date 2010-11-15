@@ -131,36 +131,6 @@ shindig.container.Container.prototype.newGadgetSite = function(
 
 
 /**
- * @param {string} id Iframe ID of gadget site to get.
- * @return {shindig.container.GadgetSite} The gadget site with the given id.
- */
-shindig.container.Container.prototype.getGadgetSite = function(id) {
-  // TODO: Support getting only the loading/active gadget in 2x buffers.
-  for (var siteId in this.sites_) {
-    var site = this.sites_[siteId];
-    if (site.getGadgetHolder(id)) {
-      return site;
-    }
-  }
-  return null;
-};
-
-
-/**
- * @param {string} id Iframe ID of gadget holder to get.
- * @return {shindig.container.GadgetHolder} The gadget holder with iframe id.
- */
-shindig.container.Container.prototype.getGadgetHolder = function(id) {
-  var site = this.getGadgetSite(id);
-  if (site) {
-    return site.getGadgetHolder(id);
-  } else {
-    return null;
-  }
-};
-
-
-/**
  * Called when gadget is navigated.
  *
  * @param {shindig.container.GadgetSite} site destination gadget to navigate to.
@@ -272,7 +242,8 @@ shindig.container.Container.prototype.rpcRegister = function(service, callback) 
   var self = this;
   gadgets.rpc.register(service, function() {
     // this['f'] is set by calling iframe via gadgets.rpc.
-    this[shindig.container.GadgetSite.RPC_ARG_KEY] = self.getGadgetSite(this['f']);
+    this[shindig.container.GadgetSite.RPC_ARG_KEY] =
+        self.getGadgetSiteByIframeId_(this['f']);
     var argsCopy = [this];
     for (var i = 0; i < arguments.length; ++i) {
       argsCopy.push(arguments[i]);
@@ -393,6 +364,24 @@ shindig.container.ContainerRender.WIDTH = 'width';
 
 
 /**
+ * @param {string} id Iframe ID of gadget holder contained in the gadget site to get.
+ * @return {shindig.container.GadgetSite} The gadget site.
+ * @private
+ */
+shindig.container.Container.prototype.getGadgetSiteByIframeId_ = function(iframeId) {
+  // TODO: Support getting only the loading/active gadget in 2x buffers.
+  for (var siteId in this.sites_) {
+    var site = this.sites_[siteId];
+    var holder = site.getActiveGadgetHolder();
+    if (holder && holder.getIframeId() === iframeId) {
+      return site;
+    }
+  }
+  return null;
+};
+
+
+/**
  * Start to schedule refreshing of tokens.
  * @private
  */
@@ -483,8 +472,8 @@ shindig.container.Container.prototype.getTokenRefreshableGadgetUrls_ =
   }
 
   // Collect active gadget urls.
-  for (var siteIndex in this.sites_) {
-    var holder = this.sites_[siteIndex].getActiveGadgetHolder();
+  for (var siteId in this.sites_) {
+    var holder = this.sites_[siteId].getActiveGadgetHolder();
     var url = holder.getUrl();
     var metadata = this.service_.getCachedGadgetMetadata(url);
     if (metadata[shindig.container.MetadataResponse.NEEDS_TOKEN_REFRESH]) {
@@ -510,8 +499,8 @@ shindig.container.Container.prototype.refreshTokens_ = function() {
     // Update active token-requiring gadgets with new tokens. Do not need to
     // update pre-loaded gadgets, since new tokens will take effect when they
     // are navigated to, from cache.
-    for (var key in self.sites_) {
-      var holder = self.sites_[key].getActiveGadgetHolder();
+    for (var siteId in self.sites_) {
+      var holder = self.sites_[siteId].getActiveGadgetHolder();
       var gadgetInfo = self.service_.getCachedGadgetMetadata(holder.getUrl());
       if (gadgetInfo[shindig.container.MetadataResponse.NEEDS_TOKEN_REFRESH]) {
         var tokenInfo = response[holder.getUrl()];

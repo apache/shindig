@@ -44,28 +44,28 @@ shindig.container.GadgetHolder = function(siteId, el) {
 
   /**
    * JSON metadata for gadget
-   * @type {Object?}
+   * @type {Object}
    * @private
    */
   this.gadgetInfo_ = null;
 
   /**
    * View parameters to pass to gadget.
-   * @type {Object?}
+   * @type {Object}
    * @private
    */
   this.viewParams_ = null;
 
   /**
    * Gadget rendering parameters
-   * @type {Object?}
+   * @type {Object}
    * @private
    */
   this.renderParams_ = null;
 
   /**
    * Unique string gadget ID. Used for DOM IDs/names.
-   * @type {string?}
+   * @type {string}
    * @private
    */
   this.iframeId_ = null;
@@ -74,7 +74,7 @@ shindig.container.GadgetHolder = function(siteId, el) {
    * A dynamically set social/security token.
    * Social tokens are sent with original view URLs but may need
    * to be refreshed for long lived gadgets.
-   * @type {string?}
+   * @type {string}
    * @private
    */
   this.securityToken_ = null;
@@ -99,7 +99,7 @@ shindig.container.GadgetHolder.prototype.getElement = function() {
 
 
 /**
- * @return {?string} The unique string ID for gadget iframe.
+ * @return {string} The unique string ID for gadget iframe.
  */
 shindig.container.GadgetHolder.prototype.getIframeId = function() {
   return this.iframeId_;
@@ -107,7 +107,7 @@ shindig.container.GadgetHolder.prototype.getIframeId = function() {
 
 
 /**
- * @return {?Object} The metadata of gadget.
+ * @return {Object} The metadata of gadget.
  */
 shindig.container.GadgetHolder.prototype.getGadgetInfo = function() {
   return this.gadgetInfo_;
@@ -123,7 +123,7 @@ shindig.container.GadgetHolder.prototype.dispose = function() {
 
 
 /**
- * @return {?string} The URL of current gadget.
+ * @return {string} The URL of current gadget.
  */
 shindig.container.GadgetHolder.prototype.getUrl = function() {
   return (this.gadgetInfo_) ? this.gadgetInfo_['url'] : null;
@@ -131,7 +131,7 @@ shindig.container.GadgetHolder.prototype.getUrl = function() {
 
 
 /**
- * @return {?string} The view of current gadget.
+ * @return {string} The view of current gadget.
  */
 shindig.container.GadgetHolder.prototype.getView = function() {
   return this.renderParams_[shindig.container.RenderParam.VIEW];
@@ -169,24 +169,12 @@ shindig.container.GadgetHolder.prototype.render = function(
   this.gadgetInfo_ = gadgetInfo;
   this.viewParams_ = viewParams;
   this.renderParams_ = renderParams;
-  this.el_.innerHTML = this.getIframeHtml_();
   
   if (this.hasFeature_(gadgetInfo, 'pubsub-2')) {
-    this.doOAAIframeHtml_();
+    this.doOaaIframeHtml_();
   } else {
-    this.el_.innerHTML = this.getIframeHtml_();
+    this.doNormalIframeHtml_();
   }
-
-  // Set up RPC channel. RPC relay url is on gmodules, relative to base of the
-  // container. Assumes container has set up forwarding to gmodules at /gadgets.
-  var iframeUri = shindig.uri(
-      this.gadgetInfo_[shindig.container.MetadataResponse.IFRAME_URL]);
-  var relayUri = shindig.uri()
-      .setSchema(iframeUri.getSchema())
-      .setAuthority(iframeUri.getAuthority())
-      .setPath('/gadgets/files/container/rpc_relay.html');
-  gadgets.rpc.setupReceiver(this.iframeId_, relayUri.toString(),
-      iframeUri.getFP('rpctoken'));
 };
 
 
@@ -206,7 +194,26 @@ shindig.container.GadgetHolder.IFRAME_ID_PREFIX_ = '__gadget_';
 /**
  * @private
  */
-shindig.container.GadgetHolder.prototype.doOAAIframeHtml_ = function() {
+shindig.container.GadgetHolder.prototype.doNormalIframeHtml_ = function() {
+  this.el_.innerHTML = this.getIframeHtml_();
+  
+  // Set up RPC channel. RPC relay url is on gmodules, relative to base of the
+  // container. Assumes container has set up forwarding to gmodules at /gadgets.
+  var iframeUri = shindig.uri(
+      this.gadgetInfo_[shindig.container.MetadataResponse.IFRAME_URL]);
+  var relayUri = shindig.uri()
+      .setSchema(iframeUri.getSchema())
+      .setAuthority(iframeUri.getAuthority())
+      .setPath('/gadgets/files/container/rpc_relay.html');
+  gadgets.rpc.setupReceiver(this.iframeId_, relayUri.toString(),
+      iframeUri.getFP('rpctoken'));
+};
+
+
+/**
+ * @private
+ */
+shindig.container.GadgetHolder.prototype.doOaaIframeHtml_ = function() {
   var iframeAttrs = {
       frameborder: 'no',
       scrolling: 'no'
@@ -221,7 +228,7 @@ shindig.container.GadgetHolder.prototype.doOAAIframeHtml_ = function() {
             source.getIframe().src = 'about:blank';
           },
           onConnect: function(container) {
-            gadgets.log("++ connected: " + container.getClientID());
+            gadgets.log(['connected: ', container.getClientID()].join(''));
           }
         },
         IframeContainer: {

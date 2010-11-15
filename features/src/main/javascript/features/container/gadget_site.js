@@ -173,22 +173,6 @@ shindig.container.GadgetSite.prototype.getFeature = function(name, opt_gadgetInf
 
 
 /**
- * Returns the loading or visible gadget with the given ID.
- * @param {string} id The iframe ID of gadget to return.
- * @return {shindig.container.GadgetHolder?} The gadget. Null, if not exist.
- */
-shindig.container.GadgetSite.prototype.getGadgetHolder = function(id) {
-  if (this.currentGadgetHolder_ && this.currentGadgetHolder_.getIframeId() == id) {
-    return this.currentGadgetHolder_;
-  }
-  if (this.loadingGadgetHolder_ && this.loadingGadgetHolder_.getIframeId() == id) {
-    return this.loadingGadgetHolder_;
-  }
-  return null;
-};
-
-
-/**
  * @return {string?} ID parent element containing this site.
  */
 shindig.container.GadgetSite.prototype.getParentId = function() {
