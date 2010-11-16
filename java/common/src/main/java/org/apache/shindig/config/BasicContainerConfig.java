@@ -291,9 +291,10 @@ public class BasicContainerConfig implements ContainerConfig {
       // Clone the object with the parent values
       Map<String, Object> clone = Maps.newHashMap(parentValues);
       // Walk parameter list for the container and merge recursively.
-      for (String field : container.keySet()) {
+      for (Map.Entry<String, Object> entry : container.entrySet()) {
+        String field = entry.getKey();
         Object fromParents = clone.get(field);
-        Object fromContainer = container.get(field);
+        Object fromContainer = entry.getValue();
         // Merge if object type is Map
         if (fromContainer instanceof Map<?, ?> && fromParents instanceof Map<?, ?>) {
           clone.put(field, mergeObjects(
