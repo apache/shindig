@@ -365,15 +365,15 @@
 			"link": "http://www.myobject.com",
 			"objectType": "article",
 			"media": {
-				"url": 'http://myvideos.com/raftingtrip/raftingvideo.avi',
-				"type": 'http://activitystrea.ms/schema/1.0/video',
-				"width": '400',
-				"height": '300',
-				"duration": '93'
+				"url": "http://myvideos.com/raftingtrip/raftingvideo.avi",
+				"type": "http://activitystrea.ms/schema/1.0/video",
+				"width": "400",
+				"height": "300",
+				"duration": "93"
 			},
 			"actionLinks": [{
-				"target": 'http://myvideos.com/raftingvideo',
-				"caption": 'Went white water rafting in the great lakes - ga hah!'
+				"target": "http://myvideos.com/raftingvideo",
+				"caption": "Went white water rafting in the great lakes - ga hah!"
 			}]
 		}
 	}]
