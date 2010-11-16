@@ -45,7 +45,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.FutureTask;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.io.IOException;
@@ -79,7 +78,7 @@ public class ImageAttributeRewriter extends DomWalker.Rewriter {
 
     public VisitStatus visit(Gadget gadget, Node node) throws RewritingException {
       if (node.getNodeType() == Node.ELEMENT_NODE &&
-          node.getNodeName().toLowerCase().equals("img")) {
+          node.getNodeName().equalsIgnoreCase("img")) {
         Element imageElement = (Element) node;
 
         // we process the <img> tag when it does not have 'class' and 'id'

@@ -19,8 +19,6 @@
 package org.apache.shindig.gadgets.http;
 
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 
 import org.apache.shindig.common.uri.Uri;
