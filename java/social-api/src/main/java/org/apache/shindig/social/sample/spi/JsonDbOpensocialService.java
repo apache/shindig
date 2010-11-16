@@ -992,7 +992,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
       throws ProtocolException {
     try {
       // First ensure user has a table
-      String user = userId.getUserId((token));
+      String user = userId.getUserId(token);
       if (db.getJSONObject(MEDIAITEMS_TABLE).has(user)) {
         // Retrieve user's MediaItems
         JSONArray userMediaItems = db.getJSONObject(MEDIAITEMS_TABLE).getJSONArray(user);
