@@ -74,12 +74,9 @@ public class UrlParameterAuthenticationHandler implements AuthenticationHandler 
 
   protected Map<String, String> getMappedParameters(final HttpServletRequest request) {
     Map<String, String> params = Maps.newHashMap();
-    String token = null;
 
     // old style security token
-    if (token == null) {
-      token = request.getParameter(SECURITY_TOKEN_PARAM);
-    }
+    String token = request.getParameter(SECURITY_TOKEN_PARAM);
 
     // OAuth2 token as a param
     // NOTE: if oauth_signature_method is present then we have a OAuth 1.0 request
