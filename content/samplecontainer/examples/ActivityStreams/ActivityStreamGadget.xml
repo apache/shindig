@@ -76,10 +76,6 @@
 				htmlCreateActivityEntry += "<td><input type='text' size=50 id='activityEntryBody'></td>"
 				htmlCreateActivityEntry += "</tr>";
 				htmlCreateActivityEntry += "<tr>";
-				htmlCreateActivityEntry += "<td>Standard Link</td>";
-				htmlCreateActivityEntry += "<td><input type='text' size=50 id='activityEntryStandardLink'></td>"
-				htmlCreateActivityEntry += "</tr>";
-				htmlCreateActivityEntry += "<tr>";
 				htmlCreateActivityEntry += "<td>Object Name</td>";
 				htmlCreateActivityEntry += "<td><input type='text' size=50 id='activityObjectName'></td>"
 				htmlCreateActivityEntry += "</tr>";
@@ -88,17 +84,17 @@
 				htmlCreateActivityEntry += "<td><input type='text' size=50 id='activityObjectSummary'></td>"
 				htmlCreateActivityEntry += "</tr>";
 				htmlCreateActivityEntry += "<tr>";
-				htmlCreateActivityEntry += "<td>Object Image URL</td>";
-				htmlCreateActivityEntry += "<td><input type='text' size=50 id='activityObjectImage'></td>"
-				htmlCreateActivityEntry += "<tr>";
 				htmlCreateActivityEntry += "<td>Object Permalink</td>";
 				htmlCreateActivityEntry += "<td><input type='text' size=50 id='activityObjectPermalink'></td>"
 				htmlCreateActivityEntry += "</tr>";
 				htmlCreateActivityEntry += "</table>";
 				htmlCreateActivityEntry += "<table>";
+				htmlCreateActivityEntry += "<tr style='color:blue'>";
+				htmlCreateActivityEntry += "<td colspan='2'> Note: Per the ActivityStreams specification, only a single verb and object type are now supported.</td>";
+				htmlCreateActivityEntry += "</tr>";
 				htmlCreateActivityEntry += "<tr>";
 				htmlCreateActivityEntry += "<td>Verbs</td>";
-				htmlCreateActivityEntry += "<td>Objects Types</td>";
+				htmlCreateActivityEntry += "<td>Object Types</td>";
 				htmlCreateActivityEntry += "</tr>";
 				htmlCreateActivityEntry += "<tr>";
 				htmlCreateActivityEntry += "<td><select MULTIPLE id='selectVerbs' size=10>";
@@ -166,13 +162,11 @@
 				
 				var title = blankToNull(document.getElementById('activityEntryTitle').value);
 				var body = blankToNull(document.getElementById('activityEntryBody').value)
-				var standardLink = blankToNull(document.getElementById('activityEntryStandardLink').value);
 				var objectName = blankToNull(document.getElementById('activityObjectName').value);
 				var objectSummary = blankToNull(document.getElementById('activityObjectSummary').value);
-				var objectImage = blankToNull(document.getElementById('activityObjectImage').value);
 				var objectPermalink = blankToNull(document.getElementById('activityObjectPermalink').value);
-				social.postActivityEntry(title, body, standardLink, selVerbs, viewer.id, viewer.name.formatted,
-												objectName, objectSummary, objectImage, objectPermalink, selTypes,
+				social.postActivityEntry(title, body, selVerbs[0], viewer.id, viewer.name.formatted,
+												objectName, objectSummary, objectPermalink, selTypes[0],
 												function(response) {
 					render.renderActivityEntries('activityEntries', refresh);
 				});

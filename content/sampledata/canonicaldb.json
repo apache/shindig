@@ -351,21 +351,30 @@
 },
 "activityEntries" : {
 	"john.doe": [{
-		"id": "myEntryId123",
-		"link": "http://www.myactivityentry.com",
-		"postedTime": "2010-04-27T06:02:36+0000",
 		"title": "This is my ActivityEntry!",
 		"body": "ActivityStreams are so much fun!",
+		"postedTime": "2010-04-27T06:02:36+0000",
 		"actor": {
 			"id": "john.doe",
 			"displayName": "John Doe"
 		},
-		"verb": ["play", "post"],
+		"verb": "post",
 		"object": {
-				"id": "myObjectId123",
-				"displayName": "My Object",
-				"permalink": "http://www.myobject.com",
-				"objectType": ["article"]
+			"id": "myObjectId123",
+			"displayName": "My Object",
+			"link": "http://www.myobject.com",
+			"objectType": "article",
+			"media": {
+				"url": 'http://myvideos.com/raftingtrip/raftingvideo.avi',
+				"type": 'http://activitystrea.ms/schema/1.0/video',
+				"width": '400',
+				"height": '300',
+				"duration": '93'
+			},
+			"actionLinks": [{
+				"target": 'http://myvideos.com/raftingvideo',
+				"caption": 'Went white water rafting in the great lakes - ga hah!'
+			}]
 		}
 	}]
 },

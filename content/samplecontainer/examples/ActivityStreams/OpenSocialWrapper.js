@@ -93,13 +93,12 @@ function OpenSocialWrapper() {
 		osapi.activitystreams.get(params).execute(callback);
 	}
 	
-	this.postActivityEntry = function(title, body, standardLink, verbs, actorId, actorName, objectName, objectSummary,
-									  objectImage, objectPermalink, objectTypes, callback) { 
+	this.postActivityEntry = function(title, body, verb, actorId, actorName, objectName, objectSummary,
+									  objectPermalink, objectType, callback) { 
 		var params = {
 			userId: '@viewer',
 			groupId: '@self',
 			activityEntry: {
-				standardLink: [standardLink],
 				postedTime: '2010-04-27T06:02:36+0000',
 				title: title,
 				body: body,
@@ -107,23 +106,13 @@ function OpenSocialWrapper() {
 					id: actorId,
 					displayName: actorName
 				},
-				verb: verbs,
+				verb: verb,
 				object: {
 					id: 'entryId123',
 					displayName: objectName,
 					link: objectPermalink,
-					type: objectTypes,
-					media: {
-						target: 'http://myvideos.com/raftingtrip/raftingvideo.avi',
-						type: 'http://activitystrea.ms/schema/1.0/video',
-						width: '400',
-						height: '300',
-						duration: '93'
-					},
-					action: {
-						target: 'http://myvideos.com/raftingvideo',
-						caption: 'Went white water rafting in the great lakes - ga hah!'
-					}
+					objectType: objectType,
+					summary: objectSummary
 				}
 			}
 		}
