@@ -726,7 +726,7 @@ if (!gadgets.rpc) { // make lib resilient to double-inclusion
      *
      * @member gadgets.rpc
      */
-      register: function(serviceName, handler) {
+      'register': function(serviceName, handler) {
         if (serviceName === CALLBACK_NAME || serviceName === ACK) {
           throw new Error('Cannot overwrite callback/ack service');
         }
@@ -745,7 +745,7 @@ if (!gadgets.rpc) { // make lib resilient to double-inclusion
      *
      * @member gadgets.rpc
      */
-      unregister: function(serviceName) {
+      'unregister': function(serviceName) {
         if (serviceName === CALLBACK_NAME || serviceName === ACK) {
           throw new Error('Cannot delete callback/ack service');
         }
@@ -975,7 +975,7 @@ if (!gadgets.rpc) { // make lib resilient to double-inclusion
      * Internal-only method used to initialize gadgets.rpc.
      * @member gadgets.rpc
      */
-      init: function() {
+      'init': function() {
         // Conduct any global setup necessary for the chosen transport.
         // Do so after gadgets.rpc definition to allow transport to access
         // gadgets.rpc methods.
