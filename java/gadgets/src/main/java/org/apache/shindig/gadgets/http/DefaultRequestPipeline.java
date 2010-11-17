@@ -20,18 +20,17 @@ package org.apache.shindig.gadgets.http;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
-
-// Temporary replacement of javax.annotation.Nullable
-import org.apache.shindig.common.Nullable;
-
 import com.google.inject.name.Named;
 
+import org.apache.shindig.common.Nullable;
 import org.apache.shindig.common.servlet.HttpUtil;
 import org.apache.shindig.common.util.DateUtil;
 import org.apache.shindig.common.util.Utf8UrlCoder;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.oauth.OAuthRequest;
+import org.apache.shindig.gadgets.rewrite.ResponseRewriterList.RewriteFlow;
 import org.apache.shindig.gadgets.rewrite.ResponseRewriterRegistry;
+import org.apache.shindig.gadgets.rewrite.RewriterRegistry;
 import org.apache.shindig.gadgets.rewrite.RewritingException;
 
 import java.util.Collection;
@@ -61,7 +60,7 @@ public class DefaultRequestPipeline implements RequestPipeline {
   public DefaultRequestPipeline(HttpFetcher httpFetcher,
                                 HttpCache httpCache,
                                 Provider<OAuthRequest> oauthRequestProvider,
-                                @Named("shindig.rewriters.response.pre-cache")
+                                @RewriterRegistry(rewriteFlow = RewriteFlow.REQUEST_PIPELINE)
                                 ResponseRewriterRegistry responseRewriterRegistry,
                                 InvalidationService invalidationService,
                                 @Nullable HttpResponseMetadataHelper metadataHelper) {

@@ -31,7 +31,9 @@ import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.http.RequestPipeline;
 import org.apache.shindig.gadgets.rewrite.DomWalker;
+import org.apache.shindig.gadgets.rewrite.ResponseRewriterList.RewriteFlow;
 import org.apache.shindig.gadgets.rewrite.ResponseRewriterRegistry;
+import org.apache.shindig.gadgets.rewrite.RewriterRegistry;
 import org.apache.shindig.gadgets.rewrite.RewritingException;
 import org.apache.shindig.gadgets.uri.AccelUriManager;
 import org.apache.shindig.gadgets.uri.ProxyUriManager;
@@ -57,7 +59,7 @@ public class AccelHandler {
 
   @Inject
   public AccelHandler(RequestPipeline requestPipeline,
-                      @Named("shindig.accelerate.response.rewriter.registry")
+                      @RewriterRegistry(rewriteFlow = RewriteFlow.ACCELERATE)
                       ResponseRewriterRegistry contentRewriterRegistry,
                       AccelUriManager accelUriManager,
                       @Named("shindig.accelerate.remapInternalServerError")

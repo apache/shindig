@@ -36,6 +36,7 @@ public interface ResponseRewriterRegistry {
    * @param req Request object for context.
    * @param resp Original response object.
    * @return Rewritten response object, or resp if not modified.
+   * @throws RewritingException In case of errors.
    */
   HttpResponse rewriteHttpResponse(HttpRequest req, HttpResponse resp)
     throws RewritingException;

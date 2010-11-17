@@ -21,15 +21,18 @@ package org.apache.shindig.gadgets.servlet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
-import org.apache.commons.lang.StringUtils;
+
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.http.RequestPipeline;
+import org.apache.shindig.gadgets.rewrite.ResponseRewriterList.RewriteFlow;
 import org.apache.shindig.gadgets.rewrite.ResponseRewriterRegistry;
+import org.apache.shindig.gadgets.rewrite.RewriterRegistry;
 import org.apache.shindig.gadgets.rewrite.RewritingException;
 import org.apache.shindig.gadgets.uri.ProxyUriManager;
 import org.apache.shindig.gadgets.uri.UriUtils;
@@ -52,6 +55,7 @@ public class ProxyHandler {
 
   @Inject
   public ProxyHandler(RequestPipeline requestPipeline,
+                      @RewriterRegistry(rewriteFlow = RewriteFlow.DEFAULT)
                       ResponseRewriterRegistry contentRewriterRegistry,
                       @Named("shindig.proxy.remapInternalServerError")
                       Boolean remapInternalServerError) {

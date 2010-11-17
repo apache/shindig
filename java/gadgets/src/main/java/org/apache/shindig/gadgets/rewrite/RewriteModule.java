@@ -18,39 +18,117 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
-import java.util.List;
-import java.util.Set;
+import com.google.common.collect.ImmutableList;
+import com.google.inject.AbstractModule;
+import com.google.inject.Key;
+import com.google.inject.Provider;
+import com.google.inject.Provides;
+import com.google.inject.Singleton;
+import com.google.inject.TypeLiteral;
+import com.google.inject.multibindings.MapBinder;
+import com.google.inject.multibindings.Multibinder;
+import com.google.inject.name.Named;
+import com.google.inject.name.Names;
 
+import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
 import org.apache.shindig.gadgets.render.CajaResponseRewriter;
 import org.apache.shindig.gadgets.render.OpenSocialI18NGadgetRewriter;
 import org.apache.shindig.gadgets.render.RenderingGadgetRewriter;
 import org.apache.shindig.gadgets.render.SanitizingGadgetRewriter;
 import org.apache.shindig.gadgets.render.SanitizingResponseRewriter;
+import org.apache.shindig.gadgets.rewrite.ResponseRewriterList.RewriteFlow;
 import org.apache.shindig.gadgets.rewrite.image.BasicImageRewriter;
 import org.apache.shindig.gadgets.servlet.CajaContentRewriter;
+import org.apache.shindig.gadgets.uri.AccelUriManager;
 
-import com.google.common.collect.ImmutableList;
-import com.google.inject.AbstractModule;
-import com.google.inject.Provides;
-import com.google.inject.Singleton;
-import com.google.inject.multibindings.Multibinder;
-import com.google.inject.name.Named;
-import com.google.inject.name.Names;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Guice bindings for the rewrite package.
  */
 public class RewriteModule extends AbstractModule {
+  public static final String ACCEL_CONTAINER = AccelUriManager.CONTAINER;
+  public static final String DEFAULT_CONTAINER = ContainerConfig.DEFAULT_CONTAINER;
+
+  // Mapbinder for the map from
+  // RewritePath -> [ List of response rewriters ].
+  private MapBinder<RewritePath, List<ResponseRewriter>> mapbinder;
 
   @Override
   protected void configure() {
-    bind(ResponseRewriterRegistry.class)
-        .annotatedWith(Names.named("shindig.accelerate.response.rewriter.registry"))
-        .to(AccelResponseRewriterRegistry.class);
-
     configureRewriters();
+    provideResponseRewriters();
+  }
 
+  protected void provideResponseRewriters() {
+    mapbinder = MapBinder.newMapBinder(binder(), new TypeLiteral<RewritePath>(){},
+                                       new TypeLiteral<List<ResponseRewriter>>() {});
+
+    Provider<List<ResponseRewriter>> accelRewriterList = getResponseRewriters(
+        ACCEL_CONTAINER, RewriteFlow.ACCELERATE);
+    Provider<List<ResponseRewriter>> requestPipelineRewriterList = getResponseRewriters(
+        DEFAULT_CONTAINER, RewriteFlow.REQUEST_PIPELINE);
+
+    addBindingForRewritePath(DEFAULT_CONTAINER, RewriteFlow.REQUEST_PIPELINE);
+    addBindingForRewritePath(DEFAULT_CONTAINER, RewriteFlow.DEFAULT);
+    addBindingForRewritePath(ACCEL_CONTAINER, RewriteFlow.ACCELERATE);
+    addBindingForRewritePath(ACCEL_CONTAINER, RewriteFlow.REQUEST_PIPELINE,
+                             requestPipelineRewriterList);
+    addBindingForRewritePath(ACCEL_CONTAINER, RewriteFlow.DEFAULT, accelRewriterList);
+  }
+
+  protected void addBindingForRewritePath(String container, RewriteFlow rewriteFlow,
+                                          Provider<List<ResponseRewriter>> list) {
+    RewritePath rewritePath = new RewritePath(container, rewriteFlow);
+    mapbinder.addBinding(rewritePath).toProvider(list);
+  }
+
+  void addBindingForRewritePath(String container, RewriteFlow rewriteFlow) {
+    addBindingForRewritePath(container, rewriteFlow, binder().getProvider(
+        getKey(container, rewriteFlow)));
+  }
+
+  Provider<List<ResponseRewriter>> getResponseRewriters(String container, RewriteFlow flow) {
+    return binder().getProvider(getKey(container, flow));
+  }
+
+  Key<List<ResponseRewriter>> getKey(String container, RewriteFlow flow) {
+    return Key.get(new TypeLiteral<List<ResponseRewriter>>() {},
+                   new RewritePath(container, flow));
+  }
+
+
+  // Provides ResponseRewriterRegistry for DEFAULT flow.
+  @Provides
+  @Singleton
+  @RewriterRegistry(rewriteFlow = RewriteFlow.DEFAULT)
+  public ResponseRewriterRegistry provideDefaultList(GadgetHtmlParser parser,
+      Provider<Map<RewritePath, Provider<List<ResponseRewriter>>>> rewritePathToRewriterList) {
+    return new ContextAwareRegistry(parser, RewriteFlow.DEFAULT,
+                                    rewritePathToRewriterList);
+  }
+
+  // Provides ResponseRewriterRegistry for REQUEST_PIPELINE flow.
+  @Provides
+  @Singleton
+  @RewriterRegistry(rewriteFlow = RewriteFlow.REQUEST_PIPELINE)
+  public ResponseRewriterRegistry provideRequestPipelineList(GadgetHtmlParser parser,
+      Provider<Map<RewritePath, Provider<List<ResponseRewriter>>>> rewritePathToRewriterList) {
+    return new ContextAwareRegistry(parser, RewriteFlow.REQUEST_PIPELINE,
+                                    rewritePathToRewriterList);
+  }
+
+  // Provides ResponseRewriterRegistry for ACCELERATE flow.
+  @Provides
+  @Singleton
+  @RewriterRegistry(rewriteFlow = RewriteFlow.ACCELERATE)
+  public ResponseRewriterRegistry provideAccelerateList(GadgetHtmlParser parser,
+      Provider<Map<RewritePath, Provider<List<ResponseRewriter>>>> rewritePathToRewriterList) {
+    return new ContextAwareRegistry(parser, RewriteFlow.ACCELERATE,
+                                    rewritePathToRewriterList);
   }
 
   private void configureRewriters() {
@@ -86,28 +164,20 @@ public class RewriteModule extends AbstractModule {
     return ImmutableList.of(proxyingContentRewriter, cajaRewriter);
   }
 
-  // TODO: Clean this up. Ideally we would let the ResponseRewriterRegistry
-  // binding create the concrete object instance.
+  // Provides the list of rewriters to be applied for REQUEST_PIPELINE flow.
   @Provides
   @Singleton
-  @Named("shindig.rewriters.response.pre-cache")
-  protected ResponseRewriterRegistry providePreCacheResponseRewritersRegistry(
-      GadgetHtmlParser parser,
-      @Named("shindig.rewriters.response.pre-cache") List<ResponseRewriter> preCached) {
-    return new DefaultResponseRewriterRegistry(preCached, parser);
-  }
-
-  @Provides
-  @Singleton
-  @Named("shindig.rewriters.response.pre-cache")
+  @ResponseRewriterList(rewriteFlow = RewriteFlow.REQUEST_PIPELINE)
   protected List<ResponseRewriter> providePreCacheResponseRewriters(
       BasicImageRewriter imageRewriter) {
     return ImmutableList.<ResponseRewriter>of(imageRewriter);
   }
 
+  // Provides the list of rewriters to be applied for DEFAULT flow.
   @Provides
   @Singleton
-  protected List<ResponseRewriter> provideResponseRewriters(
+  @ResponseRewriterList(rewriteFlow = RewriteFlow.DEFAULT)
+  protected List<ResponseRewriter> provideDefaultRewriters(
       AbsolutePathReferenceRewriter absolutePathRewriter,
       StyleTagExtractorContentRewriter styleTagExtractorRewriter,
       StyleAdjacencyContentRewriter styleAdjacencyRewriter,
@@ -120,9 +190,12 @@ public class RewriteModule extends AbstractModule {
         cssRewriter, sanitizedRewriter, cajaRewriter);
   }
 
+  // Provides the list of rewriters to be applied for ACCELERATE flow for
+  // accel container.
   @Provides
   @Singleton
-  @Named("shindig.accelerate.response.rewriters")
+  @ResponseRewriterList(rewriteFlow = RewriteFlow.ACCELERATE,
+                        container = AccelUriManager.CONTAINER)
   protected List<ResponseRewriter> provideAccelResponseRewriters(
       AbsolutePathReferenceRewriter absolutePathReferenceRewriter,
       StyleTagProxyEmbeddedUrlsRewriter styleTagProxyEmbeddedUrlsRewriter,

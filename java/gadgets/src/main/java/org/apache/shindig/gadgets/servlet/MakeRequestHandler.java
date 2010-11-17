@@ -39,7 +39,9 @@ import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.RequestPipeline;
 import org.apache.shindig.gadgets.oauth.OAuthArguments;
+import org.apache.shindig.gadgets.rewrite.ResponseRewriterList.RewriteFlow;
 import org.apache.shindig.gadgets.rewrite.ResponseRewriterRegistry;
+import org.apache.shindig.gadgets.rewrite.RewriterRegistry;
 import org.apache.shindig.gadgets.rewrite.RewritingException;
 import org.apache.shindig.gadgets.uri.UriCommon;
 import org.apache.shindig.gadgets.uri.UriCommon.Param;
@@ -77,6 +79,7 @@ public class MakeRequestHandler {
 
   @Inject
   public MakeRequestHandler(RequestPipeline requestPipeline,
+      @RewriterRegistry(rewriteFlow = RewriteFlow.DEFAULT)
       ResponseRewriterRegistry contentRewriterRegistry,
       Provider<FeedProcessor> feedProcessorProvider) {
     this.requestPipeline = requestPipeline;
