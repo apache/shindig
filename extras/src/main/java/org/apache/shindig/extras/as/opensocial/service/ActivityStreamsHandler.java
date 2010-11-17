@@ -180,6 +180,6 @@ public class ActivityStreamsHandler {
     // TODO: Would be nice if name in config matched name of service.
     String container = Objects.firstNonNull(request.getToken().getContainer(), ContainerConfig.DEFAULT_CONTAINER);
     return config.getList(container,
-        "${Cur['gadgets.features'].opensocial.supportedFields.activitystream}");
+        "${Cur['gadgets.features'].opensocial.supportedFields.activityEntry}");
   }
 }
