@@ -255,6 +255,35 @@ public class PipelinedDataTest {
     assertEquals(PipelinedData.BatchType.SOCIAL, batchItem.getType());
     JsonAssert.assertObjectEquals(expected, batchItem.getData());
   }
+  
+  @Test
+  public void testActivityStreamsRequest() throws Exception {
+    String xml = "<Content><ActivityStreamsRequest xmlns=\"" + PipelinedData.OPENSOCIAL_NAMESPACE + "\" "
+        + " key=\"key\""
+        + " userId=\"@owner,@viewer\""
+        + " startIndex=\"10\""
+        + " count=\"20\""
+        + " fields=\"foo,bar\""
+        + "/></Content>";
+
+
+    PipelinedData socialData = new PipelinedData(XmlUtil.parse(xml), null);
+    assertTrue(socialData.needsOwner());
+    assertTrue(socialData.needsViewer());
+
+    JSONObject expected = new JSONObject("{method: 'activitystreams.get', id: 'key', params:"
+        + "{userId: ['@owner','@viewer'],"
+        + "startIndex: 10,"
+        + "count: 20,"
+        + "fields: ['foo','bar']"
+        + "}}");
+
+    PipelinedData.Batch batch = socialData.getBatch(expressions, elResolver);
+    assertEquals(1, batch.getPreloads().size());
+    PipelinedData.BatchItem batchItem = batch.getPreloads().get("key");
+    assertEquals(PipelinedData.BatchType.SOCIAL, batchItem.getType());
+    JsonAssert.assertObjectEquals(expected, batchItem.getData());
+  }
 
   @Test
   public void testIgnoreNoNamespace() throws Exception {

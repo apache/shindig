@@ -94,6 +94,8 @@ public class PipelinedData {
             allPreloads.put(key, createPersonAppDataRequest(child));
           } else if ("ActivitiesRequest".equals(elementName)) {
             allPreloads.put(key, createActivityRequest(child));
+          } else if ("ActivityStreamsRequest".equals(elementName)) {
+            allPreloads.put(key, createActivityStreamRequest(child));
           } else if ("DataRequest".equals(elementName)) {
             allPreloads.put(key, createDataRequest(child));
           } else if ("HttpRequest".equals(elementName)) {
@@ -319,6 +321,23 @@ public class PipelinedData {
 
     // TODO: add activity paging support
     
+    return expression;
+  }
+  
+  /** Handle the os:ActivityStreamsRequest element */
+  private SocialData createActivityStreamRequest(Element child) throws ELException {
+    SocialData expression = new SocialData(child.getAttribute("key"), "activitystreams.get");
+
+    copyAttribute("groupId", child, expression, String.class);
+    copyAttribute("userId", child, expression, JSONArray.class);
+    updateUserArrayState("userId", child);
+    copyAttribute("appId", child, expression, String.class);
+    copyAttribute("activityEntryId", child, expression, JSONArray.class);
+    copyAttribute("fields", child, expression, JSONArray.class);
+    copyAttribute("startIndex", child, expression, Integer.class);
+    copyAttribute("count", child, expression, Integer.class);
+
+    // TODO: add activity paging support
     return expression;
   }
 
