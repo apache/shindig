@@ -23,7 +23,7 @@ import java.lang.annotation.Annotation;
 /**
  * Implementation of ResponseRewriterList annotation interface.
  */
-class RewritePath implements ResponseRewriterList {
+public class RewritePath implements ResponseRewriterList {
   protected final String container;
   protected final RewriteFlow rewriteFlow;
 

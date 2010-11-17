@@ -86,16 +86,17 @@ public class RewriteModule extends AbstractModule {
     mapbinder.addBinding(rewritePath).toProvider(list);
   }
 
-  void addBindingForRewritePath(String container, RewriteFlow rewriteFlow) {
+  protected void addBindingForRewritePath(String container, RewriteFlow rewriteFlow) {
     addBindingForRewritePath(container, rewriteFlow, binder().getProvider(
         getKey(container, rewriteFlow)));
   }
 
-  Provider<List<ResponseRewriter>> getResponseRewriters(String container, RewriteFlow flow) {
+  protected Provider<List<ResponseRewriter>> getResponseRewriters(String container,
+                                                                  RewriteFlow flow) {
     return binder().getProvider(getKey(container, flow));
   }
 
-  Key<List<ResponseRewriter>> getKey(String container, RewriteFlow flow) {
+  protected Key<List<ResponseRewriter>> getKey(String container, RewriteFlow flow) {
     return Key.get(new TypeLiteral<List<ResponseRewriter>>() {},
                    new RewritePath(container, flow));
   }
