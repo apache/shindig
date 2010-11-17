@@ -436,10 +436,14 @@ public class GadgetsHandlerService {
 
     GadgetsHandlerApi.HttpResponse beanHttp = null;
     if (httpResponse != null) {
-      // Stream out the base64-encoded data.
-      // Ctor args indicate to encode w/o line breaks.
-      Base64InputStream b64input = new Base64InputStream(httpResponse.getResponse(), true, 0, null);
-      String content = IOUtils.toString(b64input);
+      String content = "";
+      if (httpResponse.getContentLength() > 0) {
+        // Stream out the base64-encoded data.
+        // Ctor args indicate to encode w/o line breaks.
+        Base64InputStream b64input =
+            new Base64InputStream(httpResponse.getResponse(), true, 0, null);
+        content = IOUtils.toString(b64input);
+      }
 
       ImmutableList.Builder<GadgetsHandlerApi.NameValuePair> headersBuilder =
           ImmutableList.builder();

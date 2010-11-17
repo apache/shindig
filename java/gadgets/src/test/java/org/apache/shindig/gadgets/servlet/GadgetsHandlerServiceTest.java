@@ -458,6 +458,27 @@ public class GadgetsHandlerServiceTest extends EasyMockTestCase {
     verify();
   }
 
+  @Test
+  public void testGetProxyEmptyData() throws Exception {
+    List<String> fields = ImmutableList.of("proxycontent.*");
+    Uri resUri = Uri.parse("server.com/gadgets/proxy?url=" + RESOURCE);
+    GadgetsHandlerApi.ProxyRequest request = createProxyRequest(RESOURCE, CONTAINER, fields);
+    Capture<List<ProxyUri>> uriCapture = new Capture<List<ProxyUri>>();
+    expect(proxyUriManager.make(capture(uriCapture), EasyMock.anyInt()))
+        .andReturn(ImmutableList.of(resUri));
+    HttpResponse httpResponse = new HttpResponseBuilder().setHttpStatusCode(504).create();
+    expect(proxyHandler.fetch(EasyMock.isA(ProxyUri.class))).andReturn(httpResponse);
+    replay();
+    GadgetsHandlerApi.ProxyResponse response = gadgetHandler.getProxy(request);
+    assertEquals(1, uriCapture.getValue().size());
+    ProxyUri pUri = uriCapture.getValue().get(0);
+    assertEquals(CONTAINER, pUri.getContainer());
+    assertNull(response.getProxyUrl());
+    assertEquals("", response.getProxyContent().getContentBase64());
+    assertEquals(504, response.getProxyContent().getCode());
+    verify();
+  }
+
   @Test(expected = ProcessingException.class)
   public void testGetProxyDataFail() throws Exception {
     List<String> fields = ImmutableList.of("proxycontent.*");
