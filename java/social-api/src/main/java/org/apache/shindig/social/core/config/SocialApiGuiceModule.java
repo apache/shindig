@@ -73,7 +73,8 @@ public class SocialApiGuiceModule extends AbstractModule {
     bind(new TypeLiteral<List<AuthenticationHandler>>(){}).toProvider(
         AuthenticationHandlerProvider.class);
 
-    Multibinder<Object> handlerBinder = Multibinder.newSetBinder(binder(), Object.class, Names.named("org.apache.shindig.handlers"));
+    Multibinder<Object> handlerBinder = Multibinder.newSetBinder(binder(), Object.class,
+        Names.named("org.apache.shindig.handlers"));
     for (Class handler : getHandlers()) {
       handlerBinder.addBinding().toInstance(handler);
     }

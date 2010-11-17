@@ -107,7 +107,8 @@ public class DataServiceServlet extends ApiServlet {
       return;
     }
 
-    HttpUtil.setCORSheader(servletResponse, containerConfig.<String>getList(token.getContainer(), "gadgets.parentOrigins"));
+    HttpUtil.setCORSheader(servletResponse, containerConfig.<String>getList(token.getContainer(), 
+        "gadgets.parentOrigins"));
 
     BeanConverter converter = getConverterForRequest(servletRequest);
 
@@ -176,7 +177,8 @@ public class DataServiceServlet extends ApiServlet {
       }
 
       // JSONP style callbacks
-      String callback =  (HttpUtil.isJSONP(servletRequest) && ContentTypes.OUTPUT_JSON_CONTENT_TYPE.equals(converter.getContentType())) ?
+      String callback = (HttpUtil.isJSONP(servletRequest) &&
+          ContentTypes.OUTPUT_JSON_CONTENT_TYPE.equals(converter.getContentType())) ?
           servletRequest.getParameter("callback") : null;
 
       if (callback != null) writer.write(callback + '(');
