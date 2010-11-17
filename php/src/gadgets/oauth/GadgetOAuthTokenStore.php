@@ -225,3 +225,4 @@ class GadgetInfo {
     $this->providerInfo = $providerInfo;
   }
 }
+
