@@ -255,7 +255,8 @@ public class BasicContainerConfig implements ContainerConfig {
      *   'base': '/gadgets/foo',
      *   'user': 'anne',
      *   'colour': 'green',
-     *   'map': { 'latitude': 42, 'longitude': 130 } }
+     *   'map': { 'latitude': 42, 'longitude': 130 },
+     *   'data': null }
      *
      * @return The container merged with all parents.
      * @throws ContainerConfigException If there is an invalid parent parameter
@@ -301,11 +302,7 @@ public class BasicContainerConfig implements ContainerConfig {
               (Map<String, Object>) fromParents, (Map<String, Object>) fromContainer));
         } else {
           // Otherwise we just overwrite it.
-          if (fromContainer == null) {
-            clone.remove(field);
-          } else {
-            clone.put(field, fromContainer);
-          }
+          clone.put(field, fromContainer);
         }
       }
       return clone;

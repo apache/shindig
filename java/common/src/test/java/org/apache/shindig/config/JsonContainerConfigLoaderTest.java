@@ -260,9 +260,12 @@ public class JsonContainerConfigLoaderTest {
     // We use JSON Objects here to guarantee that we're well formed up front.
     JSONObject parent = new JSONObject("{ 'gadgets.container' : ['default'], features : { osapi : 'foo' }}");    
     JSONObject child = new JSONObject("{ 'gadgets.container' : ['child'], features : null}");    
+    JSONObject grand = new JSONObject("{ 'gadgets.container' : ['grand'], parent : 'child'}");    
     createConfigForTest(createContainer(parent).getAbsolutePath());
     createConfigForTest(createContainer(child).getAbsolutePath());
+    createConfigForTest(createContainer(grand).getAbsolutePath());
     assertEquals("foo", config.getMap("default", "features").get("osapi"));
     assertNull(config.getProperty("child", "features"));
+    assertNull(config.getProperty("grand", "features"));
   }
 }

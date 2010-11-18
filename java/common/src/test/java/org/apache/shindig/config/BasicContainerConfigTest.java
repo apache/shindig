@@ -136,9 +136,23 @@ public class BasicContainerConfigTest {
         "base", "/gadgets/foo",
         "user", "anne",
         "colour", "green",
-        "map", ImmutableMap.of("latitude", 42, "longitude", 130));
+        "map", ImmutableMap.of("latitude", 42, "longitude", 130),
+        "data", null);
     config.newTransaction().addContainer(defaultContainer).addContainer(newContainer).commit();
     assertEquals(expectedContainer, config.getProperties("new"));
+  }
+  
+  @Test
+  public void testNulledPropertiesRemainNulledAfterSeveralTransactions() throws Exception {
+    Map<String, Object> defaultContainer = makeContainer("default", "o1", "v1", "o2", "v2", "o3", "v3"); 
+    Map<String, Object> parentContainer = makeContainer("parent", "o3", null); 
+    Map<String, Object> childContainer = makeContainer("child", "parent", "parent", "o2", null);
+    config.newTransaction().addContainer(defaultContainer).commit();
+    config.newTransaction().addContainer(parentContainer).commit();
+    config.newTransaction().addContainer(childContainer).commit();
+    assertNull(config.getProperty("child", "o2"));
+    assertNull(config.getProperty("child", "o3"));
+    assertNull(config.getProperty("parent", "o3"));
   }
 
   @Test
