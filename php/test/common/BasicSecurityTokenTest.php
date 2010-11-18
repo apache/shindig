@@ -20,8 +20,6 @@
 
 require_once 'src/common/sample/BasicSecurityToken.php';
 
-require_once 'external/PHPUnit/Framework/TestCase.php';
-
 /**
  * BasicSecurityToken test case.
  */

@@ -20,7 +20,6 @@
 
 require_once 'src/common/sample/BasicRemoteContent.php';
 
-require_once 'external/PHPUnit/Framework/TestCase.php';
 
 class MockSigningFetcherFactory {
   private $keyName;
