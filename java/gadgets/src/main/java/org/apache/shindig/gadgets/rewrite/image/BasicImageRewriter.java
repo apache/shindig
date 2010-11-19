@@ -88,7 +88,7 @@ public class BasicImageRewriter implements ResponseRewriter {
   private static final int DEFAULT_QUALITY = 100;
   private static final int BITS_PER_BYTE = 8;
   private static final Color COLOR_TRANSPARENT = new Color(255, 255, 255, 0);
-  private static final String CONTENT_TYPE = "Content-Type";
+  public static final String CONTENT_TYPE = "Content-Type";
   private static final Logger LOG = Logger.getLogger(BasicImageRewriter.class.getName());
 
   private static final Set<String> SUPPORTED_MIME_TYPES = ImmutableSet.of(
@@ -322,7 +322,7 @@ public class BasicImageRewriter implements ResponseRewriter {
 
       // Step#5: Optimize the supported image formats viz PNG, GIF, JPG & BMP using 'BaseOptimizer'
       // and it's subclass implementations for the above four formats.
-      applyOptimizer(response, imageFormat, image);
+      applyOptimizer(response, imageFormat, image, config);
     } catch (IOException ioe) {
       LOG.log(Level.WARNING, "IO Error rewriting image " + request.toString() + " - " + ioe.getMessage());
     } catch (RuntimeException re) {
@@ -424,8 +424,8 @@ public class BasicImageRewriter implements ResponseRewriter {
     g2d.setComposite(AlphaComposite.SrcOver);
   }
 
-  private void applyOptimizer(HttpResponseBuilder response, ImageFormat imageFormat,
-      BufferedImage image) throws IOException {
+  protected void applyOptimizer(HttpResponseBuilder response, ImageFormat imageFormat,
+      BufferedImage image, OptimizerConfig config) throws IOException {
     if (imageFormat == ImageFormat.IMAGE_FORMAT_GIF) {
       // Detecting the existence of the NETSCAPE2.0 extension by string comparison
       // is not exactly clean but is good enough to determine if a GIF is animated
@@ -460,7 +460,7 @@ public class BasicImageRewriter implements ResponseRewriter {
     return imageSizeBits > config.getMaxInMemoryBytes() * BITS_PER_BYTE;
   }
 
-  private boolean isSupportedContent(HttpResponseBuilder response) {
+  protected boolean isSupportedContent(HttpResponseBuilder response) {
     return SUPPORTED_MIME_TYPES.contains(response.getHeader(CONTENT_TYPE));
   }
 

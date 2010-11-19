@@ -59,21 +59,23 @@ public class JPEGOptimizer extends BaseOptimizer {
 
   @Override
   protected void rewriteImpl(BufferedImage image) throws IOException {
-    // Create a new optimizer config and disable JPEG conversion
-    OptimizerConfig pngConfig = new OptimizerConfig(config.getMaxInMemoryBytes(),
-        config.getMaxPaletteSize(), false, config.getJpegCompression(),
-        config.getMinThresholdBytes(), config.getJpegHuffmanOptimization());
-
-    // Output the image as PNG
-    PNGOptimizer pngOptimizer = new PNGOptimizer(pngConfig, response);
-    pngOptimizer.rewriteImpl(image);
-
     int pngLength = Integer.MAX_VALUE;
-    if (pngOptimizer.getRewrittenImage()  != null) {
-      // PNG was better than original so use it
-      minBytes = pngOptimizer.getRewrittenImage();
-      minLength = minBytes.length;
-      pngLength = minLength;
+    if (config.isJpegConversionAllowed()) {
+      // Create a new optimizer config and disable JPEG conversion
+      OptimizerConfig pngConfig = new OptimizerConfig(config.getMaxInMemoryBytes(),
+          config.getMaxPaletteSize(), false, config.getJpegCompression(),
+          config.getMinThresholdBytes(), config.getJpegHuffmanOptimization());
+
+      // Output the image as PNG
+      PNGOptimizer pngOptimizer = new PNGOptimizer(pngConfig, response);
+      pngOptimizer.rewriteImpl(image);
+      
+      if (pngOptimizer.getRewrittenImage()  != null) {
+        // PNG was better than original so use it
+        minBytes = pngOptimizer.getRewrittenImage();
+        minLength = minBytes.length;
+        pngLength = minLength;
+      }
     }
 
     // Write as standard JPEG using the configured default compression level

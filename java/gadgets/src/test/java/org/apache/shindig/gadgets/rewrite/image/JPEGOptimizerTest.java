@@ -39,6 +39,15 @@ public class JPEGOptimizerTest extends BaseOptimizerTest {
   }
 
   @Test
+  public void testSmallJPEGIsNotConvertedToPNGWithJpegConversionDisabled() throws Exception {
+    HttpResponse resp =
+        createResponse("org/apache/shindig/gadgets/rewrite/image/small.jpg", "image/jpeg");
+    HttpResponse rewritten = rewrite(resp, getDefaultConfigWithJpegConversionDisabled());
+    assertEquals("image/jpeg", rewritten.getHeader("Content-Type"));
+    assertTrue(rewritten.getContentLength() <= resp.getContentLength());
+  }
+
+  @Test
   public void testLargeJPEG() throws Exception {
     HttpResponse resp =
         createResponse("org/apache/shindig/gadgets/rewrite/image/large.jpg", "image/jpeg");
@@ -99,11 +108,23 @@ public class JPEGOptimizerTest extends BaseOptimizerTest {
     rewrite(resp);
   }
 
-  HttpResponse rewrite(HttpResponse original)
+  HttpResponse rewrite(HttpResponse original) throws Exception {
+    return rewrite(original, new OptimizerConfig());
+  }
+
+  HttpResponse rewrite(HttpResponse original, OptimizerConfig config)
       throws IOException, ImageReadException {
     HttpResponseBuilder builder = new HttpResponseBuilder(original);
-    new JPEGOptimizer(new OptimizerConfig(), builder).rewrite(
+    new JPEGOptimizer(config, builder).rewrite(
         JPEGOptimizer.readJpeg(original.getResponse()));
     return builder.create();
+  }
+
+  OptimizerConfig getDefaultConfigWithJpegConversionDisabled() {
+    OptimizerConfig defaultConfig = new OptimizerConfig();
+    return new OptimizerConfig(defaultConfig.getMaxInMemoryBytes(),
+    defaultConfig.getMaxPaletteSize(), false,
+    defaultConfig.getJpegCompression(), defaultConfig.getMinThresholdBytes(),
+    defaultConfig.getJpegHuffmanOptimization());
   }
 }
