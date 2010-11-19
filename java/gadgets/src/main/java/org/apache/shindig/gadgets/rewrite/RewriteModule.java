@@ -55,7 +55,7 @@ public class RewriteModule extends AbstractModule {
 
   // Mapbinder for the map from
   // RewritePath -> [ List of response rewriters ].
-  private MapBinder<RewritePath, List<ResponseRewriter>> mapbinder;
+  protected MapBinder<RewritePath, List<ResponseRewriter>> mapbinder;
 
   @Override
   protected void configure() {
