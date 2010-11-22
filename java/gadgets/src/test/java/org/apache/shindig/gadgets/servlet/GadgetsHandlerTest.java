@@ -151,6 +151,21 @@ public class GadgetsHandlerTest extends EasyMockTestCase {
   }
 
   @Test
+  public void testGetRenderingType() throws Exception {
+    assertEquals(GadgetsHandlerApi.RenderingType.DEFAULT, GadgetsHandler.getRenderingType(null));
+    assertEquals(GadgetsHandlerApi.RenderingType.SANITIZED,
+        GadgetsHandler.getRenderingType("sanitized"));
+    assertEquals(GadgetsHandlerApi.RenderingType.INLINE_CAJOLED,
+        GadgetsHandler.getRenderingType("inline_cajoled"));
+    try {
+      GadgetsHandler.getRenderingType("unknown");
+      fail("Should have failed");
+    } catch (ProcessingException e) {
+      // As expected
+    }
+  }
+
+  @Test
   public void testTokenEmptyRequest() throws Exception {
     registerGadgetsHandler(null);
     JSONObject request = makeTokenRequest();

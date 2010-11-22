@@ -333,6 +333,11 @@ public class GadgetsHandlerService {
     public SecurityToken getToken() {
       return token;
     }
+
+    @Override
+    public boolean getSanitize() {
+      return (request.getRenderingType() == GadgetsHandlerApi.RenderingType.SANITIZED);
+    }
   }
 
   private SecurityToken convertToken(GadgetsHandlerApi.TokenData token,

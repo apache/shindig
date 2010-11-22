@@ -67,6 +67,14 @@ public class GadgetsHandlerApi {
     public boolean getDebug();
     public String getView();
     public TokenData getToken();
+    public RenderingType getRenderingType();
+  }
+
+  public enum RenderingType {
+    DEFAULT,
+    SANITIZED,
+    INLINE_CAJOLED,
+    IFRAME_CAJOLED
   }
 
   public interface TokenData {

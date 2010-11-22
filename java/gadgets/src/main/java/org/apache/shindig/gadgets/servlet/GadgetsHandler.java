@@ -477,12 +477,27 @@ public class GadgetsHandler {
     }
   }
 
+  @VisibleForTesting
+  static GadgetsHandlerApi.RenderingType getRenderingType(String value)
+      throws ProcessingException {
+    GadgetsHandlerApi.RenderingType type = GadgetsHandlerApi.RenderingType.DEFAULT;
+    if (value != null) {
+      try {
+        type = GadgetsHandlerApi.RenderingType.valueOf(value.toUpperCase());
+      } catch (IllegalArgumentException e) {
+        throw new ProcessingException("Error parsing rendering type parameter",
+            HttpServletResponse.SC_BAD_REQUEST);
+      }
+    }
+    return type;
+  }
 
   protected class MetadataRequestData extends AbstractRequest
       implements GadgetsHandlerApi.MetadataRequest {
     protected final Locale locale;
     protected final boolean ignoreCache;
     protected final boolean debug;
+    protected final GadgetsHandlerApi.RenderingType renderingType;
 
     public MetadataRequestData(String url, BaseRequestItem request)
         throws ProcessingException {
@@ -494,6 +509,7 @@ public class GadgetsHandler {
               ? new Locale(lang) : GadgetSpec.DEFAULT_LOCALE;
       this.ignoreCache = getBooleanParam(request, "ignoreCache");
       this.debug = getBooleanParam(request, "debug");
+      this.renderingType = GadgetsHandler.getRenderingType(request.getParameter("render"));
     }
 
     public int getModuleId() {
@@ -519,6 +535,10 @@ public class GadgetsHandler {
     public GadgetsHandlerApi.TokenData getToken() {
       return beanDelegator.createDelegator(
         request.getToken(), GadgetsHandlerApi.TokenData.class);
+    }
+
+    public GadgetsHandlerApi.RenderingType getRenderingType() {
+      return renderingType;
     }
   }
 }
