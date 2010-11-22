@@ -128,7 +128,7 @@ public class GadgetSpec {
    * Constructs a GadgetSpec for substitute calls.
    * @param spec
    */
-  private GadgetSpec(GadgetSpec spec) {
+  protected GadgetSpec(GadgetSpec spec) {
     url = spec.url;
     checksum = spec.checksum;
     attributes.putAll(spec.attributes);
@@ -153,7 +153,7 @@ public class GadgetSpec {
   /**
    * ModulePrefs
    */
-  private ModulePrefs modulePrefs;
+  protected ModulePrefs modulePrefs;
   public ModulePrefs getModulePrefs() {
     return modulePrefs;
   }
@@ -161,7 +161,7 @@ public class GadgetSpec {
   /**
    * UserPref
    */
-  private Map<String,UserPref> userPrefs;
+  protected Map<String,UserPref> userPrefs;
   public Map<String,UserPref> getUserPrefs() {
     return userPrefs;
   }
@@ -170,7 +170,7 @@ public class GadgetSpec {
    * Content
    * Mapping is view -> Content section.
    */
-  private Map<String, View> views;
+  protected Map<String, View> views;
   public Map<String, View> getViews() {
     return views;
   }
