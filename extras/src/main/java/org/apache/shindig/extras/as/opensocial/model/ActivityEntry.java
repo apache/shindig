@@ -19,9 +19,10 @@
 package org.apache.shindig.extras.as.opensocial.model;
 
 import java.util.List;
+import java.util.Map;
 
-import org.apache.shindig.protocol.model.Exportablebean;
 import org.apache.shindig.extras.as.core.model.ActivityEntryImpl;
+import org.apache.shindig.protocol.model.Exportablebean;
 
 import com.google.inject.ImplementedBy;
 
@@ -122,16 +123,16 @@ public interface ActivityEntry {
   /**
    * <p>getIcon</p>
    *
-   * @return a {@link java.lang.String} object.
+   * @return a {@link org.apache.shindig.extras.as.opensocial.model.MediaLink} object.
    */
-  String getIcon();
+  MediaLink getIcon();
 
   /**
    * <p>setIcon</p>
    *
-   * @param icon a {@link java.lang.String} object.
+   * @param icon a {@link org.apache.shindig.extras.as.opensocial.model.MediaLink} object.
    */
-  void setIcon(String icon);
+  void setIcon(MediaLink icon);
 
   /**
    * <p>getPostedTime</p>
@@ -262,16 +263,16 @@ public interface ActivityEntry {
   /**
    * <p>getStandardLinks</p>
    *
-   * @return a {@link java.util.List} object.
+   * @return a {@link java.util.Map} object.
    */
-  List<StandardLink> getStandardLinks();
+  Map<String, List<StandardLink>> getStandardLinks();
 
   /**
    * <p>setStandardLinks</p>
    *
-   * @param standardLinks a {@link java.util.List} object.
+   * @param standardLinks a {@link java.util.Map} object.
    */
-  void setStandardLinks(List<StandardLink> standardLinks);
+  void setStandardLinks(Map<String, List<StandardLink>> standardLinks);
   
   /**
    * <p>getTo</p>

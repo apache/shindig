@@ -17,8 +17,9 @@
  */
 package org.apache.shindig.extras.as.opensocial.model;
 
-import org.apache.shindig.protocol.model.Exportablebean;
 import org.apache.shindig.extras.as.core.model.MediaLinkImpl;
+import org.apache.shindig.protocol.model.Exportablebean;
+
 import com.google.inject.ImplementedBy;
 
 /*
@@ -97,42 +98,42 @@ public interface MediaLink {
   /**
    * <p>getWidth</p>
    *
-   * @return a {@link java.lang.String} object.
+   * @return Integer the target's width
    */
-  String getWidth();
+  Integer getWidth();
 
   /**
    * Sets the Width of this mediaLink
    *
-   * @param width a width
+   * @param width is the target's width
    */
-  void setWidth(String width);
+  void setWidth(Integer width);
 
   /**
    * Sets the Height of this mediaLink
    *
-   * @return a height
+   * @return Integer the target's height
    */
-  String getHeight();
+  Integer getHeight();
 
   /**
    * Sets the Height of this mediaLink
    *
-   * @param height a height
+   * @param height is the target's height
    */
-  void setHeight(String height);
+  void setHeight(Integer height);
 
   /**
    * Returns the duration of this mediaLink
    *
-   * @return a duration
+   * @return Integer is the target's duration
    */
-  String getDuration();
+  Integer getDuration();
 
   /**
    * Sets the duration of this mediaLink
    *
-   * @param duration a duration
+   * @param duration is the target's duration
    */
-  void setDuration(String duration);
+  void setDuration(Integer duration);
 }

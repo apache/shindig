@@ -19,9 +19,11 @@
 package org.apache.shindig.extras.as.core.model;
 
 import java.util.List;
+import java.util.Map;
 
 import org.apache.shindig.extras.as.opensocial.model.ActivityEntry;
 import org.apache.shindig.extras.as.opensocial.model.ActivityObject;
+import org.apache.shindig.extras.as.opensocial.model.MediaLink;
 import org.apache.shindig.extras.as.opensocial.model.StandardLink;
 
 /**
@@ -30,7 +32,7 @@ import org.apache.shindig.extras.as.opensocial.model.StandardLink;
  */
 public class ActivityEntryImpl implements ActivityEntry {
 
-  private String icon;
+  private MediaLink icon;
   private String postedTime;
   private ActivityObject actor;
   private String verb;
@@ -40,7 +42,7 @@ public class ActivityEntryImpl implements ActivityEntry {
   private ActivityObject provider;
   private String title;
   private String body;
-  private List<StandardLink> standardLinks;
+  private Map<String, List<StandardLink>> standardLinks;
   private List<String> to;
   private List<String> cc;
   private List<String> bcc;
@@ -52,12 +54,12 @@ public class ActivityEntryImpl implements ActivityEntry {
   }
 
   /** {@inheritDoc} */
-  public String getIcon() {
+  public MediaLink getIcon() {
     return icon;
   }
 
   /** {@inheritDoc} */
-  public void setIcon(String icon) {
+  public void setIcon(MediaLink icon) {
     this.icon = icon;
   }
 
@@ -152,12 +154,12 @@ public class ActivityEntryImpl implements ActivityEntry {
   }
 
   /** {@inheritDoc} */
-  public List<StandardLink> getStandardLinks() {
+  public Map<String, List<StandardLink>> getStandardLinks() {
     return standardLinks;
   }
 
   /** {@inheritDoc} */
-  public void setStandardLinks(List<StandardLink> standardLinks) {
+  public void setStandardLinks(Map<String, List<StandardLink>> standardLinks) {
     this.standardLinks = standardLinks;
   }
   

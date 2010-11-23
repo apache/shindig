@@ -19,6 +19,7 @@
 package org.apache.shindig.extras.as.core.model;
 
 import java.util.List;
+import java.util.Map;
 
 import org.apache.shindig.extras.as.opensocial.model.ActionLink;
 import org.apache.shindig.extras.as.opensocial.model.ActivityObject;
@@ -34,7 +35,7 @@ public class ActivityObjectImpl implements ActivityObject {
   private String id;
   private String displayName;
   private String summary;
-  private MediaLink media;
+  private MediaLink image;
   private String link;
   private String objectType;
   private ActivityObject inReplyTo;
@@ -44,7 +45,7 @@ public class ActivityObjectImpl implements ActivityObject {
   private List<ActionLink> actionLinks;
   private List<String> upstreamDuplicates;
   private List<String> downstreamDuplicates;
-  private List<StandardLink> standardLinks;
+  private Map<String, List<StandardLink>> standardLinks;
   
   /**
    * A simple implementation of an ActivtyObject
@@ -83,13 +84,13 @@ public class ActivityObjectImpl implements ActivityObject {
   }
 
   /** {@inheritDoc} */
-  public MediaLink getMedia() {
-    return media;
+  public MediaLink getImage() {
+    return image;
   }
 
   /** {@inheritDoc} */
-  public void setMedia(MediaLink media) {
-    this.media = media;
+  public void setImage(MediaLink image) {
+    this.image = image;
   }
 
   /** {@inheritDoc} */
@@ -183,12 +184,12 @@ public class ActivityObjectImpl implements ActivityObject {
   }
 
   /** {@inheritDoc} */
-  public List<StandardLink> getStandardLinks() {
+  public Map<String, List<StandardLink>> getStandardLinks() {
     return standardLinks;
   }
 
   /** {@inheritDoc} */
-  public void setStandardLinks(List<StandardLink> standardLinks) {
+  public void setStandardLinks(Map<String, List<StandardLink>> standardLinks) {
     this.standardLinks = standardLinks;
   }
 }

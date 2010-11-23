@@ -27,9 +27,9 @@ public class MediaLinkImpl implements MediaLink {
   
   private String url;
   private String type;
-  private String width;
-  private String height;
-  private String duration;
+  private Integer width;
+  private Integer height;
+  private Integer duration;
   
   /**
    * Create a new MediaLink
@@ -58,32 +58,32 @@ public class MediaLinkImpl implements MediaLink {
   }
 
   /** {@inheritDoc} */
-  public String getWidth() {
+  public Integer getWidth() {
     return width;
   }
 
   /** {@inheritDoc} */
-  public void setWidth(String width) {
+  public void setWidth(Integer width) {
     this.width = width;
   }
 
   /** {@inheritDoc} */
-  public String getHeight() {
+  public Integer getHeight() {
     return height;
   }
 
   /** {@inheritDoc} */
-  public void setHeight(String height) {
+  public void setHeight(Integer height) {
     this.height = height;
   }
 
   /** {@inheritDoc} */
-  public String getDuration() {
+  public Integer getDuration() {
     return duration;
   }
 
   /** {@inheritDoc} */
-  public void setDuration(String duration) {
+  public void setDuration(Integer duration) {
     this.duration = duration;
   }
 }

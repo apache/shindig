@@ -17,8 +17,8 @@
  */
 package org.apache.shindig.extras.as.opensocial.model;
 
-import org.apache.shindig.protocol.model.Exportablebean;
 import org.apache.shindig.extras.as.core.model.StandardLinkImpl;
+import org.apache.shindig.protocol.model.Exportablebean;
 
 import com.google.inject.ImplementedBy;
 
@@ -34,7 +34,6 @@ public interface StandardLink {
    */
   public static enum Field {
     HREF("href"),
-    REL("rel"),
     INLINE("inline"),
     TYPE("type");
 
@@ -65,10 +64,6 @@ public interface StandardLink {
   String getHref();
 
   void setHref(String href);
-
-  String getRel();
-
-  void setRel(String rel);
   
   String getInline();
 

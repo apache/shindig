@@ -19,9 +19,10 @@
 package org.apache.shindig.extras.as.opensocial.model;
 
 import java.util.List;
+import java.util.Map;
 
-import org.apache.shindig.protocol.model.Exportablebean;
 import org.apache.shindig.extras.as.core.model.ActivityObjectImpl;
+import org.apache.shindig.protocol.model.Exportablebean;
 
 import com.google.inject.ImplementedBy;
 
@@ -39,7 +40,7 @@ public interface ActivityObject {
     ID("id"),
     DISPLAY_NAME("displayName"),
     SUMMARY("summary"),
-    MEDIA("media"),
+    IMAGE("image"),
     LINK("link"),
     OBJECT_TYPE("objectType"),
     IN_REPLY_TO("inReplyTo"),
@@ -114,18 +115,18 @@ public interface ActivityObject {
   void setSummary(String summary);
 
   /**
-   * Get the link to a media item
+   * Get the link to a representative image.
    *
    * @return a {@link org.apache.shindig.extras.as.opensocial.model.MediaLink} object.
    */
-  MediaLink getMedia();
+  MediaLink getImage();
 
   /**
-   * Set the link to a media item
+   * Set the link to a representative image.
    *
-   * @param media a {@link org.apache.shindig.extras.as.opensocial.model.MediaLink} object.
+   * @param image a {@link org.apache.shindig.extras.as.opensocial.model.MediaLink} object.
    */
-  void setMedia(MediaLink media);
+  void setImage(MediaLink image);
 
   /**
    * Get the permanent link
@@ -256,14 +257,14 @@ public interface ActivityObject {
   /**
    * Return the Object's StandardLinks
    *
-   * @return List<StandardLink> is the list of StandardLinks
+   * @return Map<String, List<StandardLink>> is the list of StandardLinks
    */
-  List<StandardLink> getStandardLinks();
+  Map<String, List<StandardLink>> getStandardLinks();
 
   /**
    * Set the standard link string
    *
-   * @param standardLinks the standard link
+   * @param standardLinks the list of standard links
    */
-  void setStandardLinks(List<StandardLink> standardLinks);
+  void setStandardLinks(Map<String, List<StandardLink>> standardLinks);
 }

@@ -359,17 +359,21 @@
 			"displayName": "John Doe"
 		},
 		"verb": "post",
+		"standardLinks": {"myRel": [
+			{"href": "www.mypics.com/1", "type": "image/jpg"},
+			{"href": "www.mypics.com/2", "type": "image/jpg"}
+		]},
 		"object": {
 			"id": "myObjectId123",
 			"displayName": "My Object",
 			"link": "http://www.myobject.com",
 			"objectType": "article",
-			"media": {
+			"image": {
 				"url": "http://myvideos.com/raftingtrip/raftingvideo.avi",
 				"type": "http://activitystrea.ms/schema/1.0/video",
-				"width": "400",
-				"height": "300",
-				"duration": "93"
+				"width": 400,
+				"height": 300,
+				"duration": 93
 			},
 			"actionLinks": [{
 				"target": "http://myvideos.com/raftingvideo",

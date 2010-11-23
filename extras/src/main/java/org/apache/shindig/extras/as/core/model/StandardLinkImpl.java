@@ -26,7 +26,6 @@ import org.apache.shindig.extras.as.opensocial.model.StandardLink;
 public class StandardLinkImpl implements StandardLink {
   
   private String href;
-  private String rel;
   private String inline;
   private String type;
   
@@ -44,16 +43,6 @@ public class StandardLinkImpl implements StandardLink {
   /** {@inheritDoc} */
   public void setHref(String href) {
     this.href = href;
-  }
-  
-  /** {@inheritDoc} */
-  public String getRel() {
-    return rel;
-  }
-
-  /** {@inheritDoc} */
-  public void setRel(String rel) {
-    this.rel = rel;
   }
   
   /** {@inheritDoc} */
