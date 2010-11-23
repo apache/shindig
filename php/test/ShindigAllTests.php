@@ -44,6 +44,8 @@ function __autoload($className) {
     }
   }
 }
+// PHPUnit 3.5
+spl_autoload_register('__autoload');
 
 set_include_path(get_include_path() . PATH_SEPARATOR . realpath('.') . PATH_SEPARATOR . realpath('./external'));
 error_reporting(E_ALL | E_STRICT);
