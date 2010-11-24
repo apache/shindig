@@ -27,9 +27,9 @@
 var my = {};
 
 my.gadgetSpecUrls = [
-  'http://localhost:8080/container/sample-pubsub-publisher.xml',
-  'http://localhost:8080/container/sample-pubsub-subscriber.xml',
-  'http://localhost:8080/container/sample-pubsub-subscriber.xml'
+  'http://' + window.location.host + '/container/sample-pubsub-publisher.xml',
+  'http://' + window.location.host + '/container/sample-pubsub-subscriber.xml',
+  'http://' + window.location.host + '/container/sample-pubsub-subscriber.xml'
 ];
 
 my.LayoutManager = function() {
@@ -67,7 +67,7 @@ my.init = function() {
 };
 
 my.renderGadgets = function() {
-  shindig.container.setParentUrl("http://localhost:8080/");
+  shindig.container.setParentUrl("http://" + window.location.host + "/");
   for (var i = 0; i < my.gadgetSpecUrls.length; ++i) {
     var gadget = shindig.container.createGadget(
         {debug:1,specUrl: my.gadgetSpecUrls[i], title: (i ? "Subscriber" : "Publisher")});
