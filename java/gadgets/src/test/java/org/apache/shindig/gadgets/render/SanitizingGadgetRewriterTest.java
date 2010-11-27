@@ -18,6 +18,7 @@
  */
 package org.apache.shindig.gadgets.render;
 
+import com.google.inject.util.Providers;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
@@ -120,8 +121,8 @@ public class SanitizingGadgetRewriterTest extends RewriterTestBase {
     newTags.addAll(DEFAULT_TAGS);
     ContentRewriterFeature.Factory rewriterFeatureFactory =
         new ContentRewriterFeature.Factory(null,
-          new ContentRewriterFeature.DefaultConfig(
-            ".*", "", "HTTP", "embed,img,script,link,style", false, false, false));
+          Providers.of(new ContentRewriterFeature.DefaultConfig(
+            ".*", "", "HTTP", "embed,img,script,link,style", false, false, false)));
     return new SanitizingGadgetRewriter(newTags, attributes, rewriterFeatureFactory,
         new CajaCssSanitizer(new CajaCssParser()), new PassthruManager("host.com", "/proxy"));
   }

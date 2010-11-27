@@ -22,6 +22,7 @@ import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
@@ -68,16 +69,16 @@ public class ContentRewriterFeature {
   @Singleton
   public static class Factory {
     private final GadgetSpecFactory specFactory;
-    private final Config defaultConfig;
+    private final Provider<DefaultConfig> defaultConfig;
 
     @Inject
-    public Factory(GadgetSpecFactory specFactory, DefaultConfig defaultConfig) {
+    public Factory(GadgetSpecFactory specFactory, Provider<DefaultConfig> defaultConfig) {
       this.specFactory = specFactory;
       this.defaultConfig = defaultConfig;
     }
 
     public Config getDefault() {
-      return defaultConfig;
+      return defaultConfig.get();
     }
 
     public Config get(HttpRequest request) {
@@ -103,14 +104,14 @@ public class ContentRewriterFeature {
           // Falls through to default.
         }
       }
-      return defaultConfig;
+      return defaultConfig.get();
     }
 
     public Config get(GadgetSpec spec) {
       Config rewriterFeature =
           (Config)spec.getAttribute("content-rewriter");
       if (rewriterFeature != null) return rewriterFeature;
-      rewriterFeature = new Config(spec, defaultConfig);
+      rewriterFeature = new Config(spec, defaultConfig.get());
       spec.setAttribute("content-rewriter", rewriterFeature);
       return rewriterFeature;
     }

@@ -21,6 +21,7 @@ package org.apache.shindig.gadgets.render;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
+import com.google.inject.util.Providers;
 import org.apache.commons.io.IOUtils;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.http.HttpRequest;
@@ -59,8 +60,8 @@ public class SanitizingResponseRewriterTest extends RewriterTestBase {
   private ResponseRewriter createRewriter(Set<String> tags, Set<String> attributes) {
     ContentRewriterFeature.Factory rewriterFeatureFactory =
         new ContentRewriterFeature.Factory(null,
-          new ContentRewriterFeature.DefaultConfig(
-            ".*", "", "HTTP", "embed,img,script,link,style", false, false, false));
+          Providers.of(new ContentRewriterFeature.DefaultConfig(
+            ".*", "", "HTTP", "embed,img,script,link,style", false, false, false)));
     return new SanitizingResponseRewriter(rewriterFeatureFactory,
         new CajaCssSanitizer(new CajaCssParser()), new PassthruManager(PROXY_HOST, PROXY_PATH));
   }

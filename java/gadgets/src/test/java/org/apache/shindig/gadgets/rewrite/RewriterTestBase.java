@@ -17,6 +17,7 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
+import com.google.inject.util.Providers;
 import org.apache.shindig.common.PropertiesModule;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
@@ -71,7 +72,7 @@ public abstract class RewriterTestBase {
   @Before
   public void setUp() throws Exception {
     rewriterFeatureFactory = new ContentRewriterFeature.Factory(null,
-        new ContentRewriterFeature.DefaultConfig(".*", "", "86400", TAGS, false, false, false));
+        Providers.of(new ContentRewriterFeature.DefaultConfig(".*", "", "86400", TAGS, false, false, false)));
     defaultRewriterFeature = rewriterFeatureFactory.getDefault();
     tags = defaultRewriterFeature.getIncludedTags();
     injector = Guice.createInjector(getParseModule(), new PropertiesModule(), new TestModule());
