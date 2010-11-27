@@ -428,9 +428,31 @@ gadgets.TabSet.prototype.createTabTable_ = function() {
   var me = this;
   leftNav.onclick = function(event) {
     me.smoothScroll_(wrapper, -120);
+
+    if (event.stopPropagation) {
+      event.stopPropagation();
+    } else {
+      event.cancelBubble = true;
+    }
+    if (event.preventDefault) {
+      event.preventDefault();
+    } else {
+      event.returnValue = false;
+    }
   };
   rightNav.onclick = function(event) {
     me.smoothScroll_(wrapper, 120);
+
+    if (event.stopPropagation) {
+      event.stopPropagation();
+    } else {
+      event.cancelBubble = true;
+    }
+    if (event.preventDefault) {
+      event.preventDefault();
+    } else {
+      event.returnValue = false;
+    }
   };
 
   // Swap left and right scrolling if direction is RTL.
