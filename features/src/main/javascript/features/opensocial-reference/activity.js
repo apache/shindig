@@ -149,7 +149,7 @@
  * @param {Object.<opensocial.Activity.Field, Object>} params Parameters defining the activity.
  * @private
  * @constructor
- * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.2
+ * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.2.
  */
 opensocial.Activity = function(params) {
   this.fields_ = params;
@@ -180,7 +180,7 @@ opensocial.Activity = function(params) {
  *
  * @name opensocial.Activity.Field
  * @enum {string}
- * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.3
+ * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.3.
  */
 opensocial.Activity.Field = {
   /**
@@ -342,7 +342,7 @@ opensocial.Activity.Field = {
  *
  * @return {string} The ID.
  * @member opensocial.Activity
- * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.2.1.2
+ * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.2.1.2.
  */
 opensocial.Activity.prototype.getId = function() {
   return this.getField(opensocial.Activity.Field.ID);
@@ -361,7 +361,7 @@ opensocial.Activity.prototype.getId = function() {
  *    to pass to the request.
  * @return {string} The data.
  * @member opensocial.Activity
- * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.2.1.1
+ * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.2.1.1.
  */
 opensocial.Activity.prototype.getField = function(key, opt_params) {
   return opensocial.Container.getField(this.fields_, key, opt_params);
@@ -373,7 +373,7 @@ opensocial.Activity.prototype.getField = function(key, opt_params) {
  *
  * @param {string} key The key to set data for.
  * @param {string} data The data to set.
- * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.2.1.3
+ * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.2.1.3.
  */
 opensocial.Activity.prototype.setField = function(key, data) {
   return (this.fields_[key] = data);

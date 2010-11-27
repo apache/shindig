@@ -67,7 +67,7 @@
  *
  * @private
  * @constructor
- * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.23
+ * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.23.
  */
 opensocial.Enum = function(key, displayValue) {
   this.key = key;
@@ -81,7 +81,7 @@ opensocial.Enum = function(key, displayValue) {
  *
  * @return {string} The enum's key. This should be one of the defined enums
  *     below.
- * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.23.1.2
+ * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.23.1.2.
  */
 opensocial.Enum.prototype.getKey = function() {
   return gadgets.util.escape(this.key);
@@ -93,7 +93,7 @@ opensocial.Enum.prototype.getKey = function() {
  * container supports localization, the string will be localized.
  *
  * @return {string} The enum's value.
- * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.23.1.1
+ * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.23.1.1.
  */
 opensocial.Enum.prototype.getDisplayValue = function() {
   return gadgets.util.escape(this.displayValue);
@@ -110,7 +110,7 @@ opensocial.Enum.prototype.getDisplayValue = function() {
  * </p>
  *
  * @name opensocial.Enum.Smoker
- * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.28
+ * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.28.
  */
 opensocial.Enum.Smoker = {
   /** @member opensocial.Enum.Smoker */
@@ -142,7 +142,7 @@ opensocial.Enum.Smoker = {
  * </p>
  *
  * @name opensocial.Enum.Drinker
- * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.24
+ * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.24.
  */
 opensocial.Enum.Drinker = {
   /** @member opensocial.Enum.Drinker */
@@ -174,7 +174,7 @@ opensocial.Enum.Drinker = {
  * </p>
  *
  * @name opensocial.Enum.Gender
- * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.25
+ * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.25.
  */
 opensocial.Enum.Gender = {
   /** @member opensocial.Enum.Gender */
@@ -194,7 +194,7 @@ opensocial.Enum.Gender = {
  * </p>
  *
  * @name opensocial.Enum.LookingFor
- * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.26
+ * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.26.
  */
 opensocial.Enum.LookingFor = {
   /** @member opensocial.Enum.LookingFor */
@@ -222,7 +222,7 @@ opensocial.Enum.LookingFor = {
  * </p>
  *
  * @name opensocial.Enum.Presence
- * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.27
+ * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.27.
  */
 opensocial.Enum.Presence = {
   /** @member opensocial.Enum.Presence */

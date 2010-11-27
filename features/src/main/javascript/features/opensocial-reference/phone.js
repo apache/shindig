@@ -37,7 +37,7 @@
  *
  * @private
  * @constructor
- * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.47
+ * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.47.
  */
 opensocial.Phone = function(opt_params) {
   this.fields_ = opt_params || {};
@@ -53,7 +53,7 @@ opensocial.Phone = function(opt_params) {
  * @name opensocial.Phone.Field
  * @enum {string}
  * @const
- * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.48
+ * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.48.
  */
 opensocial.Phone.Field = {
   /**
@@ -84,7 +84,7 @@ opensocial.Phone.Field = {
  *    <a href="opensocial.DataRequest.DataRequestFields.html">params</a>
  *    to pass to the request.
  * @return {string} The data.
- * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.47.1.1
+ * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.47.1.1.
  */
 opensocial.Phone.prototype.getField = function(key, opt_params) {
   return opensocial.Container.getField(this.fields_, key, opt_params);

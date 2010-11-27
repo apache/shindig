@@ -37,7 +37,7 @@
  *
  * @private
  * @constructor
- * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.45
+ * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.45.
  */
 opensocial.Person = function(opt_params, opt_isOwner, opt_isViewer) {
   this.fields_ = opt_params || {};
@@ -53,7 +53,7 @@ opensocial.Person = function(opt_params, opt_isOwner, opt_isViewer) {
  * <a href="opensocial.Person.html#getField">Person.getField()</a> method.
  *
  * @name opensocial.Person.Field
- * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.46
+ * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.46.
  */
 opensocial.Person.Field = {
   /**
@@ -496,7 +496,7 @@ opensocial.Person.Field = {
  * Gets an ID that can be permanently associated with this person.
  *
  * @return {string} The ID.
- * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.45.1.4
+ * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.45.1.4.
  */
 opensocial.Person.prototype.getId = function() {
   return this.getField(opensocial.Person.Field.ID);
@@ -515,7 +515,7 @@ var ORDERED_NAME_FIELDS_ = [
  * a useful string.
  *
  * @return {string} The display name.
- * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.45.1.2
+ * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.45.1.2.
  */
 opensocial.Person.prototype.getDisplayName = function() {
   var name = this.getField(opensocial.Person.Field.NAME);
@@ -553,7 +553,7 @@ opensocial.Person.prototype.getDisplayName = function() {
  *    <a href="opensocial.DataRequest.DataRequestFields.html">params</a>
  *    to pass to the request.
  * @return {string} The data.
- * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.45.1.3
+ * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.45.1.3.
  */
 opensocial.Person.prototype.getField = function(key, opt_params) {
   return opensocial.Container.getField(this.fields_, key, opt_params);
@@ -566,7 +566,7 @@ opensocial.Person.prototype.getField = function(key, opt_params) {
  *
  * @param {string} key The key to get app data for.
  * @return {string} The corresponding app data.
- * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.45.1.1
+ * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.45.1.1.
  */
 opensocial.Person.prototype.getAppData = function(key) {
 };
@@ -577,7 +577,7 @@ opensocial.Person.prototype.getAppData = function(key) {
  *
  * @return {boolean} True if this is the currently logged in user;
  *   otherwise, false.
- * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.45.1.6
+ * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.45.1.6.
  */
 opensocial.Person.prototype.isViewer = function() {
   return !!this.isViewer_;
@@ -589,7 +589,7 @@ opensocial.Person.prototype.isViewer = function() {
  *
  * @return {boolean} True if this is the owner of the page;
  *   otherwise, false.
- * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.45.1.5
+ * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.45.1.5.
  */
 opensocial.Person.prototype.isOwner = function() {
   return !!this.isOwner_;

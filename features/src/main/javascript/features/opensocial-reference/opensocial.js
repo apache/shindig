@@ -35,7 +35,7 @@
  *
  * @private
  * @constructor (note: a constructor for JsDoc purposes)
- * @deprecated since 1.0 (see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.1)
+ * @deprecated since 1.0 (see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.1).
  */
 var opensocial = opensocial || {};
 
@@ -74,7 +74,7 @@ var opensocial = opensocial || {};
  *     NavigationParameters.DestinationType.</a>
  *
  * @member opensocial
- * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.1.1.9
+ * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.1.1.9.
  */
 opensocial.requestSendMessage = function(recipients, message, opt_callback,
     opt_params) {
@@ -166,7 +166,7 @@ opensocial.requestShareApp = function(recipients, reason, opt_callback,
  *    processed.
  *
  * @member opensocial
- * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.1.1.8
+ * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.1.1.8.
  */
 opensocial.requestCreateActivity = function(activity, priority, opt_callback) {
   if (!activity || (!activity.getField(opensocial.Activity.Field.TITLE) && !activity.getField(opensocial.Activity.Field.TITLE_ID))) {
@@ -196,7 +196,7 @@ opensocial.requestCreateActivity = function(activity, priority, opt_callback) {
  *
  * @name opensocial.CreateActivityPriority
  * @enum {string}
- * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.11
+ * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.11.
  */
 opensocial.CreateActivityPriority = {
   /**
@@ -313,7 +313,7 @@ opensocial.getEnvironment = function() {
  * @return {opensocial.DataRequest} The
  *    <a href="opensocial.DataRequest.html">request</a> object.
  * @member opensocial
- * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.1.1.4
+ * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.1.1.4.
  */
 opensocial.newDataRequest = function() {
   return opensocial.Container.get().newDataRequest();
@@ -347,7 +347,7 @@ opensocial.newDataRequest = function() {
  * @return {opensocial.Activity} The new
  *    <a href="opensocial.Activity.html">activity</a> object.
  * @member opensocial
- * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.1.1.2
+ * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.1.1.2.
  */
 opensocial.newActivity = function(params) {
   return opensocial.Container.get().newActivity(params);
@@ -367,7 +367,7 @@ opensocial.newActivity = function(params) {
  * @return {opensocial.Album} The new
  *    <a href="opensocial.Album.html">album</a> object.
  * @member opensocial
- * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.1.1.3
+ * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.1.1.3.
  */
 opensocial.newAlbum = function(opt_params) {
   return opensocial.Container.get().newAlbum(opt_params);
@@ -392,7 +392,7 @@ opensocial.newAlbum = function(opt_params) {
  * @return {opensocial.MediaItem} The new
  *    <a href="opensocial.MediaItem.html">media item</a> object.
  * @member opensocial
- * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.1.1.6
+ * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.1.1.6.
  */
 opensocial.newMediaItem = function(mimeType, url, opt_params) {
   return opensocial.Container.get().newMediaItem(mimeType, url, opt_params);
@@ -414,7 +414,7 @@ opensocial.newMediaItem = function(mimeType, url, opt_params) {
  * @return {opensocial.Message} The new
  *    <a href="opensocial.Message.html">message</a> object.
  * @member opensocial
- * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.1.1.7
+ * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.1.1.7.
  */
 opensocial.newMessage = function(body, opt_params) {
   return opensocial.Container.get().newMessage(body, opt_params);
@@ -427,7 +427,7 @@ opensocial.newMessage = function(body, opt_params) {
  * The types of escaping that can be applied to person data or fields.
  *
  * @name opensocial.EscapeType
- * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.29
+ * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.29.
  */
 opensocial.EscapeType = {
   /**
@@ -452,7 +452,7 @@ opensocial.EscapeType = {
  * @return {opensocial.IdSpec} The new
  *     <a href="opensocial.IdSpec.html">IdSpec</a> object.
  * @member opensocial
- * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.1.1.5
+ * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.1.1.5.
  */
 opensocial.newIdSpec = function(params) {
   return opensocial.Container.get().newIdSpec(params);
@@ -481,7 +481,7 @@ opensocial.newNavigationParameters = function(params) {
 
 /**
  * Invalidates all resources cached for the current viewer.
- * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.1.1.1
+ * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.1.1.1.
  */
 opensocial.invalidateCache = function() {
   opensocial.Container.get().invalidateCache();

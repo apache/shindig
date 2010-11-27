@@ -40,7 +40,7 @@
  *    All of the defined Fields are supported.
  * @private
  * @constructor
- * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.6
+ * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.6.
  */
 opensocial.Album = function(opt_params) {
   this.fields_ = opt_params || {};
@@ -52,7 +52,7 @@ opensocial.Album = function(opt_params) {
  * All of the fields that an Album can have.
  *
  * @name opensocial.Album.Field
- * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.7
+ * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.7.
  */
 opensocial.Album.Field = {
   /**
@@ -134,7 +134,7 @@ opensocial.Album.Field = {
  *    to pass to the request.
  * @return {string} The data.
  * @member opensocial.Album
- * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.6.1.1
+ * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.6.1.1.
  */
 opensocial.Album.prototype.getField = function(key, opt_params) {
   return opensocial.Container.getField(this.fields_, key, opt_params);
@@ -146,7 +146,7 @@ opensocial.Album.prototype.getField = function(key, opt_params) {
  *
  * @param {string} key The key to set data for.
  * @param {string} data The data to set.
- * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.6.1.2
+ * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.6.1.2.
  */
 opensocial.Album.prototype.setField = function(key, data) {
   return this.fields_[key] = data;

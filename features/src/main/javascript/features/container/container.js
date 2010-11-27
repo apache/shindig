@@ -90,7 +90,7 @@ shindig.container.Container = function(opt_config) {
   this.navigateCallback_ = String(shindig.container.util.getSafeJsonValue(
       config, shindig.container.ContainerConfig.NAVIGATE_CALLBACK,
       null));
-  
+
   /**
    * @type {shindig.container.Service}
    * @private
@@ -123,7 +123,7 @@ shindig.container.Container.prototype.newGadgetSite = function(
       'service' : this.service_,
       'navigateCallback' : this.navigateCallback_,
       'gadgetEl' : gadgetEl,
-      'bufferEl' : bufferEl    
+      'bufferEl' : bufferEl
   });
   this.sites_[site.getId()] = site;
   return site;

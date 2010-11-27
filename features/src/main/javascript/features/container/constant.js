@@ -70,7 +70,7 @@ shindig.container.NavigateTiming.XRT = 'xrt';
 shindig.container.NavigateTiming.SRT = 'srt';
 // Time (ms) to load the DOM. Typically timed at end of page.
 shindig.container.NavigateTiming.DL = 'dl';
-// Time (ms) when body onload is called. 
+// Time (ms) when body onload is called.
 shindig.container.NavigateTiming.OL = 'ol';
 // Time (ms) when page is ready for use. Typically happen after data XHR (ex:
 // calendar, email) is received/presented to users. Overridable by user.

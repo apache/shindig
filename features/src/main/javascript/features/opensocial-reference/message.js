@@ -47,7 +47,7 @@
  *    Fields are supported.
  * @private
  * @constructor
- * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.37
+ * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.37.
  */
 opensocial.Message = function(body_or_params, opt_params) {
   if (typeof body_or_params == 'string') {
@@ -74,7 +74,7 @@ opensocial.Message = function(body_or_params, opt_params) {
  * @name opensocial.Message.Field
  * @enum {string}
  * @const
- * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.38
+ * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.38.
  */
 opensocial.Message.Field = {
   /**
@@ -248,7 +248,7 @@ opensocial.Message.Status = {
  *    to pass to the request.
  * @return {string} The data.
  * @member opensocial.Message
- * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.37.1.1
+ * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.37.1.1.
  */
 opensocial.Message.prototype.getField = function(key, opt_params) {
   return opensocial.Container.getField(this.fields_, key, opt_params);
@@ -260,7 +260,7 @@ opensocial.Message.prototype.getField = function(key, opt_params) {
  *
  * @param {string} key The key to set data for.
  * @param {string} data The data to set.
- * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.37.1.2
+ * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.37.1.2.
  */
 opensocial.Message.prototype.setField = function(key, data) {
   return (this.fields_[key] = data);

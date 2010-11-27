@@ -169,7 +169,7 @@ shindig.container.GadgetHolder.prototype.render = function(
   this.gadgetInfo_ = gadgetInfo;
   this.viewParams_ = viewParams;
   this.renderParams_ = renderParams;
-  
+
   if (this.hasFeature_(gadgetInfo, 'pubsub-2')) {
     this.doOaaIframeHtml_();
   } else {
@@ -196,7 +196,7 @@ shindig.container.GadgetHolder.IFRAME_ID_PREFIX_ = '__gadget_';
  */
 shindig.container.GadgetHolder.prototype.doNormalIframeHtml_ = function() {
   this.el_.innerHTML = this.getIframeHtml_();
-  
+
   // Set up RPC channel. RPC relay url is on gmodules, relative to base of the
   // container. Assumes container has set up forwarding to gmodules at /gadgets.
   var iframeUri = shindig.uri(
@@ -321,7 +321,7 @@ shindig.container.GadgetHolder.prototype.getIframeUrl_ = function() {
     uri.setExistingP('st', this.securityToken_);
   }
 
-  // Uniquely identify possibly-same gadgets on a page. 
+  // Uniquely identify possibly-same gadgets on a page.
   uri.setQP('mid', String(this.siteId_));
 
   if (!shindig.container.util.isEmptyJson(this.viewParams_)) {

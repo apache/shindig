@@ -37,7 +37,7 @@
  *
  * @private
  * @constructor
- * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.51
+ * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.51.
  */
 opensocial.Url = function(opt_params) {
   this.fields_ = opt_params || {};
@@ -51,7 +51,7 @@ opensocial.Url = function(opt_params) {
  * <a href="opensocial.Url.html#getField">Url.getField()</a> method.
  *
  * @name opensocial.Url.Field
- * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.52
+ * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.52.
  */
 opensocial.Url.Field = {
   /**
@@ -89,7 +89,7 @@ opensocial.Url.Field = {
  *    <a href="opensocial.DataRequest.DataRequestFields.html">params</a>
  *    to pass to the request.
  * @return {string} The data.
- * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.51.1.1
+ * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.51.1.1.
  */
 opensocial.Url.prototype.getField = function(key, opt_params) {
   return opensocial.Container.getField(this.fields_, key, opt_params);

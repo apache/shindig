@@ -39,7 +39,7 @@
  *    All of the defined Fields are supported.
  * @constructor
  * @private
- * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.34
+ * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.34.
  */
 opensocial.MediaItem = function(mimeType, url, opt_params) {
   this.fields_ = {};
@@ -69,7 +69,7 @@ opensocial.MediaItem = function(mimeType, url, opt_params) {
  * @name opensocial.MediaItem.Type
  * @enum {string}
  * @const
- * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.36
+ * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.36.
  */
 opensocial.MediaItem.Type = {
   /** @member opensocial.MediaItem.Type */
@@ -93,7 +93,7 @@ opensocial.MediaItem.Type = {
  * </p>
  *
  * @name opensocial.MediaItem.Field
- * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.35
+ * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.35.
  */
 opensocial.MediaItem.Field = {
 
@@ -235,7 +235,7 @@ opensocial.MediaItem.Field = {
  *   <a href="opensocial.MediaItem.Field.html">Field</a> class
  *   for possible values.
  * @return {string} The data.
- * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.34.1.1
+ * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.34.1.1.
  */
 opensocial.MediaItem.prototype.getField = function(key, opt_params) {
   return opensocial.Container.getField(this.fields_, key, opt_params);
@@ -247,7 +247,7 @@ opensocial.MediaItem.prototype.getField = function(key, opt_params) {
  *
  * @param {string} key The key to set data for.
  * @param {string} data The data to set.
- * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.34.1.2
+ * @deprecated since 1.0 see http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Gadget.xml#rfc.section.A.34.1.2.
  */
 opensocial.MediaItem.prototype.setField = function(key, data) {
   return (this.fields_[key] = data);

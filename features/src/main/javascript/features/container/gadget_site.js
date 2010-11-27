@@ -211,8 +211,8 @@ shindig.container.GadgetSite.prototype.navigateTo = function(
     timingInfo[shindig.container.NavigateTiming.ID] = self.id_;
     timingInfo[shindig.container.NavigateTiming.START] = start;
     timingInfo[shindig.container.NavigateTiming.XRT] = xrt;
-    self.onNavigateTo(timingInfo);    
-    
+    self.onNavigateTo(timingInfo);
+
     // Possibly with an error. Leave to user to deal with raw response.
     callback(gadgetInfo);
   });
