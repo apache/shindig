@@ -17,8 +17,6 @@
  */
 package org.apache.shindig.auth;
 
-import com.google.inject.Inject;
-
 import javax.servlet.http.HttpServletRequest;
 
 /**
@@ -28,17 +26,8 @@ import javax.servlet.http.HttpServletRequest;
  * is no way to set in a public API. This can be added in the future for testing
  * purposes.
  */
-public class AuthInfo {
-  private HttpServletRequest req;
-
-  /**
-   * Create AuthInfo from a given HttpServletRequest
-   * @param req
-   */
-  @Inject
-  public AuthInfo(HttpServletRequest req) {
-    this.req = req;
-  }
+public final class AuthInfoUtil {
+  private AuthInfoUtil() {}
 
   /**
    * Constants for request attribute keys
@@ -61,7 +50,7 @@ public class AuthInfo {
    *
    * @return The security token
    */
-  public SecurityToken getSecurityToken() {
+  public static SecurityToken getSecurityTokenFromRequest(HttpServletRequest req) {
     return getRequestAttribute(req, Attribute.SECURITY_TOKEN);
   }
 
@@ -70,30 +59,28 @@ public class AuthInfo {
    *
    * @return The domain, or {@code null} if no domain was found
    */
-  public String getAuthType() {
+  public static String getAuthTypeFromRequest(HttpServletRequest req) {
     return getRequestAttribute(req, Attribute.AUTH_TYPE);
   }
 
   /**
    * Set the security token for the request.
    *
+   * @param req The request object
    * @param token The security token
-   * @return This object
    */
-  AuthInfo setSecurityToken(SecurityToken token) {
+  public static void setSecurityTokenForRequest(HttpServletRequest req, SecurityToken token) {
     setRequestAttribute(req, Attribute.SECURITY_TOKEN, token);
-    return this;
   }
 
   /**
    * Set the auth type for the request.
    *
+   * @param req The request object
    * @param authType The named auth type
-   * @return This object
    */
-  AuthInfo setAuthType(String authType) {
+  public static void setAuthTypeForRequest(HttpServletRequest req, String authType) {
     setRequestAttribute(req, Attribute.AUTH_TYPE, authType);
-    return this;
   }
 
   /**

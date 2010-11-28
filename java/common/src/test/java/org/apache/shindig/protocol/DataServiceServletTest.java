@@ -24,7 +24,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.shindig.auth.AuthInfo;
+import org.apache.shindig.auth.AuthInfoUtil;
 import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.common.testing.FakeHttpServletRequest;
 import org.apache.shindig.config.ContainerConfig;
@@ -156,7 +156,7 @@ public class DataServiceServletTest extends Assert {
       fakeReq.setPostData("", "UTF-8");
     }
     fakeReq.setMethod(actualMethod);
-    fakeReq.setAttribute(AuthInfo.Attribute.SECURITY_TOKEN.getId(), FAKE_GADGET_TOKEN);
+    fakeReq.setAttribute(AuthInfoUtil.Attribute.SECURITY_TOKEN.getId(), FAKE_GADGET_TOKEN);
     fakeReq.setContentType(ContentTypes.OUTPUT_JSON_CONTENT_TYPE);
     req = fakeReq;
   }

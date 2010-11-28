@@ -23,7 +23,7 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.shindig.auth.AuthInfo;
+import org.apache.shindig.auth.AuthInfoUtil;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.JsonSerializer;
 import org.apache.shindig.common.servlet.HttpUtil;
@@ -259,7 +259,7 @@ public class MakeRequestHandler {
    * @return A valid token for the given input.
    */
   private SecurityToken extractAndValidateToken(HttpServletRequest request) throws GadgetException {
-    SecurityToken token = new AuthInfo(request).getSecurityToken();
+    SecurityToken token = AuthInfoUtil.getSecurityTokenFromRequest(request);
     if (token == null) {
       // TODO: Determine appropriate external error code for this.
       throw new GadgetException(GadgetException.Code.INVALID_SECURITY_TOKEN);

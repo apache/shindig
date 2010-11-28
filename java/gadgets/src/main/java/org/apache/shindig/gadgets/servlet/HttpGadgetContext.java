@@ -19,7 +19,7 @@
 
 package org.apache.shindig.gadgets.servlet;
 
-import org.apache.shindig.auth.AuthInfo;
+import org.apache.shindig.auth.AuthInfoUtil;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.GadgetContext;
@@ -139,7 +139,7 @@ public class HttpGadgetContext extends GadgetContext {
 
   @Override
   public SecurityToken getToken() {
-    return new AuthInfo(request).getSecurityToken();
+    return AuthInfoUtil.getSecurityTokenFromRequest(request);
   }
 
   @Override

@@ -17,7 +17,7 @@
  */
 package org.apache.shindig.social.dataservice.integration;
 
-import org.apache.shindig.auth.AuthInfo;
+import org.apache.shindig.auth.AuthInfoUtil;
 import org.apache.shindig.common.EasyMockTestCase;
 import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.common.testing.FakeHttpServletRequest;
@@ -138,7 +138,7 @@ public abstract class AbstractLargeRestfulTests extends EasyMockTestCase {
     req.setPathInfo(path);
     req.setParameter("format",format);
     req.setParameter("X-HTTP-Method-Override", method);
-    req.setAttribute(AuthInfo.Attribute.SECURITY_TOKEN.getId(), FAKE_GADGET_TOKEN);
+    req.setAttribute(AuthInfoUtil.Attribute.SECURITY_TOKEN.getId(), FAKE_GADGET_TOKEN);
     req.setContentType(contentType);
     for (Map.Entry<String,String> entry : extraParams.entrySet()) {
       req.setParameter(entry.getKey(), entry.getValue());

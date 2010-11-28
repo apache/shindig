@@ -20,7 +20,7 @@ package org.apache.shindig.gadgets.servlet;
 import static org.easymock.EasyMock.expect;
 
 import org.apache.shindig.auth.AnonymousSecurityToken;
-import org.apache.shindig.auth.AuthInfo;
+import org.apache.shindig.auth.AuthInfoUtil;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.junit.Test;
@@ -80,7 +80,7 @@ public class HttpGadgetContextTest extends ServletTestFixture {
   @Test
   public void testGetSecurityToken() throws Exception {
     SecurityToken expected = new AnonymousSecurityToken();
-    expect(request.getAttribute(AuthInfo.Attribute.SECURITY_TOKEN.getId())).andReturn(expected);
+    expect(request.getAttribute(AuthInfoUtil.Attribute.SECURITY_TOKEN.getId())).andReturn(expected);
     replay();
     GadgetContext context = new HttpGadgetContext(request);
     assertEquals(expected, context.getToken());

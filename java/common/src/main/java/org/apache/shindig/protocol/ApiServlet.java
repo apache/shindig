@@ -17,7 +17,7 @@
  */
 package org.apache.shindig.protocol;
 
-import org.apache.shindig.auth.AuthInfo;
+import org.apache.shindig.auth.AuthInfoUtil;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.servlet.InjectedServlet;
 import org.apache.shindig.config.ContainerConfig;
@@ -110,7 +110,7 @@ public abstract class ApiServlet extends InjectedServlet {
   }
 
   protected SecurityToken getSecurityToken(HttpServletRequest servletRequest) {
-    return new AuthInfo(servletRequest).getSecurityToken();
+    return AuthInfoUtil.getSecurityTokenFromRequest(servletRequest);
   }
 
   protected abstract void sendError(HttpServletResponse servletResponse, ResponseItem responseItem)
