@@ -671,7 +671,7 @@ shindig.BaseIfrGadget.prototype.queryIfrGadgetType_ = function() {
   gadgets.io.makeNonProxiedRequest(url,
       handleJSONResponse,
       makeRequestParams,
-      'application/javascript'
+      {'Content-Type':'application/javascript'}
   );
 
   var gadget = this;

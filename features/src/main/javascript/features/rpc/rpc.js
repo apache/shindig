@@ -296,7 +296,7 @@ if (!gadgets.rpc) { // make lib resilient to double-inclusion
         //   }, 1000);
         // }
         if (rpc.c) {
-          rpc.callback = function(result) {
+          rpc['callback'] = function(result) {
             gadgets.rpc.call(rpc.f, CALLBACK_NAME, null, rpc.c, result);
           };
         }

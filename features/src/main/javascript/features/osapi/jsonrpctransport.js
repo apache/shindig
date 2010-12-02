@@ -58,14 +58,14 @@
       'METHOD' : 'POST',
       'AUTHORIZATION' : 'SIGNED'
     };
+    var headers = {'Content-Type': 'application/json'};
 
     var url = this.name;
     var token = shindig.auth.getSecurityToken();
     if (token) {
-      url += '?st=';
-      url += encodeURIComponent(token);
+      headers['Authorization'] = 'OAuth ' + token;
     }
-    gadgets.io.makeNonProxiedRequest(url, processResponse, request, 'application/json');
+    gadgets.io.makeNonProxiedRequest(url, processResponse, request, headers);
   }
 
   function init(config) {

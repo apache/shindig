@@ -267,14 +267,27 @@ class GadgetContext {
    * @return string
    */
   public function getRawToken() {
-    if (! $this->rawToken) {
-        $this->rawToken = isset($_GET["st"]) ? $_GET["st"] : '';
-    }
-    if (! $this->rawToken) {
-      $this->rawToken = isset($_POST['st']) ? $_POST['st'] : '';
+    if ($this->rawToken) {
+      return $this->rawToken;
     }
 
+    $this->rawToken = isset($_GET['st']) ? $_GET['st'] :
+                      isset($_POST['st']) ? $_POST['st'] :
+                          $this->parseAuthorization($_SERVER['AUTHORIZATION']);
+
+
     return $this->rawToken;
+  }
+
+  private function parseAuthorization($authHeader) {
+    if (substr($authHeader, 0, 5) != 'OAuth') {
+      return '';
+    }
+    // Ignore OAuth 1.0a
+    if (strpos($authHeader, "oauth_signature_method")) {
+      return '';
+    }
+    return trim(substr($authHeader, 6));
   }
 
   /**

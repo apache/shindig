@@ -24,11 +24,11 @@ JsonRpcTransportTest.inherits(TestCase);
 
 var lastXhr = {};
 
-JsonRpcTransportTest.prototype.dummyXhr = function(url, callback, params, contentType) {
+JsonRpcTransportTest.prototype.dummyXhr = function(url, callback, params, headers) {
   lastXhr.url = url;
   lastXhr.callback = callback;
   lastXhr.params = params;
-  lastXhr.contentType = contentType;
+  lastXhr.headers = headers;
   callback(lastXhr.result);
 };
 
@@ -235,11 +235,11 @@ JsonRpcTransportTest.inherits(TestCase);
 
 var lastXhr = {};
 
-JsonRpcTransportTest.prototype.dummyXhr = function(url, callback, params, contentType) {
+JsonRpcTransportTest.prototype.dummyXhr = function(url, callback, params, headers) {
   lastXhr.url = url;
   lastXhr.callback = callback;
   lastXhr.params = params;
-  lastXhr.contentType = contentType;
+  lastXhr.headers = headers;
   callback(lastXhr.result);
 };
 

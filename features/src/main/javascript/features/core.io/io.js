@@ -243,7 +243,7 @@ gadgets.io = function() {
    *     'application/x-www-form-urlencoded'.
    */
   function makeXhrRequest(realUrl, proxyUrl, callback, paramData, method,
-      params, processResponseFunction, opt_contentType) {
+      params, processResponseFunction, opt_headers) {
     var xhr = makeXhr();
 
     if (proxyUrl.indexOf('//') == 0) {
@@ -256,11 +256,15 @@ gadgets.io = function() {
           null, processResponseFunction, realUrl, callback, params, xhr);
     }
     if (paramData !== null) {
-      xhr.setRequestHeader('Content-Type', opt_contentType || 'application/x-www-form-urlencoded');
-      xhr.send(paramData);
-    } else {
-      xhr.send(null);
+      var contentTypeHeader = 'Content-Type';
+      var headers = opt_headers || {};
+      if (!headers[contentTypeHeader]) headers[contentTypeHeader] = 'application/x-www-form-urlencoded';
+
+      for (var headerName in headers) {
+        xhr.setRequestHeader(headerName, headers[headerName]);
+      }
     }
+    xhr.send(paramData);
   }
 
 
@@ -441,12 +445,16 @@ gadgets.io = function() {
     },
 
     /**
-     * @private
+     * @param {string} relativeUrl url to fetch via xhr
+     * @param callback callback to call when response is received or for error
+     * @param {Object=} opt_params
+     * @param {Object=} opt_headers
+     *
      */
-    makeNonProxiedRequest: function(relativeUrl, callback, opt_params, opt_contentType) {
+    makeNonProxiedRequest: function(relativeUrl, callback, opt_params, opt_headers) {
       var params = opt_params || {};
       makeXhrRequest(relativeUrl, relativeUrl, callback, params.POST_DATA,
-          params.METHOD, params, processNonProxiedResponse, opt_contentType);
+          params.METHOD, params, processNonProxiedResponse, opt_headers);
     },
 
     /**

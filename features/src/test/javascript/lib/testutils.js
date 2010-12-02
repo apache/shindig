@@ -42,7 +42,7 @@ TestCase.prototype.assertArgsToMakeNonProxiedRequest = function(argsInCall, expe
   this.assertTrue('params should be passed to makeNonProxiedRequest',
       argsInCall.params);
   this.assertEquals('Content type should match', 'application/json',
-      argsInCall.contentType);
+      argsInCall.headers['Content-Type']);
   this.assertEquals('Json for batch should match', expectedJson,
       gadgets.json.parse(argsInCall.params.POST_DATA));
 

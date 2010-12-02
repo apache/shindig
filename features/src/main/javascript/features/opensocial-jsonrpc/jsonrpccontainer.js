@@ -217,18 +217,18 @@ var JsonRpcRequestItem = function(rpc, opt_processData) {
       'POST_DATA' : gadgets.json.stringify(jsonBatchData)
     };
 
-    var url = [this.path_];
+    var headers = {'Content-Type':'application/json'};
+
     var token = shindig.auth.getSecurityToken();
     if (token) {
-      url.push('?st=', encodeURIComponent(token));
+      headers['Authorization'] = 'OAuth ' + token;
     }
 
-    this.sendRequest(url.join(''), sendResponse, makeRequestParams,
-        'application/json');
+    this.sendRequest(this.path_, sendResponse, makeRequestParams, headers);
   };
 
-  JsonRpcContainer.prototype.sendRequest = function(relativeUrl, callback, params, contentType) {
-    gadgets.io.makeNonProxiedRequest(relativeUrl, callback, params, contentType);
+  JsonRpcContainer.prototype.sendRequest = function(relativeUrl, callback, params, headers) {
+    gadgets.io.makeNonProxiedRequest(relativeUrl, callback, params, headers);
   };
 
   JsonRpcContainer.generateErrorResponse = function(result, requestObjects,
@@ -456,14 +456,13 @@ var JsonRpcRequestItem = function(rpc, opt_processData) {
       'POST_DATA' : gadgets.json.stringify(rpc)
     };
 
-    var url = [this.invalidatePath_];
+    var headers = {'Content-Type': 'application/json'};
     var token = shindig.auth.getSecurityToken();
     if (token) {
-      url.push('?st=', encodeURIComponent(token));
+      headers['Authorization'] = 'OAuth ' + token;
     }
 
-    this.sendRequest(url.join(''), null, makeRequestParams,
-        'application/json');
+    this.sendRequest(this.invalidatePath_, null, makeRequestParams, headers);
   };
 
 })();

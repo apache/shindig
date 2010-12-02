@@ -19,6 +19,7 @@ package org.apache.shindig.auth;
 
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import net.oauth.OAuth;
 
 import java.util.Enumeration;
@@ -35,11 +36,14 @@ public class UrlParameterAuthenticationHandler implements AuthenticationHandler 
   private static final String SECURITY_TOKEN_PARAM = "st";
 
   private final SecurityTokenCodec securityTokenCodec;
-  private static final Pattern COMMAWHITESPACE = Pattern.compile("\\s*,\\s*");
+  private final Boolean oauthSSLrequired;
 
   @Inject
-  public UrlParameterAuthenticationHandler(SecurityTokenCodec securityTokenCodec) {
+  public UrlParameterAuthenticationHandler(SecurityTokenCodec securityTokenCodec,
+                                           @Named("org.apache.shindig.auth.oauth2-require-ssl")
+                                           Boolean oauthSSLrequired) {
     this.securityTokenCodec = securityTokenCodec;
+    this.oauthSSLrequired = oauthSSLrequired;
   }
 
   public String getName() {
@@ -68,32 +72,31 @@ public class UrlParameterAuthenticationHandler implements AuthenticationHandler 
     return this.securityTokenCodec;
   }
 
-  // From OAuthMessage
-  private static final Pattern AUTHORIZATION = Pattern.compile("\\s*(\\w*)\\s+(.*)");
-  private static final Pattern NVP = Pattern.compile("(\\S*)\\s*\\=\\s*\"([^\"]*)\"");
+  private static final Pattern AUTHORIZATION_REGEX = Pattern.compile("\\s*OAuth\\s+(\\S*)\\s*.*");
 
   protected Map<String, String> getMappedParameters(final HttpServletRequest request) {
     Map<String, String> params = Maps.newHashMap();
+    boolean isSecure = this.oauthSSLrequired ? request.isSecure() : true;
 
     // old style security token
     String token = request.getParameter(SECURITY_TOKEN_PARAM);
 
     // OAuth2 token as a param
     // NOTE: if oauth_signature_method is present then we have a OAuth 1.0 request
-    if (token == null && request.isSecure() && request.getParameter(OAuth.OAUTH_SIGNATURE_METHOD) == null) {
+    // See OAuth 2.0 Draft 10 -- 5.1.2  URI Query Parameter
+    if (token == null && isSecure && request.getParameter(OAuth.OAUTH_SIGNATURE_METHOD) == null) {
       token = request.getParameter(OAuth.OAUTH_TOKEN);
     }
 
     // token in authorization header
-    if (token == null) {
+    // See OAuth 2.0 Draft 10 -- 5.1.1 The Authorization Request Header Field
+   if (token == null && isSecure) {
       for (Enumeration<String> headers = request.getHeaders("Authorization"); headers != null && headers.hasMoreElements();) {
-        Matcher m = AUTHORIZATION.matcher(headers.nextElement());
-        if (m.matches() && "Token".equalsIgnoreCase(m.group(1))) {
-          for (String nvp : COMMAWHITESPACE.split(m.group(2))) {
-            m = NVP.matcher(nvp);
-            if (m.matches() && "token".equals(m.group(1))) {
-              token = OAuth.decodePercent(m.group(2));
-            }
+        String authorization = headers.nextElement();
+        if (authorization != null && !authorization.contains("oauth_signature_method=")) {
+          Matcher m = AUTHORIZATION_REGEX.matcher(authorization);
+          if (m.matches()) {
+            token = m.group(1);
           }
         }
       }

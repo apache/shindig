@@ -55,9 +55,9 @@ BatchTest.prototype.testAddAndExecuteOneRequests = function() {
   var argsInCallToMakeNonProxiedRequest;
   var oldMakeRequest = gadgets.io.makeNonProxiedRequest;
   try {
-    gadgets.io.makeNonProxiedRequest = function(url, callback, params, contentType) {
+    gadgets.io.makeNonProxiedRequest = function(url, callback, params, headers) {
       argsInCallToMakeNonProxiedRequest = { url : url, callback : callback, params : params,
-        contentType : contentType};
+        headers : headers};
     };
     batch.execute(function() {});
 
@@ -86,9 +86,9 @@ BatchTest.prototype.testAddAndExecuteTwoRequests = function() {
   var argsInCallToMakeNonProxiedRequest;
   var oldMakeRequest = gadgets.io.makeNonProxiedRequest;
   try {
-    gadgets.io.makeNonProxiedRequest = function(url, callback, params, contentType) {
+    gadgets.io.makeNonProxiedRequest = function(url, callback, params, headers) {
       argsInCallToMakeNonProxiedRequest = { url : url, callback : callback, params : params,
-        contentType : contentType};
+        headers : headers};
     };
     batch.execute(function() {});
     this.assertArgsToMakeNonProxiedRequest(argsInCallToMakeNonProxiedRequest, expectedJson);
