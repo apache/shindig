@@ -18,12 +18,12 @@
  */
 package org.apache.shindig.gadgets.templates.tags;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.xml.DomUtil;
@@ -89,9 +89,9 @@ public class FlashTagHandler extends AbstractTagHandler {
     // Bind the security token to the flashvars if its available
     String st = processor.getTemplateContext().getGadget()
         .getContext().getParameter("st");
-    if (!StringUtils.isEmpty(st)) {
+    if (!Strings.isNullOrEmpty(st)) {
       String stVar = "st=" + Utf8UrlCoder.encode(st);
-      if (StringUtils.isEmpty(config.flashvars)) {
+      if (Strings.isNullOrEmpty(config.flashvars)) {
         config.flashvars = stVar;
       } else {
         config.flashvars += '&' + stVar;

@@ -21,6 +21,7 @@ package org.apache.shindig.gadgets.parse;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import com.google.common.base.Strings;
 import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.gadgets.spec.PipelinedData;
 import org.junit.Before;
@@ -152,7 +153,7 @@ public abstract class AbstractSocialMarkupHtmlParserTest extends AbstractParsing
 
   private void assertEmpty(Node n) {
     if (n.getChildNodes().getLength() != 0) {
-      assertTrue(StringUtils.isEmpty(n.getTextContent()) ||
+      assertTrue(Strings.isNullOrEmpty(n.getTextContent()) ||
           StringUtils.isWhitespace(n.getTextContent()));
     }
   }

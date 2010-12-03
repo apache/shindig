@@ -18,7 +18,7 @@
  */
 package org.apache.shindig.common.uri;
 
-import org.apache.commons.lang.StringUtils;
+import com.google.common.base.Strings;
 
 import com.google.common.base.Objects;
 import com.google.common.collect.Maps;
@@ -152,7 +152,7 @@ public final class Uri {
     }
 
     UriBuilder result;
-    if (StringUtils.isEmpty(relative.path) && relative.scheme == null
+    if (Strings.isNullOrEmpty(relative.path) && relative.scheme == null
         && relative.authority == null && relative.query == null
         && relative.fragment != null) {
       // if the relative URI only consists of fragment,
@@ -192,9 +192,9 @@ public final class Uri {
   }
 
   private static void validate(Uri uri) {
-    if (StringUtils.isEmpty(uri.authority) &&
-        StringUtils.isEmpty(uri.path) &&
-        StringUtils.isEmpty(uri.query)) {
+    if (Strings.isNullOrEmpty(uri.authority) &&
+        Strings.isNullOrEmpty(uri.path) &&
+        Strings.isNullOrEmpty(uri.query)) {
       throw new UriException("Invalid scheme-specific part");
     }
   }

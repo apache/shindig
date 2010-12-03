@@ -18,8 +18,8 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
-import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.config.BasicContainerConfig;
 import org.apache.shindig.config.ContainerConfig;
@@ -70,7 +70,7 @@ public class HtmlAccelServletTest extends ServletTestFixture {
     @Override
     public void rewrite(HttpRequest request, HttpResponseBuilder original) {
       super.rewrite(request, original);
-      if (!StringUtils.isEmpty(contentToRewrite)) {
+      if (!Strings.isNullOrEmpty(contentToRewrite)) {
         original.setResponse(contentToRewrite.getBytes());
       }
     }

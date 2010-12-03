@@ -18,10 +18,10 @@
  */
 package org.apache.shindig.gadgets.uri;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.Gadget;
@@ -84,7 +84,7 @@ public class DefaultAccelUriManager implements AccelUriManager, ContainerConfig.
   protected boolean looksLikeAccelUri(Uri requestUri) {
     return accelHost.equals(requestUri.getAuthority()) &&
            accelPath.equals(requestUri.getPath()) &&
-           !StringUtils.isEmpty(requestUri.getQueryParameter(
-               UriCommon.Param.URL.getKey()));
+           !Strings.isNullOrEmpty(requestUri.getQueryParameter(
+                   UriCommon.Param.URL.getKey()));
   }
 }

@@ -18,6 +18,7 @@
 package org.apache.shindig.gadgets.http;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -172,7 +173,7 @@ public class BasicHttpFetcher implements HttpFetcher {
     DefaultHttpClient client = new DefaultHttpClient(cm, params);
 
     // Set proxy if set via guice.
-    if (!StringUtils.isEmpty(basicHttpFetcherProxy)) {
+    if (!Strings.isNullOrEmpty(basicHttpFetcherProxy)) {
       String[] splits = basicHttpFetcherProxy.split(":");
       ConnRouteParams.setDefaultProxy(
           client.getParams(), new HttpHost(splits[0], Integer.parseInt(splits[1]), "http"));
@@ -221,7 +222,7 @@ public class BasicHttpFetcher implements HttpFetcher {
     client.removeResponseInterceptorByClass(ResponseProcessCookies.class);
 
     // Use Java's built-in proxy logic in case no proxy set via guice.
-    if (StringUtils.isEmpty(basicHttpFetcherProxy)) {
+    if (Strings.isNullOrEmpty(basicHttpFetcherProxy)) {
       ProxySelectorRoutePlanner routePlanner = new ProxySelectorRoutePlanner(
           client.getConnectionManager().getSchemeRegistry(),
           ProxySelector.getDefault());
@@ -284,12 +285,12 @@ public class BasicHttpFetcher implements HttpFetcher {
 
     // Break the request Uri to its components:
     Uri uri = request.getUri();
-    if (StringUtils.isEmpty(uri.getAuthority())) {
+    if (Strings.isNullOrEmpty(uri.getAuthority())) {
       throw new GadgetException(GadgetException.Code.INVALID_USER_DATA,
           "Missing domain name for request: " + uri,
           HttpServletResponse.SC_BAD_REQUEST);
     }
-    if (StringUtils.isEmpty(uri.getScheme())) {
+    if (Strings.isNullOrEmpty(uri.getScheme())) {
       throw new GadgetException(GadgetException.Code.INVALID_USER_DATA,
           "Missing schema for request: " + uri,
           HttpServletResponse.SC_BAD_REQUEST);

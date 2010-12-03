@@ -18,6 +18,7 @@
  */
 package org.apache.shindig.gadgets.uri;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
@@ -221,18 +222,18 @@ public class DefaultProxyUriManager implements ProxyUriManager {
       }
     }
 
-    if (!strictParsing && container != null && StringUtils.isEmpty(uriStr)) {
+    if (!strictParsing && container != null && Strings.isNullOrEmpty(uriStr)) {
       // Query-style despite the container being configured for chained style.
       uriStr = uriIn.getQueryParameter(Param.URL.getKey());
       queryUri = uriIn;
     }
 
     // Parameter validation.
-    if (StringUtils.isEmpty(uriStr) || StringUtils.isEmpty(container)) {
+    if (Strings.isNullOrEmpty(uriStr) || Strings.isNullOrEmpty(container)) {
       throw new GadgetException(GadgetException.Code.MISSING_PARAMETER,
           "Missing required parameter(s):" +
-          (StringUtils.isEmpty(uriStr) ? ' ' + Param.URL.getKey() : "") +
-          (StringUtils.isEmpty(container) ? ' ' + Param.CONTAINER.getKey() : ""),
+          (Strings.isNullOrEmpty(uriStr) ? ' ' + Param.URL.getKey() : "") +
+          (Strings.isNullOrEmpty(container) ? ' ' + Param.CONTAINER.getKey() : ""),
           HttpResponse.SC_BAD_REQUEST);
     }
 

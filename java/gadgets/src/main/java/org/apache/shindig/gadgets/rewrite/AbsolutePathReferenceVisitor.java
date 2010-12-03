@@ -19,10 +19,10 @@
 package org.apache.shindig.gadgets.rewrite;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.rewrite.DomWalker.Visitor;
@@ -137,7 +137,7 @@ public class AbsolutePathReferenceVisitor implements Visitor {
       Attr attr = (Attr) node.getAttributes().getNamedItem(
           resourceTags.get(nodeName));
       String nodeUri = attr != null ? attr.getValue() : null;
-      if (!StringUtils.isEmpty(nodeUri)) {
+      if (!Strings.isNullOrEmpty(nodeUri)) {
         return attr;
       }
     }

@@ -17,6 +17,7 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Lists;
@@ -252,7 +253,7 @@ public class ContentRewriterFeature {
       if (f != null && f.getParams().containsKey(INCLUDE_TAGS)) {
         tagsVal = Sets.newTreeSet();
         for (String tag : StringUtils.split(f.getParam(INCLUDE_TAGS), ',')) {
-          if (!StringUtils.isEmpty(tag)) {
+          if (!Strings.isNullOrEmpty(tag)) {
             tagsVal.add(tag.trim().toLowerCase());
           }
         }
@@ -298,7 +299,7 @@ public class ContentRewriterFeature {
       bundle.param = regex;
       bundle.matches = matches;
 
-      if (bundle.matches.isEmpty() && StringUtils.isEmpty(bundle.param)) {
+      if (bundle.matches.isEmpty() && Strings.isNullOrEmpty(bundle.param)) {
         bundle.options = PatternOptions.NONE;
       } else if (bundle.matches.size() == 1) {
         String firstVal = bundle.matches.iterator().next();

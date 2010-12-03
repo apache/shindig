@@ -18,9 +18,9 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
+import com.google.common.base.Strings;
 import com.google.inject.Inject;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.xml.DomUtil;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetException;
@@ -82,8 +82,8 @@ public class OsTemplateXmlLoaderRewriter extends DomWalker.Rewriter {
       if (node.getNodeType() == Node.ELEMENT_NODE &&
           "div".equalsIgnoreCase(((Element)node).getTagName()) &&
           OS_TEMPLATE_MIME.equalsIgnoreCase(((Element)node).getAttribute("type")) &&
-          (!StringUtils.isEmpty(((Element)node).getAttribute("id")) ||
-           !StringUtils.isEmpty(((Element)node).getAttribute("name")))) {
+          (!Strings.isNullOrEmpty(((Element) node).getAttribute("id")) ||
+           !Strings.isNullOrEmpty(((Element)node).getAttribute("name")))) {
         return VisitStatus.RESERVE_NODE;
       }
       return VisitStatus.BYPASS;
@@ -113,7 +113,7 @@ public class OsTemplateXmlLoaderRewriter extends DomWalker.Rewriter {
         Element elem = (Element)node;
         String value = elem.getTextContent();
         String id = elem.getAttribute("name");
-        if (StringUtils.isEmpty(id)) {
+        if (Strings.isNullOrEmpty(id)) {
           id = elem.getAttribute("id");
         }
         

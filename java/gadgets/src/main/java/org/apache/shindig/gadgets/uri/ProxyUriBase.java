@@ -20,7 +20,7 @@ package org.apache.shindig.gadgets.uri;
 
 import com.google.common.base.Objects;
 
-import org.apache.commons.lang.StringUtils;
+import com.google.common.base.Strings;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
@@ -180,7 +180,7 @@ public class ProxyUriBase {
     HttpRequest req = new HttpRequest(targetUri)
         .setIgnoreCache(isNoCache())
         .setContainer(getContainer());
-    if (!StringUtils.isEmpty(getGadget())) {
+    if (!Strings.isNullOrEmpty(getGadget())) {
       try {
         req.setGadget(Uri.parse(getGadget()));
       } catch (IllegalArgumentException e) {

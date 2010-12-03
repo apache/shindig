@@ -17,6 +17,7 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
+import com.google.common.base.Strings;
 import org.apache.shindig.common.servlet.HttpUtil;
 import org.apache.shindig.common.servlet.InjectedServlet;
 import org.apache.shindig.common.uri.UriBuilder;
@@ -31,7 +32,6 @@ import org.apache.shindig.gadgets.uri.UriCommon.Param;
 import com.google.inject.Inject;
 
 import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.commons.lang.StringUtils;
 
 import java.io.IOException;
 import java.util.logging.Logger;
@@ -139,7 +139,7 @@ public class GadgetRenderingServlet extends InjectedServlet {
       // with a query parameter.
       int ttl = DEFAULT_CACHE_TTL;
       String ttlStr = params.getRequest().getParameter(Param.REFRESH.getKey());
-      if (!StringUtils.isEmpty(ttlStr)) {
+      if (!Strings.isNullOrEmpty(ttlStr)) {
         try {
           ttl = Integer.parseInt(ttlStr);
         } catch (NumberFormatException e) {

@@ -18,7 +18,7 @@
  */
 package org.apache.shindig.gadgets.render;
 
-import org.apache.commons.lang.StringUtils;
+import com.google.common.base.Strings;
 import org.apache.sanselan.ImageFormat;
 import org.apache.sanselan.ImageReadException;
 import org.apache.sanselan.Sanselan;
@@ -64,7 +64,7 @@ public class SanitizingResponseRewriter implements ResponseRewriter {
     // Content fetched through the proxy can stipulate that it must be sanitized.
     if (request.isSanitizationRequested() &&
         featureConfigFactory.get(request).shouldRewriteURL(request.getUri().toString())) {
-      if (StringUtils.isEmpty(request.getRewriteMimeType())) {
+      if (Strings.isNullOrEmpty(request.getRewriteMimeType())) {
         LOG.log(Level.WARNING, "Request to sanitize without content type for "
             + request.getUri());
         resp.setContent("");

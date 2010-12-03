@@ -18,9 +18,9 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
-import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.Pair;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
@@ -112,7 +112,7 @@ public abstract class ResourceMutateVisitor implements DomWalker.Visitor {
           resourceTags.get(nodeName));
       if (attr != null) {
         String urlValue = attr.getValue();
-        if (!StringUtils.isEmpty(urlValue) && featureConfig.shouldRewriteURL(urlValue)) {
+        if (!Strings.isNullOrEmpty(urlValue) && featureConfig.shouldRewriteURL(urlValue)) {
           return VisitStatus.RESERVE_NODE;
         }
       }

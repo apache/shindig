@@ -17,12 +17,12 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
+import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetException;
@@ -160,7 +160,7 @@ public class AccelHandler {
    */
   protected boolean isRecoverable(HttpRequest req, HttpResponse results,
                                   RewritingException exception) {
-    return !(StringUtils.isEmpty(results.getResponseAsString()) &&
+    return !(Strings.isNullOrEmpty(results.getResponseAsString()) &&
              results.getHeaders() == null);
   }
 

@@ -18,10 +18,10 @@
  */
 package org.apache.shindig.gadgets.oauth;
 
+import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.crypto.BlobCrypter;
 import org.apache.shindig.common.crypto.BlobCrypterException;
@@ -133,7 +133,7 @@ public class GadgetOAuthCallbackGenerator implements OAuthCallbackGenerator {
     if (gadgetCallback == null) {
       return null;
     }
-    if (StringUtils.isEmpty(gadgetCallback.getScheme())) {
+    if (Strings.isNullOrEmpty(gadgetCallback.getScheme())) {
       gadgetCallback = new UriBuilder(gadgetCallback).setScheme(activeUrl.getScheme()).toUri();
     }
     return gadgetCallback.toString();

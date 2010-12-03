@@ -18,7 +18,7 @@
  */
 package org.apache.shindig.gadgets.templates;
 
-import org.apache.commons.lang.StringUtils;
+import com.google.common.base.Strings;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.util.ResourceLoader;
 import org.apache.shindig.common.xml.XmlException;
@@ -68,7 +68,7 @@ public class ContainerTagLibraryFactory {
   private TemplateLibrary getOsmlLibrary(String container) {
     String library = config.getString(container,
         "${Cur['gadgets.features'].osml.library}");
-    if (StringUtils.isEmpty(library)) {
+    if (Strings.isNullOrEmpty(library)) {
       return NullTemplateLibrary.INSTANCE;
     }
     

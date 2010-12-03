@@ -19,6 +19,7 @@
 package org.apache.shindig.protocol;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.auth.SecurityToken;
@@ -184,7 +185,7 @@ public class DefaultHandlerRegistry implements HandlerRegistry {
     try {
       MethodCaller methodCaller = new MethodCaller(m, true);
       String opName = m.getName();
-      if (!StringUtils.isEmpty(op.name())) {
+      if (!Strings.isNullOrEmpty(op.name())) {
         opName = op.name();
       }
       RestInvocationHandler restHandler = new RestInvocationHandler(op, methodCaller,
@@ -199,7 +200,7 @@ public class DefaultHandlerRegistry implements HandlerRegistry {
       }
 
       for (String httpMethod : op.httpMethods()) {
-        if (!StringUtils.isEmpty(httpMethod)) {
+        if (!Strings.isNullOrEmpty(httpMethod)) {
           httpMethod = httpMethod.toUpperCase();
           SortedSet<RestPath> sortedSet = methods.get(httpMethod);
           if (sortedSet == null) {
@@ -207,7 +208,7 @@ public class DefaultHandlerRegistry implements HandlerRegistry {
             methods.put(httpMethod, sortedSet);
           }
 
-          if (StringUtils.isEmpty(op.path())) {
+          if (Strings.isNullOrEmpty(op.path())) {
             sortedSet.add(new RestPath('/' + serviceName +  service.path(), restHandler));
           } else {
             // Use the standard service name and constant prefix as the key

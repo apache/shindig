@@ -18,12 +18,12 @@
 
 package org.apache.shindig.gadgets.servlet;
 
+import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import com.google.common.collect.Lists;
 
 import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.servlet.HttpUtil;
 import org.apache.shindig.common.servlet.InjectedServlet;
 import org.apache.shindig.common.Pair;
@@ -245,7 +245,7 @@ public class ConcatProxyServlet extends InjectedServlet {
     StringBuilder err = new StringBuilder();
     err.append("/* ---- Error ");
     err.append(status);
-    if (!StringUtils.isEmpty(errorMessage)) {
+    if (!Strings.isNullOrEmpty(errorMessage)) {
       err.append(", ");
       err.append(errorMessage);
     }

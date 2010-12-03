@@ -17,6 +17,7 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
+import com.google.common.base.Strings;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.uri.Uri;
@@ -138,7 +139,7 @@ public class CssResponseRewriter implements ResponseRewriter {
       List<String> imports = rewrite(stylesheet, source, uriMaker, extractImports, gadgetContext);
       // Write the rewritten CSS back into the element
       String content = cssParser.serialize(stylesheet);
-      if (StringUtils.isEmpty(content) || StringUtils.isWhitespace(content)) {
+      if (Strings.isNullOrEmpty(content) || StringUtils.isWhitespace(content)) {
         // Remove the owning node
         styleNode.getParentNode().removeChild(styleNode);
       } else {

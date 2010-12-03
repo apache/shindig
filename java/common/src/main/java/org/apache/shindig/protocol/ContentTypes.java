@@ -18,6 +18,7 @@
  */
 package org.apache.shindig.protocol;
 
+import com.google.common.base.Strings;
 import org.apache.commons.lang.StringUtils;
 
 import com.google.common.collect.ImmutableSet;
@@ -83,7 +84,7 @@ public final class ContentTypes {
   public static void checkContentTypes(Set<String> allowedContentTypes,
       String contentType) throws InvalidContentTypeException {
 
-    if (StringUtils.isEmpty(contentType)) {
+    if (Strings.isNullOrEmpty(contentType)) {
       throw new InvalidContentTypeException(
           "No Content-Type specified. One of "
               + StringUtils.join(allowedContentTypes, ", ") + " is required");

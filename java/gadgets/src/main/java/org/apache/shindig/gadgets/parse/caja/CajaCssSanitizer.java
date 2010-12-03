@@ -17,7 +17,7 @@
  */
 package org.apache.shindig.gadgets.parse.caja;
 
-import org.apache.commons.lang.StringUtils;
+import com.google.common.base.Strings;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
@@ -110,7 +110,7 @@ public class CajaCssSanitizer {
       // Failed to parse stylesheet so log and continue
       LOG.log(Level.INFO, "Failed to parse stylesheet", ge);
     }
-    if (StringUtils.isEmpty(content)) {
+    if (Strings.isNullOrEmpty(content)) {
       // Remove the owning node
       styleElem.getParentNode().removeChild(styleElem);
     } else {
@@ -208,7 +208,7 @@ public class CajaCssSanitizer {
   private boolean isValidUri(String uri) {
     try {
       String scheme = Uri.parse(uri).getScheme();
-      return StringUtils.isEmpty(scheme) ||
+      return Strings.isNullOrEmpty(scheme) ||
           ALLOWED_URI_SCHEMES.contains(scheme.toLowerCase());
     } catch (RuntimeException re) {
       if (LOG.isLoggable(Level.FINE)) {

@@ -18,9 +18,8 @@
  */
 package org.apache.shindig.gadgets.variables;
 
+import com.google.common.base.Strings;
 import org.apache.shindig.gadgets.variables.Substitutions.Type;
-
-import org.apache.commons.lang.StringUtils;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -136,9 +135,9 @@ public class SubstitutionsTest extends Assert {
     subst.addSubstitution(Type.USER_PREF, "bar", "BAR!!!");
 
     // Most real-world content contains very few substitutions.
-    msg += StringUtils.repeat("foo ", 1000);
+    msg += Strings.repeat("foo ", 1000);
 
-    String message = StringUtils.repeat(msg, 1000);
+    String message = Strings.repeat(msg, 1000);
 
     long now = System.nanoTime();
     int cnt = 1000;

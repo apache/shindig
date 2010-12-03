@@ -18,6 +18,7 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
+import com.google.common.base.Strings;
 import org.apache.commons.codec.binary.Base64InputStream;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringEscapeUtils;
@@ -153,8 +154,8 @@ public final class ServletUtil {
   }
 
   private static String getXForwardedForHeader(String origValue, String remoteAddr) {
-    if (!StringUtils.isEmpty(remoteAddr)) {
-      if (StringUtils.isEmpty(origValue)) {
+    if (!Strings.isNullOrEmpty(remoteAddr)) {
+      if (Strings.isNullOrEmpty(origValue)) {
         origValue = remoteAddr;
       } else {
         origValue = remoteAddr + ", " + origValue;

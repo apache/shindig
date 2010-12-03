@@ -18,11 +18,10 @@
  */
 package org.apache.shindig.protocol.conversion;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-
-import org.apache.commons.lang.StringUtils;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -123,7 +122,7 @@ public class BeanFilter {
 
     FilterInvocationHandler(Object origData, Set<String> fields, String fieldName) {
       this.fields = fields;
-      this.prefix = StringUtils.isEmpty(fieldName) ? "" : fieldName + DELIMITER;
+      this.prefix = Strings.isNullOrEmpty(fieldName) ? "" : fieldName + DELIMITER;
       this.origData = origData;
     }
 

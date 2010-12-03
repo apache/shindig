@@ -17,6 +17,7 @@
  */
 package org.apache.shindig.protocol;
 
+import com.google.common.base.Strings;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.auth.SecurityToken;
@@ -156,7 +157,7 @@ public class JsonRpcServlet extends ApiServlet {
           // with field name as "request". It will contain the json request. Any further form
           // field or file item will not be parsed out, but will be exposed via getFormItem
           // method of RequestItem.
-          if (!StringUtils.isEmpty(item.getContentType())) {
+          if (!Strings.isNullOrEmpty(item.getContentType())) {
             ContentTypes.checkContentTypes(ContentTypes.ALLOWED_JSON_CONTENT_TYPES, item.getContentType());
           }
           content = item.getAsString();

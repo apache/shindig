@@ -17,7 +17,7 @@
  */
 package org.apache.shindig.gadgets.http;
 
-import org.apache.commons.lang.StringUtils;
+import com.google.common.base.Strings;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.cache.Cache;
 import org.apache.shindig.common.cache.CacheProvider;
@@ -125,7 +125,7 @@ public class DefaultInvalidationService implements InvalidationService {
 
     // Assume the container is consistent in its use of either appId or appUrl.
     // Use appId
-    if (!StringUtils.isEmpty(token.getAppId())) {
+    if (!Strings.isNullOrEmpty(token.getAppId())) {
       return TOKEN_PREFIX + token.getAppId() + ':' + userId;
     }
     return TOKEN_PREFIX + token.getAppUrl() + ':' + userId;

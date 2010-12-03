@@ -23,7 +23,7 @@ import java.io.PrintWriter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.lang.StringUtils;
+import com.google.common.base.Strings;
 import org.apache.shindig.auth.AuthInfoUtil;
 import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.common.testing.FakeHttpServletRequest;
@@ -96,7 +96,7 @@ public class DataServiceServletTest extends Assert {
     String actualMethod, String overrideMethod) throws Exception {
     setupRequest(pathInfo, actualMethod, overrideMethod);
 
-    String method = StringUtils.isEmpty(overrideMethod) ? actualMethod : overrideMethod;
+    String method = Strings.isNullOrEmpty(overrideMethod) ? actualMethod : overrideMethod;
 
     EasyMock.expect(jsonConverter.convertToString(
         ImmutableMap.of("entry", TestHandler.REST_RESULTS.get(method))))

@@ -17,6 +17,7 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
@@ -269,7 +270,7 @@ public class TemplateRewriter implements GadgetRewriter {
   private void injectTemplateLibrary(TemplateLibrary library, Element head) {
     try {
       String libraryContent = library.serialize();
-      if (StringUtils.isEmpty(libraryContent)) {
+      if (Strings.isNullOrEmpty(libraryContent)) {
         return;
       }
       

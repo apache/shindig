@@ -19,12 +19,12 @@
 package org.apache.shindig.gadgets.servlet;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.Uri.UriException;
 import org.apache.shindig.gadgets.http.HttpResponse;
@@ -197,7 +197,7 @@ public class GadgetsHandler {
         return ImmutableMap.of();
       }
 
-      if (StringUtils.isEmpty(request.getParameter("container"))) {
+      if (Strings.isNullOrEmpty(request.getParameter("container"))) {
         throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST,
             "Missing container for request.");
       }

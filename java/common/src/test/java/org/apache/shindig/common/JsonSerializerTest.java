@@ -21,7 +21,8 @@ package org.apache.shindig.common;
 import static org.apache.shindig.common.JsonAssert.assertJsonEquals;
 import static org.junit.Assert.assertEquals;
 
-import org.apache.commons.lang.StringUtils;
+import com.google.common.base.Strings;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Test;
@@ -282,7 +283,7 @@ public class JsonSerializerTest {
   public static Map<String, Object> perfComparison100LargeValues() {
     Map<String, Object> data = Maps.newHashMap();
     for (int i = 0; i < 100; ++i) {
-      data.put("key-" + i, StringUtils.repeat("small value", 100));
+      data.put("key-" + i, Strings.repeat("small value", 100));
     }
     return data;
   }
@@ -290,7 +291,7 @@ public class JsonSerializerTest {
   public static Map<String, Object> perfComparison10LargeValuesAndEscapes() {
     Map<String, Object> data = Maps.newHashMap();
     for (int i = 0; i < 10; ++i) {
-      data.put("key-" + i, StringUtils.repeat("\tsmall\r value \\foo\b\uFFFF\uBCAD\n\u0083", 100));
+      data.put("key-" + i, Strings.repeat("\tsmall\r value \\foo\b\uFFFF\uBCAD\n\u0083", 100));
     }
     return data;
   }

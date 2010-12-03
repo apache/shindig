@@ -18,7 +18,7 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
-import org.apache.commons.lang.StringUtils;
+import com.google.common.base.Strings;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.uri.ConcatUriManager;
@@ -199,7 +199,7 @@ public class ConcatVisitor implements DomWalker.Visitor {
       for (Element elem : sourceBatch) {
         Uri elemOrigUri = uriIt.next();
         String snippet = concatUri.getSnippet(elemOrigUri);
-        if (!StringUtils.isEmpty(snippet)) {
+        if (!Strings.isNullOrEmpty(snippet)) {
           Node scriptNode = elem.getOwnerDocument().createElement("script");
           scriptNode.setTextContent(snippet);
           elem.getParentNode().insertBefore(scriptNode, elem);
@@ -223,7 +223,7 @@ public class ConcatVisitor implements DomWalker.Visitor {
     Multimap<String, Element> mediaBatchMap = LinkedHashMultimap.create();
     for (Element element : elements) {
       String mediaType = element.getAttribute("media");
-      mediaBatchMap.put(StringUtils.isEmpty(mediaType) ? "screen" : mediaType, element);
+      mediaBatchMap.put(Strings.isNullOrEmpty(mediaType) ? "screen" : mediaType, element);
     }
     Set<String> mediaTypes = mediaBatchMap.keySet();
     for (String mediaType : mediaTypes) {
@@ -234,7 +234,7 @@ public class ConcatVisitor implements DomWalker.Visitor {
 
   private boolean isRewritableExternData(Element elem) {
     String uriStr = elem != null ? elem.getAttribute(type.getSrcAttrib()) : null;
-    if (StringUtils.isEmpty(uriStr) ||
+    if (Strings.isNullOrEmpty(uriStr) ||
         !config.shouldRewriteURL(uriStr)) {
       return false;
     }

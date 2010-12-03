@@ -18,12 +18,12 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
+import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpRequest;
@@ -161,7 +161,7 @@ public class ProxyHandler {
    * @return True if the error is recoverable, false otherwise.
    */
   public boolean isRecoverable(HttpResponse results) {
-    return !(StringUtils.isEmpty(results.getResponseAsString()) &&
+    return !(Strings.isNullOrEmpty(results.getResponseAsString()) &&
              results.getHeaders() == null);
   }
 }

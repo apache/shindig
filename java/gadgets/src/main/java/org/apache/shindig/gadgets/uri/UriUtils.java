@@ -18,6 +18,7 @@
  */
 package org.apache.shindig.gadgets.uri;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
 import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.gadgets.GadgetException;
@@ -239,9 +240,9 @@ public final class UriUtils {
   public static void maybeRewriteContentType(HttpRequest req, HttpResponseBuilder response) {
     String responseType = response.getHeader("Content-Type");
     String requiredType = req.getRewriteMimeType();
-    if (!StringUtils.isEmpty(requiredType)) {
+    if (!Strings.isNullOrEmpty(requiredType)) {
       // Use a 'Vary' style check on the response
-      if (requiredType.endsWith("/*") && !StringUtils.isEmpty(responseType)) {
+      if (requiredType.endsWith("/*") && !Strings.isNullOrEmpty(responseType)) {
         String requiredTypePrefix = requiredType.substring(0, requiredType.length() - 1);
         if (!responseType.toLowerCase().startsWith(requiredTypePrefix.toLowerCase())) {
           // TODO: We are currently setting the content type to something like x/* (e.g. text/*)

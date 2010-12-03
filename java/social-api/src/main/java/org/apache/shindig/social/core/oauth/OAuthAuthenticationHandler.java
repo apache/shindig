@@ -17,6 +17,7 @@
  */
 package org.apache.shindig.social.core.oauth;
 
+import com.google.common.base.Strings;
 import com.google.inject.Inject;
 
 import net.oauth.OAuth;
@@ -72,12 +73,12 @@ public class OAuthAuthenticationHandler implements AuthenticationHandler {
   public SecurityToken getSecurityTokenFromRequest(HttpServletRequest request)
     throws InvalidAuthenticationException {
     OAuthMessage message = OAuthServlet.getMessage(request, null);
-    if (StringUtils.isEmpty(getParameter(message, OAuth.OAUTH_SIGNATURE))) {
+    if (Strings.isNullOrEmpty(getParameter(message, OAuth.OAUTH_SIGNATURE))) {
       // Is not an oauth request
       return null;
     }
     String bodyHash = getParameter(message, OAuthConstants.OAUTH_BODY_HASH);
-    if (!StringUtils.isEmpty(bodyHash)) {
+    if (!Strings.isNullOrEmpty(bodyHash)) {
       verifyBodyHash(request, bodyHash);
     }
     try {
@@ -123,7 +124,7 @@ public class OAuthAuthenticationHandler implements AuthenticationHandler {
   protected OAuthEntry getOAuthEntry(OAuthMessage message) throws OAuthProblemException {
     OAuthEntry entry = null;
     String token = getParameter(message, OAuth.OAUTH_TOKEN);
-    if (!StringUtils.isEmpty(token))  {
+    if (!Strings.isNullOrEmpty(token))  {
       entry = store.getEntry(token);
       if (entry == null) {
         OAuthProblemException e = new OAuthProblemException(OAuth.Problems.TOKEN_REJECTED);

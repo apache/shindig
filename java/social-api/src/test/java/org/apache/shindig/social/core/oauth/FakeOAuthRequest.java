@@ -17,6 +17,7 @@
  */
 package org.apache.shindig.social.core.oauth;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 
 import net.oauth.OAuth;
@@ -26,7 +27,6 @@ import net.oauth.OAuthMessage;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.lang.StringUtils;
 
 import org.apache.shindig.auth.OAuthConstants;
 import org.apache.shindig.common.testing.FakeHttpServletRequest;
@@ -108,7 +108,7 @@ public class FakeOAuthRequest {
 
     OAuthConsumer consumer = new OAuthConsumer(null,consumerKey,consumerSecret, null);
     OAuthAccessor accessor = new OAuthAccessor(consumer);
-    if (!StringUtils.isEmpty(token)) {
+    if (!Strings.isNullOrEmpty(token)) {
       accessor.accessToken = token;
       accessor.tokenSecret = tokenSecret;
     }

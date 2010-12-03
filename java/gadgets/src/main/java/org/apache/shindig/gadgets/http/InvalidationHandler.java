@@ -17,7 +17,7 @@
  */
 package org.apache.shindig.gadgets.http;
 
-import org.apache.commons.lang.StringUtils;
+import com.google.common.base.Strings;
 import org.apache.shindig.auth.AuthenticationMode;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.protocol.BaseRequestItem;
@@ -54,8 +54,8 @@ public class InvalidationHandler {
 
   @Operation(httpMethods = {"POST","GET"}, path = "/invalidate")
   public void invalidate(BaseRequestItem request) {
-    if (StringUtils.isEmpty(request.getToken().getAppId()) &&
-        StringUtils.isEmpty(request.getToken().getAppUrl())) {
+    if (Strings.isNullOrEmpty(request.getToken().getAppId()) &&
+        Strings.isNullOrEmpty(request.getToken().getAppUrl())) {
       throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST,
           "Cannot invalidate content without specifying application");
     }
@@ -70,7 +70,7 @@ public class InvalidationHandler {
     Set<Uri> resources = Sets.newHashSet();
 
     // Assume the the viewer content is being invalidated if it is available
-    if (!StringUtils.isEmpty(request.getToken().getViewerId())) {
+    if (!Strings.isNullOrEmpty(request.getToken().getViewerId())) {
       userIds.add(request.getToken().getViewerId());
     }
     if (keys != null) {
