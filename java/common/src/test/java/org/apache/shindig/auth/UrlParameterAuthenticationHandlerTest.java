@@ -54,6 +54,9 @@ public class UrlParameterAuthenticationHandlerTest {
     // Old behavior, no longer supported
     req = new FakeHttpServletRequest().setHeader("Authorization", "Token token=\"1234\"");
     Assert.assertNull(authHandler.getSecurityTokenFromRequest(req));
+
+    req = new FakeHttpServletRequest().setHeader("Authorization", "OAuth 1234");
+    Assert.assertNull(authHandler.getSecurityTokenFromRequest(req));
   }
 
   @Test
@@ -75,19 +78,19 @@ public class UrlParameterAuthenticationHandlerTest {
   @Test
   public void testOAuth2Header() throws Exception {
     req = new FakeHttpServletRequest("https://www.example.org/")
-        .setHeader("Authorization", "OAuth  1234");
+        .setHeader("Authorization", "OAuth2  1234");
     Assert.assertEquals(expectedToken, authHandler.getSecurityTokenFromRequest(req));
 
     req = new FakeHttpServletRequest("https://www.example.org/")
-        .setHeader("Authorization", "   OAuth    1234 ");
+        .setHeader("Authorization", "   OAuth2    1234 ");
     Assert.assertEquals(expectedToken, authHandler.getSecurityTokenFromRequest(req));
 
     req = new FakeHttpServletRequest("https://www.example.org/")
-        .setHeader("Authorization", "OAuth 1234 x=1,y=\"2 2 2\"");
+        .setHeader("Authorization", "OAuth2 1234 x=1,y=\"2 2 2\"");
     Assert.assertEquals(expectedToken, authHandler.getSecurityTokenFromRequest(req));
 
     req = new FakeHttpServletRequest("http://www.example.org/")
-        .setHeader("Authorization", "OAuth 1234");
+        .setHeader("Authorization", "OAuth2 1234");
     Assert.assertNull(authHandler.getSecurityTokenFromRequest(req));
   }
 

@@ -221,7 +221,7 @@ var JsonRpcRequestItem = function(rpc, opt_processData) {
 
     var token = shindig.auth.getSecurityToken();
     if (token) {
-      headers['Authorization'] = 'OAuth ' + token;
+      headers['Authorization'] = 'OAuth2 ' + token;
     }
 
     this.sendRequest(this.path_, sendResponse, makeRequestParams, headers);
@@ -459,7 +459,7 @@ var JsonRpcRequestItem = function(rpc, opt_processData) {
     var headers = {'Content-Type': 'application/json'};
     var token = shindig.auth.getSecurityToken();
     if (token) {
-      headers['Authorization'] = 'OAuth ' + token;
+      headers['Authorization'] = 'OAuth2 ' + token;
     }
 
     this.sendRequest(this.invalidatePath_, null, makeRequestParams, headers);

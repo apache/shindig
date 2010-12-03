@@ -63,7 +63,7 @@
     var url = this.name;
     var token = shindig.auth.getSecurityToken();
     if (token) {
-      headers['Authorization'] = 'OAuth ' + token;
+      headers['Authorization'] = 'OAuth2 ' + token;
     }
     gadgets.io.makeNonProxiedRequest(url, processResponse, request, headers);
   }

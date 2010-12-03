@@ -72,7 +72,7 @@ public class UrlParameterAuthenticationHandler implements AuthenticationHandler 
     return this.securityTokenCodec;
   }
 
-  private static final Pattern AUTHORIZATION_REGEX = Pattern.compile("\\s*OAuth\\s+(\\S*)\\s*.*");
+  private static final Pattern AUTHORIZATION_REGEX = Pattern.compile("\\s*OAuth2\\s+(\\S*)\\s*.*");
 
   protected Map<String, String> getMappedParameters(final HttpServletRequest request) {
     Map<String, String> params = Maps.newHashMap();
@@ -83,17 +83,18 @@ public class UrlParameterAuthenticationHandler implements AuthenticationHandler 
 
     // OAuth2 token as a param
     // NOTE: if oauth_signature_method is present then we have a OAuth 1.0 request
-    // See OAuth 2.0 Draft 10 -- 5.1.2  URI Query Parameter
+    // See OAuth 2.0 Bearer Tokens Draft 01 -- 2.3  URI Query Parameter
+    // http://tools.ietf.org/html/draft-ietf-oauth-v2-bearer-01
     if (token == null && isSecure && request.getParameter(OAuth.OAUTH_SIGNATURE_METHOD) == null) {
       token = request.getParameter(OAuth.OAUTH_TOKEN);
     }
 
     // token in authorization header
-    // See OAuth 2.0 Draft 10 -- 5.1.1 The Authorization Request Header Field
+    // See OAuth 2.0 Bearer Tokens Draft 01 -- 2.1 The Authorization Request Header Field
    if (token == null && isSecure) {
       for (Enumeration<String> headers = request.getHeaders("Authorization"); headers != null && headers.hasMoreElements();) {
         String authorization = headers.nextElement();
-        if (authorization != null && !authorization.contains("oauth_signature_method=")) {
+        if (authorization != null) {
           Matcher m = AUTHORIZATION_REGEX.matcher(authorization);
           if (m.matches()) {
             token = m.group(1);
