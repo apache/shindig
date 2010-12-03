@@ -71,6 +71,15 @@ class TemplateParser {
     $this->dataContext['Context'] = array('UniqueId' => uniqid());
   }
 
+  /**
+   * returns the current datacontext, used mainly for testing purposes
+   * 
+   * @return array
+   */
+  public function getDataContext() {
+    return $this->dataContext;
+  }
+
   public function parseNode(DOMNode &$node) {
     $removeNode = false;
     if ($node instanceof DOMText) {
@@ -496,7 +505,35 @@ class TemplateParser {
         $scriptBlock->appendChild($scriptCodeNode);
         return $node;
         break;
+      case 'os:var':
+        // handle expressions
+        $this->parseNodeAttributes($node);
 
+        if (! ($key = $node->getAttribute('key'))) {
+          throw new ExpressionException("os:Var missing attribute: key");
+        }
+
+        // either get value from attribute
+        if (! ($value = $node->getAttribute('value'))) {
+          $value = '';
+        }
+
+        // or from inner text of node
+        if (! $value && $node->textContent) {
+          $value = $node->textContent;
+        }
+
+        // try to decode if the value is a valid json object
+        $parsedValue = json_decode($value, true);
+
+        if ($parsedValue) {
+          $value = $parsedValue;
+        }
+
+        $this->dataContext['Top'][$key] = $value;
+
+        return $node;
+        break;
       case 'osx:navigatetoapp':
         break;
 

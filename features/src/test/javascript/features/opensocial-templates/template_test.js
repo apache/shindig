@@ -765,3 +765,26 @@ function testOsIf() {
   var output = os.compileTemplateString('<os:Repeat expression="${list}"><os:If condition="${name != \'b\'}"><b>${name}</b> <b>${name}</b> </os:If></os:Repeat>').render(data);
   assertEquals("a a c c", domutil.getVisibleTextTrim(output));
 };
+
+function testOsVar() {
+
+  assertTemplateOutput(
+  '<div><os:Var key="counter" value="1" />${counter}</div>',
+  '<div>1</div>',
+  {});
+
+  assertTemplateOutput(
+  '<div><os:Var key="counter" value="1" /><os:Var key="counter" value="${counter + 1}" />${counter}</div>',
+  '<div>2</div>',
+  {});
+
+  assertTemplateOutput(
+  '<div><os:Var key="counter" value="[1,3,5,7]" />${counter[1]}</div>',
+  '<div>3</div>',
+  {});
+
+  assertTemplateOutput(
+  '<div><os:Var key="counter">{"key" : "value"}</os:Var>${counter.key}</div>',
+  '<div>value</div>',
+  {});
+}

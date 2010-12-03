@@ -29,6 +29,26 @@ os.defineBuiltinTags = function() {
       os.createNamespace('os', 'http://ns.opensocial.org/2008/markup');
 
   /**
+   * <os:Var> custom tag for variable assignment
+   */
+  osn.Var = function(node, data, context) {
+    var value = os.getValueFromNode_(node,'value');
+
+    if (! value && node.innerHTML) {
+      value = node.innerHTML;
+    }
+    
+    var parsedValue = gadgets.json.parse(value)
+     
+    if (parsedValue) {
+      value = parsedValue;
+    }
+
+    context['vars_'][VAR_top][node.getAttribute('key')] = value;
+    return '';
+  };
+
+  /**
    * <os:Render> custom tag renders the specified child nodes of the current
    * context.
    */
