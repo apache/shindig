@@ -31,6 +31,8 @@ import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.uri.UriCommon.Param;
 
+import java.util.Map;
+
 /**
  * Represents state/config information for the proxy.
  *
@@ -46,6 +48,8 @@ public class ProxyUriBase {
   private String rewriteMimeType = null;
   private boolean sanitizeContent = false;
   private boolean cajoleContent = false;
+  /** Extension parameters to support implementation specific flags */
+  protected Map<String, String> extensionParams = null;
 
   protected ProxyUriBase(Gadget gadget) {
     this(null,  // Meaningless in "context" mode. translateStatusRefresh invalid here.
@@ -115,7 +119,8 @@ public class ProxyUriBase {
         && this.noCache == objUri.noCache
         && this.debug == objUri.debug
         && this.sanitizeContent == objUri.sanitizeContent
-        && this.cajoleContent == objUri.cajoleContent);
+        && this.cajoleContent == objUri.cajoleContent
+        && Objects.equal(this.extensionParams, objUri.extensionParams));
 
   }
 
@@ -174,6 +179,15 @@ public class ProxyUriBase {
 
   public boolean cajoleContent() {
     return cajoleContent;
+  }
+
+  public ProxyUriBase setExtensionParams(Map<String, String> extensionParams) {
+    this.extensionParams = extensionParams;
+    return this;
+  }
+
+  public Map<String, String> getExtensionParams() {
+    return extensionParams;
   }
 
   public HttpRequest makeHttpRequest(Uri targetUri) throws GadgetException {
@@ -241,6 +255,9 @@ public class ProxyUriBase {
     }
     if (cajoleContent) {
       queryBuilder.addQueryParameter(Param.CAJOLE.getKey(), "1");
+    }
+    if (extensionParams != null) {
+      queryBuilder.addQueryParameters(extensionParams);
     }
     return queryBuilder;
   }

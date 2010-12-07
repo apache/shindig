@@ -188,15 +188,7 @@ public class GadgetsHandlerService {
     verifyBaseParams(request, false);
     Set<String> fields = beanFilter.processBeanFields(request.getFields());
 
-    RenderingContext context = (RenderingContext)
-        (request.getContext() != null ?
-            // TODO: Figure out why maven complain about casting and clean the dummy cast
-            (Object) beanDelegator.convertEnum(request.getContext())
-            : RenderingContext.GADGET);
-    JsUri jsUri = new JsUri(request.getRefresh(), request.getDebug(), request.getIgnoreCache(),
-        request.getContainer(), request.getGadget(), request.getFeatures(), request.getOnload(),
-        false, context);
-
+    JsUri jsUri = createJsUri(request);
     Uri servedUri = jsUriManager.makeExternJsUri(jsUri);
 
     String content = null;
@@ -401,6 +393,18 @@ public class GadgetsHandlerService {
         fields);
   }
 
+  protected JsUri createJsUri(GadgetsHandlerApi.JsRequest request) {
+    RenderingContext context = (RenderingContext)
+    (request.getContext() != null ?
+        // TODO: Figure out why maven complain about casting and clean the dummy cast
+        (Object) beanDelegator.convertEnum(request.getContext())
+        : RenderingContext.GADGET);
+
+    return new JsUri(request.getRefresh(), request.getDebug(), request.getIgnoreCache(),
+        request.getContainer(), request.getGadget(), request.getFeatures(), request.getOnload(),
+        false, context);
+  }
+
   @VisibleForTesting
   GadgetsHandlerApi.JsResponse createJsResponse(
       Uri url, Uri jsUri, String content, Set<String> fields, Long expireMs) {
@@ -416,8 +420,7 @@ public class GadgetsHandlerService {
         fields);
   }
 
-  @VisibleForTesting
-  ProxyUri createProxyUri(GadgetsHandlerApi.ProxyRequest request) {
+  protected ProxyUri createProxyUri(GadgetsHandlerApi.ProxyRequest request) {
     ProxyUriManager.ProxyUri proxyUri = new ProxyUriManager.ProxyUri(request.getRefresh(),
         request.getDebug(), request.getIgnoreCache(), request.getContainer(),
         request.getGadget(), request.getUrl());

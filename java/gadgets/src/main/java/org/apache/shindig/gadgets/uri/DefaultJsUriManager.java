@@ -102,6 +102,9 @@ public class DefaultJsUriManager implements JsUriManager {
       uri.addQueryParameter(Param.VERSION.getKey(),
           versioner.version(ctx.getGadget(), container, ctx.getLibs()));
     }
+    if (ctx.getExtensionParams() != null) {
+      uri.addQueryParameters(ctx.getExtensionParams());
+    }
 
     return uri.toUri();
   }

@@ -19,6 +19,7 @@
 package org.apache.shindig.gadgets.uri;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
@@ -148,6 +149,7 @@ public class DefaultProxyUriManagerTest extends UriManagerTestBase {
     List<ProxyUri> proxyUris = Lists.newLinkedList();
     ProxyUri pUri = new ProxyUri(null, false, true, CONTAINER, SPEC_URI.toString(),
         RESOURCE_1);
+    pUri.setExtensionParams(ImmutableMap.<String, String>of("test", "1"));
     pUri.setResize(100, 10, 90, true);
     proxyUris.add(pUri);
 
@@ -157,7 +159,7 @@ public class DefaultProxyUriManagerTest extends UriManagerTestBase {
         null, false, host, path);
     // Verify added param:
     assertEquals("/proxy/container=container&gadget=http%3A%2F%2Fexample.com%2Fgadget.xml" +
-        "&debug=0&nocache=1&v=version&resize_h=10&resize_w=100&resize_q=90&no_expand=1" +
+        "&debug=0&nocache=1&v=version&test=1&resize_h=10&resize_w=100&resize_q=90&no_expand=1" +
         "/path/http://example.com/one.dat",
         uris.get(0).getPath());
   }
