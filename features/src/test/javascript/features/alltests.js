@@ -36,7 +36,9 @@ if (!this.JsUtil) {
   eval(JsUtil.prototype.include(testSrcDir + '/mocks/env.js'));
   eval(JsUtil.prototype.include(testSrcDir + '/mocks/xhr.js'));
   eval(JsUtil.prototype.include(srcDir + '/core/config.js'));
-  eval(JsUtil.prototype.include(srcDir + '/core/json.js'));
+  eval(JsUtil.prototype.include(srcDir + '/core/json-native.js'));
+  eval(JsUtil.prototype.include(srcDir + '/core/json-jsimpl.js'));
+  eval(JsUtil.prototype.include(srcDir + '/core/json-flatten.js'));
   eval(JsUtil.prototype.include(srcDir + '/core/auth.js'));
   eval(JsUtil.prototype.include(srcDir + '/core/util.js'));
   eval(JsUtil.prototype.include(srcDir + '/core/prefs.js'));

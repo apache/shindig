@@ -35,41 +35,15 @@
  */
 
 /**
+ * JavaScript-based implementation when window.JSON is not present.
  * Port of the public domain JSON library by Douglas Crockford.
  * See: http://www.json.org/json2.js
  */
-if (window.JSON && window.JSON.parse && window.JSON.stringify) {
-  // HTML5 implementation, or already defined.
-  // Not a direct alias as the opensocial specification disagrees with the HTML5 JSON spec.
-  // JSON says to throw on parse errors and to support filtering functions. OS does not.
-  gadgets['json'] = (function() {
-    var endsWith___ = /___$/;
-    return {
-      /* documented below */
-      'parse': function(str) {
-        try {
-          return window.JSON.parse(str);
-        } catch (e) {
-          return false;
-        }
-      },
-      /* documented below */
-      'stringify': function(obj) {
-        try {
-          return window.JSON.stringify(obj, function(k,v) {
-            return !endsWith___.test(k) ? v : null;
-          });
-        } catch (e) {
-          return null;
-        }
-      }
-    };
-  })();
-} else {
+if (!(window.JSON && window.JSON.parse && window.JSON.stringify)) {
   /**
- * Port of the public domain JSON library by Douglas Crockford.
- * See: http://www.json.org/json2.js
- */
+   * Port of the public domain JSON library by Douglas Crockford.
+   * See: http://www.json.org/json2.js
+   */
   gadgets['json'] = function() {
 
     /**
@@ -207,27 +181,3 @@ if (window.JSON && window.JSON.parse && window.JSON.stringify) {
     };
   }();
 }
-/**
- * Flatten an object to a stringified values. Useful for dealing with
- * json->querystring transformations. Note: not in official specification yet
- *
- * @param {Object} obj
- * @return {Object} object with only string values.
- */
-
-gadgets['json'].flatten = function(obj) {
-  var flat = {};
-
-  if (obj === null || obj === undefined) return flat;
-
-  for (var k in obj) {
-    if (obj.hasOwnProperty(k)) {
-      var value = obj[k];
-      if (null === value || undefined === value) {
-        continue;
-      }
-      flat[k] = (typeof value === 'string') ? value : gadgets.json.stringify(value);
-    }
-  }
-  return flat;
-};

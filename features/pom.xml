@@ -109,7 +109,9 @@
                 <source>core.config/config.js</source>
                 <source>core.config/configcontainer.js</source>
                 <source>core.config/configgadget.js</source>
-                <source>core.json/json.js</source>
+                <source>core.json/json-native.js</source>
+                <source>core.json/json-jsimpl.js</source>
+                <source>core.json/json-flatten.js</source>
                 <source>shindig.auth/auth.js</source>
                 <source>core.util/util.js</source>
                 <source>core.prefs/prefs.js</source>

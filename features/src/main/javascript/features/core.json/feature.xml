@@ -20,11 +20,15 @@
   <name>core.json</name>
   <dependency>globals</dependency>
   <gadget>
-    <script src="json.js"/>
+    <script src="json-native.js"/>
+    <script src="json-jsimpl.js"/>
+    <script src="json-flatten.js"/>
     <script src="taming.js"/>
   </gadget>
   <container>
-    <script src="json.js"/>
+    <script src="json-native.js"/>
+    <script src="json-jsimpl.js"/>
+    <script src="json-flatten.js"/>
     <script src="taming.js"/>
   </container>
 </feature>
