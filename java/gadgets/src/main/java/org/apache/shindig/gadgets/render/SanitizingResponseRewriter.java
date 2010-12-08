@@ -23,6 +23,7 @@ import org.apache.sanselan.ImageFormat;
 import org.apache.sanselan.ImageReadException;
 import org.apache.sanselan.Sanselan;
 import org.apache.sanselan.common.byteSources.ByteSourceInputStream;
+import org.apache.shindig.common.logging.i18n.MessageKeys;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
