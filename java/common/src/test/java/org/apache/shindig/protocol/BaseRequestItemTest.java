@@ -33,6 +33,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Map;
+
 /**
  * Test BaseRequestItem
  */
@@ -111,6 +113,20 @@ public class BaseRequestItemTest extends Assert {
     InputData input = request.getTypedParameter("anykey", InputData.class);
     assertEquals("Bob", input.name);
     assertEquals(1234, input.id);
+  }
+
+  @Test
+  public void testGetParameters() throws Exception {
+    request.setParameter("anykey", "{name: 'Bob', id: '1234'}");
+    Map<String, Object> params = request.getParameters();
+    assertEquals(1, params.size());
+    assertTrue(params.containsKey("anykey"));
+    try {
+      params.put("this", "is bad");
+      fail("Params should be immutable");
+    } catch (UnsupportedOperationException e) {
+      // As expected
+    }
   }
 
   @Test

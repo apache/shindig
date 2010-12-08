@@ -239,6 +239,10 @@ public class BaseRequestItem implements RequestItem {
     return param;
   }
 
+  public Map<String, Object> getParameters() {
+    return Collections.unmodifiableMap(this.parameters);
+  }
+
   public List<String> getListParameter(String paramName) {
     Object param = this.parameters.get(paramName);
     if (param == null) {
@@ -288,7 +292,7 @@ public class BaseRequestItem implements RequestItem {
       this.parameters.put(paramName, paramValue);
     }
   }
-  
+
   public FormDataItem getFormMimePart(String partName) {
     if (formItems != null) {
       return formItems.get(partName);
