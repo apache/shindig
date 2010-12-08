@@ -49,7 +49,7 @@ public @interface Operation {
   String path() default "";
 
   /**
-   * The name to match for the RPC operation to override the default behvaior 
+   * The name to match for the RPC operation to override the default behavior 
    * which is to use the name of the annotated method
    */
   String name() default "";
