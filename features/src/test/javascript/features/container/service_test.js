@@ -32,13 +32,120 @@ ServiceTest.inherits(TestCase);
 ServiceTest.prototype.setUp = function() {
   this.apiUri = window.__API_URI;
   window.__API_URI = shindig.uri('http://shindig.com');
+  this.container = window.__CONTAINER;
+  window.__CONTAINER = "best_container";
+  this.osapiGadgets = osapi.gadgets;
+  
+  this.self = {};
+  var response = {};
+  response.error = {};
 };
 
 ServiceTest.prototype.tearDown = function() {
   window.__API_URI = this.apiUri;
+  window.__CONTAINER = this.container;
+  osapi.gadgets = this.osapiGadgets;
 };
 
-ServiceTest.prototype.testNew = function() {
-  var service = new shindig.container.Service();
-  this.assertTrue(service != null);
+ServiceTest.prototype.setupOsapiGadgetsMetadata = function(response) {
+  osapi.gadgets = {};
+  osapi.gadgets.metadata = function(request) {
+    return {
+      execute: function(func) {
+        func(response);
+      }
+    };
+  };
 };
+
+ServiceTest.prototype.setupUtilCurrentTimeMs = function(time) {
+  shindig.container.util.getCurrentTimeMs = function() {
+    return time;
+  };
+};
+
+ServiceTest.prototype.testGetGadgetMetadata = function() {
+  var service = new shindig.container.Service();
+  service.cachedMetadatas_ = {
+    'cached1.xml' : {
+      'url' : 'cached1.xml',
+      'responseTimeMs' : 80,
+      'expireTimeMs' : 85,
+      'localExpireTimeMs' : 100
+    }
+  };
+
+  var request = shindig.container.util.newMetadataRequest([
+      'cached1.xml', 'resp1.xml', 'resp2.xml', 'resp3.xml'
+  ]);
+
+  var response = {
+    'resp1.xml' : {
+      'responseTimeMs' : 90,
+      'expireTimeMs' : 91
+    },
+    'resp2.xml' : {
+      'responseTimeMs' : 110,
+      'expireTimeMs' : 112
+    },
+    'resp3.xml' : {
+      'responseTimeMs' : 97,
+      'expireTimeMs' : 103
+    }
+  };
+
+  var self = this;
+  var callback = function(response) {
+    self.response = response;
+  };
+  
+  this.setupUtilCurrentTimeMs(100);
+  this.setupOsapiGadgetsMetadata(response);
+  var metadata = service.getGadgetMetadata(request, callback);
+  var response = self.response;
+  
+  this.assertEquals('cached1.xml', response['cached1.xml'].url);
+  this.assertEquals(80, response['cached1.xml'].responseTimeMs);
+  this.assertEquals(85, response['cached1.xml'].expireTimeMs);
+  this.assertEquals(100, response['cached1.xml'].localExpireTimeMs);
+
+  this.assertEquals('resp1.xml', response['resp1.xml'].url);
+  this.assertEquals(90, response['resp1.xml'].responseTimeMs);
+  this.assertEquals(91, response['resp1.xml'].expireTimeMs);
+  this.assertEquals(101, response['resp1.xml'].localExpireTimeMs);
+
+  this.assertEquals('resp2.xml', response['resp2.xml'].url);
+  this.assertEquals(110, response['resp2.xml'].responseTimeMs);
+  this.assertEquals(112, response['resp2.xml'].expireTimeMs);
+  this.assertEquals(102, response['resp2.xml'].localExpireTimeMs);
+
+  this.assertEquals('resp3.xml', response['resp3.xml'].url);
+  this.assertEquals(97, response['resp3.xml'].responseTimeMs);
+  this.assertEquals(103, response['resp3.xml'].expireTimeMs);
+  this.assertEquals(106, response['resp3.xml'].localExpireTimeMs);
+  
+  this.assertTrue(service.cachedMetadatas_['cached1.xml'] != null);
+  this.assertTrue(service.cachedMetadatas_['resp1.xml'] != null);
+  this.assertTrue(service.cachedMetadatas_['resp2.xml'] != null);
+  this.assertTrue(service.cachedMetadatas_['resp3.xml'] != null);
+};
+
+ServiceTest.prototype.testUncacheStaleGadgetMetadataExcept = function() {
+  var service = new shindig.container.Service();
+  service.cachedMetadatas_ = {
+      'cached1.xml' : { 'localExpireTimeMs' : 100 },
+      'cached2.xml' : { 'localExpireTimeMs' : 200 },
+      'except1.xml' : { 'localExpireTimeMs' : 100 },
+      'except2.xml' : { 'localExpireTimeMs' : 200 }
+  };
+  this.setupUtilCurrentTimeMs(150);
+  service.uncacheStaleGadgetMetadataExcept({
+      'except1.xml' : null,
+      'except2.xml' : null
+  });
+  this.assertTrue(service.cachedMetadatas_['cached1.xml'] == null);
+  this.assertTrue(service.cachedMetadatas_['cached2.xml'] != null);
+  this.assertTrue(service.cachedMetadatas_['except1.xml'] != null);
+  this.assertTrue(service.cachedMetadatas_['except2.xml'] != null);
+};
+

@@ -30,6 +30,15 @@ shindig.container = {};
 
 
 /**
+ * Constants to key into gadget metadata state.
+ * @enum {string}
+ */
+shindig.container.MetadataParam = {};
+shindig.container.MetadataParam.LOCAL_EXPIRE_TIME = 'localExpireTimeMs';
+shindig.container.MetadataParam.URL = 'url';
+
+
+/**
  * Constants to key into gadget metadata response JSON.
  * @enum {string}
  */
@@ -37,11 +46,13 @@ shindig.container.MetadataResponse = {};
 shindig.container.MetadataResponse.IFRAME_URL = 'iframeUrl';
 shindig.container.MetadataResponse.NEEDS_TOKEN_REFRESH = 'needsTokenRefresh';
 shindig.container.MetadataResponse.VIEWS = 'views';
+shindig.container.MetadataResponse.EXPIRE_TIME_MS = 'expireTimeMs';
 shindig.container.MetadataResponse.FEATURES = 'features';
 shindig.container.MetadataResponse.HEIGHT = 'height';
 shindig.container.MetadataResponse.MODULE_PREFS = 'modulePrefs';
 shindig.container.MetadataResponse.PREFERRED_HEIGHT = 'preferredHeight';
 shindig.container.MetadataResponse.PREFERRED_WIDTH = 'preferredWidth';
+shindig.container.MetadataResponse.RESPONSE_TIME_MS = 'responseTimeMs';
 shindig.container.MetadataResponse.WIDTH = 'width';
 
 

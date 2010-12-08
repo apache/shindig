@@ -153,6 +153,8 @@ shindig.container.Container.prototype.navigateGadget = function(
     renderParams[shindig.container.RenderParam.TEST_MODE] = true;
   }
 
+  this.refreshService_();
+  
   var self = this;
   // TODO: Lifecycle, add ability for current gadget to cancel nav.
   site.navigateTo(gadgetUrl, viewParams, renderParams, function(gadgetInfo) {
@@ -204,6 +206,8 @@ shindig.container.Container.prototype.preloadGadgets = function(gadgetUrls, opt_
   var callback = opt_callback || function() {};
   var request = shindig.container.util.newMetadataRequest(gadgetUrls);
   var self = this;
+  
+  this.refreshService_();
   this.service_.getGadgetMetadata(request, function(response) {
     for (var id in response) {
       if (response[id].error) {
@@ -221,6 +225,27 @@ shindig.container.Container.prototype.preloadGadgets = function(gadgetUrls, opt_
 
 
 /**
+ * Unload preloaded gadget. Makes future preload request possibly uncached.
+ * @param {string} gadgetUrl gadget URI to unload.
+ */
+shindig.container.Container.prototype.unloadGadget = function(gadgetUrl) {
+  this.unloadGadgets([gadgetUrl]);
+};
+
+
+/**
+ * Unload preloaded gadgets. Makes future preload request possibly uncached.
+ * @param {Array} gadgetUrls gadgets URIs to unload.
+ */
+shindig.container.Container.prototype.unloadGadgets = function(gadgetUrls) {
+  for (var i = 0; i < gadgetUrls.length; i++) {
+    var url = gadgetUrls[i];
+    delete this.preloadedGadgetUrls_[url];
+  }
+};
+
+
+/**
  * Fetch the gadget metadata commonly used by container for user preferences.
  * @param {string} gadgetUrl gadgets URI to fetch metadata for. to preload.
  * @param {function(Object)} callback Function called with gadget metadata.
@@ -228,6 +253,8 @@ shindig.container.Container.prototype.preloadGadgets = function(gadgetUrls, opt_
 shindig.container.Container.prototype.getGadgetMetadata = function(
     gadgetUrl, callback) {
   var request = shindig.container.util.newMetadataRequest([gadgetUrl]);
+  
+  this.refreshService_();
   this.service_.getGadgetMetadata(request, callback);
 };
 
@@ -364,6 +391,18 @@ shindig.container.ContainerRender.WIDTH = 'width';
 
 
 /**
+ * Deletes stale cached data in service. The container knows what data are safe
+ * to be marked for deletion.
+ * @private
+ */
+shindig.container.Container.prototype.refreshService_ = function() {
+  var urls = this.getActiveGadgetUrls_();
+  this.service_.uncacheStaleGadgetMetadataExcept(urls);
+  // TODO: also uncache stale gadget tokens.
+};
+
+
+/**
  * @param {string} id Iframe ID of gadget holder contained in the gadget site to get.
  * @return {shindig.container.GadgetSite} The gadget site.
  * @private
@@ -447,8 +486,7 @@ shindig.container.Container.prototype.registerRpcServices_ = function() {
  * @param {string} gadgetUrl URL of preloaded gadget.
  * @private
  */
-shindig.container.Container.prototype.addPreloadedGadgetUrl_ = function(
-    gadgetUrl) {
+shindig.container.Container.prototype.addPreloadedGadgetUrl_ = function(gadgetUrl) {
   this.preloadedGadgetUrls_[gadgetUrl] = null;
 };
 
@@ -459,36 +497,50 @@ shindig.container.Container.prototype.addPreloadedGadgetUrl_ = function(
  * @return {Array} An array of URLs of gadgets.
  * @private
  */
-shindig.container.Container.prototype.getTokenRefreshableGadgetUrls_ =
-    function() {
+shindig.container.Container.prototype.getTokenRefreshableGadgetUrls_ = function() {
   var result = {};
-
-  // Collect preloaded gadget urls.
-  for (var url in this.preloadedGadgetUrls_) {
+  for (var url in this.getActiveGadgetUrls_()) {
     var metadata = this.service_.getCachedGadgetMetadata(url);
     if (metadata[shindig.container.MetadataResponse.NEEDS_TOKEN_REFRESH]) {
       result[url] = null;
     }
   }
+  return shindig.container.util.toArrayOfJsonKeys(result);
+};
 
-  // Collect active gadget urls.
+
+/**
+ * Get gadget urls that are either navigated or preloaded.
+ * @return {Object} JSON of gadget URLs.
+ * @private
+ */
+shindig.container.Container.prototype.getActiveGadgetUrls_ = function() { 
+  return shindig.container.util.mergeJsons(
+      this.getNavigatedGadgetUrls_(),
+      this.preloadedGadgetUrls_);
+};
+
+
+/**
+ * Get gadget urls that are navigated on page.
+ * @return {Object} JSON of gadget URLs.
+ * @private
+ */
+shindig.container.Container.prototype.getNavigatedGadgetUrls_ = function() {
+  var result = {};
   for (var siteId in this.sites_) {
     var holder = this.sites_[siteId].getActiveGadgetHolder();
-    var url = holder.getUrl();
-    var metadata = this.service_.getCachedGadgetMetadata(url);
-    if (metadata[shindig.container.MetadataResponse.NEEDS_TOKEN_REFRESH]) {
-      result[url] = null;
+    if (holder) {
+      result[holder.getUrl()] = null;
     }
   }
-
-  return shindig.container.util.toArrayOfJsonKeys(result);
+  return result;
 };
 
 
 /**
  * Refresh security tokens immediately. This will fetch gadget metadata, along
  * with its token and have the token cache updated.
- * @private
  */
 shindig.container.Container.prototype.refreshTokens_ = function() {
   var ids = this.getTokenRefreshableGadgetUrls_();

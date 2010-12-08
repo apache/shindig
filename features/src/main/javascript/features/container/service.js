@@ -87,8 +87,10 @@ shindig.container.Service.prototype.getGadgetMetadata = function(
   // arbitrarily-navigated gadgets. The former should be indefinite, unless
   // unloaded. The later can done without user knowing.
   var callback = opt_callback || function() {};
-  var uncachedUrls = this.getUncachedUrls_(request, this.cachedMetadatas_);
-  var finalResponse = this.getCachedData_(request, this.cachedMetadatas_);
+
+  var uncachedUrls = shindig.container.util.toArrayOfJsonKeys(
+      this.getUncachedDataByRequest_(this.cachedMetadatas_, request));
+  var finalResponse = this.getCachedDataByRequest_(this.cachedMetadatas_, request);
 
   // If fully cached, return from cache.
   if (uncachedUrls.length == 0) {
@@ -108,10 +110,18 @@ shindig.container.Service.prototype.getGadgetMetadata = function(
 
       // Otherwise, cache response. Augment final response with server response.
       } else {
+        var currentTimeMs = shindig.container.util.getCurrentTimeMs();
         for (var id in response) {
-          response[id]['url'] = id; // make sure url is set
-          self.cachedMetadatas_[id] = response[id];
-          finalResponse[id] = response[id];
+          var resp = response[id]; 
+          resp[shindig.container.MetadataParam.URL] = id;
+          
+          // This ignores time to fetch metadata. Okay, expect to be < 2s.
+          resp[shindig.container.MetadataParam.LOCAL_EXPIRE_TIME]
+              = resp[shindig.container.MetadataResponse.EXPIRE_TIME_MS]
+              - resp[shindig.container.MetadataResponse.RESPONSE_TIME_MS]
+              + currentTimeMs;
+          self.cachedMetadatas_[id] = resp;
+          finalResponse[id] = resp;
         }
       }
 
@@ -173,6 +183,22 @@ shindig.container.Service.prototype.getCachedGadgetToken = function(url) {
 
 
 /**
+ * @param {Object} urls JSON containing gadget URLs to avoid removing.
+ */
+shindig.container.Service.prototype.uncacheStaleGadgetMetadataExcept = function(urls) {
+  for (var url in this.cachedMetadatas_) {
+    if (typeof urls[url] === 'undefined') {
+      var gadgetInfo = this.cachedMetadatas_[url];
+      if (gadgetInfo[shindig.container.MetadataParam.LOCAL_EXPIRE_TIME]
+          < shindig.container.util.getCurrentTimeMs()) {
+        delete this.cachedMetadatas_[url];
+      }
+    }
+  }
+};
+
+
+/**
  * Initialize OSAPI endpoint methods/interfaces.
  */
 shindig.container.Service.prototype.registerOsapiServices = function() {
@@ -193,37 +219,49 @@ shindig.container.Service.prototype.registerOsapiServices = function() {
 
 
 /**
- * Filter cache with requested ids.
- * @param {Object} request containing ids.
+ * Get cached data by ids listed in request.
  * @param {Object} cache JSON containing cached data.
+ * @param {Object} request containing ids.
  * @return {Object} JSON containing requested and cached entries.
  * @private
  */
-shindig.container.Service.prototype.getCachedData_ = function(request, cache) {
-  var result = {};
-  for (var i = 0; i < request.ids.length; i++) {
-    var id = request.ids[i];
-    if (cache[id]) {
-      result[id] = cache[id];
-    }
-  }
-  return result;
+shindig.container.Service.prototype.getCachedDataByRequest_ = function(
+    cache, request) {
+  return this.filterCachedDataByRequest_(cache, request,
+      function(data) { return (typeof data !== 'undefined') });
 };
 
 
 /**
- * Extract ids in request not in cache.
- * @param {Object} request containing ids.
+ * Get uncached data by ids listed in request.
  * @param {Object} cache JSON containing cached data.
- * @return {Array.<string>} keys in the json.
+ * @param {Object} request containing ids.
+ * @return {Object} JSON containing requested and uncached entries.
  * @private
  */
-shindig.container.Service.prototype.getUncachedUrls_ = function(request, cache) {
-  var result = [];
+shindig.container.Service.prototype.getUncachedDataByRequest_ = function(
+    cache, request) {
+  return this.filterCachedDataByRequest_(cache, request,
+      function(data) { return (typeof data === 'undefined') });
+};
+
+
+/**
+ * Helper to filter out cached data 
+ * @param {Object} cache JSON containing cached data.
+ * @param {Object} request containing ids.
+ * @param {Function} filterFunc function to filter result.
+ * @return {Object} JSON containing requested and filtered entries.
+ * @private
+ */
+shindig.container.Service.prototype.filterCachedDataByRequest_ = function(
+    data, request, filterFunc) {
+  var result = {};
   for (var i = 0; i < request.ids.length; i++) {
     var id = request.ids[i];
-    if (!cache[id]) {
-      result.push(id);
+    var cachedData = data[id];
+    if (filterFunc(cachedData)) {
+      result[id] = cachedData;
     }
   }
   return result;
