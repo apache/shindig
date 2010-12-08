@@ -19,6 +19,7 @@
 package org.apache.shindig.gadgets.render;
 
 import org.apache.shindig.common.JsonSerializer;
+import org.apache.shindig.common.logging.i18n.MessageKeys;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.xml.DomUtil;
 import org.apache.shindig.config.ContainerConfig;
@@ -79,8 +80,10 @@ import com.google.inject.name.Named;
  * - html document normalization
  */
 public class RenderingGadgetRewriter implements GadgetRewriter {
-  private static final Logger LOG = Logger.getLogger(RenderingGadgetRewriter.class.getName());
-
+  //class name for logging purpose
+  private static final String classname = "org.apache.shindig.gadgets.render.RenderingGadgetRewriter";
+  private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
+ 
   private static final int INLINE_JS_BUFFER = 50;
 
   protected static final String DEFAULT_CSS =
@@ -241,7 +244,9 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
     List<FeatureResource> externForcedResources =
         featureRegistry.getFeatureResources(context, externForcedLibs, unsupported);
     if (!unsupported.isEmpty()) {
-      LOG.info("Unknown feature(s) in extern &libs=: " + unsupported.toString());
+      if (LOG.isLoggable(Level.INFO)) {
+        LOG.logp(Level.INFO, classname, "injectFeatureLibraries", MessageKeys.UNKNOWN_FEATURES, new Object[] {unsupported.toString()});
+      }
       unsupported.clear();
     }
 
@@ -416,7 +421,10 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
         preload.addAll(preloaded.toJson());
       } catch (PreloadException pe) {
         // This will be thrown in the event of some unexpected exception. We can move on.
-        LOG.log(Level.WARNING, "Unexpected error when preloading", pe);
+        if (LOG.isLoggable(Level.WARNING)) {
+          LOG.logp(Level.WARNING, classname, "injectPreloads", MessageKeys.UNEXPECTED_ERROR_PRELOADING);
+          LOG.log(Level.WARNING, pe.getMessage(), pe);
+        }
       }
     }
     Text text = scriptTag.getOwnerDocument().createTextNode("gadgets.io.preloaded_=");

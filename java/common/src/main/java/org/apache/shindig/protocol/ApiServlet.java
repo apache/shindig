@@ -19,6 +19,7 @@ package org.apache.shindig.protocol;
 
 import org.apache.shindig.auth.AuthInfoUtil;
 import org.apache.shindig.auth.SecurityToken;
+import org.apache.shindig.common.logging.i18n.MessageKeys;
 import org.apache.shindig.common.servlet.InjectedServlet;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.protocol.conversion.BeanConverter;
@@ -47,8 +48,8 @@ import com.google.inject.name.Names;
  * Common base class for API servlets.
  */
 public abstract class ApiServlet extends InjectedServlet {
-
-  private static final Logger LOG = Logger.getLogger(ApiServlet.class.getName());
+  private static final String classname = "org.apache.shindig.protocol.ApiServlet";
+  private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);   
 
   protected static final String FORMAT_PARAM = "format";
   protected static final String JSON_FORMAT = "json";
@@ -139,10 +140,14 @@ public abstract class ApiServlet extends InjectedServlet {
   protected ResponseItem responseItemFromException(Throwable t) {
     if (t instanceof ProtocolException) {
       ProtocolException pe = (ProtocolException) t;
-      LOG.log(Level.INFO, "Returning a response error as result of a protocol exception", pe);
+      if (LOG.isLoggable(Level.INFO)) {
+        LOG.logp(Level.INFO, classname, "responseItemFromException", MessageKeys.API_SERVLET_PROTOCAL_EXCEPTION,pe);
+      }
       return new ResponseItem(pe.getCode(), pe.getMessage(), pe.getResponse());
     }
-    LOG.log(Level.WARNING, "Returning a response error as result of an exception", t);
+    if (LOG.isLoggable(Level.INFO)) {
+      LOG.logp(Level.INFO, classname, "responseItemFromException", MessageKeys.API_SERVLET_EXCEPTION,t);
+    }
     return new ResponseItem(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, t.getMessage());
   }
 

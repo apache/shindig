@@ -24,6 +24,7 @@ import com.google.inject.Provider;
 
 import org.apache.shindig.common.cache.Cache;
 import org.apache.shindig.common.cache.CacheProvider;
+import org.apache.shindig.common.logging.i18n.MessageKeys;
 import org.apache.shindig.common.util.HashUtil;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.parse.nekohtml.NekoSimplifiedHtmlParser;
@@ -38,6 +39,7 @@ import org.w3c.dom.NodeList;
 
 import java.io.IOException;
 import java.util.LinkedList;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -46,7 +48,10 @@ import java.util.logging.Logger;
 @ImplementedBy(NekoSimplifiedHtmlParser.class)
 public abstract class GadgetHtmlParser {
   
-  private static final Logger LOG = Logger.getLogger(GadgetHtmlParser.class.getName());
+  //class name for logging purpose
+  private static final String classname = "org.apache.shindig.gadgets.parse.GadgetHtmlParser";
+  private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
+	  
 
   public static final String PARSED_DOCUMENTS = "parsedDocuments";
   public static final String PARSED_FRAGMENTS = "parsedFragments";
@@ -323,7 +328,9 @@ public abstract class GadgetHtmlParser {
                 next.getAttributes(), sb, /*withXmlClose*/ false);
 
           } catch (IOException e) {
-            LOG.info("Unable to convert script node to an osml tag");
+            if (LOG.isLoggable(Level.INFO)) {    
+              LOG.logp(Level.INFO, classname, "reprocessScriptForOpenSocial", MessageKeys.UNABLE_TO_CONVERT_SCRIPT);
+            }
           }
 
           NodeList scriptKids = next.getChildNodes();

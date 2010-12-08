@@ -21,6 +21,7 @@ package org.apache.shindig.gadgets.uri;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
 import org.apache.commons.lang.StringUtils;
+import org.apache.shindig.common.logging.i18n.MessageKeys;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
@@ -31,6 +32,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -40,7 +42,9 @@ import java.util.logging.Logger;
  */
 public final class UriUtils {
   public static final String CHARSET = "charset";
-  private static final Logger LOG = Logger.getLogger(UriUtils.class.getName());
+  //class name for logging purpose
+  private static final String classname = "org.apache.shindig.gadgets.uri.UriUtils";
+  private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
 
   private UriUtils() {}
   
@@ -167,7 +171,9 @@ public final class UriUtils {
           }
         } catch (IllegalArgumentException e) {
           // Skip illegal header
-          LOG.warning("Skipping illegal header:  " + entry.getKey() + ":" + entry.getValue());
+          if (LOG.isLoggable(Level.WARNING)) {
+            LOG.logp(Level.WARNING, classname, "copyResponseHeadersAndStatusCode", MessageKeys.SKIP_ILLEGAL_HEADER, new Object[] {entry.getKey(),entry.getValue()});
+          }
         }
       }
     }

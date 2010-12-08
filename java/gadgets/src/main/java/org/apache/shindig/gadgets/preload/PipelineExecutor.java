@@ -19,6 +19,7 @@
 package org.apache.shindig.gadgets.preload;
 
 import org.apache.shindig.common.JsonUtil;
+import org.apache.shindig.common.logging.i18n.MessageKeys;
 import org.apache.shindig.expressions.Expressions;
 import org.apache.shindig.expressions.RootELResolver;
 import org.apache.shindig.gadgets.GadgetContext;
@@ -45,7 +46,10 @@ import com.google.inject.Inject;
 public class PipelineExecutor {
   // TODO: support configuration
   private static final int MAX_BATCH_COUNT = 3;
-  private static final Logger LOG = Logger.getLogger(PipelineExecutor.class.getName());
+  //class name for logging purpose
+  private static final String classname = "org.apache.shindig.gadgets.preload.PipelineExecutor";
+  private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
+  
 
   private final PipelinedDataPreloader preloader;
   private final PreloaderService preloaderService;
@@ -145,7 +149,10 @@ public class PipelineExecutor {
           }
         } catch (PreloadException pe) {
           // This will be thrown in the event of some unexpected exception. We can move on.
-          LOG.log(Level.WARNING, "Unexpected error when preloading", pe);
+          if (LOG.isLoggable(Level.WARNING)) {
+            LOG.logp(Level.WARNING, classname, "execute", MessageKeys.ERROR_PRELOADING);
+            LOG.log(Level.WARNING, "", pe);
+          } 
         }
       }
 

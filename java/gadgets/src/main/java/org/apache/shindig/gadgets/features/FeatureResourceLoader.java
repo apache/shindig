@@ -21,6 +21,7 @@ import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
+import org.apache.shindig.common.logging.i18n.MessageKeys;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.util.ResourceLoader;
 import org.apache.shindig.common.util.TimeSource;
@@ -32,14 +33,17 @@ import org.apache.shindig.gadgets.http.HttpResponse;
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
  * Class that loads FeatureResource objects used to populate JS feature code.
  */
 public class FeatureResourceLoader {
-  private static final Logger LOG
-      = Logger.getLogger("org.apache.shindig.gadgets");
+	  
+  //class name for logging purpose
+  private static final String classname = "org.apache.shindig.gadgets.features.FeatureResourceLoader";
+  private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
   
   private HttpFetcher fetcher;
   private TimeSource timeSource = new TimeSource();
@@ -186,7 +190,9 @@ public class FeatureResourceLoader {
               lastModified = file.lastModified();
             } else if (content != null) {
               // Content existed before, file removed - log error.
-              LOG.warning("File existed before but is now missing! Name: " + filePath);
+              if (LOG.isLoggable(Level.WARNING)) {
+                LOG.logp(Level.WARNING, classname, "get", MessageKeys.MISSING_FILE, new Object[] {filePath});
+              }
             }
           }
         }
@@ -251,10 +257,14 @@ public class FeatureResourceLoader {
           if (response.getHttpStatusCode() == HttpResponse.SC_OK) {
             content = response.getResponseAsString();
           } else {
-            LOG.warning("Unable to retrieve remote library from " + uri);
+            if (LOG.isLoggable(Level.WARNING)) {
+              LOG.logp(Level.WARNING, classname, "getContent", MessageKeys.UNABLE_RETRIVE_LIB, new Object[] {uri});
+            }
           }
         } catch (GadgetException e) {
-          LOG.warning("Unable to retrieve remote library from " + uri);
+          if (LOG.isLoggable(Level.WARNING)) {
+            LOG.logp(Level.WARNING, classname, "getContent", MessageKeys.UNABLE_RETRIVE_LIB, new Object[] {uri});
+          }
         }
       }
       

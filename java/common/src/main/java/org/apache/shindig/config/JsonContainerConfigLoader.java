@@ -23,6 +23,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.shindig.common.logging.i18n.MessageKeys;
 import org.apache.shindig.common.util.ResourceLoader;
 import org.apache.shindig.config.ContainerConfig.Transaction;
 import org.json.JSONArray;
@@ -55,7 +56,8 @@ import java.util.regex.Pattern;
  */
 public class JsonContainerConfigLoader {
 
-  private static final Logger LOG = Logger.getLogger(JsonContainerConfigLoader.class.getName());
+  private static final String classname = "org.apache.shindig.config.JsonContainerConfigLoader";
+  private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
   private static final Pattern CRLF_PATTERN = Pattern.compile("[\r\n]+");
 
   public static final char FILE_SEPARATOR = ',';
@@ -139,14 +141,18 @@ public class JsonContainerConfigLoader {
       for (String location : StringUtils.split(path, FILE_SEPARATOR)) {
         if (location.startsWith("res://")) {
           location = location.substring(6);
-          LOG.info("Loading resources from: " + location);
+          if (LOG.isLoggable(Level.INFO)) {
+            LOG.logp(Level.INFO, classname, "loadContainers", MessageKeys.LOAD_RESOURCES_FROM, new Object[] {location});
+          }          
           if (path.endsWith(".txt")) {
             loadResources(CRLF_PATTERN.split(ResourceLoader.getContent(location)), all);
           } else {
             loadResources(new String[] {location}, all);
           }
         } else {
-          LOG.info("Loading files from: " + location);
+          if (LOG.isLoggable(Level.INFO)) {
+            LOG.logp(Level.INFO, classname, "loadContainers", MessageKeys.LOAD_FILES_FROM, new Object[] {location});
+          } 
           File file = new File(location);
           loadFiles(new File[] {file}, all);
         }
@@ -171,7 +177,9 @@ public class JsonContainerConfigLoader {
     for (File file : files) {
       try {
         if (file == null) continue;
-        LOG.info("Reading container config: " + file.getName());
+        if (LOG.isLoggable(Level.INFO)) {
+          LOG.logp(Level.INFO, classname, "loadFiles", MessageKeys.READING_CONFIG, new Object[] {file.getName()});
+        }
         if (file.isDirectory()) {
           loadFiles(file.listFiles(), all);
         } else if (file.getName().toLowerCase(Locale.ENGLISH).endsWith(".js")
@@ -202,7 +210,9 @@ public class JsonContainerConfigLoader {
       throws ContainerConfigException {
     try {
       for (String entry : files) {
-        LOG.info("Reading container config: " + entry);
+        if (LOG.isLoggable(Level.INFO)) {
+          LOG.logp(Level.INFO, classname, "loadResources", MessageKeys.READING_CONFIG, new Object[] {entry});
+        }
         String content = ResourceLoader.getContent(entry);
         if (content == null || content.length() == 0)
           throw new IOException("The file " + entry + "is empty");
@@ -223,7 +233,9 @@ public class JsonContainerConfigLoader {
     try {
       return jsonToMap(new JSONObject(json));
     } catch (JSONException e) {
-      LOG.warning("Trouble parsing " + json);
+      if (LOG.isLoggable(Level.WARNING)) {
+        LOG.logp(Level.WARNING, classname, "loadFromString", MessageKeys.READING_CONFIG, new Object[] {json});
+      }
       throw new ContainerConfigException("Trouble parsing " + json, e);
     }
   }

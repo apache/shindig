@@ -18,6 +18,7 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
+import org.apache.shindig.common.logging.i18n.MessageKeys;
 import org.apache.shindig.common.servlet.InjectedServlet;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
@@ -27,6 +28,7 @@ import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.uri.ProxyUriManager;
 
 import java.io.IOException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -41,7 +43,9 @@ import com.google.inject.Inject;
 public class ProxyServlet extends InjectedServlet {
   private static final long serialVersionUID = 9085050443492307723L;
   
-  private static final Logger LOG = Logger.getLogger(ProxyServlet.class.getName());
+  //class name for logging purpose
+  private static final String classname = "org.apache.shindig.gadgets.servlet.ProxyServlet";
+  private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
   
   private transient ProxyUriManager proxyUriManager;
   private transient LockedDomainService lockedDomainService;
@@ -87,7 +91,9 @@ public class ProxyServlet extends InjectedServlet {
         Uri resourceUri = proxyUri.getResource();
         String msg = "Embed request for url " +
             (resourceUri != null ? resourceUri.toString() : "n/a") + " made to wrong domain " + host;
-        LOG.info(msg);
+        if (LOG.isLoggable(Level.INFO)) {
+          LOG.logp(Level.INFO, classname, "doGet", MessageKeys.EMBEDED_IMG_WRONG_DOMAIN, new Object[] {resourceUri != null ? resourceUri.toString() : "n/a", host});
+        }
         throw new GadgetException(GadgetException.Code.INVALID_PARAMETER, msg,
             HttpResponse.SC_BAD_REQUEST);
       }

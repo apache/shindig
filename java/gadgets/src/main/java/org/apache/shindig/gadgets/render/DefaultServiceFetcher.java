@@ -25,6 +25,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.shindig.common.logging.i18n.MessageKeys;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.GadgetException;
@@ -48,7 +49,9 @@ import com.google.inject.Inject;
  */
 public class DefaultServiceFetcher {
 
-  static final Logger logger = Logger.getLogger(Renderer.class.getName());
+  //class name for logging purpose
+  private static final String classname = "org.apache.shindig.gadgets.render.DefaultServiceFetcher";
+  private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
 
   static final String JSON_RESPONSE_WRAPPER_ELEMENT = "result";
 
@@ -126,15 +129,18 @@ public class DefaultServiceFetcher {
       if (response.getHttpStatusCode() == HttpResponse.SC_OK) {
         return getServicesFromJsonResponse(response.getResponseAsString());
       } else {
-        logger.log(Level.SEVERE, "HTTP Error " + response.getHttpStatusCode() +
-            " fetching service methods from endpoint " + endpoint);
+        if (LOG.isLoggable(Level.SEVERE)) {
+          LOG.logp(Level.SEVERE, classname, "retrieveServices", MessageKeys.HTTP_ERROR_FETCHING, new Object[] {response.getHttpStatusCode(),endpoint});
+        }
       }
     } catch (GadgetException ge) {
-      logger.log(Level.SEVERE, "Failed to fetch services methods from endpoint " + endpoint +
-          ". Error " + ge.getMessage());
+      if (LOG.isLoggable(Level.SEVERE)) {
+        LOG.logp(Level.SEVERE, classname, "retrieveServices", MessageKeys.FAILED_TO_FETCH_SERVICE, new Object[] {endpoint,ge.getMessage()});
+      }
     } catch (JSONException je) {
-      logger.log(Level.SEVERE, "Failed to parse services methods from endpoint " + endpoint +
-          ". " + je.getMessage());
+      if (LOG.isLoggable(Level.SEVERE)) {
+        LOG.logp(Level.SEVERE, classname, "retrieveServices", MessageKeys.FAILED_TO_PARSE_SERVICE, new Object[] {endpoint,je.getMessage()});
+      }
     }
     return ImmutableSet.of();
   }

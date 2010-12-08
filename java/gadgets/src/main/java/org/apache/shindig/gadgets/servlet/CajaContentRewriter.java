@@ -50,6 +50,7 @@ import com.google.inject.Inject;
 import org.apache.commons.io.IOUtils;
 import org.apache.shindig.common.cache.Cache;
 import org.apache.shindig.common.cache.CacheProvider;
+import org.apache.shindig.common.logging.i18n.MessageKeys;
 import org.apache.shindig.common.util.HashUtil;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
@@ -69,6 +70,7 @@ import org.w3c.dom.Node;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -77,7 +79,10 @@ import java.util.logging.Logger;
 public class CajaContentRewriter implements GadgetRewriter {
   public static final String CAJOLED_DOCUMENTS = "cajoledDocuments";
 
-  private static final Logger LOG = Logger.getLogger(CajaContentRewriter.class.getName());
+  //class name for logging purpose
+  private static final String classname = "org.apache.shindig.gadgets.servlet.CajaContentRewriter";
+  private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
+
 
   private final Cache<String, Element> cajoledCache;
   private final RequestPipeline requestPipeline;
@@ -87,7 +92,9 @@ public class CajaContentRewriter implements GadgetRewriter {
   public CajaContentRewriter(CacheProvider cacheProvider, RequestPipeline requestPipeline,
       HtmlSerializer htmlSerializer) {
     this.cajoledCache = cacheProvider.createCache(CAJOLED_DOCUMENTS);
-    LOG.info("Cajoled cache created" + cajoledCache);
+    if (LOG.isLoggable(Level.INFO)) {
+      LOG.logp(Level.INFO, classname, "CajaContentRewriter", MessageKeys.CAJOLED_CACHE_CREATED, new Object[] {cajoledCache});
+    }
     this.requestPipeline = requestPipeline;
     this.htmlSerializer = htmlSerializer;
   }
@@ -192,7 +199,7 @@ public class CajaContentRewriter implements GadgetRewriter {
         createContainerFor(doc,
             formatErrors(doc, is, docContent, mq, true /* visible */));
         mc.documentChanged();
-        logException(e, mq);
+        logException("rewrite", e, mq);
         safe = true;
       } finally {
         if (!safe) {
@@ -216,7 +223,9 @@ public class CajaContentRewriter implements GadgetRewriter {
     return new UriFetcher() {
       public FetchedData fetch(ExternalReference ref, String mimeType)
           throws UriFetchException {
-        LOG.info("Retrieving " + ref.toString());
+        if (LOG.isLoggable(Level.INFO)) {
+          LOG.logp(Level.INFO, classname, "makeFetcher", MessageKeys.RETRIEVE_REFERENCE, new Object[] {ref.toString()});
+        }        
         Uri resourceUri = gadgetUri.resolve(Uri.fromJavaUri(ref.getUri()));
         HttpRequest request =
             new HttpRequest(resourceUri).setContainer(container).setGadget(gadgetUri);
@@ -226,10 +235,14 @@ public class CajaContentRewriter implements GadgetRewriter {
           return FetchedData.fromBytes(responseBytes, mimeType, response.getEncoding(),
               new InputSource(ref.getUri()));
         } catch (GadgetException e) {
-          LOG.info("Failed to retrieve: " + ref.toString());
+          if (LOG.isLoggable(Level.INFO)) {
+            LOG.logp(Level.INFO, classname, "makeFetcher", MessageKeys.FAILED_TO_RETRIEVE, new Object[] {ref.toString()});
+          }
           return null;
         } catch (IOException e) {
-          LOG.info("Failed to read: " + ref.toString());
+          if (LOG.isLoggable(Level.INFO)) {
+            LOG.logp(Level.INFO, classname, "makeFetcher", MessageKeys.FAILED_TO_READ, new Object[] {ref.toString()});
+          }
           return null;
         }
       }
@@ -304,7 +317,7 @@ public class CajaContentRewriter implements GadgetRewriter {
     return scriptElement;
   }
 
-  private void logException(Exception cause, MessageQueue mq) {
+  private void logException(String methodname, Exception cause, MessageQueue mq) {
     StringBuilder errbuilder = new StringBuilder();
     MessageContext mc = new MessageContext();
     if (cause != null) {
@@ -313,7 +326,9 @@ public class CajaContentRewriter implements GadgetRewriter {
     for (Message m : mq.getMessages()) {
       errbuilder.append(m.format(mc)).append('\n');
     }
-    LOG.info("Unable to cajole gadget: " + errbuilder);
+    if (LOG.isLoggable(Level.INFO)) {
+      LOG.logp(Level.INFO, classname, methodname, MessageKeys.UNABLE_TO_CAJOLE, new Object[] {errbuilder});
+    }
   }
   
   protected PluginCompiler makePluginCompiler(

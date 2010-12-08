@@ -163,8 +163,8 @@ public class OAuthResponseParamsTest {
   public void testNullSafe() {
     params.addRequestTrace(null, null);
     new OAuthRequestException("error", "errorText");
-    params.logDetailedWarning("wow");
-    params.logDetailedWarning("new runtime", new RuntimeException());
+    params.logDetailedWarning("org.apache.shindig.gadgets.oauth.OAuthResponseParamsTest","testNullSafe","wow");
+    params.logDetailedWarning("org.apache.shindig.gadgets.oauth.OAuthResponseParamsTest","testNullSafe","new runtime", new RuntimeException());
   }
 
   @Test

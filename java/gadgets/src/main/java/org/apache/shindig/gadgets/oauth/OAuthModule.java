@@ -20,6 +20,7 @@ package org.apache.shindig.gadgets.oauth;
 import org.apache.shindig.common.crypto.BasicBlobCrypter;
 import org.apache.shindig.common.crypto.BlobCrypter;
 import org.apache.shindig.common.crypto.Crypto;
+import org.apache.shindig.common.logging.i18n.MessageKeys;
 import org.apache.shindig.common.util.ResourceLoader;
 import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.oauth.BasicOAuthStoreConsumerKeyAndSecret.KeyType;
@@ -44,7 +45,10 @@ import java.util.logging.Logger;
  */
 public class OAuthModule extends AbstractModule {
 
-  private static final Logger LOG = Logger.getLogger(OAuthModule.class.getName());
+  //class name for logging purpose
+  private static final String classname = "org.apache.shindig.gadgets.oauth.OAuthModule";
+  private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
+  
 
   private static final String OAUTH_CONFIG = "config/oauth.json";
   private static final String OAUTH_SIGNING_KEY_FILE = "shindig.signing.key-file";
@@ -73,9 +77,14 @@ public class OAuthModule extends AbstractModule {
         throws IOException {
       if (StringUtils.isBlank(stateCrypterPath)) {
         LOG.info("Using random key for OAuth client-side state encryption");
+        if (LOG.isLoggable(Level.INFO)) {
+          LOG.logp(Level.INFO, classname, "OAuthCrypterProvider constructor", MessageKeys.USING_RANDOM_KEY);
+        }         
         crypter = new BasicBlobCrypter(Crypto.getRandomBytes(BasicBlobCrypter.MASTER_KEY_MIN_LEN));
       } else {
-        LOG.info("Using file " + stateCrypterPath + " for OAuth client-side state encryption");
+        if (LOG.isLoggable(Level.INFO)) {
+          LOG.logp(Level.INFO, classname, "OAuthCrypterProvider constructor", MessageKeys.USING_FILE, new Object[] {stateCrypterPath});
+        }
         crypter = new BasicBlobCrypter(new File(stateCrypterPath));
       }
     }
@@ -120,26 +129,26 @@ public class OAuthModule extends AbstractModule {
       BasicOAuthStoreConsumerKeyAndSecret key = null;
       if (!StringUtils.isBlank(signingKeyFile)) {
         try {
-          LOG.info("Loading OAuth signing key from " + signingKeyFile);
+          if (LOG.isLoggable(Level.INFO)) {
+            LOG.logp(Level.INFO, classname, "loadDefaultKey", MessageKeys.LOAD_KEY_FILE_FROM, new Object[] {signingKeyFile});
+          }
           String privateKey = IOUtils.toString(ResourceLoader.open(signingKeyFile), "UTF-8");
           privateKey = BasicOAuthStore.convertFromOpenSsl(privateKey);
           key = new BasicOAuthStoreConsumerKeyAndSecret(null, privateKey, KeyType.RSA_PRIVATE,
               signingKeyName, null);
         } catch (Throwable t) {
-          LOG.log(Level.WARNING, "Couldn't load key file " + signingKeyFile, t);
+           if (LOG.isLoggable(Level.WARNING)) {
+            LOG.logp(Level.WARNING, classname, "loadDefaultKey", MessageKeys.COULD_NOT_LOAD_KEY_FILE, new Object[] {signingKeyFile});
+            LOG.logp(Level.WARNING, classname, "loadDefaultKey", "",t);
+          }
         }
       }
       if (key != null) {
         store.setDefaultKey(key);
       } else {
-        LOG.log(Level.WARNING, "Couldn't load OAuth signing key.  To create a key, run:\n" +
-            "  openssl req -newkey rsa:1024 -days 365 -nodes -x509 -keyout testkey.pem \\\n" +
-            "     -out testkey.pem -subj '/CN=mytestkey'\n" +
-            "  openssl pkcs8 -in testkey.pem -out oauthkey.pem -topk8 -nocrypt -outform PEM\n" +
-            '\n' +
-            "Then edit shindig.properties and add these lines:\n" +
-            OAUTH_SIGNING_KEY_FILE + "=<path-to-oauthkey.pem>\n" +
-            OAUTH_SIGNING_KEY_NAME + "=mykey\n");
+        if (LOG.isLoggable(Level.WARNING)) {
+          LOG.logp(Level.WARNING, classname, "loadDefaultKey", MessageKeys.COULD_NOT_LOAD_SIGN_KEY, new Object[] {OAUTH_SIGNING_KEY_FILE,OAUTH_SIGNING_KEY_NAME});
+        }        
       }
     }
 
@@ -148,7 +157,10 @@ public class OAuthModule extends AbstractModule {
         String oauthConfigString = ResourceLoader.getContent(OAUTH_CONFIG);
         store.initFromConfigString(oauthConfigString);
       } catch (Throwable t) {
-        LOG.log(Level.WARNING, "Failed to initialize OAuth consumers from " + OAUTH_CONFIG, t);
+        if (LOG.isLoggable(Level.WARNING)) {
+          LOG.logp(Level.WARNING, classname, "loadConsumers", MessageKeys.FAILED_TO_INIT, new Object[] {OAUTH_CONFIG});
+          LOG.log(Level.WARNING, "", t);
+        } 
       }
     }
 

@@ -19,6 +19,7 @@
 package org.apache.shindig.gadgets.rewrite;
 
 import org.apache.shindig.common.JsonSerializer;
+import org.apache.shindig.common.logging.i18n.MessageKeys;
 import org.apache.shindig.common.xml.DomUtil;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.parse.SocialDataTags;
@@ -43,9 +44,10 @@ import java.util.logging.Logger;
  * This rewriter cannot be used currently without the SocialMarkupHtmlParser.
  */
 public class PipelineDataGadgetRewriter implements GadgetRewriter {
-
-  private static final Logger LOG = Logger.getLogger(
-      PipelineDataGadgetRewriter.class.getName());
+	
+  //class name for logging purpose
+  private static final String classname = "org.apache.shindig.gadgets.rewrite.PipelineDataGadgetRewriter";
+  private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
   
   private final PipelineExecutor executor;
 
@@ -122,7 +124,10 @@ public class PipelineDataGadgetRewriter implements GadgetRewriter {
         pipelineNodes.put(pipelineData, n);
       } catch (SpecParserException e) {
         // Leave the element to the client
-        LOG.log(Level.INFO, "Failed to parse preload in " + gadget.getSpec().getUrl(), e);
+        if (LOG.isLoggable(Level.INFO)) {
+          LOG.logp(Level.INFO, classname, "parsePipelinedData", MessageKeys.FAILED_TO_PARSE_PRELOAD, new Object[] {gadget.getSpec().getUrl()});
+          LOG.log(Level.INFO, e.getMessage(), e);
+        }
       }
     }
     return pipelineNodes;

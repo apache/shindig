@@ -17,6 +17,7 @@
  */
 package org.apache.shindig.gadgets;
 
+import org.apache.shindig.common.logging.i18n.MessageKeys;
 import org.apache.shindig.common.util.Base32;
 import org.apache.shindig.config.ContainerConfig;
 
@@ -29,6 +30,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -42,7 +44,10 @@ import java.util.logging.Logger;
  */
 @Singleton
 public class HashLockedDomainService implements LockedDomainService, ContainerConfig.ConfigObserver {
-  private static final Logger LOG = Logger.getLogger(HashLockedDomainService.class.getName());
+  //class name for logging purpose
+  private static final String classname = "org.apache.shindig.gadgets.HashLockedDomainService";
+  private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
+  
   private final boolean enabled;
   private boolean lockSecurityTokens = false;
   private final Map<String, String> lockedSuffixes;
@@ -72,7 +77,9 @@ public class HashLockedDomainService implements LockedDomainService, ContainerCo
     for (String container : changed) {
       String suffix = config.getString(container, LOCKED_DOMAIN_SUFFIX_KEY);
       if (suffix == null) {
-        LOG.warning("No locked domain configuration for " + container);
+        if (LOG.isLoggable(Level.WARNING)) {
+          LOG.logp(Level.WARNING, classname, "HashLockedDomainService", MessageKeys.NO_LOCKED_DOMAIN_CONFIG, new Object[] {container});
+        }
       } else {
         lockedSuffixes.put(container, suffix);
       }    

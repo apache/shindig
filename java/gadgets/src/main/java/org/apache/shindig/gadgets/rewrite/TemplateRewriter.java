@@ -26,6 +26,7 @@ import com.google.inject.Provider;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.JsonSerializer;
+import org.apache.shindig.common.logging.i18n.MessageKeys;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.xml.DomUtil;
 import org.apache.shindig.expressions.Expressions;
@@ -85,7 +86,10 @@ public class TemplateRewriter implements GadgetRewriter {
   /** Enable client support? **/
   static final String CLIENT_SUPPORT_PARAM = "client";
 
-  private static final Logger LOG = Logger.getLogger(TemplateRewriter.class.getName());
+  //class name for logging purpose
+  private static final String classname = "org.apache.shindig.gadgets.rewrite.TemplateRewriter";
+  private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
+
   
   /**
    * Provider of the processor.  TemplateRewriters are stateless and multithreaded,
@@ -239,7 +243,10 @@ public class TemplateRewriter implements GadgetRewriter {
           libraries.add(library);
         } catch (TemplateParserException te) {
           // Suppress exceptions due to malformed template libraries
-          LOG.log(Level.WARNING, null, te);
+          if (LOG.isLoggable(Level.WARNING)) {
+            LOG.logp(Level.WARNING, classname, "loadTemplateLibraries", MessageKeys.MALFORMED_TEMPLATE_LIB);
+            LOG.log(Level.WARNING, te.getMessage(),te);;
+          }
         }
       }
     }

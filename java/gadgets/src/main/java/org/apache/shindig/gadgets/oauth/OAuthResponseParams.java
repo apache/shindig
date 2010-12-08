@@ -25,6 +25,7 @@ import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.Pair;
 import org.apache.shindig.common.crypto.BlobCrypter;
 import org.apache.shindig.common.crypto.BlobCrypterException;
+import org.apache.shindig.common.logging.i18n.MessageKeys;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
@@ -97,30 +98,30 @@ public class OAuthResponseParams {
   /**
    * Log a warning message that includes the details of the request.
    */
-  public void logDetailedWarning(String note) {
+  public void logDetailedWarning(String classname, String method, String msgKey) {
     if (LOG.isLoggable(Level.FINE)) {
-      LOG.log(Level.FINE, note + '\n' + getDetails(null));
+      LOG.log(Level.FINE,getDetails(null));
     } else if (LOG.isLoggable(Level.WARNING)) {
-      LOG.log(Level.WARNING, note);
+    	LOG.logp(Level.WARNING, classname, method, msgKey, new Object[] {getDetails(null)});
     }
   }
 
   /**
    * Log a warning message that includes the details of the request and the thrown exception.
    */
-  public void logDetailedWarning(String note, Throwable e) {
+  public void logDetailedWarning(String classname, String method, String msgKey, Throwable e) {
     if (LOG.isLoggable(Level.FINE)) {
-      LOG.log(Level.FINE, note + '\n' + getDetails(e), e);
+      LOG.log(Level.FINE, getDetails(e), e);
     } else if (LOG.isLoggable(Level.WARNING)) {
-      LOG.log(Level.WARNING, note + ": " + e.getMessage());
+       LOG.logp(Level.WARNING, classname, method, msgKey, new Object[] {e.getMessage()});
     }
   }
   
-  public void logDetailedInfo(String note, Throwable e) {
+  public void logDetailedInfo(String classname, String method, String msgKey, Throwable e) {
     if (LOG.isLoggable(Level.FINE)) {
-      LOG.log(Level.FINE, note + '\n' + getDetails(e), e);
+      LOG.log(Level.FINE, getDetails(e), e);     
     } else if (LOG.isLoggable(Level.INFO)) {
-      LOG.log(Level.INFO, note + ": " + e.getMessage());
+    	LOG.logp(Level.INFO, classname, method, msgKey, new Object[] {e.getMessage()});
     }
   }
 

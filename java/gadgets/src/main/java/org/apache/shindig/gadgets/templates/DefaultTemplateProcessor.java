@@ -18,6 +18,7 @@
  */
 package org.apache.shindig.gadgets.templates;
 
+import org.apache.shindig.common.logging.i18n.MessageKeys;
 import org.apache.shindig.expressions.Expressions;
 import org.apache.shindig.gadgets.GadgetELResolver;
 import org.apache.shindig.gadgets.parse.HtmlSerialization;
@@ -60,7 +61,10 @@ import com.google.inject.Inject;
  */
 public class DefaultTemplateProcessor implements TemplateProcessor {
   
-  private static final Logger LOG = Logger.getLogger(DefaultTemplateProcessor.class.getName()); 
+  //class name for logging purpose
+  private static final String classname = "org.apache.shindig.gadgets.templates.DefaultTemplateProcessor";
+  private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
+   
   
   public static final String PROPERTY_INDEX = "Index";
   public static final String PROPERTY_COUNT = "Count";
@@ -484,9 +488,10 @@ public class DefaultTemplateProcessor implements TemplateProcessor {
       Object result = expr.getValue(elContext);
       return type.cast(result);
     } catch (ELException e) {
-      LOG.log(Level.WARNING, "EL failure for gadget {0}: {1}",
-          new Object[]{getTemplateContext().getGadget().getContext().getUrl(),
-              e.getMessage()});
+      if (LOG.isLoggable(Level.WARNING)) {
+        LOG.logp(Level.WARNING, classname, "evaluate", MessageKeys.EL_FAILURE, 
+        		  new Object[] {getTemplateContext().getGadget().getContext().getUrl(), e.getMessage()});
+      }
       return defaultValue;
     }
   }

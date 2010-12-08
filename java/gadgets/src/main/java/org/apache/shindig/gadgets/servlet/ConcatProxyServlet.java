@@ -24,6 +24,7 @@ import com.google.inject.name.Named;
 import com.google.common.collect.Lists;
 
 import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.shindig.common.logging.i18n.MessageKeys;
 import org.apache.shindig.common.servlet.HttpUtil;
 import org.apache.shindig.common.servlet.InjectedServlet;
 import org.apache.shindig.common.Pair;
@@ -69,9 +70,10 @@ public class ConcatProxyServlet extends InjectedServlet {
   static final Integer LONG_LIVED_REFRESH = (365 * 24 * 60 * 60);  // 1 year
   static final Integer DEFAULT_REFRESH = (60 * 60);                // 1 hour
 
-  private static final Logger LOG
-      = Logger.getLogger(ConcatProxyServlet.class.getName());
-
+  //class name for logging purpose
+  private static final String classname = "org.apache.shindig.gadgets.servlet.ConcatProxyServlet";
+  private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
+  
   private transient RequestPipeline requestPipeline;
   private transient ConcatUriManager concatUriManager;
   private transient ResponseRewriterRegistry contentRewriterRegistry;
@@ -133,7 +135,7 @@ public class ConcatProxyServlet extends InjectedServlet {
       HttpUtil.setCachingHeaders(response,
           concatUri.translateStatusRefresh(LONG_LIVED_REFRESH, DEFAULT_REFRESH), false);
     } catch (GadgetException gex) {
-      response.sendError(HttpResponse.SC_BAD_REQUEST, formatError(gex, uri));
+      response.sendError(HttpResponse.SC_BAD_REQUEST, formatError("doGet", gex, uri));
       return;
     }
 
@@ -257,7 +259,7 @@ public class ConcatProxyServlet extends InjectedServlet {
     return err.toString();
   }
 
-  private static String formatError(GadgetException excep, Uri uri)
+  private static String formatError(String methodname, GadgetException excep, Uri uri)
       throws IOException {
     StringBuilder err = new StringBuilder();
     err.append(excep.getCode().toString());
@@ -268,7 +270,9 @@ public class ConcatProxyServlet extends InjectedServlet {
 
     // Log the errors here for now. We might want different severity levels
     // for different error codes.
-    LOG.log(Level.INFO, "Concat proxy request failed", err);
+    if (LOG.isLoggable(Level.INFO)) {
+      LOG.logp(Level.INFO, classname, methodname, MessageKeys.CONCAT_PROXY_REQUEST_FAILED, new Object[] {err.toString()});
+    }
     return err.toString();
   }
 
@@ -291,7 +295,7 @@ public class ConcatProxyServlet extends InjectedServlet {
 
     public boolean outputError(Uri uri, GadgetException e)
         throws IOException {
-      print(formatError(e, uri));
+      print(formatError("outputError", e, uri));
       return e.getHttpStatusCode() == HttpResponse.SC_INTERNAL_SERVER_ERROR;
     }
 

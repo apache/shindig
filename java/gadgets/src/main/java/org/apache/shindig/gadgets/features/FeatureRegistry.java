@@ -30,6 +30,7 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
 import org.apache.shindig.common.Pair;
+import org.apache.shindig.common.logging.i18n.MessageKeys;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.common.util.ResourceLoader;
@@ -61,9 +62,10 @@ import java.util.logging.Level;
 public class FeatureRegistry {
   public static final String RESOURCE_SCHEME = "res";
   public static final String FILE_SCHEME = "file";
-  
-  private static final Logger LOG
-      = Logger.getLogger("org.apache.shindig.gadgets");
+
+  //class name for logging purpose
+  private static final String classname = "org.apache.shindig.gadgets.features.FeatureRegistry";
+  private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
   
   // Map keyed by FeatureNode object created as a lookup for transitive feature deps.
   private final Map<FeatureCacheKey, List<FeatureResource>> cache = new MapMaker().makeMap();
@@ -132,8 +134,9 @@ public class FeatureRegistry {
             // Accommodate res:// URIs.
             location = location.substring(1);
           }
-          LOG.info("Loading resources from: " + uriLoc.toString());
-          
+          if (LOG.isLoggable(Level.INFO)) {
+            LOG.logp(Level.INFO, classname, "register", MessageKeys.LOAD_RESOURCES_FROM, new Object[] {uriLoc.toString()});
+          }
           if (location.endsWith(".txt")) {
             // Text file contains a list of other resource files to load
             for (String resource : getResourceContent(location).split("[\r\n]+")) {
@@ -151,8 +154,9 @@ public class FeatureRegistry {
           loadResources(resources, featureMapBuilder);
         } else {
           // Load files in directory structure.
-          LOG.info("Loading files from: " + location);
-          
+          if (LOG.isLoggable(Level.INFO)) {
+            LOG.logp(Level.INFO, classname, "register", MessageKeys.LOAD_FILES_FROM, new Object[] {location});
+          }
           loadFile(new File(uriLoc.getPath()), featureMapBuilder);
         }
       }
@@ -443,7 +447,7 @@ public class FeatureRegistry {
     // Duplicate feature = OK, just indicate it's being overridden.
     if (featureMapBuilder.containsKey(parsed.getName())) {
       if (LOG.isLoggable(Level.WARNING)) {
-        LOG.warning("Overriding feature: " + parsed.getName() + " with def at: " + parent);
+        LOG.logp(Level.WARNING, classname, "doFilter", MessageKeys.OVERRIDING_FEATURE, new Object[] {parsed.getName(),parent});
       }
     }
     

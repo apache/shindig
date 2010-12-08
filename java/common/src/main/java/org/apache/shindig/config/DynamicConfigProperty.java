@@ -18,6 +18,7 @@
  */
 package org.apache.shindig.config;
 
+import org.apache.shindig.common.logging.i18n.MessageKeys;
 import org.apache.shindig.expressions.Expressions;
 
 import java.util.logging.Level;
@@ -34,7 +35,8 @@ import javax.el.ValueExpression;
  * Implements CharSequence strictly as a marker. Only toString is supported.
  */
 public class DynamicConfigProperty implements CharSequence {
-  private static final Logger LOG = Logger.getLogger(DynamicConfigProperty.class.getName()); 
+  private static final String classname = "org.apache.shindig.config.DynamicConfigProperty";
+  private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES); 
   private final ELContext context;
   private final ValueExpression expression;
 
@@ -48,7 +50,12 @@ public class DynamicConfigProperty implements CharSequence {
     try {
       return (String) expression.getValue(context);
     } catch (ELException e) {
-      LOG.log(Level.WARNING, "Evaluation of " + expression.getExpressionString() + " failed", e);
+        if (LOG.isLoggable(Level.WARNING)) {
+          //log the i18n expression
+          LOG.logp(Level.WARNING, classname, "toString", MessageKeys.EVAL_EL_FAILED, new Object[] {expression.getExpressionString()});
+          //now log the stacktrace
+          LOG.logp(Level.WARNING, classname, "toString", MessageKeys.EVAL_EL_FAILED, e);
+        }    	
       return "";
     }
   }

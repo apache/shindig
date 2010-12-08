@@ -34,6 +34,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.auth.OAuthConstants;
 import org.apache.shindig.auth.OAuthUtil;
 import org.apache.shindig.common.crypto.Crypto;
+import org.apache.shindig.common.logging.i18n.MessageKeys;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.common.util.CharsetUtil;
@@ -52,6 +53,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 /**
@@ -72,6 +75,9 @@ import java.util.regex.Pattern;
  */
 public class OAuthRequest {
 
+  //class name for logging purpose
+  private static final String classname = "org.apache.shindig.gadgets.oauth.OAuthRequest";
+	  
   // Maximum number of attempts at the protocol before giving up.
   private static final int MAX_ATTEMPTS = 2;
 
@@ -178,7 +184,7 @@ public class OAuthRequest {
       return fetchNoThrow();
     } catch (RuntimeException e) {
       // We log here to record the request/response pairs that created the failure.
-      responseParams.logDetailedWarning("OAuth fetch unexpected fatal error", e);
+      responseParams.logDetailedWarning(classname,"fetch",MessageKeys.OAUTH_FETCH_UNEXPECTED_ERROR, e);
       throw e;
     }
   }
@@ -198,11 +204,11 @@ public class OAuthRequest {
     } catch (OAuthRequestException e) {
       // No data for us.
       if (OAuthError.UNAUTHENTICATED.name().equals(e.getError())) {
-        responseParams.logDetailedInfo("Unauthenticated OAuth fetch", e);
+        responseParams.logDetailedInfo(classname,"fetchNoThrow",MessageKeys.UNAUTHENTICATED_OAUTH, e);
       } else if (OAuthError.BAD_OAUTH_TOKEN_URL.name().equals(e.getError())) {
-        responseParams.logDetailedInfo("Invalid OAuth fetch request", e);
+        responseParams.logDetailedInfo(classname,"fetchNoThrow",MessageKeys.INVALID_OAUTH, e);
       } else {
-        responseParams.logDetailedWarning("OAuth fetch fatal error", e);
+        responseParams.logDetailedWarning(classname,"fetchNoThrow",MessageKeys.OAUTH_FETCH_FATAL_ERROR, e);
       }
       responseParams.setSendTraceToClient(true);
       response = new HttpResponseBuilder()
@@ -214,10 +220,11 @@ public class OAuthRequest {
 
     // OK, got some data back, annotate it as necessary.
     if (response.getHttpStatusCode() >= 400) {
-      responseParams.logDetailedWarning("OAuth fetch fatal error");
+      responseParams.logDetailedWarning(classname,"fetchNoThrow",MessageKeys.OAUTH_FETCH_FATAL_ERROR);
+      
       responseParams.setSendTraceToClient(true);
     } else if (responseParams.getAznUrl() != null && responseParams.sawErrorResponse()) {
-      responseParams.logDetailedWarning("OAuth fetch error, reprompting for user approval");
+      responseParams.logDetailedWarning(classname,"fetchNoThrow",MessageKeys.OAUTH_FETCH_ERROR_REPROMPT);
       responseParams.setSendTraceToClient(true);
     }
 
@@ -775,7 +782,7 @@ public class OAuthRequest {
       } catch (NumberFormatException e) {
         // Hrm.  Bogus server.  We can safely ignore this, we'll just wait for the server to
         // tell us when the access token has expired.
-        responseParams.logDetailedWarning("server returned bogus expiration");
+        responseParams.logDetailedWarning(classname,"exchangeRequestToken",MessageKeys.BOGUS_EXPIRED);
       }
     }
 

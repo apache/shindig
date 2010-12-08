@@ -17,7 +17,7 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
-import com.google.common.base.Strings;
+import org.apache.shindig.common.logging.i18n.MessageKeys;
 import org.apache.shindig.common.servlet.HttpUtil;
 import org.apache.shindig.common.servlet.InjectedServlet;
 import org.apache.shindig.common.uri.UriBuilder;
@@ -28,12 +28,14 @@ import org.apache.shindig.gadgets.render.RenderingResults;
 import org.apache.shindig.gadgets.uri.IframeUriManager;
 import org.apache.shindig.gadgets.uri.UriStatus;
 import org.apache.shindig.gadgets.uri.UriCommon.Param;
-
+ 
+import com.google.common.base.Strings;
 import com.google.inject.Inject;
 
 import org.apache.commons.lang.StringEscapeUtils;
 
 import java.io.IOException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -48,7 +50,9 @@ public class GadgetRenderingServlet extends InjectedServlet {
 
   static final int DEFAULT_CACHE_TTL = 60 * 5;
 
-  private static final Logger LOG = Logger.getLogger(GadgetRenderingServlet.class.getName());
+  //class name for logging purpose
+  private static final String classname = "org.apache.shindig.gadgets.servlet.GadgetRenderingServlet";
+  private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
 
   protected transient Renderer renderer;
   protected transient IframeUriManager iframeUriManager;
@@ -144,7 +148,9 @@ public class GadgetRenderingServlet extends InjectedServlet {
           ttl = Integer.parseInt(ttlStr);
         } catch (NumberFormatException e) {
           // Ignore malformed TTL value
-          LOG.info("Bad TTL value '" + ttlStr + "' was ignored");
+          if (LOG.isLoggable(Level.INFO)) {
+            LOG.logp(Level.INFO, classname, "onOkRenderingResultsStatus", MessageKeys.MALFORMED_TTL_VALUE, new Object[] {ttlStr});
+          }
         }
       }
       HttpUtil.setCachingHeaders(resp, ttl, true);

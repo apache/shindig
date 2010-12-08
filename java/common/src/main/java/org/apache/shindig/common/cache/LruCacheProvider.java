@@ -31,6 +31,8 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.shindig.common.logging.i18n.MessageKeys;
+
 /**
  * A cache provider that always produces LRU caches.
  *
@@ -44,7 +46,8 @@ import java.util.logging.Logger;
  * {@code EhCacheCacheProvider}.
  */
 public class LruCacheProvider implements CacheProvider {
-  private static final Logger LOG = Logger.getLogger(LruCacheProvider.class.getName());
+  private static final String classname = "org.apache.shindig.common.cache.LruCacheProvider";
+  private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
   private final int defaultCapacity;
   private final Injector injector;
   private final Map<String, Cache<?, ?>> caches = new MapMaker().makeMap();
@@ -66,13 +69,17 @@ public class LruCacheProvider implements CacheProvider {
       Key<String> guiceKey = Key.get(String.class, Names.named(key));
       try {
         if (injector.getBinding(guiceKey) == null) {
-          LOG.warning("No LRU capacity configured for " + name);
+          if (LOG.isLoggable(Level.WARNING)) {
+            LOG.logp(Level.WARNING, classname, "getCapacity(String name)", MessageKeys.LRU_CAPACITY,new Object[] {"No",name});
+          }
         } else {
           String value = injector.getInstance(guiceKey);
           try {
             return Integer.parseInt(value);
           } catch (NumberFormatException e) {
-            LOG.warning("Invalid LRU capacity configured for " + name);
+            if (LOG.isLoggable(Level.WARNING)) {
+              LOG.logp(Level.WARNING, classname, "getCapacity(String name)", MessageKeys.LRU_CAPACITY,new Object[] {"Invalid",name});
+            }
           }
         }
       } catch ( ConfigurationException e ) {

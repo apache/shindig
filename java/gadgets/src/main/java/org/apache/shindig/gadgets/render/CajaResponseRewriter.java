@@ -49,6 +49,7 @@ import com.google.caja.reporting.SimpleMessageQueue;
 import com.google.inject.Inject;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.shindig.common.logging.i18n.MessageKeys;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetException;
@@ -65,6 +66,7 @@ import org.apache.shindig.gadgets.uri.ProxyUriManager;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -73,8 +75,10 @@ import java.util.logging.Logger;
  * @since 2.0.0
  */
 public class CajaResponseRewriter implements ResponseRewriter {
-  private static final Logger LOG = Logger.getLogger(CajaResponseRewriter.class.getName());
-
+  //class name for logging purpose
+  private static final String classname = "org.apache.shindig.gadgets.render.CajaResponseRewriter";
+  private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
+  
   private final RequestPipeline requestPipeline;
 
   @Inject
@@ -190,10 +194,14 @@ public class CajaResponseRewriter implements ResponseRewriter {
           return FetchedData.fromBytes(responseBytes, mimeType, response.getEncoding(),
               new InputSource(ref.getUri()));
         } catch (GadgetException e) {
-          LOG.info("Failed to retrieve: " + ref.toString());
+          if (LOG.isLoggable(Level.INFO)) {
+            LOG.logp(Level.INFO, classname, "proxyFetcher", MessageKeys.FAILED_TO_RETRIEVE, new Object[] {ref.toString()});
+          }
           return null;
         } catch (IOException e) {
-          LOG.info("Failed to read: " + ref.toString());
+          if (LOG.isLoggable(Level.INFO)) {
+            LOG.logp(Level.INFO, classname, "proxyFetcher", MessageKeys.FAILED_TO_READ, new Object[] {ref.toString()});
+          }
           return null;
         }
       }

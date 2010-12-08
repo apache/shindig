@@ -68,6 +68,7 @@ import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.ByteArrayBuffer;
+import org.apache.shindig.common.logging.i18n.MessageKeys;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.GadgetException;
 
@@ -110,9 +111,11 @@ public class BasicHttpFetcher implements HttpFetcher {
   // mutable fields must be volatile
   private volatile int maxObjSize;
   private volatile long slowResponseWarning;
-
-  private static final Logger LOG = Logger.getLogger(BasicHttpFetcher.class.getName());
-
+ 
+  //class name for logging purpose
+  private static final String classname = "org.apache.shindig.gadgets.http.BasicHttpFeatcher";
+  private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
+  
   private final Set<Class<?>> TIMEOUT_EXCEPTIONS = ImmutableSet.<Class<?>>of(ConnectionPoolTimeoutException.class,
       SocketTimeoutException.class, SocketException.class, HttpHostConnectException.class, NoHttpResponseException.class,
       InterruptedException.class, UnknownHostException.class);
@@ -370,12 +373,15 @@ public class BasicHttpFetcher implements HttpFetcher {
 
       // Find timeout exceptions, respond accordingly
       if (TIMEOUT_EXCEPTIONS.contains(e.getClass())) {
-        LOG.info("Timeout for " + request.getUri() + " Exception: " + e.getClass().getName() + " - " + e.getMessage() + " - " + (now - started) + "ms");
+        if (LOG.isLoggable(Level.INFO)) {
+          LOG.logp(Level.INFO, classname, "fetch", MessageKeys.TIMEOUT_EXCEPTION, new Object[] {request.getUri(),classname,e.getMessage(),now-started});
+        }        
         return HttpResponse.timeout();
+      }  
+      if (LOG.isLoggable(Level.INFO)) {
+          LOG.logp(Level.INFO, classname, "fetch", MessageKeys.EXCEPTION_OCCURRED, new Object[] {request.getUri(),now-started});
+          LOG.logp(Level.INFO, classname, "fetch", "", e);
       }
-
-      LOG.log(Level.INFO, "Got Exception fetching " + request.getUri() + " - " + (now - started) + "ms", e);
-
       // Separate shindig error from external error
       throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, e,
           HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -398,7 +404,9 @@ public class BasicHttpFetcher implements HttpFetcher {
    * @param finished the time the request finished, in milliseconds.
    */
   protected void slowResponseWarning(HttpRequest request, long started, long finished) {
-    LOG.warning("Slow response from " + request.getUri() + ' ' + (finished - started) + "ms");
+    if (LOG.isLoggable(Level.WARNING)) {
+      LOG.logp(Level.WARNING, classname, "slowResponseWarning", MessageKeys.SLOW_RESPONSE, new Object[] {request.getUri(),finished-started});
+    } 
   }
 
   /**

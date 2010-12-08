@@ -44,9 +44,11 @@ import com.google.inject.Inject;
  * @since 2.0.0
  */
 public class SanitizingResponseRewriter implements ResponseRewriter {
-  private static final Logger LOG =
-    Logger.getLogger(SanitizingResponseRewriter.class.getName());
 
+  //class name for logging purpose
+  private static final String classname = "org.apache.shindig.gadgets.render.SanitizingResponseRewriter";
+  private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
+ 
   private final ContentRewriterFeature.Factory featureConfigFactory;
   private final CajaCssSanitizer cssSanitizer;
   private final ProxyUriManager proxyUriManager;
@@ -65,17 +67,20 @@ public class SanitizingResponseRewriter implements ResponseRewriter {
     if (request.isSanitizationRequested() &&
         featureConfigFactory.get(request).shouldRewriteURL(request.getUri().toString())) {
       if (Strings.isNullOrEmpty(request.getRewriteMimeType())) {
-        LOG.log(Level.WARNING, "Request to sanitize without content type for "
-            + request.getUri());
+        if (LOG.isLoggable(Level.INFO)) {
+          LOG.logp(Level.INFO, classname, "rewrite", MessageKeys.REQUEST_TO_SANITIZE_WITHOUT_CONTENT,new Object[] {request.getUri()});
+        }
         resp.setContent("");
       } else if (request.getRewriteMimeType().equalsIgnoreCase("text/css")) {
         rewriteProxiedCss(request, resp);
       } else if (request.getRewriteMimeType().toLowerCase().startsWith("image/")) {
         rewriteProxiedImage(request, resp);
       } else {
-        LOG.log(Level.WARNING, "Request to sanitize unknown content type "
-            + request.getRewriteMimeType()
-            + " for " + request.getUri());
+        if (LOG.isLoggable(Level.WARNING)) {
+          LOG.logp(Level.WARNING, classname, "rewrite", 
+            MessageKeys.REQUEST_TO_SANITIZE_UNKNOW_CONTENT,
+            new Object[] {request.getRewriteMimeType(),request.getUri()});
+        }
         resp.setContent("");
       }
     }
@@ -96,8 +101,9 @@ public class SanitizingResponseRewriter implements ResponseRewriter {
               .guessFormat(new ByteSourceInputStream(resp.getContentBytes(),
                   request.getUri().getPath()));
           if (imageFormat == ImageFormat.IMAGE_FORMAT_UNKNOWN) {
-            LOG.log(Level.INFO, "Unable to sanitize unknown image type "
-                + request.getUri().toString());
+            if (LOG.isLoggable(Level.INFO)) {
+              LOG.logp(Level.INFO, classname, "rewriteProxiedImage", MessageKeys.UNABLE_SANITIZE_UNKNOWN_IMG,new Object[] {request.getUri().toString()});
+            }
             return;
           }
           imageIsSafe = true;
@@ -107,8 +113,10 @@ public class SanitizingResponseRewriter implements ResponseRewriter {
           throw new RuntimeException(ioe);
         } catch (ImageReadException ire) {
           // Unable to read the image so its not safe
-          LOG.log(Level.INFO, "Unable to detect image type for " +request.getUri().toString() +
-              " for sanitized content", ire);
+          if (LOG.isLoggable(Level.INFO)) {
+            LOG.logp(Level.INFO, classname, "rewriteProxiedImage", MessageKeys.UNABLE_DETECT_IMG_TYPE,new Object[] {request.getUri().toString()});
+            LOG.log(Level.INFO, ire.getMessage(), ire);
+          }
           return;
         }
       } else {

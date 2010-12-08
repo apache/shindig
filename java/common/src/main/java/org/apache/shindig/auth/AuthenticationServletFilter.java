@@ -21,6 +21,7 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 
+import org.apache.shindig.common.logging.i18n.MessageKeys;
 import org.apache.shindig.common.servlet.InjectedFilter;
 
 import java.io.BufferedReader;
@@ -56,12 +57,13 @@ public class AuthenticationServletFilter extends InjectedFilter {
 
   // At some point change this to a container specific realm
   private static final String realm = "shindig";
-
+ 
   private List<AuthenticationHandler> handlers;
 
-  private static final Logger LOG = Logger.getLogger(
-      AuthenticationServletFilter.class.getName());
-
+  //class name for logging purpose
+  private static final String classname = "org.apache.shindig.auth.AuthenticationServletFilter";
+  private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
+  
   @Inject
   public void setAuthenticationHandlers(List<AuthenticationHandler> handlers) {
     this.handlers = handlers;
@@ -99,8 +101,11 @@ public class AuthenticationServletFilter extends InjectedFilter {
       callChain(chain, req, resp);
     } catch (AuthenticationHandler.InvalidAuthenticationException iae) {
       Throwable cause = iae.getCause();
-      LOG.log(Level.INFO, iae.getMessage(), cause);
 
+      if (LOG.isLoggable(Level.INFO)) {
+        LOG.logp(Level.INFO, classname, "doFilter", MessageKeys.ERROR_PARSING_SECURE_TOKEN, cause);
+      }
+           
       if (iae.getAdditionalHeaders() != null) {
         for (Map.Entry<String,String> entry : iae.getAdditionalHeaders().entrySet()) {
           resp.addHeader(entry.getKey(), entry.getValue());

@@ -20,6 +20,7 @@ package org.apache.shindig.gadgets;
 
 import org.apache.shindig.common.cache.Cache;
 import org.apache.shindig.common.cache.SoftExpiringCache;
+import org.apache.shindig.common.logging.i18n.MessageKeys;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.xml.XmlException;
 import org.apache.shindig.config.ContainerConfig;
@@ -38,7 +39,9 @@ import java.util.logging.Logger;
  * Automatically updates objects as needed asynchronously to provide optimal throughput.
  */
 public abstract class AbstractSpecFactory<T> {
-  private static final Logger LOG = Logger.getLogger(AbstractSpecFactory.class.getName());
+  //class name for logging purpose
+  private static final String classname = "org.apache.shindig.gadgets.AbstractSpecFactory";
+  private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
   private final Class<T> clazz;
   private final ExecutorService executor;
   private final RequestPipeline pipeline;
@@ -216,10 +219,14 @@ public abstract class AbstractSpecFactory<T> {
         cache.addElement(query.specUri, newSpec, refresh);
       } catch (GadgetException e) {
         if (old != null) {
-          LOG.log(Level.INFO, "Failed to update {0}. Using cached version.", query.specUri);
+          if (LOG.isLoggable(Level.INFO)) {
+            LOG.logp(Level.INFO, classname, "SpecUpdater", MessageKeys.UPDATE_SPEC_FAILURE_USE_CACHE_VERSION, new Object[] {query.specUri});
+          }
           cache.addElement(query.specUri, old, refresh);
         } else {
-          LOG.log(Level.INFO, "Failed to update {0}. Applying negative cache.", query.specUri);
+          if (LOG.isLoggable(Level.INFO)) {
+            LOG.logp(Level.INFO, classname, "SpecUpdater", MessageKeys.UPDATE_SPEC_FAILURE_APPLY_NEG_CACHE, new Object[] {query.specUri});
+          }
           cache.addElement(query.specUri, e, refresh);
         }
       }

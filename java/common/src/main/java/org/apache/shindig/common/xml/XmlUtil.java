@@ -17,6 +17,7 @@
  */
 package org.apache.shindig.common.xml;
 
+import org.apache.shindig.common.logging.i18n.MessageKeys;
 import org.apache.shindig.common.uri.Uri;
 
 import org.w3c.dom.Element;
@@ -42,7 +43,8 @@ import javax.xml.parsers.ParserConfigurationException;
  * loading of external files (xinclude, external entities, DTDs, etc.) are disabled.
  */
 public final class XmlUtil {
-  private static final Logger LOG = Logger.getLogger(XmlUtil.class.getName());
+  private static final String classname = "org.apache.shindig.common.xml.XmlUtil";
+  private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
   // Handles xml errors so that they're not logged to stderr.
   private static final ErrorHandler errorHandler = new ErrorHandler() {
     public void error(SAXParseException exception) throws SAXException {
@@ -52,8 +54,9 @@ public final class XmlUtil {
       throw exception;
     }
     public void warning(SAXParseException exception) {
-      // warnings can be ignored.
-      LOG.log(Level.INFO, "XmlUtil warning", exception);
+      if (LOG.isLoggable(Level.INFO)) {
+        LOG.logp(Level.INFO, classname, "warning", MessageKeys.ERROR_PARSING_XML, exception);
+      }
     }
   };
 
@@ -90,7 +93,9 @@ public final class XmlUtil {
           "http://xml.org/sax/features/external-general-entities", false);
     } catch (IllegalArgumentException e) {
       // Not supported by some very old parsers.
-      LOG.info("XML parsers will load external general entities.");
+      if (LOG.isLoggable(Level.INFO)) {
+        LOG.logp(Level.INFO, classname, "static block", MessageKeys.ERROR_PARSING_EXTERNAL_ENTITIES);
+      }	
     }
 
     try {
@@ -98,7 +103,9 @@ public final class XmlUtil {
           "http://xml.org/sax/features/external-parameter-entities", false);
     } catch (IllegalArgumentException e) {
       // Not supported by some very old parsers.
-      LOG.info("XML parsers will load external parameter entities.");
+      if (LOG.isLoggable(Level.INFO)) {
+        LOG.logp(Level.INFO, classname, "static block", MessageKeys.ERROR_PARSING_EXTERNAL_ENTITIES);
+      }
     }
 
     try {
@@ -106,29 +113,39 @@ public final class XmlUtil {
           "http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
     } catch (IllegalArgumentException e) {
       // Only supported by Apache's XML parsers.
-      LOG.info("XML parsers will load external DTDs.");
+      if (LOG.isLoggable(Level.INFO)) {
+        LOG.logp(Level.INFO, classname, "static block", MessageKeys.ERROR_PARSING_EXTERNAL_DTD);
+      }      
     }
 
     try {
       builderFactory.setAttribute(XMLConstants.FEATURE_SECURE_PROCESSING, true);
     } catch (IllegalArgumentException e) {
       // Not supported by older parsers.
-      LOG.info("Not using secure XML processing.");
+      if (LOG.isLoggable(Level.INFO)) {
+        LOG.logp(Level.INFO, classname, "static block", MessageKeys.ERROR_PARSING_SECURE_XML);
+      }
     }
 
     try {
       DocumentBuilder builder = builderFactory.newDocumentBuilder();
       builder.reset();
       canReuseBuilders = true;
-      LOG.info("Reusing document builders");
+      if (LOG.isLoggable(Level.INFO)) {
+        LOG.logp(Level.INFO, classname, "static block", MessageKeys.REUSE_DOC_BUILDERS);
+      }      
     } catch (UnsupportedOperationException e) {
       // Only supported by newer parsers (xerces 2.8.x+ for instance).
       canReuseBuilders = false;
-      LOG.info("Not reusing document builders");
+      if (LOG.isLoggable(Level.INFO)) {
+        LOG.logp(Level.INFO, classname, "static block", MessageKeys.NOT_REUSE_DOC_BUILDERS);
+      } 
     } catch (ParserConfigurationException e) {
       // Only supported by newer parsers (xerces 2.8.x+ for instance).
       canReuseBuilders = false;
-      LOG.info("Not reusing document builders");
+      if (LOG.isLoggable(Level.INFO)) {
+        LOG.logp(Level.INFO, classname, "static block", MessageKeys.NOT_REUSE_DOC_BUILDERS);
+      }
     }
   }
 

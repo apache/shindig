@@ -17,6 +17,7 @@
  */
 package org.apache.shindig.social.opensocial.util;
 
+import org.apache.shindig.common.logging.i18n.MessageKeys;
 import org.w3c.dom.ls.LSInput;
 import org.w3c.dom.ls.LSResourceResolver;
 import org.xml.sax.SAXException;
@@ -48,7 +49,9 @@ public class XSDValidator {
    */
   public static final String XMLDEC = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
 
-  protected static final Logger log = Logger.getLogger(XSDValidator.class.getName());
+  //class name for logging purpose
+  private static final String classname = "org.apache.shindig.social.opensocial.util.XSDValidator";
+  private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
 
   /**
    * Validate a xml string against a supplied schema.
@@ -92,8 +95,9 @@ public class XSDValidator {
 
         public LSInput resolveResource(String arg0, String arg1, String arg2,
             String arg3, String arg4) {
-          log.info("resolveResource(" + arg0 + ',' + arg1 + ',' + arg2 + ','
-              + arg3 + ',' + arg4 + ')');
+          if (LOG.isLoggable(Level.INFO)) {
+            LOG.logp(Level.INFO, classname, "resolveResource", MessageKeys.RESOLVE_RESOURCE, new Object[] {arg0, arg1, arg2, arg3, arg4});
+          }
           return lsr.resolveResource(arg0, arg1, arg2, arg3, arg4);
         }
 
@@ -148,13 +152,15 @@ public class XSDValidator {
       String schemaResource, boolean removeContainer) {
 
     String xml = XSDValidator.insertSchema(xmlFragment, schemaStatement, removeContainer);
-    if (log.isLoggable(Level.FINE)) {
-      log.fine("Validating " + xml);
+    if (LOG.isLoggable(Level.FINE)) {
+      LOG.fine("Validating " + xml);
     }
     String errors = XSDValidator.validate(xml, XSDValidator.class
         .getResourceAsStream(schemaResource));
     if (!"".equals(errors)) {
-      log.severe("Failed to validate " + xml);
+      if (LOG.isLoggable(Level.SEVERE)) {
+        LOG.logp(Level.SEVERE, classname, "resolveResource", MessageKeys.FAILED_TO_VALIDATE, new Object[] {xml});
+      }
     }
     if (!"".equals(errors)) {
       throw new Error("XML document does not validate \n" + errors + '\n' + xml);
@@ -167,13 +173,15 @@ public class XSDValidator {
     + " xsi:schemaLocation=\"http://ns.opensocial.org/2008/opensocial classpath:opensocial.xsd\" ";
 
     String xml = XSDValidator.insertSchema(xmlFragment, XMLSCHEMA, true);
-    if (log.isLoggable(Level.FINE)) {
-      log.fine("Validating " + xml);
+    if (LOG.isLoggable(Level.FINE)) {
+      LOG.fine("Validating " + xml);
     }
     String errors = XSDValidator.validate(xml, XSDValidator.class
         .getResourceAsStream("opensocial.xsd"));
     if (!"".equals(errors)) {
-      log.severe("Failed to validate " + xml);
+      if (LOG.isLoggable(Level.SEVERE)) {
+        LOG.logp(Level.SEVERE, classname, "resolveResource", MessageKeys.FAILED_TO_VALIDATE, new Object[] {xml});
+      }
     }
     if (!"".equals(errors)) {
       throw new Error("XML document does not validate \n" + errors + '\n' + xml);

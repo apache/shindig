@@ -22,6 +22,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.shindig.common.logging.i18n.MessageKeys;
 import org.apache.shindig.common.util.CharsetUtil;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpResponse;
@@ -62,7 +63,9 @@ public class MutableContent {
   private Map<String, Object> pipelinedData;
 
   private static final String MUTABLE_CONTENT_LISTENER = "MutableContentListener";
-  private static final Logger logger = Logger.getLogger(MutableContent.class.getName());
+  //class name for logging purpose
+  private static final String classname = "org.apache.shindig.gadgets.rewrite.MutableContent";
+  private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
 
   public static void notifyEdit(Document doc) {
     MutableContent mc = (MutableContent) doc.getUserData(MUTABLE_CONTENT_LISTENER);
@@ -239,7 +242,10 @@ public class MutableContent {
       document = contentParser.parseDom(getContent());
       document.setUserData(MUTABLE_CONTENT_LISTENER, this, null);
     } catch (GadgetException e) {
-      logger.log(Level.WARNING, "Got GadgetException when parsing content", e);
+      if (LOG.isLoggable(Level.WARNING)) {
+        LOG.logp(Level.WARNING, classname, "getDocument", MessageKeys.EXCEPTION_PARSING_CONTENT);
+        LOG.log(Level.WARNING, e.getMessage(), e);
+      }
       return null;
     }
     return document;

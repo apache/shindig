@@ -31,6 +31,7 @@ import org.apache.sanselan.ImageInfo;
 import org.apache.sanselan.ImageReadException;
 import org.apache.sanselan.Sanselan;
 import org.apache.sanselan.common.byteSources.ByteSourceInputStream;
+import org.apache.shindig.common.logging.i18n.MessageKeys;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
@@ -89,7 +90,9 @@ public class BasicImageRewriter implements ResponseRewriter {
   private static final int BITS_PER_BYTE = 8;
   private static final Color COLOR_TRANSPARENT = new Color(255, 255, 255, 0);
   public static final String CONTENT_TYPE = "Content-Type";
-  private static final Logger LOG = Logger.getLogger(BasicImageRewriter.class.getName());
+  //class name for logging purpose
+  private static final String classname = "org.apache.shindig.gadgets.rewrite.image.BasicImageRewriter";
+  private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
 
   private static final Set<String> SUPPORTED_MIME_TYPES = ImmutableSet.of(
       "image/gif", CONTENT_TYPE_IMAGE_PNG, "image/jpeg", "image/bmp");
@@ -324,13 +327,19 @@ public class BasicImageRewriter implements ResponseRewriter {
       // and it's subclass implementations for the above four formats.
       applyOptimizer(response, imageFormat, image, config);
     } catch (IOException ioe) {
-      LOG.log(Level.WARNING, "IO Error rewriting image " + request.toString() + " - " + ioe.getMessage());
+      if (LOG.isLoggable(Level.WARNING)) {
+        LOG.logp(Level.WARNING, classname, "rewrite", MessageKeys.IO_ERROR_REWRITING_IMG, new Object[] {request.toString(),ioe.getMessage()});
+      } 
     } catch (RuntimeException re) {
       // This is safe to recover from and necessary because the ImageIO/Sanselan calls can
       // throw a very wide variety of exceptions
-      LOG.log(Level.INFO, "Unknown error rewriting image " + request.toString(), re);
+      if (LOG.isLoggable(Level.INFO)) {
+        LOG.logp(Level.INFO, classname, "rewrite", MessageKeys.UNKNOWN_ERROR_REWRITING_IMG, new Object[] {request.toString(),re.getMessage()});
+      }
     } catch (ImageReadException ire) {
-      LOG.log(Level.INFO, "Failed to read image. Skipping " + request.toString(), ire.getMessage());
+      if (LOG.isLoggable(Level.INFO)) {
+        LOG.logp(Level.INFO, classname, "rewrite", MessageKeys.FAILED_TO_READ_IMG, new Object[] {request.toString(),ire.getMessage()});
+      }
     }
   }
 

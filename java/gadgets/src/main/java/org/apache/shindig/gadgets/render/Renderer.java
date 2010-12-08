@@ -18,6 +18,7 @@
  */
 package org.apache.shindig.gadgets.render;
 
+import org.apache.shindig.common.logging.i18n.MessageKeys;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.Gadget;
@@ -32,6 +33,7 @@ import com.google.inject.Inject;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
@@ -39,7 +41,10 @@ import java.util.regex.Pattern;
  * Validates a rendering request parameters before calling an appropriate renderer.
  */
 public class Renderer {
-  private static final Logger LOG = Logger.getLogger(Renderer.class.getName());
+  //class name for logging purpose
+  private static final String classname = "org.apache.shindig.gadgets.render.Renderer";
+  private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
+
   private final Processor processor;
   private final HtmlRenderer renderer;
   private final ContainerConfig containerConfig;
@@ -92,20 +97,22 @@ public class Renderer {
 
       return RenderingResults.ok(renderer.render(gadget));
     } catch (RenderingException e) {
-      return logError(context.getUrl(), e.getHttpStatusCode(), e);
+      return logError("render", context.getUrl(), e.getHttpStatusCode(), e);
     } catch (ProcessingException e) {
-      return logError(context.getUrl(), e.getHttpStatusCode(), e);
+      return logError("render", context.getUrl(), e.getHttpStatusCode(), e);
     } catch (RuntimeException e) {
       if (e.getCause() instanceof GadgetException) {
-        return logError(context.getUrl(), ((GadgetException)e.getCause()).getHttpStatusCode(),
+        return logError("render", context.getUrl(), ((GadgetException)e.getCause()).getHttpStatusCode(),
             e.getCause());
       }
       throw e;
     }
   }
 
-  private RenderingResults logError(Uri gadgetUrl, int statusCode, Throwable t) {
-    LOG.info("Failed to render gadget " + gadgetUrl + ": " + t.getMessage());
+  private RenderingResults logError(String methodname, Uri gadgetUrl, int statusCode, Throwable t) {
+    if (LOG.isLoggable(Level.INFO)) {
+      LOG.logp(Level.INFO, classname, methodname, MessageKeys.FAILED_TO_RENDER, new Object[] {gadgetUrl,t.getMessage()});
+    }
     return RenderingResults.error(t.getMessage(), statusCode);
   }
 

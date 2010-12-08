@@ -30,6 +30,7 @@ import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.common.xml.DomUtil;
+import org.apache.shindig.common.logging.i18n.MessageKeys;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.sanselan.ImageFormat;
@@ -40,6 +41,7 @@ import org.apache.sanselan.common.byteSources.ByteSourceInputStream;
 import org.w3c.dom.Node;
 import org.w3c.dom.Element;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -53,7 +55,9 @@ import java.io.IOException;
  * Rewriter that adds height/width attributes to <img> tags.
  */
 public class ImageAttributeRewriter extends DomWalker.Rewriter {
-  private static final Logger LOG = Logger.getLogger(ImageAttributeRewriter.class.getName());
+  //class name for logging purpose
+  private static final String classname = "org.apache.shindig.gadgets.rewrite.ImageAttributeRewriter";
+  private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
 
   @Inject
   public ImageAttributeRewriter(RequestPipeline requestPipeline, ExecutorService executor) {
@@ -113,7 +117,9 @@ public class ImageAttributeRewriter extends DomWalker.Rewriter {
         try {
           resourceRequests.add(buildHttpRequest(gadget, uri));
         } catch (GadgetException e) {
-          LOG.warning("Unable to process the image resource " + imgSrc);
+          if (LOG.isLoggable(Level.WARNING)) {
+            LOG.logp(Level.WARNING, classname, "revisit", MessageKeys.UNABLE_TO_PROCESS_IMG, new Object[] {imgSrc});
+          }
         }
       }
 
@@ -197,11 +203,17 @@ public class ImageAttributeRewriter extends DomWalker.Rewriter {
                        "}\n";
           }
         } catch (ImageReadException e) {
-          LOG.warning("Unable to read reponnse for the image resource " + src);
+          if (LOG.isLoggable(Level.WARNING)) {
+            LOG.logp(Level.WARNING, classname, "processAllImgResources", MessageKeys.UNABLE_TO_READ_RESPONSE, new Object[] {src});
+          }
         } catch (GadgetException e) {
-          LOG.warning("Unable to fetch the image resource " + src);
+          if (LOG.isLoggable(Level.WARNING)) {
+            LOG.logp(Level.WARNING, classname, "processAllImgResources", MessageKeys.UNABLE_TO_FETCH_IMG, new Object[] {src});
+          }
         } catch (IOException e) {
-          LOG.warning("Unable to parse the image resource " + src);
+          if (LOG.isLoggable(Level.WARNING)) {
+            LOG.logp(Level.WARNING, classname, "processAllImgResources", MessageKeys.UNABLE_TO_PARSE_IMG, new Object[] {src});
+          }
         }
       }
 

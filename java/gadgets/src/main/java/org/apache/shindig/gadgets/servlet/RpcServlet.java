@@ -46,7 +46,7 @@ public class RpcServlet extends InjectedServlet {
   static final String GET_REQUEST_REQ_PARAM = "req";
   static final String GET_REQUEST_CALLBACK_PARAM = "callback";
 
-  private static final Logger LOG = Logger.getLogger("org.apache.shindig.gadgets");
+  private static final Logger LOG = Logger.getLogger("org.apache.shindig.gadgets.servlet.RpcServlet");
 
   private transient JsonRpcHandler jsonHandler;
 

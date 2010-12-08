@@ -20,6 +20,7 @@ package org.apache.shindig.gadgets.rewrite;
 
 import com.google.common.collect.Lists;
 import org.apache.shindig.common.Pair;
+import org.apache.shindig.common.logging.i18n.MessageKeys;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.Uri.UriException;
 import org.apache.shindig.gadgets.Gadget;
@@ -40,8 +41,10 @@ import java.util.logging.Logger;
  * @since 2.0.0
  */
 public class ProxyingVisitor extends ResourceMutateVisitor {
-  private static final Logger logger = Logger.getLogger(
-      ProxyUriManager.class.getName());
+  //class name for logging purpose
+  private static final String classname = "org.apache.shindig.gadgets.rewrite.ProxyingVisitor";
+  private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
+  
   private final ProxyUriManager uriManager;
 
   public ProxyingVisitor(ContentRewriterFeature.Config featureConfig,
@@ -71,7 +74,10 @@ public class ProxyingVisitor extends ResourceMutateVisitor {
         reservedNodes.add(node);
       } catch (UriException e) {
         // Uri parse exception, ignore.
-        logger.log(Level.WARNING, "Uri exception when parsing: " + uriStr, e);
+        if (LOG.isLoggable(Level.WARNING)) {
+          LOG.logp(Level.WARNING, classname, "mutateUris", MessageKeys.URI_EXCEPTION_PARSING, new Object[] {uriStr});
+          LOG.log(Level.WARNING, e.getMessage(), e);
+        }
       }
     }
     

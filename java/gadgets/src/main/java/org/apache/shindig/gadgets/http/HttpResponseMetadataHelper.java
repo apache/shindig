@@ -20,12 +20,14 @@ package org.apache.shindig.gadgets.http;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 
+import org.apache.shindig.common.logging.i18n.MessageKeys;
 import org.apache.shindig.common.util.Base32;
 
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -38,9 +40,10 @@ public class HttpResponseMetadataHelper {
   public static final String IMAGE_HEIGHT = "ImageHeight";
   public static final String IMAGE_WIDTH = "ImageWidth";
 
-  private static final Logger LOG =
-    Logger.getLogger(HttpResponseMetadataHelper.class.getName());
-
+  //class name for logging purpose
+  private static final String classname = "org.apache.shindig.gadgets.http.HttpResponseMetadataHelperr";
+  private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
+ 
   /**
    * Return a copy of input response with additional metadata values.
    * @param response source response
@@ -68,10 +71,14 @@ public class HttpResponseMetadataHelper {
       return new String(Base32.encodeBase32(md5val), "UTF-8");
     } catch (NoSuchAlgorithmException e) {
       // Should not happen
-      LOG.info("Error getting MD5 digest, ignored");
+      if (LOG.isLoggable(Level.INFO)) {
+        LOG.logp(Level.INFO, classname, "getHash", MessageKeys.ERROR_GETTING_MD5);
+      } 
     } catch (UnsupportedEncodingException e) {
       // Should not happen
-      LOG.info("Error parsing MD5 string as UTF8");
+      if (LOG.isLoggable(Level.INFO)) {
+        LOG.logp(Level.INFO, classname, "getHash", MessageKeys.ERROR_PARSING_MD5);
+      }     
     }
     return null;
   }

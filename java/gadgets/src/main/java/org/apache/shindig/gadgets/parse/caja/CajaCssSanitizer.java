@@ -18,6 +18,7 @@
 package org.apache.shindig.gadgets.parse.caja;
 
 import com.google.common.base.Strings;
+import org.apache.shindig.common.logging.i18n.MessageKeys;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
@@ -51,9 +52,10 @@ import java.util.logging.Logger;
  * - Force @url references to have the HTTP/HTTPS protocol
  */
 public class CajaCssSanitizer {
-
-  private static final Logger LOG = Logger.getLogger(CajaCssSanitizer.class.getName());
-
+  //class name for logging purpose
+  private static final String classname = "org.apache.shindig.gadgets.parse.caja.CajaCssSanitizer";
+  private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
+	  
   private static final Set<String> ALLOWED_URI_SCHEMES = ImmutableSet.of("http", "https");
 
   private final CajaCssParser parser;
@@ -84,7 +86,10 @@ public class CajaCssSanitizer {
       return parser.serialize(stylesheet);
     } catch (GadgetException ge) {
       // Failed to parse stylesheet so log and continue
-      LOG.log(Level.INFO, "Failed to parse stylesheet", ge);
+      if (LOG.isLoggable(Level.INFO)) {    
+        LOG.logp(Level.INFO, classname, "sanitize", MessageKeys.FAILED_TO_PARSE);
+        LOG.log(Level.INFO, ge.getMessage(), ge);
+      }
       return "";
     }
   }
@@ -108,7 +113,10 @@ public class CajaCssSanitizer {
       content = parser.serialize(stylesheet);
     } catch (GadgetException ge) {
       // Failed to parse stylesheet so log and continue
-      LOG.log(Level.INFO, "Failed to parse stylesheet", ge);
+        if (LOG.isLoggable(Level.INFO)) {    
+          LOG.logp(Level.INFO, classname, "sanitize", MessageKeys.FAILED_TO_PARSE);
+          LOG.log(Level.INFO, ge.getMessage(), ge);
+        }
     }
     if (Strings.isNullOrEmpty(content)) {
       // Remove the owning node

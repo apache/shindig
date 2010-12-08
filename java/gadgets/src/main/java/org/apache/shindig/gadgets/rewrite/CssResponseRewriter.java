@@ -20,6 +20,7 @@ package org.apache.shindig.gadgets.rewrite;
 import com.google.common.base.Strings;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.shindig.common.logging.i18n.MessageKeys;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
@@ -55,7 +56,9 @@ import com.google.inject.Inject;
  */
 public class CssResponseRewriter implements ResponseRewriter {
 
-  private static final Logger LOG = Logger.getLogger(CssResponseRewriter.class.getName());
+  //class name for logging purpose
+  private static final String classname = "org.apache.shindig.gadgets.rewrite.CssResponseRewriter";
+  private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
 
   private final CajaCssParser cssParser;
   private final ProxyUriManager proxyUriManager;
@@ -108,8 +111,9 @@ public class CssResponseRewriter implements ResponseRewriter {
         return stringList;
       } catch (GadgetException ge) {
         if (ge.getCause() instanceof ParseException) {
-          LOG.log(Level.WARNING,
-              "Caja CSS parse failure: " + ge.getCause().getMessage() + " for " + source);
+          if (LOG.isLoggable(Level.WARNING)) {
+            LOG.logp(Level.WARNING, classname, "rewrite", MessageKeys.CAJA_CSS_PARSE_FAILURE, new Object[] {ge.getCause().getMessage(),source});
+          }
           writer.write(original);
           return Collections.emptyList();
         } else {
@@ -148,8 +152,9 @@ public class CssResponseRewriter implements ResponseRewriter {
       return imports;
     } catch (GadgetException ge) {
       if (ge.getCause() instanceof ParseException) {
-        LOG.log(Level.WARNING,
-            "Caja CSS parse failure: " + ge.getCause().getMessage() + " for " + source);
+    	if (LOG.isLoggable(Level.INFO)) {
+          LOG.logp(Level.WARNING, classname, "rewrite", MessageKeys.CAJA_CSS_PARSE_FAILURE, new Object[] {ge.getCause().getMessage(),source});
+        }
         return Collections.emptyList();
       } else {
         throw new RewritingException(ge, ge.getHttpStatusCode());

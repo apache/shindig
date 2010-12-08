@@ -17,6 +17,7 @@
  */
 package org.apache.shindig.gadgets.process;
 
+import org.apache.shindig.common.logging.i18n.MessageKeys;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.Gadget;
@@ -32,6 +33,7 @@ import org.apache.shindig.gadgets.variables.VariableSubstituter;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletResponse;
@@ -41,7 +43,9 @@ import javax.servlet.http.HttpServletResponse;
  */
 @Singleton
 public class Processor {
-  private static final Logger LOG = Logger.getLogger(Processor.class.getName());
+  //class name for logging purpose
+  private static final String classname = "org.apache.shindig.gadgets.oauth.Processor";
+  private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
   private final GadgetSpecFactory gadgetSpecFactory;
   private final VariableSubstituter substituter;
   private final ContainerConfig containerConfig;
@@ -81,7 +85,9 @@ public class Processor {
     }
 
     if (blacklist.isBlacklisted(context.getUrl())) {
-      LOG.info("Attempted to render blacklisted gadget: " + context.getUrl());
+      if (LOG.isLoggable(Level.INFO)) {
+        LOG.logp(Level.INFO, classname, "process", MessageKeys.RENDER_BLACKLISTED_GADGET, new Object[] {context.getUrl()});
+      } 
       throw new ProcessingException("The requested gadget is unavailable",
           HttpServletResponse.SC_FORBIDDEN);
     }

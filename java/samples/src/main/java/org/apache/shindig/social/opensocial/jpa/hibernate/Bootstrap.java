@@ -23,11 +23,14 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
+
+import org.apache.shindig.common.logging.i18n.MessageKeys;
 
 /**
  *
@@ -40,7 +43,9 @@ public class Bootstrap {
   private static final String DB_PASSWORD = "db.password";
   private static final String DB_MIN_WRITE = "db.write.min";
   private static final String DB_MIN_NUM_READ = "db.read.min";
-  private static final Logger LOG = Logger.getLogger(Boolean.class.getName());
+  //class name for logging purpose
+  private static final String classname = "org.apache.shindig.social.opensocial.jpa.hibernate.Bootstrap";
+  private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
   private EntityManager entityManager;
 
   @Inject
@@ -60,8 +65,9 @@ public class Bootstrap {
 
     Map<String, String> properties = Maps.newHashMap();
 
-    LOG.info("Starting connection manager with properties " + properties);
-
+    if (LOG.isLoggable(Level.INFO)) {
+      LOG.logp(Level.INFO, classname, "init", MessageKeys.STARTING_CONN_MANAGER_WITH, new Object[] {properties});
+    }
     EntityManagerFactory emFactory = Persistence.createEntityManagerFactory(
         unitName, properties);
     entityManager = emFactory.createEntityManager();
