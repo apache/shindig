@@ -551,8 +551,8 @@ public class DefaultHandlerRegistry implements HandlerRegistry {
       }
     }
 
-    final  String operationPath;
-    final  List<Part> parts;
+    final String operationPath;
+    final List<Part> parts;
     final RestInvocationHandler handler;
     final int constCount;
     final int lastConstIndex;
