@@ -75,6 +75,7 @@ ContainerTest.prototype.testNavigateGadget = function() {
   this.setupGadgetsRpcRegister();
   var container = new shindig.container.Container({
     'allowDefaultView' : true,
+    'renderCajole' : true,
     'renderDebug' : true,
     'renderTest' : true
   });
@@ -84,6 +85,7 @@ ContainerTest.prototype.testNavigateGadget = function() {
   container.navigateGadget(site, 'gadget.xml', {}, {});
   this.assertEquals('gadget.xml', this.site_navigateTo_gadgetUrl);
   this.assertTrue(this.site_navigateTo_renderParams['allowDefaultView']);
+  this.assertTrue(this.site_navigateTo_renderParams['cajole']);
   this.assertTrue(this.site_navigateTo_renderParams['debug']);
   this.assertTrue(this.site_navigateTo_renderParams['nocache']);
   this.assertTrue(this.site_navigateTo_renderParams['testmode']);

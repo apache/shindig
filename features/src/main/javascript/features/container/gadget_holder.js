@@ -309,6 +309,12 @@ shindig.container.GadgetHolder.prototype.getIframeUrl_ = function() {
   uri.setQP('nocache', this.renderParams_[shindig.container.RenderParam.NO_CACHE] ? '1' : '0');
   uri.setQP('testmode', this.renderParams_[shindig.container.RenderParam.TEST_MODE] ? '1' : '0');
   uri.setQP('view', this.getView());
+  if (this.renderParams_[shindig.container.RenderParam.CAJOLE]) {
+    var libs = uri.getQP('libs');
+    if (libs == null || libs == '') uri.setQP('libs', 'caja');
+    else uri.setQP('libs', [ libs, ':caja' ].join(''));
+    uri.setQP('caja', '1');
+  }
   this.updateUserPrefParams_(uri);
 
   // TODO: Share this base container logic

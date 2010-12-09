@@ -45,11 +45,20 @@ shindig.container.Container = function(opt_config) {
 
   /**
    * @type {boolean}
+   * @private
    */
   this.allowDefaultView_ = Boolean(
       shindig.container.util.getSafeJsonValue(config,
       shindig.container.ContainerConfig.ALLOW_DEFAULT_VIEW, true));
 
+  /**
+   * @type {boolean}
+   * @private
+   */
+  this.renderCajole_ = Boolean(
+      shindig.container.util.getSafeJsonValue(config,
+      shindig.container.ContainerConfig.RENDER_CAJOLE, false));
+  
   /**
    * @type {string}
    * @private
@@ -60,6 +69,7 @@ shindig.container.Container = function(opt_config) {
 
   /**
    * @type {boolean}
+   * @private
    */
   var param = window.__CONTAINER_URI.getQP(this.renderDebugParam_);
   this.renderDebug_ = (typeof param === 'undefined')
@@ -144,6 +154,9 @@ shindig.container.Container.prototype.navigateGadget = function(
   var callback = opt_callback || function() {};
   if (this.allowDefaultView_) {
     renderParams[shindig.container.RenderParam.ALLOW_DEFAULT_VIEW] = true;
+  }
+  if (this.renderCajole_) {
+    renderParams[shindig.container.RenderParam.CAJOLE] = true;
   }
   if (this.renderDebug_) {
     renderParams[shindig.container.RenderParam.NO_CACHE] = true;
@@ -300,6 +313,12 @@ shindig.container.Container.prototype.onConstructed = function(opt_config) {};
  * @enum {string}
  */
 shindig.container.ContainerConfig = {};
+/**
+ * Whether cajole mode is turned on.
+ * @type {string}
+ * @const
+ */
+shindig.container.ContainerConfig.RENDER_CAJOLE = 'renderCajole';
 /**
  * Whether debug mode is turned on.
  * @type {string}

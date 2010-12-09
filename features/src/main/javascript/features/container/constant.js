@@ -94,6 +94,7 @@ shindig.container.NavigateTiming.PRT = 'prt';
  */
 shindig.container.RenderParam = {};
 shindig.container.RenderParam.ALLOW_DEFAULT_VIEW = 'allowDefaultView';
+shindig.container.RenderParam.CAJOLE = 'cajole';
 shindig.container.RenderParam.CLASS = 'class';
 shindig.container.RenderParam.DEBUG = 'debug';
 shindig.container.RenderParam.HEIGHT = 'height';

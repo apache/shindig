@@ -30,9 +30,14 @@ function GadgetHolderTest(name) {
 GadgetHolderTest.inherits(TestCase);
 
 GadgetHolderTest.prototype.setUp = function() {
+  this.containerUri = window.__CONTAINER_URI;
+  window.__CONTAINER_URI = shindig.uri('http://container.com');
+  this.gadgetsRpc = gadgets.rpc;
 };
 
 GadgetHolderTest.prototype.tearDown = function() {
+  window.__CONTAINER_URI = this.containerUri;
+  gadgets.rpc = this.gadgetsRpc;
 };
 
 GadgetHolderTest.prototype.testNew = function() {
@@ -42,4 +47,69 @@ GadgetHolderTest.prototype.testNew = function() {
   this.assertNull(holder.getIframeId());
   this.assertNull(holder.getGadgetInfo());
   this.assertNull(holder.getUrl());
+};
+
+GadgetHolderTest.prototype.testRenderWithoutRenderParams = function() {
+  var element = {};
+  var gadgetInfo = {
+      'iframeUrl' : 'http://shindig/gadgets/ifr?url=gadget.xml'
+  };
+  this.setupGadgetsRpcSetupReceiver();
+  var holder = new shindig.container.GadgetHolder(123, element);
+  holder.render(gadgetInfo, {}, {});
+  this.assertEquals('<iframe' +
+      ' marginwidth="0"' +
+      ' hspace="0"' +
+      ' frameborder="0"' +
+      ' scrolling="no"' +
+      ' marginheight="0"' +
+      ' vspace="0"' +
+      ' id="__gadget_123"' +
+      ' name="__gadget_123"' +
+      ' src="http://shindig/gadgets/ifr?url=gadget.xml&debug=0&nocache=0&testmode=0' +
+          '&parent=http%3A//container.com&mid=123"' +
+      ' ></iframe>',
+      element.innerHTML);
+};
+
+GadgetHolderTest.prototype.testRenderWithRenderRequests = function() {
+  var element = {};
+  var gadgetInfo = {
+      'iframeUrl' : 'http://shindig/gadgets/ifr?url=gadget.xml'
+  };
+  var renderParams = {
+      'cajole' : true,
+      'class' : 'xyz',
+      'debug' : true,
+      'height' : 111,
+      'nocache' : true,
+      'testmode' : true,
+      'width' : 222
+  };
+  this.setupGadgetsRpcSetupReceiver();
+  var holder = new shindig.container.GadgetHolder(123, element);
+  holder.render(gadgetInfo, {}, renderParams);
+  this.assertEquals('<iframe' +
+      ' marginwidth="0"' +
+      ' hspace="0"' +
+      ' height="111"' +
+      ' frameborder="0"' +
+      ' scrolling="no"' +
+      ' class="xyz"' +
+      ' marginheight="0"' +
+      ' vspace="0"' +
+      ' id="__gadget_123"' +
+      ' width="222"' +
+      ' name="__gadget_123"' +
+      ' src="http://shindig/gadgets/ifr?url=gadget.xml&debug=1&nocache=1&testmode=1' +
+          '&libs=caja&caja=1&parent=http%3A//container.com&mid=123"' +
+      ' ></iframe>',
+      element.innerHTML);
+};
+
+GadgetHolderTest.prototype.setupGadgetsRpcSetupReceiver = function() {
+  gadgets.rpc = {
+    setupReceiver: function(iframeId, relayUri, rpcToken) {
+    }
+  };
 };
