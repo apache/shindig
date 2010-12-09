@@ -203,7 +203,7 @@ public class FlashTagHandler extends AbstractTagHandler {
     swfobject.setAttribute("type", "text/javascript");
     List<FeatureResource> resources =
         featureRegistry.getFeatureResources(processor.getTemplateContext().getGadget().getContext(),
-          ImmutableSet.of(SWFOBJECT), null);
+          ImmutableSet.of(SWFOBJECT), null).getResources();
     for (FeatureResource resource : resources) {
       // Emits all content for feature SWFOBJECT, which has no downstream dependencies.
       swfobject.setTextContent(resource.getContent());

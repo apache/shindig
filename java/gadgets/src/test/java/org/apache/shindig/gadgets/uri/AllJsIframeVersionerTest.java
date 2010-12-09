@@ -53,7 +53,10 @@ public class AllJsIframeVersionerTest {
     FeatureRegistry registry = createMock(FeatureRegistry.class);
     FeatureResource resource = new FeatureResource.Simple(featureContent, debugContent);
     List<FeatureResource> allResources = Lists.newArrayList(resource);
-    expect(registry.getAllFeatures()).andReturn(allResources).once();
+    final FeatureRegistry.LookupResult lr = createMock(FeatureRegistry.LookupResult.class);
+    expect(lr.getResources()).andReturn(allResources);
+    replay(lr);
+    expect(registry.getAllFeatures()).andReturn(lr).once();
     replay(registry);
     versioner = new AllJsIframeVersioner(registry);
     verify(registry);

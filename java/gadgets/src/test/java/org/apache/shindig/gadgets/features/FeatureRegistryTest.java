@@ -118,7 +118,7 @@ public class FeatureRegistryTest {
     registry = new TestFeatureRegistry(withScheme ? featureFile.toString() : featureFile.getPath());
     
     // Verify single resource works all the way through.
-    List<FeatureResource> resources = registry.getAllFeatures();
+    List<FeatureResource> resources = registry.getAllFeatures().getResources();
     assertEquals(1, resources.size());
     assertEquals(content, resources.get(0).getContent());
   }
@@ -150,7 +150,7 @@ public class FeatureRegistryTest {
     registry = new TestFeatureRegistry(childDir.toURI().toString());
     
     // Verify single resource works all the way through.
-    List<FeatureResource> resources = registry.getAllFeatures();
+    List<FeatureResource> resources = registry.getAllFeatures().getResources();
     assertEquals(1, resources.size());
     assertEquals(content, resources.get(0).getContent());
   }
@@ -163,7 +163,7 @@ public class FeatureRegistryTest {
     registry = new TestFeatureRegistry(featureUri.toString());
     
     // Verify single resource works all the way through.
-    List<FeatureResource> resources = registry.getAllFeatures();
+    List<FeatureResource> resources = registry.getAllFeatures().getResources();
     assertEquals(1, resources.size());
     assertEquals(content, resources.get(0).getContent());
   }
@@ -177,7 +177,7 @@ public class FeatureRegistryTest {
     registry = new TestFeatureRegistry(featureUri.toString());
     
     // Verify single resource works all the way through.
-    List<FeatureResource> resources = registry.getAllFeatures();
+    List<FeatureResource> resources = registry.getAllFeatures().getResources();
     assertEquals(1, resources.size());
     assertEquals(content, resources.get(0).getContent());
   }
@@ -200,7 +200,7 @@ public class FeatureRegistryTest {
     registry = new TestFeatureRegistry(txtFile.toString());
     
     // Contents should be ordered based on the way they went in.
-    List<FeatureResource> resources = registry.getAllFeatures();
+    List<FeatureResource> resources = registry.getAllFeatures().getResources();
     assertEquals(2, resources.size());
     assertEquals(content2, resources.get(0).getContent());
     assertEquals(content1, resources.get(1).getContent());
@@ -218,18 +218,18 @@ public class FeatureRegistryTest {
     Uri feature2Uri = expectResource(xml(BOTTOM_TPL, "gadget", content2Uri.getPath(), null));
     
     registry = new TestFeatureRegistry(feature1Uri.toString());
-    List<FeatureResource> resources1 = registry.getAllFeatures();
+    List<FeatureResource> resources1 = registry.getAllFeatures().getResources();
     assertEquals(1, resources1.size());
     assertEquals(content1, resources1.get(0).getContent());
     
     // Register it again, different def.
     registry = new TestFeatureRegistry(feature2Uri.toString());
-    List<FeatureResource> resources2 = registry.getAllFeatures();
+    List<FeatureResource> resources2 = registry.getAllFeatures().getResources();
     assertEquals(1, resources2.size());
     assertEquals(content2, resources2.get(0).getContent());
 
     // Check cached resources too.
-    List<FeatureResource> resourcesAgain = registry.getAllFeatures();
+    List<FeatureResource> resourcesAgain = registry.getAllFeatures().getResources();
     assertSame(resources2, resourcesAgain);
   }
   
@@ -249,11 +249,11 @@ public class FeatureRegistryTest {
     List<String> needed = Lists.newArrayList("bottom");
     List<String> unsupported = Lists.newArrayList();
     List<FeatureResource> resources = registry.getFeatureResources(
-        getCtx(RenderingContext.GADGET, theContainer), needed, unsupported);
+        getCtx(RenderingContext.GADGET, theContainer), needed, unsupported).getResources();
     
     // Retrieve again w/ no unsupported list.
     List<FeatureResource> resourcesUnsup = registry.getFeatureResources(
-        getCtx(RenderingContext.GADGET, theContainer), needed, null);
+        getCtx(RenderingContext.GADGET, theContainer), needed, null).getResources();
     
     assertNotSame(resources, resourcesUnsup);
     assertEquals(resources, resourcesUnsup);
@@ -262,16 +262,16 @@ public class FeatureRegistryTest {
 
     // Now make sure the cache DOES work when needed.
     List<FeatureResource> resources2 = registry.getFeatureResources(
-        getCtx(RenderingContext.GADGET, theContainer), needed, unsupported);
+        getCtx(RenderingContext.GADGET, theContainer), needed, unsupported).getResources();
     assertSame(resources, resources2);
 
     List<FeatureResource> resourcesUnsup2 = registry.getFeatureResources(
-        getCtx(RenderingContext.GADGET, theContainer), needed, null);
+        getCtx(RenderingContext.GADGET, theContainer), needed, null).getResources();
     assertSame(resourcesUnsup, resourcesUnsup2);
     
     // Lastly, ensure that ignoreCache is properly accounted.
     List<FeatureResource> resourcesIgnoreCache = registry.getFeatureResources(
-        getCtx(RenderingContext.GADGET, theContainer, true), needed, unsupported);
+        getCtx(RenderingContext.GADGET, theContainer, true), needed, unsupported).getResources();
     assertNotSame(resources, resourcesIgnoreCache);
     assertEquals(1, resourcesIgnoreCache.size());
     assertEquals(content1, resourcesIgnoreCache.get(0).getContent());
@@ -293,15 +293,15 @@ public class FeatureRegistryTest {
     List<String> needed = Lists.newArrayList("bottom");
     List<String> unsupported = Lists.newArrayList();
     List<FeatureResource> resources = registry.getFeatureResources(
-        getCtx(RenderingContext.GADGET, theContainer), needed, unsupported);
+        getCtx(RenderingContext.GADGET, theContainer), needed, unsupported).getResources();
     
     // Retrieve again w/ mismatch container.
     List<FeatureResource> resourcesNoMatch = registry.getFeatureResources(
-        getCtx(RenderingContext.GADGET, "foo"), needed, unsupported);
+        getCtx(RenderingContext.GADGET, "foo"), needed, unsupported).getResources();
     
     // Retrieve again w/ mismatched context.
     List<FeatureResource> ctxMismatch = registry.getFeatureResources(
-        getCtx(RenderingContext.CONTAINER, theContainer), needed, unsupported);
+        getCtx(RenderingContext.CONTAINER, theContainer), needed, unsupported).getResources();
 
     assertNotSame(resources, resourcesNoMatch);
     assertNotSame(resources, ctxMismatch);
@@ -314,30 +314,21 @@ public class FeatureRegistryTest {
     
     // Make sure caches work with appropriate matching.
     List<FeatureResource> resources2 = registry.getFeatureResources(
-        getCtx(RenderingContext.GADGET, theContainer), needed, unsupported);
+        getCtx(RenderingContext.GADGET, theContainer), needed, unsupported).getResources();
     assertSame(resources, resources2);
     
     List<FeatureResource> resourcesNoMatch2 = registry.getFeatureResources(
-        getCtx(RenderingContext.GADGET, "foo"), needed, unsupported);
+        getCtx(RenderingContext.GADGET, "foo"), needed, unsupported).getResources();
     assertSame(resourcesNoMatch, resourcesNoMatch2);
     
     List<FeatureResource> ctxMismatch2 = registry.getFeatureResources(
-        getCtx(RenderingContext.CONTAINER, theContainer), needed, unsupported);
+        getCtx(RenderingContext.CONTAINER, theContainer), needed, unsupported).getResources();
     assertSame(ctxMismatch, ctxMismatch2);
     
     // Check ignoreCache
     List<FeatureResource> resourcesIC = registry.getFeatureResources(
-        getCtx(RenderingContext.GADGET, theContainer, true), needed, unsupported);
+        getCtx(RenderingContext.GADGET, theContainer, true), needed, unsupported).getResources();
     assertNotSame(resources, resourcesIC);
-    
-//    bogus tests - both requests return EMPTY_LIST now, so you can't ascertain cache behavior.
-//    List<FeatureResource> resourcesNoMatchIC = registry.getFeatureResources(
-//        getCtx(RenderingContext.GADGET, "foo", true), needed, unsupported);
-//    assertNotSame(resourcesNoMatch, resourcesNoMatchIC);
-//
-//    List<FeatureResource> ctxMismatchIC = registry.getFeatureResources(
-//        getCtx(RenderingContext.CONTAINER, theContainer, true), needed, unsupported);
-//    assertNotSame(ctxMismatch, ctxMismatchIC);
   }
   
   @Test
@@ -378,7 +369,7 @@ public class FeatureRegistryTest {
     GadgetContext ctx = getCtx(rctx, null);
     List<String> needed = Lists.newArrayList("nodep", "bottom");
     List<String> unsupported = Lists.newLinkedList();
-    List<FeatureResource> resources = registry.getFeatureResources(ctx, needed, unsupported);
+    List<FeatureResource> resources = registry.getFeatureResources(ctx, needed, unsupported).getResources();
     assertEquals(0, unsupported.size());
     assertEquals(2, resources.size());
     assertEquals("nodep", resources.get(0).getContent());
@@ -401,7 +392,7 @@ public class FeatureRegistryTest {
     GadgetContext ctx = getCtx(rctx, null);
     List<String> needed = Lists.newArrayList("nodep", "bottom");
     List<String> unsupported = Lists.newLinkedList();
-    List<FeatureResource> resources = registry.getFeatureResources(ctx, needed, unsupported);
+    List<FeatureResource> resources = registry.getFeatureResources(ctx, needed, unsupported).getResources();
     assertEquals(0, resources.size());
   }
   
@@ -424,7 +415,7 @@ public class FeatureRegistryTest {
     
     // Should come back in insertable order (from bottom of the graph up),
     // querying in feature.xml dependency order.
-    List<FeatureResource> resources = registry.getFeatureResources(ctx, needed, unsupported);
+    List<FeatureResource> resources = registry.getFeatureResources(ctx, needed, unsupported).getResources();
     assertEquals(5, resources.size());
     assertEquals("bottom", resources.get(0).getContent());
     assertEquals("mid_a", resources.get(1).getContent());
@@ -441,7 +432,7 @@ public class FeatureRegistryTest {
     GadgetContext ctx = getCtx(RenderingContext.GADGET, null);
     List<String> needed = Lists.newArrayList("nodep", "does-not-exist");
     List<String> unsupported = Lists.newLinkedList();
-    List<FeatureResource> resources = registry.getFeatureResources(ctx, needed, unsupported);
+    List<FeatureResource> resources = registry.getFeatureResources(ctx, needed, unsupported).getResources();
     assertEquals(1, resources.size());
     assertEquals("nodep", resources.get(0).getContent());
     assertEquals(1, unsupported.size());
@@ -455,7 +446,7 @@ public class FeatureRegistryTest {
     GadgetContext ctx = getCtx(RenderingContext.GADGET, "two");
     List<String> needed = Lists.newArrayList("nodep", "bottom");
     List<String> unsupported = Lists.newLinkedList();
-    List<FeatureResource> resources = registry.getFeatureResources(ctx, needed, unsupported);
+    List<FeatureResource> resources = registry.getFeatureResources(ctx, needed, unsupported).getResources();
     assertEquals(2, resources.size());
     assertEquals("nodep", resources.get(0).getContent());
     assertEquals("bottom", resources.get(1).getContent());
@@ -469,7 +460,7 @@ public class FeatureRegistryTest {
     GadgetContext ctx = getCtx(RenderingContext.GADGET, "four");
     List<String> needed = Lists.newArrayList("nodep", "bottom");
     List<String> unsupported = Lists.newLinkedList();
-    List<FeatureResource> resources = registry.getFeatureResources(ctx, needed, unsupported);
+    List<FeatureResource> resources = registry.getFeatureResources(ctx, needed, unsupported).getResources();
     assertEquals(0, resources.size());  // no resource matches but all feature keys valid
     assertEquals(0, unsupported.size());
   }
@@ -480,7 +471,7 @@ public class FeatureRegistryTest {
     GadgetContext ctx = getCtx(RenderingContext.GADGET, null);
     List<String> needed = Lists.newArrayList("top", "bottom");
     List<String> unsupported = Lists.newLinkedList();
-    List<FeatureResource> resources = registry.getFeatureResources(ctx, needed, unsupported, false);
+    List<FeatureResource> resources = registry.getFeatureResources(ctx, needed, unsupported, false).getResources();
     // Should return in order requested.
     assertEquals(2, resources.size());
     assertEquals("top", resources.get(0).getContent());
@@ -491,7 +482,7 @@ public class FeatureRegistryTest {
   @Test
   public void getAllFeatures() throws Exception {
     setupFullRegistry("gadget", null);
-    List<FeatureResource> resources = registry.getAllFeatures();
+    List<FeatureResource> resources = registry.getAllFeatures().getResources();
     
     // No guaranteed order (top/mid/bottom bundle may be before nodep)
     // Just check that there are 5 resources around and let the above tests
@@ -564,7 +555,7 @@ public class FeatureRegistryTest {
     List<String> unsupported = Lists.newLinkedList();
     List<FeatureResource> resources =
         registry.getFeatureResources(
-          getCtx(RenderingContext.GADGET, container), needed, unsupported);
+          getCtx(RenderingContext.GADGET, container), needed, unsupported).getResources();
     assertEquals(1, resources.size());
     assertEquals(containerContent, resources.get(0).getContent());
   }
@@ -583,7 +574,7 @@ public class FeatureRegistryTest {
     List<String> unsupported = Lists.newLinkedList();
     List<FeatureResource> resources = 
         registry.getFeatureResources(
-          getCtx(RenderingContext.GADGET, "othercontainer"), needed, unsupported);
+          getCtx(RenderingContext.GADGET, "othercontainer"), needed, unsupported).getResources();
     assertEquals(1, resources.size());
     assertEquals(defaultContent, resources.get(0).getContent());
   }
@@ -622,7 +613,7 @@ public class FeatureRegistryTest {
     List<String> needed = Lists.newArrayList("bottom");
     List<String> unsupported = Lists.newArrayList();
     List<FeatureResource> resources = registry.getFeatureResources(
-        getCtx(RenderingContext.GADGET, theContainer), needed, unsupported);
+        getCtx(RenderingContext.GADGET, theContainer), needed, unsupported).getResources();
 
     // Sanity test.
     assertEquals(1, resources.size());

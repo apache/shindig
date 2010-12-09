@@ -48,7 +48,7 @@ public class AllJsIframeVersioner implements Versioner {
   @Inject
   public AllJsIframeVersioner(FeatureRegistry registry) {
     StringBuilder jsBuf = new StringBuilder();
-    for (FeatureResource resource : registry.getAllFeatures()) {
+    for (FeatureResource resource : registry.getAllFeatures().getResources()) {
       jsBuf.append(resource.getContent()).append(resource.getDebugContent());
     }
     allJsChecksum = HashUtil.checksum(jsBuf.toString().getBytes());

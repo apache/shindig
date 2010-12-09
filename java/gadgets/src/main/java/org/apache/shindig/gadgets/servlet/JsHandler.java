@@ -45,7 +45,9 @@ public class JsHandler {
   protected final Map<String, ConfigContributor> configContributors;
 
   @Inject
-  public JsHandler(FeatureRegistry registry, ContainerConfig containerConfig,
+  public JsHandler(
+      FeatureRegistry registry,
+      ContainerConfig containerConfig,
       Map<String, ConfigContributor> configContributors) {
     this.registry = registry;
     this.containerConfig = containerConfig;
@@ -65,7 +67,7 @@ public class JsHandler {
     StringBuilder jsData = new StringBuilder();
     Collection<String> needed = jsUri.getLibs();
     Collection<? extends FeatureResource> resources =
-        registry.getFeatureResources(ctx, needed, null);
+        registry.getFeatureResources(ctx, needed, null).getResources();
     String container = ctx.getContainer();
     boolean isProxyCacheable = true;
 

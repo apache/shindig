@@ -92,9 +92,12 @@ public class FlashTagHandlerTest extends EasyMockTestCase {
   private void expectFeatureLookup() throws GadgetException {
     List<FeatureResource> swfObjectResources = Lists.newArrayList();
     swfObjectResources.add(new SwfResource());
+    final FeatureRegistry.LookupResult lr = EasyMock.createMock(FeatureRegistry.LookupResult.class);
+    EasyMock.expect(lr.getResources()).andReturn(swfObjectResources);
+    EasyMock.replay(lr);
     EasyMock.expect(featureRegistry
         .getFeatureResources(isA(GadgetContext.class), eq(ImmutableSet.of("swfobject")),
-            EasyMock.<List<String>>isNull())).andReturn(swfObjectResources);
+            EasyMock.<List<String>>isNull())).andReturn(lr);
   }
   
   private static class SwfResource extends FeatureResource.Default {

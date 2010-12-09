@@ -90,19 +90,19 @@ public class FeatureParserTest {
     assertEquals(1, bundle1.getResources().get(1).getAttribs().size());
     assertEquals("gadget_value", bundle1.getResources().get(1).getAttribs().get("gadget_attrib"));
     assertEquals(5, bundle1.getApis().size());
-    assertEquals(FeatureParser.ParsedFeature.ApiDirective.Type.JS, bundle1.getApis().get(0).getType());
+    assertEquals(ApiDirective.Type.JS, bundle1.getApis().get(0).getType());
     assertTrue(bundle1.getApis().get(0).isUses());
     assertEquals("foo.symbol", bundle1.getApis().get(0).getValue());
-    assertEquals(FeatureParser.ParsedFeature.ApiDirective.Type.RPC, bundle1.getApis().get(1).getType());
+    assertEquals(ApiDirective.Type.RPC, bundle1.getApis().get(1).getType());
     assertFalse(bundle1.getApis().get(1).isUses());
     assertEquals("rpc_service", bundle1.getApis().get(1).getValue());
-    assertEquals(FeatureParser.ParsedFeature.ApiDirective.Type.JS, bundle1.getApis().get(2).getType());
+    assertEquals(ApiDirective.Type.JS, bundle1.getApis().get(2).getType());
     assertFalse(bundle1.getApis().get(2).isUses());
     assertEquals("bar.symbol", bundle1.getApis().get(2).getValue());
-    assertEquals(FeatureParser.ParsedFeature.ApiDirective.Type.RPC, bundle1.getApis().get(3).getType());
+    assertEquals(ApiDirective.Type.RPC, bundle1.getApis().get(3).getType());
     assertTrue(bundle1.getApis().get(3).isUses());
     assertEquals("uses_service", bundle1.getApis().get(3).getValue());
-    assertEquals(FeatureParser.ParsedFeature.ApiDirective.Type.JS, bundle1.getApis().get(4).getType());
+    assertEquals(ApiDirective.Type.JS, bundle1.getApis().get(4).getType());
     assertTrue(bundle1.getApis().get(4).isUses());
     assertEquals("last.symbol", bundle1.getApis().get(4).getValue());
     

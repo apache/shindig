@@ -146,7 +146,10 @@ public class DefaultJsVersionerTest {
     FeatureResource resource = new FeatureResource.Simple(content, "");
     Collection<String> libs = Lists.newArrayList(feature);
     List<FeatureResource> resources = Lists.newArrayList(resource);
+    final FeatureRegistry.LookupResult lr = createMock(FeatureRegistry.LookupResult.class);
+    expect(lr.getResources()).andReturn(resources).anyTimes();
+    replay(lr);
     expect(registry.getFeatureResources(isA(GadgetContext.class), eq(libs),
-        EasyMock.<List<String>>isNull())).andReturn(resources).anyTimes();
+        EasyMock.<List<String>>isNull())).andReturn(lr).anyTimes();
   }
 }

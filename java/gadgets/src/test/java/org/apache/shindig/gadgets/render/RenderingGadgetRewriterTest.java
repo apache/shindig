@@ -733,17 +733,23 @@ public class RenderingGadgetRewriterTest {
     Gadget gadget = makeGadgetWithSpec(gadgetXml);
 
     reset(featureRegistry);
+    FeatureRegistry.LookupResult lr = createMock(FeatureRegistry.LookupResult.class);
+    expect(lr.getResources()).andReturn(ImmutableList.<FeatureResource>of());
+    replay(lr);
     expect(featureRegistry.getFeatureResources(same(gadget.getContext()),
         eq(ImmutableSet.<String>of()), eq(Lists.<String>newArrayList())))
-        .andReturn(ImmutableList.<FeatureResource>of());
+        .andReturn(lr);
+    final FeatureRegistry.LookupResult lr2 = createMock(FeatureRegistry.LookupResult.class);
+    expect(lr2.getResources()).andReturn(ImmutableList.<FeatureResource>of());
+    replay(lr2);
     expect(featureRegistry.getFeatureResources(same(gadget.getContext()),
         eq(ImmutableList.<String>of("foo", "core")), eq(Lists.<String>newArrayList())))
-        .andAnswer(new IAnswer<List<FeatureResource>>() {
+        .andAnswer(new IAnswer<FeatureRegistry.LookupResult>() {
           @SuppressWarnings("unchecked")
-          public List<FeatureResource> answer() throws Throwable {
+          public FeatureRegistry.LookupResult answer() throws Throwable {
             List<String> unsupported = (List<String>)getCurrentArguments()[2];
             unsupported.add("foo");
-            return Lists.newArrayList();
+            return lr2;
           }
         });
     replay(featureRegistry);
@@ -772,19 +778,22 @@ public class RenderingGadgetRewriterTest {
     Gadget gadget = makeGadgetWithSpec(gadgetXml).setContext(context);
 
     reset(featureRegistry);
+    final FeatureRegistry.LookupResult lr = createMock(FeatureRegistry.LookupResult.class);
+    expect(lr.getResources()).andReturn(ImmutableList.<FeatureResource>of()).anyTimes();
+    replay(lr);
     expect(featureRegistry.getFeatureResources(same(gadget.getContext()),
         eq(ImmutableSet.<String>of("bar")), eq(Lists.<String>newArrayList())))
-        .andAnswer(new IAnswer<List<FeatureResource>>() {
+        .andAnswer(new IAnswer<FeatureRegistry.LookupResult>() {
           @SuppressWarnings("unchecked")
-          public List<FeatureResource> answer() throws Throwable {
+          public FeatureRegistry.LookupResult answer() throws Throwable {
             List<String> unsupported = (List<String>)getCurrentArguments()[2];
             unsupported.add("bar");
-            return Lists.newArrayList();
+            return lr;
           }
         });
     expect(featureRegistry.getFeatureResources(same(gadget.getContext()),
         eq(ImmutableList.<String>of("core")), eq(Lists.<String>newArrayList())))
-        .andReturn(ImmutableList.<FeatureResource>of());
+        .andReturn(lr);
     expect(featureRegistry.getFeatures(eq(ImmutableList.of("core", "bar"))))
         .andReturn(ImmutableList.of("core"));
     expect(featureRegistry.getFeatures(eq(ImmutableList.of("core"))))
@@ -952,10 +961,16 @@ public class RenderingGadgetRewriterTest {
     List<String> allFeaturesAndLibs = Lists.newArrayList(gadgetFeatures);
     allFeaturesAndLibs.addAll(externLibs);
     List<String> emptyList = Lists.newArrayList();
+    final FeatureRegistry.LookupResult externLr = createMock(FeatureRegistry.LookupResult.class);
+    expect(externLr.getResources()).andReturn(externResources);
+    replay(externLr);
+    final FeatureRegistry.LookupResult gadgetLr = createMock(FeatureRegistry.LookupResult.class);
+    expect(gadgetLr.getResources()).andReturn(gadgetResources);
+    replay(gadgetLr);
     expect(featureRegistry.getFeatureResources(same(gadgetContext), eq(externLibs), eq(emptyList)))
-        .andReturn(externResources);
+        .andReturn(externLr);
     expect(featureRegistry.getFeatureResources(same(gadgetContext), eq(gadgetFeatures),
-        eq(emptyList))).andReturn(gadgetResources);
+        eq(emptyList))).andReturn(gadgetLr);
     expect(featureRegistry.getFeatures(eq(allFeatures)))
         .andReturn(allFeatures);
     expect(featureRegistry.getFeatures(eq(allFeaturesAndLibs)))

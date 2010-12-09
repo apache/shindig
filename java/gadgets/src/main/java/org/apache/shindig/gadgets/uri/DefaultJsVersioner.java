@@ -62,7 +62,8 @@ public class DefaultJsVersioner implements Versioner {
     };
 
     // Registry itself will cache these requests.
-    List<FeatureResource> resources = registry.getFeatureResources(ctx, extern, null);
+    List<FeatureResource> resources =
+        registry.getFeatureResources(ctx, extern, null).getResources();
     if (versionCache.containsKey(resources)) {
       return versionCache.get(resources);
     }

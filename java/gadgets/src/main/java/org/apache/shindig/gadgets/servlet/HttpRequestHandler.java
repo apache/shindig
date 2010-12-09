@@ -29,7 +29,6 @@ import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.RequestPipeline;
 import org.apache.shindig.gadgets.oauth.OAuthArguments;
-import org.apache.shindig.gadgets.rewrite.ResponseRewriterList;
 import org.apache.shindig.gadgets.rewrite.ResponseRewriterList.RewriteFlow;
 import org.apache.shindig.gadgets.rewrite.ResponseRewriterRegistry;
 import org.apache.shindig.gadgets.rewrite.RewriterRegistry;

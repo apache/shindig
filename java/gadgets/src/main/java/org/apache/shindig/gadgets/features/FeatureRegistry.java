@@ -68,7 +68,7 @@ public class FeatureRegistry {
   private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
   
   // Map keyed by FeatureNode object created as a lookup for transitive feature deps.
-  private final Map<FeatureCacheKey, List<FeatureResource>> cache = new MapMaker().makeMap();
+  private final Map<FeatureCacheKey, LookupResult> cache = new MapMaker().makeMap();
 
   private final FeatureParser parser;
   private final FeatureResourceLoader resourceLoader;
@@ -76,14 +76,18 @@ public class FeatureRegistry {
   
 
 /**
- *
+ * Construct a new FeatureRegistry, using resourceLoader to load actual resources,
+ * and loading data from the list of features provided, each of which points to a
+ * directory (whose .xml files will be scanned), file (interpreted as feature.xml),
+ * or resource (interpreted as feature.xml).
  * @param resourceLoader
- * @param featuresoo
+ * @param features
  * @throws GadgetException
  */
   @Inject
   public FeatureRegistry(FeatureResourceLoader resourceLoader,
-                         @Named("org.apache.shindig.features") List<String> features) throws GadgetException {
+                         @Named("org.apache.shindig.features") List<String> features)
+      throws GadgetException {
     this.parser = new FeatureParser();
     this.resourceLoader = resourceLoader;
 
@@ -118,7 +122,8 @@ public class FeatureRegistry {
    *    them with a comma.
    * @throws GadgetException If any of the files can't be read, are malformed, or invalid.
    */
-  protected ImmutableMap<String,FeatureNode> register(List<String> resourceList) throws GadgetException {
+  protected ImmutableMap<String, FeatureNode> register(List<String> resourceList)
+      throws GadgetException {
     Map<String,FeatureNode> featureMapBuilder = Maps.newHashMap();
 
     try {
@@ -135,7 +140,8 @@ public class FeatureRegistry {
             location = location.substring(1);
           }
           if (LOG.isLoggable(Level.INFO)) {
-            LOG.logp(Level.INFO, classname, "register", MessageKeys.LOAD_RESOURCES_FROM, new Object[] {uriLoc.toString()});
+            LOG.logp(Level.INFO, classname, "register",
+                MessageKeys.LOAD_RESOURCES_FROM, new Object[] {uriLoc.toString()});
           }
           if (location.endsWith(".txt")) {
             // Text file contains a list of other resource files to load
@@ -155,7 +161,8 @@ public class FeatureRegistry {
         } else {
           // Load files in directory structure.
           if (LOG.isLoggable(Level.INFO)) {
-            LOG.logp(Level.INFO, classname, "register", MessageKeys.LOAD_FILES_FROM, new Object[] {location});
+            LOG.logp(Level.INFO, classname, "register",
+                MessageKeys.LOAD_FILES_FROM, new Object[] {location});
           }
           loadFile(new File(uriLoc.getPath()), featureMapBuilder);
         }
@@ -181,10 +188,10 @@ public class FeatureRegistry {
    * @param ctx Context for the request.
    * @param needed List of all needed features.
    * @param unsupported If non-null, a List populated with unknown features from the needed list.
-   * @return List of FeatureResources that may be used to render the needed features.
+   * @return LookupResult object that may be used to render the needed features.
    * @throws GadgetException
    */
-  public List<FeatureResource> getFeatureResources(
+  public LookupResult getFeatureResources(
       GadgetContext ctx, Collection<String> needed, List<String> unsupported, boolean transitive) {
     boolean useCache = (transitive && !ctx.getIgnoreCache());
     FeatureCacheKey cacheKey = new FeatureCacheKey(needed, ctx, unsupported != null);
@@ -200,8 +207,10 @@ public class FeatureRegistry {
       featureNodes = getRequestedNodes(needed, unsupported);
     }
 
-    String targetBundleType = ctx.getRenderingContext() == RenderingContext.CONTAINER ? "container" : "gadget";
-    ImmutableList.Builder<FeatureResource> resourcesBuilder = new ImmutableList.Builder<FeatureResource>();
+    String targetBundleType =
+        ctx.getRenderingContext() == RenderingContext.CONTAINER ? "container" : "gadget";
+    ImmutableList.Builder<FeatureBundle> bundlesBuilder =
+        new ImmutableList.Builder<FeatureBundle>();
 
     for (FeatureNode entry : featureNodes) {
       boolean specificContainerMatched = false;
@@ -211,7 +220,7 @@ public class FeatureRegistry {
           String containerAttrib = bundle.getAttribs().get("container");
           if (containerAttrib != null) {
             if (containerMatch(containerAttrib, ctx.getContainer())) {
-              resourcesBuilder.addAll(bundle.getResources());
+              bundlesBuilder.add(bundle);
               specificContainerMatched = true;
             }
           } else {
@@ -222,16 +231,17 @@ public class FeatureRegistry {
       }
       if (!specificContainerMatched) {
         for (FeatureBundle bundle : noContainerBundles) {
-          resourcesBuilder.addAll(bundle.getResources());
+          bundlesBuilder.add(bundle);
         }
       }
     }
-    List<FeatureResource> resources = resourcesBuilder.build();
+    
+    LookupResult result = new LookupResult(bundlesBuilder.build());
     if (useCache && (unsupported == null || unsupported.isEmpty())) {
-      cache.put(cacheKey, resources);
+      cache.put(cacheKey, result);
     }
       
-    return resources;
+    return result;
   }
   
   /**
@@ -241,7 +251,8 @@ public class FeatureRegistry {
    * @param unsupported If non-null, a List populated with unknown features from the needed list.
    * @return List of FeatureResources that may be used to render the needed features.
    */
-  public List<FeatureResource> getFeatureResources(GadgetContext ctx, Collection<String> needed, List<String> unsupported) {
+  public LookupResult getFeatureResources(GadgetContext ctx, Collection<String> needed,
+      List<String> unsupported) {
     return getFeatureResources(ctx, needed, unsupported, true);
   }
 
@@ -251,7 +262,7 @@ public class FeatureRegistry {
    * JS checksum.
    * @return List of all known (RenderingContext.GADGET) FeatureResources.
    */
-  public List<FeatureResource> getAllFeatures() {
+  public LookupResult getAllFeatures() {
     return getFeatureResources(new GadgetContext(), featureMap.keySet(), null);
   }
   
@@ -297,7 +308,8 @@ public class FeatureRegistry {
     return uri;
   }
   
-  private List<FeatureNode> getTransitiveDeps(Collection<String> needed, List<String> unsupported) {
+  private List<FeatureNode> getTransitiveDeps(
+      Collection<String> needed, List<String> unsupported) {
     final List<FeatureNode> requested = getRequestedNodes(needed, unsupported);
     
     Comparator<FeatureNode> nodeDepthComparator = new Comparator<FeatureNode>() {
@@ -334,7 +346,8 @@ public class FeatureRegistry {
     return fullDeps;
   }
   
-  private List<FeatureNode> getRequestedNodes(Collection<String> needed, List<String> unsupported) {
+  private List<FeatureNode> getRequestedNodes(
+      Collection<String> needed, List<String> unsupported) {
     List<FeatureNode> requested = Lists.newArrayList();
     for (String featureName : needed) {
       if (featureMap.containsKey(featureName)) {
@@ -394,7 +407,8 @@ public class FeatureRegistry {
     }
   }
   
-  private void loadResources(List<String> resources, Map<String,FeatureNode> featureMapBuilder) throws GadgetException {
+  private void loadResources(List<String> resources, Map<String,FeatureNode> featureMapBuilder)
+      throws GadgetException {
     try {
       for (String resource : resources) {
         if (LOG.isLoggable(Level.FINE)) {
@@ -410,7 +424,8 @@ public class FeatureRegistry {
     }
   }
 
-  private void loadFile(File file, Map<String,FeatureNode> featureMapBuilder) throws GadgetException, IOException {
+  private void loadFile(File file, Map<String,FeatureNode> featureMapBuilder)
+      throws GadgetException, IOException {
     if (!file.exists() || !file.canRead()) {
       throw new GadgetException(GadgetException.Code.INVALID_CONFIG,
           "Feature file '" + file.getPath() + "' doesn't exist or can't be read");
@@ -447,7 +462,8 @@ public class FeatureRegistry {
     // Duplicate feature = OK, just indicate it's being overridden.
     if (featureMapBuilder.containsKey(parsed.getName())) {
       if (LOG.isLoggable(Level.WARNING)) {
-        LOG.logp(Level.WARNING, classname, "doFilter", MessageKeys.OVERRIDING_FEATURE, new Object[] {parsed.getName(),parent});
+        LOG.logp(Level.WARNING, classname, "doFilter", MessageKeys.OVERRIDING_FEATURE,
+            new Object[] {parsed.getName(),parent});
       }
     }
     
@@ -464,18 +480,21 @@ public class FeatureRegistry {
               getResourceAttribs(parsedBundle.getAttribs(), parsedResource.getAttribs())));
         }
       }
-      bundles.add(new FeatureBundle(parsedBundle.getType(), parsedBundle.getAttribs(), resources));
+      bundles.add(new FeatureBundle(parsedBundle, resources));
     }
     
     // Add feature to the master Map. The dependency tree isn't connected/validated/linked yet.
-    featureMapBuilder.put(parsed.getName(), new FeatureNode(parsed.getName(), bundles, parsed.getDeps()));
+    featureMapBuilder.put(parsed.getName(),
+        new FeatureNode(parsed.getName(), bundles, parsed.getDeps()));
   }
   
   private Map<String, String> getResourceAttribs(Map<String, String> bundleAttribs,
       Map<String, String> resourceAttribs) {
-    // For a given resource, attribs are a merge (by key, not by value) of bundle attribs and per-resource
-    // attribs, the latter serving as higher-precedence overrides.
-    return ImmutableMap.<String, String>builder().putAll(bundleAttribs).putAll(resourceAttribs).build();
+    // For a given resource, attribs are a merge (by key, not by value) of bundle attribs and
+    // per-resource attribs, the latter serving as higher-precedence overrides.
+    return ImmutableMap.<String, String>builder()
+        .putAll(bundleAttribs)
+        .putAll(resourceAttribs).build();
   }
   
   private static final class InlineFeatureResource extends FeatureResource.Default {
@@ -493,28 +512,57 @@ public class FeatureRegistry {
       return content;
     }
   }
+  
+  public static class LookupResult {
+    private final List<FeatureBundle> bundles;
+    private final List<FeatureResource> allResources;
+    
+    private LookupResult(List<FeatureBundle> bundles) {
+      this.bundles = bundles;
+      ImmutableList.Builder<FeatureResource> resourcesBuilder = ImmutableList.builder();
+      for (FeatureBundle bundle : getBundles()) {
+        resourcesBuilder.addAll(bundle.getResources());
+      }
+      this.allResources = resourcesBuilder.build();
+    }
+    
+    public List<FeatureBundle> getBundles() {
+      return bundles;
+    }
+    
+    public List<FeatureResource> getResources() {
+      return allResources;
+    }
+  }
 
-  private static final class FeatureBundle {
-    private final String type;
-    private final Map<String, String> attribs;
+  public static final class FeatureBundle {
+    private final FeatureParser.ParsedFeature.Bundle bundle;
     private final List<FeatureResource> resources;
     
-    private FeatureBundle(String type, Map<String, String> attribs, List<FeatureResource> resources) {
-      this.type = type;
-      this.attribs = ImmutableMap.copyOf(attribs);
+    private FeatureBundle(FeatureParser.ParsedFeature.Bundle bundle,
+                          List<FeatureResource> resources) {
+      this.bundle = bundle;
       this.resources = ImmutableList.copyOf(resources);
     }
     
+    public String getName() {
+      return bundle.getName();
+    }
+    
     public String getType() {
-      return type;
+      return bundle.getType();
     }
     
     public Map<String, String> getAttribs() {
-      return attribs;
+      return bundle.getAttribs();
     }
     
     public List<FeatureResource> getResources() {
       return resources;
+    }
+    
+    public List<ApiDirective> getApis() {
+      return bundle.getApis();
     }
   }
   

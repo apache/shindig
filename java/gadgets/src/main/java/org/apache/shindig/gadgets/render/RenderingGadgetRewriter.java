@@ -242,7 +242,7 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
     List<String> unsupported = Lists.newLinkedList();
 
     List<FeatureResource> externForcedResources =
-        featureRegistry.getFeatureResources(context, externForcedLibs, unsupported);
+        featureRegistry.getFeatureResources(context, externForcedLibs, unsupported).getResources();
     if (!unsupported.isEmpty()) {
       if (LOG.isLoggable(Level.INFO)) {
         LOG.logp(Level.INFO, classname, "injectFeatureLibraries", MessageKeys.UNKNOWN_FEATURES, new Object[] {unsupported.toString()});
@@ -254,7 +254,7 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
     Map<String, Feature> featureMap = gadget.getSpec().getModulePrefs().getFeatures();
     List<String> gadgetFeatureKeys = Lists.newArrayList(gadget.getDirectFeatureDeps());
     List<FeatureResource> gadgetResources =
-        featureRegistry.getFeatureResources(context, gadgetFeatureKeys, unsupported);
+        featureRegistry.getFeatureResources(context, gadgetFeatureKeys, unsupported).getResources();
     if (!unsupported.isEmpty()) {
       List<String> requiredUnsupported = Lists.newLinkedList();
       for (String notThere : unsupported) {

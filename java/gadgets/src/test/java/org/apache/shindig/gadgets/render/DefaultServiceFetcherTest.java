@@ -28,7 +28,6 @@ import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.config.JsonContainerConfig;
 import org.apache.shindig.expressions.Expressions;
 import org.apache.shindig.expressions.Functions;
-import org.apache.shindig.expressions.ShindigTypeConverter;
 import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
