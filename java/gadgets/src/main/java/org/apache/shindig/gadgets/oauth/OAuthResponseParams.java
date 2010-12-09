@@ -25,7 +25,6 @@ import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.Pair;
 import org.apache.shindig.common.crypto.BlobCrypter;
 import org.apache.shindig.common.crypto.BlobCrypterException;
-import org.apache.shindig.common.logging.i18n.MessageKeys;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
@@ -116,12 +115,42 @@ public class OAuthResponseParams {
        LOG.logp(Level.WARNING, classname, method, msgKey, new Object[] {e.getMessage()});
     }
   }
-  
+
   public void logDetailedInfo(String classname, String method, String msgKey, Throwable e) {
     if (LOG.isLoggable(Level.FINE)) {
-      LOG.log(Level.FINE, getDetails(e), e);     
+      LOG.log(Level.FINE, getDetails(e), e);
     } else if (LOG.isLoggable(Level.INFO)) {
     	LOG.logp(Level.INFO, classname, method, msgKey, new Object[] {e.getMessage()});
+    }
+  }
+
+  /**
+   * Log a warning message that includes the details of the request.
+   */
+  public void logDetailedWarning(String note) {
+    if (LOG.isLoggable(Level.FINE)) {
+      LOG.log(Level.FINE, note + '\n' + getDetails(null));
+    } else if (LOG.isLoggable(Level.WARNING)) {
+      LOG.log(Level.WARNING, note);
+    }
+  }
+
+  /**
+   * Log a warning message that includes the details of the request and the thrown exception.
+   */
+  public void logDetailedWarning(String note, Throwable e) {
+    if (LOG.isLoggable(Level.FINE)) {
+      LOG.log(Level.FINE, note + '\n' + getDetails(e), e);
+    } else if (LOG.isLoggable(Level.WARNING)) {
+      LOG.log(Level.WARNING, note + ": " + e.getMessage());
+    }
+  }
+
+  public void logDetailedInfo(String note, Throwable e) {
+    if (LOG.isLoggable(Level.FINE)) {
+      LOG.log(Level.FINE, note + '\n' + getDetails(e), e);
+    } else if (LOG.isLoggable(Level.INFO)) {
+      LOG.log(Level.INFO, note + ": " + e.getMessage());
     }
   }
 
@@ -156,7 +185,7 @@ public class OAuthResponseParams {
         error = e.getMessage();
       }
     }
-    
+
     return "OAuth error [" + error + "] for application "
         + securityToken.getAppUrl() + ".  Request trace:" + getRequestTrace();
   }
@@ -208,7 +237,7 @@ public class OAuthResponseParams {
 
     if (e != null || sendTraceToClient) {
       StringBuilder verboseError = new StringBuilder();
-      
+
       if (e != null) {
         response.setMetadata(ERROR_CODE, e.getError());
         verboseError.append(e.getErrorText());
