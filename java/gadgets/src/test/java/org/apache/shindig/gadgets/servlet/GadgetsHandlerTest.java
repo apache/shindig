@@ -17,10 +17,12 @@
 
 package org.apache.shindig.gadgets.servlet;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
+import java.io.StringReader;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.shindig.auth.SecurityToken;
@@ -35,6 +37,7 @@ import org.apache.shindig.common.util.FakeTimeSource;
 import org.apache.shindig.gadgets.RenderingContext;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.process.ProcessingException;
+import org.apache.shindig.gadgets.servlet.CajaContentRewriter.CajoledResult;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.uri.JsUriManager;
 import org.apache.shindig.gadgets.uri.ProxyUriManager;
@@ -55,15 +58,21 @@ import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletResponse;
+import com.google.caja.lexer.CharProducer;
+import com.google.caja.lexer.InputSource;
+import com.google.caja.lexer.ParseException;
+import com.google.caja.reporting.MessageQueue;
+import com.google.caja.reporting.SimpleMessageQueue;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 
 public class GadgetsHandlerTest extends EasyMockTestCase {
   private static final String GADGET1_URL = FakeProcessor.SPEC_URL.toString();
   private static final String GADGET2_URL = FakeProcessor.SPEC_URL2 .toString();
+  private static final Uri HTML_URL = Uri.parse("http://www.example.com/a.html");
+  private static final Uri JS_URL = Uri.parse("http://www.example.com/a.js");
   private static final String CONTAINER = "container";
   private static final String TOKEN = "_nekot_";
   private static final Long SPEC_REFRESH_INTERVAL = 123L;
@@ -76,6 +85,7 @@ public class GadgetsHandlerTest extends EasyMockTestCase {
   private final ProxyUriManager proxyUriManager = mock(ProxyUriManager.class);
   private final JsUriManager jsUriManager = mock(JsUriManager.class);
   private final ProxyHandler proxyHandler = mock(ProxyHandler.class);
+  private final CajaContentRewriter cajaContentRewriter = mock(CajaContentRewriter.class);
   private final JsHandler jsHandler = mock(JsHandler.class);
 
   private Injector injector;
@@ -95,7 +105,7 @@ public class GadgetsHandlerTest extends EasyMockTestCase {
     BeanFilter beanFilter = new BeanFilter();
     GadgetsHandlerService service = new GadgetsHandlerService(timeSource, processor,
         urlGenerator, codec, proxyUriManager, jsUriManager, proxyHandler, jsHandler,
-        SPEC_REFRESH_INTERVAL, beanFilter);
+        SPEC_REFRESH_INTERVAL, beanFilter, cajaContentRewriter);
     GadgetsHandler handler =
         new GadgetsHandler(new TestExecutorService(), service, beanFilter);
     registry = new DefaultHandlerRegistry(
@@ -148,6 +158,134 @@ public class GadgetsHandlerTest extends EasyMockTestCase {
     } catch (Exception e) {
       assertTrue(e.getMessage().contains("Missing container"));
     }
+  }
+
+  private JSONObject makeCajaRequest(String mime, String... uris)
+      throws JSONException {
+    JSONObject params = new JSONObject()
+      .put("container", CONTAINER)
+      .put("ids", ImmutableList.copyOf(uris));
+    
+    if (null != mime) {
+      params.put("mime-type", mime);
+    }
+    
+    return new JSONObject()
+      .put("id", "req1")
+      .put("method", "gadgets.cajole")
+      .put("params", params);
+  }
+
+  @Test
+  public void testCajaEmptyRequest() throws Exception {
+    registerGadgetsHandler(null);
+    JSONObject request = makeCajaRequest(null);
+    RpcHandler operation = registry.getRpcHandler(request);
+    Object empty = operation.execute(emptyFormItems, token, converter).get();
+    JsonAssert.assertJsonEquals("{}", converter.convertToString(empty));
+  }
+  
+  private CajoledResult cajole(Uri uri, String mime, String content) throws ParseException {
+    CajaContentRewriter rw = new CajaContentRewriter(null, null, null);
+    InputSource is = new InputSource(uri.toJavaUri());
+    MessageQueue mq = new SimpleMessageQueue();
+    CharProducer cp = CharProducer.Factory.create(new StringReader(content), is);
+    return rw.rewrite(uri, CONTAINER, rw.parse(is, cp, mime, mq), false, false);
+  }
+  
+  @Test
+  public void testCajaJsRequest() throws Exception {
+    registerGadgetsHandler(null);
+    Capture<Uri> uriCapture = new Capture<Uri>();
+    Capture<String> containerCapture = new Capture<String>();
+    Capture<String> mimeCapture = new Capture<String>();
+    
+    String goldenMime = "text/javascript";
+    
+    CajoledResult golden = cajole(JS_URL, goldenMime, "alert('hi');");
+    
+    EasyMock.expect(cajaContentRewriter.rewrite(
+        EasyMock.capture(uriCapture),
+        EasyMock.capture(containerCapture),
+        EasyMock.capture(mimeCapture),
+        EasyMock.eq(true),
+        EasyMock.anyBoolean()))
+        .andReturn(golden)
+        .anyTimes();
+    replay();
+
+    JSONObject request = makeCajaRequest(goldenMime, JS_URL.toString());
+    RpcHandler operation = registry.getRpcHandler(request);
+    Object result = operation.execute(emptyFormItems, token, converter).get();
+    
+    assertEquals(CONTAINER, containerCapture.getValue());
+    assertEquals(JS_URL, uriCapture.getValue());
+    assertTrue(mimeCapture.getValue().contains("javascript"));
+    
+    JSONObject response = new JSONObject(converter.convertToString(result));
+    assertTrue(response.has(JS_URL.toString()));
+    JSONObject cajaResponse = response.getJSONObject(JS_URL.toString());
+
+    // Pure js url - no html produced
+    assertFalse(cajaResponse.has("html"));
+    assertTrue(cajaResponse.has("js"));
+    assertTrue(cajaResponse.has("messages"));
+    assertTrue(cajaResponse.getString("js").contains("alert"));
+    assertTrue(cajaResponse.getJSONArray("messages").length() > 0);
+  }
+
+  @Test
+  public void testCajaHtmlRequest() throws Exception {
+    registerGadgetsHandler(null);
+    Capture<Uri> uriCapture = new Capture<Uri>();
+    Capture<String> containerCapture = new Capture<String>();
+    Capture<String> mimeCapture = new Capture<String>();
+    
+    String goldenMime = "text/html";
+    
+    CajoledResult golden = cajole(HTML_URL, goldenMime,
+        "<b>hello</b>world<script>evilFunc1()</script><div onclick='evilFunc2'></div>");
+    
+    EasyMock.expect(cajaContentRewriter.rewrite(
+        EasyMock.capture(uriCapture),
+        EasyMock.capture(containerCapture),
+        EasyMock.capture(mimeCapture),
+        EasyMock.eq(true),
+        EasyMock.anyBoolean()))
+        .andReturn(golden)
+        .anyTimes();
+    replay();
+
+    JSONObject request = makeCajaRequest(goldenMime, HTML_URL.toString());
+    RpcHandler operation = registry.getRpcHandler(request);
+    Object result = operation.execute(emptyFormItems, token, converter).get();
+    
+    assertEquals(CONTAINER, containerCapture.getValue());
+    assertEquals(HTML_URL, uriCapture.getValue());
+    assertTrue(mimeCapture.getValue().contains("html"));
+    
+    JSONObject response = new JSONObject(converter.convertToString(result));
+    assertTrue(response.has(HTML_URL.toString()));
+
+    JSONObject cajaResponse = response.getJSONObject(HTML_URL.toString());
+    assertTrue(cajaResponse.has("html"));
+    assertTrue(cajaResponse.has("js"));
+    assertTrue(cajaResponse.has("messages"));
+    
+    // HTML is sanitized
+    assertTrue(cajaResponse.getString("html").contains("<b>hello</b>world"));
+    assertFalse(cajaResponse.getString("html").contains("evilFunc"));
+    assertTrue(cajaResponse.getString("js").contains("evilFunc"));
+    assertTrue(cajaResponse.getJSONArray("messages").length() > 0);
+  }
+
+  @Test
+  public void testCajaES53Request() throws Exception {
+    registerGadgetsHandler(null);
+    JSONObject request = makeCajaRequest(null);
+    RpcHandler operation = registry.getRpcHandler(request);
+    Object empty = operation.execute(emptyFormItems, token, converter).get();
+    JsonAssert.assertJsonEquals("{}", converter.convertToString(empty));
   }
 
   @Test
@@ -568,5 +706,4 @@ public class GadgetsHandlerTest extends EasyMockTestCase {
     assertFalse(gadget1.has("error"));
     verify();
   }
-
 }

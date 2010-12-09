@@ -18,14 +18,23 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
+import com.google.caja.lexer.CharProducer;
 import com.google.caja.lexer.ExternalReference;
 import com.google.caja.lexer.FetchedData;
+import com.google.caja.lexer.FilePosition;
+import com.google.caja.lexer.HtmlLexer;
 import com.google.caja.lexer.InputSource;
+import com.google.caja.lexer.JsLexer;
+import com.google.caja.lexer.JsTokenQueue;
+import com.google.caja.lexer.ParseException;
 import com.google.caja.lexer.TokenConsumer;
 import com.google.caja.lexer.escaping.Escaping;
+import com.google.caja.parser.ParseTreeNode;
 import com.google.caja.parser.html.Dom;
+import com.google.caja.parser.html.DomParser;
 import com.google.caja.parser.html.Namespaces;
 import com.google.caja.parser.js.CajoledModule;
+import com.google.caja.parser.js.Parser;
 import com.google.caja.plugin.PipelineMaker;
 import com.google.caja.plugin.PluginCompiler;
 import com.google.caja.plugin.PluginMeta;
@@ -33,6 +42,7 @@ import com.google.caja.plugin.LoaderType;
 import com.google.caja.plugin.UriEffect;
 import com.google.caja.plugin.UriFetcher;
 import com.google.caja.plugin.UriPolicy;
+import com.google.caja.plugin.UriFetcher.UriFetchException;
 import com.google.caja.render.Concatenator;
 import com.google.caja.render.JsMinimalPrinter;
 import com.google.caja.render.JsPrettyPrinter;
@@ -40,10 +50,14 @@ import com.google.caja.reporting.BuildInfo;
 import com.google.caja.reporting.Message;
 import com.google.caja.reporting.MessageContext;
 import com.google.caja.reporting.MessageLevel;
+import com.google.caja.reporting.MessagePart;
 import com.google.caja.reporting.MessageQueue;
+import com.google.caja.reporting.MessageType;
 import com.google.caja.reporting.RenderContext;
 import com.google.caja.reporting.SimpleMessageQueue;
 import com.google.caja.reporting.SnippetProducer;
+import com.google.caja.service.ServiceMessageType;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 
@@ -68,7 +82,9 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -80,7 +96,7 @@ public class CajaContentRewriter implements GadgetRewriter {
   public static final String CAJOLED_DOCUMENTS = "cajoledDocuments";
 
   //class name for logging purpose
-  private static final String classname = "org.apache.shindig.gadgets.servlet.CajaContentRewriter";
+  private static final String classname = CajaContentRewriter.class.getName();
   private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
 
 
@@ -91,12 +107,108 @@ public class CajaContentRewriter implements GadgetRewriter {
   @Inject
   public CajaContentRewriter(CacheProvider cacheProvider, RequestPipeline requestPipeline,
       HtmlSerializer htmlSerializer) {
-    this.cajoledCache = cacheProvider.createCache(CAJOLED_DOCUMENTS);
+    if (null == cacheProvider) {
+      this.cajoledCache = null;
+    } else {
+      this.cajoledCache = cacheProvider.createCache(CAJOLED_DOCUMENTS);
+    }
     if (LOG.isLoggable(Level.INFO)) {
-      LOG.logp(Level.INFO, classname, "CajaContentRewriter", MessageKeys.CAJOLED_CACHE_CREATED, new Object[] {cajoledCache});
+      LOG.logp(Level.INFO, classname, "CajaContentRewriter", MessageKeys.CAJOLED_CACHE_CREATED,
+          new Object[] {cajoledCache});
     }
     this.requestPipeline = requestPipeline;
     this.htmlSerializer = htmlSerializer;
+  }
+  
+  public class CajoledResult {
+    public final Node html;
+    public final CajoledModule js;
+    public final List<Message> messages;
+    public final boolean hasErrors;
+    CajoledResult(Node html, CajoledModule js, List<Message> messages, boolean hasErrors) {
+      this.html = html;
+      this.js = js;
+      this.messages = messages;
+      this.hasErrors= hasErrors;
+    }
+    public String toString() {
+      return "[html:'" + html + "', js: '" + js + "', messages: '" + messages + "']"; 
+    }
+  }
+  
+  @VisibleForTesting
+  ParseTreeNode parse(InputSource is, CharProducer cp, String mime, MessageQueue mq)
+      throws ParseException {
+    ParseTreeNode ptn;
+    if (mime.contains("javascript")) {
+      JsLexer lexer = new JsLexer(cp);
+      JsTokenQueue tq = new JsTokenQueue(lexer, is);
+      if (tq.isEmpty()) { return null; }
+      Parser p = new Parser(tq, mq);
+      ptn = p.parse();
+      tq.expectEmpty();
+    } else {
+      DomParser p = new DomParser(new HtmlLexer(cp), false, is, mq);
+      ptn = new Dom(p.parseFragment());
+      p.getTokenQueue().expectEmpty();
+    }
+    return ptn;
+  }
+  
+  public CajoledResult rewrite(Uri uri, String container, String mime,
+      boolean es53, boolean debug) {
+    URI javaUri = uri.toJavaUri();
+    InputSource is = new InputSource(javaUri);
+    MessageQueue mq = new SimpleMessageQueue();
+    try {
+      UriFetcher fetcher = makeFetcher(uri, container);
+      ExternalReference extRef = new ExternalReference(javaUri,
+          FilePosition.instance(is, /*lineNo*/ 1, /*charInFile*/ 1, /*charInLine*/ 1));
+        // If the fetch fails, a UriFetchException is thrown and serialized as part of the
+        // message queue.
+        CharProducer cp = fetcher.fetch(extRef, mime).getTextualContent();
+        ParseTreeNode ptn = parse(is, cp, mime, mq);
+        return rewrite(uri, container, ptn, es53, debug);
+    } catch (UnsupportedEncodingException e) {
+      LOG.severe("Unexpected inability to recognize mime type: " + mime);
+      mq.addMessage(ServiceMessageType.UNEXPECTED_INPUT_MIME_TYPE,
+          MessagePart.Factory.valueOf(mime));
+    } catch (UriFetchException e) {
+      LOG.info("Failed to retrieve: " + e.toString());
+    } catch (ParseException e) {
+      mq.addMessage(MessageType.PARSE_ERROR, FilePosition.UNKNOWN);
+    }
+    return new CajoledResult(null, null, mq.getMessages(), /* hasErrors */ true);
+  }
+  
+  public CajoledResult rewrite(Uri gadgetUri, String container,
+      ParseTreeNode root, boolean es53, boolean debug) {
+    UriFetcher fetcher = makeFetcher(gadgetUri, container);
+    UriPolicy policy = makePolicy(gadgetUri);
+    URI javaGadgetUri = gadgetUri.toJavaUri();
+    MessageQueue mq = new SimpleMessageQueue();
+    MessageContext context = new MessageContext();
+    PluginMeta meta = new PluginMeta(fetcher, policy);
+    PluginCompiler compiler = makePluginCompiler(meta, mq);
+    compiler.setMessageContext(context);
+
+    if (debug) {
+      compiler.setGoals(compiler.getGoals()
+          .without(PipelineMaker.ONE_CAJOLED_MODULE)
+          .with(PipelineMaker.ONE_CAJOLED_MODULE_DEBUG));
+    }
+
+    compiler.addInput(root, javaGadgetUri);
+
+    boolean hasErrors = false;
+    if (!compiler.run()) {
+      hasErrors = true;
+    }
+
+    return new CajoledResult(compiler.getStaticHtml(), 
+        compiler.getJavascript(), 
+        compiler.getMessageQueue().getMessages(),
+        hasErrors);
   }
 
   public void rewrite(Gadget gadget, MutableContent mc) {
@@ -123,37 +235,19 @@ public class CajaContentRewriter implements GadgetRewriter {
     }
 
     if (cajoledData == null) {
-      UriFetcher fetcher = makeFetcher(gadget);
-      UriPolicy policy = makePolicy(gadget);
-      URI javaGadgetUri = gadgetContext.getUrl().toJavaUri();
-      MessageQueue mq = new SimpleMessageQueue();
-      MessageContext context = new MessageContext();
-      PluginMeta meta = new PluginMeta(fetcher, policy);
-      PluginCompiler compiler = makePluginCompiler(meta, mq);
-
-      compiler.setMessageContext(context);
-
       if (debug) {
         // This will load cajita-debugmode.js
         gadget.addFeature("caja-debug");
-        compiler.setGoals(compiler.getGoals()
-                .without(PipelineMaker.ONE_CAJOLED_MODULE)
-                .with(PipelineMaker.ONE_CAJOLED_MODULE_DEBUG));
       }
       
-      InputSource is = new InputSource(javaGadgetUri);
-      boolean safe = false;
-
-      compiler.addInput(new Dom(root), javaGadgetUri);
-
-      try {
-        if (!compiler.run()) {
-          throw new GadgetException(
-              GadgetException.Code.MALFORMED_FOR_SAFE_INLINING,
-              "Gadget has compile errors");
-        }
+      InputSource is = new InputSource(gadgetContext.getUrl().toJavaUri());
+      // TODO(jasvir): Turn on es53 once gadgets apis support it
+      CajoledResult result =
+        rewrite(gadgetContext.getUrl(), gadgetContext.getContainer(),
+            new Dom(root), /* es53 */ false, debug);
+      if (!result.hasErrors) {
         StringBuilder scriptBody = new StringBuilder();
-        CajoledModule cajoled = compiler.getJavascript();
+        CajoledModule cajoled = result.js;
         TokenConsumer tc = debug
             ? new JsPrettyPrinter(new Concatenator(scriptBody))
             : new JsMinimalPrinter(new Concatenator(scriptBody));
@@ -163,7 +257,7 @@ public class CajaContentRewriter implements GadgetRewriter {
 
         tc.noMoreTokens();
 
-        Node html = compiler.getStaticHtml();
+        Node html = result.html;
 
         Element script = doc.createElementNS(
             Namespaces.HTML_NAMESPACE_URI, "script");
@@ -180,9 +274,10 @@ public class CajaContentRewriter implements GadgetRewriter {
         cajoledOutput.appendChild(doc.adoptNode(html));
         cajoledOutput.appendChild(tameCajaClientApi(doc));
         cajoledOutput.appendChild(doc.adoptNode(script));
-
-        Element messagesNode = formatErrors(doc, is, docContent, mq,
-            /* is invisible */ false);
+        
+        List<Message> messages = result.messages;
+        Element messagesNode = formatErrors(doc, is, docContent, messages,
+            /* invisible */ false);
         cajoledOutput.appendChild(messagesNode);
         if (cajoledCache != null && !debug) {
           cajoledCache.addElement(cacheKey, cajoledOutput);
@@ -191,22 +286,15 @@ public class CajaContentRewriter implements GadgetRewriter {
         cajoledData = cajoledOutput;
         createContainerFor(doc, cajoledData);
         mc.documentChanged();
-        safe = true;
         HtmlSerialization.attach(doc, htmlSerializer, null);
-      } catch (GadgetException e) {
+      } else {
         // There were cajoling errors
         // Content is only used to produce useful snippets with error messages
+        List<Message> messages = result.messages;
         createContainerFor(doc,
-            formatErrors(doc, is, docContent, mq, true /* visible */));
+            formatErrors(doc, is, docContent, messages, true /* visible */));
         mc.documentChanged();
-        logException("rewrite", e, mq);
-        safe = true;
-      } finally {
-        if (!safe) {
-          // Fail safe
-          mc.setContent("");
-          mc.documentChanged();
-        }
+        logException("rewrite", messages);
       }
     }
   }
@@ -216,15 +304,13 @@ public class CajaContentRewriter implements GadgetRewriter {
         "1".equals(gadget.getContext().getParameter("caja")));
   }
 
-  private UriFetcher makeFetcher(Gadget gadget) {
-    final Uri gadgetUri = gadget.getContext().getUrl();
-    final String container = gadget.getContext().getContainer();
-    
+  UriFetcher makeFetcher(final Uri gadgetUri, final String container) {
     return new UriFetcher() {
       public FetchedData fetch(ExternalReference ref, String mimeType)
           throws UriFetchException {
         if (LOG.isLoggable(Level.INFO)) {
-          LOG.logp(Level.INFO, classname, "makeFetcher", MessageKeys.RETRIEVE_REFERENCE, new Object[] {ref.toString()});
+          LOG.logp(Level.INFO, classname, "makeFetcher", MessageKeys.RETRIEVE_REFERENCE,
+              new Object[] {ref.toString()});
         }        
         Uri resourceUri = gadgetUri.resolve(Uri.fromJavaUri(ref.getUri()));
         HttpRequest request =
@@ -236,23 +322,23 @@ public class CajaContentRewriter implements GadgetRewriter {
               new InputSource(ref.getUri()));
         } catch (GadgetException e) {
           if (LOG.isLoggable(Level.INFO)) {
-            LOG.logp(Level.INFO, classname, "makeFetcher", MessageKeys.FAILED_TO_RETRIEVE, new Object[] {ref.toString()});
+            LOG.logp(Level.INFO, classname, "makeFetcher", MessageKeys.FAILED_TO_RETRIEVE,
+                new Object[] {ref.toString()});
           }
-          return null;
+          throw new UriFetchException(ref, mimeType, e);
         } catch (IOException e) {
           if (LOG.isLoggable(Level.INFO)) {
-            LOG.logp(Level.INFO, classname, "makeFetcher", MessageKeys.FAILED_TO_READ, new Object[] {ref.toString()});
+            LOG.logp(Level.INFO, classname, "makeFetcher", MessageKeys.FAILED_TO_READ,
+                new Object[] {ref.toString()});
           }
-          return null;
+          throw new UriFetchException(ref, mimeType, e);
         }
       }
       
     };
   }
   
-  private UriPolicy makePolicy(Gadget gadget) {
-    final Uri gadgetUri = gadget.getContext().getUrl();
-
+  private UriPolicy makePolicy(final Uri gadgetUri) {
     return new UriPolicy() {
       public String rewriteUri(ExternalReference ref, UriEffect effect,
           LoaderType loader, Map<String, ?> hints) {
@@ -277,7 +363,7 @@ public class CajaContentRewriter implements GadgetRewriter {
   }
 
   private Element formatErrors(Document doc, InputSource is,
-      CharSequence orig, MessageQueue mq, boolean visible) {
+      CharSequence orig, List<Message> messages, boolean visible) {
     MessageContext mc = new MessageContext();
     Map<InputSource, CharSequence> originalSrc = Maps.newHashMap();
     originalSrc.put(is, orig);
@@ -290,7 +376,7 @@ public class CajaContentRewriter implements GadgetRewriter {
     if (!visible) {
       errElement.setAttribute("style", "display: none");
     }
-    for (Message msg : mq.getMessages()) {
+    for (Message msg : messages) {
       // Ignore LINT messages
       if (MessageLevel.LINT.compareTo(msg.getMessageLevel()) <= 0) {
         String snippet = sp.getSnippet(msg);
@@ -317,17 +403,15 @@ public class CajaContentRewriter implements GadgetRewriter {
     return scriptElement;
   }
 
-  private void logException(String methodname, Exception cause, MessageQueue mq) {
+  private void logException(String methodname, List<Message> messages) {
     StringBuilder errbuilder = new StringBuilder();
     MessageContext mc = new MessageContext();
-    if (cause != null) {
-      errbuilder.append(cause).append('\n');
-    }
-    for (Message m : mq.getMessages()) {
+    for (Message m : messages) {
       errbuilder.append(m.format(mc)).append('\n');
     }
     if (LOG.isLoggable(Level.INFO)) {
-      LOG.logp(Level.INFO, classname, methodname, MessageKeys.UNABLE_TO_CAJOLE, new Object[] {errbuilder});
+      LOG.logp(Level.INFO, classname, methodname, MessageKeys.UNABLE_TO_CAJOLE,
+          new Object[] {errbuilder});
     }
   }
   

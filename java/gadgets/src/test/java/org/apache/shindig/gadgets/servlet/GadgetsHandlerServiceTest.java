@@ -40,6 +40,8 @@ import org.apache.shindig.gadgets.features.FeatureRegistry;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.process.ProcessingException;
+import org.apache.shindig.gadgets.servlet.GadgetsHandlerApi.Message;
+import org.apache.shindig.gadgets.servlet.GadgetsHandlerApi.MessageLevel;
 import org.apache.shindig.gadgets.uri.JsUriManager;
 import org.apache.shindig.gadgets.uri.ProxyUriManager;
 import org.apache.shindig.gadgets.uri.JsUriManager.JsUri;
@@ -78,6 +80,7 @@ public class GadgetsHandlerServiceTest extends EasyMockTestCase {
   private final ProxyUriManager proxyUriManager = mock(ProxyUriManager.class);
   private final JsUriManager jsUriManager = mock(JsUriManager.class);
   private final ProxyHandler proxyHandler = mock(ProxyHandler.class);
+  private final CajaContentRewriter cajaContentRewriter = mock(CajaContentRewriter.class);
   private final JsHandler jsHandler = mock(JsHandler.class);
 
   private FakeSecurityTokenCodec tokenCodec;
@@ -88,7 +91,7 @@ public class GadgetsHandlerServiceTest extends EasyMockTestCase {
     tokenCodec = new FakeSecurityTokenCodec();
     gadgetHandler = new GadgetsHandlerService(timeSource, processor, urlGenerator,
         tokenCodec, proxyUriManager, jsUriManager, proxyHandler, jsHandler,
-        SPEC_REFRESH_INTERVAL_MS, new BeanFilter());
+        SPEC_REFRESH_INTERVAL_MS, new BeanFilter(), cajaContentRewriter);
   }
 
   // Next test verify that the API data classes are configured correctly.
@@ -493,6 +496,37 @@ public class GadgetsHandlerServiceTest extends EasyMockTestCase {
     replay();
     GadgetsHandlerApi.ProxyResponse response = gadgetHandler.getProxy(request);
   }
+  
+  @Test
+  public void testCreateCajaResponse() throws Exception {
+    String goldenEntries[][] = {{"name1", "LINT", "msg1"}, {"name2", "LINT", "msg2"}};
+    List<Message> goldenMessages = Lists.newArrayList();
+    
+    for (String[] goldenEntry : goldenEntries) {
+      Message m = mock(Message.class);
+      expect(m.getName()).andReturn(goldenEntry[0]);
+      expect(m.getLevel()).andReturn(MessageLevel.valueOf(goldenEntry[1]));
+      expect(m.getMessage()).andReturn(goldenEntry[2]);
+      goldenMessages.add(m);
+    }
+    replay();
+    
+    Uri jsUri = Uri.parse("http://www.shindig.com/js");
+    GadgetsHandlerApi.CajaResponse jsResponse =
+        gadgetHandler.createCajaResponse(jsUri, "html", "js",
+            goldenMessages, ImmutableSet.of("*"), null);
+    BeanDelegator.validateDelegator(jsResponse);
+    
+    assertEquals("html", jsResponse.getHtml());
+    assertEquals("js", jsResponse.getJs());
+    List<Message> response = jsResponse.getMessages();
+    assertEquals(goldenMessages.size(), response.size());
+    for (int i=0; i < response.size(); i++) {
+      assertEquals(goldenEntries[i][0], response.get(i).getName());
+      assertEquals(goldenEntries[i][1], response.get(i).getLevel().name());
+      assertEquals(goldenEntries[i][2], response.get(i).getMessage());
+    }
+  }
 
   private GadgetsHandlerApi.TokenData createTokenData(String ownerId, String viewerId) {
     GadgetsHandlerApi.TokenData token = mock(GadgetsHandlerApi.TokenData.class);
@@ -539,6 +573,15 @@ public class GadgetsHandlerServiceTest extends EasyMockTestCase {
   private GadgetsHandlerApi.ProxyRequest createProxyRequest(Uri url, String container,
       List<String> fields) {
     GadgetsHandlerApi.ProxyRequest request = mock(GadgetsHandlerApi.ProxyRequest.class);
+    EasyMock.expect(request.getFields()).andStubReturn(fields);
+    EasyMock.expect(request.getContainer()).andStubReturn(container);
+    EasyMock.expect(request.getUrl()).andStubReturn(url);
+    return request;
+  }
+
+  private GadgetsHandlerApi.CajaRequest createCajaRequest(Uri url, String container,
+      List<String> fields) {
+    GadgetsHandlerApi.CajaRequest request = mock(GadgetsHandlerApi.CajaRequest.class);
     EasyMock.expect(request.getFields()).andStubReturn(fields);
     EasyMock.expect(request.getContainer()).andStubReturn(container);
     EasyMock.expect(request.getUrl()).andStubReturn(url);

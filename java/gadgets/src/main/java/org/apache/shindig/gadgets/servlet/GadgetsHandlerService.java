@@ -18,12 +18,21 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
+
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.codec.binary.Base64InputStream;
 import org.apache.commons.io.IOUtils;
@@ -40,6 +49,7 @@ import org.apache.shindig.gadgets.RenderingContext;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.process.ProcessingException;
 import org.apache.shindig.gadgets.process.Processor;
+import org.apache.shindig.gadgets.servlet.CajaContentRewriter.CajoledResult;
 import org.apache.shindig.gadgets.spec.Feature;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.LinkSpec;
@@ -55,15 +65,14 @@ import org.apache.shindig.gadgets.uri.ProxyUriManager.ProxyUri;
 import org.apache.shindig.protocol.conversion.BeanDelegator;
 import org.apache.shindig.protocol.conversion.BeanFilter;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import javax.servlet.http.HttpServletResponse;
+import com.google.caja.lexer.TokenConsumer;
+import com.google.caja.parser.html.Nodes;
+import com.google.caja.render.Concatenator;
+import com.google.caja.render.JsMinimalPrinter;
+import com.google.caja.render.JsPrettyPrinter;
+import com.google.caja.reporting.MessageContext;
+import com.google.caja.reporting.RenderContext;
+import com.google.caja.util.Lists;
 
 /**
  * Service that interfaces with the system to provide information about gadgets.
@@ -117,6 +126,7 @@ public class GadgetsHandlerService {
   protected final BeanDelegator beanDelegator;
   protected final long specRefreshInterval;
   protected final BeanFilter beanFilter;
+  protected final CajaContentRewriter cajaContentRewriter;
 
   @Inject
   public GadgetsHandlerService(TimeSource timeSource, Processor processor,
@@ -124,7 +134,7 @@ public class GadgetsHandlerService {
       ProxyUriManager proxyUriManager, JsUriManager jsUriManager, ProxyHandler proxyHandler,
       JsHandler jsHandler,
       @Named("shindig.cache.xml.refreshInterval") long specRefreshInterval,
-      BeanFilter beanFilter) {
+      BeanFilter beanFilter, CajaContentRewriter cajaContentRewriter) {
     this.timeSource = timeSource;
     this.processor = processor;
     this.iframeUriManager = iframeUriManager;
@@ -135,6 +145,7 @@ public class GadgetsHandlerService {
     this.jsHandler = jsHandler;
     this.specRefreshInterval = specRefreshInterval;
     this.beanFilter = beanFilter;
+    this.cajaContentRewriter = cajaContentRewriter;
 
     this.beanDelegator = new BeanDelegator(apiClasses, enumConversionMap);
   }
@@ -240,6 +251,73 @@ public class GadgetsHandlerService {
           HttpResponse.SC_INTERNAL_SERVER_ERROR);
     }
   }
+  
+  /**
+   * Convert message level to Shindig's serializable message type
+   */
+  public static GadgetsHandlerApi.MessageLevel convertMessageLevel(String name) {
+    try {
+      return GadgetsHandlerApi.MessageLevel.valueOf(name);
+    }
+    catch (Exception ex) {
+      return GadgetsHandlerApi.MessageLevel.UNKNOWN;
+    }
+  }
+
+  /**
+   * Convert messages from Caja's internal message type to Shindig's serializable message type
+   */
+  private List<GadgetsHandlerApi.Message> convertMessages(
+      List<com.google.caja.reporting.Message> msgs,
+      final MessageContext mc) {
+    List<GadgetsHandlerApi.Message> result = Lists.newArrayList(msgs.size());
+    for (final com.google.caja.reporting.Message m : msgs) {
+      MessageImpl msg = new MessageImpl(m.getMessageType().name(),
+          m.format(mc), convertMessageLevel(m.getMessageLevel().name()));
+      result.add(msg);
+    }
+    return result;
+  }
+
+  public GadgetsHandlerApi.CajaResponse getCaja(GadgetsHandlerApi.CajaRequest request)
+      throws ProcessingException {
+    verifyBaseParams(request, true);
+    Set<String> fields = beanFilter.processBeanFields(request.getFields());
+
+    HttpResponse httpResponse = null;
+    try {
+      MessageContext mc = new MessageContext();
+      CajoledResult result =
+        cajaContentRewriter.rewrite(request.getUrl(), request.getContainer(),
+            request.getMimeType(), true /* only support es53 */, request.getDebug());
+      String html = null;
+      String js = null;
+      if (!result.hasErrors && null != result.html) {
+        html = Nodes.render(result.html);
+      }
+      
+      if (!result.hasErrors && null != result.js) {
+        StringBuilder builder = new StringBuilder();
+        TokenConsumer tc = request.getDebug() ?
+            new JsPrettyPrinter(new Concatenator(builder))
+            : new JsMinimalPrinter(new Concatenator(builder));
+        RenderContext rc = new RenderContext(tc)
+            .withAsciiOnly(true)
+            .withEmbeddable(true);
+        result.js.render(rc);
+        rc.getOut().noMoreTokens();
+        js = builder.toString();
+      }
+      
+      // TODO(jasvir): Improve Caja responses expiration handling
+      return createCajaResponse(request.getUrl(), 
+          html, js, convertMessages(result.messages, mc), fields,
+          timeSource.currentTimeMillis() + specRefreshInterval);
+    } catch (IOException e) {
+      LOG.log(Level.WARNING, "Error creating cajoled response", e);
+      throw new ProcessingException("Error getting response content", HttpResponse.SC_INTERNAL_SERVER_ERROR);
+    }
+  }
 
   /**
    * Verify request parameter are defined.
@@ -247,13 +325,13 @@ public class GadgetsHandlerService {
   protected void verifyBaseParams(GadgetsHandlerApi.BaseRequest request, boolean checkUrl)
       throws ProcessingException {
     if (checkUrl && request.getUrl() == null) {
-      throw new ProcessingException("Missing url paramater", HttpResponse.SC_BAD_REQUEST);
+      throw new ProcessingException("Missing url parameter", HttpResponse.SC_BAD_REQUEST);
     }
     if (request.getContainer() == null) {
-      throw new ProcessingException("Missing container paramater", HttpResponse.SC_BAD_REQUEST);
+      throw new ProcessingException("Missing container parameter", HttpResponse.SC_BAD_REQUEST);
     }
     if (request.getFields() == null) {
-      throw new ProcessingException("Missing fields paramater", HttpResponse.SC_BAD_REQUEST);
+      throw new ProcessingException("Missing fields parameter", HttpResponse.SC_BAD_REQUEST);
     }
   }
 
@@ -481,5 +559,57 @@ public class GadgetsHandlerService {
               .put("expiretimems", BeanDelegator.nullable(expireMs))
               .build()),
       fields);
+  }
+  
+  @VisibleForTesting
+  GadgetsHandlerApi.CajaResponse createCajaResponse(Uri uri,
+      String html, String js, List<GadgetsHandlerApi.Message> messages, 
+      Set<String> fields, Long expireMs) throws IOException {
+    ImmutableList.Builder<GadgetsHandlerApi.Message> msgBuilder =
+      ImmutableList.builder();
+    for (final GadgetsHandlerApi.Message m : messages) {
+      msgBuilder.add(
+        beanDelegator.createDelegator(null, GadgetsHandlerApi.Message.class,
+            ImmutableMap.<String, Object>of("name", m.getName(), 
+                "level", m.getLevel(), "message", m.getMessage())));
+    }
+
+    return (GadgetsHandlerApi.CajaResponse) beanFilter.createFilteredBean(
+        beanDelegator.createDelegator(null, GadgetsHandlerApi.CajaResponse.class,
+            ImmutableMap.<String, Object>builder()
+            .put("url", uri)
+            .put("html", BeanDelegator.nullable(html))
+            .put("js", BeanDelegator.nullable(js))
+            .put("messages", msgBuilder.build())
+            .put("error", BeanDelegator.NULL)
+            .put("responsetimems", timeSource.currentTimeMillis())
+            .put("expiretimems", BeanDelegator.nullable(expireMs))
+            .build()),
+            fields);
+  }
+  
+  private class MessageImpl implements GadgetsHandlerApi.Message {
+    private GadgetsHandlerApi.MessageLevel level;
+    private String message;
+    private String name;
+    
+    public MessageImpl(String name, String message, GadgetsHandlerApi.MessageLevel level) {
+      this.name = name;
+      this.message = message;
+      this.level = level;
+    }
+    
+    public GadgetsHandlerApi.MessageLevel getLevel() {
+      return level;
+    }
+
+    public String getMessage() {
+      return message;
+    }
+
+    public String getName() {
+      return name;
+    }
+    
   }
 }

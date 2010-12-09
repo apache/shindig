@@ -68,6 +68,8 @@ public class GadgetsHandler {
   @VisibleForTesting
   static final String FAILURE_PROXY = "Failed to get proxy data.";
   @VisibleForTesting
+  static final String FAILURE_CAJA = "Failed to cajole data.";
+  @VisibleForTesting
   static final String FAILURE_JS = "Failed to get js data.";
 
   private static final List<String> DEFAULT_METADATA_FIELDS =
@@ -77,8 +79,9 @@ public class GadgetsHandler {
 
   private static final List<String> DEFAULT_PROXY_FIELDS = ImmutableList.of("proxyUrl");
 
+  private static final List<String> DEFAULT_CAJA_FIELDS = ImmutableList.of("*");
   private static final List<String> DEFAULT_JS_FIELDS = ImmutableList.of("jsUrl");
-
+  
   private static final Logger LOG = Logger.getLogger(GadgetsHandler.class.getName());
 
   protected final ExecutorService executor;
@@ -151,6 +154,18 @@ public class GadgetsHandler {
     }.execute(request);
   }
 
+  @Operation(httpMethods = {"POST", "GET"}, path = "cajole")
+  public Map<String, GadgetsHandlerApi.BaseResponse> cajole(BaseRequestItem request)
+      throws ProtocolException {
+    return new AbstractExecutor() {
+      @Override
+      protected Callable<CallableData> createJob(String url, BaseRequestItem request)
+          throws ProcessingException {
+        return createCajaJob(url, request);
+      }
+    }.execute(request);
+  }
+
   @Operation(httpMethods = "GET", path = "/@metadata.supportedFields")
   public Set<String> supportedFields(RequestItem request) {
     return ImmutableSet.copyOf(beanFilter
@@ -173,6 +188,12 @@ public class GadgetsHandler {
   public Set<String> proxySupportedFields(RequestItem request) {
     return ImmutableSet.copyOf(
         beanFilter.getBeanFields(GadgetsHandlerApi.ProxyResponse.class, 5));
+  }
+
+  @Operation(httpMethods = "GET", path = "/@cajole.supportedFields")
+  public Set<String> cajaSupportedFields(RequestItem request) {
+    return ImmutableSet.copyOf(beanFilter
+        .getBeanFields(GadgetsHandlerApi.CajaResponse.class, 5));
   }
 
   /**
@@ -282,6 +303,22 @@ public class GadgetsHandler {
         } catch (Exception e) {
           return new CallableData(url,
             handlerService.createErrorResponse(null, e, FAILURE_PROXY));
+        }
+      }
+    };
+  }
+
+  // Hook to override in sub-class.
+  protected Callable<CallableData> createCajaJob(final String url,
+      BaseRequestItem request) throws ProcessingException {
+    final CajaRequestData cajaRequest = new CajaRequestData(url, request);
+    return new Callable<CallableData>() {
+      public CallableData call() throws Exception {
+        try {
+          return new CallableData(url, handlerService.getCaja(cajaRequest));
+        } catch (Exception e) {
+          return new CallableData(url,
+            handlerService.createErrorResponse(null, e, FAILURE_CAJA));
         }
       }
     };
@@ -490,6 +527,27 @@ public class GadgetsHandler {
       }
     }
     return type;
+  }
+
+  protected class CajaRequestData extends AbstractRequest
+      implements GadgetsHandlerApi.CajaRequest {
+    private final String mimeType;
+    private final boolean debug;
+    
+    public CajaRequestData(String url, BaseRequestItem request)
+        throws ProcessingException {
+      super(url, request, DEFAULT_CAJA_FIELDS);
+      this.mimeType = request.getParameter("mime-type", "text/html");
+      this.debug = getBooleanParam(request, "debug");
+    }
+
+    public String getMimeType() {
+      return mimeType;
+    }
+
+    public boolean getDebug() {
+      return debug;
+    }
   }
 
   protected class MetadataRequestData extends AbstractRequest

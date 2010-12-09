@@ -182,6 +182,43 @@ public class GadgetsHandlerApi {
     public String getToken();
   }
 
+  // TODO(jasvir): Support getRefresh and noCache
+  public interface CajaRequest extends BaseRequest {
+    public String getMimeType();
+    public boolean getDebug();
+  }
+
+  public interface CajaResponse extends BaseResponse {
+    public String getHtml();
+    public String getJs();
+    public List<Message> getMessages();
+  }
+  
+  public interface Message {
+    public MessageLevel getLevel();
+    public String getName();
+    public String getMessage();
+  }
+  
+  public enum MessageLevel {
+    UNKNOWN,
+    // Fine grained info about internal progress
+    LOG,
+    // Broad info about internal progress
+    SUMMARY,
+    // Information inferred about source files
+    INFERENCE,
+    // Indicative of a possible problem in an input source file
+    LINT,
+    // Indicative of a probable problem in an input source file
+    WARNING,
+    // Indicative of a problem which prevents production of usable output
+    // but progress should continue in case further messages shed more info
+    ERROR,
+    // Indicative of a problem that prevents usable further processing
+    FATAL_ERROR;
+  }
+
   public interface ProxyRequest extends BaseRequest {
     // The BaseRequest.url store the resource to proxy
     public String getGadget();
