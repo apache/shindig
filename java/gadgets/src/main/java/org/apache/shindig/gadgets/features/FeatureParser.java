@@ -82,7 +82,25 @@ class FeatureParser {
                 src != null && src.length() != 0 ? null : content,
                 getAttribs(resourceChild)));
           }
-          bundles.add(new ParsedFeature.Bundle(type, getAttribs(element), resources));
+          List<ParsedFeature.ApiDirective> apiDirectives = Lists.newArrayList();
+          NodeList apiKids = element.getElementsByTagName("api");
+          for (int x = 0, y = apiKids.getLength(); x < y; ++x) {
+            Element apiChild = (Element)apiKids.item(x);
+            NodeList apiElems = apiChild.getChildNodes();
+            for (int a = 0, b = apiElems.getLength(); a < b; ++a) {
+              Node apiElemNode = apiElems.item(a);
+              if (apiElemNode.getNodeType() == Node.ELEMENT_NODE) {
+                Element apiElem = (Element)apiElemNode;
+                boolean isImport = "uses".equals(apiElem.getNodeName());
+                boolean isExport = "exports".equals(apiElem.getNodeName());
+                if (isImport || isExport) {
+                  apiDirectives.add(new ParsedFeature.ApiDirective(
+                      apiElem.getAttribute("type"), apiElem.getTextContent(), isImport));
+                }
+              }
+            }
+          }
+          bundles.add(new ParsedFeature.Bundle(type, getAttribs(element), resources, apiDirectives));
         }
       }
     }
@@ -125,15 +143,66 @@ class FeatureParser {
       return bundles;
     }
     
+    public final static class ApiDirective {
+      public enum Type {
+        JS("js"),
+        RPC("rpc");
+        
+        private final String code;
+        
+        private Type(String code) {
+          this.code = code;
+        }
+        
+        public static Type fromCode(String code) {
+          for (Type value : Type.values()) {
+            if (value.code.equals(code)) {
+              return value;
+            }
+          }
+          return null;
+        }
+      }
+      
+      private final Type type;
+      private final String value;
+      private final boolean isUses;
+      
+      public ApiDirective(String type, String value, boolean isUses) {
+        this.type = Type.fromCode(type);
+        this.value = value;
+        this.isUses = isUses;
+      }
+      
+      public Type getType() {
+        return type;
+      }
+      
+      public String getValue() {
+        return value;
+      }
+      
+      public boolean isUses() {
+        return isUses;
+      }
+      
+      public boolean isExports() {
+        return !isUses;
+      }
+    }
+    
     public final static class Bundle {
       private final String type;
       private final Map<String, String> attribs;
       private final List<Resource> resources;
+      private final List<ApiDirective> apiDirectives;
       
-      private Bundle(String type, Map<String, String> attribs, List<Resource> resources) {
+      private Bundle(String type, Map<String, String> attribs,
+          List<Resource> resources, List<ApiDirective> apiDirectives) {
         this.type = type;
         this.attribs = attribs;
         this.resources = resources;
+        this.apiDirectives = apiDirectives;
       }
       
       public String getType() {
@@ -146,6 +215,10 @@ class FeatureParser {
       
       public List<Resource> getResources() {
         return resources;
+      }
+      
+      public List<ApiDirective> getApis() {
+        return apiDirectives;
       }
     }
     

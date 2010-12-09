@@ -18,7 +18,9 @@
 package org.apache.shindig.gadgets.features;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.GadgetException;
@@ -36,7 +38,19 @@ public class FeatureParserTest {
       "  <dependency>mySecondDep</dependency>" +
       "  <gadget>" +
       "    <ignored>This tag is ignored</ignored>" +
+      "    <api>" +
+      "      <!-- This is a comment about the API -->" +
+      "      <uses type=\"js\">foo.symbol</uses>" +
+      "      <exports type=\"rpc\">rpc_service</exports>" +
+      "      More extraneous crap." +
+      "      <exports type=\"js\">bar.symbol</exports>" +
+      "    </api>" +
       "    <script src=\"http://www.apache.org/file.js\"/>" +
+      "    <api>" +
+      "      <!-- A way of adding APIs together per-bundle but not tied to a resource -->" +
+      "      <uses type=\"rpc\">uses_service</uses>" +
+      "      <uses type=\"js\">last.symbol</uses>" +
+      "    </api>" +
       "    <script src=\"relative/resource.js\" gadget_attrib=\"gadget_value\"/>" +
       "  </gadget>" +
       "  <gadget container=\"container1\">" +
@@ -47,6 +61,7 @@ public class FeatureParserTest {
       "    <script>Inlined content</script>" +
       "  </container>" +
       "  <other_type>" +
+      "    <api> <!-- No actual API decls here --> </api>" +
       "    <script src=\"http://www.apache.org/two.js\"/>" +
       "    <script src=\"//extern/unchanged.dat\" inline=\"false\"/>" +
       "  </other_type>" +
@@ -74,6 +89,22 @@ public class FeatureParserTest {
         bundle1.getResources().get(1).getSource());
     assertEquals(1, bundle1.getResources().get(1).getAttribs().size());
     assertEquals("gadget_value", bundle1.getResources().get(1).getAttribs().get("gadget_attrib"));
+    assertEquals(5, bundle1.getApis().size());
+    assertEquals(FeatureParser.ParsedFeature.ApiDirective.Type.JS, bundle1.getApis().get(0).getType());
+    assertTrue(bundle1.getApis().get(0).isUses());
+    assertEquals("foo.symbol", bundle1.getApis().get(0).getValue());
+    assertEquals(FeatureParser.ParsedFeature.ApiDirective.Type.RPC, bundle1.getApis().get(1).getType());
+    assertFalse(bundle1.getApis().get(1).isUses());
+    assertEquals("rpc_service", bundle1.getApis().get(1).getValue());
+    assertEquals(FeatureParser.ParsedFeature.ApiDirective.Type.JS, bundle1.getApis().get(2).getType());
+    assertFalse(bundle1.getApis().get(2).isUses());
+    assertEquals("bar.symbol", bundle1.getApis().get(2).getValue());
+    assertEquals(FeatureParser.ParsedFeature.ApiDirective.Type.RPC, bundle1.getApis().get(3).getType());
+    assertTrue(bundle1.getApis().get(3).isUses());
+    assertEquals("uses_service", bundle1.getApis().get(3).getValue());
+    assertEquals(FeatureParser.ParsedFeature.ApiDirective.Type.JS, bundle1.getApis().get(4).getType());
+    assertTrue(bundle1.getApis().get(4).isUses());
+    assertEquals("last.symbol", bundle1.getApis().get(4).getValue());
     
     // Second gadget bundle.
     FeatureParser.ParsedFeature.Bundle bundle2 = parsed.getBundles().get(1);
@@ -81,6 +112,7 @@ public class FeatureParserTest {
     assertEquals(1, bundle2.getAttribs().size());
     assertEquals("container1", bundle2.getAttribs().get("container"));
     assertEquals(0, bundle2.getResources().size());
+    assertEquals(0, bundle2.getApis().size());
     
     // Container bundle.
     FeatureParser.ParsedFeature.Bundle bundle3 = parsed.getBundles().get(2);
@@ -98,6 +130,7 @@ public class FeatureParserTest {
     assertNull(bundle3.getResources().get(1).getSource());
     assertEquals("Inlined content", bundle3.getResources().get(1).getContent());
     assertEquals(0, bundle3.getResources().get(1).getAttribs().size());
+    assertEquals(0, bundle3.getApis().size());
     
     // Other_type bundle.
     FeatureParser.ParsedFeature.Bundle bundle4 = parsed.getBundles().get(3);
@@ -111,6 +144,7 @@ public class FeatureParserTest {
     assertEquals(Uri.parse("//extern/unchanged.dat"),
         bundle4.getResources().get(1).getSource());
     assertEquals(0, bundle4.getResources().get(0).getAttribs().size());
+    assertEquals(0, bundle4.getApis().size());
   }
   
   @Test(expected=GadgetException.class)
