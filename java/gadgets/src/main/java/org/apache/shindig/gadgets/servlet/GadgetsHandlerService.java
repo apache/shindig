@@ -284,7 +284,6 @@ public class GadgetsHandlerService {
     verifyBaseParams(request, true);
     Set<String> fields = beanFilter.processBeanFields(request.getFields());
 
-    HttpResponse httpResponse = null;
     try {
       MessageContext mc = new MessageContext();
       CajoledResult result =
