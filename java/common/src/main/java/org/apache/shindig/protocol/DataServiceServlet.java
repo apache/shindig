@@ -118,6 +118,7 @@ public class DataServiceServlet extends ApiServlet {
   @Override
   protected void sendError(HttpServletResponse servletResponse, ResponseItem responseItem)
       throws IOException {
+    String errorMessage = responseItem.getErrorMessage();
     int errorCode = responseItem.getErrorCode();
     if (errorCode < 0) {
       // Map JSON-RPC error codes into HTTP error codes as best we can
@@ -141,8 +142,7 @@ public class DataServiceServlet extends ApiServlet {
       }
     }
 
-    servletResponse.sendError(responseItem.getErrorCode(),
-        responseItem.getErrorMessage());
+    servletResponse.sendError(errorCode, errorMessage);
   }
 
   /**
