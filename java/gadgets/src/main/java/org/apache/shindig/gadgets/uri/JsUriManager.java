@@ -58,8 +58,10 @@ public interface JsUriManager {
     public JsUri(UriStatus status, Uri origUri, Collection<String> libs) {
       super(status, origUri);
       if (origUri != null) {
-        this.context = "1".equals(origUri.getQueryParameter(Param.CONTAINER_MODE.getKey())) ?
-            RenderingContext.CONTAINER : RenderingContext.GADGET;
+        String param = origUri.getQueryParameter(Param.CONTAINER_MODE.getKey());
+        if ("1".equals(param)) context = RenderingContext.CONTAINER;
+        else if ("2".equals(param)) context = RenderingContext.CONFIGURED_GADGET;
+        else context = RenderingContext.GADGET;
         this.jsload = "1".equals(origUri.getQueryParameter(Param.JSLOAD.getKey()));
         this.onload = origUri.getQueryParameter(Param.ONLOAD.getKey());
       } else {

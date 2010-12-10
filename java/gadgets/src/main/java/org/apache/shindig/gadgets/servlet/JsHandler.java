@@ -36,7 +36,7 @@ import com.google.inject.Singleton;
 /**
  * Provide processing logic for the JsServlet to serve the JavsScript as features request.
  * This class will allow separation of flow and serving logic for easy customization.
- * 
+ *
  */
 @Singleton
 public class JsHandler {
@@ -56,7 +56,7 @@ public class JsHandler {
 
   /**
    * Get the content of the feature resources and push it to jsData.
-   * 
+   *
    * @param req The HttpServletRequest object.
    * @param ctx GadgetContext object.
    * @param needed Set of requested feature names.
@@ -83,7 +83,7 @@ public class JsHandler {
       jsData.append(";\n");
     }
 
-    if (ctx.getRenderingContext() == RenderingContext.CONTAINER) {
+    if (ctx.getRenderingContext() != RenderingContext.GADGET) {
       // Append some container specific things
       Map<String, Object> features = containerConfig.getMap(container, "gadgets.features");
       Map<String, Object> config =
@@ -140,7 +140,7 @@ public class JsHandler {
       this.renderingContext = ctx.getContext();
       this.container = ctx.getContainer();
     }
-    
+
     @Override
     public RenderingContext getRenderingContext() {
       return renderingContext;

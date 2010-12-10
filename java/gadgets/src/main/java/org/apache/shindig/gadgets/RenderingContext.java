@@ -21,9 +21,15 @@ package org.apache.shindig.gadgets;
  * Defines where the gadget is being rendered.
  */
 public enum RenderingContext {
-  // Used when rendering gadgets (iframes or inline).
+  // Used when rendering gadgets of type=html|inline. gadgets.config.init is not
+  // injected into the gadget render, and container mediated.
   // TODO: rename this to "RENDER_GADGET"?
   GADGET,
+
+  // Used when rendering gadgets of type=url. Unlike RenderingContext.GADGET,
+  // this special context is explicitly requested by the gadget (to include
+  // gadgets.config.init), while still considered a gadget render.
+  CONFIGURED_GADGET,
 
   // Used when rendering container data (not a gadget render)
   CONTAINER,

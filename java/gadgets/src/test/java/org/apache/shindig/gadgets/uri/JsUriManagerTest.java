@@ -18,9 +18,12 @@
  */
 package org.apache.shindig.gadgets.uri;
 
-import com.google.caja.util.Lists;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
-import junit.framework.TestCase;
+import com.google.caja.util.Lists;
 
 import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.config.ContainerConfig;
@@ -31,24 +34,15 @@ import org.junit.Test;
 import java.util.Collections;
 import java.util.List;
 
-public class JsUriManagerTest extends TestCase {
+public class JsUriManagerTest extends UriManagerTestBase {
   private static final UriStatus STATUS = UriStatus.VALID_UNVERSIONED;
   private static final List<String> LIBS = Lists.newArrayList("feat1", "feat2");
   private static final String CONTAINER_VALUE = "ig";
   private static final String ONLOAD_VALUE = "ol";
 
   @Test
-  public void testJsUriNormal() throws Exception {
-    UriBuilder builder = new UriBuilder();
-    builder.setScheme("http");
-    builder.setAuthority("localohst");
-    builder.setPath("/gadgets/js/feature.js");
-    builder.addQueryParameter(Param.CONTAINER.getKey(), CONTAINER_VALUE);
-    builder.addQueryParameter(Param.CONTAINER_MODE.getKey(), "1");
-    builder.addQueryParameter(Param.JSLOAD.getKey(), "1");
-    builder.addQueryParameter(Param.NO_CACHE.getKey(), "1");
-    builder.addQueryParameter(Param.ONLOAD.getKey(), ONLOAD_VALUE);
-
+  public void newJsUriWithOriginalUri() throws Exception {
+    UriBuilder builder = newTestUriBuilder("1"); // container context
     JsUriManager.JsUri jsUri = new JsUriManager.JsUri(STATUS, builder.toUri(), LIBS);
     assertEquals(RenderingContext.CONTAINER, jsUri.getContext());
     assertEquals(CONTAINER_VALUE, jsUri.getContainer());
@@ -59,14 +53,39 @@ public class JsUriManagerTest extends TestCase {
   }
 
   @Test
-  public void testJsUriNullUri() throws Exception {
+  public void newJsUriWithConfiguredGadgetContext() throws Exception {
+    UriBuilder builder = newTestUriBuilder("2"); // configured gadget context
+    JsUriManager.JsUri jsUri = new JsUriManager.JsUri(STATUS, builder.toUri(), LIBS);
+    assertEquals(RenderingContext.CONFIGURED_GADGET, jsUri.getContext());
+    assertEquals(CONTAINER_VALUE, jsUri.getContainer());
+    assertTrue(jsUri.isJsload());
+    assertTrue(jsUri.isNoCache());
+    assertEquals(ONLOAD_VALUE, jsUri.getOnload());
+    assertEquals(LIBS, Lists.newArrayList(jsUri.getLibs()));
+  }
+
+  @Test
+  public void newJsUriWithEmptyOriginalUri() throws Exception {
     JsUriManager.JsUri jsUri = new JsUriManager.JsUri(STATUS, null,
         Collections.<String>emptyList()); // Null URI.
     assertEquals(RenderingContext.GADGET, jsUri.getContext());
     assertEquals(ContainerConfig.DEFAULT_CONTAINER, jsUri.getContainer());
     assertFalse(jsUri.isJsload());
     assertFalse(jsUri.isNoCache());
-    assertNull(ONLOAD_VALUE, jsUri.getOnload());
+    assertNull(jsUri.getOnload());
     assertTrue(jsUri.getLibs().isEmpty());
+  }
+
+  private UriBuilder newTestUriBuilder(String containerMode) {
+    UriBuilder builder = new UriBuilder();
+    builder.setScheme("http");
+    builder.setAuthority("localohst");
+    builder.setPath("/gadgets/js/feature.js");
+    builder.addQueryParameter(Param.CONTAINER.getKey(), CONTAINER_VALUE);
+    builder.addQueryParameter(Param.CONTAINER_MODE.getKey(), containerMode);
+    builder.addQueryParameter(Param.JSLOAD.getKey(), "1");
+    builder.addQueryParameter(Param.NO_CACHE.getKey(), "1");
+    builder.addQueryParameter(Param.ONLOAD.getKey(), ONLOAD_VALUE);
+    return builder;
   }
 }
