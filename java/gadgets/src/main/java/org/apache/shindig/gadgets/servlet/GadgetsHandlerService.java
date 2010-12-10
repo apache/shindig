@@ -187,7 +187,7 @@ public class GadgetsHandlerService {
     verifyBaseParams(request, true);
     Set<String> fields = beanFilter.processBeanFields(request.getFields());
 
-    SecurityToken tokenData = convertToken(request.getToken(), request.getContainer(),
+    SecurityToken tokenData = convertAuthContext(request.getAuthContext(), request.getContainer(),
         request.getUrl().toString());
     String token = securityTokenCodec.encodeToken(tokenData);
     Long expiryTimeMs = securityTokenCodec.getTokenExpiration(tokenData);
@@ -251,7 +251,7 @@ public class GadgetsHandlerService {
           HttpResponse.SC_INTERNAL_SERVER_ERROR);
     }
   }
-  
+
   /**
    * Convert message level to Shindig's serializable message type
    */
@@ -284,38 +284,33 @@ public class GadgetsHandlerService {
     verifyBaseParams(request, true);
     Set<String> fields = beanFilter.processBeanFields(request.getFields());
 
-    try {
-      MessageContext mc = new MessageContext();
-      CajoledResult result =
-        cajaContentRewriter.rewrite(request.getUrl(), request.getContainer(),
-            request.getMimeType(), true /* only support es53 */, request.getDebug());
-      String html = null;
-      String js = null;
-      if (!result.hasErrors && null != result.html) {
-        html = Nodes.render(result.html);
-      }
-      
-      if (!result.hasErrors && null != result.js) {
-        StringBuilder builder = new StringBuilder();
-        TokenConsumer tc = request.getDebug() ?
-            new JsPrettyPrinter(new Concatenator(builder))
-            : new JsMinimalPrinter(new Concatenator(builder));
-        RenderContext rc = new RenderContext(tc)
-            .withAsciiOnly(true)
-            .withEmbeddable(true);
-        result.js.render(rc);
-        rc.getOut().noMoreTokens();
-        js = builder.toString();
-      }
-      
-      // TODO(jasvir): Improve Caja responses expiration handling
-      return createCajaResponse(request.getUrl(), 
-          html, js, convertMessages(result.messages, mc), fields,
-          timeSource.currentTimeMillis() + specRefreshInterval);
-    } catch (IOException e) {
-      LOG.log(Level.WARNING, "Error creating cajoled response", e);
-      throw new ProcessingException("Error getting response content", HttpResponse.SC_INTERNAL_SERVER_ERROR);
+    MessageContext mc = new MessageContext();
+    CajoledResult result =
+      cajaContentRewriter.rewrite(request.getUrl(), request.getContainer(),
+          request.getMimeType(), true /* only support es53 */, request.getDebug());
+    String html = null;
+    String js = null;
+    if (!result.hasErrors && null != result.html) {
+      html = Nodes.render(result.html);
     }
+
+    if (!result.hasErrors && null != result.js) {
+      StringBuilder builder = new StringBuilder();
+      TokenConsumer tc = request.getDebug() ?
+          new JsPrettyPrinter(new Concatenator(builder))
+          : new JsMinimalPrinter(new Concatenator(builder));
+      RenderContext rc = new RenderContext(tc)
+          .withAsciiOnly(true)
+          .withEmbeddable(true);
+      result.js.render(rc);
+      rc.getOut().noMoreTokens();
+      js = builder.toString();
+    }
+
+    // TODO(jasvir): Improve Caja responses expiration handling
+    return createCajaResponse(request.getUrl(),
+        html, js, convertMessages(result.messages, mc), fields,
+        timeSource.currentTimeMillis() + specRefreshInterval);
   }
 
   /**
@@ -350,12 +345,12 @@ public class GadgetsHandlerService {
   protected class MetadataGadgetContext extends GadgetContext {
 
     private final GadgetsHandlerApi.MetadataRequest request;
-    private final SecurityToken token;
+    private final SecurityToken authContext;
 
     public MetadataGadgetContext(GadgetsHandlerApi.MetadataRequest request) {
       this.request = request;
-      this.token = convertToken(
-          request.getToken(), request.getContainer(), request.getUrl().toString());
+      this.authContext = convertAuthContext(
+          request.getAuthContext(), request.getContainer(), request.getUrl().toString());
     }
 
     @Override
@@ -400,7 +395,7 @@ public class GadgetsHandlerService {
 
     @Override
     public SecurityToken getToken() {
-      return token;
+      return authContext;
     }
 
     @Override
@@ -409,12 +404,12 @@ public class GadgetsHandlerService {
     }
   }
 
-  private SecurityToken convertToken(GadgetsHandlerApi.TokenData token,
+  private SecurityToken convertAuthContext(GadgetsHandlerApi.AuthContext authContext,
       String container, String url) {
-    if (token == null) {
+    if (authContext == null) {
       return null;
     }
-    return beanDelegator.createDelegator(token, SecurityToken.class,
+    return beanDelegator.createDelegator(authContext, SecurityToken.class,
         ImmutableMap.<String, Object>of("container", container,
             "appid", url, "appurl", url));
   }
@@ -504,8 +499,7 @@ public class GadgetsHandlerService {
 
     proxyUri.setFallbackUrl(request.getFallbackUrl())
         .setRewriteMimeType(request.getRewriteMimeType())
-        .setSanitizeContent(request.getSanitize())
-        .setCajoleContent(request.getCajole());
+        .setSanitizeContent(request.getSanitize());
 
     GadgetsHandlerApi.ImageParams image = request.getImageParams();
     if (image != null) {
@@ -559,17 +553,17 @@ public class GadgetsHandlerService {
               .build()),
       fields);
   }
-  
+
   @VisibleForTesting
   GadgetsHandlerApi.CajaResponse createCajaResponse(Uri uri,
-      String html, String js, List<GadgetsHandlerApi.Message> messages, 
-      Set<String> fields, Long expireMs) throws IOException {
+      String html, String js, List<GadgetsHandlerApi.Message> messages,
+      Set<String> fields, Long expireMs) {
     ImmutableList.Builder<GadgetsHandlerApi.Message> msgBuilder =
       ImmutableList.builder();
     for (final GadgetsHandlerApi.Message m : messages) {
       msgBuilder.add(
         beanDelegator.createDelegator(null, GadgetsHandlerApi.Message.class,
-            ImmutableMap.<String, Object>of("name", m.getName(), 
+            ImmutableMap.<String, Object>of("name", m.getName(),
                 "level", m.getLevel(), "message", m.getMessage())));
     }
 
@@ -586,18 +580,18 @@ public class GadgetsHandlerService {
             .build()),
             fields);
   }
-  
+
   private class MessageImpl implements GadgetsHandlerApi.Message {
-    private GadgetsHandlerApi.MessageLevel level;
-    private String message;
-    private String name;
-    
+    private final GadgetsHandlerApi.MessageLevel level;
+    private final String message;
+    private final String name;
+
     public MessageImpl(String name, String message, GadgetsHandlerApi.MessageLevel level) {
       this.name = name;
       this.message = message;
       this.level = level;
     }
-    
+
     public GadgetsHandlerApi.MessageLevel getLevel() {
       return level;
     }
@@ -609,6 +603,6 @@ public class GadgetsHandlerService {
     public String getName() {
       return name;
     }
-    
+
   }
 }

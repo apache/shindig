@@ -31,6 +31,7 @@ import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.process.ProcessingException;
 import org.apache.shindig.gadgets.servlet.GadgetsHandlerApi.RenderingContext;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
+import org.apache.shindig.gadgets.uri.UriCommon;
 import org.apache.shindig.protocol.BaseRequestItem;
 import org.apache.shindig.protocol.Operation;
 import org.apache.shindig.protocol.ProtocolException;
@@ -81,8 +82,43 @@ public class GadgetsHandler {
 
   private static final List<String> DEFAULT_CAJA_FIELDS = ImmutableList.of("*");
   private static final List<String> DEFAULT_JS_FIELDS = ImmutableList.of("jsUrl");
-  
+
   private static final Logger LOG = Logger.getLogger(GadgetsHandler.class.getName());
+
+  /**
+   *  Enum to list the used JSON/JSONP request parameters
+   *  It mostly reference the UriCommon fields for consistency,
+   *  This enum defined the API names, Do not change the names!
+   */
+  enum Param {
+    IDS("ids"),
+    CONTAINER(UriCommon.Param.CONTAINER.getKey()),
+    FIELDS("fields"),
+    DEBUG(UriCommon.Param.DEBUG),
+    NO_CACHE(UriCommon.Param.NO_CACHE),
+    REFRESH(UriCommon.Param.REFRESH),
+    LANG(UriCommon.Param.LANG),
+    COUNTRY(UriCommon.Param.COUNTRY),
+    VIEW(UriCommon.Param.VIEW),
+    RENDER_TYPE("render"),
+    SANITIZE(UriCommon.Param.SANITIZE),
+    GADGET(UriCommon.Param.GADGET),
+    FALLBACK_URL(UriCommon.Param.FALLBACK_URL_PARAM),
+    REWRITE_MIME(UriCommon.Param.REWRITE_MIME_TYPE),
+    NO_EXPAND(UriCommon.Param.NO_EXPAND),
+    RESIZE_HEIGHT(UriCommon.Param.RESIZE_HEIGHT),
+    RESIZE_WIDTH(UriCommon.Param.RESIZE_WIDTH),
+    RESIZE_QUALITY(UriCommon.Param.RESIZE_QUALITY),
+    FEATURES("features"),
+    CONTAINER_MODE(UriCommon.Param.CONTAINER_MODE),
+    ONLOAD(UriCommon.Param.ONLOAD),
+    MIME_TYPE("mime_type");
+
+    private final String name;
+    Param(String name) { this.name = name; }
+    Param(UriCommon.Param param) { this.name = param.getKey(); }
+    String getName() { return name; }
+  }
 
   protected final ExecutorService executor;
   protected final GadgetsHandlerService handlerService;
@@ -213,12 +249,12 @@ public class GadgetsHandler {
 
   private abstract class AbstractExecutor {
     public Map<String, GadgetsHandlerApi.BaseResponse> execute(BaseRequestItem request) {
-      Set<String> gadgetUrls = ImmutableSet.copyOf(request.getListParameter("ids"));
+      Set<String> gadgetUrls = ImmutableSet.copyOf(request.getListParameter(Param.IDS.getName()));
       if (gadgetUrls.isEmpty()) {
         return ImmutableMap.of();
       }
 
-      if (Strings.isNullOrEmpty(request.getParameter("container"))) {
+      if (Strings.isNullOrEmpty(request.getParameter(Param.CONTAINER.getName()))) {
         throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST,
             "Missing container for request.");
       }
@@ -343,21 +379,33 @@ public class GadgetsHandler {
         throw new ProcessingException("Bad url - " + url, HttpServletResponse.SC_BAD_REQUEST);
       }
       this.request = request;
-      this.container = request.getParameter("container");
+      this.container = request.getParameter(Param.CONTAINER.getName());
       this.fields = processFields(request, defaultFields);
     }
 
-    protected Boolean getBooleanParam(BaseRequestItem request, String field) {
-      String val = request.getParameter(field);
+    protected String getParam(BaseRequestItem request, Param field) {
+      return request.getParameter(field.getName());
+    }
+
+    protected String getParam(BaseRequestItem request, Param field, String defaultValue) {
+      return request.getParameter(field.getName(), defaultValue);
+    }
+
+    protected List<String> getListParam(BaseRequestItem request, Param field) {
+      return request.getListParameter(field.getName());
+    }
+
+    protected Boolean getBooleanParam(BaseRequestItem request, Param field) {
+      String val = request.getParameter(field.getName());
       if (val != null) {
         return "1".equals(val) || Boolean.valueOf(val);
       }
       return false;
     }
 
-    protected Integer getIntegerParam(BaseRequestItem request, String field)
+    protected Integer getIntegerParam(BaseRequestItem request, Param field)
         throws ProcessingException {
-      String val = request.getParameter(field);
+      String val = request.getParameter(field.getName());
       Integer intVal = null;
       if (val != null) {
         try {
@@ -399,14 +447,13 @@ public class GadgetsHandler {
 
     public JsRequestData(BaseRequestItem request) throws ProcessingException {
       super(null, request, DEFAULT_JS_FIELDS);
-      this.ignoreCache = getBooleanParam(request, "ignoreCache");
-      this.debug = getBooleanParam(request, "debug");
-      this.refresh = getIntegerParam(request, "refresh");
-      this.features = request.getListParameter("features");
-      this.context = (getBooleanParam(request, "c") ?
-          RenderingContext.CONTAINER : RenderingContext.GADGET);
-      this.onload = request.getParameter("onload");
-      this.gadget = request.getParameter("gadget");
+      this.ignoreCache = getBooleanParam(request, Param.NO_CACHE);
+      this.debug = getBooleanParam(request, Param.DEBUG);
+      this.refresh = getIntegerParam(request, Param.REFRESH);
+      this.features = getListParam(request, Param.FEATURES);
+      this.context = getRenderingContext(getParam(request, Param.CONTAINER_MODE));
+      this.onload = getParam(request, Param.ONLOAD);
+      this.gadget = getParam(request, Param.GADGET);
     }
 
     public RenderingContext getContext() { return context; }
@@ -416,6 +463,16 @@ public class GadgetsHandler {
     public String getOnload() { return onload; }
     public Integer getRefresh() { return refresh; }
     public String getGadget() { return gadget; }
+  }
+
+  private RenderingContext getRenderingContext(String param) {
+    RenderingContext context = RenderingContext.GADGET;
+    if ("1".equals(param)) {
+      context = RenderingContext.CONTAINER;
+    } else if ("2".equals(param)) {
+      context = RenderingContext.CONFIGURED_GADGET;
+    }
+    return context;
   }
 
   protected class ProxyRequestData extends AbstractRequest
@@ -428,29 +485,27 @@ public class GadgetsHandler {
     private final String fallbackUrl;
     private final String mimetype;
     private final boolean sanitize;
-    private final boolean cajole;
     private final GadgetsHandlerApi.ImageParams imageParams;
 
     public ProxyRequestData(String url, BaseRequestItem request) throws ProcessingException {
       super(url, request, DEFAULT_PROXY_FIELDS);
-      this.ignoreCache = getBooleanParam(request, "ignoreCache");
-      this.debug = getBooleanParam(request, "debug");
-      this.sanitize = getBooleanParam(request, "sanitize");
-      this.cajole = getBooleanParam(request, "cajole");
-      this.gadget = request.getParameter("gadget");
-      this.fallbackUrl = request.getParameter("fallback_url");
-      this.mimetype = request.getParameter("rewriteMime");
-      this.refresh = getIntegerParam(request, "refresh");
+      this.ignoreCache = getBooleanParam(request, Param.NO_CACHE);
+      this.debug = getBooleanParam(request, Param.DEBUG);
+      this.sanitize = getBooleanParam(request, Param.SANITIZE);
+      this.gadget = getParam(request, Param.GADGET);
+      this.fallbackUrl = getParam(request, Param.FALLBACK_URL);
+      this.mimetype = getParam(request, Param.REWRITE_MIME);
+      this.refresh = getIntegerParam(request, Param.REFRESH);
       imageParams = getImageParams(request);
     }
 
     private GadgetsHandlerApi.ImageParams getImageParams(BaseRequestItem request)
         throws ProcessingException {
       GadgetsHandlerApi.ImageParams params = null;
-      Boolean doNotExpand = getBooleanParam(request, "no_expand");
-      Integer height = getIntegerParam(request, "resize_h");
-      Integer width = getIntegerParam(request, "resize_w");
-      Integer quality = getIntegerParam(request, "resize_q");
+      Boolean doNotExpand = getBooleanParam(request, Param.NO_EXPAND);
+      Integer height = getIntegerParam(request, Param.RESIZE_HEIGHT);
+      Integer width = getIntegerParam(request, Param.RESIZE_WIDTH);
+      Integer quality = getIntegerParam(request, Param.RESIZE_QUALITY);
 
       if (height != null || width != null) {
         return beanDelegator.createDelegator(null, GadgetsHandlerApi.ImageParams.class,
@@ -491,10 +546,6 @@ public class GadgetsHandler {
       return sanitize;
     }
 
-    public boolean getCajole() {
-      return cajole;
-    }
-
     public String getGadget() {
       return gadget;
     }
@@ -508,9 +559,9 @@ public class GadgetsHandler {
       super(url, request, DEFAULT_TOKEN_FIELDS);
     }
 
-    public GadgetsHandlerApi.TokenData getToken() {
+    public GadgetsHandlerApi.AuthContext getAuthContext() {
       return beanDelegator.createDelegator(
-          request.getToken(), GadgetsHandlerApi.TokenData.class);
+          request.getToken(), GadgetsHandlerApi.AuthContext.class);
     }
   }
 
@@ -533,12 +584,12 @@ public class GadgetsHandler {
       implements GadgetsHandlerApi.CajaRequest {
     private final String mimeType;
     private final boolean debug;
-    
+
     public CajaRequestData(String url, BaseRequestItem request)
         throws ProcessingException {
       super(url, request, DEFAULT_CAJA_FIELDS);
-      this.mimeType = request.getParameter("mime-type", "text/html");
-      this.debug = getBooleanParam(request, "debug");
+      this.mimeType = getParam(request, Param.MIME_TYPE, "text/html");
+      this.debug = getBooleanParam(request, Param.DEBUG);
     }
 
     public String getMimeType() {
@@ -565,9 +616,9 @@ public class GadgetsHandler {
       this.locale =
           (lang != null && country != null) ? new Locale(lang, country) : (lang != null)
               ? new Locale(lang) : GadgetSpec.DEFAULT_LOCALE;
-      this.ignoreCache = getBooleanParam(request, "ignoreCache");
-      this.debug = getBooleanParam(request, "debug");
-      this.renderingType = GadgetsHandler.getRenderingType(request.getParameter("render"));
+      this.ignoreCache = getBooleanParam(request, Param.NO_CACHE);
+      this.debug = getBooleanParam(request, Param.DEBUG);
+      this.renderingType = GadgetsHandler.getRenderingType(getParam(request, Param.RENDER_TYPE));
     }
 
     public int getModuleId() {
@@ -587,12 +638,12 @@ public class GadgetsHandler {
     }
 
     public String getView() {
-      return request.getParameter("view", "default");
+      return getParam(request, Param.VIEW, "default");
     }
 
-    public GadgetsHandlerApi.TokenData getToken() {
+    public GadgetsHandlerApi.AuthContext getAuthContext() {
       return beanDelegator.createDelegator(
-        request.getToken(), GadgetsHandlerApi.TokenData.class);
+        request.getToken(), GadgetsHandlerApi.AuthContext.class);
     }
 
     public GadgetsHandlerApi.RenderingType getRenderingType() {

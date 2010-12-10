@@ -66,7 +66,7 @@ public class GadgetsHandlerApi {
     public boolean getIgnoreCache();
     public boolean getDebug();
     public String getView();
-    public TokenData getToken();
+    public AuthContext getAuthContext();
     public RenderingType getRenderingType();
   }
 
@@ -77,7 +77,7 @@ public class GadgetsHandlerApi {
     IFRAME_CAJOLED
   }
 
-  public interface TokenData {
+  public interface AuthContext {
     public String getOwnerId();
     public String getViewerId();
     public String getDomain();
@@ -173,7 +173,7 @@ public class GadgetsHandlerApi {
   }
 
   public interface TokenRequest extends BaseRequest {
-    public TokenData getToken();
+    public AuthContext getAuthContext();
     // TODO: Consider support container controlled token duration
     // public Long getDurationSeconds();
   }
@@ -193,13 +193,13 @@ public class GadgetsHandlerApi {
     public String getJs();
     public List<Message> getMessages();
   }
-  
+
   public interface Message {
     public MessageLevel getLevel();
     public String getName();
     public String getMessage();
   }
-  
+
   public enum MessageLevel {
     UNKNOWN,
     // Fine grained info about internal progress
@@ -228,7 +228,6 @@ public class GadgetsHandlerApi {
     public String getFallbackUrl();
     public String getRewriteMimeType();
     public boolean getSanitize();
-    public boolean getCajole();
     public ImageParams getImageParams();
   }
 
@@ -267,7 +266,7 @@ public class GadgetsHandlerApi {
   }
 
   public enum RenderingContext {
-    GADGET, CONTAINER
+    GADGET, CONTAINER, CONFIGURED_GADGET
   }
 
   public interface JsResponse extends BaseResponse {
