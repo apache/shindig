@@ -43,7 +43,7 @@ import java.util.logging.Logger;
 public final class UriUtils {
   public static final String CHARSET = "charset";
   //class name for logging purpose
-  private static final String classname = "org.apache.shindig.gadgets.uri.UriUtils";
+  private static final String classname = UriUtils.class.getName();
   private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
 
   private UriUtils() {}

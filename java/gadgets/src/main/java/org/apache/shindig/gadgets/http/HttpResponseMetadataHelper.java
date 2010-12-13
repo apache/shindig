@@ -41,7 +41,7 @@ public class HttpResponseMetadataHelper {
   public static final String IMAGE_WIDTH = "ImageWidth";
 
   //class name for logging purpose
-  private static final String classname = "org.apache.shindig.gadgets.http.HttpResponseMetadataHelperr";
+  private static final String classname = HttpResponseMetadataHelper.class.getName();
   private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
  
   /**

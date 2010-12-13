@@ -44,7 +44,7 @@ public class Bootstrap {
   private static final String DB_MIN_WRITE = "db.write.min";
   private static final String DB_MIN_NUM_READ = "db.read.min";
   //class name for logging purpose
-  private static final String classname = "org.apache.shindig.social.opensocial.jpa.hibernate.Bootstrap";
+  private static final String classname = Bootstrap.class.getName();
   private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
   private EntityManager entityManager;
 

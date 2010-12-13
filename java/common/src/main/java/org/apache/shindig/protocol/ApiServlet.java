@@ -48,8 +48,8 @@ import com.google.inject.name.Names;
  * Common base class for API servlets.
  */
 public abstract class ApiServlet extends InjectedServlet {
-  private static final String classname = "org.apache.shindig.protocol.ApiServlet";
-  private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);   
+  private static final String classname = ApiServlet.class.getName();
+  private static final Logger LOG = Logger.getLogger(classname, MessageKeys.MESSAGES);   
 
   protected static final String FORMAT_PARAM = "format";
   protected static final String JSON_FORMAT = "json";

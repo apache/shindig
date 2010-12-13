@@ -50,7 +50,7 @@ import com.google.inject.Inject;
 public class DefaultServiceFetcher {
 
   //class name for logging purpose
-  private static final String classname = "org.apache.shindig.gadgets.render.DefaultServiceFetcher";
+  private static final String classname = DefaultServiceFetcher.class.getName();
   private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
 
   static final String JSON_RESPONSE_WRAPPER_ELEMENT = "result";

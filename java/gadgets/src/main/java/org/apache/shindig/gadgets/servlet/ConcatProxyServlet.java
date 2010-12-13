@@ -71,7 +71,7 @@ public class ConcatProxyServlet extends InjectedServlet {
   static final Integer DEFAULT_REFRESH = (60 * 60);                // 1 hour
 
   //class name for logging purpose
-  private static final String classname = "org.apache.shindig.gadgets.servlet.ConcatProxyServlet";
+  private static final String classname = ConcatProxyServlet.class.getName();
   private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
   
   private transient RequestPipeline requestPipeline;

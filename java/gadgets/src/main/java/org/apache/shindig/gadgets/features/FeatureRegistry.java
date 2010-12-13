@@ -64,8 +64,8 @@ public class FeatureRegistry {
   public static final String FILE_SCHEME = "file";
 
   //class name for logging purpose
-  private static final String classname = "org.apache.shindig.gadgets.features.FeatureRegistry";
-  private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
+  private static final String classname = FeatureRegistry.class.getName();
+  private static final Logger LOG = Logger.getLogger(classname, MessageKeys.MESSAGES);
   
   // Map keyed by FeatureNode object created as a lookup for transitive feature deps.
   private final Map<FeatureCacheKey, LookupResult> cache = new MapMaker().makeMap();

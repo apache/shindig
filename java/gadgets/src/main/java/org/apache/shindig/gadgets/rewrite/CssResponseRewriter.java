@@ -57,7 +57,7 @@ import com.google.inject.Inject;
 public class CssResponseRewriter implements ResponseRewriter {
 
   //class name for logging purpose
-  private static final String classname = "org.apache.shindig.gadgets.rewrite.CssResponseRewriter";
+  private static final String classname = CssResponseRewriter.class.getName();
   private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
 
   private final CajaCssParser cssParser;

@@ -76,7 +76,7 @@ import java.util.regex.Pattern;
 public class OAuthRequest {
 
   //class name for logging purpose
-  private static final String classname = "org.apache.shindig.gadgets.oauth.OAuthRequest";
+  private static final String classname = OAuthRequest.class.getName();
 	  
   // Maximum number of attempts at the protocol before giving up.
   private static final int MAX_ATTEMPTS = 2;

@@ -42,8 +42,8 @@ import java.util.logging.Logger;
 public class FeatureResourceLoader {
 	  
   //class name for logging purpose
-  private static final String classname = "org.apache.shindig.gadgets.features.FeatureResourceLoader";
-  private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
+  private static final String classname = FeatureResourceLoader.class.getName();
+  private static final Logger LOG = Logger.getLogger(classname, MessageKeys.MESSAGES);
   
   private HttpFetcher fetcher;
   private TimeSource timeSource = new TimeSource();

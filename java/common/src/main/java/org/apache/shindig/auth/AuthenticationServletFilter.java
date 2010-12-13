@@ -61,8 +61,8 @@ public class AuthenticationServletFilter extends InjectedFilter {
   private List<AuthenticationHandler> handlers;
 
   //class name for logging purpose
-  private static final String classname = "org.apache.shindig.auth.AuthenticationServletFilter";
-  private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
+  private static final String classname = AuthenticationServletFilter.class.getName();
+  private static final Logger LOG = Logger.getLogger(classname, MessageKeys.MESSAGES);
   
   @Inject
   public void setAuthenticationHandlers(List<AuthenticationHandler> handlers) {

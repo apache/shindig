@@ -56,7 +56,7 @@ import java.io.IOException;
  */
 public class ImageAttributeRewriter extends DomWalker.Rewriter {
   //class name for logging purpose
-  private static final String classname = "org.apache.shindig.gadgets.rewrite.ImageAttributeRewriter";
+    private static final String classname = ImageAttributeRewriter.class.getName();
   private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
 
   @Inject

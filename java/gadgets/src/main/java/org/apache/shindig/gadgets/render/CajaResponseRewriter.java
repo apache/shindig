@@ -76,7 +76,7 @@ import java.util.logging.Logger;
  */
 public class CajaResponseRewriter implements ResponseRewriter {
   //class name for logging purpose
-  private static final String classname = "org.apache.shindig.gadgets.render.CajaResponseRewriter";
+  private static final String classname = CajaResponseRewriter.class.getName();
   private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
   
   private final RequestPipeline requestPipeline;

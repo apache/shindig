@@ -53,7 +53,7 @@ import java.util.logging.Logger;
  */
 public class CajaCssSanitizer {
   //class name for logging purpose
-  private static final String classname = "org.apache.shindig.gadgets.parse.caja.CajaCssSanitizer";
+  private static final String classname = CajaCssSanitizer.class.getName();
   private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
 	  
   private static final Set<String> ALLOWED_URI_SCHEMES = ImmutableSet.of("http", "https");

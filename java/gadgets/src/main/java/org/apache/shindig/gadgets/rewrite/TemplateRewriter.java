@@ -87,7 +87,7 @@ public class TemplateRewriter implements GadgetRewriter {
   static final String CLIENT_SUPPORT_PARAM = "client";
 
   //class name for logging purpose
-  private static final String classname = "org.apache.shindig.gadgets.rewrite.TemplateRewriter";
+  private static final String classname = TemplateRewriter.class.getName();
   private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
 
   

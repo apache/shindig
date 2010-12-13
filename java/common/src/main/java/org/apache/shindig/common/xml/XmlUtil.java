@@ -43,8 +43,8 @@ import javax.xml.parsers.ParserConfigurationException;
  * loading of external files (xinclude, external entities, DTDs, etc.) are disabled.
  */
 public final class XmlUtil {
-  private static final String classname = "org.apache.shindig.common.xml.XmlUtil";
-  private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
+  private static final String classname = XmlUtil.class.getName();
+  private static final Logger LOG = Logger.getLogger(classname, MessageKeys.MESSAGES);
   // Handles xml errors so that they're not logged to stderr.
   private static final ErrorHandler errorHandler = new ErrorHandler() {
     public void error(SAXParseException exception) throws SAXException {

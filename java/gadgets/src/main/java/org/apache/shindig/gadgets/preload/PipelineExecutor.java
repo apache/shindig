@@ -47,7 +47,7 @@ public class PipelineExecutor {
   // TODO: support configuration
   private static final int MAX_BATCH_COUNT = 3;
   //class name for logging purpose
-  private static final String classname = "org.apache.shindig.gadgets.preload.PipelineExecutor";
+  private static final String classname = PipelineExecutor.class.getName();
   private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
   
 

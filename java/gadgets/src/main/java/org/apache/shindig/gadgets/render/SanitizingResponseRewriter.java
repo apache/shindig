@@ -47,7 +47,7 @@ import com.google.inject.Inject;
 public class SanitizingResponseRewriter implements ResponseRewriter {
 
   //class name for logging purpose
-  private static final String classname = "org.apache.shindig.gadgets.render.SanitizingResponseRewriter";
+  private static final String classname = SanitizingResponseRewriter.class.getName();
   private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
  
   private final ContentRewriterFeature.Factory featureConfigFactory;

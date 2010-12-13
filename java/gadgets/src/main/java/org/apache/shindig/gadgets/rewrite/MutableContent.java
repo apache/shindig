@@ -64,7 +64,7 @@ public class MutableContent {
 
   private static final String MUTABLE_CONTENT_LISTENER = "MutableContentListener";
   //class name for logging purpose
-  private static final String classname = "org.apache.shindig.gadgets.rewrite.MutableContent";
+  private static final String classname = MutableContent.class.getName();
   private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
 
   public static void notifyEdit(Document doc) {

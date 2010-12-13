@@ -46,8 +46,8 @@ import java.util.logging.Logger;
 public class OAuthModule extends AbstractModule {
 
   //class name for logging purpose
-  private static final String classname = "org.apache.shindig.gadgets.oauth.OAuthModule";
-  private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
+  private static final String classname = OAuthModule.class.getName();
+  private static final Logger LOG = Logger.getLogger(classname, MessageKeys.MESSAGES);
   
 
   private static final String OAUTH_CONFIG = "config/oauth.json";

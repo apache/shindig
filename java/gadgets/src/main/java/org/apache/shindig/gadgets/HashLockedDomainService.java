@@ -45,7 +45,7 @@ import java.util.logging.Logger;
 @Singleton
 public class HashLockedDomainService implements LockedDomainService, ContainerConfig.ConfigObserver {
   //class name for logging purpose
-  private static final String classname = "org.apache.shindig.gadgets.HashLockedDomainService";
+  private static final String classname = HashLockedDomainService.class.getName();
   private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
   
   private final boolean enabled;

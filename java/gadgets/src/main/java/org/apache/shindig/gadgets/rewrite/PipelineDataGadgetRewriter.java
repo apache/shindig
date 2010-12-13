@@ -46,7 +46,7 @@ import java.util.logging.Logger;
 public class PipelineDataGadgetRewriter implements GadgetRewriter {
 	
   //class name for logging purpose
-  private static final String classname = "org.apache.shindig.gadgets.rewrite.PipelineDataGadgetRewriter";
+  private static final String classname = PipelineDataGadgetRewriter.class.getName();
   private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
   
   private final PipelineExecutor executor;

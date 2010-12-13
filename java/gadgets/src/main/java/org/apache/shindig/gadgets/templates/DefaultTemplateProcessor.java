@@ -62,7 +62,7 @@ import com.google.inject.Inject;
 public class DefaultTemplateProcessor implements TemplateProcessor {
   
   //class name for logging purpose
-  private static final String classname = "org.apache.shindig.gadgets.templates.DefaultTemplateProcessor";
+  private static final String classname = DefaultTemplateProcessor.class.getName();
   private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
    
   

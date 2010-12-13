@@ -44,7 +44,7 @@ public class ProxyServlet extends InjectedServlet {
   private static final long serialVersionUID = 9085050443492307723L;
   
   //class name for logging purpose
-  private static final String classname = "org.apache.shindig.gadgets.servlet.ProxyServlet";
+  private static final String classname = ProxyServlet.class.getName();
   private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
   
   private transient ProxyUriManager proxyUriManager;

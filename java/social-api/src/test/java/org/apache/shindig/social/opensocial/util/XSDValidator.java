@@ -50,7 +50,7 @@ public class XSDValidator {
   public static final String XMLDEC = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
 
   //class name for logging purpose
-  private static final String classname = "org.apache.shindig.social.opensocial.util.XSDValidator";
+  private static final String classname = XSDValidator.class.getName();
   private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
 
   /**

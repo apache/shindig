@@ -56,7 +56,7 @@ import java.util.regex.Pattern;
  */
 public class JsonContainerConfigLoader {
 
-  private static final String classname = "org.apache.shindig.config.JsonContainerConfigLoader";
+  private static final String classname = JsonContainerConfigLoader.class.getName();
   private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
   private static final Pattern CRLF_PATTERN = Pattern.compile("[\r\n]+");
 

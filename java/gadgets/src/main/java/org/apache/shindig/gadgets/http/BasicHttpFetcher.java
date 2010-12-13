@@ -113,7 +113,7 @@ public class BasicHttpFetcher implements HttpFetcher {
   private volatile long slowResponseWarning;
  
   //class name for logging purpose
-  private static final String classname = "org.apache.shindig.gadgets.http.BasicHttpFeatcher";
+  private static final String classname = BasicHttpFetcher.class.getName();
   private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
   
   private final Set<Class<?>> TIMEOUT_EXCEPTIONS = ImmutableSet.<Class<?>>of(ConnectionPoolTimeoutException.class,

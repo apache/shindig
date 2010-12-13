@@ -44,7 +44,7 @@ import javax.servlet.http.HttpServletResponse;
 @Singleton
 public class Processor {
   //class name for logging purpose
-  private static final String classname = "org.apache.shindig.gadgets.oauth.Processor";
+  private static final String classname = Processor.class.getName();
   private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
   private final GadgetSpecFactory gadgetSpecFactory;
   private final VariableSubstituter substituter;

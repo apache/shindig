@@ -35,7 +35,7 @@ import javax.el.ValueExpression;
  * Implements CharSequence strictly as a marker. Only toString is supported.
  */
 public class DynamicConfigProperty implements CharSequence {
-  private static final String classname = "org.apache.shindig.config.DynamicConfigProperty";
+  private static final String classname = DynamicConfigProperty.class.getName();
   private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES); 
   private final ELContext context;
   private final ValueExpression expression;

@@ -42,7 +42,7 @@ import java.util.logging.Logger;
  */
 public class ProxyingVisitor extends ResourceMutateVisitor {
   //class name for logging purpose
-  private static final String classname = "org.apache.shindig.gadgets.rewrite.ProxyingVisitor";
+  private static final String classname = ProxyingVisitor.class.getName();
   private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
   
   private final ProxyUriManager uriManager;

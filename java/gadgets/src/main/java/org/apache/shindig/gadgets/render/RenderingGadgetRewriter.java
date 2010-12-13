@@ -81,7 +81,7 @@ import com.google.inject.name.Named;
  */
 public class RenderingGadgetRewriter implements GadgetRewriter {
   //class name for logging purpose
-  private static final String classname = "org.apache.shindig.gadgets.render.RenderingGadgetRewriter";
+  private static final String classname = RenderingGadgetRewriter.class.getName();
   private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
  
   private static final int INLINE_JS_BUFFER = 50;

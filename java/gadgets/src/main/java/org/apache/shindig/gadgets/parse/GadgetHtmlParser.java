@@ -49,7 +49,7 @@ import java.util.logging.Logger;
 public abstract class GadgetHtmlParser {
   
   //class name for logging purpose
-  private static final String classname = "org.apache.shindig.gadgets.parse.GadgetHtmlParser";
+  private static final String classname = GadgetHtmlParser.class.getName();
   private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
 	  
 

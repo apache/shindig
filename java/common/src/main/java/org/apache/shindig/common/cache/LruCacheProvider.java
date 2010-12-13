@@ -46,8 +46,8 @@ import org.apache.shindig.common.logging.i18n.MessageKeys;
  * {@code EhCacheCacheProvider}.
  */
 public class LruCacheProvider implements CacheProvider {
-  private static final String classname = "org.apache.shindig.common.cache.LruCacheProvider";
-  private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
+  private static final String classname = LruCacheProvider.class.getName();
+  private static final Logger LOG = Logger.getLogger(classname, MessageKeys.MESSAGES);
   private final int defaultCapacity;
   private final Injector injector;
   private final Map<String, Cache<?, ?>> caches = new MapMaker().makeMap();

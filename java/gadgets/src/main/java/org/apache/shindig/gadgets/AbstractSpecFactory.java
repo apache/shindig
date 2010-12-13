@@ -40,7 +40,7 @@ import java.util.logging.Logger;
  */
 public abstract class AbstractSpecFactory<T> {
   //class name for logging purpose
-  private static final String classname = "org.apache.shindig.gadgets.AbstractSpecFactory";
+  private static final String classname = AbstractSpecFactory.class.getName();
   private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
   private final Class<T> clazz;
   private final ExecutorService executor;

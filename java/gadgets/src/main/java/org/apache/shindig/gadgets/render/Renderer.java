@@ -42,7 +42,7 @@ import java.util.regex.Pattern;
  */
 public class Renderer {
   //class name for logging purpose
-  private static final String classname = "org.apache.shindig.gadgets.render.Renderer";
+  private static final String classname = Renderer.class.getName();
   private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
 
   private final Processor processor;

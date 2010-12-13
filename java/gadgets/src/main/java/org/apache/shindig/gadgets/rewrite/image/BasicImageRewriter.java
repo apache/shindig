@@ -91,7 +91,7 @@ public class BasicImageRewriter implements ResponseRewriter {
   private static final Color COLOR_TRANSPARENT = new Color(255, 255, 255, 0);
   public static final String CONTENT_TYPE = "Content-Type";
   //class name for logging purpose
-  private static final String classname = "org.apache.shindig.gadgets.rewrite.image.BasicImageRewriter";
+  private static final String classname = BasicImageRewriter.class.getName();
   private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
 
   private static final Set<String> SUPPORTED_MIME_TYPES = ImmutableSet.of(

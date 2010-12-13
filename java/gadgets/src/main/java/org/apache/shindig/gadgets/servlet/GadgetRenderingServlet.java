@@ -51,7 +51,7 @@ public class GadgetRenderingServlet extends InjectedServlet {
   static final int DEFAULT_CACHE_TTL = 60 * 5;
 
   //class name for logging purpose
-  private static final String classname = "org.apache.shindig.gadgets.servlet.GadgetRenderingServlet";
+  private static final String classname = GadgetRenderingServlet.class.getName();
   private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
 
   protected transient Renderer renderer;
