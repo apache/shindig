@@ -145,7 +145,7 @@ public class FeatureRegistry {
           }
           if (location.endsWith(".txt")) {
             // Text file contains a list of other resource files to load
-            for (String resource : getResourceContent(location).split("[\r\n]+")) {
+            for (String resource : resourceLoader.getResourceContent(location).split("[\r\n]+")) {
               resource = resource.trim();
               if (resource.length () > 0 && resource.charAt(0) != '#') {
                 // Skip blank/commented lines.
@@ -290,11 +290,6 @@ public class FeatureRegistry {
     return featureMap.keySet();
   }
   
-  // Visible for testing.
-  String getResourceContent(String resource) throws IOException {
-    return ResourceLoader.getContent(resource);
-  }
-  
   // Provided for backward compatibility with existing feature loader configurations.
   // res://-prefixed URIs are actually scheme = res, host = "", path = "/stuff". We want res:path.
   // Package-private for use by FeatureParser as well.
@@ -415,7 +410,7 @@ public class FeatureRegistry {
           LOG.fine("Processing resource: " + resource);
         }
         
-        String content = getResourceContent(resource);
+        String content = resourceLoader.getResourceContent(resource);
         Uri parent = new UriBuilder().setScheme(RESOURCE_SCHEME).setPath(resource).toUri();
         loadFeature(parent, content, featureMapBuilder);
       }

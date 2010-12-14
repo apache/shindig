@@ -112,12 +112,8 @@ public class FeatureResourceLoader {
         getResourceContent(path));
   }
   
-  protected String getResourceContent(String resource) {
-    try {
-      return ResourceLoader.getContent(resource);
-    } catch (IOException e) {
-      return null;
-    }
+  public String getResourceContent(String resource) throws IOException {
+    return ResourceLoader.getContent(resource);
   }
   
   protected FeatureResource loadUri(Uri uri, Map<String, String> attribs) {

@@ -17,8 +17,6 @@
  */
 package org.apache.shindig.gadgets.features;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
@@ -28,13 +26,11 @@ import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.RenderingContext;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -66,40 +62,8 @@ public class FeatureRegistryTest {
   
   private static String RESOURCE_BASE_PATH = "/resource/base/path";
   private static int resourceIdx = 0;
-  private FeatureResourceLoader resourceLoader;
-  private ResourceMock resourceMock;
-  private FeatureRegistry registry;
-  private Map<String, String> lastAttribs;
-
-  @Before
-  public void setUp() {
-    resourceMock = new ResourceMock();
-    lastAttribs = null;
-    resourceLoader = new FeatureResourceLoader() {
-      public FeatureResource load(Uri uri, Map<String, String> attribs) throws GadgetException {
-        lastAttribs = ImmutableMap.copyOf(attribs);
-        return super.load(uri, attribs);
-      }
-      @Override
-      protected String getResourceContent(String resource) {
-        try {
-          return resourceMock.get(resource);
-        } catch (IOException e) {
-          return null;
-        }
-      }
-    };
-  }
-
-  private class TestFeatureRegistry extends FeatureRegistry {
-    TestFeatureRegistry(String featureFiles) throws GadgetException {
-      super(resourceLoader, ImmutableList.<String>of(featureFiles));
-    }
-    @Override
-    String getResourceContent(String resource) throws IOException {
-      return resourceMock.get(resource);
-    }
-  }
+  private TestFeatureRegistry registry;
+  
   @Test
   public void registerFromFileFeatureXmlFileScheme() throws Exception {
     checkRegisterFromFileFeatureXml(true);
@@ -111,11 +75,12 @@ public class FeatureRegistryTest {
   }
   
   private void checkRegisterFromFileFeatureXml(boolean withScheme) throws Exception {
+    TestFeatureRegistry.Builder builder = TestFeatureRegistry.newBuilder();
     String content = "content-" + (withScheme ? "withScheme" : "noScheme");
     Uri resUri = makeFile(content);
     Uri featureFile = makeFile(xml(NODEP_TPL, "gadget",
         withScheme ? resUri.toString() : resUri.getPath(), null));
-    registry = new TestFeatureRegistry(withScheme ? featureFile.toString() : featureFile.getPath());
+    registry = builder.build(withScheme ? featureFile.toString() : featureFile.getPath());
     
     // Verify single resource works all the way through.
     List<FeatureResource> resources = registry.getAllFeatures().getResources();
@@ -147,7 +112,7 @@ public class FeatureRegistryTest {
     out = new BufferedWriter(new FileWriter(featureFile));
     out.write(xml(NODEP_TPL, "gadget", resFile.toURI().toString(), null));
     out.close();
-    registry = new TestFeatureRegistry(childDir.toURI().toString());
+    registry = TestFeatureRegistry.newBuilder().build(childDir.toURI().toString());
     
     // Verify single resource works all the way through.
     List<FeatureResource> resources = registry.getAllFeatures().getResources();
@@ -157,10 +122,12 @@ public class FeatureRegistryTest {
   
   @Test
   public void registerFromResourceFeatureXml() throws Exception {
+    TestFeatureRegistry.Builder builder = TestFeatureRegistry.newBuilder();
     String content = "resource-content()";
-    Uri contentUri = expectResource(content);
-    Uri featureUri = expectResource(xml(NODEP_TPL, "gadget", contentUri.getPath(), null));
-    registry = new TestFeatureRegistry(featureUri.toString());
+    Uri contentUri = builder.expectResource(content);
+    Uri featureUri = builder.expectResource(xml(NODEP_TPL, "gadget", contentUri.getPath(), null));
+    builder.addFeatureFile(featureUri.toString());
+    registry = builder.build();
     
     // Verify single resource works all the way through.
     List<FeatureResource> resources = registry.getAllFeatures().getResources();
@@ -170,11 +137,12 @@ public class FeatureRegistryTest {
   
   @Test
   public void registerFromResourceFeatureXmlRelativeContent() throws Exception {
+    TestFeatureRegistry.Builder builder = TestFeatureRegistry.newBuilder();
     String content = "resource-content-relative()";
-    Uri contentUri = expectResource(content);
+    Uri contentUri = builder.expectResource(content);
     String relativePath = contentUri.getPath().substring(contentUri.getPath().lastIndexOf('/') + 1);
-    Uri featureUri = expectResource(xml(NODEP_TPL, "gadget", relativePath, null));
-    registry = new TestFeatureRegistry(featureUri.toString());
+    Uri featureUri = builder.expectResource(xml(NODEP_TPL, "gadget", relativePath, null));
+    registry = builder.build(featureUri.toString());
     
     // Verify single resource works all the way through.
     List<FeatureResource> resources = registry.getAllFeatures().getResources();
@@ -184,20 +152,22 @@ public class FeatureRegistryTest {
   
   @Test
   public void registerFromResourceIndex() throws Exception {
+    TestFeatureRegistry.Builder builder = TestFeatureRegistry.newBuilder();
+    
     // One with extern resource loaded content...
     String content1 = "content1()";
-    Uri content1Uri = expectResource(content1);
-    Uri feature1Uri = expectResource(xml(MID_A_TPL, "gadget", content1Uri.getPath(), null));
+    Uri content1Uri = builder.expectResource(content1);
+    Uri feature1Uri = builder.expectResource(xml(MID_A_TPL, "gadget", content1Uri.getPath(), null));
 
     // One feature with inline content (that it depends on)...
     String content2 = "inline()";
-    Uri feature2Uri = expectResource(xml(BOTTOM_TPL, "gadget", null, content2));
+    Uri feature2Uri = builder.expectResource(xml(BOTTOM_TPL, "gadget", null, content2));
     
     // .txt file to join the two
-    Uri txtFile = expectResource(feature1Uri.toString() + '\n' + feature2Uri.toString(), ".txt");
+    Uri txtFile = builder.expectResource(feature1Uri.toString() + '\n' + feature2Uri.toString(), ".txt");
     
     // Load resources from the text file and do basic validation they're good.
-    registry = new TestFeatureRegistry(txtFile.toString());
+    registry = builder.build(txtFile.toString());
     
     // Contents should be ordered based on the way they went in.
     List<FeatureResource> resources = registry.getAllFeatures().getResources();
@@ -208,22 +178,24 @@ public class FeatureRegistryTest {
   
   @Test
   public void registerOverrideFeature() throws Exception {
+    TestFeatureRegistry.Builder builder = TestFeatureRegistry.newBuilder();
+
     // Feature 1
     String content1 = "content1()";
-    Uri content1Uri = expectResource(content1);
-    Uri feature1Uri = expectResource(xml(BOTTOM_TPL, "gadget", content1Uri.getPath(), null));
+    Uri content1Uri = builder.expectResource(content1);
+    Uri feature1Uri = builder.expectResource(xml(BOTTOM_TPL, "gadget", content1Uri.getPath(), null));
     
     String content2 = "content_two()";
-    Uri content2Uri = expectResource(content2);
-    Uri feature2Uri = expectResource(xml(BOTTOM_TPL, "gadget", content2Uri.getPath(), null));
+    Uri content2Uri = builder.expectResource(content2);
+    Uri feature2Uri = builder.expectResource(xml(BOTTOM_TPL, "gadget", content2Uri.getPath(), null));
     
-    registry = new TestFeatureRegistry(feature1Uri.toString());
+    registry = builder.build(feature1Uri.toString());
     List<FeatureResource> resources1 = registry.getAllFeatures().getResources();
     assertEquals(1, resources1.size());
     assertEquals(content1, resources1.get(0).getContent());
     
     // Register it again, different def.
-    registry = new TestFeatureRegistry(feature2Uri.toString());
+    registry = builder.build(feature2Uri.toString());
     List<FeatureResource> resources2 = registry.getAllFeatures().getResources();
     assertEquals(1, resources2.size());
     assertEquals(content2, resources2.get(0).getContent());
@@ -235,15 +207,17 @@ public class FeatureRegistryTest {
   
   @Test
   public void cacheAccountsForUnsupportedState() throws Exception {
+    TestFeatureRegistry.Builder builder = TestFeatureRegistry.newBuilder();
+
     String content1 = "content1()";
-    Uri content1Uri = expectResource(content1);
+    Uri content1Uri = builder.expectResource(content1);
     Map<String, String> attribs = Maps.newHashMap();
     String theContainer = "the-container";
     attribs.put("container", theContainer);
-    Uri feature1Uri = expectResource(xml(BOTTOM_TPL, "gadget", content1Uri.getPath(), null, attribs));
+    Uri feature1Uri = builder.expectResource(xml(BOTTOM_TPL, "gadget", content1Uri.getPath(), null, attribs));
     
     // Register it.
-    registry = new TestFeatureRegistry(feature1Uri.toString());
+    registry = builder.build(feature1Uri.toString());
     
     // Retrieve content for matching context.
     List<String> needed = Lists.newArrayList("bottom");
@@ -279,15 +253,17 @@ public class FeatureRegistryTest {
   
   @Test
   public void cacheAccountsForContext() throws Exception {
+    TestFeatureRegistry.Builder builder = TestFeatureRegistry.newBuilder();
+
     String content1 = "content1()";
-    Uri content1Uri = expectResource(content1);
+    Uri content1Uri = builder.expectResource(content1);
     Map<String, String> attribs = Maps.newHashMap();
     String theContainer = "the-container";
     attribs.put("container", theContainer);
-    Uri feature1Uri = expectResource(xml(BOTTOM_TPL, "gadget", content1Uri.getPath(), null, attribs));
+    Uri feature1Uri = builder.expectResource(xml(BOTTOM_TPL, "gadget", content1Uri.getPath(), null, attribs));
     
     // Register it.
-    registry = new TestFeatureRegistry(feature1Uri.toString());
+    registry = builder.build(feature1Uri.toString());
     
     // Retrieve content for matching context.
     List<String> needed = Lists.newArrayList("bottom");
@@ -334,7 +310,7 @@ public class FeatureRegistryTest {
   @Test
   public void missingIndexResultsInException() throws Exception {
     try {
-      registry = new TestFeatureRegistry(makeResourceUri(".txt").toString());
+      registry = TestFeatureRegistry.newBuilder().build(makeResourceUri(".txt").toString());
       fail("Should have thrown an exception for missing .txt file");
     } catch (GadgetException e) {
       // Expected. Verify code.
@@ -345,7 +321,7 @@ public class FeatureRegistryTest {
   @Test
   public void missingFileResultsInException() throws Exception {
     try {
-      registry = new TestFeatureRegistry(new UriBuilder().setScheme("file")
+      registry = TestFeatureRegistry.newBuilder().build(new UriBuilder().setScheme("file")
           .setPath("/is/not/there.foo.xml").toUri().toString());
       fail("Should have thrown missing .xml file exception");
     } catch (GadgetException e) {
@@ -515,16 +491,18 @@ public class FeatureRegistryTest {
   
   @Test
   public void loopIsDetectedAndCrashes() throws Exception {
+    TestFeatureRegistry.Builder builder = TestFeatureRegistry.newBuilder();
+    
     // Set up a registry with features loop_a,b,c. C points back to A, which should
     // cause an exception to be thrown by the register method.
     String type = "gadget";
-    Uri loopAUri = expectResource(xml(LOOP_A_TPL, type, null, "loop_a"));
-    Uri loopBUri = expectResource(xml(LOOP_B_TPL, type, null, "loop_b"));
-    Uri loopCUri = expectResource(xml(LOOP_C_TPL, type, null, "loop_c"));
-    Uri txtFile = expectResource(loopAUri.toString() + '\n' + loopBUri.toString() + '\n' +
+    Uri loopAUri = builder.expectResource(xml(LOOP_A_TPL, type, null, "loop_a"));
+    Uri loopBUri = builder.expectResource(xml(LOOP_B_TPL, type, null, "loop_b"));
+    Uri loopCUri = builder.expectResource(xml(LOOP_C_TPL, type, null, "loop_c"));
+    Uri txtFile = builder.expectResource(loopAUri.toString() + '\n' + loopBUri.toString() + '\n' +
         loopCUri.toString(), ".txt");
     try {
-      registry = new TestFeatureRegistry(txtFile.toString());
+      registry = builder.build(txtFile.toString());
       fail("Should have thrown a loop-detected exception");
     } catch (GadgetException e) {
       assertEquals(GadgetException.Code.INVALID_CONFIG, e.getCode());
@@ -533,9 +511,10 @@ public class FeatureRegistryTest {
   
   @Test
   public void unavailableFeatureCrashes() throws Exception {
-    Uri featUri = expectResource(xml(BAD_DEP_TPL, "gadget", null, "content"));
+    TestFeatureRegistry.Builder builder = TestFeatureRegistry.newBuilder();
+    Uri featUri = builder.expectResource(xml(BAD_DEP_TPL, "gadget", null, "content"));
     try {
-      registry = new TestFeatureRegistry(featUri.toString());
+      registry = builder.build(featUri.toString());
     } catch (GadgetException e) {
       assertEquals(GadgetException.Code.INVALID_CONFIG, e.getCode());
     }
@@ -543,14 +522,15 @@ public class FeatureRegistryTest {
   
   @Test
   public void returnOnlyContainerFilteredJs() throws Exception {
+    TestFeatureRegistry.Builder builder = TestFeatureRegistry.newBuilder();
     String feature = "thefeature";
     String container =  "foo";
     String containerContent = "content1();";
     String defaultContent = "content2();";
     Uri featureUri =
-        expectResource(
+        builder.expectResource(
           getContainerAndDefaultTpl(feature, container, containerContent, defaultContent));
-    registry = new TestFeatureRegistry(featureUri.toString());
+    registry = builder.build(featureUri.toString());
     List<String> needed = Lists.newArrayList(feature);
     List<String> unsupported = Lists.newLinkedList();
     List<FeatureResource> resources =
@@ -562,14 +542,15 @@ public class FeatureRegistryTest {
   
   @Test
   public void returnDefaultMatchJs() throws Exception {
+    TestFeatureRegistry.Builder builder = TestFeatureRegistry.newBuilder();
     String feature = "thefeature";
     String container =  "foo";
     String containerContent = "content1();";
     String defaultContent = "content2();";
     Uri featureUri =
-        expectResource(
+        builder.expectResource(
           getContainerAndDefaultTpl(feature, container, containerContent, defaultContent));
-    registry = new TestFeatureRegistry(featureUri.toString());
+    registry = builder.build(featureUri.toString());
     List<String> needed = Lists.newArrayList(feature);
     List<String> unsupported = Lists.newLinkedList();
     List<FeatureResource> resources = 
@@ -592,8 +573,10 @@ public class FeatureRegistryTest {
   
   @Test
   public void resourceGetsMergedAttribs() throws Exception {
+    TestFeatureRegistry.Builder builder = TestFeatureRegistry.newBuilder();
+
     String content1 = "content1()";
-    Uri content1Uri = expectResource(content1);
+    Uri content1Uri = builder.expectResource(content1);
     Map<String, String> attribs = Maps.newHashMap();
     String theContainer = "the-container";
     attribs.put("container", theContainer);
@@ -603,11 +586,11 @@ public class FeatureRegistryTest {
     Map<String, String> resourceAttribs = Maps.newHashMap();
     attribs.put("two", "attrib-two");
     attribs.put("three", "attrib-three");
-    Uri feature1Uri = expectResource(xml(BOTTOM_TPL, "gadget", content1Uri.getPath(),
+    Uri feature1Uri = builder.expectResource(xml(BOTTOM_TPL, "gadget", content1Uri.getPath(),
         null, attribs, resourceAttribs));
     
     // Register it.
-    registry = new TestFeatureRegistry(feature1Uri.toString());
+    registry = builder.build(feature1Uri.toString());
     
     // Retrieve the resource for matching context.
     List<String> needed = Lists.newArrayList("bottom");
@@ -619,6 +602,7 @@ public class FeatureRegistryTest {
     assertEquals(1, resources.size());
 
     // Check the attribs passed into the resource. This is a little funky, but it works.
+    Map<String, String> lastAttribs = registry.getLastAttribs();
     assertNotNull(lastAttribs);
     assertEquals(4, lastAttribs.size());
     assertEquals(theContainer, lastAttribs.get("container"));
@@ -659,30 +643,21 @@ public class FeatureRegistryTest {
     // bottom - depends on nothing else
     // The content registered for each is equal to the feature's name, for simplicity.
     // Also, all content is loaded as inline, also for simplicity.
+    TestFeatureRegistry.Builder builder = TestFeatureRegistry.newBuilder();
     
     Map<String, String> attribs = Maps.newHashMap();
     if (containers != null) {
       attribs.put("container", containers);
     }
     
-    Uri nodepUri = expectResource(xml(NODEP_TPL, type, null, "nodep", attribs));
-    Uri topUri = expectResource(xml(TOP_TPL, type, null, "top", attribs));
-    Uri midAUri = expectResource(xml(MID_A_TPL, type, null, "mid_a", attribs));
-    Uri midBUri = expectResource(xml(MID_B_TPL, type, null, "mid_b", attribs));
-    Uri bottomUri = expectResource(xml(BOTTOM_TPL, type, null, "bottom", attribs));
-    Uri txtFile = expectResource(nodepUri.toString() + '\n' + topUri.toString() + '\n' +
+    Uri nodepUri = builder.expectResource(xml(NODEP_TPL, type, null, "nodep", attribs));
+    Uri topUri = builder.expectResource(xml(TOP_TPL, type, null, "top", attribs));
+    Uri midAUri = builder.expectResource(xml(MID_A_TPL, type, null, "mid_a", attribs));
+    Uri midBUri = builder.expectResource(xml(MID_B_TPL, type, null, "mid_b", attribs));
+    Uri bottomUri = builder.expectResource(xml(BOTTOM_TPL, type, null, "bottom", attribs));
+    Uri txtFile = builder.expectResource(nodepUri.toString() + '\n' + topUri.toString() + '\n' +
         midAUri.toString() + '\n' + midBUri.toString() + '\n' + bottomUri.toString(), ".txt");
-    registry = new TestFeatureRegistry(txtFile.toString());
-  }
-  
-  private Uri expectResource(String content) {
-    return expectResource(content, ".xml");
-  }
-  
-  private Uri expectResource(String content, String suffix) {
-    Uri res = makeResourceUri(suffix);
-    resourceMock.put(res.getPath(), content);
-    return res;
+    registry = builder.build(txtFile.toString());
   }
   
   private static String getFeatureTpl(String name, String[] deps) {
@@ -735,30 +710,5 @@ public class FeatureRegistryTest {
   
   private static Uri makeResourceUri(String suffix) {
     return Uri.parse("res://" + RESOURCE_BASE_PATH + "/file" + (++resourceIdx) + suffix);
-  }
-  
-  private static class ResourceMock {
-    private final Map<String, String> resourceMap;
-    
-    private ResourceMock() {
-      this.resourceMap = Maps.newHashMap();
-    }
-    
-    private void put(String key, String value) {
-      resourceMap.put(clean(key), value);
-    }
-    
-    private String get(String key) throws IOException {
-      key = clean(key);
-      if (!resourceMap.containsKey(key)) {
-        throw new IOException("Missing resource: " + key);
-      }
-      return resourceMap.get(key); 
-    }
-    
-    private String clean(String key) {
-      // Resource loading doesn't support leading '/'
-      return key.startsWith("/") ? key.substring(1) : key;
-    }
   }
 }
