@@ -108,8 +108,18 @@ public class FeatureResourceLoader {
   
   protected FeatureResource loadResource(
       String path, Map<String, String> attribs) throws IOException {
-    return new DualModeStaticResource(path, getResourceContent(getOptPath(path)),
-        getResourceContent(path));
+    String optContent = null, debugContent = null;
+    try {
+      optContent = getResourceContent(getOptPath(path));
+    } catch (IOException e) {
+      // OK - optContent can be null. Error thrown downstream if both are null.
+    }
+    try {
+      debugContent = getResourceContent(path);
+    } catch (IOException e) {
+      // See above; OK for debugContent to be null.
+    }
+    return new DualModeStaticResource(path, optContent, debugContent);
   }
   
   public String getResourceContent(String resource) throws IOException {
