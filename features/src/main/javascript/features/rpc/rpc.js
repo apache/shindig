@@ -596,7 +596,9 @@ if (!gadgets.rpc) { // make lib resilient to double-inclusion
           }
         }
 
-        var useLegacy = !!configRpc.useLegacyProtocol;
+        var configLegacy = configRpc.useLegacyProtocol;
+        if (typeof configLegacy == "string") { configLegacy = (configLegacy == "true") }
+        var useLegacy = !!configLegacy;
         setRelayUrl('..', parentRelayUrl, useLegacy);
 
         if (useLegacy) {
