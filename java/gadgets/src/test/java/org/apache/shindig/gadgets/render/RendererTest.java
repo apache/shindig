@@ -55,6 +55,14 @@ public class RendererTest {
       " <Content view='html' type='html'>" + BASIC_HTML_CONTENT + "</Content>" +
       " <Content view='url' type='url' href='" + TYPE_URL_HREF + "'/>" +
       "</Module>";
+  protected static final String GADGET_CAJA =
+    "<Module>" +
+    " <ModulePrefs title='foo'>" +
+    "   <Require feature='caja'/>" +
+    " </ModulePrefs>" +
+    " <Content view='html' type='html'>" + BASIC_HTML_CONTENT + "</Content>" +
+    " <Content view='url' type='url' href='" + TYPE_URL_HREF + "'/>" +
+    "</Module>";
 
   private final FakeHtmlRenderer htmlRenderer = new FakeHtmlRenderer();
   private final FakeProcessor processor = new FakeProcessor();
@@ -67,8 +75,12 @@ public class RendererTest {
     containerConfig = new FakeContainerConfig();
     renderer = new Renderer(processor, htmlRenderer, containerConfig, lockedDomainService);
   }
-
+  
   private GadgetContext makeContext(final String view) {
+    return makeContext(view, null, null);
+  }
+
+  private GadgetContext makeContext(final String view, final String sanitize, final String caja) {
     return new GadgetContext() {
       @Override
       public String getView() {
@@ -79,6 +91,10 @@ public class RendererTest {
       public String getParameter(String name) {
         if (name.equals("parent")) {
           return "http://example.org/foo";
+        } else if (name.equals("sanitize")) {
+          return sanitize;
+        } else if (name.equals("caja")) {
+          return caja;
         }
         return null;
       }
@@ -97,6 +113,28 @@ public class RendererTest {
     RenderingResults results = renderer.render(makeContext("url"));
     assertEquals(RenderingResults.Status.MUST_REDIRECT, results.getStatus());
     assertEquals(TYPE_URL_HREF, results.getRedirect());
+  }
+  
+  @Test
+  public void renderTypeUrlRequiresCajaIncompatible() {
+    processor.setGadgetData(GADGET_CAJA);
+    RenderingResults results = renderer.render(makeContext("url"));
+    assertEquals(RenderingResults.Status.ERROR, results.getStatus());
+    assertEquals(HttpServletResponse.SC_BAD_REQUEST, results.getHttpStatusCode());
+  }
+  
+  @Test
+  public void renderTypeUrlCajaParamIncompatible() {
+    RenderingResults results = renderer.render(makeContext("url", null, "1"));
+    assertEquals(RenderingResults.Status.ERROR, results.getStatus());
+    assertEquals(HttpServletResponse.SC_BAD_REQUEST, results.getHttpStatusCode());
+  }
+  
+  @Test
+  public void renderTypeUrlSanitizedIncompatible() {
+    RenderingResults results = renderer.render(makeContext("url", "1", null));
+    assertEquals(RenderingResults.Status.ERROR, results.getStatus());
+    assertEquals(HttpServletResponse.SC_BAD_REQUEST, results.getHttpStatusCode());
   }
 
   @Test
@@ -201,9 +239,15 @@ public class RendererTest {
 
   private static class FakeProcessor extends Processor {
     protected ProcessingException exception;
+    private String gadgetData;
 
     public FakeProcessor() {
       super(null, null, null, null, null);
+      this.gadgetData = GADGET;
+    }
+    
+    public void setGadgetData(String gadgetData) {
+      this.gadgetData = gadgetData;
     }
 
     @Override
@@ -212,7 +256,7 @@ public class RendererTest {
         throw exception;
       }
       try {
-        GadgetSpec spec = new GadgetSpec(SPEC_URL, GADGET);
+        GadgetSpec spec = new GadgetSpec(SPEC_URL, gadgetData);
         View view = spec.getView(context.getView());
         return new Gadget()
             .setContext(context)

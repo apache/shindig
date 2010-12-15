@@ -87,6 +87,9 @@ public class Renderer {
         if (requiresCaja(gadget)) {
           return RenderingResults.error("Caja does not support url type gadgets.",
             HttpServletResponse.SC_BAD_REQUEST);
+        } else if (gadget.sanitizeOutput()) {
+          return RenderingResults.error("Type=url gadgets cannot be sanitized.",
+            HttpServletResponse.SC_BAD_REQUEST);
         }
         return RenderingResults.mustRedirect(gadget.getCurrentView().getHref());
       }
