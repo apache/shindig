@@ -62,6 +62,10 @@ public enum RenderingContext {
   }
 
   public static RenderingContext valueOfParam(String param) {
+    // Exception: when no &c= parameter provided, default to GADGET.
+    if (param == null) {
+      return RenderingContext.GADGET;
+    }
     for (RenderingContext rc : RenderingContext.values()) {
       String rcParam = rc.getParamValue();
       if ((rcParam == null && param == null) || (rcParam != null && rcParam.equals(param))) {
