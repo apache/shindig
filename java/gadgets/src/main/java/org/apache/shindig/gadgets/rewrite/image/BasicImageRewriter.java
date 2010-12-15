@@ -86,7 +86,6 @@ public class BasicImageRewriter implements ResponseRewriter {
   /** Parameter used to request resizing will not expand image */
   private static final String PARAM_NO_EXPAND = Param.NO_EXPAND.getKey();
 
-  private static final int DEFAULT_QUALITY = 100;
   private static final int BITS_PER_BYTE = 8;
   private static final Color COLOR_TRANSPARENT = new Color(255, 255, 255, 0);
   public static final String CONTENT_TYPE = "Content-Type";
@@ -283,9 +282,9 @@ public class BasicImageRewriter implements ResponseRewriter {
 
     try {
        // If the path or MIME type don't match, continue
-       if (!isSupportedContent(response) && !isImage(uri)) {
-         return;
-       }
+      if (!isSupportedImageResult(response, uri)) {
+        return;
+      }
 
       // Content header checking is fast so this is fine to do for every response.
       ImageFormat imageFormat = Sanselan
@@ -468,6 +467,10 @@ public class BasicImageRewriter implements ResponseRewriter {
     long imageSizeBits = imagePixels * imageInfo.getBitsPerPixel();
     return imageSizeBits > config.getMaxInMemoryBytes() * BITS_PER_BYTE;
   }
+  
+  protected boolean isSupportedImageResult(HttpResponseBuilder response, Uri uri) {
+    return isSupportedContent(response) || isImageUri(uri);
+  }
 
   protected boolean isSupportedContent(HttpResponseBuilder response) {
     return SUPPORTED_MIME_TYPES.contains(response.getHeader(CONTENT_TYPE));
@@ -478,7 +481,7 @@ public class BasicImageRewriter implements ResponseRewriter {
    *
    *  @param uri the URI to check
    */
-  private boolean isImage(Uri uri) {
+  protected boolean isImageUri(Uri uri) {
     boolean pathExtMatches = false;
     for (String ext: SUPPORTED_FILE_EXTENSIONS) {
       if (uri.getPath().endsWith(ext)) {
@@ -499,7 +502,7 @@ public class BasicImageRewriter implements ResponseRewriter {
    * MIME-type indicate that image content should be available but we failed to read it, then return
    * an error response.
    */
-  void enforceUnreadableImageRestrictions(Uri uri, HttpResponseBuilder response) {
+  protected void enforceUnreadableImageRestrictions(Uri uri, HttpResponseBuilder response) {
     String contentType = response.getHeader(CONTENT_TYPE);
     if (contentType != null) {
       contentType = contentType.toLowerCase();
