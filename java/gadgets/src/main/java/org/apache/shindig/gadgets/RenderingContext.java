@@ -68,7 +68,7 @@ public enum RenderingContext {
     }
     for (RenderingContext rc : RenderingContext.values()) {
       String rcParam = rc.getParamValue();
-      if ((rcParam == null && param == null) || (rcParam != null && rcParam.equals(param))) {
+      if (rcParam != null && rcParam.equals(param)) {
         return rc;
       }
     }
