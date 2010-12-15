@@ -17,16 +17,12 @@
   specific language governing permissions and limitations under the License.
 -->
 <feature>
-  <name>core.util</name>
+  <name>core.util.urlparams</name>
   <dependency>globals</dependency>
-  <dependency>core.config</dependency>
-  <dependency>core.util.urlparams</dependency>
   <gadget>
-    <script src="util.js"/>
-    <script src="taming.js"/>
+    <script src="urlparams.js"/>
   </gadget>
   <container>
-    <script src="util.js"/>
-    <script src="taming.js"/>
+    <script src="urlparams.js"/>
   </container>
 </feature>
