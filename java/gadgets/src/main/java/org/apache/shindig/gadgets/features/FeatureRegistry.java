@@ -66,14 +66,14 @@ public class FeatureRegistry {
   //class name for logging purpose
   private static final String classname = FeatureRegistry.class.getName();
   private static final Logger LOG = Logger.getLogger(classname, MessageKeys.MESSAGES);
-  
+
   // Map keyed by FeatureNode object created as a lookup for transitive feature deps.
   private final Map<FeatureCacheKey, LookupResult> cache = new MapMaker().makeMap();
 
   private final FeatureParser parser;
   private final FeatureResourceLoader resourceLoader;
   private final ImmutableMap<String, FeatureNode> featureMap;
-  
+
 
 /**
  * Construct a new FeatureRegistry, using resourceLoader to load actual resources,
@@ -100,12 +100,12 @@ public class FeatureRegistry {
     // Clear caches.
     cache.clear();
   }
-  
+
   /**
    * Reads and registers all of the features in the directory, or the file, specified by
    * the given resourceKey. Invalid features or invalid paths will yield a
    * GadgetException.
-   * 
+   *
    * All features registered by this method must be valid (well-formed XML, resource
    * references all return successfully), and each "batch" of registered features
    * must be able to be assimilated into the current features tree in a valid fashion.
@@ -129,10 +129,10 @@ public class FeatureRegistry {
     try {
       for (String location : resourceList) {
         Uri uriLoc = getComponentUri(location);
-        
+
         if (uriLoc.getScheme() != null && uriLoc.getScheme().equals(RESOURCE_SCHEME)) {
           List<String> resources = Lists.newArrayList();
-          
+
           // Load as resource using ResourceLoader.
           location = uriLoc.getPath();
           if (location.startsWith("/")) {
@@ -156,7 +156,7 @@ public class FeatureRegistry {
           } else {
             resources.add(location);
           }
-          
+
           loadResources(resources, featureMapBuilder);
         } else {
           // Load files in directory structure.
@@ -172,19 +172,19 @@ public class FeatureRegistry {
       throw new GadgetException(GadgetException.Code.INVALID_PATH, e);
     }
   }
-  
+
   /**
    * For the given list of needed features, retrieves all the FeatureResource objects that
    * contain their content and, if requested, that of their transitive dependencies.
-   * 
+   *
    * Resources are returned in order of their place in the dependency tree, with "bottom"/
    * depended-on resources returned before those that depend on them. Resource objects
    * within a given feature are returned in the order specified in their corresponding
    * feature.xml file. In the case of a dependency tree "tie" eg. A depends on [B, C], B and C
    * depend on D - resources are returned in the dependency order specified in feature.xml.
-   * 
+   *
    * Fills the "unsupported" list, if provided, with unknown features in the needed list.
-   * 
+   *
    * @param ctx Context for the request.
    * @param needed List of all needed features.
    * @param unsupported If non-null, a List populated with unknown features from the needed list.
@@ -195,11 +195,11 @@ public class FeatureRegistry {
       GadgetContext ctx, Collection<String> needed, List<String> unsupported, boolean transitive) {
     boolean useCache = (transitive && !ctx.getIgnoreCache());
     FeatureCacheKey cacheKey = new FeatureCacheKey(needed, ctx, unsupported != null);
-    
+
     if (useCache && cache.containsKey(cacheKey)) {
       return cache.get(cacheKey);
     }
-    
+
     List<FeatureNode> featureNodes = null;
     if (transitive) {
       featureNodes = getTransitiveDeps(needed, unsupported);
@@ -207,8 +207,7 @@ public class FeatureRegistry {
       featureNodes = getRequestedNodes(needed, unsupported);
     }
 
-    String targetBundleType =
-        ctx.getRenderingContext() == RenderingContext.CONTAINER ? "container" : "gadget";
+    String targetBundleType = ctx.getRenderingContext().getFeatureBundleTag();
     ImmutableList.Builder<FeatureBundle> bundlesBuilder =
         new ImmutableList.Builder<FeatureBundle>();
 
@@ -235,15 +234,15 @@ public class FeatureRegistry {
         }
       }
     }
-    
+
     LookupResult result = new LookupResult(bundlesBuilder.build());
     if (useCache && (unsupported == null || unsupported.isEmpty())) {
       cache.put(cacheKey, result);
     }
-      
+
     return result;
   }
-  
+
   /**
    * Helper method retrieving feature resources, including transitive dependencies.
    * @param ctx Context for the request.
@@ -265,7 +264,7 @@ public class FeatureRegistry {
   public LookupResult getAllFeatures() {
     return getFeatureResources(new GadgetContext(), featureMap.keySet(), null);
   }
-  
+
   /**
    * Calculates and returns a dependency-ordered (as in getFeatureResources) list of features
    * included directly or transitively from the specified list of needed features.
@@ -289,7 +288,7 @@ public class FeatureRegistry {
   public Set<String> getAllFeatureNames() {
     return featureMap.keySet();
   }
-  
+
   // Provided for backward compatibility with existing feature loader configurations.
   // res://-prefixed URIs are actually scheme = res, host = "", path = "/stuff". We want res:path.
   // Package-private for use by FeatureParser as well.
@@ -302,11 +301,11 @@ public class FeatureRegistry {
     }
     return uri;
   }
-  
+
   private List<FeatureNode> getTransitiveDeps(
       Collection<String> needed, List<String> unsupported) {
     final List<FeatureNode> requested = getRequestedNodes(needed, unsupported);
-    
+
     Comparator<FeatureNode> nodeDepthComparator = new Comparator<FeatureNode>() {
       public int compare(FeatureNode one, FeatureNode two) {
         if (one.nodeDepth > two.nodeDepth ||
@@ -326,7 +325,7 @@ public class FeatureRegistry {
     // first - A's tree is deeper than that of C, so *if* A's tree contains C, traversing
     // it first guarantees that C is eventually included.
     Collections.sort(requested, nodeDepthComparator);
-    
+
     Set<String> alreadySeen = Sets.newHashSet();
     List<FeatureNode> fullDeps = Lists.newLinkedList();
     for (FeatureNode requestedFeature : requested) {
@@ -337,10 +336,10 @@ public class FeatureRegistry {
         }
       }
     }
-    
+
     return fullDeps;
   }
-  
+
   private List<FeatureNode> getRequestedNodes(
       Collection<String> needed, List<String> unsupported) {
     List<FeatureNode> requested = Lists.newArrayList();
@@ -353,25 +352,25 @@ public class FeatureRegistry {
     }
     return requested;
   }
-  
+
   private boolean containerMatch(String containerAttrib, String container) {
     for (String attr : StringUtils.split(containerAttrib, ',')) {
       if (attr.trim().equals(container)) return true;
     }
     return false;
   }
-  
+
   private void connectDependencyGraph() throws GadgetException {
     // Iterate through each raw dependency, adding the corresponding feature to the graph.
     // Collect as many feature dep tree errors as possible before erroring out.
     List<String> problems = Lists.newLinkedList();
     List<FeatureNode> theFeatures = Lists.newLinkedList();
-    
+
     // First hook up all first-order dependencies.
     for (Map.Entry<String, FeatureNode> featureEntry : featureMap.entrySet()) {
       String name = featureEntry.getKey();
       FeatureNode feature = featureEntry.getValue();
-      
+
       for (String rawDep : feature.getRawDeps()) {
         if (!featureMap.containsKey(rawDep)) {
           problems.add("Feature [" + name + "] has dependency on unknown feature: " + rawDep);
@@ -381,7 +380,7 @@ public class FeatureRegistry {
         }
       }
     }
-    
+
     // Then hook up the transitive dependency graph to validate there are
     // no loops present.
     for (FeatureNode feature : theFeatures) {
@@ -393,7 +392,7 @@ public class FeatureRegistry {
         problems.add(e.getMessage());
       }
     }
-    
+
     if (!problems.isEmpty()) {
       StringBuilder sb = new StringBuilder();
       sb.append("Problems found processing features:\n");
@@ -401,7 +400,7 @@ public class FeatureRegistry {
       throw new GadgetException(GadgetException.Code.INVALID_CONFIG, sb.toString());
     }
   }
-  
+
   private void loadResources(List<String> resources, Map<String,FeatureNode> featureMapBuilder)
       throws GadgetException {
     try {
@@ -409,7 +408,7 @@ public class FeatureRegistry {
         if (LOG.isLoggable(Level.FINE)) {
           LOG.fine("Processing resource: " + resource);
         }
-        
+
         String content = resourceLoader.getResourceContent(resource);
         Uri parent = new UriBuilder().setScheme(RESOURCE_SCHEME).setPath(resource).toUri();
         loadFeature(parent, content, featureMapBuilder);
@@ -425,7 +424,7 @@ public class FeatureRegistry {
       throw new GadgetException(GadgetException.Code.INVALID_CONFIG,
           "Feature file '" + file.getPath() + "' doesn't exist or can't be read");
     }
-    
+
     File[] toLoad = file.isDirectory() ? file.listFiles() : new File[] { file };
 
     for (File featureFile : toLoad) {
@@ -461,7 +460,7 @@ public class FeatureRegistry {
             new Object[] {parsed.getName(),parent});
       }
     }
-    
+
     // Walk through all parsed bundles, pulling resources and creating FeatureBundles/Nodes.
     List<FeatureBundle> bundles = Lists.newArrayList();
     for (FeatureParser.ParsedFeature.Bundle parsedBundle : parsed.getBundles()) {
@@ -477,12 +476,12 @@ public class FeatureRegistry {
       }
       bundles.add(new FeatureBundle(parsedBundle, resources));
     }
-    
+
     // Add feature to the master Map. The dependency tree isn't connected/validated/linked yet.
     featureMapBuilder.put(parsed.getName(),
         new FeatureNode(parsed.getName(), bundles, parsed.getDeps()));
   }
-  
+
   private Map<String, String> getResourceAttribs(Map<String, String> bundleAttribs,
       Map<String, String> resourceAttribs) {
     // For a given resource, attribs are a merge (by key, not by value) of bundle attribs and
@@ -491,14 +490,14 @@ public class FeatureRegistry {
         .putAll(bundleAttribs)
         .putAll(resourceAttribs).build();
   }
-  
+
   private static final class InlineFeatureResource extends FeatureResource.Default {
     private final String content;
-    
+
     private InlineFeatureResource(String content) {
       this.content = content;
     }
-    
+
     public String getContent() {
       return content;
     }
@@ -507,11 +506,11 @@ public class FeatureRegistry {
       return content;
     }
   }
-  
+
   public static class LookupResult {
     private final List<FeatureBundle> bundles;
     private final List<FeatureResource> allResources;
-    
+
     private LookupResult(List<FeatureBundle> bundles) {
       this.bundles = bundles;
       ImmutableList.Builder<FeatureResource> resourcesBuilder = ImmutableList.builder();
@@ -520,11 +519,11 @@ public class FeatureRegistry {
       }
       this.allResources = resourcesBuilder.build();
     }
-    
+
     public List<FeatureBundle> getBundles() {
       return bundles;
     }
-    
+
     public List<FeatureResource> getResources() {
       return allResources;
     }
@@ -533,34 +532,34 @@ public class FeatureRegistry {
   public static final class FeatureBundle {
     private final FeatureParser.ParsedFeature.Bundle bundle;
     private final List<FeatureResource> resources;
-    
+
     private FeatureBundle(FeatureParser.ParsedFeature.Bundle bundle,
                           List<FeatureResource> resources) {
       this.bundle = bundle;
       this.resources = ImmutableList.copyOf(resources);
     }
-    
+
     public String getName() {
       return bundle.getName();
     }
-    
+
     public String getType() {
       return bundle.getType();
     }
-    
+
     public Map<String, String> getAttribs() {
       return bundle.getAttribs();
     }
-    
+
     public List<FeatureResource> getResources() {
       return resources;
     }
-    
+
     public List<ApiDirective> getApis() {
       return bundle.getApis();
     }
   }
-  
+
   private static final class FeatureNode {
     private final String name;
     private final List<FeatureBundle> bundles;
@@ -569,7 +568,7 @@ public class FeatureRegistry {
     private List<FeatureNode> transitiveDeps;
     private boolean calculatedDepsStale;
     private int nodeDepth = 0;
-    
+
     private FeatureNode(String name, List<FeatureBundle> bundles, List<String> rawDeps) {
       this.name = name;
       this.bundles = ImmutableList.copyOf(bundles);
@@ -578,38 +577,38 @@ public class FeatureRegistry {
       this.transitiveDeps = Lists.newArrayList(this);
       this.calculatedDepsStale = false;
     }
-    
+
     public List<FeatureBundle> getBundles() {
       return bundles;
     }
-    
+
     public List<String> getRawDeps() {
       return requestedDeps;
     }
-    
+
     public void addDep(FeatureNode dep) {
       depList.add(dep);
       calculatedDepsStale = true;
     }
-    
+
     private List<FeatureNode> getDepList() {
       List<FeatureNode> revOrderDeps = Lists.newArrayList(depList);
       Collections.reverse(revOrderDeps);
       return ImmutableList.copyOf(revOrderDeps);
     }
-    
+
     public void completeNodeGraph() throws GadgetException {
       if (!calculatedDepsStale) {
         return;
       }
-      
+
       this.nodeDepth = 0;
       this.transitiveDeps = Lists.newLinkedList();
       this.transitiveDeps.add(this);
-      
+
       Queue<Pair<FeatureNode, Pair<Integer, String>>> toTraverse = Lists.newLinkedList();
       toTraverse.add(Pair.of(this, Pair.of(0, "")));
-      
+
       while (!toTraverse.isEmpty()) {
         Pair<FeatureNode, Pair<Integer, String>> next = toTraverse.poll();
         String debug = next.two.two + (next.two.one > 0 ? " -> " : "") + next.one.name;
@@ -624,29 +623,29 @@ public class FeatureRegistry {
           toTraverse.add(Pair.of(nextDep, Pair.of(next.two.one + 1, debug)));
         }
       }
-      
+
       Collections.reverse(this.transitiveDeps);
       calculatedDepsStale = false;
     }
-    
+
     public List<FeatureNode> getTransitiveDeps() {
       return this.transitiveDeps;
     }
   }
-  
+
   private static final class FeatureCacheKey {
     private final Collection<String> needed;
     private final RenderingContext rCtx;
     private final String container;
     private final boolean useUnsupported;
-    
+
     private FeatureCacheKey(Collection<String> needed, GadgetContext ctx, boolean useUnsupported) {
       this.needed = needed;
       this.rCtx = ctx.getRenderingContext();
       this.container = ctx.getContainer();
       this.useUnsupported = useUnsupported;
     }
-    
+
     @Override
     public boolean equals(Object other) {
       if (other == this) {
@@ -661,7 +660,7 @@ public class FeatureRegistry {
              otherKey.container.equals(this.container) &&
              otherKey.useUnsupported == this.useUnsupported;
     }
-    
+
     @Override
     public int hashCode() {
       // Doesn't need to be good, just cheap and consistent.

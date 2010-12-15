@@ -42,7 +42,7 @@ public class JsUriManagerTest extends UriManagerTestBase {
 
   @Test
   public void newJsUriWithOriginalUri() throws Exception {
-    UriBuilder builder = newTestUriBuilder("1"); // container context
+    UriBuilder builder = newTestUriBuilder(RenderingContext.CONTAINER);
     JsUriManager.JsUri jsUri = new JsUriManager.JsUri(STATUS, builder.toUri(), LIBS);
     assertEquals(RenderingContext.CONTAINER, jsUri.getContext());
     assertEquals(CONTAINER_VALUE, jsUri.getContainer());
@@ -54,7 +54,7 @@ public class JsUriManagerTest extends UriManagerTestBase {
 
   @Test
   public void newJsUriWithConfiguredGadgetContext() throws Exception {
-    UriBuilder builder = newTestUriBuilder("2"); // configured gadget context
+    UriBuilder builder = newTestUriBuilder(RenderingContext.CONFIGURED_GADGET);
     JsUriManager.JsUri jsUri = new JsUriManager.JsUri(STATUS, builder.toUri(), LIBS);
     assertEquals(RenderingContext.CONFIGURED_GADGET, jsUri.getContext());
     assertEquals(CONTAINER_VALUE, jsUri.getContainer());
@@ -76,13 +76,13 @@ public class JsUriManagerTest extends UriManagerTestBase {
     assertTrue(jsUri.getLibs().isEmpty());
   }
 
-  private UriBuilder newTestUriBuilder(String containerMode) {
+  private UriBuilder newTestUriBuilder(RenderingContext context) {
     UriBuilder builder = new UriBuilder();
     builder.setScheme("http");
     builder.setAuthority("localohst");
     builder.setPath("/gadgets/js/feature.js");
     builder.addQueryParameter(Param.CONTAINER.getKey(), CONTAINER_VALUE);
-    builder.addQueryParameter(Param.CONTAINER_MODE.getKey(), containerMode);
+    builder.addQueryParameter(Param.CONTAINER_MODE.getKey(), context.getParamValue());
     builder.addQueryParameter(Param.JSLOAD.getKey(), "1");
     builder.addQueryParameter(Param.NO_CACHE.getKey(), "1");
     builder.addQueryParameter(Param.ONLOAD.getKey(), ONLOAD_VALUE);

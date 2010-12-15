@@ -79,7 +79,8 @@ public class DefaultJsUriManagerTest {
     assertEquals(CONTAINER, jsUri.getQueryParameter(Param.CONTAINER.getKey()));
     assertEquals("0", jsUri.getQueryParameter(Param.NO_CACHE.getKey()));
     assertEquals("0", jsUri.getQueryParameter(Param.DEBUG.getKey()));
-    assertEquals("0", jsUri.getQueryParameter(Param.CONTAINER_MODE.getKey()));
+    assertEquals(RenderingContext.GADGET.getParamValue(),
+        jsUri.getQueryParameter(Param.CONTAINER_MODE.getKey()));
   }
 
   @Test
@@ -131,7 +132,8 @@ public class DefaultJsUriManagerTest {
     assertEquals(version, jsUri.getQueryParameter(Param.VERSION.getKey()));
     assertEquals("0", jsUri.getQueryParameter(Param.NO_CACHE.getKey()));
     assertEquals("0", jsUri.getQueryParameter(Param.DEBUG.getKey()));
-    assertEquals("0", jsUri.getQueryParameter(Param.CONTAINER_MODE.getKey()));
+    assertEquals(RenderingContext.GADGET.getParamValue(),
+        jsUri.getQueryParameter(Param.CONTAINER_MODE.getKey()));
   }
 
   @Test
@@ -152,7 +154,8 @@ public class DefaultJsUriManagerTest {
     assertEquals(null, jsUri.getQueryParameter(Param.VERSION.getKey()));
     assertEquals("1", jsUri.getQueryParameter(Param.NO_CACHE.getKey()));
     assertEquals("0", jsUri.getQueryParameter(Param.DEBUG.getKey()));
-    assertEquals("0", jsUri.getQueryParameter(Param.CONTAINER_MODE.getKey()));
+    assertEquals(RenderingContext.GADGET.getParamValue(),
+        jsUri.getQueryParameter(Param.CONTAINER_MODE.getKey()));
   }
 
   @Test
@@ -169,7 +172,8 @@ public class DefaultJsUriManagerTest {
     assertEquals(CONTAINER, jsUri.getQueryParameter(Param.CONTAINER.getKey()));
     assertEquals("0", jsUri.getQueryParameter(Param.NO_CACHE.getKey()));
     assertEquals("0", jsUri.getQueryParameter(Param.DEBUG.getKey()));
-    assertEquals("1", jsUri.getQueryParameter(Param.CONTAINER_MODE.getKey()));
+    assertEquals(RenderingContext.CONTAINER.getParamValue(),
+        jsUri.getQueryParameter(Param.CONTAINER_MODE.getKey()));
   }
 
   // processJsUri tests

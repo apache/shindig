@@ -82,7 +82,7 @@ public class DefaultJsUriManager implements JsUriManager {
         ctx.isDebug() ? "1" : "0");
 
     uri.addQueryParameter(Param.CONTAINER_MODE.getKey(),
-        ctx.getContext() == RenderingContext.CONTAINER ? "1" : "0");
+        ctx.getContext().getParamValue());
 
     // Pass through gadget Uri
     if (addGadgetUri()) {

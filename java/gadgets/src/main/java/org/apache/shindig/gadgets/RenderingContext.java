@@ -24,18 +24,50 @@ public enum RenderingContext {
   // Used when rendering gadgets of type=html|inline. gadgets.config.init is not
   // injected into the gadget render, and container mediated.
   // TODO: rename this to "RENDER_GADGET"?
-  GADGET,
+  GADGET("gadget", "0", false),
 
   // Used when rendering gadgets of type=url. Unlike RenderingContext.GADGET,
   // this special context is explicitly requested by the gadget (to include
   // gadgets.config.init), while still considered a gadget render.
-  CONFIGURED_GADGET,
+  CONFIGURED_GADGET("gadget", "2", true),
 
   // Used when rendering container data (not a gadget render)
-  CONTAINER,
+  CONTAINER("container", "1", true),
 
   // Used when retrieving metadata about a gadget. Processing is generally
   // identical to processing under GADGET, but some operations may be safely
   // skipped, such as preload processing.
-  METADATA
+  METADATA(null, null, null);
+
+  private final String featureBundleTag;
+  private final String paramValue;
+  private final Boolean configurable;
+
+  private RenderingContext(String featureXmlTag, String paramValue, Boolean configurable) {
+    this.featureBundleTag = featureXmlTag;
+    this.paramValue = paramValue;
+    this.configurable = configurable;
+  }
+
+  public String getFeatureBundleTag() {
+    return featureBundleTag;
+  }
+
+  public boolean isConfigurable() {
+    return configurable;
+  }
+
+  public String getParamValue() {
+    return paramValue;
+  }
+
+  public static RenderingContext valueOfParam(String param) {
+    for (RenderingContext rc : RenderingContext.values()) {
+      String rcParam = rc.getParamValue();
+      if ((rcParam == null && param == null) || (rcParam != null && rcParam.equals(param))) {
+        return rc;
+      }
+    }
+    return null;
+  }
 }
