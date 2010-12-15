@@ -16,15 +16,14 @@ software distributed under the License is distributed on an
 KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 -->
-
-<!-- TODO: rename to dynamic-height.viewport -->
 <feature>
-  <name>dynamic-height.util</name>
+  <name>dynamic-height.height</name>
   <dependency>globals</dependency>
+  <dependency>dynamic-height.util</dependency>
   <gadget>
-    <script src="dynamic-height-util.js"/>
+    <script src="dynamic-height-height.js"/>
   </gadget>
   <container>
-    <script src="dynamic-height-util.js"/>
+    <script src="dynamic-height-height.js"/>
   </container>
 </feature>
