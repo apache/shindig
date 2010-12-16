@@ -63,7 +63,7 @@ class Main {
       var sending_lc:LocalConnection = new LocalConnection();
       receiving_lc.receiveMessage = function(to:String, from:String, channel:String, message:String) {
         if ((to === "*" || to === origin) && channel === this_channel) {
-          ExternalInterface.call("gadgets.rpctx.flash.receiveMessage", channel, message, from, to);
+          ExternalInterface.call("gadgets.rpctx.flash._receiveMessage", channel, message, from, to);
         }
       }
 
@@ -73,7 +73,7 @@ class Main {
       } );
       receiving_lc.connect(this_channel + "_" + role);
     } );
-    ExternalInterface.call("ready");
+    ExternalInterface.call("gadgets.rpctx.flash._ready");
   }
   
   public function Main() {
