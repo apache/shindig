@@ -29,7 +29,7 @@ gadgets.rpctx = gadgets.rpctx || {};
  *          though embed code is tailored to IE only to reduce size.
  *        + (window.postMessage takes precedence where available)
  */
-if (!gadgets.rpctx.wpm) {  // make lib resilient to double-inclusion
+if (!gadgets.rpctx.flash) {  // make lib resilient to double-inclusion
 
   gadgets.rpctx.flash = function() {
     var swfUrl = "//flashrpctx.googleusercontent.com/xpc.swf";
