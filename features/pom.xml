@@ -224,7 +224,50 @@
     </plugins>
   </build>
 
+  <!--
+       Profile used for rebuilding the xpc.swf file
+       You will need to put a copy of mtasc in features/mtasc
+       It's available from http://www.mtasc.org/
+  -->
   <profiles>
+    <profile>
+      <id>flashxpc</id>
+      <build>
+        <defaultGoal>exec:exec</defaultGoal>
+        <plugins>
+	  <plugin>
+	    <groupId>org.codehaus.mojo</groupId>
+	    <artifactId>exec-maven-plugin</artifactId>
+	    <version>1.2</version>
+	    <executions>
+	      <execution>
+		<goals>
+		  <goal>exec</goal>
+		</goals>
+	      </execution>
+	    </executions>
+	    <configuration>
+	      <executable>./mtasc/mtasc</executable>
+	      <!--<workingDirectory>/tmp</workingDirectory>-->
+	      <arguments>
+	        <!--  -header 1:1:1 -v  -main -version 8 -swf xpc.swf src/main/flex/Main.as -->
+		<argument>-header</argument>
+		<argument>1:1:1</argument>
+		<argument>-v</argument>
+		<argument>-main</argument>
+		<argument>-version</argument>
+		<argument>8</argument>
+		<argument>-swf</argument>
+		<argument>../content/xpc.swf</argument>
+		<argument>src/main/flex/Main.as</argument>
+	      </arguments>
+	    </configuration>
+	  </plugin>
+	</plugins>
+      </build>
+    </profile>
+    
+
     <profile>
       <id>reporting</id>
       <build>
