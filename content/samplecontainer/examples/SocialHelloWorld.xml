@@ -23,7 +23,7 @@
               thumbnail="http://localhost:8080/"
               icon="http://localhost:8080/samplecontainer/examples/icon.png">
    <Require feature="osapi"></Require>
-       <Require feature="settitle"/>
+   <Require feature="settitle"/>
    <Require feature="dynamic-height"></Require>
  </ModulePrefs>
  <Content type="html">

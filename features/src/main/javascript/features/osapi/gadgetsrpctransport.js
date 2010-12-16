@@ -57,11 +57,13 @@ if (gadgets && gadgets.rpc) { //Dont bind if gadgets.rpc not defined
       if (services) {
         // Iterate over the defined services, extract the gadget.rpc endpoint and
         // bind to it
-        for (var endpointName in services) if (services.hasOwnProperty(endpointName)) {
-          if (endpointName === 'gadgets.rpc') {
-            var methods = services[endpointName];
-            for (var i = 0; i < methods.length; i++) {
-              osapi._registerMethod(methods[i], transport);
+        for (var endpointName in services) {
+          if (services.hasOwnProperty(endpointName)) {
+            if (endpointName === 'gadgets.rpc') {
+              var methods = services[endpointName];
+              for (var i = 0; i < methods.length; i++) {
+                osapi._registerMethod(methods[i], transport);
+              }
             }
           }
         }
