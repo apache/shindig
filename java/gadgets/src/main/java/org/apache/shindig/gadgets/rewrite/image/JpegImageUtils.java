@@ -168,7 +168,7 @@ public class JpegImageUtils {
      */
     public void addQTable(int tableIndex, int[] table) {
       if (tableIndex == 0 || tableIndex == 1) {
-        tables[tableIndex] = Arrays.copyOf(table, table.length);
+        System.arraycopy(table, 0, tables[tableIndex], 0, table.length);
       }
     }
 
