@@ -200,7 +200,7 @@
         -->
         <!-- <groupId>net.sf.hammerfest</groupId> -->
         <!-- <artifactId>maven-javascript-plugin</artifactId> -->
-        <groupId>net.sf.alchim</groupId>
+        <groupId>net.alchim31.maven</groupId>
         <artifactId>yuicompressor-maven-plugin</artifactId>
         <executions>
           <execution>

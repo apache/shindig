@@ -760,6 +760,14 @@
           <!-- Mojo -->
           <plugin>
             <groupId>org.codehaus.mojo</groupId>
+            <artifactId>clirr-maven-plugin</artifactId>
+            <version>2.2.3</version>
+            <configuration>
+              <comparisonVersion>${shindig.api.previous}</comparisonVersion>
+            </configuration>
+          </plugin>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
             <artifactId>cobertura-maven-plugin</artifactId>
             <version>2.4</version>
           </plugin>
@@ -1142,7 +1150,7 @@
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>clirr-maven-plugin</artifactId>
-          <version>2.2.2</version>
+          <version>2.2.3</version>
         </plugin>
         <plugin>
           <groupId>org.codehaus.mojo</groupId>

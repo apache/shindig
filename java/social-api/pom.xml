@@ -62,9 +62,8 @@
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>clirr-maven-plugin</artifactId>
             <configuration>
-              <comparisonVersion>1.0.1</comparisonVersion>
+              <comparisonVersion>${shindig.api.previous}</comparisonVersion>
             </configuration>
-            <version>2.2.2</version>
           </plugin>
         </plugins>
       </reporting>
