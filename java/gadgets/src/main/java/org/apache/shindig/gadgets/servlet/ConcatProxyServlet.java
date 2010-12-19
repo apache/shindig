@@ -262,11 +262,13 @@ public class ConcatProxyServlet extends InjectedServlet {
   private static String formatError(String methodname, GadgetException excep, Uri uri)
       throws IOException {
     StringBuilder err = new StringBuilder();
+    err.append("/* ---- Error ");
     err.append(excep.getCode().toString());
     err.append(" concat(");
     err.append(uri.toString());
     err.append(") ");
     err.append(excep.getMessage());
+    err.append(" ---- */");
 
     // Log the errors here for now. We might want different severity levels
     // for different error codes.
@@ -295,7 +297,7 @@ public class ConcatProxyServlet extends InjectedServlet {
 
     public boolean outputError(Uri uri, GadgetException e)
         throws IOException {
-      print(formatError("outputError", e, uri));
+      println(formatError("outputError", e, uri));
       return e.getHttpStatusCode() == HttpResponse.SC_INTERNAL_SERVER_ERROR;
     }
 
