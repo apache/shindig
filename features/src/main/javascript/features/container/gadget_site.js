@@ -247,24 +247,28 @@ shindig.container.GadgetSite.prototype.render = function(
   if (curUrl == gadgetInfo['url']) {
     previousView = this.currentGadgetHolder_.getView();
   }
-
-  // Load into the double-buffer if there is one.
-  var el = this.loadingGadgetEl_ || this.currentGadgetEl_;
-  this.loadingGadgetHolder_ = new shindig.container.GadgetHolder(this.id_, el);
-
+  
   // Find requested view.
   var view = renderParams[shindig.container.RenderParam.VIEW]
       || viewParams[shindig.container.ViewParam.VIEW]
       || previousView;
   var viewInfo = gadgetInfo[shindig.container.MetadataResponse.VIEWS][view];
 
+  // Allow default view if requested view is not found.
   if (!viewInfo && renderParams[shindig.container.RenderParam.ALLOW_DEFAULT_VIEW]) {
     view = shindig.container.GadgetSite.DEFAULT_VIEW_;
     viewInfo = gadgetInfo[shindig.container.MetadataResponse.VIEWS][view];
   }
+
+  // Check if view exists.
   if (!viewInfo) {
-    throw ['Unsupported view ', view, ' for gadget ', gadgetInfo_['url'], '.'].join('');
+    gadgets.warn(['Unsupported view ', view, ' for gadget ', gadgetInfo['url'], '.'].join(''));
+    return;
   }
+
+  // Load into the double-buffer if there is one.
+  var el = this.loadingGadgetEl_ || this.currentGadgetEl_;
+  this.loadingGadgetHolder_ = new shindig.container.GadgetHolder(this.id_, el);
 
   var localRenderParams = {};
   for (var key in renderParams) {

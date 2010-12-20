@@ -289,7 +289,10 @@ shindig.container.GadgetHolder.prototype.getIframeHtml_ = function() {
   for (var key in iframeParams) {
     var value = iframeParams[key];
     if (value) {
-      out.push(key + '="' + value + '" ');
+      out.push(key);
+      out.push('="');
+      out.push(value);
+      out.push('" ');
     }
   }
   out.push('></iframe>');

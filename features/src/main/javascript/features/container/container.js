@@ -175,10 +175,9 @@ shindig.container.Container.prototype.navigateGadget = function(
     // TODO: Should display error without doing a standard navigate.
     // TODO: Bad if the error gadget fails to load.
     if (gadgetInfo.error) {
-      throw ['Failed to possibly schedule token refresh for gadget ',
-          holder.getUrl(), '.'].join('');
-    }
-    if (gadgetInfo[shindig.container.MetadataResponse.NEEDS_TOKEN_REFRESH]) {
+      gadgets.warn(['Failed to possibly schedule token refresh for gadget ',
+          gadgetUrl, '.'].join(''));
+    } else if (gadgetInfo[shindig.container.MetadataResponse.NEEDS_TOKEN_REFRESH]) {
       self.scheduleRefreshTokens_();
     }
     callback(gadgetInfo);
@@ -224,12 +223,13 @@ shindig.container.Container.prototype.preloadGadgets = function(gadgetUrls, opt_
   this.service_.getGadgetMetadata(request, function(response) {
     for (var id in response) {
       if (response[id].error) {
-        throw ['Failed to preload gadget ', id, '.'].join('');
-      }
-      self.addPreloadedGadgetUrl_(id);
-      if (response[id][shindig.container.MetadataResponse.NEEDS_TOKEN_REFRESH]) {
-        // Safe to re-schedule many times.
-        self.scheduleRefreshTokens_();
+        gadgets.warn(['Failed to preload gadget ', id, '.'].join(''));
+      } else {
+        self.addPreloadedGadgetUrl_(id);
+        if (response[id][shindig.container.MetadataResponse.NEEDS_TOKEN_REFRESH]) {
+          // Safe to re-schedule many times.
+          self.scheduleRefreshTokens_();
+        }
       }
     }
     callback(response);
@@ -576,12 +576,12 @@ shindig.container.Container.prototype.refreshTokens_ = function() {
       if (gadgetInfo[shindig.container.MetadataResponse.NEEDS_TOKEN_REFRESH]) {
         var tokenInfo = response[holder.getUrl()];
         if (tokenInfo.error) {
-          throw ['Failed to get token for gadget ', holder.getUrl(), '.'].join('');
+          gadgets.warn(['Failed to get token for gadget ', holder.getUrl(), '.'].join(''));
+        } else {
+          gadgets.rpc.call(holder.getIframeId(), 'update_security_token', null,
+              tokenInfo[shindig.container.TokenResponse.TOKEN]);
         }
-        gadgets.rpc.call(holder.getIframeId(), 'update_security_token', null,
-            tokenInfo[shindig.container.TokenResponse.TOKEN]);
       }
     }
-    // TODO: Tokens will be stale, but error should not be ignored.
   });
 };
