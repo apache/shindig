@@ -359,11 +359,10 @@ public class DefaultHandlerRegistry implements HandlerRegistry {
         if (body != null) {
           parameters.put(operation.bodyParam(), new String[]{IOUtils.toString(body)});
         }
-        item = methodCaller.getRestRequestItem(parameters, token, converter,
-            beanJsonConverter);
-        } catch (Exception e) {
-          return ImmediateFuture.errorInstance(e);
-        }
+        item = methodCaller.getRestRequestItem(parameters, token, converter, beanJsonConverter);
+      } catch (Exception e) {
+        return ImmediateFuture.errorInstance(e);
+      }
 
       try {
         listener.executing(item);
