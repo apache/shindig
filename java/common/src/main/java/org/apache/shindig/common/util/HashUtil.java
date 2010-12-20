@@ -40,6 +40,16 @@ public final class HashUtil {
    */
   public static String checksum(byte[] data) {
     byte[] hashBytes = getMessageDigest().digest(Preconditions.checkNotNull(data));
+    return bytesToHex(hashBytes);
+  }
+  
+  /**
+   * Converts a byte array into a hex string.
+   * 
+   * @param hashBytes The byte array to convert.
+   * @return The hex string.
+   */
+  public static String bytesToHex(byte[] hashBytes) {
     char[] hex = new char[2 * hashBytes.length];
 
     // Convert to hex. possibly change to base64 in the future for smaller
@@ -63,7 +73,12 @@ public final class HashUtil {
     return new String(getMessageDigest().digest(Preconditions.checkNotNull(data)));
   }
 
-  private static MessageDigest getMessageDigest() {
+  /**
+   * Provides a {@link MessageDigest} object for calculating checksums.
+   * 
+   * @return A MessageDigest object.
+   */
+  public static MessageDigest getMessageDigest() {
     MessageDigest md;
     try {
       md = MessageDigest.getInstance("MD5");
