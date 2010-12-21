@@ -32,9 +32,12 @@ gadgets.rpctx = gadgets.rpctx || {};
 if (!gadgets.rpctx.flash) {  // make lib resilient to double-inclusion
 
   gadgets.rpctx.flash = function() {
+    // TODO: provide method to override this
+    // TODO: implement xpc swf servlet
     var swfUrl = "//flashrpctx.googleusercontent.com/xpc.swf";
     var process = null;
     var ready = null;
+    var secureReceivers = {};
     var relayHandle = null;
 
     var LOADER_TIMEOUT_MS = 100;
@@ -43,11 +46,13 @@ if (!gadgets.rpctx.flash) {  // make lib resilient to double-inclusion
     var setupHandle = null;
     var setupAttempts = 0;
 
-    function handshakePoller() {
+    var myLoc = window.location.href;
+
+    function relayLoader() {
       if (relayHandle === null && document.body) {
         relayHandle = document.createElement('embed');
         relayHandle.allowScriptAccess = true;
-        relayHandle.src = swfUrl + '?origin=' + window.location;
+        relayHandle.src = swfUrl + '?origin=' + myLoc;
         document.body.appendChild(relayHandle);
       }
       ++setupAttempts;
@@ -67,6 +72,7 @@ if (!gadgets.rpctx.flash) {  // make lib resilient to double-inclusion
     }
 
     return {
+      // "core" transport methods
       getCode: function() {
         return 'flash';
       },
@@ -81,7 +87,7 @@ if (!gadgets.rpctx.flash) {  // make lib resilient to double-inclusion
         return true;
       },
 
-      setup: function(receiverId, token) {
+      setup: function(receiverId, token, forceSecure) {
         // Perform all setup, including embedding of relay SWF (a one-time
         // per Window operation), in this method. We cannot assume document.body
         // exists however, since child-to-parent setup is often done in head.
@@ -89,6 +95,7 @@ if (!gadgets.rpctx.flash) {  // make lib resilient to double-inclusion
         // If body already exists then this enqueueing will immediately flush;
         // otherwise polling will occur until the SWF has completed loading, at
         // which point all connections will complete their handshake.
+        secureReceivers[receiverId] = !!forceSecure;
         var role = targetId === ".." ? "OUTER" : "INNER";
         pendingHandshakes.push({ id: targetId, role: role });
         if (relayHandle === null && setupHandle === null) {
@@ -99,15 +106,22 @@ if (!gadgets.rpctx.flash) {  // make lib resilient to double-inclusion
       },
 
       call: function(targetId, from, rpc) {
+        var targetOrigin = gadgets.rpc.getTargetOrigin(targetId);;
+        relayHandle["sendMessage_" + targetId](gadgets.json.stringify(rpc), targetOrigin);
         return true;
       },
 
       // Methods called by relay SWF. Should be considered private.
-      _receiveMessage: function(channel, message, from, to) {
+      _receiveMessage: function(targetId, message, fromOrigin, toOrigin) {
+        // TODO: validate targetId for sanity, and fromOrigin/toOrigin for domain verification.
+        window.setTimeout(function() { process(gadgets.json.parse(message)); }, 0);
       },
 
       _ready: function() {
         flushHandshakes();
+        if (setupHandle !== null) {
+          window.clearTimeout(setupHandle);
+        }
         setupHandle = null;
       }
     };
