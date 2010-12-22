@@ -40,14 +40,22 @@ class GadgetContextTest extends PHPUnit_Framework_TestCase {
    */
   private $gadgetRenderingContext = 'GADGET';
 
+  private $orgGet;
+  private $orgPost;
+  private $orgServer;
+
   /**
    * Prepares the environment before running a test.
    */
   protected function setUp() {
     parent::setUp();
+
+    $this->orgGet = $_GET;
+    $this->orgPost = $_POST;
+    $this->orgServer = $_SERVER;
     
     $_GET = $this->testData;
-    $this->GadgetContext = new GadgetContext($this->gadgetRenderingContext);
+    $this->GadgetContext = new TestGadgetContext($this->gadgetRenderingContext);
   
   }
 
@@ -56,6 +64,10 @@ class GadgetContextTest extends PHPUnit_Framework_TestCase {
    */
   protected function tearDown() {
     $this->GadgetContext = null;
+
+    $_GET = $this->orgGet;
+    $_POST = $this->orgPost;
+    $_SERVER = $this->orgServer;
     
     parent::tearDown();
   }
@@ -170,5 +182,37 @@ class GadgetContextTest extends PHPUnit_Framework_TestCase {
   
   }
 
+  public function testGetRawToken() {
+      $_GET['st'] = 'abc';
+
+      $this->assertEquals('abc', $this->GadgetContext->getRawToken());
+      $this->GadgetContext->resetRawToken();
+
+      $_POST['st'] = 'def';
+      $_SERVER['AUTHORIZATION'] = 'OAuth ghi';
+      $this->assertEquals('abc', $this->GadgetContext->getRawToken());
+
+      unset($_GET['st']);
+
+      // test if runtime cache works
+      $this->assertEquals('abc', $this->GadgetContext->getRawToken());
+      $this->GadgetContext->resetRawToken();
+      //should use post now
+      $this->assertEquals('def', $this->GadgetContext->getRawToken());
+      $this->GadgetContext->resetRawToken();
+      
+      unset($_POST['st']);
+
+      // get token from OAuth header
+      $this->assertEquals('ghi', $this->GadgetContext->getRawToken());
+  }
+
 }
 
+class TestGadgetContext extends GadgetContext
+{
+    public function resetRawToken()
+    {
+        $this->rawToken = null;
+    }
+}

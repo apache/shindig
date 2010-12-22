@@ -103,4 +103,3 @@ class GadgetRewriterTest extends PHPUnit_Framework_TestCase {
     $this->assertEquals($source_string, $desc_string);
   }
 }
-?>
