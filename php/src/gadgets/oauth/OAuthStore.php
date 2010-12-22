@@ -210,6 +210,15 @@ class TokenKey {
   private $moduleId;
   private $tokenName;
   private $serviceName;
+  private $appId;
+
+  public function getAppId() {
+    return $this->appId;
+  }
+
+  public function setAppId($appId) {
+    $this->appId = $appId;
+  }
 
   public function getUserId() {
     return $this->userId;

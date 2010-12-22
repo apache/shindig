@@ -214,6 +214,7 @@ class OAuthFetcher extends RemoteContentFetcher {
     // need to URLDecode so when comparing with the ProviderKey it goes thought
     $tokenKey->setGadgetUri(urldecode($this->authToken->getAppUrl()));
     $tokenKey->setModuleId($this->authToken->getModuleId());
+    $tokenKey->setAppId($this->authToken->getAppId());
     $tokenKey->setServiceName($this->requestParams->getServiceName());
     $tokenKey->setTokenName($this->requestParams->getTokenName());
     // At some point we might want to let gadgets specify whether to use OAuth

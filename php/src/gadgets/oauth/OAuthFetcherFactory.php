@@ -49,7 +49,8 @@ class OAuthFetcherFactory {
       $this->oauthCrypter = new BasicBlobCrypter(srand($BBC->MASTER_KEY_MIN_LEN));
       $specFactory = new BasicGadgetSpecFactory();
       $OAuthStore = Config::get('oauth_store');
-      $basicStore = new BasicGadgetOAuthTokenStore(new $OAuthStore, $specFactory);
+      $gadgetOAuthTokenStore = Config::get('gadget_oauth_token_store');
+      $basicStore = new $gadgetOAuthTokenStore(new $OAuthStore, $specFactory);
       $basicStore->initFromConfigFile($fetcher);
       $this->tokenStore = $basicStore;
     } catch (Exeption $e) {}

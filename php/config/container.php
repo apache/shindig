@@ -154,7 +154,7 @@ $shindigConfig = array(
   'oauth_lookup_service' => 'BasicOAuthLookupService',
   // The OAuth Store is used to store the (gadgets/)oauth proxy credentials it obtained on behalf of the user/gadget combo
   'oauth_store' => 'BasicOAuthStore',
-
+  'gadget_oauth_token_store' => 'BasicGadgetOAuthTokenStore',
  
   // handler for ApiServlet
   'service_handler' => array(

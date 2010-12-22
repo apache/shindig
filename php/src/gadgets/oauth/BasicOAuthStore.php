@@ -108,7 +108,7 @@ class BasicOAuthStore implements OAuthStore {
     unset($this->tokens[md5(serialize($tokenKey))]);
   }
 
-  private function getTokenInfo($tokenKey) {
+  protected function getTokenInfo($tokenKey) {
     $key = md5(serialize($tokenKey));
     return isset($this->tokens[$key]) ? $this->tokens[$key] : null;
   }
