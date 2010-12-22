@@ -479,7 +479,9 @@ shindig.Gadget.prototype.getAdditionalParams = function() {
 
 shindig.BaseIfrGadget = function(opt_params) {
   shindig.Gadget.call(this, opt_params);
-  this.serverBase_ = '/gadgets/'; // default gadget server
+  if(!this.serverBase_){
+	  this.serverBase_ = '/gadgets/'; // default gadget server
+  }
   this.queryIfrGadgetType_();
 };
 
