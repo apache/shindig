@@ -272,8 +272,8 @@ class GadgetContext {
     }
 
     $this->rawToken = isset($_GET['st']) ? $_GET['st'] :
-                      isset($_POST['st']) ? $_POST['st'] :
-                          $this->parseAuthorization($_SERVER['AUTHORIZATION']);
+                      (isset($_POST['st']) ? $_POST['st'] :
+                          $this->parseAuthorization($_SERVER['AUTHORIZATION']));
 
 
     return $this->rawToken;
