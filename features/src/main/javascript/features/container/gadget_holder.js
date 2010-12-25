@@ -214,9 +214,19 @@ shindig.container.GadgetHolder.prototype.doNormalIframeHtml_ = function() {
  * @private
  */
 shindig.container.GadgetHolder.prototype.doOaaIframeHtml_ = function() {
-  var iframeAttrs = {
-      frameborder: 'no',
-      scrolling: 'no'
+  var iframeParams = {
+      'id': this.iframeId_,
+      'name': this.iframeId_,
+      'src': this.getIframeUrl_(),
+      'scrolling': 'no',
+      'marginwidth': '0',
+      'marginheight': '0',
+      'frameborder': '0',
+      'vspace': '0',
+      'hspace': '0',
+      'class': this.renderParams_[shindig.container.RenderParam.CLASS],
+      'height': this.renderParams_[shindig.container.RenderParam.HEIGHT],
+      'width': this.renderParams_[shindig.container.RenderParam.WIDTH]
   };
   new OpenAjax.hub.IframeContainer(
       gadgets.pubsub2router.hub,
@@ -235,7 +245,7 @@ shindig.container.GadgetHolder.prototype.doOaaIframeHtml_ = function() {
           parent: this.el_,
           uri: this.getIframeUrl_(),
           tunnelURI: shindig.uri('/gadgets/' + '../container/rpc_relay.html').resolve(shindig.uri(window.location.href)),
-          iframeAttrs: iframeAttrs
+          iframeAttrs: iframeParams
         }
       }
   );
