@@ -499,10 +499,10 @@
       </modules>
     </profile>
 
+    <!-- profile to run an embedded jetty instance -->
     <profile>
       <id>run</id>
       <dependencies>
-        <!-- project dependencies -->
         <dependency>
           <groupId>org.apache.shindig</groupId>
           <artifactId>shindig-gadgets</artifactId>
@@ -520,7 +520,6 @@
           <artifactId>shindig-extras</artifactId>
           <version>${project.version}</version>
         </dependency>
-        <!-- external dependencies -->
       </dependencies>
 
       <build>
@@ -557,6 +556,7 @@
       </build>
     </profile>
 
+    <!-- generate reports -->
     <profile>
       <id>reporting</id>
       <modules>
@@ -845,7 +845,6 @@
     </profile>
 
     <!-- Apache Release Profile -->
-
     <profile>
       <id>apache-release</id>
       <modules>
@@ -902,6 +901,7 @@
         </plugins>
       </build>
     </profile>
+
     <profile>
       <id>php</id>
       <modules>
@@ -909,6 +909,8 @@
         <module>php</module>
       </modules>
     </profile>
+
+    <!-- assemble the source releases -->
     <profile>
       <id>assemble</id>
       <build>
@@ -1108,7 +1110,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-site-plugin</artifactId>
-          <version>3.0-beta-3</version>
+          <version>2.2</version>
           <configuration>
             <inputEncoding>${project.build.sourceEncoding}</inputEncoding>
             <outputEncoding>${project.build.sourceEncoding}</outputEncoding>
