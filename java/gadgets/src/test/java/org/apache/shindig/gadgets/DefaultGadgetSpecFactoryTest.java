@@ -25,7 +25,7 @@ import static org.junit.Assert.assertEquals;
 import org.apache.shindig.common.cache.CacheProvider;
 import org.apache.shindig.common.cache.LruCacheProvider;
 import org.apache.shindig.common.cache.SoftExpiringCache;
-import org.apache.shindig.common.testing.TestExecutorService;
+import org.apache.shindig.common.testing.ImmediateExecutorService;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.http.HttpRequest;
@@ -265,7 +265,7 @@ public class DefaultGadgetSpecFactoryTest {
     CapturingPipeline capturingPipeline = new CapturingPipeline();
 
     GadgetSpecFactory forcedCacheFactory = new DefaultGadgetSpecFactory(
-        new TestExecutorService(), capturingPipeline, cacheProvider, 10000);
+        new ImmediateExecutorService(), capturingPipeline, cacheProvider, 10000);
 
     forcedCacheFactory.getGadgetSpec(createContext(SPEC_URL, false));
 
@@ -334,7 +334,7 @@ public class DefaultGadgetSpecFactoryTest {
     specFactory.getGadgetSpec(createContext(SPEC_URL, false));
   }
 
-  private static class CountingExecutor extends TestExecutorService {
+  private static class CountingExecutor extends ImmediateExecutorService {
     int runnableCount = 0;
 
     @Override

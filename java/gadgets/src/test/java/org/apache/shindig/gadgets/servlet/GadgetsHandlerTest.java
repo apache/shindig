@@ -31,7 +31,7 @@ import org.apache.shindig.auth.SecurityTokenException;
 import org.apache.shindig.common.EasyMockTestCase;
 import org.apache.shindig.common.JsonAssert;
 import org.apache.shindig.common.testing.FakeGadgetToken;
-import org.apache.shindig.common.testing.TestExecutorService;
+import org.apache.shindig.common.testing.ImmediateExecutorService;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.util.FakeTimeSource;
 import org.apache.shindig.gadgets.RenderingContext;
@@ -107,7 +107,7 @@ public class GadgetsHandlerTest extends EasyMockTestCase {
         urlGenerator, codec, proxyUriManager, jsUriManager, proxyHandler, jsHandler,
         SPEC_REFRESH_INTERVAL, beanFilter, cajaContentRewriter);
     GadgetsHandler handler =
-        new GadgetsHandler(new TestExecutorService(), service, beanFilter);
+        new GadgetsHandler(new ImmediateExecutorService(), service, beanFilter);
     registry = new DefaultHandlerRegistry(
         injector, converter, new HandlerExecutionListener.NoOpHandler());
     registry.addHandlers(ImmutableSet.<Object> of(handler));

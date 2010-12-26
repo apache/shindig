@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * ExecutorService used for testing. Executes all tasks immediately.
  */
-public class TestExecutorService extends AbstractExecutorService {
+public class ImmediateExecutorService extends AbstractExecutorService {
     private boolean shutdown;
 
     public void execute(Runnable command) {

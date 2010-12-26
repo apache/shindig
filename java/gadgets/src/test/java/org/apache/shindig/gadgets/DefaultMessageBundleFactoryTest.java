@@ -28,7 +28,7 @@ import static org.junit.Assert.assertNull;
 import org.apache.shindig.common.cache.Cache;
 import org.apache.shindig.common.cache.CacheProvider;
 import org.apache.shindig.common.cache.LruCacheProvider;
-import org.apache.shindig.common.testing.TestExecutorService;
+import org.apache.shindig.common.testing.ImmediateExecutorService;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.util.TimeSource;
 import org.apache.shindig.config.ContainerConfig;
@@ -136,7 +136,7 @@ public class DefaultMessageBundleFactoryTest {
   private final Cache<String, MessageBundle> cache
       = cacheProvider.createCache(DefaultMessageBundleFactory.CACHE_NAME);
   private final DefaultMessageBundleFactory bundleFactory
-      = new DefaultMessageBundleFactory(new TestExecutorService(), pipeline, cacheProvider, MAX_AGE);
+      = new DefaultMessageBundleFactory(new ImmediateExecutorService(), pipeline, cacheProvider, MAX_AGE);
   private final GadgetSpec gadgetSpec;
   private final GadgetSpec externalSpec;
 
@@ -330,7 +330,7 @@ public class DefaultMessageBundleFactoryTest {
     CapturingFetcher capturingFetcher = new CapturingFetcher();
 
     MessageBundleFactory factory = new DefaultMessageBundleFactory(
-        new TestExecutorService(), capturingFetcher, cacheProvider, MAX_AGE);
+        new ImmediateExecutorService(), capturingFetcher, cacheProvider, MAX_AGE);
 
     factory.getBundle(gadgetSpec, LOCALE, false, ContainerConfig.DEFAULT_CONTAINER);
 

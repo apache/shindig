@@ -22,7 +22,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.fail;
 
-import org.apache.shindig.common.testing.TestExecutorService;
+import org.apache.shindig.common.testing.ImmediateExecutorService;
 import org.apache.shindig.gadgets.Gadget;
 import org.junit.Test;
 
@@ -55,7 +55,7 @@ public class ConcurrentPreloaderServiceTest {
     preloader.tasks.add(new TestPreloadCallable(
         new DataPreload(PRELOAD_STRING_KEY, PRELOAD_STRING_VALUE)));
 
-    PreloaderService service = new ConcurrentPreloaderService(new TestExecutorService(),
+    PreloaderService service = new ConcurrentPreloaderService(new ImmediateExecutorService(),
         preloader);
 
     Collection<PreloadedData> preloads = service.preload((Gadget) null);
@@ -86,7 +86,7 @@ public class ConcurrentPreloaderServiceTest {
     preloader.tasks.add(new TestPreloadCallable(
         new DataPreload(PRELOAD_MAP_KEY, PRELOAD_MAP_VALUE)));
 
-    PreloaderService service = new ConcurrentPreloaderService(new TestExecutorService(),
+    PreloaderService service = new ConcurrentPreloaderService(new ImmediateExecutorService(),
         preloader);
 
     Collection<PreloadedData> preloads =

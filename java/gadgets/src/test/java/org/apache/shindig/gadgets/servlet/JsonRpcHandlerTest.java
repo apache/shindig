@@ -22,7 +22,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import org.apache.shindig.common.testing.TestExecutorService;
+import org.apache.shindig.common.testing.ImmediateExecutorService;
 import org.apache.shindig.gadgets.process.ProcessingException;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 
@@ -40,7 +40,7 @@ public class JsonRpcHandlerTest {
   private final FakeProcessor processor = new FakeProcessor();
   private final FakeIframeUriManager urlGenerator = new FakeIframeUriManager();
   private final JsonRpcHandler jsonRpcHandler
-      = new JsonRpcHandler(new TestExecutorService(), processor, urlGenerator);
+      = new JsonRpcHandler(new ImmediateExecutorService(), processor, urlGenerator);
 
   private JSONObject createContext(String lang, String country)
       throws JSONException {
