@@ -84,7 +84,7 @@ public class ImageResizeRewriter extends DomWalker.Rewriter {
     }
 
     private boolean isEmpty(Element element, String attribute) {
-      return element.getAttribute(attribute).isEmpty();
+      return "".equals(element.getAttribute(attribute));
     }
 
     public boolean revisit(Gadget gadget, List<Node> nodes) throws RewritingException {
@@ -174,7 +174,7 @@ public class ImageResizeRewriter extends DomWalker.Rewriter {
       }
 
       Integer value = null;
-      if (!integerPrefix.isEmpty()) {
+      if (!"".equals(integerPrefix)) {
         try {
           value = NumberUtils.createInteger(integerPrefix);
         } catch (NumberFormatException e) {
