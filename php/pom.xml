@@ -101,7 +101,7 @@
 		  <arg value="-o" />
 		  <arg value="HTML:frames:DOM/default" />
 		  <arg value="--title" />
-		  <arg value="Apache Shindig ${version}" />
+		  <arg value="Apache Shindig ${project.version}" />
 		</exec>
 	      </target>
 	    </configuration>
