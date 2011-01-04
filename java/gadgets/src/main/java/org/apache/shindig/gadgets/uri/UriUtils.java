@@ -62,7 +62,9 @@ public final class UriUtils {
     CACHING_DIRECTIVES(ImmutableSet.of("vary", "expires", "date", "pragma",
                                        "cache-control", "etag", "last-modified")),
 
-    CLIENT_STATE_DIRECTIVES(ImmutableSet.of("set-cookie", "www-authenticate")),
+    CLIENT_STATE_DIRECTIVES(ImmutableSet.of("set-cookie", "set-cookie2", "www-authenticate")),
+
+    AUTHENTICATION_DIRECTIVES(ImmutableSet.of("www-authenticate")),
 
     // Headers that the fetcher itself would like to fill. For example,
     // httpclient library crashes if Content-Length header is set in the

@@ -99,9 +99,9 @@ public class AccelHandler {
     // response.
     HttpResponseBuilder response = new HttpResponseBuilder();
     UriUtils.copyResponseHeadersAndStatusCode(
-        results, response, remapInternalServerError, true,
+        results, response, remapInternalServerError, false,
         UriUtils.DisallowedHeaders.OUTPUT_TRANSFER_DIRECTIVES,
-        UriUtils.DisallowedHeaders.CLIENT_STATE_DIRECTIVES);
+        UriUtils.DisallowedHeaders.AUTHENTICATION_DIRECTIVES);
 
     // Override the content type of the final http response if the input request
     // had the rewrite mime type header.

@@ -306,4 +306,32 @@ public class HtmlAccelServletTest extends ServletTestFixture {
     assertEquals(5001, recorder.getHttpStatusCode());
     assertFalse(rewriter.responseWasRewritten());
   }
+
+  @Test
+  public void testSetCookieHeadersPassed() throws Exception {
+    String url = "http://example.org/data.html";
+    String data = "<html><body>Hello World</body></html>";
+
+    ((FakeCaptureRewriter) rewriter).setContentToRewrite(REWRITE_CONTENT);
+    HttpRequest req = new HttpRequest(Uri.parse(url));
+    req.addHeader("Host", Uri.parse(url).getAuthority());
+    HttpResponse resp = new HttpResponseBuilder()
+        .setResponse(data.getBytes())
+        .setHeader("Content-Type", "text/html")
+        .setHeader("Set-Cookie", "name=value")
+        .setHeader("Set-Cookie2", "name2=value2")
+        .setHttpStatusCode(200)
+        .create();
+    expect(pipeline.execute(req)).andReturn(resp).once();
+    expectRequest("", url);
+    replay();
+
+    servlet.doGet(request, recorder);
+    verify();
+    assertEquals(recorder.getHeader("Set-Cookie"), "name=value");
+    assertEquals(recorder.getHeader("Set-Cookie2"), "name2=value2");
+    assertEquals(REWRITE_CONTENT, recorder.getResponseAsString());
+    assertEquals(200, recorder.getHttpStatusCode());
+    assertTrue(rewriter.responseWasRewritten());    
+  }
 }
