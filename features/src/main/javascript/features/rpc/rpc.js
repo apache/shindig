@@ -377,7 +377,7 @@ if (!gadgets.rpc) { // make lib resilient to double-inclusion
      *   {id: <siblingId>, origin: <siblingOrigin>} otherwise.
      */
     function parseSiblingId(id) {
-      if (id[0] == '/') {
+      if (id.charAt(0) == '/') {
         var delimiter = id.indexOf(ID_ORIGIN_DELIMITER);
         var siblingId = delimiter > 0 ? id.substring(1, delimiter) : id.substring(1);
         var origin = delimiter > 0 ? id.substring(delimiter + 1) : null;
@@ -631,7 +631,7 @@ if (!gadgets.rpc) { // make lib resilient to double-inclusion
     }
 
     function setupChildIframe(gadgetId, opt_frameurl, opt_authtoken, opt_forcesecure) {
-      if (gadgetId[0] != '/') {
+      if (gadgetId.charAt(0) != '/') {
         // only set up child (and not sibling) iframe
         if (!gadgets.util) {
           return;
@@ -812,7 +812,7 @@ if (!gadgets.rpc) { // make lib resilient to double-inclusion
 
         if (targetId === '..') {
           from = rpcId;
-        } else if (targetId[0] == '/') {
+        } else if (targetId.charAt(0) == '/') {
           // sending to sibling
           from = makeSiblingId(rpcId, gadgets.rpc.getOrigin(location.href));
         }
