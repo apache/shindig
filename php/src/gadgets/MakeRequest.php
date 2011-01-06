@@ -29,7 +29,7 @@ require_once 'src/gadgets/MakeRequestOptions.php';
  *   $params->setAuthz('SIGNED')
  *          ->setNoCache(true)
  *          ->setSignViewer(false)
- *          ->setSecurityTokenString($_GET('st'));
+ *          ->setSecurityTokenString(BasicSecurityToken::getTokenStringFromRequest());
  *   $result = $this->makeRequest->fetch($context, $params);
  *   $responseCode = $result->getHttpCode();
  *   $responseText = $result->getResponseContent();

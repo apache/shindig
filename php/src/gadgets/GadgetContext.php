@@ -39,7 +39,6 @@ class GadgetContext {
   protected $containerConfig = null;
   protected $container = null;
   protected $refreshInterval;
-  protected $rawToken;
 
   public function __construct($renderingContext) {
     // Rendering context is set by the calling event handler (either GADGET or CONTAINER)
@@ -262,35 +261,6 @@ class GadgetContext {
   }
 
   /**
-   * returns raw encoded token
-   * 
-   * @return string
-   */
-  public function getRawToken() {
-    if ($this->rawToken) {
-      return $this->rawToken;
-    }
-
-    $this->rawToken = isset($_GET['st']) ? $_GET['st'] :
-                      (isset($_POST['st']) ? $_POST['st'] :
-                          $this->parseAuthorization($_SERVER['AUTHORIZATION']));
-
-
-    return $this->rawToken;
-  }
-
-  private function parseAuthorization($authHeader) {
-    if (substr($authHeader, 0, 5) != 'OAuth') {
-      return '';
-    }
-    // Ignore OAuth 1.0a
-    if (strpos($authHeader, "oauth_signature_method")) {
-      return '';
-    }
-    return trim(substr($authHeader, 6));
-  }
-
-  /**
    * Extracts the 'st' token from the GET or POST params and calls the
    * signer to validate the token
    *
@@ -302,7 +272,7 @@ class GadgetContext {
       return null;
     }
 
-    $token = $this->getRawToken();
+    $token = BasicSecurityToken::getTokenStringFromRequest();
 
     return $this->validateToken($token, $signer);
   }

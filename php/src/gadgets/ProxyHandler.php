@@ -33,7 +33,7 @@ class ProxyHandler extends ProxyBase {
    */
   public function fetch($url) {
     // TODO: Check to see if we can just use MakeRequestOptions::fromCurrentRequest
-    $st = isset($_GET['st']) ? $_GET['st'] : (isset($_POST['st']) ? $_POST['st'] : false);
+    $st = BasicSecurityToken::getTokenStringFromRequest();
     $body = isset($_GET['postData']) ? $_GET['postData'] : (isset($_POST['postData']) ? $_POST['postData'] : false);
     $authz = isset($_GET['authz']) ? $_GET['authz'] : (isset($_POST['authz']) ? $_POST['authz'] : null);
     $headers = isset($_GET['headers']) ? $_GET['headers'] : (isset($_POST['headers']) ? $_POST['headers'] : null);

@@ -464,7 +464,7 @@ class TemplateParser {
         }
 
         // attach security token in the flash var
-        $st = 'st=' . $_GET['st'];
+        $st = 'st=' . BasicSecurityToken::getTokenStringFromRequest();
         if (array_key_exists('flashvars', $swfConfig)) {
           $swfConfig['flashvars'] = $swfConfig['flashvars'] . '&' . $st;
         } else {

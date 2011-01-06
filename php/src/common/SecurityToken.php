@@ -32,6 +32,13 @@ abstract class SecurityToken {
   static public $ANONYMOUS = '-1';
 
   /**
+   * should return the actual raw token string from get, post or header
+   * 
+   * @return string
+   */
+  abstract static public function getTokenStringFromRequest();
+
+  /**
    * is this an anonymous token? Always check this before using the owner/viewer/etc
    *
    * @return boolean if it's anonymous

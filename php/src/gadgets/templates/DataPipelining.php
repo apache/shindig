@@ -152,7 +152,7 @@ class DataPipelining {
     $httpRequests = array();
     $decodedResponse = array();
     // Using the same gadget security token for all social & http requests so everything happens in the right context
-    if (!isset($_GET['st'])) {
+    if (! BasicSecurityToken::getTokenStringFromRequest()) {
     	throw new ExpressionException("No security token set, required for data-pipeling");
     }
     $securityToken = $_GET['st'];

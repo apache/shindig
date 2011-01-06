@@ -18,6 +18,7 @@
  * under the License.
  */
 
+require_once 'external/OAuth/OAuth.php';
 
 /**
  * Primitive token implementation that uses stings as tokens.
@@ -41,6 +42,7 @@ class BasicSecurityToken extends SecurityToken {
   private $CONTAINER_KEY = "c";
 
   protected $authenticationMode;
+  static protected $rawToken;
 
   /**
    * {@inheritDoc}
@@ -72,6 +74,41 @@ class BasicSecurityToken extends SecurityToken {
    */
   static public function createFromValues($owner, $viewer, $app, $domain, $appUrl, $moduleId, $containerId) {
     return new BasicSecurityToken(null, null, $owner, $viewer, $app, $domain, $appUrl, $moduleId, $containerId);
+  }
+
+  /**
+   * gets security token string from get, post or auth header
+   * @return string
+   */
+  static public function getTokenStringFromRequest() {
+    if (self::$rawToken) {
+      return self::$rawToken;
+    }
+
+    $headers = OAuthUtil::get_headers();
+
+    self::$rawToken = isset($_GET['st']) ? $_GET['st'] :
+                      (isset($_POST['st']) ? $_POST['st'] :
+                          (isset($headers['Authorization']) ? self::parseAuthorization($headers['Authorization']) : ''));
+
+
+    return self::$rawToken;
+  }
+
+  /**
+   *
+   * @param string $authHeader
+   * @return string
+   */
+  static private function parseAuthorization($authHeader) {
+    if (substr($authHeader, 0, 5) != 'OAuth') {
+      return '';
+    }
+    // Ignore OAuth 1.0a
+    if (strpos($authHeader, "oauth_signature_method")) {
+      return '';
+    }
+    return trim(substr($authHeader, 6));
   }
 
   public function __construct($token, $maxAge, $owner, $viewer, $app, $domain, $appUrl, $moduleId, $containerId) {

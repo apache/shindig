@@ -202,7 +202,7 @@ class MakeRequestOptions {
             ->setOAuthUseToken(MakeRequestOptions::getRequestParam('OAUTH_USE_TOKEN'))
             ->setOAuthReceivedCallback(MakeRequestOptions::getRequestParam('OAUTH_RECEIVED_CALLBACK'))
             ->setOAuthClientState(MakeRequestOptions::getRequestParam('oauthState'))
-            ->setSecurityTokenString(MakeRequestOptions::getRequestParam('st'));
+            ->setSecurityTokenString(BasicSecurityToken::getTokenStringFromRequest());
 
     return $options;
   }

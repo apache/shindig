@@ -105,7 +105,7 @@ abstract class ApiServlet extends HttpServlet {
 
 
     // look for encrypted security token
-    $token = isset($_POST['st']) ? $_POST['st'] : (isset($_GET['st']) ? $_GET['st'] : '');
+    $token = BasicSecurityToken::getTokenStringFromRequest();
     if (empty($token)) {
       if (Config::get('allow_anonymous_token')) {
         // no security token, continue anonymously, remeber to check

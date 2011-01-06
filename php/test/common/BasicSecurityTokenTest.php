@@ -50,6 +50,10 @@ class BasicSecurityTokenTest extends PHPUnit_Framework_TestCase {
   protected function tearDown() {
     $this->BasicSecurityToken = null;
     $this->anonymousToken = null;
+    TestBasicSecurityToken::resetRawToken();
+    unset($_SERVER['HTTP_AUTHORIZATION']);
+    unset($_POST['st']);
+    unset($_GET['st']);
     parent::tearDown();
   }
 
@@ -135,4 +139,38 @@ class BasicSecurityTokenTest extends PHPUnit_Framework_TestCase {
   public function testIsAnonymous() {
     $this->assertFalse($this->BasicSecurityToken->isAnonymous());
   }
+
+  public function testGetRawToken() {
+      $_GET['st'] = 'abc';
+
+      $this->assertEquals('abc', BasicSecurityToken::getTokenStringFromRequest());
+      TestBasicSecurityToken::resetRawToken();
+
+      $_POST['st'] = 'def';
+      $_SERVER['HTTP_AUTHORIZATION'] = 'OAuth ghi';
+      $this->assertEquals('abc', BasicSecurityToken::getTokenStringFromRequest());
+
+      unset($_GET['st']);
+
+      // test if runtime cache works
+      $this->assertEquals('abc', BasicSecurityToken::getTokenStringFromRequest());
+      TestBasicSecurityToken::resetRawToken();
+      //should use post now
+      $this->assertEquals('def', BasicSecurityToken::getTokenStringFromRequest());
+      TestBasicSecurityToken::resetRawToken();
+
+      unset($_POST['st']);
+
+      // get token from OAuth header
+      $this->assertEquals('ghi', BasicSecurityToken::getTokenStringFromRequest());
+  }
+}
+
+class TestBasicSecurityToken extends BasicSecurityToken
+{
+    static public function resetRawToken()
+    {
+        parent::$rawToken = null;
+    }
+
 }
