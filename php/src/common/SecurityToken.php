@@ -36,7 +36,7 @@ abstract class SecurityToken {
    * 
    * @return string
    */
-  abstract static public function getTokenStringFromRequest();
+  static public function getTokenStringFromRequest() {}
 
   /**
    * is this an anonymous token? Always check this before using the owner/viewer/etc
