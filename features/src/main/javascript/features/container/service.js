@@ -112,14 +112,8 @@ shindig.container.Service.prototype.getGadgetMetadata = function(
       } else {
         var currentTimeMs = shindig.container.util.getCurrentTimeMs();
         for (var id in response) {
-          var resp = response[id]; 
-          resp[shindig.container.MetadataParam.URL] = id;
-          
-          // This ignores time to fetch metadata. Okay, expect to be < 2s.
-          resp[shindig.container.MetadataParam.LOCAL_EXPIRE_TIME]
-              = resp[shindig.container.MetadataResponse.EXPIRE_TIME_MS]
-              - resp[shindig.container.MetadataResponse.RESPONSE_TIME_MS]
-              + currentTimeMs;
+          var resp = response[id];
+          self.updateResponse_(resp, id, currentTimeMs);
           self.cachedMetadatas_[id] = resp;
           finalResponse[id] = resp;
         }
@@ -128,6 +122,63 @@ shindig.container.Service.prototype.getGadgetMetadata = function(
       callback(finalResponse);
     });
   }
+};
+
+
+/**
+ * Add preloaded gadgets to cache
+ * @param {Object} response hash of gadgets metadata
+ * @param {Object} data time to override responseTime (in order to support external caching)
+ */
+shindig.container.Service.prototype.addGadgetMetadatas = function(response, refTime) {
+  this.addToCache_(response, refTime, this.cachedMetadatas_);
+};
+
+
+/**
+ * Add preloaded tokens to cache
+ * @param {Object} response hash of gadgets metadata
+ * @param {Object} refTime data time to override responseTime (in order to support external caching)
+ */
+shindig.container.Service.prototype.addGadgetTokens = function(response, refTime) {
+  this.addToCache_(response, refTime, this.cachedTokens_);
+};
+
+
+/**
+ * Utility function to add data to cache
+ * @param {Object} response hash of gadgets metadata
+ * @param {Object} refTime data time to override responseTime (in order to support external caching)
+ * @param {Object} cache the cache to update
+ * @private
+ */
+shindig.container.Service.prototype.addToCache_ = function(response, refTime, cache) {
+  var currentTimeMs = shindig.container.util.getCurrentTimeMs();
+  for (var id in response) {
+    var resp = response[id];
+    this.updateResponse_(resp, id, currentTimeMs, refTime);
+    cache[id] = resp;
+  }
+};
+
+
+/**
+ * Update gadget data, set gadget id and calculate expiration time
+ * @param {Object} resp gadget metadata item
+ * @param {string} id gadget id
+ * @param {Object} opt_refTime data time to override responseTime (support external caching)
+ * @param {Object} currentTimeMs current time
+ * @private
+ */
+shindig.container.Service.prototype.updateResponse_ = function(
+    resp, id, currentTimeMs, opt_refTime) { 
+  resp[shindig.container.MetadataParam.URL] = id;
+  // This ignores time to fetch metadata. Okay, expect to be < 2s.
+  resp[shindig.container.MetadataParam.LOCAL_EXPIRE_TIME]
+      = resp[shindig.container.MetadataResponse.EXPIRE_TIME_MS]
+      - (opt_refTime == null ? 
+          resp[shindig.container.MetadataResponse.RESPONSE_TIME_MS] : opt_refTime)
+      + currentTimeMs;
 };
 
 

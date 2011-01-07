@@ -71,6 +71,16 @@ ContainerTest.prototype.testUnloadGadgets = function() {
   this.assertTrue('3', container.preloadedGadgetUrls_['preloaded3.xml'] != null);
 };
 
+ContainerTest.prototype.testPreloadConfigGadgets = function() {
+  this.setupGadgetsRpcRegister();
+  var container = new shindig.container.Container( 
+    { 'preloadMetadatas' : { 'preloaded1.xml' : {}}});
+  var test = null;
+  this.assertTrue('1', 'preloaded1.xml' in container.preloadedGadgetUrls_);
+  this.assertFalse('2', 'preloaded2.xml' in container.preloadedGadgetUrls_);
+};
+
+
 ContainerTest.prototype.testNavigateGadget = function() {
   this.setupGadgetsRpcRegister();
   var container = new shindig.container.Container({

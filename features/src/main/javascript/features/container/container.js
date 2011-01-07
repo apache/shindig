@@ -114,6 +114,8 @@ shindig.container.Container = function(opt_config) {
    */
   this.tokenRefreshTimer_ = null;
 
+  this.preloadFromConfig_(config);
+
   this.registerRpcServices_();
 
   this.onConstructed(config);
@@ -221,17 +223,7 @@ shindig.container.Container.prototype.preloadGadgets = function(gadgetUrls, opt_
   
   this.refreshService_();
   this.service_.getGadgetMetadata(request, function(response) {
-    for (var id in response) {
-      if (response[id].error) {
-        gadgets.warn(['Failed to preload gadget ', id, '.'].join(''));
-      } else {
-        self.addPreloadedGadgetUrl_(id);
-        if (response[id][shindig.container.MetadataResponse.NEEDS_TOKEN_REFRESH]) {
-          // Safe to re-schedule many times.
-          self.scheduleRefreshTokens_();
-        }
-      }
-    }
+    self.addPreloadGadgets_(response);
     callback(response);
   });
 };
@@ -351,6 +343,26 @@ shindig.container.ContainerConfig.TOKEN_REFRESH_INTERVAL = 'tokenRefreshInterval
  */
 shindig.container.ContainerConfig.NAVIGATE_CALLBACK = 'navigateCallback';
 
+/**
+ * Provide server reference time for preloaded data. 
+ * This time is used instead of each response time in order to support server caching of results.
+ * @type {number}
+ * @const
+ */
+shindig.container.ContainerConfig.PRELOAD_REF_TIME = 'preloadRefTime';
+/**
+ * Preloaded hash of gadgets metadata
+ * @type {Object}
+ * @const
+ */
+shindig.container.ContainerConfig.PRELOAD_METADATAS = 'preloadMetadatas';
+/**
+ * Preloaded hash of gadgets tokens
+ * @type {Object}
+ * @const
+ */
+shindig.container.ContainerConfig.PRELOAD_TOKENS = 'preloadTokens';
+
 
 /**
  * Enum keys for gadget rendering params. Gadget rendering params affect which
@@ -407,6 +419,45 @@ shindig.container.ContainerRender.WIDTH = 'width';
 // -----------------------------------------------------------------------------
 // Private variables and methods.
 // -----------------------------------------------------------------------------
+
+/**
+ * Add list of gadgets to preload list
+ * @param {Object} hash of gadgets data
+ * @private
+ */
+shindig.container.Container.prototype.addPreloadGadgets_ = function(response) {
+  for (var id in response) {
+    if (response[id].error) {
+      gadgets.warn(['Failed to preload gadget ', id, '.'].join(''));
+    } else {
+      this.addPreloadedGadgetUrl_(id);
+      if (response[id][shindig.container.MetadataResponse.NEEDS_TOKEN_REFRESH]) {
+        // Safe to re-schedule many times.
+        this.scheduleRefreshTokens_();
+      }
+    }
+  }
+}
+
+
+/**
+ * Preload gadgets and tokens from container config.
+ * Support caching by providing server time to override respnse time usage
+ * @param {Object} config container configuration
+ * @private
+ */
+shindig.container.Container.prototype.preloadFromConfig_ = function(config) {
+  var gadgets = shindig.container.util.getSafeJsonValue(
+      config, shindig.container.ContainerConfig.PRELOAD_METADATAS, {});
+  var tokens = shindig.container.util.getSafeJsonValue(
+      config, shindig.container.ContainerConfig.PRELOAD_TOKENS, {});
+  var refTime = shindig.container.util.getSafeJsonValue(
+      config, shindig.container.ContainerConfig.PRELOAD_REF_TIME, null);
+
+  this.service_.addGadgetMetadatas(gadgets, refTime);
+  this.service_.addGadgetTokens(tokens, refTime);
+  this.addPreloadGadgets_(gadgets);
+}
 
 
 /**

@@ -149,3 +149,33 @@ ServiceTest.prototype.testUncacheStaleGadgetMetadataExcept = function() {
   this.assertTrue(service.cachedMetadatas_['except2.xml'] != null);
 };
 
+ServiceTest.prototype.testUpdateResponse = function() {
+  var service = new shindig.container.Service();
+  this.setupUtilCurrentTimeMs(120);
+
+  var data = {responseTimeMs : 100, expireTimeMs : 105};
+  service.addGadgetMetadatas({'id' : data});
+  this.assertEquals("id", data.url);
+  this.assertEquals(125, data.localExpireTimeMs);
+  
+  data = {responseTimeMs : 100, expireTimeMs : 105};
+  service.addGadgetMetadatas({'id' : data}, 104);
+  this.assertEquals("id", data.url);
+  this.assertEquals(121, data.localExpireTimeMs);
+}
+
+ServiceTest.prototype.testAddToCache = function() {
+  var service = new shindig.container.Service();
+  this.setupUtilCurrentTimeMs(120);
+
+  var cache = {};
+  service.addToCache_(
+    { "id1": { responseTimeMs : 100, expireTimeMs : 105 },
+      "id2": { responseTimeMs : 100, expireTimeMs : 135 }},
+    103, cache);
+  
+  this.assertTrue(122, cache["id1"].localExpireTimeMs);
+  this.assertTrue(152, cache["id2"].localExpireTimeMs);
+}
+  
+
