@@ -46,11 +46,14 @@ import java.util.Map;
 public class AbsolutePathReferenceVisitor implements Visitor {
   public enum Tags {
     // Resources which would be fetched by the browser when rendering the page.
+    //TODO: Document the second parameter for clarity
+    // Does it make sense to factor this out into shindig properties?
     RESOURCES(ImmutableMap.<String, String>builder()
         .put("body", "background")
         .put("img", "src")
         .put("input", "src")
         .put("link", "href")
+        .put("embed", "src")
         .put("script", "src").build()),
 
     // Hyperlinks that the user clicks on to navigate pages.
