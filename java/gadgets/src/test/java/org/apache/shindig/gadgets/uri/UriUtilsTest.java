@@ -18,8 +18,8 @@
  */
 package org.apache.shindig.gadgets.uri;
 
-import com.google.inject.internal.ImmutableList;
-import com.google.inject.internal.ImmutableMap;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;

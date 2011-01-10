@@ -17,7 +17,8 @@
  */
 package org.apache.shindig.gadgets.parse;
 
-import com.google.inject.internal.ImmutableList;
+import com.google.common.collect.ImmutableList;
+
 import org.apache.shindig.gadgets.parse.caja.CajaHtmlParser;
 import org.apache.shindig.gadgets.parse.nekohtml.NekoSimplifiedHtmlParser;
 import org.junit.Before;

@@ -24,11 +24,11 @@ import java.util.Map;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.GadgetException;
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.inject.internal.Join;
 
 import java.util.List;
 
@@ -61,7 +61,7 @@ public class TestFeatureRegistry extends FeatureRegistry {
     }
     
     public TestFeatureRegistry build() throws GadgetException {
-      return build(Join.join(",", featureFiles));
+      return build(Joiner.on(",").join(featureFiles));
     }
     
     public Builder addFeatureFile(String featureFile) {

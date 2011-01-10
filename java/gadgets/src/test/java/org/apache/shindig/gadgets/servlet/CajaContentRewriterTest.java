@@ -22,7 +22,7 @@ import com.google.caja.plugin.PluginCompiler;
 import com.google.caja.plugin.PluginMeta;
 import com.google.caja.reporting.BuildInfo;
 import com.google.caja.reporting.MessageQueue;
-import com.google.inject.internal.ImmutableList;
+import com.google.common.collect.ImmutableList;
 import org.apache.shindig.common.cache.CacheProvider;
 import org.apache.shindig.common.cache.LruCacheProvider;
 import org.apache.shindig.common.uri.Uri;
