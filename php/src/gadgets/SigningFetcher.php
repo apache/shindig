@@ -33,6 +33,7 @@ class SigningFetcher extends RemoteContentFetcher {
   protected static $OPENSOCIAL_VIEWERID = "opensocial_viewer_id";
   protected static $OPENSOCIAL_APPID = "opensocial_app_id";
   protected static $OPENSOCIAL_APPURL = "opensocial_app_url";
+  protected static $OPENSOCIAL_INSTANCEID = "opensocial_instance_id";
   protected static $XOAUTH_PUBLIC_KEY_OLD = "xoauth_signature_publickey";
   protected static $XOAUTH_PUBLIC_KEY_NEW = "xoauth_public_key";
   protected static $ALLOWED_PARAM_NAME = '^[-_[:alnum:]]+$';
@@ -166,23 +167,27 @@ class SigningFetcher extends RemoteContentFetcher {
     if ($signOwner) {
       $owner = $token->getOwnerId();
       if ($owner != null) {
-	$msgParams[SigningFetcher::$OPENSOCIAL_OWNERID] = $owner;
+	    $msgParams[SigningFetcher::$OPENSOCIAL_OWNERID] = $owner;
       }
     }
     if ($signViewer) {
       $viewer = $token->getViewerId();
       if ($viewer != null) {
-	$msgParams[SigningFetcher::$OPENSOCIAL_VIEWERID] = $viewer;
+	    $msgParams[SigningFetcher::$OPENSOCIAL_VIEWERID] = $viewer;
       }
     }
     if ($signOwner || $signViewer) {
       $app = $token->getAppId();
       if ($app != null) {
-	$msgParams[SigningFetcher::$OPENSOCIAL_APPID] = $app;
+	    $msgParams[SigningFetcher::$OPENSOCIAL_APPID] = $app;
       }
       $url = $token->getAppUrl();
       if ($url != null) {
-	$msgParams[SigningFetcher::$OPENSOCIAL_APPURL] = $url;
+	    $msgParams[SigningFetcher::$OPENSOCIAL_APPURL] = $url;
+      }
+      $moduleId = $token->getModuleId();
+      if ($moduleId != null) {
+	    $msgParams[SigningFetcher::$OPENSOCIAL_INSTANCEID] = $moduleId;
       }
     }
   }

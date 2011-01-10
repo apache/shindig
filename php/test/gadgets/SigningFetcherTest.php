@@ -51,12 +51,12 @@ EOD;
  * SigningFetcher test case.
  */
 class SigningFetcherTest extends PHPUnit_Framework_TestCase {
-  
+
   /**
    * @var SigningFetcher
    */
   private $signingFetcher;
-  
+
   /**
    * Prepares the environment before running a test.
    */
@@ -125,7 +125,7 @@ EOD;
     // OAuth Request Body Hash 1.0 Draft 4 Example
     $this->assertEquals('Lve95gjOVATpfV8EL5X4nxwjKHE=', $query['oauth_body_hash']);
   }
-  
+
   /**
    * Tests SigningFetcher->fetchRequest
    */
@@ -137,7 +137,7 @@ EOD;
     $this->signingFetcher->fetchRequest($request);
     $this->verifySignedRequest($request);
   }
-  
+
   private function verifySignedRequest(RemoteContentRequest $request) {
     $url = parse_url($request->getUrl());
     $query = array();
@@ -149,6 +149,12 @@ EOD;
     } else {
       $this->assertEquals(base64_encode(sha1($request->getPostBody(), true)), $query['oauth_body_hash']);
     }
+    $this->assertEquals('owner', $query['opensocial_owner_id']);
+    $this->assertEquals('viewer', $query['opensocial_viewer_id']);
+    $this->assertEquals('app', $query['opensocial_app_id']);
+    $this->assertEquals('appUrl', $query['opensocial_app_url']);
+    $this->assertEquals('1', $query['opensocial_instance_id']);
+    $this->assertEquals($query['xoauth_signature_publickey'], $query['xoauth_public_key']);
     $oauthRequest = OAuthRequest::from_request($request->getMethod(), $request->getUrl(), array_merge($query, $post));
     $signature_method = new MockSignatureMethod();
     $signature_valid = $signature_method->check_signature($oauthRequest, null, null, $query['oauth_signature']);
