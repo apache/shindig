@@ -50,8 +50,7 @@ public class ETagFilter implements Filter {
   public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
       throws IOException, ServletException {
     if (request instanceof HttpServletRequest && response instanceof HttpServletResponse) {
-      ETaggingHttpResponse taggingResponse =
-          new ETaggingHttpResponse((HttpServletRequest) request, (HttpServletResponse) response);
+      ETaggingHttpResponse taggingResponse = createTaggingResponse(request, response);
       try {
         chain.doFilter(request, taggingResponse);
       } finally {
@@ -64,4 +63,8 @@ public class ETagFilter implements Filter {
     }
   }
 
+  protected ETaggingHttpResponse createTaggingResponse(
+      ServletRequest request, ServletResponse response) {
+    return new ETaggingHttpResponse((HttpServletRequest) request, (HttpServletResponse) response);
+  }
 }

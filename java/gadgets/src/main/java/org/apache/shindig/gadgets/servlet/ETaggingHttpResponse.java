@@ -17,6 +17,8 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
+import com.google.common.annotations.VisibleForTesting;
+
 import org.apache.http.util.ByteArrayBuffer;
 import org.apache.shindig.common.util.HashUtil;
 
@@ -46,11 +48,11 @@ public class ETaggingHttpResponse extends HttpServletResponseWrapper {
   public static final String RESPONSE_HEADER = "ETag";
   public static final String REQUEST_HEADER = "If-None-Match";
 
-  private final HttpServletRequest request;
-  private final BufferServletOutputStream stream;
-  private ServletOutputStream originalStream;
-  private PrintWriter writer;
-  private boolean batching;
+  protected final HttpServletRequest request;
+  protected final BufferServletOutputStream stream;
+  protected ServletOutputStream originalStream;
+  protected PrintWriter writer;
+  protected boolean batching;
 
   public ETaggingHttpResponse(HttpServletRequest request, HttpServletResponse response) {
     super(response);
@@ -155,8 +157,7 @@ public class ETaggingHttpResponse extends HttpServletResponseWrapper {
       if (etag.equals(reqEtag)) {
         emitETagMatchedResult();
       } else {
-        getResponse().setContentLength(bytes.length);
-        getResponse().getOutputStream().write(bytes);
+        emitFullResponseBody(bytes);
       }
     } else if (bytes.length != 0) {
       originalStream.write(bytes);
@@ -164,18 +165,24 @@ public class ETaggingHttpResponse extends HttpServletResponseWrapper {
     }
   }
 
-  protected void emitETagMatchedResult() throws IOException {
+  protected void emitETagMatchedResult() {
     ((HttpServletResponse) getResponse()).setStatus(HttpServletResponse.SC_NOT_MODIFIED);
     getResponse().setContentLength(0);
+  }
+
+  protected void emitFullResponseBody(byte[] bytes) throws IOException {
+    getResponse().setContentLength(bytes.length);
+    getResponse().getOutputStream().write(bytes);
   }
 
   /**
    * A ServletOutputStream that stores the data in a byte array buffer.
    */
-  private class BufferServletOutputStream extends ServletOutputStream {
+  @VisibleForTesting
+  class BufferServletOutputStream extends ServletOutputStream {
     private static final int BUFFER_INITIAL_CAPACITY = 16384;
 
-    private MessageDigest digest = HashUtil.getMessageDigest();
+    private MessageDigest digest = null;
     private ByteArrayBuffer buffer = new ByteArrayBuffer(BUFFER_INITIAL_CAPACITY);
 
     @Override
@@ -194,20 +201,26 @@ public class ETaggingHttpResponse extends HttpServletResponseWrapper {
 
     public void reset() {
       buffer.clear();
-      digest.reset();
+      digest = null;
     }
 
     public String getContentHash() {
+      ensureDigestObjectExists();
       String hash = HashUtil.bytesToHex(digest.digest());
       digest = null;
       return hash;
     }
 
     private void updateDigest(int b) {
+      ensureDigestObjectExists();
+      digest.update((byte) b);
+    }
+
+    private void ensureDigestObjectExists() {
       if (digest == null) {
         digest = HashUtil.getMessageDigest();
+        digest.update(buffer.toByteArray());
       }
-      digest.update((byte) b);
     }
   }
 }
