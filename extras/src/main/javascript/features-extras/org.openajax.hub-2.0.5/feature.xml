@@ -27,6 +27,7 @@ specific language governing permissions and limitations under the License.
   <container>
     <script src="OpenAjax-mashup.js"/>
     <script src="iframe.js"/>
+    <script src="inline.js"/> 
     <script src="crypto.js"/>
   </container>
 </feature>
