@@ -103,7 +103,7 @@ class GadgetHrefRenderer extends GadgetBaseRenderer {
       $content = '<html><body><h1>An error occured fetching the gadget content</h1><p>http error code: '.$response->getHttpCode().'</p><p>'.$response->getResponseContent().'</body></html>';
     } else {
       // fetched ok, build the response document and output it
-      $content = $response->getResponseContent();
+      $content = $gadget->substitutions->substitute($response->getResponseContent());
       $content = $this->parseTemplates($content);
       $content = $this->rewriteContent($content);
       $content = $this->addTemplates($content);
