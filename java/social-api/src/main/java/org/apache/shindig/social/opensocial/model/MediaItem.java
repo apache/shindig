@@ -36,7 +36,7 @@ public interface MediaItem {
     ALBUM_ID("albumId"),
     CREATED("created"),
     DESCRIPTION("description"),
-    DURATION("DURATION"),
+    DURATION("duration"),
     FILE_SIZE("fileSize"),
     ID("id"),
     LANGUAGE("language"),
