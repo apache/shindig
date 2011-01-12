@@ -188,7 +188,7 @@ public class MediaItemHandler {
     // Retrieve userIds, albumIds, and mediaItemIds
     Set<UserId> userIds = request.getUsers();
     Set<String> albumIds = ImmutableSet.copyOf(request.getListParameter("albumId"));
-    Set<String> mediaItemIds = ImmutableSet.copyOf(request.getListParameter("mediaItemIds"));
+    Set<String> mediaItemIds = ImmutableSet.copyOf(request.getListParameter("mediaItemId"));
 
     // Exactly one user, Album, and MediaItem must be specified
     HandlerPreconditions.requireNotEmpty(userIds, "No userId specified");
