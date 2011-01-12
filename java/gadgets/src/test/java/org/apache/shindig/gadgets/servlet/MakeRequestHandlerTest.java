@@ -205,6 +205,45 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
     assertEquals(RESPONSE_BODY, results.get("body"));
     assertTrue(rewriter.responseWasRewritten());
   }
+  
+  @Test
+  public void testFetchAtom1Feed() throws Exception {
+    String txt = "<?xml version='1.0' encoding='utf-8'?>" +
+      "<feed xmlns=\"http://www.w3.org/2005/Atom\">" +
+        "<id>fooId</id>" +
+        "<title type=\"text\">feed</title>" +
+        "<updated>2011-01-07T14:26:19.879Z</updated>" +
+        "<author>" +
+          "<name>author@example.org</name>" +
+        "</author>" +
+        "<entry>" +
+          "<updated>2011-01-07T14:26:19.879Z</updated>" +
+          "<author />" +
+          "<title type=\"text\">howdy</title>" +
+          "<content type=\"application/xml\">" +
+            "<entity xmlns=\"\"><Data>hello world</Data></entity>" +
+            "</content>" +
+          "<id>entity1ID</id>" +
+          "<link href=\"http://example.org/edit/entity1ID\"/>" +
+        "</entry>" +
+      "</feed>";
+    expectGetAndReturnBody(txt);
+    expect(request.getParameter(MakeRequestHandler.CONTENT_TYPE_PARAM)).andReturn("FEED");
+    expect(request.getParameter(MakeRequestHandler.GET_SUMMARIES_PARAM)).andReturn("true");
+    replay();
+    handler.fetch(request, recorder);
+    JSONObject results = extractJsonFromResponse();
+    JSONObject feed = new JSONObject(results.getString("body"));
+    assertEquals("feed", feed.getString("Title"));
+    assertEquals("author@example.org", feed.getString("Author"));
+    assertEquals("http://example.org/file", feed.getString("URL"));
+    
+    JSONObject entry = feed.getJSONArray("Entry").getJSONObject(0);
+    assertEquals("howdy", entry.getString("Title"));
+    assertEquals("http://example.org/edit/entity1ID", entry.getString("Link"));
+    assertEquals("<entity><Data>hello world</Data></entity>",
+        entry.getString("Summary"));
+  }
 
   @Test
   public void testFetchContentTypeFeed() throws Exception {

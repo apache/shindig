@@ -30,6 +30,7 @@ import com.sun.syndication.feed.module.mediarss.types.Thumbnail;
 import com.sun.syndication.feed.synd.SyndContent;
 import com.sun.syndication.feed.synd.SyndEntry;
 import com.sun.syndication.feed.synd.SyndFeed;
+import com.sun.syndication.feed.synd.SyndLink;
 import com.sun.syndication.feed.synd.SyndPerson;
 import com.sun.syndication.io.FeedException;
 import com.sun.syndication.io.SyndFeedInput;
@@ -90,7 +91,14 @@ public class FeedProcessorImpl implements FeedProcessor {
 
         JSONObject entry = new JSONObject();
         entry.put("Title", e.getTitle());
-        entry.put("Link", e.getLink());
+        String link = e.getLink();
+        if (link == null) {
+          List<SyndLink> links = e.getLinks();
+          if (links != null && links.size() > 0) {
+            link = links.get(0).getHref();
+          }
+        }
+        entry.put("Link", link);
         if (getSummaries) {
           if (e.getContents() != null && !e.getContents().isEmpty()) {
             entry.put("Summary", ((SyndContent) e.getContents().get(0)).getValue());
