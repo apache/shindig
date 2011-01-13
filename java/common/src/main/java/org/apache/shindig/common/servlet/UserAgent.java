@@ -74,6 +74,7 @@ public final class UserAgent {
     WEBKIT,
     CHROME,
     OPERA,
+    HTML5,  // A faux-Browser useful for directly referencing HTML5 JS capability vs. "legacy".
     OTHER
   }
 }
