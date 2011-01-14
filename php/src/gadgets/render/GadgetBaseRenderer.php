@@ -28,9 +28,21 @@ class EmptyClass {
  * functions to deal with rewriting, templates, script insertion, etc
  */
 abstract class GadgetBaseRenderer extends GadgetRenderer {
+  /**
+   * @var Gadget
+   */
   public $gadget;
+  /**
+   * @var array
+   */
   public $dataContext = array();
+  /**
+   * @var array
+   */
   public $unparsedTemplates = array();
+  /**
+   * @var array
+   */
   public $dataInserts = array();
 
   /**
@@ -64,6 +76,9 @@ abstract class GadgetBaseRenderer extends GadgetRenderer {
   /**
    * If some templates could not be parsed, we paste the back into the html document
    * so javascript can take care of them
+   *
+   * @param string $content html to parse
+   * @return string
    */
   public function addTemplates($content) {
     // If $this->gadget->gadgetSpec->templatesDisableAutoProcessing == true, unparsedTemplates will be empty, so the setting is ignored here
@@ -83,6 +98,7 @@ abstract class GadgetBaseRenderer extends GadgetRenderer {
    * before we can proceeed to dom parse the resulting document
    *
    * @param string $content html to parse
+   * @return string
    */
   public function parseTemplates($content) {
     $osTemplates = array();
@@ -196,9 +212,10 @@ abstract class GadgetBaseRenderer extends GadgetRenderer {
    * the TemplateParser, and then returns the expanded template content (or '' on data)
    *
    * @param string $template
+   * @param TemplateLibrary $templateLibrary
    * @return string
    */
-  private function renderTemplate($template, $templateLibrary) {
+  private function renderTemplate($template, TemplateLibrary $templateLibrary) {
     libxml_use_internal_errors(true);
     $this->doc = new DOMDocument(null, 'utf-8');
     $this->doc->preserveWhiteSpace = true;
@@ -341,9 +358,11 @@ abstract class GadgetBaseRenderer extends GadgetRenderer {
     $script .= $this->appendPreloads($this->gadget);
     if (count($this->dataInserts)) {
       foreach ($this->dataInserts as $data) {
-        $key = $data['id'];
-        $data = json_encode($data['result']);
-        $script .= "opensocial.data.DataContext.putDataSet(\"$key\", $data);\n";
+        if (isset($data['result'])) {
+          $key = $data['id'];
+          $data = json_encode($data['result']);
+          $script .= "opensocial.data.DataContext.putDataSet(\"$key\", $data);\n";
+        }
       }
     }
     if ($this->gadget->gadgetSpec->templatesRequireLibraries) {
