@@ -45,6 +45,11 @@
     <shindig.api.compatible>3.0.0</shindig.api.compatible>
     <!-- What version of the API did we ship last -->
     <shindig.api.previous>2.0.0</shindig.api.previous>
+
+    <!-- properties that help us sort through the java 1.5/1.6 mess -->
+    <shindig.jdk.version>1.5</shindig.jdk.version>
+    <shindig.jdk.javadoc>1.5.0</shindig.jdk.javadoc>
+    <shindig.jdk.classifier></shindig.jdk.classifier>
   </properties>
 
   <prerequisites>
@@ -445,6 +450,25 @@
   <!-- P R O F I L E S                                                        -->
   <!-- ====================================================================== -->
   <profiles>
+    <profile>
+      <!-- force java5 usage -->
+      <id>java5</id>
+      <properties>
+        <shindig.jdk.version>1.5</shindig.jdk.version>
+        <shindig.jdk.javadoc>1.5.0</shindig.jdk.javadoc>
+        <shindig.jdk.classifier>java5</shindig.jdk.classifier>
+      </properties>
+    </profile>
+
+    <profile>
+      <!-- force java6 usage -->
+      <id>java6</id>
+      <properties>
+        <shindig.jdk.version>1.6</shindig.jdk.version>
+        <shindig.jdk.javadoc>1.6.0</shindig.jdk.javadoc>
+      </properties>
+    </profile>
+
     <!-- default profile that builds everything -->
     <profile>
       <id>all</id>
@@ -623,11 +647,11 @@
             <artifactId>maven-javadoc-plugin</artifactId>
             <version>2.7</version>
             <configuration>
-              <source>1.5</source>
-              <target>1.5</target>
+              <source>${shindig.jdk.version}</source>
+              <target>${shindig.jdk.version}</target>
               <encoding>${project.build.sourceEncoding}</encoding>
               <links>
-                <link>http://java.sun.com/j2se/1.5.0/docs/api</link>
+                <link>http://java.sun.com/j2se/${shindig.jdk.javadoc}/docs/api</link>
                 <link>http://java.sun.com/products/servlet/2.5/docs/servlet-2_5-mr2/</link>
                 <link>http://www.json.org/javadoc/</link>
                 <link>http://junit.sourceforge.net/javadoc/</link>
@@ -687,7 +711,7 @@
             <artifactId>maven-pmd-plugin</artifactId>
             <version>2.5</version>
             <configuration>
-              <targetJdk>1.5</targetJdk>
+              <targetJdk>${shindig.jdk.version}</targetJdk>
               <sourceEncoding>${project.build.sourceEncoding}</sourceEncoding>
             </configuration>
             <reportSets>
@@ -1003,8 +1027,8 @@
           <artifactId>maven-compiler-plugin</artifactId>
           <version>2.3.2</version>
           <configuration>
-            <source>1.5</source>
-            <target>1.5</target>
+            <source>${shindig.jdk.version}</source>
+            <target>${shindig.jdk.version}</target>
             <showDeprecation>true</showDeprecation>
             <compilerArgument>-Xlint:unchecked,deprecation,fallthrough,finally</compilerArgument>
             <fork>true</fork>
@@ -1067,6 +1091,7 @@
                 <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
               </manifest>
             </archive>
+            <classifier>${shindig.jdk.classifier}</classifier>
           </configuration>
         </plugin>
         <plugin>
@@ -1074,11 +1099,11 @@
           <artifactId>maven-javadoc-plugin</artifactId>
           <version>2.7</version>
           <configuration>
-            <source>1.5</source>
-            <target>1.5</target>
+            <source>${shindig.jdk.version}</source>
+            <target>${shindig.jdk.version}</target>
             <encoding>${project.build.sourceEncoding}</encoding>
             <links>
-              <link>http://java.sun.com/j2se/1.5.0/docs/api</link>
+              <link>http://java.sun.com/j2se/${shindig.jdk.javadoc}/docs/api</link>
               <link>http://java.sun.com/products/servlet/2.5/docs/servlet-2_5-mr2/</link>
               <link>http://www.json.org/javadoc/</link>
               <link>http://junit.sourceforge.net/javadoc/</link>
