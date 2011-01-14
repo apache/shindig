@@ -33,6 +33,11 @@ class OutputAtomConverter extends OutputConverter {
       'activities' => 'entry', 'messages' => 'entry');
   private $doc;
 
+  /**
+   *
+   * @param ResponseItem $responseItem
+   * @param RestRequestItem $requestItem
+   */
   function outputResponse(ResponseItem $responseItem, RestRequestItem $requestItem) {
     $doc = $this->createAtomDoc();
     $requestType = $this->getRequestType($requestItem);
@@ -123,6 +128,12 @@ class OutputAtomConverter extends OutputConverter {
     echo $xml;
   }
 
+  /**
+   *
+   * @param array $responses
+   * @param SecurityToken $token
+   * @throws Exception
+   */
   function outputBatch(Array $responses, SecurityToken $token) {
     throw new Exception("Atom batch not supported");
   }

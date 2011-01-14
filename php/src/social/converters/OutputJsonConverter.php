@@ -24,6 +24,11 @@
  */
 class OutputJsonConverter extends OutputConverter {
 
+  /**
+   *
+   * @param ResponseItem $responseItem
+   * @param RestRequestItem $requestItem
+   */
   function outputResponse(ResponseItem $responseItem, RestRequestItem $requestItem) {
     $response = $responseItem->getResponse();
     if ($response instanceof RestfulCollection) {
@@ -36,6 +41,11 @@ class OutputJsonConverter extends OutputConverter {
     }
   }
 
+  /**
+   *
+   * @param array $responses
+   * @param SecurityToken $token
+   */
   function outputBatch(Array $responses, SecurityToken $token) {
     $this->boundryHeaders();
     foreach ($responses as $response) {
@@ -46,6 +56,11 @@ class OutputJsonConverter extends OutputConverter {
     }
   }
 
+  /**
+   *
+   * @param array $responses
+   * @param SecurityToken $token
+   */
   function outputJsonBatch(Array $responses, SecurityToken $token) {
     $this->encodeAndSendResponse(array("responses" => $responses, "error" => false));
   }

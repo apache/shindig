@@ -31,6 +31,9 @@ class GroupHandler extends DataRequestHandler {
    * examples:
    * /groups/john.doe?fields=count
    * /groups/@me
+   *
+   * @param RequestItem $requestItem
+   * @return ResponseItem
    */
   public function handleGet(RequestItem $requestItem) {
     $this->checkService();
@@ -41,14 +44,30 @@ class GroupHandler extends DataRequestHandler {
     }
     return $this->service->getPersonGroups($userIds[0], $requestItem->getGroup(), $requestItem->getToken());
   }
+
+  /**
+   *
+   * @param RequestItem $requestItem
+   * @throws SocialSpiException
+   */
   public function handleDelete(RequestItem $requestItem) {
     throw new SocialSpiException("You can't delete groups.", ResponseError::$BAD_REQUEST);
   }
 
+  /**
+   *
+   * @param RequestItem $requestItem
+   * @throws SocialSpiException
+   */
   public function handlePut(RequestItem $requestItem) {
     throw new SocialSpiException("You can't update groups.", ResponseError::$NOT_IMPLEMENTED);
   }
 
+  /**
+   *
+   * @param RequestItem $requestItem
+   * @throws SocialSpiException
+   */
   public function handlePost(RequestItem $requestItem) {
     throw new SocialSpiException("You can't add groups.", ResponseError::$NOT_IMPLEMENTED);
   }

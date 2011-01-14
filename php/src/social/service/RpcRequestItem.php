@@ -25,6 +25,11 @@ class RpcRequestItem extends RequestItem {
 
   private $data;
 
+  /**
+   *
+   * @param array $rpc
+   * @param SecurityToken $token
+   */
   public function __construct($rpc, SecurityToken $token) {
     if (empty($rpc['method'])) {
       throw new SocialSpiException("Missing method in RPC call");
@@ -37,6 +42,11 @@ class RpcRequestItem extends RequestItem {
     }
   }
 
+  /**
+   *
+   * @param string $rpcMethod
+   * @return string
+   */
   public function getService($rpcMethod = null) {
     $service = null;
     if ($rpcMethod != null) {
@@ -51,6 +61,11 @@ class RpcRequestItem extends RequestItem {
     return $service;
   }
 
+  /**
+   *
+   * @param string $rpcMethod
+   * @return string
+   */
   public function getOperation($rpcMethod = null) {
     if ($rpcMethod != null) {
       $op = substr($rpcMethod, strpos($rpcMethod, '.') + 1);
@@ -60,14 +75,29 @@ class RpcRequestItem extends RequestItem {
     return $op;
   }
 
+  /**
+   *
+   * @param string $rpcMethod
+   * @return string
+   */
   public function getMethod($rpcMethod = null) {
     return $this->getOperation($rpcMethod);
   }
 
+  /**
+   *
+   * @return array
+   */
   public function getParameters() {
     return $this->data;
   }
 
+  /**
+   *
+   * @param string $paramName
+   * @param string $defaultValue
+   * @return string
+   */
   public function getParameter($paramName, $defaultValue = null) {
     if (isset($this->data[$paramName])) {
       return $this->data[$paramName];
@@ -76,6 +106,11 @@ class RpcRequestItem extends RequestItem {
     }
   }
 
+  /**
+   *
+   * @param string $paramName
+   * @return array
+   */
   public function getListParameter($paramName) {
     if (isset($this->data[$paramName])) {
       if (is_array($this->data[$paramName])) {
@@ -89,6 +124,10 @@ class RpcRequestItem extends RequestItem {
     }
   }
 
+  /**
+   *
+   * @param string $urlTemplate
+   */
   public function applyUrlTemplate($urlTemplate) {  // No params in the URL
   }
 }

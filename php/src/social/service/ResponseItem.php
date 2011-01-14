@@ -27,6 +27,12 @@ class ResponseItem {
   public $errorMessage;
   public $response;
 
+  /**
+   *
+   * @param string $error
+   * @param string $errorMessage
+   * @param mixed $response
+   */
   public function __construct($error = null, $errorMessage = null, $response = null) {
     $this->error = $error;
     $this->errorMessage = $errorMessage;
@@ -67,26 +73,50 @@ class ResponseItem {
     return $object;
   }
 
+  /**
+   *
+   * @return string
+   */
   public function getError() {
     return isset($this->error) ? $this->error : null;
   }
 
+  /**
+   *
+   * @param string $error
+   */
   public function setError($error) {
     $this->error = $error;
   }
 
+  /**
+   *
+   * @return string
+   */
   public function getErrorMessage() {
     return $this->errorMessage;
   }
 
+  /**
+   *
+   * @param string $errorMessage
+   */
   public function setErrorMessage($errorMessage) {
     $this->errorMessage = $errorMessage;
   }
 
+  /**
+   *
+   * @return mixed
+   */
   public function getResponse() {
     return $this->response;
   }
 
+  /**
+   *
+   * @param mixed $response
+   */
   public function setResponse($response) {
     $this->response = $response;
   }

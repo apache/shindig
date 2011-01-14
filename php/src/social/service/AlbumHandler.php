@@ -30,6 +30,9 @@ class AlbumHandler extends DataRequestHandler {
 
   /**
    * Deletes the album. The URI structure: /{userId}/{groupId}/{albumId}
+   *
+   * @param RequestItem $requestItem
+   * @return ResponseItem
    */
   public function handleDelete(RequestItem $requestItem) {
     $this->checkService();
@@ -48,6 +51,9 @@ class AlbumHandler extends DataRequestHandler {
 
   /**
    * Gets the albums. The URI structure: /{userId}/{groupId}/{albumId}+.
+   *
+   * @param RequestItem $requestItem
+   * @return ResponseItem
    */
   public function handleGet(RequestItem $requestItem) {
     $this->checkService();
@@ -69,6 +75,9 @@ class AlbumHandler extends DataRequestHandler {
 
   /**
    * Creates an album. The URI structure: /{userId}/{groupId}.
+   *
+   * @param RequestItem $requestItem
+   * @return ResponseItem
    */
   public function handlePost(RequestItem $requestItem) {
     $this->checkService();
@@ -87,6 +96,9 @@ class AlbumHandler extends DataRequestHandler {
 
   /**
    * Updates the album. The URI structure: /{userId}/{groupId}/{albumId}
+   *
+   * @param RequestItem $requestItem
+   * @return ResponseItem
    */
   public function handlePut(RequestItem $requestItem) {
     $this->checkService();

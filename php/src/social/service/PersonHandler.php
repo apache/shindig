@@ -35,14 +35,29 @@ class PersonHandler extends DataRequestHandler {
     parent::__construct('person_service');
   }
 
+  /**
+   *
+   * @param RequestItem $requestItem
+   * @throws SocialSpiException
+   */
   public function handleDelete(RequestItem $request) {
     throw new SocialSpiException("You can't delete people.", ResponseError::$BAD_REQUEST);
   }
 
+  /**
+   *
+   * @param RequestItem $requestItem
+   * @throws SocialSpiException
+   */
   public function handlePut(RequestItem $request) {
     throw new SocialSpiException("You can't update right now.", ResponseError::$NOT_IMPLEMENTED);
   }
 
+  /**
+   *
+   * @param RequestItem $requestItem
+   * @throws SocialSpiException
+   */
   public function handlePost(RequestItem $request) {
     throw new SocialSpiException("You can't add people right now.", ResponseError::$NOT_IMPLEMENTED);
   }
@@ -51,6 +66,9 @@ class PersonHandler extends DataRequestHandler {
    * Allowed end-points /people/{userId}+/{groupId} /people/{userId}/{groupId}/{optionalPersonId}+
    *
    * examples: /people/john.doe/@all /people/john.doe/@friends /people/john.doe/@self
+   *
+   * @param RequestItem $request
+   * @return ResponseItem
    */
   public function handleGet(RequestItem $request) {
     $this->checkService();

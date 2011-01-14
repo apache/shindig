@@ -55,8 +55,7 @@ class ResponseError {
 
   /**
    * Construct a Response Error from the jsonValue as a string and the Http Error Code.
-   * @param jsonValue the json String representation of the error code.
-   * @param httpErrorCode the numeric HTTP error code.
+   * @param string $jsonValue the json String representation of the error code.
    */
   public function __construct($jsonValue) {
     $this->jsonValue = $jsonValue;
@@ -97,6 +96,8 @@ class ResponseError {
   /**
    *
    * Converts the ResponseError to a String representation
+   *
+   * @return string
    */
   public function toString() {
     return $this->jsonValue;
@@ -104,7 +105,7 @@ class ResponseError {
 
   /**
    * Get the HTTP error code.
-   * @return the Http Error code.
+   * @return string the Http Error code.
    */
   public function getHttpErrorCode() {
     return $this->httpErrorCode;
@@ -112,7 +113,7 @@ class ResponseError {
 
   /**
    * Get the HTTP error response header.
-   * @return the Http response header.
+   * @return string the Http response header.
    */
   public function getHttpErrorMsg() {
     return $this->httpErrorMsg;

@@ -26,6 +26,11 @@ class ActivityHandler extends DataRequestHandler {
     parent::__construct('activity_service');
   }
 
+  /**
+   *
+   * @param RequestItem $requestItem
+   * @return ResponseItem
+   */
   public function handleDelete(RequestItem $requestItem) {
     $this->checkService();
     $requestItem->applyUrlTemplate(self::$ACTIVITY_ID_PATH);
@@ -46,6 +51,9 @@ class ActivityHandler extends DataRequestHandler {
    * /activities/john.doe/@self/1
    * /activities/john.doe/@self
    * /activities/john.doe/@friends
+   *
+   * @param RequestItem $requestItem
+   * @return ResponseItem
    */
   public function handleGet(RequestItem $requestItem) {
     $this->checkService();
@@ -75,6 +83,9 @@ class ActivityHandler extends DataRequestHandler {
    * /activities/@viewer/@self/@app
    * /activities/john.doe/@self
    * - postBody is an activity object
+   *
+   * @param RequestItem $requestItem
+   * @return ResponseItem
    */
   public function handlePost(RequestItem $requestItem) {
     $this->checkService();
@@ -105,6 +116,9 @@ class ActivityHandler extends DataRequestHandler {
    * examples:
    * /activities/john.doe/@self
    * - postBody is an activity object
+   *
+   * @param RequestItem $requestItem
+   * @return ResponseItem
    */
   public function handlePut(RequestItem $requestItem) {
     return $this->handlePost($requestItem);

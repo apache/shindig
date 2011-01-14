@@ -28,6 +28,9 @@ class MessagesHandler extends DataRequestHandler {
 
   /**
    * Deletes the message collection or the messages.
+   *
+   * @param RequestItem $request
+   * @return ResponseItem
    */
   public function handleDelete(RequestItem $requestItem) {
     $this->checkService();
@@ -53,6 +56,9 @@ class MessagesHandler extends DataRequestHandler {
    * /messages/john.doe
    * /messages/john.doe/notification
    * /messages/john.doe/notification/1,2,3
+   *
+   * @param RequestItem $request
+   * @return ResponseItem
    */
   public function handleGet(RequestItem $requestItem) {
     $this->checkService();
@@ -82,6 +88,9 @@ class MessagesHandler extends DataRequestHandler {
    * Exapmples:
    * /messages/john.doe
    * /messages/john.doe/notification
+   *
+   * @param RequestItem $request
+   * @return ResponseItem
    */
   public function handlePost(RequestItem $requestItem) {
     $this->checkService();
@@ -126,6 +135,9 @@ class MessagesHandler extends DataRequestHandler {
 
   /**
    * Updates a message or a message collection.
+   *
+   * @param RequestItem $request
+   * @return ResponseItem
    */
   public function handlePut(RequestItem $requestItem) {
     $this->checkService();

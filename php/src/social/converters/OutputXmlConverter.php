@@ -32,6 +32,11 @@ class OutputXmlConverter extends OutputConverter {
       'activities' => 'entry', 'messages' => 'entry');
   private $doc;
 
+  /**
+   *
+   * @param ResponseItem $responseItem
+   * @param RestRequestItem $requestItem
+   */
   function outputResponse(ResponseItem $responseItem, RestRequestItem $requestItem) {
     $doc = $this->createXmlDoc();
     $requestType = $this->getRequestType($requestItem);
@@ -66,6 +71,11 @@ class OutputXmlConverter extends OutputConverter {
     echo $xml;
   }
 
+  /**
+   *
+   * @param array $responses
+   * @param SecurityToken $token 
+   */
   function outputBatch(Array $responses, SecurityToken $token) {
     throw new Exception("XML batch not supported");
   }

@@ -20,7 +20,11 @@
 
 abstract class DataRequestHandler {
   protected $service;
-  
+
+  /**
+   *
+   * @param string $serviceName
+   */
   public function __construct($serviceName) {
     try {
       $service = trim(Config::get($serviceName));
@@ -39,6 +43,11 @@ abstract class DataRequestHandler {
   private static $UPDATE_SYNONYMS = array("put", "update");
   private static $DELETE_SYNONYMS = array("delete");
 
+  /**
+   *
+   * @param RequestItem $requestItem
+   * @return ResponseItem 
+   */
   public function handleItem(RequestItem $requestItem) {
     try {
       $token = $requestItem->getToken();
@@ -70,6 +79,12 @@ abstract class DataRequestHandler {
     return $response;
   }
 
+  /**
+   *
+   * @param int $appId
+   * @param SecurityToken $token
+   * @return int
+   */
   static public function getAppId($appId, SecurityToken $token) {
     if ($appId == '@app') {
       return $token->getAppId();
@@ -78,6 +93,11 @@ abstract class DataRequestHandler {
     }
   }
 
+  /**
+   *
+   * @param string $string
+   * @return object
+   */
   static public function convertToObject($string) {
     //TODO should detect if it's atom/xml or json here really. assuming json for now
     $decoded = json_decode($string);
@@ -89,7 +109,9 @@ abstract class DataRequestHandler {
 
   /**
    *  To support people/@supportedFields and activity/@supportedFields
-   *  @param parameters url parameters to get request type(people/activity)
+   *
+   * @param array $parameters url parameters to get request type(people/activity)
+   * @return ResponseItem
    */
   public function getSupportedFields($parameters) {
     $contextClass = Config::get('gadget_context_class');
@@ -110,7 +132,9 @@ abstract class DataRequestHandler {
 
   /**
    *  To get OpenSocial version for getting supportedFields
-   *  @param config configuration values from container's js files
+   *
+   * @param array $config configuration values from container's js files
+   * @return string
    */
   private function getOpenSocialVersion($config) {
     $str = "opensocial-";
@@ -136,11 +160,27 @@ abstract class DataRequestHandler {
     }
   }
 
+  /**
+   * @param RequestItem $requestItem
+   * @return ResponseItem
+   */
   abstract public function handleDelete(RequestItem $requestItem);
 
+  /**
+   * @param RequestItem $requestItem
+   * @return ResponseItem
+   */
   abstract public function handleGet(RequestItem $requestItem);
 
+  /**
+   * @param RequestItem $requestItem
+   * @return ResponseItem
+   */
   abstract public function handlePost(RequestItem $requestItem);
 
+  /**
+   * @param RequestItem $requestItem
+   * @return ResponseItem
+   */
   abstract public function handlePut(RequestItem $requestItem);
 }

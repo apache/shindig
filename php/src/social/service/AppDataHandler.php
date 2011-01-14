@@ -33,6 +33,8 @@ class AppDataHandler extends DataRequestHandler {
    * /appdata/john.doe/@friends/app?fields=count
    * /appdata/john.doe/@self/app
    *
+   * @param RequestItem $requestItem
+   * @return ResponseItem
    */
   public function handleDelete(RequestItem $requestItem) {
     $this->checkService();
@@ -53,6 +55,9 @@ class AppDataHandler extends DataRequestHandler {
    * examples:
    * /appdata/john.doe/@friends/app?fields=count
    * /appdata/john.doe/@self/app
+   *
+   * @param RequestItem $requestItem
+   * @return ResponseItem
    */
   public function handleGet(RequestItem $requestItem) {
     $this->checkService();
@@ -75,6 +80,9 @@ class AppDataHandler extends DataRequestHandler {
    * The post data should be a regular json object. All of the fields vars will
    * be pulled from the values and set on the person object. If there are no
    * fields vars then all of the data will be overridden.
+   *
+   * @param RequestItem $requestItem
+   * @return ResponseItem
    */
   public function handlePost(RequestItem $requestItem) {
     $this->checkService();
@@ -109,6 +117,9 @@ class AppDataHandler extends DataRequestHandler {
    * The post data should be a regular json object. All of the fields vars will
    * be pulled from the values and set on the person object. If there are no
    * fields vars then all of the data will be overridden.
+   *
+   * @param RequestItem $requestItem
+   * @return ResponseItem
    */
   public function handlePut(RequestItem $requestItem) {
     return $this->handlePost($requestItem);
@@ -117,8 +128,8 @@ class AppDataHandler extends DataRequestHandler {
   /**
    * Determines whether the input is a valid key.
    *
-   * @param key the key to validate.
-   * @return true if the key is a valid appdata key, false otherwise.
+   * @param string $key the key to validate.
+   * @return boolean true if the key is a valid appdata key, false otherwise.
    */
   public static function isValidKey($key) {
     if (empty($key)) {

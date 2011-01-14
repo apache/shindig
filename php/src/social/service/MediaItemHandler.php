@@ -27,6 +27,9 @@ class MediaItemHandler extends DataRequestHandler {
 
   /**
    * Deletes the media items. The URI structure: /{userId}/{groupId}/{albumId}/{mediaItemId}+
+   *
+   * @param RequestItem $request
+   * @return ResponseItem
    */
   public function handleDelete(RequestItem $requestItem) {
     $this->checkService();
@@ -46,6 +49,9 @@ class MediaItemHandler extends DataRequestHandler {
 
   /**
    * Gets the media items. The URI structure: /{userId}/{groupId}/{albumId}/{mediaItemId}+
+   *
+   * @param RequestItem $request
+   * @return ResponseItem
    */
   public function handleGet(RequestItem $requestItem) {
     $this->checkService();
@@ -68,6 +74,9 @@ class MediaItemHandler extends DataRequestHandler {
 
   /**
    * Creates the media item. The URI structure: /{userId}/{groupId}/{albumId}.
+   *
+   * @param RequestItem $request
+   * @return ResponseItem
    */
   public function handlePost(RequestItem $requestItem) {
     $this->checkService();
@@ -113,6 +122,9 @@ class MediaItemHandler extends DataRequestHandler {
 
   /**
    * Fetches the remote media content and saves it as a temporary file. Returns the meta data of the file.
+   *
+   * @param RequestItem $request
+   * @return ResponseItem
    */
   private function processRemoteContent($uri) {
     $request = new RemoteContentRequest($uri);
@@ -132,7 +144,9 @@ class MediaItemHandler extends DataRequestHandler {
 
   /**
    * Checks the $_FILES and HTTP_RAW_POST_DATA variables to write the user uploaded content as a temporary file.
-   * Returns the meta data of the file. 
+   * Returns the meta data of the file.
+   *
+   * @return array
    */
   private function processUploadedContent() {
     $file = array();
@@ -169,6 +183,10 @@ class MediaItemHandler extends DataRequestHandler {
   
   /**
    * Writes the binary content to a temporary file and returns the meta data of the file.
+   *
+   * @param string $rawData
+   * @param string $contentType
+   * @return array
    */
   private function writeBinaryContent(&$rawData, $contentType) {
     $tmpName = tempnam('', 'shindig');
@@ -182,6 +200,9 @@ class MediaItemHandler extends DataRequestHandler {
   
   /**
    * Returns true if the given content type is valid.
+   *
+   * @param string $contentType
+   * @return boolean
    */
   private function isValidContentType($contentType) {
     $acceptedMediaPrefixes = array('image', 'video', 'audio');
@@ -191,6 +212,9 @@ class MediaItemHandler extends DataRequestHandler {
 
   /**
    * Updates the mediaItem. The URI structure: /{userId}/{groupId}/{albumId}/{mediaItemId}
+   *
+   * @param RequestItem $request
+   * @return ResponseItem
    */
   public function handlePut(RequestItem $requestItem) {
     $this->checkService();

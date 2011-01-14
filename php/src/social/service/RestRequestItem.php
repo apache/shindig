@@ -22,7 +22,15 @@
  * Represents the request items that come from the restful request.
  */
 class RestRequestItem extends RequestItem {
+  /**
+   *
+   * @var string
+   */
   private $url;
+  /**
+   *
+   * @var array
+   */
   private $params;
   
   /**
@@ -34,8 +42,21 @@ class RestRequestItem extends RequestItem {
    * @var OutputConverter
    */
   private $outputConverter;
+
+  /**
+   *
+   * @var string
+   */
   private $postData;
 
+  /**
+   *
+   * @param object $service
+   * @param string $method
+   * @param SecurityToken $token
+   * @param string $inputConverterMethod
+   * @param OutputConverter $outputConverter
+   */
   public function __construct($service, $method, SecurityToken $token, $inputConverterMethod, $outputConverter) {
     parent::__construct($service, $method, $token);
     $this->inputConverterMethod = $inputConverterMethod;
@@ -43,6 +64,10 @@ class RestRequestItem extends RequestItem {
   }
 
   /**
+   * @param $servletRequest
+   * @param SecurityToken $token
+   * @param string $inputConverterMethod
+   * @param OutputConverter $outputConverter
    * @return RestRequestItem
    */
   public static function createWithRequest($servletRequest, $token, $inputConverterMethod, $outputConverter) {
@@ -64,14 +89,26 @@ class RestRequestItem extends RequestItem {
     return $restfulRequestItem;
   }
 
+  /**
+   *
+   * @param string $url
+   */
   public function setUrl($url) {
     $this->url = $url;
   }
 
+  /**
+   *
+   * @param array $params
+   */
   public function setParams($params) {
     $this->params = $params;
   }
 
+  /**
+   *
+   * @param string $postData
+   */
   public function setPostData($postData) {
     $this->postData = $postData;
     $service = $this->getServiceFromPath($this->url);
@@ -97,6 +134,9 @@ class RestRequestItem extends RequestItem {
   /**
    * '/people/@me/@self' => 'people'
    * '/invalidate?invalidationKey=1' => 'invalidate'
+   *
+   * @param string $pathInfo
+   * @return $pathInfo
    */
   static function getServiceFromPath($pathInfo) {
     $pathInfo = substr($pathInfo, 1);
@@ -114,6 +154,10 @@ class RestRequestItem extends RequestItem {
     return $pathInfo;
   }
 
+  /**
+   *
+   * @return string
+   */
   static function getMethod() {
     if (isset($_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'])) {
       return $_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'];
@@ -145,10 +189,19 @@ class RestRequestItem extends RequestItem {
     }
   }
 
+  /**
+   *
+   * @return aray
+   */
   public function getParameters() {
     return $this->params;
   }
 
+  /**
+   *
+   * @param string $paramName
+   * @param string $paramValue
+   */
   public function setParameter($paramName, $paramValue) {
     // Ignore nulls
     if ($paramValue == null) {
@@ -159,6 +212,10 @@ class RestRequestItem extends RequestItem {
 
   /**
    * Return a single param value
+   *
+   * @param string $paramName
+   * @param string $defaultValue
+   * @return string
    */
   public function getParameter($paramName, $defaultValue = null) {
     $paramValue = isset($this->params[$paramName]) ? $this->params[$paramName] : null;
@@ -170,6 +227,9 @@ class RestRequestItem extends RequestItem {
 
   /**
    * Return a list param value
+   *
+   * @param string $paramName
+   * @return array
    */
   public function getListParameter($paramName) {
     $stringList = isset($this->params[$paramName]) ? $this->params[$paramName] : null;

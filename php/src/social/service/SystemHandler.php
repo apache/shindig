@@ -26,6 +26,11 @@ class SystemHandler extends DataRequestHandler {
   public function __construct() {  // do nothing, listMethods doesn't have a service implementation since it depends on the container.js configuration
   }
 
+  /**
+   *
+   * @param RequestItem $requestItem
+   * @return ResponseItem
+   */
   public function handleItem(RequestItem $requestItem) {
     try {
       $method = strtolower($requestItem->getMethod());
@@ -39,22 +44,44 @@ class SystemHandler extends DataRequestHandler {
     return $response;
   }
 
+  /**
+   *
+   * @param RequestItem $request
+   */
   public function handleDelete(RequestItem $request) {
     throw new SocialSpiException("Http delete not allowed for invalidation service", ResponseError::$BAD_REQUEST);
   }
 
+  /**
+   *
+   * @param RequestItem $request
+   */
   public function handlePut(RequestItem $request) {
     throw new SocialSpiException("Http put not allowed for invalidation service", ResponseError::$BAD_REQUEST);
   }
 
+  /**
+   *
+   * @param RequestItem $request
+   */
   public function handlePost(RequestItem $request) {
     throw new SocialSpiException("Http put not allowed for invalidation service", ResponseError::$BAD_REQUEST);
   }
 
+  /**
+   *
+   * @param RequestItem $request
+   * @return array
+   */
   public function handleGet(RequestItem $request) {
     return $this->handleListMethods($request);
   }
 
+  /**
+   *
+   * @param RequestItem $request
+   * @return array
+   */
   public function handleListMethods(RequestItem $request) {
     $containerConfigClass = Config::get('container_config_class');
     $containerConfig = new $containerConfigClass(Config::get('container_path'));

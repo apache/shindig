@@ -66,6 +66,11 @@ class JsonRpcServlet extends ApiServlet {
     }
   }
 
+  /**
+   *
+   * @param array $batch
+   * @param SecurityToken $token
+   */
   public function dispatchBatch($batch, $token) {
     $responses = array();
     // Gather all Futures.  We do this up front so that
@@ -89,6 +94,11 @@ class JsonRpcServlet extends ApiServlet {
     $this->encodeAndSendResponse($result);
   }
 
+  /**
+   *
+   * @param array $request
+   * @param SecurityToken $token
+   */
   public function dispatch($request, $token) {
     $key = null;
     if (isset($request["id"])) {
@@ -102,6 +112,12 @@ class JsonRpcServlet extends ApiServlet {
     $this->encodeAndSendResponse($result);
   }
 
+  /**
+   *
+   * @param string $key
+   * @param ResponseItem $responseItem
+   * @return array
+   */
   private function getJSONResponse($key, ResponseItem $responseItem) {
     $result = array();
     if ($key != null) {
@@ -129,6 +145,11 @@ class JsonRpcServlet extends ApiServlet {
   // TODO(doll): Refactor the responseItem so that the fields on it line up with this format.
   // Then we can use the general converter to output the response to the client and we won't
   // be harcoded to json.
+  /**
+   *
+   * @param ResponseItem $responseItem
+   * @return array
+   */
   private function getErrorJson(ResponseItem $responseItem) {
     $error = array();
     $error["code"] = $responseItem->getError();
@@ -141,6 +162,7 @@ class JsonRpcServlet extends ApiServlet {
    * to client
    * 
    * @param array $data
+   * @return string
    */
   private function encodeAndSendResponse($data) {
     // TODO: Refactor this class to use the OutputJsonConverter, so that we do not have to duplicate
@@ -152,12 +174,12 @@ class JsonRpcServlet extends ApiServlet {
     echo json_encode($data);
   }
 
+  /**
+   *
+   * @param ResponseItem $responseItem
+   */
   public function sendError(ResponseItem $responseItem) {
     $error = $this->getErrorJson($responseItem);
     $this->encodeAndSendResponse($error);
-  }
-
-  private function sendBadRequest($t, $response) {
-    $this->sendError($response, new ResponseItem(ResponseError::$BAD_REQUEST, "Invalid batch - " + $t->getMessage()));
   }
 }

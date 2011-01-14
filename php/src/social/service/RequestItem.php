@@ -59,12 +59,22 @@ abstract class RequestItem {
 
   protected $service;
 
+  /**
+   *
+   * @param object $service
+   * @param string $operation
+   * @param SecurityToken $token
+   */
   public function __construct($service, $operation, SecurityToken $token) {
     $this->service = $service;
     $this->operation = $operation;
     $this->token = $token;
   }
 
+  /**
+   *
+   * @return int
+   */
   public function getAppId() {
     $appId = $this->getParameter(self::$APP_ID);
     if ($appId != null && $appId == self::$APP_SUBSTITUTION_TOKEN) {
@@ -74,6 +84,10 @@ abstract class RequestItem {
     }
   }
 
+  /**
+   *
+   * @return array
+   */
   public function getUsers() {
     $ids = $this->getListParameter(self::$USER_ID);
     if (empty($ids)) {
@@ -91,10 +105,18 @@ abstract class RequestItem {
     return $userIds;
   }
 
+  /**
+   *
+   * @return string
+   */
   public function getGroup() {
     return GroupId::fromJson($this->getParameter(self::$GROUP_ID, "@self"));
   }
 
+  /**
+   *
+   * @return int
+   */
   public function getStartIndex() {
     $startIndex = $this->getParameter(self::$START_INDEX);
     if ($startIndex == null) {
@@ -106,6 +128,10 @@ abstract class RequestItem {
     }
   }
 
+  /**
+   *
+   * @return int
+   */
   public function getCount() {
     $count = $this->getParameter(self::$COUNT);
     if ($count == null) {
@@ -117,11 +143,19 @@ abstract class RequestItem {
     }
   }
 
+  /**
+   *
+   * @return string
+   */
   public function getSortBy() {
     $sortBy = $this->getParameter(self::$SORT_BY);
     return $sortBy == null ? CollectionOptions::TOP_FRIENDS_SORT : $sortBy;
   }
 
+  /**
+   *
+   * @return string
+   */
   public function getSortOrder() {
     $sortOrder = $this->getParameter(self::$SORT_ORDER);
     if (empty($sortOrder)) {
@@ -133,10 +167,18 @@ abstract class RequestItem {
     }
   }
 
+  /**
+   *
+   * @return string
+   */
   public function getFilterBy() {
     return $this->getParameter(self::$FILTER_BY);
   }
 
+  /**
+   *
+   * @return string
+   */
   public function getFilterOperation() {
     $filterOp = $this->getParameter(self::$FILTER_OPERATION);
     if (empty($filterOp)) {
@@ -148,11 +190,20 @@ abstract class RequestItem {
     }
   }
 
+  /**
+   *
+   * @return string
+   */
   public function getFilterValue() {
     $filterValue = $this->getParameter(self::$FILTER_VALUE);
     return empty($filterValue) ? "" : $filterValue;
   }
 
+  /**
+   *
+   * @param array $defaultValue
+   * @return array
+   */
   public function getFields(Array $defaultValue = array()) {
     $result = array();
     $fields = $this->getListParameter(self::$FIELDS);
@@ -174,10 +225,20 @@ abstract class RequestItem {
     return $result;
   }
 
+  /**
+   *
+   * @param string $rpcMethod
+   * @return string
+   */
   public function getOperation($rpcMethod = null) {
     return $this->operation;
   }
 
+  /**
+   *
+   * @param string $rpcMethod
+   * @return object
+   */
   public function getService($rpcMethod = null) {
     return $this->service;
   }

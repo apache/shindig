@@ -25,18 +25,33 @@ class HandlerPreconditions {
 
   private function __construct() {}
 
+  /**
+   *
+   * @param mixed $item
+   * @param string $message
+   */
   public static function requireNotEmpty($item, $message) {
     if (empty($item)) {
       throw new InvalidArgumentException($message);
     }
   }
 
+  /**
+   *
+   * @param mixed $item
+   * @param string $message
+   */
   public static function requireEmpty($item, $message) {
     if (! empty($item)) {
       throw new InvalidArgumentException($message);
     }
   }
 
+  /**
+   *
+   * @param mixed $item
+   * @param string $message
+   */
   public static function requireSingular($item, $message) {
     self::requireNotEmpty($item, $message);
     if (count($item) != 1) {
@@ -44,6 +59,11 @@ class HandlerPreconditions {
     }
   }
 
+  /**
+   *
+   * @param mixed $item
+   * @param string $message
+   */
   public static function requirePlural($item, $message) {
     self::requireNotEmpty($item, $message);
     if (count($item) <= 1) {
@@ -51,6 +71,11 @@ class HandlerPreconditions {
     }
   }
 
+  /**
+   *
+   * @param mixed $item
+   * @param string $message
+   */
   public static function requireCondition($cond, $message) {
     if (! $cond) {
       throw new InvalidArgumentException($message);

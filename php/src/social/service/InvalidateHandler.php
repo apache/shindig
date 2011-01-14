@@ -37,6 +37,11 @@ class InvalidateHandler extends DataRequestHandler {
     }
   }
 
+  /**
+   *
+   * @param RequestItem $requestItem
+   * @return ResponseItem
+   */
   public function handleItem(RequestItem $requestItem) {
     try {
       $method = strtolower($requestItem->getMethod());
@@ -50,22 +55,44 @@ class InvalidateHandler extends DataRequestHandler {
     return $response;
   }
 
+  /**
+   *
+   * @param RequestItem $request
+   * @throws SocialSpiException
+   */
   public function handleDelete(RequestItem $request) {
     throw new SocialSpiException("Http delete not allowed for invalidation service", ResponseError::$BAD_REQUEST);
   }
 
+  /**
+   *
+   * @param RequestItem $request
+   * @throws SocialSpiException
+   */
   public function handlePut(RequestItem $request) {
     throw new SocialSpiException("Http put not allowed for invalidation service", ResponseError::$BAD_REQUEST);
   }
 
+  /**
+   *
+   * @param RequestItem $requestItem
+   */
   public function handlePost(RequestItem $request) {
     $this->handleInvalidate($request);
   }
 
+  /**
+   *
+   * @param RequestItem $requestItem
+   */
   public function handleGet(RequestItem $request) {
     $this->handleInvalidate($request);
   }
 
+  /**
+   *
+   * @param RequestItem $requestItem
+   */
   public function handleInvalidate(RequestItem $request) {
     $this->checkService();
     if (!$request->getToken()->getAppId() && !$request->getToken()->getAppUrl()) {

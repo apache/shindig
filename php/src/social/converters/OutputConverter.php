@@ -23,9 +23,15 @@
  *
  */
 abstract class OutputConverter {
-  private $boundry;
-
+  /**
+   * @param ResponseItem $responseItem
+   * @param RestRequestItem $requestItem
+   */
   abstract function outputResponse(ResponseItem $responseItem, RestRequestItem $requestItem);
 
+  /**
+   * @param array $responses
+   * @param SecurityToken $token
+   */
   abstract function outputBatch(Array $responses, SecurityToken $token);
 }

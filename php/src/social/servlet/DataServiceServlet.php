@@ -62,6 +62,10 @@ class DataServiceServlet extends ApiServlet {
     }
   }
 
+  /**
+   *
+   * @param ResponseItem $responseItem 
+   */
   public function sendError(ResponseItem $responseItem) {
     $unauthorized = false;
     $errorMessage = $responseItem->getErrorMessage();
@@ -98,6 +102,10 @@ class DataServiceServlet extends ApiServlet {
 
   /**
    * Handler for non-batch requests (REST only has non-batch requests)
+   *
+   * @param SecurityToken $token
+   * @param string $inputConverterMethod
+   * @param OutputConverter $outputConverter
    */
   private function handleSingleRequest(SecurityToken $token, $inputConverterMethod, $outputConverter) {
     //uri example: /social/rest/people/@self   /gadgets/api/rest/cache/invalidate

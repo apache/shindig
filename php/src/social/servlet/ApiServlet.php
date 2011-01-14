@@ -80,6 +80,10 @@ abstract class ApiServlet extends HttpServlet {
     }
   }
 
+  /**
+   *
+   * @return SecurityToken
+   */
   public function getSecurityToken() {
     // Support a configurable host name ('http_host' key) so that OAuth signatures don't fail in reverse-proxy type situations
     $scheme = (! isset($_SERVER['HTTPS']) || $_SERVER['HTTPS'] != "on") ? 'http' : 'https';
@@ -123,6 +127,9 @@ abstract class ApiServlet extends HttpServlet {
     return $gadgetSigner->createToken($token);
   }
 
+  /**
+   * @param ResponseItem $responseItem
+   */
   protected abstract function sendError(ResponseItem $responseItem);
 
   protected function sendSecurityError() {
@@ -131,6 +138,9 @@ abstract class ApiServlet extends HttpServlet {
 
   /**
    * Delivers a request item to the appropriate DataRequestHandler.
+   *
+   * @param RequestItem $requestItem
+   * @return ResponseItem
    */
   protected function handleRequestItem(RequestItem $requestItem) {
     // lazy initialization of the service handlers, no need to instance them all for each request
@@ -153,6 +163,11 @@ abstract class ApiServlet extends HttpServlet {
     return $handler->handleItem($requestItem);
   }
 
+  /**
+   *
+   * @param mixed $result
+   * @return ResponseItem 
+   */
   protected function getResponseItem($result) {
     if ($result instanceof ResponseItem) {
       return $result;
@@ -161,6 +176,11 @@ abstract class ApiServlet extends HttpServlet {
     }
   }
 
+  /**
+   *
+   * @param Exception $e
+   * @return ResponseItem
+   */
   protected function responseItemFromException($e) {
     if ($e instanceof SocialSpiException) {
       return new ResponseItem($e->getCode(), $e->getMessage(), null);
