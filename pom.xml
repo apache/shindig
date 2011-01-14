@@ -623,11 +623,11 @@
             <artifactId>maven-javadoc-plugin</artifactId>
             <version>2.7</version>
             <configuration>
-              <source>1.6</source>
-              <target>1.6</target>
+              <source>1.5</source>
+              <target>1.5</target>
               <encoding>${project.build.sourceEncoding}</encoding>
               <links>
-                <link>http://java.sun.com/j2se/1.6.0/docs/api</link>
+                <link>http://java.sun.com/j2se/1.5.0/docs/api</link>
                 <link>http://java.sun.com/products/servlet/2.5/docs/servlet-2_5-mr2/</link>
                 <link>http://www.json.org/javadoc/</link>
                 <link>http://junit.sourceforge.net/javadoc/</link>
@@ -687,7 +687,7 @@
             <artifactId>maven-pmd-plugin</artifactId>
             <version>2.5</version>
             <configuration>
-              <targetJdk>1.6</targetJdk>
+              <targetJdk>1.5</targetJdk>
               <sourceEncoding>${project.build.sourceEncoding}</sourceEncoding>
             </configuration>
             <reportSets>
@@ -1003,8 +1003,8 @@
           <artifactId>maven-compiler-plugin</artifactId>
           <version>2.3.2</version>
           <configuration>
-            <source>1.6</source>
-            <target>1.6</target>
+            <source>1.5</source>
+            <target>1.5</target>
             <showDeprecation>true</showDeprecation>
             <compilerArgument>-Xlint:unchecked,deprecation,fallthrough,finally</compilerArgument>
             <fork>true</fork>
@@ -1034,7 +1034,7 @@
             <configuration>
               <rules>
                 <requireJavaVersion>
-                  <version>[1.6,)</version>
+                  <version>[1.5,)</version>
                 </requireJavaVersion>
               </rules>    
             </configuration>
@@ -1074,11 +1074,11 @@
           <artifactId>maven-javadoc-plugin</artifactId>
           <version>2.7</version>
           <configuration>
-            <source>1.6</source>
-            <target>1.6</target>
+            <source>1.5</source>
+            <target>1.5</target>
             <encoding>${project.build.sourceEncoding}</encoding>
             <links>
-              <link>http://java.sun.com/j2se/1.6.0/docs/api</link>
+              <link>http://java.sun.com/j2se/1.5.0/docs/api</link>
               <link>http://java.sun.com/products/servlet/2.5/docs/servlet-2_5-mr2/</link>
               <link>http://www.json.org/javadoc/</link>
               <link>http://junit.sourceforge.net/javadoc/</link>
