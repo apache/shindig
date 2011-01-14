@@ -79,7 +79,6 @@ public class JsServletTest extends ServletTestFixture {
   }
 
   @Test
-  @SuppressWarnings("unchecked")
   public void testDoJsloadNormal() throws Exception {
     String url = "http://localhost/gadgets/js/feature.js?v=abc&nocache=0&onload=" + ONLOAD_PARAM;
     JsUri jsUri = mockJsUri(CONTAINER_PARAM, RenderingContext.CONTAINER, true, true, false,
@@ -98,7 +97,6 @@ public class JsServletTest extends ServletTestFixture {
   }
 
   @Test
-  @SuppressWarnings("unchecked")
   public void testDoJsloadWithJsLoadTimeout() throws Exception {
     String url = "http://localhost/gadgets/js/feature.js?v=abc&nocache=0&onload=" + ONLOAD_PARAM;
     JsUri jsUri = mockJsUri(CONTAINER_PARAM, RenderingContext.CONTAINER, true, true,
