@@ -24,9 +24,24 @@
 class OAuthCallbackState {
   public  static $CALLBACK_STATE_MAX_AGE_SECS = 600;
   private static $REAL_CALLBACK_URL_KEY = "u";
+
+  /**
+   *
+   * @var BlobCrypter
+   */
   private $crypter;
+
+  /**
+   *
+   * @var array
+   */
   private $state = array();
 
+  /**
+   *
+   * @param BlobCrypter $crypter
+   * @param string $stateBlob
+   */
   public function __construct($crypter, $stateBlob = null) {
     $this->crypter = $crypter;
     if ($stateBlob != null) {
@@ -42,10 +57,18 @@ class OAuthCallbackState {
     return;
   }
 
+  /**
+   *
+   * @return string
+   */
   public function getEncryptedState() {
     return $this->crypter->wrap($this->state);
   }
 
+  /**
+   *
+   * @return string
+   */
   public function getRealCallbackUrl() {
     if (isset($this->state[self::$REAL_CALLBACK_URL_KEY])) {
       return $this->state[self::$REAL_CALLBACK_URL_KEY];
@@ -54,6 +77,10 @@ class OAuthCallbackState {
     }
   }
 
+  /**
+   *
+   * @param string $callbackUrl
+   */
   public function setRealCallbackUrl($callbackUrl) {
     $this->state[self::$REAL_CALLBACK_URL_KEY] = $callbackUrl;
   }

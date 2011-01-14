@@ -20,22 +20,56 @@
 
 class BasicOAuthStore implements OAuthStore {
 
+  /**
+   *
+   * @var array
+   */
   private $consumerInfos = array();
+
+  /**
+   *
+   * @var array
+   */
   private $tokens = array();
 
+  /**
+   *
+   * @var string
+   */
   private $defaultConsumerKey;
+
+  /**
+   *
+   * @var string
+   */
   private $defaultConsumerSecret;
 
+  /**
+   *
+   * @param string $consumerKey
+   * @param string $privateKey
+   */
   public function __construct($consumerKey = null, $privateKey = null) {
     $this->defaultConsumerKey = $consumerKey;
     $this->defaultConsumerSecret = $privateKey;
   }
 
+  /**
+   *
+   * @param array $consumerInfos
+   * @param array $tokens
+   */
   public function setHashMapsForTesting($consumerInfos, $tokens) {
     $this->consumerInfos = $consumerInfos;
     $this->tokens = $tokens;
   }
 
+  /**
+   *
+   * @param TokenKey $tokenKey
+   * @param ProviderInfo $provInfo
+   * @return AccesorInfo
+   */
   public function getOAuthAccessorTokenKey(TokenKey $tokenKey, ProviderInfo $provInfo) {
     $provKey = new ProviderKey();
     $provKey->setGadgetUri($tokenKey->getGadgetUri());
@@ -52,6 +86,12 @@ class BasicOAuthStore implements OAuthStore {
     return $result;
   }
 
+  /**
+   *
+   * @param ProviderKey $providerKey
+   * @param ProviderInfo $provInfo
+   * @return AccesorInfo
+   */
   public function getOAuthAccessorProviderKey(ProviderKey $providerKey, ProviderInfo $provInfo) {
     if ($provInfo == null) {
       throw new ShindigOAuthNoDataException("must pass non-null provider info to getOAuthAccessor");
@@ -95,19 +135,38 @@ class BasicOAuthStore implements OAuthStore {
     return $result;
   }
 
+  /**
+   *
+   * @param ProviderKey $providerKey
+   * @param ConsumerKeyAndSecret $keyAndSecret
+   */
   public function setOAuthConsumerKeyAndSecret($providerKey, $keyAndSecret) {
     $key = md5(serialize($providerKey));
     $this->consumerInfos[$key] = $keyAndSecret;
   }
 
+  /**
+   *
+   * @param TokenKey $tokenKey
+   * @param TokenInfo $tokenInfo
+   */
   public function setTokenAndSecret($tokenKey, $tokenInfo) {
     $this->tokens[md5(serialize($tokenKey))] = $tokenInfo;
   }
 
+  /**
+   *
+   * @param TokenKey $tokenKey
+   */
   public function removeTokenAndSecret($tokenKey) {
     unset($this->tokens[md5(serialize($tokenKey))]);
   }
 
+  /**
+   *
+   * @param TokenKey $tokenKey
+   * @return TokenInfo
+   */
   protected function getTokenInfo($tokenKey) {
     $key = md5(serialize($tokenKey));
     return isset($this->tokens[$key]) ? $this->tokens[$key] : null;

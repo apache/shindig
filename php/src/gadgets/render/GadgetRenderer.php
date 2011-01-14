@@ -23,8 +23,15 @@
  *
  */
 abstract class GadgetRenderer {
+  /**
+   * @var GadgetContext
+   */
   protected $context;
 
+  /**
+   *
+   * @param GadgetContext $context 
+   */
   public function __construct(GadgetContext $context) {
     $this->context = $context;
   }
@@ -34,7 +41,6 @@ abstract class GadgetRenderer {
    * javascript content (?v=<md5 of js>) for cache busting
    *
    * @param array $features
-   * @param Gadget $gadget
    * @return string the list of libraries in core:caja:etc.js?v=checksum> format
    */
   protected function getJsUrl($features) {
@@ -67,5 +73,9 @@ abstract class GadgetRenderer {
     return $ret;
   }
 
+  /**
+   * @param Gadget $gadget
+   * @param array $view
+   */
   abstract function renderGadget(Gadget $gadget, $view);
 }

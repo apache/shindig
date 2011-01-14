@@ -26,10 +26,25 @@ require_once 'external/jsmin-php/jsmin.php';
  *
  */
 class GadgetFeatureRegistry {
+  /**
+   * @var array
+   */
   public $features = array();
+
+  /**
+   * @var array
+   */
   private $coreFeatures;
+
+  /**
+   * @var array
+   */
   private $sortedFeatures;
-  
+
+  /**
+   *
+   * @param miexed $featurePath
+   */
   public function __construct($featurePath) {
     if (is_array($featurePath)) {
       foreach ($featurePath as $path) {
@@ -41,6 +56,13 @@ class GadgetFeatureRegistry {
     $this->processFeatures();
   }
 
+  /**
+   *
+   * @param array $features
+   * @param GadgetContext $context
+   * @param boolean $isGadgetContext
+   * @return string
+   */
   public function getFeaturesContent($features, GadgetContext $context, $isGadgetContext) {
     $ret = '';
     foreach ($features as $feature) {
@@ -48,7 +70,14 @@ class GadgetFeatureRegistry {
     }
     return $ret;
   }
-  
+
+  /**
+   *
+   * @param string $feature
+   * @param GadgetContext $context
+   * @param boolean $isGadgetContext
+   * @return string
+   */
   public function getFeatureContent($feature, GadgetContext $context, $isGadgetContext) {
     if (empty($feature)) return '';
     if (!isset($this->features[$feature])) {
@@ -94,6 +123,13 @@ class GadgetFeatureRegistry {
     return $ret;
   }
 
+  /**
+   *
+   * @param array $needed
+   * @param array $resultsFound
+   * @param array $resultsMissing
+   * @return boolean
+   */
   public function resolveFeatures($needed, &$resultsFound, &$resultsMissing) {
     $resultsFound = array();
     $resultsMissing = array();
@@ -110,7 +146,12 @@ class GadgetFeatureRegistry {
     }
     return count($resultsMissing) == 0;
   }
-  
+
+  /**
+   *
+   * @param array $features
+   * @param array $sortedFeatures
+   */
   public function sortFeatures($features, &$sortedFeatures) {
     if (empty($features)) {
       return;
@@ -122,7 +163,12 @@ class GadgetFeatureRegistry {
       }
     }
   }
-  
+
+  /**
+   *
+   * @param array $results
+   * @param array $feature
+   */
   private function addFeatureToResults(&$results, $feature) {
     if (in_array($feature['name'], $results)) {
       return;
@@ -218,8 +264,8 @@ class GadgetFeatureRegistry {
   /**
    * Loads the feature's xml content
    *
-   * @param unknown_type $file
-   * @return unknown
+   * @param string $file
+   * @return array
    */
   private function processFile($file) {
     $feature = null;
@@ -236,7 +282,7 @@ class GadgetFeatureRegistry {
    *
    * @param string $content
    * @param string $path
-   * @return feature array
+   * @return array
    */
   private function parse($content, $path) {
     $doc = simplexml_load_string($content);
@@ -314,6 +360,12 @@ class GadgetFeatureRegistry {
     }
   }
 
+  /**
+   *
+   * @param string $feature1
+   * @param string $feature2
+   * @return boolean
+   */
   private function sortFeaturesFiles($feature1, $feature2) {
     $feature1 = basename(str_replace('/feature.xml', '', $feature1));
     $feature2 = basename(str_replace('/feature.xml', '', $feature2));

@@ -28,7 +28,8 @@ class DataPipelining {
    * Parses the data-pipelining tags of from a html/href view, or from a os-data script tag and returns a
    * normalized array of requests to perform (which can be used to call DataPipelining::fetch)
    *
-   * @param DOMNodeList $dataTags
+   * @param DOMElement $viewNode
+   * @return array
    */
   static public function parse(DOMElement &$viewNode) {
     $dataTags = $viewNode->getElementsByTagName('*');
@@ -119,6 +120,7 @@ class DataPipelining {
    *
    * @param array $returnedResults
    * @param array $dataContext
+   * @return array
    */
   static private function addResultToContext($returnedResults, $dataContext) {
     foreach ($returnedResults as $val) {
@@ -145,9 +147,10 @@ class DataPipelining {
    * both request types use the current security token ($_GET['st']) when performing the requests so they happen in the correct context
    *
    * @param array $requests
+   * @param GadgetContext $context
    * @return array response
    */
-  static private function performRequests($requests, $context) {
+  static private function performRequests($requests, GadgetContext $context) {
     $jsonRequests = array();
     $httpRequests = array();
     $decodedResponse = array();
@@ -250,6 +253,8 @@ class DataPipelining {
    * array, returning the parsed request on success, or FALSE on failure to resolve.
    *
    * @param array $request
+   * @param array $result
+   * @return array
    */
   static private function resolveRequest($request, $result) {
     $dataContext = self::makeContextData($result);

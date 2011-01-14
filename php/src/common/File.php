@@ -21,6 +21,11 @@
 
 class File {
 
+  /**
+   *
+   * @param string $file
+   * @return boolean
+   */
   public static function exists($file) {
     // only really check if check_file_exists == true, big performance hit on production systems, but also much safer :)
     if (Config::get('check_file_exists')) {
@@ -30,6 +35,11 @@ class File {
     }
   }
 
+  /**
+   *
+   * @param string $file
+   * @return boolean
+   */
   public static function readable($file) {
     // only really check if check_file_exists == true, big performance hit on production systems, but also much safer :)
     if (Config::get('check_file_exists')) {

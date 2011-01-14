@@ -217,6 +217,9 @@ class BasicSecurityToken extends SecurityToken {
     return $this->authenticationMode;
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public function setAuthenticationMode($mode) {
     $this->authenticationMode = $mode;
   }

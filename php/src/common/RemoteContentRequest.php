@@ -422,6 +422,8 @@ class Options {
 
   /**
    * Copy constructor
+   *
+   * @param Options $copyFrom
    */
   public function copyOptions(Options $copyFrom) {
     $this->ignoreCache = $copyFrom->ignoreCache;

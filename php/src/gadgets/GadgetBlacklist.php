@@ -20,5 +20,9 @@
 
 interface GadgetBlacklist {
 
+  /**
+   * @param string $url
+   * @return boolean
+   */
   function isBlacklisted($url);
 }

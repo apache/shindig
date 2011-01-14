@@ -24,10 +24,23 @@
  * listeners
  */
 class GadgetRewriter {
+  /**
+   *
+   * @var GadgetContext
+   */
   private $context;
   private $doc;
+
+  /**
+   *
+   * @var array
+   */
   private $domObservers = array();
 
+  /**
+   *
+   * @param GadgetContext $context
+   */
   public function __construct(GadgetContext $context) {
     $this->context = $context;
   }
@@ -37,6 +50,8 @@ class GadgetRewriter {
    *
    * @param string $content
    * @param Gadget $gadget
+   * @param boolean $checkDocument
+   * @return string
    */
   public function rewrite($content, Gadget &$gadget, $checkDocument = false) {
     // Check to see if the gadget requested rewriting, or if rewriting is forced in the configuration

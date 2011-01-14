@@ -20,14 +20,22 @@
 
 
 /**
- * Basic implementation of OAuthLookupService using BasicOAuthDataStore.
+ * Basic implementation of OAuthLookupService
  */
 class BasicOAuthLookupService extends OAuthLookupService {
 
+  /**
+   * {@inheritDoc}
+   */
   public function getSecurityToken($oauthRequest, $appUrl, $userId, $contentType) {
     return new OAuthSecurityToken($userId, $appUrl, $this->getAppId($appUrl), "samplecontainer");
   }
 
+  /**
+   *
+   * @param string $appUrl
+   * @return int
+   */
   private function getAppId($appUrl) {
     return 0; // a real implementation would look this up
   }

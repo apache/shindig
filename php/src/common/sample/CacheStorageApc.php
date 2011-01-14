@@ -21,24 +21,39 @@
 class CacheStorageApc extends CacheStorage {
   private $prefix = null;
 
+  /**
+   * {@inheritDoc}
+   */
   public function __construct($name) {
     $this->prefix = $name;
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public function store($key, $value) {
     if (($ret = @apc_fetch($key)) === false) {
       return @apc_store($this->storageKey($key), $value);
     }
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public function fetch($key) {
     return @apc_fetch($this->storageKey($key));
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public function delete($key) {
     return @apc_delete($this->storageKey($key));
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public function isLocked($key) {
     if ((@apc_fetch($this->storageKey($key) . '.lock')) === false) {
       return false;
@@ -46,17 +61,26 @@ class CacheStorageApc extends CacheStorage {
     return true;
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public function lock($key) {
     // the interesting thing is that this could fail if the lock was created in the meantime..
     // but we'll ignore that out of convenience
     @apc_add($this->storageKey($key) . '.lock', '', 5);
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public function unlock($key) {
     // suppress all warnings, if some other process removed it that's ok too
     @apc_delete($this->storageKey($key) . '.lock');
   }
 
+  /**
+   * {@inheritDoc}
+   */
   private function storageKey($key) {
     return $this->prefix . '_' . $key;
   }

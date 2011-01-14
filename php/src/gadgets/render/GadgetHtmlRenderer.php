@@ -27,6 +27,11 @@ require 'GadgetBaseRenderer.php';
  */
 class GadgetHtmlRenderer extends GadgetBaseRenderer {
 
+  /**
+   *
+   * @param Gadget $gadget
+   * @param array $view
+   */
   public function renderGadget(Gadget $gadget, $view) {
     $this->setGadget($gadget);
     // Was a privacy policy header configured? if so set it

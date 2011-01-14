@@ -20,6 +20,11 @@
 
 class MetadataGadgetContext extends GadgetContext {
 
+  /**
+   *
+   * @param object $jsonContext
+   * @param string $url
+   */
   public function __construct($jsonContext, $url) {
     parent::__construct('GADGET');
     $this->url = $url;
@@ -28,6 +33,9 @@ class MetadataGadgetContext extends GadgetContext {
     $this->container = $jsonContext->container;
   }
 
+  /**
+   * @return array
+   */
   public function getView() {
     return $this->view;
   }

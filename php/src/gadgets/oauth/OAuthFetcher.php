@@ -130,11 +130,12 @@ class OAuthFetcher extends RemoteContentFetcher {
 
   /**
    *
-   * @param oauthCrypter used to encrypt transient information we store on the
+   * @param $tokenStore storage for long lived tokens.
+   * @param $oauthCrypter used to encrypt transient information we store on the
    *        client.
-   * @param authToken user's gadget security token
-   * @param params OAuth fetch parameters sent from makeRequest
-   * @param tokenStore storage for long lived tokens.
+   * @param RemoteContentFetcher $fetcher
+   * @param $authToken user's gadget security token
+   * @param OAuthRequestParams $params OAuth fetch parameters sent from makeRequest
    */
   public function __construct($tokenStore, $oauthCrypter, $fetcher, $authToken, OAuthRequestParams $params) {
     $this->fetcher = $fetcher;
@@ -159,6 +160,11 @@ class OAuthFetcher extends RemoteContentFetcher {
     $this->tokenStore = $tokenStore;
   }
 
+  /**
+   *
+   * @param Exception $e
+   * @return RemoteContentRequest
+   */
   private function buildErrorResponse(Exception $e) {
     if ($this->error == null) {
       $this->error = OAuthError::$UNKNOWN_PROBLEM;
@@ -209,6 +215,10 @@ class OAuthFetcher extends RemoteContentFetcher {
     }
   }
 
+  /**
+   *
+   * @return TokenKey 
+   */
   private function buildTokenKey() {
     $tokenKey = new TokenKey();
     // need to URLDecode so when comparing with the ProviderKey it goes thought
@@ -224,6 +234,11 @@ class OAuthFetcher extends RemoteContentFetcher {
     return $tokenKey;
   }
 
+  /**
+   *
+   * @param RemoteContentRequest $request
+   * @return RemoteContentRequest
+   */
   public function fetch($request) {
   	$this->realRequest = $request;
     try {
@@ -237,6 +252,7 @@ class OAuthFetcher extends RemoteContentFetcher {
   }
 
   /**
+   * @param RemoteContentRequest $request
    * @return RemoteContentRequest
    */
   public function fetchRequest(RemoteContentRequest $request) {
@@ -260,12 +276,18 @@ class OAuthFetcher extends RemoteContentFetcher {
     return $this->fetchData();
   }
 
+  /**
+   *
+   * @return RemoteContentRequest
+   */
   private function buildOAuthApprovalResponse() {
     return $this->buildNonDataResponse();
   }
 
   /**
    * Do we need to get the user's approval to access the data?
+   *
+   * @return boolean
    */
   private function needApproval() {
     if ($this->accessorInfo == NULL) {
@@ -298,6 +320,7 @@ class OAuthFetcher extends RemoteContentFetcher {
 
   /**
    *
+   * @param RemoteContentRequest $request
    * @throws GadgetException
    */
   private function fetchRequestToken(RemoteContentRequest $request) {
@@ -325,7 +348,10 @@ class OAuthFetcher extends RemoteContentFetcher {
   }
 
   /**
-   * @return OAuthRequest
+   * @param string $method
+   * @param string $url
+   * @param $params
+   * @return ShindigOAuthRequest
    */
   private function newRequestMessageMethod($method, $url, $params) {
     if (! isset($params)) {
@@ -348,6 +374,9 @@ class OAuthFetcher extends RemoteContentFetcher {
   /*
    * @deprecated (All outgoing messages must send additional params
    * like XOAUTH_APP_URL, so use newRequestMessageParams instead)
+   *
+   * @param string $url
+   * @return ShindigOAuthRequest
    */
   private function newRequestMessageUrlOnly($url) {
     $params = array();
@@ -355,7 +384,9 @@ class OAuthFetcher extends RemoteContentFetcher {
   }
 
   /**
-   * @return OAuthRequest
+   * @param string $url
+   * @param string $params
+   * @return ShindigOAuthRequest
    */
   private function newRequestMessageParams($url, $params) {
     $method = "POST";
@@ -365,6 +396,13 @@ class OAuthFetcher extends RemoteContentFetcher {
     return $this->newRequestMessageMethod($method, $url, $params);
   }
 
+  /**
+   *
+   * @param string $url
+   * @param string $method
+   * @param array $params
+   * @return ShindigOAuthRequest
+   */
   private function newRequestMessage($url = null, $method = null, $params = null) {
     if (isset($method) && isset($url) && isset($params)) {
       return $this->newRequestMessageMethod($method, $url, $params);
@@ -375,6 +413,11 @@ class OAuthFetcher extends RemoteContentFetcher {
     }
   }
 
+  /**
+   *
+   * @param array $oauthParams
+   * @return string
+   */
   private function getAuthorizationHeader($oauthParams) {
     $result = "OAuth ";
     $first = true;
@@ -390,6 +433,13 @@ class OAuthFetcher extends RemoteContentFetcher {
   }
 
   /**
+   * @param array $oauthParams
+   * @param string $method
+   * @param string $url
+   * @param array $headers
+   * @param string $contentType
+   * @param string $postBody
+   * @param Options $options
    * @return RemoteContentRequest
    */
   private function createRemoteContentRequest($oauthParams, $method, $url, $headers, $contentType, $postBody, $options) {
@@ -429,6 +479,9 @@ class OAuthFetcher extends RemoteContentFetcher {
 
   /**
    * Sends OAuth request token and access token messages.
+   *
+   * @param ShindigOAuthRequest $request
+   * @return ShindigOAuthRequest
    */
   private function sendOAuthMessage(ShindigOAuthRequest $request) {
     $rcr = $this->createRemoteContentRequest($this->filterOAuthParams($request), $request->get_normalized_http_method(), $request->get_url(), null, RemoteContentRequest::$DEFAULT_CONTENT_TYPE, null, RemoteContentRequest::getDefaultOptions());
@@ -445,6 +498,8 @@ class OAuthFetcher extends RemoteContentFetcher {
 
   /**
    * Builds the data we'll cache on the client while we wait for approval.
+   *
+   * @throws GadgetException
    */
   private function buildClientApprovalState() {
     try {
@@ -481,6 +536,8 @@ class OAuthFetcher extends RemoteContentFetcher {
 
   /**
    * Do we need to exchange a request token for an access token?
+   *
+   * @return boolean
    */
   private function needAccessToken() {
     return ($this->accessorInfo->getAccessor()->requestToken != null && $this->accessorInfo->getAccessor()->accessToken == null);
@@ -488,6 +545,9 @@ class OAuthFetcher extends RemoteContentFetcher {
 
   /**
    * Implements section 6.3 of the OAuth spec.
+   *
+   * @param RemoteContentRequest $request
+   * @throws GadgetException
    */
   private function exchangeRequestToken(RemoteContentRequest $request) {
     try {
@@ -534,6 +594,8 @@ class OAuthFetcher extends RemoteContentFetcher {
 
   /**
    * Builds the data we'll cache on the client while we make requests.
+   *
+   * @throws GadgetException
    */
   private function buildClientAccessState() {
     try {
@@ -550,6 +612,8 @@ class OAuthFetcher extends RemoteContentFetcher {
 
   /**
    * Get honest-to-goodness user data.
+   *
+   * @return RemoteContentRequest
    */
   private function fetchData() {
     try {
@@ -616,9 +680,9 @@ class OAuthFetcher extends RemoteContentFetcher {
    * Parse OAuth WWW-Authenticate header and either add them to an existing
    * message or create a new message.
    *
-   * @param msg
-   * @param resp
-   * @return the updated message.
+   * @param ShindigOAuthRequest $msg
+   * @param RemoteContentRequest $resp
+   * @return string the updated message.
    */
   private function parseAuthHeader(ShindigOAuthRequest $msg = null, RemoteContentRequest $resp) {
     if ($msg == null) {
@@ -639,12 +703,12 @@ class OAuthFetcher extends RemoteContentFetcher {
    * they, and only they, may have to be put into an Authorization: header or
    * some such thing.
    *
-   * @param message the OAuthMessage object, which holds non-OAuth parameters
+   * @param string $message the OAuthMessage object, which holds non-OAuth parameters
    * such as foo=bar (which may have been in the original URI query part, or
    * perhaps in the POST body), as well as OAuth-related parameters (such as
    * oauth_timestamp or oauth_signature).
    *
-   * @return a list that contains only the oauth_related parameters.
+   * @return array a list that contains only the oauth_related parameters.
    *
    * @throws IOException
    */
@@ -658,12 +722,16 @@ class OAuthFetcher extends RemoteContentFetcher {
     return $result;
   }
 
+  /**
+   *
+   * @return array
+   */
   public function getResponseMetadata() {
     return $this->responseMetadata;
   }
 
   /**
-   * @var RemoteContentRequest $response
+   * @param RemoteContentRequest $response
    */
   public function addResponseMetadata(RemoteContentRequest $response) {
     $response->setHttpCode(200);
@@ -685,9 +753,16 @@ class OAuthFetcher extends RemoteContentFetcher {
     }
   }
 
+  /**
+   * @param array $requests
+   */
   public function multiFetchRequest(Array $requests) {// Do nothing
-}
+  }
 
+  /**
+   * @param array $params
+   * @param SecurityToken $token
+   */
   private static function addIdentityParams(array & $params, SecurityToken $token) {
     $params['opensocial_owner_id'] = $token->getOwnerId();
     $params['opensocial_viewer_id'] = $token->getViewerId();
@@ -695,6 +770,10 @@ class OAuthFetcher extends RemoteContentFetcher {
     $params['opensocial_app_url'] = $token->getAppUrl();
   }
 
+  /**
+   *
+   * @param RemoteContentRequest $response 
+   */
   private static function setStrictNoCache(RemoteContentRequest $response) {
     $response->setResponseHeader('Pragma', 'no-cache');
     $response->setResponseHeader('Cache-Control', 'no-cache');

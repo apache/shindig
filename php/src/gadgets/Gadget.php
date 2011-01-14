@@ -27,6 +27,10 @@ class Gadget {
   public $gadgetSpec;
 
   public $features;
+
+  /*
+   * @var Substitutions
+   */
   public $substitutions;
   public $rightToLeft;
 
@@ -35,11 +39,23 @@ class Gadget {
    */
   public $gadgetContext;
 
+  /**
+   *
+   * @param GadgetSpec $gadgetSpec
+   * @param GadgetContext $gadgetContext
+   */
   public function __construct(GadgetSpec $gadgetSpec, GadgetContext $gadgetContext) {
     $this->gadgetSpec = $gadgetSpec;
     $this->gadgetContext = $gadgetContext;
   }
 
+  /**
+   * returns all information about the given viewName
+   *
+   * @param string $viewName
+   * @throws GadgetException
+   * @return array
+   */
   public function getView($viewName) {
     if (isset($this->gadgetSpec->views[$viewName])) {
       return $this->gadgetSpec->views[$viewName];

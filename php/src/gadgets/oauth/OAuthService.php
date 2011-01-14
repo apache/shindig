@@ -26,24 +26,32 @@ class OAuthService {
   private static $URL_ATTR = "url";
   private static $PARAM_LOCATION_ATTR = "param_location";
   private static $METHOD_ATTR = "method";
-  
+
+  /**
+   * @var string
+   */
   private $name;
   
   /**
-   * @var EndPoint
+   * @var string EndPoint
    */
   private $requestUrl;
   
   /**
-   * @var EndPoint
+   * @var string EndPoint
    */
   private $authorizationUrl;
   
   /**
-   * @var EndPoint
+   * @var string EndPoint
    */
   private $accessUrl;
 
+  /**
+   *
+   * @param DOMElement $service
+   * @throws SpecParserException
+   */
   public function __construct(DOMElement $service) {
     $this->name = (string)$service->getAttribute('name');
     $elements = $service->getElementsByTagName('*');
@@ -90,6 +98,11 @@ class OAuthService {
     }
   }
 
+  /**
+   *
+   * @param DOMElement $element
+   * @return EndPoint
+   */
   private function parseEndPoint($element) {
     $url = trim($element->getAttribute(OAuthService::$URL_ATTR));
     if (empty($url)) {
@@ -108,18 +121,30 @@ class OAuthService {
     return new EndPoint($url, $method, $location);
   }
 
+  /**
+   * @return string
+   */
   public function getName() {
     return $this->name;
   }
 
+  /**
+   * @return string
+   */
   public function getRequestUrl() {
     return $this->requestUrl;
   }
 
+  /**
+   * @return string
+   */
   public function getAuthorizationUrl() {
     return $this->authorizationUrl;
   }
 
+  /**
+   * @return string
+   */
   public function getAccessUrl() {
     return $this->accessUrl;
   }
@@ -147,10 +172,27 @@ class Location {
  * Description of an OAuth request token or access token URL.
  */
 class EndPoint {
+  /**
+   * @var string
+   */
   public $url;
+
+  /**
+   * @var string
+   */
   public $method;
+
+  /**
+   * @var string
+   */
   public $location;
 
+  /**
+   *
+   * @param string $url
+   * @param string $method
+   * @param string $location
+   */
   public function __construct($url, $method, $location) {
     $this->url = $url;
     $this->method = $method;

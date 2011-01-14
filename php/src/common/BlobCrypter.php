@@ -32,8 +32,8 @@ abstract class BlobCrypter {
   /**
    * Time stamps, encrypts, and signs a blob.
    *
-   * @param in name/value pairs to encrypt
-   * @return a base64 encoded blob
+   * @param array $in name/value pairs to encrypt
+   * @return string a base64 encoded blob
    *
    * @throws BlobCrypterException
    */
@@ -42,9 +42,9 @@ abstract class BlobCrypter {
   /**
    * Unwraps a blob.
    *
-   * @param in blob
-   * @param maxAgeSec maximum age for the blob
-   * @return the name/value pairs, including the origin timestamp.
+   * @param string $in blob
+   * @param int $maxAgeSec maximum age for the blob
+   * @return array the name/value pairs, including the origin timestamp.
    *
    * @throws BlobExpiredException if the blob is too old to be accepted.
    * @throws BlobCrypterException if the blob can't be decoded.

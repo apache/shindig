@@ -91,6 +91,11 @@ class ProxyHandler extends ProxyBase {
     }
   }
 
+  /**
+   *
+   * @param string $gadgetUrl
+   * @param RemoteContentRequest $result
+   */
   private function rewriteContent($gadgetUrl, RemoteContentRequest &$result) {
     try {
       // At the moment we're only able to rewrite CSS files, so check the content type and/or the file extension before rewriting
@@ -120,6 +125,7 @@ class ProxyHandler extends ProxyBase {
    * Uses the GadgetFactory to instrance the specified gadget
    *
    * @param string $gadgetUrl
+   * @return Gadget
    */
   private function createGadget($gadgetUrl) {
     // Only include these files if appropiate, else it would slow down the entire proxy way to much

@@ -20,6 +20,11 @@
 
 class MetadataHandler {
 
+  /**
+   *
+   * @param object $requests
+   * @return array
+   */
   public function process($requests) {
     $response = array();
     foreach ($requests->gadgets as $gadget) {
@@ -40,6 +45,10 @@ class MetadataHandler {
     return $response;
   }
 
+  /**
+   *
+   * @return SecurityToken
+   */
   private function getSecurityToken() {
     $token = BasicSecurityToken::getTokenStringFromRequest();
     if (empty($token)) {
@@ -59,6 +68,12 @@ class MetadataHandler {
     return $gadgetSigner->createToken($token);
   }
 
+  /**
+   *
+   * @param Gadget $gadget
+   * @param GadgetContext $context
+   * @return array
+   */
   private function getIframeURL(Gadget $gadget, GadgetContext $context) {
     $v = $gadget->getChecksum();
     $view = $gadget->getView($context->getView());

@@ -23,9 +23,17 @@
  * Now, it only has 1 property, but this class was designed to be reusable
  **/
 class OAuthSpec {
-  
+
+  /**
+   *
+   * @var array
+   */
   private $oAuthServices = array();
 
+  /**
+   *
+   * @param array $services
+   */
   public function __construct($services) {
     foreach ($services as $service) {
       $oauthService = new OAuthService($service);
@@ -33,6 +41,10 @@ class OAuthSpec {
     }
   }
 
+  /**
+   *
+   * @return array
+   */
   public function getServices() {
     return $this->oAuthServices;
   }

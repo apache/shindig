@@ -22,9 +22,16 @@
  * Basic implementation of a gadget spec factory.
  */
 class BasicGadgetSpecFactory {
-  private $cache;
+  /**
+   * @var GadgetContext
+   */
   private $context;
 
+  /**
+   *
+   * @param GadgetContext $context
+   * @return GadgetSpec
+   */
   public function getGadgetSpec(GadgetContext $context) {
     $this->context = $context;
     return $this->getGadgetSpecUri($context->getUrl(), $context->getIgnoreCache());
@@ -32,6 +39,10 @@ class BasicGadgetSpecFactory {
 
   /**
    * Retrieves a gadget specification from the cache or from the Internet.
+   *
+   * @param string $url
+   * @param boolean $ignoreCache
+   * @return GadgetSpec
    */
   public function getGadgetSpecUri($url, $ignoreCache) {
     return $this->fetchFromWeb($url, $ignoreCache);
@@ -40,6 +51,10 @@ class BasicGadgetSpecFactory {
   /**
    * Retrieves a gadget specification from the Internet, processes its views and
    * adds it to the cache.
+   *
+   * @param string $url
+   * @param boolean $ignoreCache
+   * @return GadgetSpec
    */
   private function fetchFromWeb($url, $ignoreCache) {
     $remoteContentRequest = new RemoteContentRequest($url);

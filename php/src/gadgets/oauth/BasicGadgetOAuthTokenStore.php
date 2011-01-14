@@ -26,11 +26,19 @@ class BasicGadgetOAuthTokenStore extends GadgetOAuthTokenStore {
   private $CONSUMER_KEY_KEY = "consumer_key";
   private $KEY_TYPE_KEY = "key_type";
 
-  public function __construct($store, $fetcher) {
-    parent::__construct($store, $fetcher);
+  /**
+   *
+   * @param OAuthStore $store
+   * @param BasicGadgetSpecFactory $specFadtory
+   */
+  public function __construct($store, $specFadtory) {
+    parent::__construct($store, $specFadtory);
     $this->OAUTH_CONFIG = Config::get('container_path') . $this->OAUTH_CONFIG;
   }
 
+  /**
+   * @param SigningFetcher $fetcher
+   */
   public function initFromConfigFile($fetcher) {
     // Read our consumer keys and secrets from config/oauth.js
     // This actually involves fetching gadget specs
@@ -51,6 +59,11 @@ class BasicGadgetOAuthTokenStore extends GadgetOAuthTokenStore {
     }
   }
 
+  /**
+   *
+   * @param string $gadgetUri
+   * @param array $oauthConfig
+   */
   protected function storeConsumerInfos($gadgetUri, $oauthConfig) {
     foreach ($oauthConfig as $key => $value) {
       $serviceName = $key;
@@ -59,6 +72,12 @@ class BasicGadgetOAuthTokenStore extends GadgetOAuthTokenStore {
     }
   }
 
+  /**
+   *
+   * @param string $gadgetUri
+   * @param string $serviceName
+   * @param array $consumerInfo
+   */
   protected function storeConsumerInfo($gadgetUri, $serviceName, $consumerInfo) {
     if (! isset($consumerInfo[$this->CONSUMER_SECRET_KEY]) || ! isset($consumerInfo[$this->CONSUMER_KEY_KEY]) || ! isset($consumerInfo[$this->KEY_TYPE_KEY])) {
       throw new Exception("Invalid configuration in oauth.json");

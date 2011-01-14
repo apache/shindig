@@ -19,11 +19,27 @@
  */
 
 class OAuthServiceProvider {
-  
+  /**
+   * @var string
+   */
   public $requestTokenURL;
+
+  /**
+   * @var string
+   */
   public $userAuthorizationURL;
+
+  /**
+   * @var string
+   */
   public $accessTokenURL;
 
+  /**
+   *
+   * @param string $requestTokenURL
+   * @param string $userAuthorizationURL
+   * @param string $accessTokenURL
+   */
   public function __construct($requestTokenURL, $userAuthorizationURL, $accessTokenURL) {
     $this->requestTokenURL = $requestTokenURL;
     $this->userAuthorizationURL = $userAuthorizationURL;

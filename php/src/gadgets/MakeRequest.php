@@ -53,7 +53,10 @@ class MakeRequest {
     "SET-COOKIE", "CONTENT-LENGTH", "CONTENT-ENCODING", "ETAG", "LAST-MODIFIED",
     "ACCEPT-RANGES", "VARY", "EXPIRES", "DATE", "PRAGMA", "CACHE-CONTROL",
     "TRANSFER-ENCODING", "WWW-AUTHENTICATE");
-  
+
+  /**
+   * @var RemoteContentFetcher
+   */
   private $remoteFetcher;
 
   /**
@@ -246,6 +249,10 @@ class MakeRequest {
   /**
    * Handles (RSS & Atom) Type.FEED parsing using Zend's feed parser
    *
+   * @param RemoteContentRequest $result
+   * @param string $url
+   * @param int $numEntries
+   * @param boolean $getSummaries
    * @return response string, either a json encoded feed structure or an error message
    */
   private function parseFeed($result, $url, $numEntries = 3, $getSummaries = false) {

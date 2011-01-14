@@ -54,9 +54,10 @@ class BasicSecurityTokenDecoder extends SecurityTokenDecoder {
   }
 
   /**
-   * {@inheritDoc}
-   *
    * Parses the security token
+   *
+   * @param string $stringToken
+   * @return array
    */
   private function parseToken($stringToken) {
     $data = explode(":", $stringToken);

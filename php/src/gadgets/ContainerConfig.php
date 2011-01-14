@@ -19,16 +19,35 @@
  */
 
 class ContainerConfig {
+  /**
+   * @var string
+   */
   public $default_container = 'default';
+
+  /**
+   * @var string
+   */
   public $container_key = 'gadgets.container';
+
+  /**
+   * @var array
+   */
   private $config = array();
 
+  /**
+   *
+   * @param string $defaultContainer
+   */
   public function __construct($defaultContainer) {
     if (! empty($defaultContainer)) {
       $this->loadContainers($defaultContainer);
     }
   }
 
+  /**
+   *
+   * @param array $containers
+   */
   private function loadContainers($containers) {
     if (! File::exists($containers)) {
       throw new Exception("Invalid container path");
@@ -46,6 +65,10 @@ class ContainerConfig {
     }
   }
 
+  /**
+   *
+   * @param string $file
+   */
   private function loadFromFile($file) {
     $contents = file_get_contents($file);
     $contents = $this->removeComments($contents);
@@ -63,6 +86,10 @@ class ContainerConfig {
     }
   }
 
+  /**
+   * @param string $str
+   * @return string
+   */
   public function removeComments($str) {
     // remove /* */ style comments
     $str = preg_replace('@/\\*.*?\\*/@s', '', $str);
@@ -72,6 +99,12 @@ class ContainerConfig {
     return $str;
   }
 
+  /**
+   *
+   * @param string $container
+   * @param string $name
+   * @return array
+   */
   public function getConfig($container, $name) {
     $config = array();
     if (isset($this->config[$container]) && isset($this->config[$container][$name])) {
@@ -83,11 +116,15 @@ class ContainerConfig {
     return $config;
   }
 
-  // Code sniplet borrowed from: http://nl.php.net/manual/en/function.array-merge-recursive.php#81409
-  // default array merge recursive doesn't overwrite values, but creates multiple elementents for that key,
-  // which is not what we want here, we want array_merge like behavior
+  /**
+   * Code sniplet borrowed from: http://nl.php.net/manual/en/function.array-merge-recursive.php#81409
+   * default array merge recursive doesn't overwrite values, but creates multiple elementents for that key,
+   * which is not what we want here, we want array_merge like behavior
+   *
+   * @return array
+   */
   private function mergeConfig() // $array1, $array2, etc
-{
+  {
     $arrays = func_get_args();
     $narrays = count($arrays);
     for ($i = 0; $i < $narrays; $i ++) {

@@ -21,10 +21,16 @@
 class CacheStorageFile extends CacheStorage {
   private $prefix = null;
 
+  /**
+   * {@inheritDoc}
+   */
   public function __construct($name) {
     $this->prefix = $name;
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public function store($key, $value) {
     $cacheDir = CacheStorageFile::getCacheDir($key);
     $cacheFile = CacheStorageFile::getCacheFile($key);
@@ -37,6 +43,9 @@ class CacheStorageFile extends CacheStorage {
     return file_put_contents($cacheFile, $value);
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public function fetch($key) {
     $cacheFile = CacheStorageFile::getCacheFile($key);
     if (File::exists($cacheFile) && File::readable($cacheFile)) {
@@ -45,6 +54,9 @@ class CacheStorageFile extends CacheStorage {
     return false;
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public function delete($key) {
     $cacheFile = CacheStorageFile::getCacheFile($key);
     if (! @unlink($cacheFile)) {
@@ -52,12 +64,18 @@ class CacheStorageFile extends CacheStorage {
     }
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public function isLocked($key) {
     // our lock file convention is simple: /the/file/path.lock
     clearstatcache();
     return file_exists($key . '.lock');
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public function lock($key) {
     $cacheDir = CacheStorageFile::getCacheDir($key);
     $cacheFile = CacheStorageFile::getCacheFile($key);
@@ -72,12 +90,20 @@ class CacheStorageFile extends CacheStorage {
     @touch($cacheFile . '.lock');
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public function unlock($key) {
     // suppress all warnings, if some other process removed it that's ok too
     $cacheFile = CacheStorageFile::getCacheFile($key);
     @unlink($cacheFile . '.lock');
   }
 
+  /**
+   *
+   * @param string $key
+   * @return string
+   */
   private function getCacheDir($key) {
     // use the first 2 characters of the hash as a directory prefix
     // this should prevent slowdowns due to huge directory listings
@@ -86,6 +112,11 @@ class CacheStorageFile extends CacheStorage {
         substr($key, 0, 2);
   }
 
+  /**
+   *
+   * @param string $key
+   * @return string
+   */
   private function getCacheFile($key) {
     return $this->getCacheDir($key) . '/' . $key;
   }

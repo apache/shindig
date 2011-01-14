@@ -45,7 +45,7 @@ class BasicRemoteContent extends RemoteContent {
   private $invalidateService = null;
 
   /**
-   * @var cachePostRequest
+   * @var boolean cachePostRequest
    */
   private $cachePostRequest = false;
 
@@ -62,10 +62,19 @@ class BasicRemoteContent extends RemoteContent {
     $this->invalidateService = new DefaultInvalidateService($this->cache);
   }
 
+  /**
+   *
+   * @param RemoteContentFetcher $basicFetcher 
+   */
   public function setBasicFetcher(RemoteContentFetcher $basicFetcher) {
     $this->basicFetcher = $basicFetcher;
   }
 
+  /**
+   *
+   * @param RemoteContentRequest $request
+   * @return RemoteContentRequest
+   */
   public function fetch(RemoteContentRequest $request) {
     $ignoreCache = $request->getOptions()->ignoreCache;
     if (! $ignoreCache && ($this->cachePostRequest || ! $request->isPost()) && ($cachedRequest = $this->cache->get($request->toHash())) !== false && $this->invalidateService->isValid($cachedRequest)) {
@@ -84,6 +93,11 @@ class BasicRemoteContent extends RemoteContent {
     return $response;
   }
 
+  /**
+   *
+   * @param array $requests
+   * @return array 
+   */
   public function multiFetch(Array $requests) {
     $rets = array();
     $requestsToProc = array();
@@ -140,10 +154,20 @@ class BasicRemoteContent extends RemoteContent {
     return $rets;
   }
 
+  /**
+   *
+   * @param RemoteContentRequest $request 
+   */
   public function invalidate(RemoteContentRequest $request) {
     $this->cache->invalidate($request->toHash());
   }
 
+  /**
+   *
+   * @param RemoteContentRequest $originalRequest
+   * @param RemoteContentRequest $request
+   * @param Cache $cache
+   */
   private function setRequestCache(RemoteContentRequest $originalRequest, RemoteContentRequest $request, Cache $cache) {
     if ($request->isStrictNoCache()) {
       return;
@@ -184,6 +208,11 @@ class BasicRemoteContent extends RemoteContent {
     }
   }
 
+  /**
+   *
+   * @param RemoteContentRequest $request
+   * @return RemoteContentRequest
+   */
   private function divertFetch(RemoteContentRequest $request) {
     switch ($request->getAuthType()) {
       case RemoteContentRequest::$AUTH_SIGNED:
@@ -205,7 +234,7 @@ class BasicRemoteContent extends RemoteContent {
    * Returns the cached request, or false if there's no cached copy of this request, ignoreCache = true or if it's invalidated
    *
    * @param RemoteContentRequest $request
-   * @return unknown
+   * @return mixed
    */
   public function getCachedRequest(RemoteContentRequest $request) {
     $ignoreCache = $request->getOptions()->ignoreCache;

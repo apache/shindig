@@ -40,12 +40,21 @@ class Cache {
   private $storage = null;
 
   /**
+   * @param string $cacheClass
+   * @param string $name
+   * @param RequestTime $time
    * @return Cache
    */
   static public function createCache($cacheClass, $name, RequestTime $time = null) {
     return new Cache($cacheClass, $name, $time);
   }
 
+  /**
+   *
+   * @param string $cacheClass
+   * @param string $name
+   * @param RequestTime $time
+   */
   private function __construct($cacheClass, $name, RequestTime $time = null) {
     $this->storage = new $cacheClass($name);
     if ($time == null) {
@@ -55,6 +64,11 @@ class Cache {
     }
   }
 
+  /**
+   *
+   * @param string $key
+   * @return array or false
+   */
   public function get($key) {
     if ($this->storage->isLocked($key)) {
       $this->storage->waitForLock($key);
@@ -69,6 +83,11 @@ class Cache {
     return false;
   }
 
+  /**
+   *
+   * @param string $key
+   * @return array
+   */
   public function expiredGet($key) {
     if ($this->storage->isLocked($key)) {
       $this->storage->waitForLock($key);
@@ -81,6 +100,12 @@ class Cache {
     return array('found' => false);
   }
 
+  /**
+   *
+   * @param string $key
+   * @param mixed $value
+   * @param int $ttl optional
+   */
   public function set($key, $value, $ttl = false) {
     if (! $ttl) {
       $ttl = Config::Get('cache_time');
@@ -99,6 +124,10 @@ class Cache {
     }
   }
 
+  /**
+   *
+   * @param string $key
+   */
   public function delete($key) {
     if ($this->storage->isLocked($key)) {
       $this->storage->waitForLock($key);
@@ -108,6 +137,10 @@ class Cache {
     $this->storage->unlock($key);
   }
 
+  /**
+   *
+   * @param string $key
+   */
   public function invalidate($key) {
     if ($this->storage->isLocked($key)) {
       $this->storage->waitForLock($key);

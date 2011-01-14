@@ -25,9 +25,21 @@
 require_once 'ExpressionParser.php';
 
 class TemplateParser {
+  /**
+   * @var array
+   */
   private $dataContext;
+  /**
+   * @var TemplateLibrary
+   */
   private $templateLibrary;
 
+  /**
+   * dumps a node to stdout
+   * 
+   * @param DOMnode $node
+   * @param string $function
+   */
   public function dumpNode($node, $function) {
     $doc = new DOMDocument(null, 'utf-8');
     $doc->preserveWhiteSpace = true;
@@ -46,9 +58,11 @@ class TemplateParser {
   /**
    * Processes an os-template
    *
-   * @param string $template
+   * @param DOMnode $osTemplate
+   * @param array $dataContext
+   * @param TemplateLibrary $templateLibrary
    */
-  public function process(DOMnode &$osTemplate, $dataContext, $templateLibrary) {
+  public function process(DOMnode &$osTemplate, $dataContext, TemplateLibrary $templateLibrary) {
     $this->setDataContext($dataContext);
     $this->templateLibrary = $templateLibrary;
     if ($osTemplate instanceof DOMElement) {
@@ -80,6 +94,10 @@ class TemplateParser {
     return $this->dataContext;
   }
 
+  /**
+   * @param DOMNode $node
+   * @return boolean
+   */
   public function parseNode(DOMNode &$node) {
     $removeNode = false;
     if ($node instanceof DOMText) {
@@ -167,6 +185,10 @@ class TemplateParser {
     }
   }
 
+  /**
+   *
+   * @param DOMText $node
+   */
   private function parseNodeText(DOMText &$node) {
     if (strpos($node->nodeValue, '${') !== false) {
       $expressions = array();
@@ -181,6 +203,11 @@ class TemplateParser {
     }
   }
 
+  /**
+   *
+   * @param DOMNode $node
+   * @return DOMNode or false
+   */
   private function parseNodeAttributes(DOMNode &$node) {
     if ($node->hasAttributes()) {
       foreach ($node->attributes as $attr) {
@@ -318,6 +345,7 @@ class TemplateParser {
    * Function that handles the os: and osx: tags
    *
    * @param DOMNode $node
+   * @return DOMNode or false
    */
   private function parseOsmlNode(DOMNode &$node) {
     $tagName = strtolower($node->tagName);
@@ -548,6 +576,7 @@ class TemplateParser {
    * true if the expression is true or no if attribute is set
    *
    * @param DOMElement $node
+   * @return boolean
    */
   private function checkIf(DOMElement &$node) {
     if (($if = $node->getAttribute('if'))) {
@@ -571,6 +600,13 @@ class SwfConfig {
       'allowfullscreen', 'allownetworking');
   public static $ATTRS = array('id', 'name', 'styleclass', 'align');
 
+  /**
+   *
+   * @param array $swfConfig
+   * @param string $altContentId
+   * @param string $flashVars
+   * @return string
+   */
   public static function buildSwfObjectCall($swfConfig, $altContentId, $flashVars = 'null') {
     $params = SwfConfig::buildJsObj($swfConfig, SwfConfig::$PARAMS);
     $attrs = SwfConfig::buildJsObj($swfConfig, SwfConfig::$ATTRS);

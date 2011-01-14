@@ -50,7 +50,7 @@ class BasicRemoteContentFetcher extends RemoteContentFetcher {
    * in the $request objects
    *
    * @param Array of RemoteContentRequest's $requests
-   * @return $requests
+   * @return array $requests
    */
   public function multiFetchRequest(Array $requests) {
     $mh = curl_multi_init();

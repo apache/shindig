@@ -25,6 +25,10 @@ class OAuthAccessor {
   public $tokenSecret;
   private $properties = array();
 
+  /**
+   *
+   * @param OAuthConsumer $consumer 
+   */
   public function __construct(OAuthConsumer $consumer) {
     $this->consumer = $consumer;
     $this->requestToken = null;
@@ -32,16 +36,29 @@ class OAuthAccessor {
     $this->tokenSecret = null;
   }
 
+  /**
+   *
+   * @param string $name
+   * @return string
+   */
   public function getProperty($name) {
     return $this->properties[$name];
   }
 
+  /**
+   *
+   * @param stirng $name
+   * @param string $value
+   */
   public function setProperty($name, $value) {
     $this->properties[$name] = $value;
   }
 
   /**
-   * @return OAuthRequest
+   * @param string $method
+   * @param string $url
+   * @param string $parameters
+   * @return ShindigOAuthRequest
    */
   public function newRequestMessage($method, $url, $parameters) {
     if (! isset($method)) {

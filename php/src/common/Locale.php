@@ -24,14 +24,33 @@
  * interpretation one, we created our own
  */
 class Locale {
+  /**
+   *
+   * @var string
+   */
   public $language;
+
+  /**
+   *
+   * @var string
+   */
   public $country;
 
+  /**
+   *
+   * @param string $language
+   * @param string $country
+   */
   public function __construct($language, $country) {
     $this->language = $language;
     $this->country = $country;
   }
 
+  /**
+   *
+   * @param Locale $obj
+   * @return boolean
+   */
   public function equals($obj) {
     if (! ($obj instanceof Locale)) {
       return false;
@@ -39,10 +58,18 @@ class Locale {
     return ($obj->language == $this->language && $obj->country == $this->country);
   }
 
+  /**
+   *
+   * @return string
+   */
   public function getLanguage() {
     return $this->language;
   }
 
+  /**
+   *
+   * @return string
+   */
   public function getCountry() {
     return $this->country;
   }

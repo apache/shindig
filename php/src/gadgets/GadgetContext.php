@@ -25,21 +25,81 @@
  */
 class GadgetContext {
   const DEFAULT_VIEW = 'profile';
+  /**
+   *
+   * @var RemoteContentFetcher
+   */
   protected $httpFetcher = null;
+  /**
+   *
+   * @var array
+   */
   protected $locale = null;
+  /**
+   *
+   * @var string
+   */
   protected $renderingContext = null;
+  /**
+   *
+   * @var GadgetFeatureRegistry
+   */
   protected $registry = null;
+  /**
+   *
+   * @var string
+   */
   protected $view = null;
+  /**
+   *
+   * @var string
+   */
   protected $moduleId = null;
+  /**
+   *
+   * @var string
+   */
   protected $url = null;
+  /**
+   *
+   * @var array
+   */
   protected $cache = null;
+  /**
+   *
+   * @var GadgetBlacklist
+   */
   protected $blacklist = null;
+  /**
+   *
+   * @var boolean
+   */
   protected $ignoreCache = null;
+  /**
+   *
+   * @var string
+   */
   protected $forcedJsLibs = null;
+  /**
+   *
+   * @var array
+   */
   protected $containerConfig = null;
+  /**
+   *
+   * @var string
+   */
   protected $container = null;
+  /**
+   *
+   * @var int
+   */
   protected $refreshInterval;
 
+  /**
+   *
+   * @param string $renderingContext
+   */
   public function __construct($renderingContext) {
     // Rendering context is set by the calling event handler (either GADGET or CONTAINER)
     $this->setRenderingContext($renderingContext);
@@ -55,10 +115,18 @@ class GadgetContext {
     //NOTE All classes are initialized when called (aka lazy loading) because we don't need all of them in every situation
   }
 
+  /**
+   *
+   * @return int
+   */
   protected function getRefreshIntervalParam() {
     return isset($_GET['refresh']) ? $_GET['refresh'] : Config::get('default_refresh_interval');
   }
 
+  /**
+   *
+   * @return string
+   */
   protected function getContainerParam() {
     $container = 'default';
     if (! empty($_GET['container'])) {
@@ -74,15 +142,27 @@ class GadgetContext {
     return $container;
   }
 
+  /**
+   *
+   * @return boolean
+   */
   protected function getIgnoreCacheParam() {
     // Support both the old Orkut style &bpc and new standard style &nocache= params
     return (isset($_GET['nocache']) && intval($_GET['nocache']) == 1) || (isset($_GET['bpc']) && intval($_GET['bpc']) == 1);
   }
 
+  /**
+   *
+   * @return string
+   */
   protected function getForcedJsLibsParam() {
     return isset($_GET['libs']) ? trim($_GET['libs']) : null;
   }
 
+  /**
+   *
+   * @return string
+   */
   protected function getUrlParam() {
     if (! empty($_GET['url'])) {
       return $_GET['url'];
@@ -92,14 +172,26 @@ class GadgetContext {
     return null;
   }
 
+  /**
+   *
+   * @return int
+   */
   protected function getModuleIdParam() {
     return isset($_GET['mid']) && is_numeric($_GET['mid']) ? intval($_GET['mid']) : 0;
   }
 
+  /**
+   *
+   * @return string
+   */
   protected function getViewParam() {
     return ! empty($_GET['view']) ? $_GET['view'] : self::DEFAULT_VIEW;
   }
 
+  /**
+   *
+   * @return GadgetBlacklist
+   */
   protected function instanceBlacklist() {
     $blackListClass = Config::get('blacklist_class');
     if (! empty($blackListClass)) {
@@ -109,11 +201,19 @@ class GadgetContext {
     }
   }
 
+  /**
+   *
+   * @return RemoteContentFetcher
+   */
   protected function instanceHttpFetcher() {
     $remoteContent = Config::get('remote_content');
     return new $remoteContent();
   }
 
+  /**
+   *
+   * @return GadgetFeatureRegistry 
+   */
   protected function instanceRegistry() {
     // feature parsing is very resource intensive so by caching the result this saves upto 30% of the processing time
     $featureCache = Cache::createCache(Config::get('feature_cache'), 'FeatureCache');
@@ -125,6 +225,10 @@ class GadgetContext {
     return $registry;
   }
 
+  /**
+   *
+   * @return array
+   */
   protected function instanceLocale() {
     // Get language and country params, try the GET params first, if their not set try the POST, else use 'all' as default
     $language = ! empty($_GET['lang']) ? $_GET['lang'] : (! empty($_POST['lang']) ? $_POST['lang'] : 'all');
@@ -132,15 +236,27 @@ class GadgetContext {
     return array('lang' => strtolower($language), 'country' => strtoupper($country));
   }
 
+  /**
+   *
+   * @return ContainerConfig
+   */
   protected function instanceContainerConfig() {
     $containerConfigClass = Config::get('container_config_class');
     return new $containerConfigClass(Config::get('container_path'));
   }
 
+  /**
+   *
+   * @return string
+   */
   public function getContainer() {
     return $this->container;
   }
 
+  /**
+   *
+   * @return ContainerConfig
+   */
   public function getContainerConfig() {
     if ($this->containerConfig == null) {
       $this->containerConfig = $this->instanceContainerConfig();
@@ -148,10 +264,18 @@ class GadgetContext {
     return $this->containerConfig;
   }
 
+  /**
+   *
+   * @return int
+   */
   public function getModuleId() {
     return $this->moduleId;
   }
 
+  /**
+   *
+   * @return GadgetFeatureRegistry
+   */
   public function getRegistry() {
     if ($this->registry == null) {
       $this->setRegistry($this->instanceRegistry());
@@ -159,82 +283,162 @@ class GadgetContext {
     return $this->registry;
   }
 
+  /**
+   *
+   * @return string
+   */
   public function getUrl() {
     return $this->url;
   }
 
+  /**
+   *
+   * @return string
+   */
   public function getView() {
     return $this->view;
   }
 
+  /**
+   *
+   * @param int $interval
+   */
   public function setRefreshInterval($interval) {
     $this->refreshInterval = $interval;
   }
 
+  /**
+   *
+   * @param string $container
+   */
   public function setContainer($container) {
     $this->container = $container;
   }
 
+  /**
+   *
+   * @param array $containerConfig
+   */
   public function setContainerConfig($containerConfig) {
     $this->containerConfig = $containerConfig;
   }
 
+  /**
+   *
+   * @param GadgetBlacklist $blacklist
+   */
   public function setBlacklist($blacklist) {
     $this->blacklist = $blacklist;
   }
 
+  /**
+   *
+   * @param array $cache
+   */
   public function setCache($cache) {
     $this->cache = $cache;
   }
 
+  /**
+   *
+   * @param RemoteContentFetcher $httpFetcher
+   */
   public function setHttpFetcher($httpFetcher) {
     $this->httpFetcher = $httpFetcher;
   }
 
+  /**
+   *
+   * @param array $locale
+   */
   public function setLocale($locale) {
     $this->locale = $locale;
   }
 
+  /**
+   *
+   * @param int $moduleId
+   */
   public function setModuleId($moduleId) {
     $this->moduleId = $moduleId;
   }
 
+  /**
+   *
+   * @param GadgetFeatureRegistry $registry
+   */
   public function setRegistry($registry) {
     $this->registry = $registry;
   }
 
+  /**
+   *
+   * @param string $renderingContext
+   */
   public function setRenderingContext($renderingContext) {
     $this->renderingContext = $renderingContext;
   }
 
+  /**
+   *
+   * @param string $url
+   */
   public function setUrl($url) {
     $this->url = $url;
   }
 
+  /**
+   *
+   * @param string $view
+   */
   public function setView($view) {
     $this->view = $view;
   }
 
+  /**
+   *
+   * @param boolean $ignoreCache
+   */
   public function setIgnoreCache($ignoreCache) {
     $this->ignoreCache = $ignoreCache;
   }
 
+  /**
+   *
+   * @param string $forcedJsLibs
+   */
   public function setForcedJsLibs($forcedJsLibs) {
     $this->forcedJsLibs = $forcedJsLibs;
   }
 
+  /**
+   *
+   * @return int
+   */
   public function getRefreshInterval() {
     return $this->refreshInterval;
   }
 
+  /**
+   *
+   * @return boolean
+   */
   public function getIgnoreCache() {
     return $this->ignoreCache;
   }
 
+  /**
+   *
+   * @return string
+   */
   public function getForcedJsLibs() {
     return $this->forcedJsLibs;
   }
 
+  /**
+   *
+   * @return GadgetBlacklist
+   */
   public function getBlacklist() {
     if ($this->blacklist == null) {
       $this->setBlacklist($this->instanceBlacklist());
@@ -242,10 +446,18 @@ class GadgetContext {
     return $this->blacklist;
   }
 
+  /**
+   *
+   * @return string
+   */
   public function getRenderingContext() {
     return $this->renderingContext;
   }
 
+  /**
+   *
+   * @return RemoteContentFetcher
+   */
   public function getHttpFetcher() {
     if ($this->httpFetcher == null) {
       $this->setHttpFetcher($this->instanceHttpFetcher());
@@ -253,6 +465,10 @@ class GadgetContext {
     return $this->httpFetcher;
   }
 
+  /**
+   *
+   * @return array
+   */
   public function getLocale() {
     if ($this->locale == null) {
       $this->setLocale($this->instanceLocale());

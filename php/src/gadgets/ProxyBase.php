@@ -29,7 +29,18 @@ class ProxyBase {
    */
   public $context;
 
-  public function __construct($context, MakeRequest $makeRequest = null) {
+  /**
+   *
+   * @var MakeRequest
+   */
+  protected $makeRequest;
+
+  /**
+   *
+   * @param GadgetContext $context
+   * @param MakeRequest $makeRequest
+   */
+  public function __construct(GadgetContext $context, MakeRequest $makeRequest = null) {
     $this->context = $context;
     if (isset($makeRequest)) {
       $this->makeRequest = $makeRequest;
@@ -42,6 +53,8 @@ class ProxyBase {
   /**
    * Sets the caching (Cache-Control & Expires) with a cache age of $lastModified
    * or if $lastModified === false, sets Pragma: no-cache & Cache-Control: no-cache
+   *
+   * @param boolean $lastModified
    */
   protected function setCachingHeaders($lastModified = false) {
     $maxAge = $this->context->getIgnoreCache() ? false : $this->context->getRefreshInterval();
@@ -66,7 +79,7 @@ class ProxyBase {
    * Returns the request headers, using the apache_request_headers function if it's
    * available, and otherwise tries to guess them from the $_SERVER superglobal
    *
-   * @return unknown
+   * @return array
    */
   protected function request_headers() {
     // Try to use apache's request headers if available

@@ -24,9 +24,23 @@
  *
  */
 abstract class DomRewriter {
+  /**
+   *
+   * @var GadgetContext
+   */
   protected $context;
+
+  /**
+   *
+   * @var Gadget
+   */
   protected $gadget;
 
+  /**
+   *
+   * @param GadgetContext $context
+   * @param Gadget $gadget
+   */
   public function __construct(GadgetContext $context, Gadget &$gadget) {
     $this->context = $context;
     $this->gadget = $gadget;

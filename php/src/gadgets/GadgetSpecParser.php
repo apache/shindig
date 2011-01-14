@@ -26,12 +26,18 @@ class GadgetSpecException extends Exception {
  */
 class GadgetSpecParser {
 
+  /**
+   *
+   * @var GadgetContext
+   */
   protected $context;
 
   /**
    * Parses the $xmlContent into a Gadget class
    *
    * @param string $xmlContent
+   * @param GadgetContext $context
+   * @return GadgetSpec
    */
   public function parse($xmlContent, GadgetContext $context = null) {
     $this->context = $context;
@@ -161,6 +167,7 @@ class GadgetSpecParser {
    * This function also parses the ModulePref's child elements (Icon, Features, Preload and Locale)
    *
    * @param DOMDocument $doc
+   * @param GadgetSpec $gadget
    */
   private function parseModulePrefs(DOMDocument &$doc, GadgetSpec &$gadget) {
     $modulePrefs = $doc->getElementsByTagName("ModulePrefs");
@@ -200,7 +207,7 @@ class GadgetSpecParser {
   * override if needed
   *
   * @param DOMElement $modulePrefs
-  * @param Gadget $gadget
+  * @param GadgetSpec $gadget
   */
   protected function parseContainerSpecific(DOMElement &$modulePrefs, GadgetSpec &$gadget) {
  
@@ -210,7 +217,7 @@ class GadgetSpecParser {
    * Parses the (optional) Icon element, returns a Icon class or null
    *
    * @param DOMElement $modulePrefs
-   * @param Gadget $gadget
+   * @param GadgetSpec $gadget
    */
   private function parseIcon(DOMElement &$modulePrefs, GadgetSpec &$gadget) {
     if (($iconNodes = $modulePrefs->getElementsByTagName('Icon')) != null) {
@@ -227,7 +234,7 @@ class GadgetSpecParser {
    * Parses the Required and Optional feature entries in the ModulePrefs
    *
    * @param DOMElement $modulePrefs
-   * @param Gadget $gadget
+   * @param GadgetSpec $gadget
    */
   private function parseFeatures(DOMElement &$modulePrefs, GadgetSpec &$gadget) {
     $gadget->requiredFeatures = $gadget->optionalFeatures = array();
@@ -382,7 +389,7 @@ class GadgetSpecParser {
    * Parses the preload elements
    *
    * @param DOMElement $modulePrefs
-   * @param Gadget $gadget
+   * @param GadgetSpec $gadget
    */
   private function parsePreloads(DOMElement &$modulePrefs, GadgetSpec &$gadget) {
     $gadget->preloads = array();
@@ -400,7 +407,7 @@ class GadgetSpecParser {
    * Parses the Locale (message bundle) entries
    *
    * @param DOMElement $modulePrefs
-   * @param Gadget $gadget
+   * @param GadgetSpec $gadget
    */
   private function parseLocales(DOMElement &$modulePrefs, GadgetSpec &$gadget) {
     $gadget->locales = array();

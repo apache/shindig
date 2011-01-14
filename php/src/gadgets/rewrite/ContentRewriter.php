@@ -27,8 +27,18 @@
 class ContentRewriter extends DomRewriter {
   private $rewrite;
   private $baseUrl;
+  
+  /**
+   *
+   * @var array
+   */
   private $defaultRewrite = array('include-url' => array('*'), 'exclude-url' => array(), 'refresh' => '86400');
 
+  /**
+   *
+   * @param GadgetContext $context
+   * @param Gadget $gadget 
+   */
   public function __construct(GadgetContext $context, Gadget &$gadget) {
     parent::__construct($context, $gadget);
     // if no rewrite params are set in the gadget but rewrite_by_default is on, use our default rules (rewrite all)
@@ -59,6 +69,7 @@ class ContentRewriter extends DomRewriter {
    * url so that the proxy server knows to rewrite it's content or not
    *
    * @param string $url
+   * @return string
    */
   private function getProxyUrl($url) {
     if (strpos(strtolower($url), 'http://') === false && strpos(strtolower($url), 'https://') === false) {
@@ -75,6 +86,7 @@ class ContentRewriter extends DomRewriter {
    * Checks the URL against the include-url and exclude-url params
    *
    * @param string $url
+   * @param boolean
    */
   private function includedUrl($url) {
     $included = $excluded = false;

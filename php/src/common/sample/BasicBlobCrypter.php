@@ -69,6 +69,11 @@ class BasicBlobCrypter extends BlobCrypter {
     return $b64;
   }
 
+  /**
+   *
+   * @param array $in
+   * @return string 
+   */
   protected function serializeAndTimestamp(Array $in) {
     $encoded = "";
     foreach ($in as $key => $val) {
@@ -115,9 +120,9 @@ class BasicBlobCrypter extends BlobCrypter {
   }
 
   /**
-   * {@inheritDoc}
-   *
    * Parses the security token
+   * @param string $stringToken
+   * @return array
    */
   protected function parseToken($stringToken) {
     $data = explode(":", $stringToken);
@@ -130,12 +135,22 @@ class BasicBlobCrypter extends BlobCrypter {
     return $data;
   }
 
+  /**
+   * @param string $plain
+   * @return array
+   */
   protected function deserialize($plain) {
     $map = array();
     parse_str($plain, $map);
     return $map;
   }
 
+  /**
+   *
+   * @param array $out
+   * @param int $maxAge
+   * @throws BlobExpiredException
+   */
   protected function checkTimestamp(Array $out, $maxAge) {
     $minTime = (int)$out[$this->TIMESTAMP_KEY] - $this->CLOCK_SKEW_ALLOWANCE;
     $maxTime = (int)$out[$this->TIMESTAMP_KEY] + $maxAge + $this->CLOCK_SKEW_ALLOWANCE;

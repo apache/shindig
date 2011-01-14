@@ -25,8 +25,14 @@
  *
  */
 class BasicGadgetBlacklist implements GadgetBlacklist {
+  /**
+   * @var array
+   */
   private $rules = array();
 
+  /**
+   * @param string $file
+   */
   public function __construct($file = false) {
     if (! $file) {
       $file = Config::get('base_path') . '/blacklist.txt';

@@ -20,7 +20,15 @@
 
 
 abstract class RemoteContentFetcher {
+  /**
+   * @param RemoteContentRequest $request
+   * @return RemoteContentRequest
+   */
   abstract public function fetchRequest(RemoteContentRequest $request);
 
+  /**
+   * @param array $requests
+   * @return array
+   */
   abstract public function multiFetchRequest(Array $requests);
 }

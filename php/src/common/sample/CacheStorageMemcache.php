@@ -26,6 +26,9 @@ class CacheStorageMemcache extends CacheStorage {
 
   private $prefix = null;
 
+  /**
+   * {@inheritDoc}
+   */
   public function __construct($name) {
     $this->prefix = $name;
     if (!self::$memcache) {
@@ -44,6 +47,9 @@ class CacheStorageMemcache extends CacheStorage {
     }
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public function isLocked($key) {
     if ((@self::$memcache->get($this->storageKey($key) . '.lock')) === false) {
       return false;
@@ -51,31 +57,51 @@ class CacheStorageMemcache extends CacheStorage {
     return true;
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public function lock($key) {
     // the interesting thing is that this could fail if the lock was created in the meantime..
     // but we'll ignore that out of convenience
     @self::$memcache->add($this->storageKey($key) . '.lock', '', 0, 2);
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public function unlock($key) {
     // suppress all warnings, if some other process removed it that's ok too
     @self::$memcache->delete($this->storageKey($key) . '.lock');
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public function store($key, $value) {
     return self::$memcache->set($this->storageKey($key), $value, false, 0);
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public function fetch($key) {
     return self::$memcache->get($this->storageKey($key));
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public function delete($key) {
     if (!@self::$memcache->delete($this->storageKey($key))) {
       throw new CacheException("Cache memcache could not be deleted");
     }
   }
 
+  /**
+   *
+   * @param string $key
+   * @return string
+   */
   private function storageKey($key) {
     return $this->prefix . '_' . $key;
   }

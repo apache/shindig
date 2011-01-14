@@ -27,12 +27,32 @@
  * </Require>
  */
 class TemplateLibrary {
+  /**
+   *
+   * @var array
+   */
   private $osmlTags = array('os:Name', 'os:PeopleSelector', 'os:Badge');
+  /**
+   *
+   * @var array
+   */
   private $templates = array();
+  /**
+   *
+   * @var boolean
+   */
   private $osmlLoaded = false;
+  /**
+   *
+   * @var GadgetContext
+   */
   private $gadgetContext;
 
-  public function __construct($gadgetContext) {
+  /**
+   *
+   * @param GadgetContext $gadgetContext
+   */
+  public function __construct(GadgetContext $gadgetContext) {
     $this->gadgetContext = $gadgetContext;
   }
 
@@ -98,6 +118,12 @@ class TemplateLibrary {
     $this->templates[$tag] = $template;
   }
 
+  /**
+   *
+   * @param DOMElement $node
+   * @param TemplateLibraryContent $globalScript
+   * @param TemplateLibraryContent $globalStyle
+   */
   private function addTemplateDef(DOMElement &$node, $globalScript, $globalStyle) {
     $tag = $node->getAttribute('tag');
     if (empty($tag)) {
@@ -198,6 +224,9 @@ class TemplateLibrary {
     return $this->templates[$tag];
   }
 
+  /*
+   * 
+   */
   private function loadOsmlLibrary() {
     $container = $this->gadgetContext->getContainer();
     $containerConfig = $this->gadgetContext->getContainerConfig();

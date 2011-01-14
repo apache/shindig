@@ -51,8 +51,9 @@ class GadgetOAuthTokenStore {
   /**
    * Public constructor.
    *
-   * @param store an {@link OAuthStore} that can store and retrieve OAuth
+   * @param OAuthStore $store an {@link OAuthStore} that can store and retrieve OAuth
    *              tokens, as well as information about service providers.
+   * @param BasicGadgetSpecFactory $specFactory
    */
   public function __construct($store, $specFactory) {
     $this->specFactory = $specFactory;
@@ -65,9 +66,10 @@ class GadgetOAuthTokenStore {
    * or it can be a PKCS8-then-Base64 encoded private key that we'll be using
    * with this service provider.
    *
-   * @param gadgetUrl the URL of the gadget
-   * @param serviceName the service provider with whom we have negotiated a
+   * @param string $gadgetUrl the URL of the gadget
+   * @param string $serviceName the service provider with whom we have negotiated a
    *                    consumer key and secret.
+   * @param ConsumerKeyAndSecret $keyAndSecret
    */
   public function storeConsumerKeyAndSecret($gadgetUrl, $serviceName, $keyAndSecret) {
     $providerKey = new ProviderKey();
@@ -78,8 +80,8 @@ class GadgetOAuthTokenStore {
 
   /**
    * Stores an access token in the OAuth Data Store.
-   * @param tokenKey information about the Gadget storing the token.
-   * @param tokenInfo the TokenInfo to be stored in the OAuth data store.
+   * @param TokenKey $tokenKey information about the Gadget storing the token.
+   * @param TokenInfo $tokenInfo the TokenInfo to be stored in the OAuth data store.
    */
   public function storeTokenKeyAndSecret($tokenKey, $tokenInfo) {
     $getGadgetUri = $tokenKey->getGadgetUri();
@@ -93,6 +95,10 @@ class GadgetOAuthTokenStore {
     $this->store->setTokenAndSecret($tokenKey, $tokenInfo);
   }
 
+  /**
+   *
+   * @param TokenKey $tokenKey
+   */
   public function removeTokenAndSecret(TokenKey $tokenKey) {
     $this->store->removeTokenAndSecret($tokenKey);
   }
@@ -100,9 +106,9 @@ class GadgetOAuthTokenStore {
   /**
    * Retrieve an OAuthAccessor that is ready to sign OAuthMessages.
    *
-   * @param tokenKey information about the gadget retrieving the accessor.
+   * @param TokenKey $tokenKey information about the gadget retrieving the accessor.
    *
-   * @return an OAuthAccessorInfo containing an OAuthAccessor (whic can be
+   * @return OAuthAccessorInfo containing an OAuthAccessor (whic can be
    *         passed to an OAuthMessage.sign method), as well as httpMethod and
    *         signatureType fields.
    */
@@ -122,8 +128,9 @@ class GadgetOAuthTokenStore {
 
   /**
    * Reads OAuth provider information out of gadget spec.
-   * @param spec
-   * @return a GadgetInfo
+   * @param GadgetSpec $spec
+   * @param string $serviceName
+   * @return GadgetInfo
    */
   public static function getProviderInfo(GadgetSpec $spec, $serviceName) {
     $oauthSpec = $spec->oauth;
@@ -188,9 +195,9 @@ class GadgetOAuthTokenStore {
    * throwing an exception if the parameter could not be found (unless the
    * parameter is optional, in which case null is returned).
    *
-   * @param params the key-value map from which to pull the value (parameter)
-   * @param paramName the name of the parameter (key).
-   * @param isOptional if it's optional, don't throw an exception if it's not
+   * @param array $params the key-value map from which to pull the value (parameter)
+   * @param string $ paramName the name of the parameter (key).
+   * @param boolean $isOptional if it's optional, don't throw an exception if it's not
    *                   found.
    * @return the value corresponding to the key (paramName)
    * @throws GadgetException if the parameter value couldn't be found.
@@ -206,21 +213,46 @@ class GadgetOAuthTokenStore {
 }
 
 class GadgetInfo {
+  /**
+   *
+   * @var string
+   */
   private $serviceName;
+
+  /**
+   *
+   * @var ProviderInfo
+   */
   private $providerInfo;
 
+  /**
+   *
+   * @return string
+   */
   public function getServiceName() {
     return $this->serviceName;
   }
 
+  /**
+   *
+   * @param string $serviceName
+   */
   public function setServiceName($serviceName) {
     $this->serviceName = $serviceName;
   }
 
+  /**
+   *
+   * @return ProviderInfo
+   */
   public function getProviderInfo() {
     return $this->providerInfo;
   }
 
+  /**
+   *
+   * @param ProviderInfo $providerInfo
+   */
   public function setProviderInfo(ProviderInfo $providerInfo) {
     $this->providerInfo = $providerInfo;
   }

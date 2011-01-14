@@ -29,14 +29,14 @@ interface OAuthStore {
   /**
    * Retrieve an OAuthAccessor that is ready to sign OAuthMessages for
    * resource access.
-   * @param tokenKey a structure uniquely identifying the token: a userId,
+   * @param TokenKey $tokenKey a structure uniquely identifying the token: a userId,
    *                 a gadgetId, a moduleId (in case there are more than one
    *                 gadget of the same type on a page), a tokenName (which
    *                 distinguishes this token from others that the same gadget
    *                 might hold for the same service provider) and a serviceName
    *                 (which is the same as the service name in the ProviderKey
    *                 structure).
-   * @param provInfo provider information. The store combines information stored
+   * @param ProviderInfo $provInfo provider information. The store combines information stored
    *                 in the store (consumer key/secret, token, token secret,
    *                 etc.) with the provider information (access URL, request
    *                 URL etc.) passed in here to create an AccessorInfo object.

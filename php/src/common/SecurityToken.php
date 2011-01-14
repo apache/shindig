@@ -88,6 +88,9 @@ abstract class SecurityToken {
    * @return string
    */
   abstract public function getAuthenticationMode();
-  
+
+  /**
+   * @param string $mode
+   */
   abstract public function setAuthenticationMode($mode);
 }

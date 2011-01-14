@@ -37,6 +37,10 @@ class OAuthRequestParams {
   protected $receivedCallback;
   protected $bypassSpecCache;
 
+  /**
+   *
+   * @param array $arguments
+   */
   public function __construct(array $arguments) {
     $this->serviceName = self::getParam($arguments, self::$SERVICE_PARAM, "");
     $this->tokenName = self::getParam($arguments, self::$TOKEN_PARAM, "");
@@ -47,6 +51,13 @@ class OAuthRequestParams {
     $this->bypassSpecCache = '1' == self::getParam($arguments, self::$BYPASS_SPEC_CACHE_PARAM, null);
   }
 
+  /**
+   *
+   * @param array $arguments
+   * @param string $name
+   * @param string $defaultValue
+   * @return array
+   */
   private static function getParam(array $arguments, $name, $defaultValue) {
     if (isset($arguments[$name])) {
       return $arguments[$name];
@@ -55,30 +66,51 @@ class OAuthRequestParams {
     }
   }
 
+  /**
+   * @return string
+   */
   public function getBypassSpecCache() {
     return $this->bypassSpecCache;
   }
 
+  /**
+   * @return string
+   */
   public function getRequestToken() {
     return $this->requestToken;
   }
 
+  /**
+   * @return string
+   */
   public function getRequestTokenSecret() {
     return $this->requestTokenSecret;
   }
 
+  /**
+   * @return string
+   */
   public function getServiceName() {
     return $this->serviceName;
   }
 
+  /**
+   * @return string
+   */
   public function getTokenName() {
     return $this->tokenName;
   }
 
+  /**
+   * @return string
+   */
   public function getOrigClientState() {
     return $this->origClientState;
   }
 
+  /**
+   * @return string
+   */
   public function getReceivedCallback() {
     return $this->receivedCallback;
   }

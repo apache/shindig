@@ -27,44 +27,151 @@ class GadgetSpec {
   public $checksum;
 
   // Basic and extended ModulePrefs attributes
+  /**
+   * @var string
+   */
   public $title;
+  /**
+   * @var string
+   */
   public $author;
+  /**
+   * @var string
+   */
   public $authorEmail;
+  /**
+   * @var string
+   */
   public $description;
+  /**
+   * @var string
+   */
   public $directoryTitle;
+  /**
+   * @var string
+   */
   public $screenshot;
+  /**
+   * @var string
+   */
   public $thumbnail;
+  /**
+   * @var string
+   */
   public $titleUrl;
+  /**
+   * @var string
+   */
   public $authorAffiliation;
+  /**
+   * @var string
+   */
   public $authorLocation;
+  /**
+   * @var string
+   */
   public $authorPhoto;
+  /**
+   * @var string
+   */
   public $authorAboutme;
+  /**
+   * @var string
+   */
   public $authorQuote;
+  /**
+   * @var string
+   */
   public $authorLink;
+  /**
+   * @var string
+   */
   public $showStats;
+  /**
+   * @var string
+   */
   public $showInDirectory;
+  /**
+   * @var string
+   */
   public $string;
+  /**
+   * @var string
+   */
   public $width;
+  /**
+   * @var string
+   */
   public $height;
+  /**
+   * @var string
+   */
   public $category;
+  /**
+   * @var string
+   */
   public $category2;
+  /**
+   * @var string
+   */
   public $singleton;
+  /**
+   * @var string
+   */
   public $renderInline;
+  /**
+   * @var string
+   */
   public $scaling;
+  /**
+   * @var string
+   */
   public $scrolling;
-
+  /**
+   * @var string
+   */
   public $preloads;
+  /**
+   * @var string
+   */
   public $locales;
+  /**
+   * @var string
+   */
   public $icon;
+  /**
+   * @var string
+   */
   public $optionalFeatures;
+  /**
+   * @var string
+   */
   public $requiredFeatures;
-
+  /**
+   * @var string
+   */
   public $links;
+  /**
+   * @var string
+   */
   public $userPrefs;
+  /**
+   * @var string
+   */
   public $rewrite = null;
+  /**
+   * @var string
+   */
   public $oauth = null;
 
   // used to track os-templating
+
+  /**
+   * @var boolean
+   */
   public $templatesRequireLibraries = false;
+  /**
+   * @var boolean
+   */
   public $templatesDisableAutoProcessing = false;
 }

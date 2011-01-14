@@ -26,8 +26,17 @@ class ConfigException extends Exception {
  * and (if the file exists) config/local.php.
  */
 class Config {
+  /**
+   *
+   * @var boolean
+   */
   private static $config = false;
 
+  /**
+   *
+   * @global array $shindigConfig
+   * @param string $local
+   */
   static public function loadConfig($local = 'local') {
     global $shindigConfig;
     if (! self::$config) {
@@ -48,6 +57,8 @@ class Config {
   
   /**
    * Merges the given array with the config array. It uses the keys/values from config/container.php.
+   *
+   * @param array $tconfig
    */
   static function setConfig($tconfig) {
     if (!is_array(self::$config))
@@ -56,6 +67,12 @@ class Config {
     self::$config = array_merge(self::$config, $tconfig);
   }
 
+  /**
+   *
+   * @param string $key
+   * @return array
+   * @throws ConfigException
+   */
   static function get($key) {
     if (! self::$config) {
       self::loadConfig();

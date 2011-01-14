@@ -42,11 +42,15 @@ class SigningFetcher extends RemoteContentFetcher {
    * Private key we pass to the OAuth RSA_SHA1 algorithm.This can be a
    * PrivateKey object, or a PEM formatted private key, or a DER encoded byte
    * array for the private key.(No, really, they accept any of them.)
+   *
+   * @var resource
    */
   protected $privateKeyObject;
 
   /**
    * The name of the key, included in the fetch to help with key rotation.
+   *
+   * @var string
    */
   protected $keyName;
 
@@ -60,8 +64,8 @@ class SigningFetcher extends RemoteContentFetcher {
    * from the openssl_pkey_get_private method.
    *
    * @param RemoteContentFetcher $fetcher
-   * @param keyName name of the key to include in the request
-   * @param privateKey A key resource identifier, as returned from
+   * @param string $keyName name of the key to include in the request
+   * @param resource $privateKey A key resource identifier, as returned from
    *     openssl_pkey_get_private
    * @return SigningFetcher
    */
@@ -69,17 +73,33 @@ class SigningFetcher extends RemoteContentFetcher {
     return new SigningFetcher($fetcher, $keyName, $privateKey);
   }
 
+  /**
+   *
+   * @param RemoteContentFetcher $fetcher
+   * @param string $keyName
+   * @param resource $privateKeyObject
+   */
   protected function __construct(RemoteContentFetcher $fetcher, $keyName, $privateKeyObject) {
     $this->fetcher = $fetcher;
     $this->keyName = $keyName;
     $this->privateKeyObject = $privateKeyObject;
   }
 
+  /**
+   *
+   * @param RemoteContentRequest $request
+   * @return RemoteContentRequest
+   */
   public function fetchRequest(RemoteContentRequest $request) {
     $this->signRequest($request);
     return $this->fetcher->fetchRequest($request);
   }
 
+  /**
+   *
+   * @param array $requests
+   * @return array
+   */
   public function multiFetchRequest(Array $requests) {
     foreach ($requests as $request) {
       $this->signRequest($request);
@@ -87,6 +107,10 @@ class SigningFetcher extends RemoteContentFetcher {
     return $this->fetcher->multiFetchRequest($requests);
   }
 
+  /**
+   *
+   * @param RemoteContentRequest $request
+   */
   private function signRequest(RemoteContentRequest $request) {
     $url = $request->getUrl();
     $method = $request->getMethod();
@@ -163,6 +187,13 @@ class SigningFetcher extends RemoteContentFetcher {
     }
   }
 
+  /**
+   *
+   * @param array $msgParams
+   * @param SecurityToken $token
+   * @param boolean $signOwner
+   * @param boolean $signViewer
+   */
   private function addOpenSocialParams(&$msgParams, SecurityToken $token, $signOwner, $signViewer) {
     if ($signOwner) {
       $owner = $token->getOwnerId();
@@ -192,6 +223,11 @@ class SigningFetcher extends RemoteContentFetcher {
     }
   }
 
+  /**
+   *
+   * @param array $msgParams
+   * @param SecurityToken $token
+   */
   private function addOAuthParams(&$msgParams, SecurityToken $token) {
     $msgParams[ShindigOAuth::$OAUTH_TOKEN] = '';
     $domain = $token->getDomain();
@@ -211,6 +247,9 @@ class SigningFetcher extends RemoteContentFetcher {
 
   /**
    * Strip out any owner or viewer id passed by the client.
+   *
+   * @param array $params
+   * @return array
    */
   private function sanitize($params) {
     $list = array();
@@ -222,6 +261,11 @@ class SigningFetcher extends RemoteContentFetcher {
     return $list;
   }
 
+  /**
+   *
+   * @param string $paramName
+   * @return booelan
+   */
   private function allowParam($paramName) {
     $canonParamName = strtolower($paramName);
     // Exclude the fields which are only used to tell the proxy what to do

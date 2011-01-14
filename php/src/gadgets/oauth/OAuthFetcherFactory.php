@@ -23,17 +23,29 @@
  */
 class OAuthFetcherFactory {
 
-  /** used to encrypt state stored on the client */
+  /**
+   * used to encrypt state stored on the client
+   * @var BlobCrypter
+   */
   protected $oauthCrypter;
 
-  /** persistent storage for OAuth tokens */
+  /**
+   * persistent storage for OAuth tokens
+   * @var OAuthStore
+   */
   protected $tokenStore;
 
+  /**
+   *
+   * @param SigningFetcher $fetcher
+   * @param BlobCrypter $oauthCrypter
+   * @param OAuthStore $tokenStore
+   */
   public function __construct($fetcher = null, $oauthCrypter = null, $tokenStore = null) {
     if (isset($oauthCrypter) && isset($tokenStore)) {
-      return $this->OAuthFetcherFactoryCreate($oauthCrypter, $tokenStore);
+      $this->OAuthFetcherFactoryCreate($oauthCrypter, $tokenStore);
     } elseif (isset($fetcher)) {
-      return $this->OAuthFetcherFactoryInit($fetcher);
+      $this->OAuthFetcherFactoryInit($fetcher);
     } else {
       throw new Exception('Wrong number of parameters in the OAuthFetcherFactory constuct');
     }
@@ -42,6 +54,8 @@ class OAuthFetcherFactory {
   /**
    * Initialize the OAuth factory with a default implementation of
    * BlobCrypter and consumer keys/secrets read from oauth.js
+   *
+   * @param SigningFetcher $fetcher
    */
   public function OAuthFetcherFactoryInit($fetcher) {
     try {
@@ -59,8 +73,8 @@ class OAuthFetcherFactory {
   /**
    * Creates an OAuthFetcherFactory based on prepared crypter and token store.
    *
-   * @param oauthCrypter used to wrap client side state
-   * @param tokenStore used as interface to persistent token store.
+   * @param $oauthCrypter used to wrap client side state
+   * @param OAuthStore $tokenStore used as interface to persistent token store.
    */
   protected function OAuthFetcherFactoryCreate($oauthCrypter, $tokenStore) {
     $this->oauthCrypter = $oauthCrypter;
@@ -71,10 +85,10 @@ class OAuthFetcherFactory {
    * Produces an OAuthFetcher that will sign requests and delegate actual
    * network retrieval to the {@code fetcher}
    *
-   * @param fetcher The fetcher that will fetch real content
-   * @param token The gadget token used to identity the user and gadget
-   * @param params The parsed parameters the gadget requested
-   * @return The oauth fetcher.
+   * @param RemoteContentFetcher $fetcher The fetcher that will fetch real content
+   * @param SecurityToken $token The gadget token used to identity the user and gadget
+   * @param OAuthRequestParams $params The parsed parameters the gadget requested
+   * @return OAuthFetcher
    * @throws GadgetException
    */
   public function getOAuthFetcher(RemoteContentFetcher $fetcher, SecurityToken $token, OAuthRequestParams $params) {

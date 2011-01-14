@@ -25,6 +25,11 @@
  */
 class XmlError {
 
+  /**
+   *
+   * @param string $xml
+   * @return string
+   */
   static public function getErrors($xml = false) {
     $errors = libxml_get_errors();
     $ret = '';
@@ -38,6 +43,12 @@ class XmlError {
     return $ret;
   }
 
+  /**
+   *
+   * @param object $error
+   * @param array $xml
+   * @return string
+   */
   static public function parseXmlError($error, $xml) {
     if ($xml) {
       $ret = $xml[$error->line - 1] . "\n";

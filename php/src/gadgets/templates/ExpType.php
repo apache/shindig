@@ -29,9 +29,21 @@
  */
 
 class Token {
+  /**
+   * @var string
+   */
   public $type;
+
+  /**
+   * @var mixed
+   */
   public $value;
 
+  /**
+   *
+   * @param string $type
+   * @param mixed $value
+   */
   function __construct($type, $value = null) {
     $this->type = $type;
     $this->value = $value;
@@ -66,6 +78,11 @@ class ExpType {
 
   private static $ESCAPE_CHARS = array('\"' => '"', "\'" => "'", '\\\\' => '\\');
 
+  /**
+   *
+   * @param mixed $value
+   * @return string
+   */
   public static function detectType($value) {
     if (is_int($value)) {
       return ExpType::$INT;
@@ -86,6 +103,10 @@ class ExpType {
     }
   }
 
+  /**
+   * @param Token $token
+   * @return Token
+   */
   public static function coerceToNumber($token) {
     $INTEGER_PATTERN = "/^[0-9]+$/";
     $type = $token->type;
@@ -101,6 +122,10 @@ class ExpType {
     throw new ExpTypeException("Unable to coerce token " . print_r($token, true) . " to number");
   }
 
+  /**
+   * @param Token $token
+   * @return Token
+   */
   public static function coerceToString($token) {
     $PRIMITIVE_TYPES = array(ExpType::$INT, ExpType::$FLOAT, ExpType::$STRING, ExpType::$BOOL, ExpType::$NULL);
     $COMPOSITE_TYPES = array(ExpType::$ARRAY, ExpType::$OBJECT);
@@ -123,6 +148,10 @@ class ExpType {
     return $string;
   }
 
+  /**
+   * @param Token $token
+   * @return Token
+   */
   public static function coerceToBool($token) {
     $PRIMITIVE_TYPES = array(ExpType::$INT, ExpType::$FLOAT, ExpType::$STRING, ExpType::$BOOL, ExpType::$NULL);
     $COMPOSITE_TYPES = array(ExpType::$ARRAY, ExpType::$OBJECT);
@@ -141,6 +170,10 @@ class ExpType {
     return $bool;
   }
 
+  /**
+   * @param Token $token
+   * @return Token
+   */
   public static function coerceToNull($token) {
     $COMPOSITE_TYPES = array(ExpType::$ARRAY, ExpType::$OBJECT);
     $type = $token->type;

@@ -19,18 +19,48 @@
  */
 
 abstract class CacheStorage {
+
+  /**
+   *
+   * @param string $key
+   * @param mixed $value
+   */
   abstract public function store($key, $value);
 
+  /**
+   *
+   * @param string $key
+   */
   abstract public function fetch($key);
 
+  /**
+   *
+   * @param string $key
+   */
   abstract public function delete($key);
 
+  /**
+   *
+   * @param string $key
+   */
   abstract public function lock($key);
 
+  /**
+   *
+   * @param string $key
+   */
   abstract public function unlock($key);
 
+  /**
+   *
+   * @param string $key
+   */
   abstract public function isLocked($key);
 
+  /**
+   *
+   * @param string $key
+   */
   public function waitForLock($key) {
     $tries = 10;
     $cnt = 0;

@@ -24,6 +24,12 @@
  */
 abstract class OAuthLookupService {
 
+  /**
+   * @var OAuthRequest $oauthRequest
+   * @var string $appUrl
+   * @var string $userId
+   * @var string $contentType
+   */
   abstract public function getSecurityToken($oauthRequest, $appUrl, $userId, $contentType);
 }
 

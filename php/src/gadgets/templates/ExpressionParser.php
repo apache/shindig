@@ -73,6 +73,9 @@ class ExpressionParser {
    * on array, return "1, 2, 3, 4"
    * on int, return "1"
    * on string, return as is
+   *
+   * @param mixed $val
+   * @return string
    */
   public static function stringValue($val) {
     if (is_array($val)) {

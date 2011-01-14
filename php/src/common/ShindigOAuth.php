@@ -68,6 +68,8 @@ class ShindigOAuth {
 class ShindigOAuthRequest extends OAuthRequest {
   /**
    * Needed so that OAuthFetcher works with the correct type of requests.
+   *
+   * @param OAuthRequest $request
    */
   public function __construct(OAuthRequest $request) {
     $this->parameters = $request->parameters;
@@ -93,6 +95,9 @@ class ShindigOAuthRequest extends OAuthRequest {
 
   /**
    * Needed in OAuthFetcher.php
+   *
+   * @param array $params
+   * @return array
    */
   public function set_parameters($params) {
     return $this->parameters = $params;
@@ -100,6 +105,8 @@ class ShindigOAuthRequest extends OAuthRequest {
 
   /**
    * Needed in OAuthFetcher.php
+   *
+   * @param array $names
    */
   public function requireParameters($names) {
     $present = $this->parameters;
@@ -116,6 +123,8 @@ class ShindigOAuthRequest extends OAuthRequest {
 
   /**
    * Needed in OAuthFetcher.php
+   *
+   * @return string
    */
   public function get_url() {
     return $this->http_url;
@@ -123,6 +132,8 @@ class ShindigOAuthRequest extends OAuthRequest {
 
   /**
    * Needed in SigningFetcher.php
+   *
+   * @return string
    */
   public static function generate_nonce() {
     $mt = microtime();
@@ -132,6 +143,8 @@ class ShindigOAuthRequest extends OAuthRequest {
 
   /**
    * Needed for from_consumer_and_token
+   *
+   * @return int
    */
   private static function generate_timestamp() {
     return time();
@@ -146,6 +159,9 @@ class ShindigOAuthUtil extends OAuthUtil {
 
   /**
    * Needed in OAuthFetcher.php
+   *
+   * @param array $params
+   * @return string
    */
   public static function getPostBodyString(Array $params) {
     $result = '';
@@ -164,6 +180,9 @@ class ShindigOAuthUtil extends OAuthUtil {
   /**
    * Needed in OAuthFetcher.php
    * Return true if the given Content-Type header means FORM_ENCODED.
+   *
+   * @param string $contentType
+   * @return boolean
    */
   public static function isFormEncoded($contentType) {
     if (! isset($contentType)) {
@@ -178,6 +197,10 @@ class ShindigOAuthUtil extends OAuthUtil {
 
   /**
    * Needed in OAuthFetcher.php
+   *
+   * @param string $url
+   * @param array $oauthParams
+   * @return string
    */
   public static function addParameters($url, $oauthParams) {
     $url .= strchr($url, '?') === false ? '?' : '&';
@@ -189,6 +212,9 @@ class ShindigOAuthUtil extends OAuthUtil {
 
   /**
    * Needed in OAuthFetcher.php
+   *
+   * @param string $form
+   * @return array
    */
   public static function decodeForm($form) {
     $parameters = array();
@@ -208,6 +234,9 @@ class ShindigOAuthUtil extends OAuthUtil {
    * Parse the parameters from an OAuth Authorization or WWW-Authenticate
    * header. The realm is included as a parameter. If the given header doesn't
    * start with "OAuth ", return an empty list.
+   *
+   * @param string $authorization
+   * @return array
    */
   public static function decodeAuthorization($authorization) {
     $into = array();
