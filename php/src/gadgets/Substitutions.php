@@ -19,8 +19,14 @@
  */
 
 class Substitutions {
+  /**
+   * @var array
+   */
   protected $types = array('MESSAGE' => 'MSG', 'BIDI' => 'BIDI', 'USER_PREF' => 'UP', 'MODULE' => 'MODULE');
-  
+
+  /**
+   * @var array
+   */
   protected $substitutions = array();
 
   public function __construct() {
@@ -29,16 +35,32 @@ class Substitutions {
     }
   }
 
+  /**
+   *
+   * @param string $type
+   * @param string $key
+   * @param string $value
+   */
   public function addSubstitution($type, $key, $value) {
     $this->substitutions[$type]["__{$type}_{$key}__"] = $value;
   }
 
+  /**
+   *
+   * @param string $type
+   * @param array $array
+   */
   public function addSubstitutions($type, $array) {
     foreach ($array as $key => $value) {
       $this->addSubstitution($type, $key, $value);
     }
   }
 
+  /**
+   *
+   * @param string $input
+   * @return string
+   */
   public function substitute($input) {
     foreach ($this->types as $type) {
       $input = $this->substituteType($type, $input);
@@ -46,18 +68,26 @@ class Substitutions {
     return $input;
   }
 
+  /**
+   *
+   * @param string $type
+   * @param string $input
+   * @return string
+   */
   public function substituteType($type, $input) {
-    if (empty($this->substitutions[$type])) {
-      return $input;
+    foreach ($this->substitutions[$type] as $key => $value) {
+      if (! is_array($value)) {
+        $input = str_replace($key, $value, $input);
+      }
     }
-    return str_replace(array_keys($this->substitutions[$type]), array_values($this->substitutions[$type]), $input);
+    return $input;
   }
 
   /**
    * Substitutes a uri
-   * @param type The type to substitute, or null for all types.
-   * @param uri
-   * @return The substituted uri, or a dummy value if the result is invalid.
+   * @param string $type The type to substitute, or null for all types.
+   * @param string $uri
+   * @return string The substituted uri, or a dummy value if the result is invalid.
    */
   public function substituteUri($type, $uri) {
     if (empty($uri)) {

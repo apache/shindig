@@ -61,7 +61,7 @@ class GadgetHrefRenderer extends GadgetBaseRenderer {
     */
     $authz = $this->getAuthz($view);
     $refreshInterval = $this->getRefreshInterval($view);
-    $href = $this->buildHref($view, $authz);
+    $href = $this->buildHref($view, $authz, $gadget);
     if (count($view['dataPipelining'])) {
       $request = new RemoteContentRequest($href, "Content-type: application/json\n");
       $request->setMethod('POST');
@@ -91,11 +91,18 @@ class GadgetHrefRenderer extends GadgetBaseRenderer {
     $basicRemoteContent->setCachePostRequest(true);
     if (($response = $basicRemoteContent->getCachedRequest($request)) == false) {
       // Don't fetch the data-pipelining social data unless we don't have a cached version of the gadget's content
-      $dataPipeliningResults = DataPipelining::fetch($view['dataPipelining'], $this->context);
-      // spec stats that the proxied content data-pipelinging data is *not* available to templates (to avoid duplicate posting
-      // of the data to the gadget dev's server and once to js space), so we don't assign it to the data context, and just
-      // post the json encoded results to the remote url.
-      $request->setPostBody(json_encode($dataPipeliningResults));
+      if (isset($view['dataPipelining']) && is_array($view['dataPipelining'])) {
+        foreach ($view['dataPipelining'] as &$pipeliningRequest) {
+          if (isset($pipeliningRequest['href'])) {
+            $pipeliningRequest['href'] = $gadget->substitutions->substituteUri(null, $pipeliningRequest['href']);
+          }
+        }
+        $dataPipeliningResults = DataPipelining::fetch($view['dataPipelining'], $this->context);
+        // spec stats that the proxied content data-pipelinging data is *not* available to templates (to avoid duplicate posting
+        // of the data to the gadget dev's server and once to js space), so we don't assign it to the data context, and just
+        // post the json encoded results to the remote url.
+        $request->setPostBody(json_encode($dataPipeliningResults));
+      }
       $response = $basicRemoteContent->fetch($request);
     }
     if ($response->getHttpCode() != '200') {
@@ -117,10 +124,11 @@ class GadgetHrefRenderer extends GadgetBaseRenderer {
    *
    * @param array $view
    * @param SecurityToken $token
+   * @param Gadget $gadget
    * @return string the url
    */
-  private function buildHref($view, $authz) {
-    $href = RemoteContentRequest::transformRelativeUrl($view['href'], $this->context->getUrl());
+  private function buildHref($view, $authz, $gadget) {
+    $href = RemoteContentRequest::transformRelativeUrl($gadget->substitutions->substituteUri(null, $view['href']), $this->context->getUrl());
     if (empty($href)) {
       throw new Exception("Invalid empty href in the gadget view");
     } // add the required country and lang param to the URL

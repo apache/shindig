@@ -38,7 +38,7 @@ class GadgetFactory {
   /**
    * Returns the processed gadget spec
    *
-   * @return GadgetSpec
+   * @return Gadget
    */
   public function createGadget() {
     $gadgetUrl = $this->context->getUrl();
@@ -54,10 +54,10 @@ class GadgetFactory {
     $gadget = new $gadgetClass($gadgetSpec, $this->context);
 
     // Process the gadget: fetching remote resources, processing & applying the correct translations, user prefs and feature resolving
+    $this->addSubstitutions($gadget);
     $this->fetchResources($gadget);
     $this->mergeLocales($gadget);
     $this->parseUserPrefs($gadget);
-    $this->addSubstitutions($gadget);
     $this->applySubstitutions($gadget);
     $this->parseFeatures($gadget);
     return $gadget;
@@ -93,10 +93,15 @@ class GadgetFactory {
   /**
    * Applies the substitutions to the complex types (preloads, user prefs, etc). Simple
    * types (author, title, etc) are translated on the fly in the gadget's getFoo() functions
+   *
+   * @param Gadget $gadget
    */
   protected function applySubstitutions(Gadget &$gadget) {
     // Apply the substitutions to the UserPrefs
     foreach ($gadget->gadgetSpec->userPrefs as $key => $pref) {
+
+      $gadget->substitutions->addSubstitution('UP', $gadget->substitutions->substitute($pref['name']), $gadget->substitutions->substitute($pref['value']));
+
       $gadget->gadgetSpec->userPrefs[$key]['name'] = $gadget->substitutions->substitute($pref['name']);
       $gadget->gadgetSpec->userPrefs[$key]['displayName'] = $gadget->substitutions->substitute($pref['displayName']);
       $gadget->gadgetSpec->userPrefs[$key]['required'] = $gadget->substitutions->substitute($pref['required']);
@@ -110,6 +115,7 @@ class GadgetFactory {
         }
       }
     }
+
     // Apply substitutions to the preloads
     foreach ($gadget->gadgetSpec->preloads as $key => $preload) {
       $gadget->gadgetSpec->preloads[$key]['body'] = $gadget->substitutions->substitute($preload['body']);
@@ -118,6 +124,8 @@ class GadgetFactory {
 
   /**
    * Seeds the substitutions class with the user prefs, messages, bidi and module id
+   *
+   * @param Gadget $gadget
    */
   protected function addSubstitutions(Gadget &$gadget) {
     $substiutionClass = Config::get('substitution_class');
@@ -134,9 +142,6 @@ class GadgetFactory {
     $gadget->substitutions->addSubstitution('BIDI', "END_EDGE", $gadget->rightToLeft ? "left" : "right");
     $gadget->substitutions->addSubstitution('BIDI', "DIR", $gadget->rightToLeft ? "rtl" : "ltr");
     $gadget->substitutions->addSubstitution('BIDI', "REVERSE_DIR", $gadget->rightToLeft ? "ltr" : "rtl");
-    foreach ($gadget->gadgetSpec->userPrefs as $pref) {
-      $gadget->substitutions->addSubstitution('UP', $gadget->substitutions->substitute($pref['name']), $gadget->substitutions->substitute($pref['value']));
-    }
   }
 
   /**
@@ -191,7 +196,6 @@ class GadgetFactory {
    * be reduced to only the GadgetContext->getLocale matching entries.
    *
    * @param Gadget $gadget
-   * @param GadgetContext $context
    */
   protected function fetchResources(Gadget &$gadget) {
     $contextLocale = $this->context->getLocale();
@@ -206,6 +210,7 @@ class GadgetFactory {
              unset($gadget->gadgetSpec->locales[$key]);
              continue;
           } else {
+            $transformedUrl = $gadget->substitutions->substitute($transformedUrl);
             $gadget->gadgetSpec->locales[$key]['messages'] = $transformedUrl;
            }
           // locale matches the current context, add it to the requests queue
@@ -223,6 +228,7 @@ class GadgetFactory {
       // Add preloads to the request queue
       foreach ($gadget->getPreloads() as $preload) {
         if (! empty($preload['href'])) {
+          $preload['href'] = $gadget->substitutions->substitute($preload['href']);
           $request = new RemoteContentRequest($preload['href']);
           if (! empty($preload['authz']) && $preload['authz'] == 'SIGNED') {
             if ($this->token == '') {
@@ -250,7 +256,8 @@ class GadgetFactory {
       // Add template libraries to the request queue
       if ($gadget->gadgetSpec->templatesRequireLibraries) {
         foreach ($gadget->gadgetSpec->templatesRequireLibraries as $key => $libraryUrl) {
-               $request = new RemoteContentRequest($libraryUrl);
+          $gadget->gadgetSpec->templatesRequireLibraries[$key] = $libraryUrl = $gadget->substitutions->substitute($libraryUrl);
+          $request = new RemoteContentRequest($libraryUrl);
           $transformedUrl = RemoteContentRequest::transformRelativeUrl($libraryUrl, $this->context->getUrl());
           if (! $transformedUrl) {
             continue;
@@ -340,7 +347,7 @@ class GadgetFactory {
   /**
    * Fetches the gadget xml for the requested URL using the http fetcher
    *
-   * @param unknown_type $gadgetUrl
+   * @param string $gadgetUrl
    * @return string gadget's xml content
    */
   protected function fetchGadget($gadgetUrl) {
