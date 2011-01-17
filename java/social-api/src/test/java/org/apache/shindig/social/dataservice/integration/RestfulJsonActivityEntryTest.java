@@ -1,17 +1,34 @@
-package org.apache.shindig.extras.as.dataservice.integration;
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ */
+package org.apache.shindig.social.dataservice.integration;
 
-import org.apache.shindig.extras.as.core.model.ActivityEntryImpl;
-import org.apache.shindig.extras.as.core.model.ActivityObjectImpl;
-import org.apache.shindig.extras.as.opensocial.model.ActivityEntry;
-import org.apache.shindig.extras.as.opensocial.model.ActivityObject;
 import org.apache.shindig.protocol.ContentTypes;
+import org.apache.shindig.social.core.model.ActivityEntryImpl;
+import org.apache.shindig.social.core.model.ActivityObjectImpl;
+import org.apache.shindig.social.opensocial.model.ActivityEntry;
+import org.apache.shindig.social.opensocial.model.ActivityObject;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
-public class RestfulJsonActivityEntryTest extends AbstractActivityStreamsRestfulTests {
+public class RestfulJsonActivityEntryTest extends AbstractLargeRestfulTests {
   ActivityEntry johnsEntry;
 
   @Before
@@ -21,12 +38,12 @@ public class RestfulJsonActivityEntryTest extends AbstractActivityStreamsRestful
     actor.setDisplayName("John Doe");
     
     ActivityObject object = new ActivityObjectImpl();
-    object.setId("myObjectId123");
-    object.setDisplayName("My Object");
+    object.setId("object1");
+    object.setDisplayName("Frozen Eric");
     
     johnsEntry = new ActivityEntryImpl();
-    johnsEntry.setTitle("This is my ActivityEntry!");
-    johnsEntry.setBody("ActivityStreams are so much fun!");
+    johnsEntry.setTitle("John posted a photo");
+    johnsEntry.setBody("John Doe posted a photo to the album Germany 2009");
     johnsEntry.setActor(actor);
     johnsEntry.setObject(object);
   }
@@ -34,15 +51,15 @@ public class RestfulJsonActivityEntryTest extends AbstractActivityStreamsRestful
   /**
    * Expected response for an activity in json:
    * { 'entry' : {
-   *     'title' : 'This is my ActivityEntry!',
-   *     'body' : 'ActivityStreams are so much fun!',
+   *     'title' : 'John posted a photo',
+   *     'body' : 'John Doe posted a photo to the album German 2009',
    *     'actor' : {
    *       'id' : 'john.doe',
    *       'displayName' : 'John Doe'
    *     },
    *     'object' : {
-   *       'id' : 'myObjectId123',
-   *       'displayName' : 'My Object'
+   *       'id' : 'object1',
+   *       'displayName' : 'Frozen Eric'
    *     }
    *   }
    * }
@@ -51,7 +68,7 @@ public class RestfulJsonActivityEntryTest extends AbstractActivityStreamsRestful
    */
   @Test
   public void testGetActivityEntryJson() throws Exception {
-    String resp = getResponse("/activitystreams/john.doe/@self/@app/myObjectId123", "GET", null,
+    String resp = getResponse("/activitystreams/john.doe/@self/@app/object1", "GET", null,
         ContentTypes.OUTPUT_JSON_CONTENT_TYPE);
     JSONObject result = getJson(resp);
     assertActivityEntriesEqual(johnsEntry, result.getJSONObject("entry"));
@@ -61,7 +78,7 @@ public class RestfulJsonActivityEntryTest extends AbstractActivityStreamsRestful
    * Expected response for a list of activities in json:
    *
    * {
-   *  "totalResults" : 1,
+   *  "totalResults" : 2,
    *  "startIndex" : 0
    *  "itemsPerPage" : 10 // Note: the js doesn't support paging. Should rest?
    *  "entry" : [
@@ -77,7 +94,7 @@ public class RestfulJsonActivityEntryTest extends AbstractActivityStreamsRestful
         ContentTypes.OUTPUT_JSON_CONTENT_TYPE);
     JSONObject result = getJson(resp);
 
-    assertEquals(1, result.getInt("totalResults"));
+    assertEquals(2, result.getInt("totalResults"));
     assertEquals(0, result.getInt("startIndex"));
     assertActivityEntriesEqual(johnsEntry, result.getJSONArray("entry").getJSONObject(0));
   }
@@ -86,7 +103,7 @@ public class RestfulJsonActivityEntryTest extends AbstractActivityStreamsRestful
    * Expected response for a list of activities in json:
    *
    * {
-   *  "totalResults" : 3,
+   *  "totalResults" : 2,
    *  "startIndex" : 0
    *  "itemsPerPage" : 10 // Note: the js doesn't support paging. Should rest?
    *  "entry" : [
@@ -102,7 +119,7 @@ public class RestfulJsonActivityEntryTest extends AbstractActivityStreamsRestful
         ContentTypes.OUTPUT_JSON_CONTENT_TYPE);
     JSONObject result = getJson(resp);
 
-    assertEquals(1, result.getInt("totalResults"));
+    assertEquals(2, result.getInt("totalResults"));
     assertEquals(0, result.getInt("startIndex"));
   }
 
@@ -128,14 +145,16 @@ public class RestfulJsonActivityEntryTest extends AbstractActivityStreamsRestful
         ContentTypes.OUTPUT_JSON_CONTENT_TYPE);
     JSONObject result = getJson(resp);
 
-    assertEquals(2, result.getInt("totalResults"));
+    assertEquals(3, result.getInt("totalResults"));
     assertEquals(0, result.getInt("startIndex"));
 
     JSONArray entries = result.getJSONArray("entry");
     int newEntryIndex = 0;
-    if (entries.getJSONObject(0).getJSONObject("object").getString("id")
-        .equals("myObjectId123")) {
+    if (entries.getJSONObject(1).getJSONObject("object").getString("id").equals("1")) {
       newEntryIndex = 1;
+    }
+    if (entries.getJSONObject(2).getJSONObject("object").getString("id").equals("1")) {
+      newEntryIndex = 2;
     }
 
     JSONObject jsonEntry = entries.getJSONObject(newEntryIndex);

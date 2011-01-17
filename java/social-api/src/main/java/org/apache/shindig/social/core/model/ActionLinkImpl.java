@@ -15,53 +15,41 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.apache.shindig.extras.as.core.model;
+package org.apache.shindig.social.core.model;
 
-import org.apache.shindig.extras.as.opensocial.model.StandardLink;
+import org.apache.shindig.social.opensocial.model.ActionLink;
 
 /**
- * <p>MediaLinkImpl class.</p>
- *
+ * A simple implementation of an ActionLink used by ActivityStreams.
  */
-public class StandardLinkImpl implements StandardLink {
-  
-  private String href;
-  private String inline;
-  private String type;
-  
+public class ActionLinkImpl implements ActionLink {
+
+  private String target;
+  private String caption;
+
   /**
-   * Create a new MediaLink
+   * Construct an empty ActionLinkImpl.
    */
-  public StandardLinkImpl() {
+  public ActionLinkImpl() {
   }
 
   /** {@inheritDoc} */
-  public String getHref() {
-    return href;
+  public String getTarget() {
+    return target;
   }
 
   /** {@inheritDoc} */
-  public void setHref(String href) {
-    this.href = href;
-  }
-  
-  /** {@inheritDoc} */
-  public String getInline() {
-    return inline;
+  public void setTarget(String target) {
+    this.target = target;
   }
 
   /** {@inheritDoc} */
-  public void setInline(String inline) {
-    this.inline = inline;
-  }
-  
-  /** {@inheritDoc} */
-  public String getType() {
-    return type;
+  public String getCaption() {
+    return caption;
   }
 
   /** {@inheritDoc} */
-  public void setType(String type) {
-    this.type = type;
+  public void setCaption(String caption) {
+    this.caption = caption;
   }
 }

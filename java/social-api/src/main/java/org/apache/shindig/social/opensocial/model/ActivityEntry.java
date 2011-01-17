@@ -16,13 +16,13 @@
  * specific language governing permissions and limitations under the License.
  */
 
-package org.apache.shindig.extras.as.opensocial.model;
+package org.apache.shindig.social.opensocial.model;
 
 import java.util.List;
 import java.util.Map;
 
-import org.apache.shindig.extras.as.core.model.ActivityEntryImpl;
 import org.apache.shindig.protocol.model.Exportablebean;
+import org.apache.shindig.social.core.model.ActivityEntryImpl;
 
 import com.google.inject.ImplementedBy;
 
@@ -293,26 +293,26 @@ public interface ActivityEntry {
    *
    * @return a List<String> of carbon-copy recipients
    */
-  List<String> getCC();
+  List<String> getCc();
   
   /**
    * <p>setCC</p>
    *
    * @param cc is the list of carbon-copy recipients
    */
-  void setCC(List<String> cc);
+  void setCc(List<String> cc);
   
   /**
    * <p>getBCC</p>
    *
    * @return a List<String> of BCC recipients
    */
-  List<String> getBCC();
+  List<String> getBcc();
   
   /**
    * <p>setBCC</p>
    *
    * @param bcc is the list of BCC recipients
    */
-  void setBCC(List<String> bcc);
+  void setBcc(List<String> bcc);
 }

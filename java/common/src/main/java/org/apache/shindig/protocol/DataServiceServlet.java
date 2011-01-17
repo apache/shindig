@@ -217,7 +217,9 @@ public class DataServiceServlet extends ApiServlet {
       }
     }
     try {
-      contentType = servletRequest.getContentType();
+      // TODO: First implementation causes bug when Content-Type is application/atom+xml.  Fix is applied.
+      //contentType = servletRequest.getContentType();
+      contentType = ContentTypes.extractMimePart(servletRequest.getContentType());
     } catch (Throwable t) {
       //this happens while testing
       if (LOG.isLoggable(Level.FINE)) {

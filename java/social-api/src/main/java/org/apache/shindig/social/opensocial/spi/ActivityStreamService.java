@@ -15,7 +15,7 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.apache.shindig.extras.as.opensocial.spi;
+package org.apache.shindig.social.opensocial.spi;
 
 import java.util.Set;
 import java.util.concurrent.Future;
@@ -23,10 +23,7 @@ import java.util.concurrent.Future;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.protocol.ProtocolException;
 import org.apache.shindig.protocol.RestfulCollection;
-import org.apache.shindig.extras.as.opensocial.model.ActivityEntry;
-import org.apache.shindig.social.opensocial.spi.CollectionOptions;
-import org.apache.shindig.social.opensocial.spi.GroupId;
-import org.apache.shindig.social.opensocial.spi.UserId;
+import org.apache.shindig.social.opensocial.model.ActivityEntry;
 
 /**
  * The ActivityService interface defines the service provider interface to retrieve activities from

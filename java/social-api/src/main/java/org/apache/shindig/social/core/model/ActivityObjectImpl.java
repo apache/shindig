@@ -16,15 +16,15 @@
  * specific language governing permissions and limitations under the License.
  */
 
-package org.apache.shindig.extras.as.core.model;
+package org.apache.shindig.social.core.model;
 
 import java.util.List;
 import java.util.Map;
 
-import org.apache.shindig.extras.as.opensocial.model.ActionLink;
-import org.apache.shindig.extras.as.opensocial.model.ActivityObject;
-import org.apache.shindig.extras.as.opensocial.model.MediaLink;
-import org.apache.shindig.extras.as.opensocial.model.StandardLink;
+import org.apache.shindig.social.opensocial.model.ActionLink;
+import org.apache.shindig.social.opensocial.model.ActivityObject;
+import org.apache.shindig.social.opensocial.model.MediaLink;
+import org.apache.shindig.social.opensocial.model.StandardLink;
 
 /**
  * <p>ActivityObjectImpl class.</p>

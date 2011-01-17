@@ -33,6 +33,7 @@ import org.apache.shindig.social.core.oauth.AuthenticationHandlerProvider;
 import org.apache.shindig.social.core.util.BeanXStreamAtomConverter;
 import org.apache.shindig.social.core.util.xstream.XStream081Configuration;
 import org.apache.shindig.social.opensocial.service.ActivityHandler;
+import org.apache.shindig.social.opensocial.service.ActivityStreamHandler;
 import org.apache.shindig.social.opensocial.service.AlbumHandler;
 import org.apache.shindig.social.opensocial.service.AppDataHandler;
 import org.apache.shindig.social.opensocial.service.MediaItemHandler;
@@ -85,7 +86,8 @@ public class SocialApiGuiceModule extends AbstractModule {
    * to add or replace additional handlers.
    */
   protected Set<Class<?>> getHandlers() {
-    return ImmutableSet.<Class<?>>of(ActivityHandler.class, AppDataHandler.class,
-        PersonHandler.class, MessageHandler.class, AlbumHandler.class, MediaItemHandler.class);
+    return ImmutableSet.<Class<?>> of(ActivityHandler.class, AppDataHandler.class,
+            PersonHandler.class, MessageHandler.class, AlbumHandler.class,
+            MediaItemHandler.class, ActivityStreamHandler.class);
   }
 }

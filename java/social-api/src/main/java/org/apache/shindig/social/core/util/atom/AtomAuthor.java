@@ -18,6 +18,7 @@
 package org.apache.shindig.social.core.util.atom;
 
 import org.apache.shindig.social.opensocial.model.Activity;
+import org.apache.shindig.social.opensocial.model.ActivityEntry;
 
 /**
  * Represents and atom:entry/atom:author element.
@@ -26,7 +27,15 @@ public class AtomAuthor {
 
   @SuppressWarnings("unused")
   private String uri;
-
+  @SuppressWarnings("unused")
+  private String name;
+  
+  /**
+   * Default constructor for POSTs to the REST API.
+   */
+  public AtomAuthor() {
+  }
+  
   /**
    * @param activity
    */
@@ -34,4 +43,11 @@ public class AtomAuthor {
     uri = activity.getUserId();
   }
 
+  /**
+   * @param activityEntry
+   */
+  public AtomAuthor(ActivityEntry activityEntry) {
+    uri = activityEntry.getActor().getId();
+    name = activityEntry.getActor().getDisplayName();
+  }
 }

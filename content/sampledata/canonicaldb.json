@@ -351,35 +351,59 @@
 },
 "activityEntries" : {
 	"john.doe": [{
-		"title": "This is my ActivityEntry!",
-		"body": "ActivityStreams are so much fun!",
+		"title": "John posted a photo",
+		"body": "John Doe posted a photo to the album Germany 2009",
 		"postedTime": "2010-04-27T06:02:36+0000",
 		"actor": {
 			"id": "john.doe",
 			"displayName": "John Doe"
 		},
+		"to": ["jane.doe", "canonical"],
+		"cc": ["george.doe"],
 		"verb": "post",
-		"standardLinks": {"myRel": [
-			{"href": "www.mypics.com/1", "type": "image/jpg"},
-			{"href": "www.mypics.com/2", "type": "image/jpg"}
-		]},
+		"standardLinks": {
+			"myRel1": 
+				[{"href": "www.mypics.com/1", "type": "image/jpg"},
+				{"href": "www.mypics.com/2", "type": "image/jpg"}],
+			"myRel2":
+				[{"href": "www.mypics.com/3", "type": "image/jpg"},
+				{"href": "www.mypics.com/4", "type": "image/jpg"}]
+		},
 		"object": {
-			"id": "myObjectId123",
-			"displayName": "My Object",
-			"link": "http://www.myobject.com",
-			"objectType": "article",
+			"id": "object1",
+			"displayName": "Frozen Eric",
+			"link": "http://www.johnsalbums/germany123",
+			"objectType": "picture",
 			"image": {
-				"url": "http://myvideos.com/raftingtrip/raftingvideo.avi",
-				"type": "http://activitystrea.ms/schema/1.0/video",
+				"url": "https://docs.google.com/uc?id=0B-zwcqgujo7CMTRmZTg3Y2UtZGZlYS00MTY4LWFjOTItNDRiNmY3MzRmYzQ5&export=download&hl=en",
+				"type": "http://activitystrea.ms/schema/1.0/picture",
 				"width": 400,
 				"height": 300,
 				"duration": 93
 			},
-			"actionLinks": [{
-				"target": "http://myvideos.com/raftingvideo",
-				"caption": "Went white water rafting in the great lakes - ga hah!"
-			}]
+			"actionLinks": [
+				{
+					"target": "http://johnsalbums/germany123/mediaItem3",
+					"caption": "Frozen at the top of the German Alps"
+				}, {
+					"target": "http://johnsalbums/germany123/mediaItem6",
+					"caption": "Sign of Garmisch-Partenkirchen"
+				}
+			]
 		}
+	}, {
+		"title": "Super simple ActivityEntry",
+		"actor": {
+			"id": "john.doe",
+			"displayName": "John Doe"
+		},
+		"postedTime": "2010-04-27T06:02:36+0000",
+		"object": {
+			"id": "object2",
+			"displayName": "Super simple ActivityObject",
+			"objectType": "article"
+		},
+		"verb": "post"
 	}]
 },
 "albums" : {

@@ -15,9 +15,9 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.apache.shindig.extras.as.core.model;
+package org.apache.shindig.social.core.model;
 
-import org.apache.shindig.extras.as.opensocial.model.MediaLink;
+import org.apache.shindig.social.opensocial.model.MediaLink;
 
 /**
  * <p>MediaLinkImpl class.</p>

@@ -18,6 +18,10 @@
  */
 package org.apache.shindig.social.sample.spi;
 
+import java.util.Collections;
+
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.protocol.DataCollection;
@@ -27,23 +31,20 @@ import org.apache.shindig.protocol.model.FilterOperation;
 import org.apache.shindig.protocol.model.SortOrder;
 import org.apache.shindig.social.SocialApiTestsGuiceModule;
 import org.apache.shindig.social.opensocial.model.Activity;
+import org.apache.shindig.social.opensocial.model.ActivityEntry;
 import org.apache.shindig.social.opensocial.model.Person;
 import org.apache.shindig.social.opensocial.spi.CollectionOptions;
 import org.apache.shindig.social.opensocial.spi.GroupId;
 import org.apache.shindig.social.opensocial.spi.PersonService;
 import org.apache.shindig.social.opensocial.spi.UserId;
-
-import java.util.Collections;
-
-import javax.servlet.http.HttpServletResponse;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
 
 /**
  * Test the JSONOpensocialService
@@ -273,5 +274,47 @@ public class JsonDbOpensocialServiceTest extends Assert {
     assertEquals("10", responseItem.getEntry().get(CANONICAL_USER_ID).get("count"));
     assertTrue(responseItem.getEntry().get(CANONICAL_USER_ID).containsKey("newvalue"));
     assertEquals("20", responseItem.getEntry().get(CANONICAL_USER_ID).get("newvalue"));
+  }
+  
+  @Test
+  public void testGetExpectedActivityEntries() throws Exception {
+    RestfulCollection<ActivityEntry> responseItem = db.getActivityEntries(
+        ImmutableSet.of(JOHN_DOE), SELF_GROUP, APP_ID, Collections.<String>emptySet(), null,
+        new FakeGadgetToken()).get();
+    assertSame(2, responseItem.getTotalResults());
+  }
+
+  @Test
+  public void testGetExpectedActivityEntriesForPlural() throws Exception {
+    RestfulCollection<ActivityEntry> responseItem = db.getActivityEntries(
+        ImmutableSet.of(CANON_USER, JOHN_DOE), SELF_GROUP, APP_ID, Collections.<String>emptySet(), null,
+        new FakeGadgetToken()).get();
+    assertSame(2, responseItem.getTotalResults());
+  }
+
+  @Test
+  public void testGetExpectedActivityEntry() throws Exception {
+    ActivityEntry entry = db.getActivityEntry(JOHN_DOE, SELF_GROUP, APP_ID,
+        ImmutableSet.of("body"), "object1", new FakeGadgetToken()).get();
+    assertNotNull(entry);
+    // Check that some fields are fetched and others are not
+    assertNotNull(entry.getBody());
+    assertNull(entry.getPostedTime());
+  }
+
+  @Test
+  public void testDeleteExpectedActivityEntry() throws Exception {
+    db.deleteActivityEntries(JOHN_DOE, SELF_GROUP, APP_ID, ImmutableSet.of(APP_ID),
+        new FakeGadgetToken());
+
+    // Try to fetch the activity
+    try {
+      db.getActivityEntry(
+          JOHN_DOE, SELF_GROUP, APP_ID,
+          ImmutableSet.of("body"), APP_ID, new FakeGadgetToken()).get();
+      fail();
+    } catch (ProtocolException sse) {
+      assertEquals(HttpServletResponse.SC_BAD_REQUEST, sse.getCode());
+    }
   }
 }

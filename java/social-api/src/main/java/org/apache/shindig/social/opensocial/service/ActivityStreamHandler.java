@@ -15,21 +15,20 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.apache.shindig.extras.as.opensocial.service;
+package org.apache.shindig.social.opensocial.service;
 
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Future;
 
 import org.apache.shindig.config.ContainerConfig;
-import org.apache.shindig.extras.as.opensocial.spi.ActivityStreamService;
 import org.apache.shindig.protocol.HandlerPreconditions;
 import org.apache.shindig.protocol.Operation;
 import org.apache.shindig.protocol.ProtocolException;
 import org.apache.shindig.protocol.RequestItem;
 import org.apache.shindig.protocol.Service;
-import org.apache.shindig.extras.as.opensocial.model.ActivityEntry;
-import org.apache.shindig.social.opensocial.service.SocialRequestItem;
+import org.apache.shindig.social.opensocial.model.ActivityEntry;
+import org.apache.shindig.social.opensocial.spi.ActivityStreamService;
 import org.apache.shindig.social.opensocial.spi.CollectionOptions;
 import org.apache.shindig.social.opensocial.spi.UserId;
 
@@ -43,7 +42,7 @@ import com.google.inject.Inject;
  *
  */
 @Service(name = "activitystreams", path="/{userId}+/{groupId}/{appId}/{activityEntryId}+")
-public class ActivityStreamsHandler {
+public class ActivityStreamHandler {
 
   private final ActivityStreamService service;
   private final ContainerConfig config;
@@ -55,15 +54,15 @@ public class ActivityStreamsHandler {
    * @param config a {@link org.apache.shindig.config.ContainerConfig} object.
    */
   @Inject
-  public ActivityStreamsHandler(ActivityStreamService service, ContainerConfig config) {
+  public ActivityStreamHandler(ActivityStreamService service, ContainerConfig config) {
     this.service = service;
     this.config = config;
   }
 
   /**
-   * Allowed end-points /activities/{userId}/@self/{actvityId}+
+   * Allowed end-points /activitiestreams/{userId}/@self/{actvityId}+
    *
-   * examples: /activities/john.doe/@self/1
+   * examples: /activitiestreams/john.doe/@self/1
    *
    * @param request a {@link org.apache.shindig.social.opensocial.service.SocialRequestItem} object.
    * @return a {@link java.util.concurrent.Future} object.
@@ -84,9 +83,9 @@ public class ActivityStreamsHandler {
   }
 
   /**
-   * Allowed end-points /activities/{userId}/@self
+   * Allowed end-points /activitiestreams/{userId}/@self
    *
-   * examples: /activities/john.doe/@self - postBody is an activity object
+   * examples: /activitiestreams/john.doe/@self - postBody is an activity object
    *
    * TODO: REST end-point
    *
@@ -100,9 +99,9 @@ public class ActivityStreamsHandler {
   }
 
   /**
-   * Allowed end-points /activities/{userId}/@self
+   * Allowed end-points /activitiestreams/{userId}/@self
    *
-   * examples: /activities/john.doe/@self - postBody is an activity object
+   * examples: /activitiestreams/john.doe/@self - postBody is an activity object
    *
    * TODO: REST end-point
    *
@@ -127,11 +126,11 @@ public class ActivityStreamsHandler {
   }
 
   /**
-   * Allowed end-points /activities/{userId}/{groupId}/{optionalActvityId}+
-   * /activities/{userId}+/{groupId}
+   * Allowed end-points /activitiestreams/{userId}/{groupId}/{optionalActvityId}+
+   * /activitiestreams/{userId}+/{groupId}
    *
-   * examples: /activities/john.doe/@self/1 /activities/john.doe/@self
-   * /activities/john.doe,jane.doe/@friends
+   * examples: /activitiestreams/john.doe/@self/1 /activitiestreams/john.doe/@self
+   * /activitiestreams/john.doe,jane.doe/@friends
    *
    * @param request a {@link org.apache.shindig.social.opensocial.service.SocialRequestItem} object.
    * @return a {@link java.util.concurrent.Future} object.

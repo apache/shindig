@@ -15,7 +15,7 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.apache.shindig.extras.as.opensocial.service;
+package org.apache.shindig.social.opensocial.service;
 
 import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.isNull;
@@ -31,9 +31,6 @@ import org.apache.shindig.common.util.ImmediateFuture;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.config.JsonContainerConfig;
 import org.apache.shindig.expressions.Expressions;
-import org.apache.shindig.extras.as.core.model.ActivityEntryImpl;
-import org.apache.shindig.extras.as.opensocial.model.ActivityEntry;
-import org.apache.shindig.extras.as.opensocial.spi.ActivityStreamService;
 import org.apache.shindig.protocol.DefaultHandlerRegistry;
 import org.apache.shindig.protocol.HandlerExecutionListener;
 import org.apache.shindig.protocol.HandlerRegistry;
@@ -41,6 +38,9 @@ import org.apache.shindig.protocol.ProtocolException;
 import org.apache.shindig.protocol.RestHandler;
 import org.apache.shindig.protocol.RestfulCollection;
 import org.apache.shindig.protocol.conversion.BeanJsonConverter;
+import org.apache.shindig.social.core.model.ActivityEntryImpl;
+import org.apache.shindig.social.opensocial.model.ActivityEntry;
+import org.apache.shindig.social.opensocial.spi.ActivityStreamService;
 import org.apache.shindig.social.opensocial.spi.CollectionOptions;
 import org.apache.shindig.social.opensocial.spi.GroupId;
 import org.apache.shindig.social.opensocial.spi.UserId;
@@ -56,13 +56,13 @@ import com.google.common.collect.Sets;
 /**
  * Tests the ActivityStreamsHandler.
  */
-public class ActivityStreamsHandlerTest extends EasyMockTestCase {
+public class ActivityStreamHandlerTest extends EasyMockTestCase {
   
   private BeanJsonConverter converter;
   
   private ActivityStreamService service;
   
-  private ActivityStreamsHandler handler; // TODO: Rename to ActivityStreamHandler
+  private ActivityStreamHandler handler; // TODO: Rename to ActivityStreamHandler
   
   private FakeGadgetToken token;
   
@@ -87,7 +87,7 @@ public class ActivityStreamsHandlerTest extends EasyMockTestCase {
          "}}}");
 
     containerConfig = new JsonContainerConfig(config, Expressions.forTesting());
-    handler = new ActivityStreamsHandler(service, containerConfig);
+    handler = new ActivityStreamHandler(service, containerConfig);
     registry = new DefaultHandlerRegistry(null, converter,
         new HandlerExecutionListener.NoOpHandler());
     registry.addHandlers(ImmutableSet.<Object>of(handler));

@@ -17,14 +17,15 @@
  */
 package org.apache.shindig.social.core.util.atom;
 
-import com.google.common.collect.Lists;
-
-import org.apache.shindig.social.opensocial.model.Activity;
-import org.apache.shindig.social.opensocial.model.Person;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import org.apache.shindig.social.opensocial.model.Activity;
+import org.apache.shindig.social.opensocial.model.ActivityEntry;
+import org.apache.shindig.social.opensocial.model.Person;
+
+import com.google.common.collect.Lists;
 
 /**
  * Represents and atom:content element.
@@ -35,6 +36,8 @@ public class AtomContent {
   private Person person;
   @SuppressWarnings("unused")
   private Activity activity;
+  @SuppressWarnings("unused")
+  private ActivityEntry activityEntry;
   @SuppressWarnings("unused")
   private AtomAttribute type = new AtomAttribute("application/xml");
   @SuppressWarnings("unused")
@@ -54,6 +57,13 @@ public class AtomContent {
    */
   public AtomContent(Activity activity) {
     this.activity = activity;
+  }
+  
+  /**
+   * @param activityEntry
+   */
+  public AtomContent(ActivityEntry activityEntry) {
+    this.activityEntry = activityEntry;
   }
 
   /**

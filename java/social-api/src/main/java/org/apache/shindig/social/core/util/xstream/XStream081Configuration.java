@@ -46,16 +46,21 @@ import org.apache.shindig.social.core.util.atom.AtomFeed;
 import org.apache.shindig.social.core.util.atom.AtomKeyValue;
 import org.apache.shindig.social.core.util.atom.AtomLinkConverter;
 import org.apache.shindig.social.opensocial.model.Account;
+import org.apache.shindig.social.opensocial.model.ActionLink;
 import org.apache.shindig.social.opensocial.model.Activity;
+import org.apache.shindig.social.opensocial.model.ActivityEntry;
+import org.apache.shindig.social.opensocial.model.ActivityObject;
 import org.apache.shindig.social.opensocial.model.Address;
 import org.apache.shindig.social.opensocial.model.BodyType;
 import org.apache.shindig.social.opensocial.model.ListField;
 import org.apache.shindig.social.opensocial.model.MediaItem;
+import org.apache.shindig.social.opensocial.model.MediaLink;
 import org.apache.shindig.social.opensocial.model.Message;
 import org.apache.shindig.social.opensocial.model.MessageCollection;
 import org.apache.shindig.social.opensocial.model.Name;
 import org.apache.shindig.social.opensocial.model.Organization;
 import org.apache.shindig.social.opensocial.model.Person;
+import org.apache.shindig.social.opensocial.model.StandardLink;
 import org.apache.shindig.social.opensocial.model.Url;
 
 import com.google.common.base.Objects;
@@ -136,7 +141,7 @@ public class XStream081Configuration implements XStreamConfiguration {
         .put("feed", atom)
         .put("person", os)
         .put("activity", os)
-        .put("activityStream", os)
+        .put("activityEntry", os)
         .put("account", os)
         .put("address", os)
         .put("bodyType", os)
@@ -154,9 +159,14 @@ public class XStream081Configuration implements XStreamConfiguration {
         // this is order specific, so put the more specified interfaces at the top.
         new ClassFieldMapping("feed", AtomFeed.class),
         new ClassFieldMapping("content", AtomContent.class),
+        new ClassFieldMapping("entry", AtomEntry.class),
 
         new ClassFieldMapping("activity", Activity.class),
-//  AS TODO      new ClassFieldMapping("activityStream", ActivityStream.class),
+        new ClassFieldMapping("activityEntry", ActivityEntry.class),
+        new ClassFieldMapping("object", ActivityObject.class),
+        new ClassFieldMapping("standardLink", StandardLink.class),
+        new ClassFieldMapping("actionLink", ActionLink.class),
+        new ClassFieldMapping("mediaLink", MediaLink.class),
         new ClassFieldMapping("account", Account.class),
         new ClassFieldMapping("address", Address.class),
         new ClassFieldMapping("bodyType", BodyType.class),
@@ -189,9 +199,14 @@ public class XStream081Configuration implements XStreamConfiguration {
     elementMappingList.put(ConverterSet.COLLECTION, ImmutableList.of(
         new ClassFieldMapping("feed", AtomFeed.class),
         new ClassFieldMapping("content", AtomContent.class),
+        new ClassFieldMapping("entry", AtomEntry.class),
 
         new ClassFieldMapping("activity", Activity.class),
-// AS TODO        new ClassFieldMapping("activityStream", ActivityStream.class),
+        new ClassFieldMapping("activityEntry", ActivityEntry.class),
+        new ClassFieldMapping("object", ActivityObject.class),
+        new ClassFieldMapping("standardLink", StandardLink.class),
+        new ClassFieldMapping("actionLink", ActionLink.class),
+        new ClassFieldMapping("mediaLink", MediaLink.class),
         new ClassFieldMapping("account", Account.class),
         new ClassFieldMapping("address", Address.class),
         new ClassFieldMapping("bodyType", BodyType.class),
@@ -221,13 +236,18 @@ public class XStream081Configuration implements XStreamConfiguration {
     elementClassMap.put(ConverterSet.DEFAULT, new ImmutableMap.Builder<String, Class<?>>()
         .put("feed", AtomFeed.class)
         .put("content", AtomContent.class)
+        .put("entry", AtomEntry.class)
         .put("email", ListField.class)
         .put("phone", ListField.class)
         .put("list", ArrayList.class)
         .put("map", ConcurrentHashMap.class)
         .put("appdata", DataCollection.class)
         .put("activity", Activity.class)
-// AS TODO        .put("activityStream", ActivityStream.class)
+        .put("activityEntry", ActivityEntry.class)
+        .put("object", ActivityObject.class)
+        .put("standardLink", StandardLink.class)
+        .put("actionLink", ActionLink.class)
+        .put("mediaLink", MediaLink.class)
         .put("account", Account.class)
         .put("address", Address.class)
         .put("bodyType", BodyType.class)
@@ -274,6 +294,10 @@ public class XStream081Configuration implements XStreamConfiguration {
         new ImplicitCollectionFieldMapping(Message.class, "recipients", String.class, "recipients"),
         new ImplicitCollectionFieldMapping(Message.class, "collectionIds", String.class, "collectionsIds"),
         new ImplicitCollectionFieldMapping(Message.class, "replies", String.class, "replies"),
+        
+        new ImplicitCollectionFieldMapping(ActivityEntry.class, "to", String.class, "to"),
+        new ImplicitCollectionFieldMapping(ActivityEntry.class, "cc", String.class, "cc"),
+        new ImplicitCollectionFieldMapping(ActivityEntry.class, "bcc", String.class, "bcc"),
 
         new ImplicitCollectionFieldMapping(Activity.class, "mediaItems", MediaItem.class, "mediaItems"))
     );

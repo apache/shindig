@@ -16,15 +16,15 @@
  * specific language governing permissions and limitations under the License.
  */
 
-package org.apache.shindig.extras.as.core.model;
+package org.apache.shindig.social.core.model;
 
 import java.util.List;
 import java.util.Map;
 
-import org.apache.shindig.extras.as.opensocial.model.ActivityEntry;
-import org.apache.shindig.extras.as.opensocial.model.ActivityObject;
-import org.apache.shindig.extras.as.opensocial.model.MediaLink;
-import org.apache.shindig.extras.as.opensocial.model.StandardLink;
+import org.apache.shindig.social.opensocial.model.ActivityEntry;
+import org.apache.shindig.social.opensocial.model.ActivityObject;
+import org.apache.shindig.social.opensocial.model.MediaLink;
+import org.apache.shindig.social.opensocial.model.StandardLink;
 
 /**
  * A simple bean implementation of an ActivityStream Entry.
@@ -174,22 +174,22 @@ public class ActivityEntryImpl implements ActivityEntry {
   }
   
   /** {@inheritDoc} */
-  public List<String> getCC() {
+  public List<String> getCc() {
     return cc;
   }
   
   /** {@inheritDoc} */
-  public void setCC(List<String> cc) {
+  public void setCc(List<String> cc) {
     this.cc = cc;
   }
 
   /** {@inheritDoc} */
-  public List<String> getBCC() {
+  public List<String> getBcc() {
     return bcc;
   }
   
   /** {@inheritDoc} */
-  public void setBCC(List<String> bcc) {
+  public void setBcc(List<String> bcc) {
     this.bcc = bcc;
   }
 }

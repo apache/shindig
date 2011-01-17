@@ -38,12 +38,15 @@ import org.apache.shindig.protocol.RestfulCollection;
 import org.apache.shindig.protocol.conversion.BeanConverter;
 import org.apache.shindig.protocol.model.SortOrder;
 import org.apache.shindig.social.opensocial.model.Activity;
+import org.apache.shindig.social.opensocial.model.ActivityEntry;
+import org.apache.shindig.social.opensocial.model.ActivityObject;
 import org.apache.shindig.social.opensocial.model.Album;
 import org.apache.shindig.social.opensocial.model.MediaItem;
 import org.apache.shindig.social.opensocial.model.Message;
 import org.apache.shindig.social.opensocial.model.MessageCollection;
 import org.apache.shindig.social.opensocial.model.Person;
 import org.apache.shindig.social.opensocial.spi.ActivityService;
+import org.apache.shindig.social.opensocial.spi.ActivityStreamService;
 import org.apache.shindig.social.opensocial.spi.AlbumService;
 import org.apache.shindig.social.opensocial.spi.AppDataService;
 import org.apache.shindig.social.opensocial.spi.CollectionOptions;
@@ -69,7 +72,7 @@ import com.google.inject.name.Named;
  */
 @Singleton
 public class JsonDbOpensocialService implements ActivityService, PersonService, AppDataService,
-    MessageService, AlbumService, MediaItemService {
+    MessageService, AlbumService, MediaItemService, ActivityStreamService {
 
   private static final Comparator<Person> NAME_COMPARATOR = new Comparator<Person>() {
     public int compare(Person person, Person person1) {
@@ -128,6 +131,11 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
    * db["passwords"] -> Map<Person.Id, String>
    */
   private static final String PASSWORDS_TABLE = "passwords";
+  
+  /**
+   * db["people"] -> Map<Person.Id, Array<ActivityEntry>>
+   */
+  private static final String ACTIVITYSTREAMS_TABLE = "activityEntries";
 
   /**
    * Initializes the JsonDbOpensocialService using Guice
@@ -1162,6 +1170,148 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
           je.getMessage(), je);
     }
   }
+  
+  // Are fields really needed here?
+  /** {@inheritDoc} */
+  public Future<Void> createActivityEntry(UserId userId, GroupId groupId, String appId,
+        Set<String> fields, ActivityEntry activityEntry, SecurityToken token) throws ProtocolException {
+    try {
+      JSONObject jsonEntry = convertFromActivityEntry(activityEntry, fields);
+      JSONObject jsonEntryObject = jsonEntry.getJSONObject(ActivityEntry.Field.OBJECT.toString());
+      if (!jsonEntryObject.has(ActivityObject.Field.ID.toString())) {
+        jsonEntryObject.put(ActivityObject.Field.ID.toString(), System.currentTimeMillis());
+        jsonEntry.put(ActivityEntry.Field.OBJECT.toString(), jsonEntryObject);
+      }
+
+      // TODO: bug fixed: jsonArray will not be null; will throw exception!
+      // Fix in createActivity()
+      JSONArray jsonArray;
+      if (db.getJSONObject(ACTIVITYSTREAMS_TABLE).has(userId.getUserId(token))) {
+        jsonArray = db.getJSONObject(ACTIVITYSTREAMS_TABLE).getJSONArray(userId.getUserId(token));
+      } else {
+        jsonArray = new JSONArray();
+        db.getJSONObject(ACTIVITYSTREAMS_TABLE).put(userId.getUserId(token), jsonArray);
+      }
+      jsonArray.put(jsonEntry);
+      return ImmediateFuture.newInstance(null);
+    } catch (JSONException je) {
+      throw new ProtocolException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, je.getMessage(), je);
+    }
+  }
+
+  /** {@inheritDoc} */
+  public Future<Void> deleteActivityEntries(UserId userId, GroupId groupId,
+      String appId, Set<String> activityIds, SecurityToken token) throws ProtocolException {
+    try {
+      String user = userId.getUserId(token);
+
+      if (db.getJSONObject(ACTIVITYSTREAMS_TABLE).has(user)) {
+        JSONArray activityEntries = db.getJSONObject(ACTIVITYSTREAMS_TABLE).getJSONArray(user);
+
+        if (activityEntries != null) {
+          JSONArray newList = new JSONArray();
+          for (int i = 0; i < activityEntries.length(); i++) {
+            JSONObject activityEntry = activityEntries.getJSONObject(i);
+            if (!activityIds.contains(activityEntry.getJSONObject(ActivityEntry.Field.OBJECT.toString()).getString(ActivityObject.Field.ID.toString()))) {
+              newList.put(activityEntry);
+            }
+          }
+          db.getJSONObject(ACTIVITYSTREAMS_TABLE).put(user, newList);
+          // TODO: This seems very odd that we return no useful response in this
+          // case
+          // There is no way to represent not-found
+          // if (found) { ??
+          // }
+        }
+      }
+      // What is the appropriate response here??
+      return ImmediateFuture.newInstance(null);
+    } catch (JSONException je) {
+      throw new ProtocolException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, je.getMessage(), je);
+    }
+  }
+
+  /** {@inheritDoc} */
+  public Future<ActivityEntry> getActivityEntry(UserId userId, GroupId groupId,
+      String appId, Set<String> fields, String activityId, SecurityToken token)
+      throws ProtocolException {
+    try {       
+      String user = userId.getUserId(token);
+      if (db.getJSONObject(ACTIVITYSTREAMS_TABLE).has(user)) {
+        JSONArray activityEntries = db.getJSONObject(ACTIVITYSTREAMS_TABLE).getJSONArray(user);
+        for (int i = 0; i < activityEntries.length(); i++) {
+          JSONObject activityEntry = activityEntries.getJSONObject(i);
+          JSONObject actor = activityEntry.getJSONObject(ActivityEntry.Field.ACTOR.toString());
+          String actorId = actor.get(ActivityObject.Field.ID.toString()).toString();
+          if (actorId.equals(user)
+              && activityEntry.getJSONObject(ActivityEntry.Field.OBJECT.toString()).get(ActivityObject.Field.ID.toString()).toString().equals(activityId)) {
+            return ImmediateFuture.newInstance(filterFields(activityEntry, fields, ActivityEntry.class));
+          }
+        }
+      }
+
+      throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST, "ActivityEntry not found");
+    } catch (JSONException je) {
+      throw new ProtocolException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, je.getMessage(), je);
+    }
+  }
+  
+  /** {@inheritDoc} */
+  public Future<RestfulCollection<ActivityEntry>> getActivityEntries(
+      Set<UserId> userIds, GroupId groupId, String appId, Set<String> fields,
+      CollectionOptions options, SecurityToken token)
+      throws ProtocolException {
+      List<ActivityEntry> result = Lists.newArrayList();
+    try {
+      Set<String> idSet = getIdSet(userIds, groupId, token);
+      for (String id : idSet) {
+        if (db.getJSONObject(ACTIVITYSTREAMS_TABLE).has(id)) {
+          JSONArray activityEntries = db.getJSONObject(ACTIVITYSTREAMS_TABLE).getJSONArray(id);
+          for (int i = 0; i < activityEntries.length(); i++) {
+            JSONObject activityEntry = activityEntries.getJSONObject(i);
+            result.add(filterFields(activityEntry, fields, ActivityEntry.class));
+            // TODO: ActivityStreams don't have appIds
+          }
+        }
+      }
+      return ImmediateFuture.newInstance(new RestfulCollection<ActivityEntry>(result));
+    } catch (JSONException je) {
+      throw new ProtocolException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, je.getMessage(), je);
+    }
+  }
+  
+  /** {@inheritDoc} */
+  public Future<RestfulCollection<ActivityEntry>> getActivityEntries(
+      UserId userId, GroupId groupId, String appId, Set<String> fields,
+      CollectionOptions options, Set<String> activityIds, SecurityToken token)
+      throws ProtocolException {
+    List<ActivityEntry> result = Lists.newArrayList();    
+    try {
+      String user = userId.getUserId(token);
+      if (db.getJSONObject(ACTIVITYSTREAMS_TABLE).has(user)) {
+        JSONArray activityEntries = db.getJSONObject(ACTIVITYSTREAMS_TABLE).getJSONArray(user);
+        for(String activityId : activityIds) {
+          boolean found = false;
+          for (int i = 0; i < activityEntries.length(); i++) {
+            JSONObject activityEntry = activityEntries.getJSONObject(i);
+            String actorId = activityEntry.getJSONObject(ActivityEntry.Field.ACTOR.toString()).getString(ActivityObject.Field.ID.toString());
+            String objectId = activityEntry.getJSONObject(ActivityEntry.Field.OBJECT.toString()).getString(ActivityObject.Field.ID.toString());
+            if (actorId.equals(user) && objectId.equals(activityId)) {
+              result.add(filterFields(activityEntry, fields, ActivityEntry.class));
+              found = true;
+              break;
+            }
+          }
+          if (!found) {
+            throw new ProtocolException(HttpServletResponse.SC_NOT_FOUND, "ActivityEntry not found: " + activityId);
+          }
+        }
+      }
+      return ImmediateFuture.newInstance(new RestfulCollection<ActivityEntry>(result));
+    } catch (JSONException je) {
+      throw new ProtocolException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, je.getMessage(), je);
+    }
+  }
 
   // TODO Why specifically handle Activity instead of generic POJO (below)?
 
@@ -1169,6 +1319,11 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
       throws JSONException {
     // TODO Not using fields yet
     return new JSONObject(converter.convertToString(activity));
+  }
+  
+  private JSONObject convertFromActivityEntry(ActivityEntry activityEntry, Set<String> fields) throws JSONException {
+    // TODO Not using fields yet
+    return new JSONObject(converter.convertToString(activityEntry));
   }
 
   private JSONObject convertToJson(Object object) throws JSONException {

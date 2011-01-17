@@ -17,11 +17,14 @@
  */
 package org.apache.shindig.social.core.util.atom;
 
-import org.apache.shindig.social.opensocial.model.Activity;
-import org.apache.shindig.social.opensocial.model.Person;
-
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map.Entry;
+
+import org.apache.shindig.social.opensocial.model.Activity;
+import org.apache.shindig.social.opensocial.model.ActivityEntry;
+import org.apache.shindig.social.opensocial.model.Person;
 
 /**
  * This bean represents a Atom Entry for serialization. It contains, optionally
@@ -49,11 +52,23 @@ public class AtomEntry {
   private AtomLink link;
   @SuppressWarnings("unused")
   private Object content;
+  
+  /**
+   * Default constructor for POSTs to the REST API.
+   */
+  public AtomEntry() {
+  }
 
   /**
    * @param o
    */
   public AtomEntry(Object o) {
+    Object oCopy = o;
+    if(o instanceof Entry) {
+      // Try to recognize Entry's value
+      o = ((Entry<?, ?>)o).getValue();
+    }
+    
     if (o instanceof Person) {
       Person person = (Person) o;
       content = new AtomContent(person);
@@ -70,13 +85,24 @@ public class AtomEntry {
       generator = new AtomGenerator(activity);
       author = new AtomAuthor(activity);
       updated = activity.getUpdated();
-    } else if ( o instanceof Entry ) {
-      Entry<?, ?> e = (Entry<?, ?>) o;
+    } else if (o instanceof ActivityEntry) {
+      ActivityEntry activity = (ActivityEntry)o;
+      id = activity.getObject().getId();
+      title = activity.getTitle();
+      summary = activity.getBody();
+      author = new AtomAuthor(activity);
+      content = new AtomContent(activity);
+      try {
+        updated = new SimpleDateFormat().parse(activity.getPostedTime());
+      } catch (ParseException e) {
+        // TODO: map postedTime to updated field correctly
+      }
+    } else if (oCopy instanceof Entry) {
+      Entry<?, ?> e = (Entry<?, ?>) oCopy;
       id = (String) e.getKey();
       content = new AtomContent(e.getValue());
     } else {
       content = o;
     }
   }
-
 }

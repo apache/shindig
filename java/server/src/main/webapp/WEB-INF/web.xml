@@ -39,7 +39,6 @@
       org.apache.shindig.sample.shiro.ShiroGuiceModule:
       org.apache.shindig.sample.container.SampleContainerGuiceModule:
       org.apache.shindig.extras.ShindigExtrasGuiceModule:
-      org.apache.shindig.extras.as.ActivityStreamsGuiceModule
     </param-value>
   </context-param>
 

@@ -30,10 +30,12 @@ import org.apache.shindig.protocol.conversion.BeanXStreamConverter;
 import org.apache.shindig.protocol.conversion.xstream.XStreamConfiguration;
 import org.apache.shindig.social.core.util.xstream.XStream081Configuration;
 import org.apache.shindig.social.opensocial.service.ActivityHandler;
+import org.apache.shindig.social.opensocial.service.ActivityStreamHandler;
 import org.apache.shindig.social.opensocial.service.AppDataHandler;
 import org.apache.shindig.social.opensocial.service.MessageHandler;
 import org.apache.shindig.social.opensocial.service.PersonHandler;
 import org.apache.shindig.social.opensocial.spi.ActivityService;
+import org.apache.shindig.social.opensocial.spi.ActivityStreamService;
 import org.apache.shindig.social.opensocial.spi.AppDataService;
 import org.apache.shindig.social.opensocial.spi.MessageService;
 import org.apache.shindig.social.opensocial.spi.PersonService;
@@ -55,6 +57,7 @@ public class SocialApiTestsGuiceModule extends AbstractModule {
         .to(DataServiceServletFetcher.class);
 
     bind(ActivityService.class).to(JsonDbOpensocialService.class);
+    bind(ActivityStreamService.class).to(JsonDbOpensocialService.class);
     bind(AppDataService.class).to(JsonDbOpensocialService.class);
     bind(MessageService.class).to(JsonDbOpensocialService.class);
     bind(PersonService.class).to(JsonDbOpensocialService.class);
@@ -71,7 +74,7 @@ public class SocialApiTestsGuiceModule extends AbstractModule {
     bind(new TypeLiteral<Set<Object>>(){}).annotatedWith(
         Names.named("org.apache.shindig.handlers"))
         .toInstance(ImmutableSet.<Object>of(ActivityHandler.class, AppDataHandler.class,
-            PersonHandler.class, MessageHandler.class));
+            PersonHandler.class, MessageHandler.class, ActivityStreamHandler.class));
 
     bindConstant().annotatedWith(Names.named("shindig.containers.default"))
         .to("res://containers/default/container.js");
