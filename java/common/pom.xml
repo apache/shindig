@@ -118,10 +118,6 @@
       <artifactId>oauth</artifactId>
     </dependency>
     <dependency>
-      <artifactId>commons-betwixt</artifactId>
-      <groupId>commons-betwixt</groupId>
-    </dependency>
-    <dependency>
       <groupId>com.thoughtworks.xstream</groupId>
       <artifactId>xstream</artifactId>
     </dependency>
