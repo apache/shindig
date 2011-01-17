@@ -44,7 +44,7 @@ public class GuiceServletContextListener implements ServletContextListener {
   // From guice-servlet-2.0
   public static final String INJECTOR_NAME = Injector.class.getName();
   
-  //HNN- constant name matched system.properties <contextparam> specified in the web.xml
+  // HNN- constant name matched system.properties <contextparam> specified in the web.xml
   private static final String SYSTEM_PROPERTIES = "system.properties";
 
   public void contextInitialized(ServletContextEvent event) {
@@ -58,7 +58,14 @@ public class GuiceServletContextListener implements ServletContextListener {
         try {
           moduleName = moduleName.trim();
           if (moduleName.length() > 0) {
-            modules.add((Module)Class.forName(moduleName).newInstance());
+            try {
+              modules.add((Module)Class.forName(moduleName).newInstance());
+            } catch (Throwable t) {
+              // If we cannot find the class using forName try the current
+              // threads class loader
+              modules.add((Module)Thread.currentThread().getContextClassLoader()
+                  .loadClass(moduleName).newInstance());
+            }
           }
         } catch (InstantiationException e) {
           throw new RuntimeException(e);
@@ -71,7 +78,6 @@ public class GuiceServletContextListener implements ServletContextListener {
     }
     Injector injector = Guice.createInjector(Stage.PRODUCTION, modules);
     context.setAttribute(INJECTOR_ATTRIBUTE, injector);
-
   }
 
   public void contextDestroyed(ServletContextEvent event) {

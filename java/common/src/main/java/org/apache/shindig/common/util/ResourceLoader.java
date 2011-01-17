@@ -50,12 +50,33 @@ public final class ResourceLoader {
   }
 
   /**
+   * Opens a resource
    * @param resource
    * @return An input stream for the given named resource
    * @throws FileNotFoundException
    */
-  public static InputStream openResource(String resource) throws IOException {
+  public static InputStream openResource(String resource) throws FileNotFoundException  {
     ClassLoader cl = ResourceLoader.class.getClassLoader();
+    try {
+      return openResource(cl, resource);
+    } catch (FileNotFoundException e) {
+      // If we cannot find the resource using the current classes class loader
+      // try the current threads
+      cl = Thread.currentThread().getContextClassLoader();
+      return openResource(cl, resource);
+    }
+  }
+
+  /**
+   * Opens a resource
+   * @param cl The classloader to use to find the resource
+   * @param resource The resource to open
+   * @return An input stream for the given named resource
+   * @throws FileNotFoundException
+   */
+
+  private static InputStream openResource(ClassLoader cl, String resource)
+      throws FileNotFoundException {
     InputStream is = cl.getResourceAsStream(resource.trim());
     if (is == null) {
       throw new FileNotFoundException("Can not locate resource: " + resource);
@@ -72,7 +93,7 @@ public final class ResourceLoader {
    */
   public static String getContent(String resource) throws IOException {
     InputStream is = openResource(resource);
-    try{
+    try {
       return IOUtils.toString(is, "UTF-8");
     } finally {
       IOUtils.closeQuietly(is);
@@ -86,7 +107,7 @@ public final class ResourceLoader {
    */
   public static String getContent(File file) throws IOException {
     InputStream is = new FileInputStream(file);
-    try{
+    try {
       return IOUtils.toString(is, "UTF-8");
     } finally {
       IOUtils.closeQuietly(is);
