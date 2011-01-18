@@ -292,11 +292,7 @@ abstract class GadgetBaseRenderer extends GadgetRenderer {
    * @return string script
    */
   public function getBodyScript() {
-    $script = "gadgets.util.runOnLoadHandlers();";
-    if ($this instanceof GadgetHrefRenderer) {
-      $script .= "window.setTimeout(function(){gadgets.window.adjustHeight()}, 10);";
-    }
-    return $script;
+    return "gadgets.util.runOnLoadHandlers();";
   }
 
   /**
