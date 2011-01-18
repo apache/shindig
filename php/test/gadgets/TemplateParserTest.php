@@ -34,7 +34,7 @@ class TemplateParserTest extends PHPUnit_Framework_TestCase {
     $doc = new DomDocument();
     $doc->loadXml($viewNode);
     $contentBlocks = $doc->getElementsByTagName('script');
-    $library = new TemplateLibrary(null);
+    $library = new TemplateLibrary(new GadgetContext('GADGET'));
     $parser = new TemplateParser();
     $tags = array();
     foreach ($contentBlocks as $content) {
