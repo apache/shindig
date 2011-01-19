@@ -131,7 +131,6 @@ public class CacheEnforcementVisitor extends ResourceMutateVisitor {
 
     executor.execute(new Runnable() {
 
-      @Override
       public void run() {
         try {
           requestPipeline.execute(new HttpRequest(Uri.parse(uri)));
