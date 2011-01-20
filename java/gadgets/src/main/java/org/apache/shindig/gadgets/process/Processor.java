@@ -65,6 +65,13 @@ public class Processor {
     this.featureRegistry = featureRegistry;
   }
 
+  protected void validateGadgetUrl(Uri url) throws ProcessingException {
+    if (!"http".equalsIgnoreCase(url.getScheme()) && !"https".equalsIgnoreCase(url.getScheme())) {
+      throw new ProcessingException("Unsupported scheme (must be http or https).",
+          HttpServletResponse.SC_FORBIDDEN);
+    }
+  }
+
   /**
    * Process a single gadget. Creates a gadget from a retrieved GadgetSpec and context object,
    * automatically performing variable substitution on the spec for use elsewhere.
@@ -79,15 +86,12 @@ public class Processor {
           HttpServletResponse.SC_BAD_REQUEST);
     }
 
-    if (!"http".equalsIgnoreCase(url.getScheme()) && !"https".equalsIgnoreCase(url.getScheme())) {
-      throw new ProcessingException("Unsupported scheme (must be http or https).",
-          HttpServletResponse.SC_FORBIDDEN);
-    }
+    validateGadgetUrl(url);
 
     if (blacklist.isBlacklisted(context.getUrl())) {
       if (LOG.isLoggable(Level.INFO)) {
         LOG.logp(Level.INFO, classname, "process", MessageKeys.RENDER_BLACKLISTED_GADGET, new Object[] {context.getUrl()});
-      } 
+      }
       throw new ProcessingException("The requested gadget is unavailable",
           HttpServletResponse.SC_FORBIDDEN);
     }
@@ -95,7 +99,7 @@ public class Processor {
     try {
       GadgetSpec spec = gadgetSpecFactory.getGadgetSpec(context);
       spec = substituter.substitute(context, spec);
-      
+
       if (context.getSanitize()) {
         spec = spec.removeUrlViews();
       }
