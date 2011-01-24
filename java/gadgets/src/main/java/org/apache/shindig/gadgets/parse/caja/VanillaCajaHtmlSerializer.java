@@ -19,6 +19,7 @@ package org.apache.shindig.gadgets.parse.caja;
 
 import com.google.caja.parser.html.Nodes;
 import com.google.caja.render.Concatenator;
+import com.google.caja.reporting.MarkupRenderMode;
 import com.google.caja.reporting.RenderContext;
 import org.apache.shindig.gadgets.parse.HtmlSerialization;
 import org.apache.shindig.gadgets.parse.HtmlSerializer;
@@ -37,7 +38,8 @@ public class VanillaCajaHtmlSerializer implements HtmlSerializer {
       if (doc.getDoctype() != null) {
         HtmlSerialization.outputDocType(doc.getDoctype(), sw);
       }
-      sw.append(Nodes.render(doc, new RenderContext(new Concatenator(sw, null)).asXml()));
+      sw.append(Nodes.render(doc,
+              new RenderContext(new Concatenator(sw, null)).asXml() ? MarkupRenderMode.XML : MarkupRenderMode.HTML));
       return sw.toString();
     } catch (IOException e) {
       return null;

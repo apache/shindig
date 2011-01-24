@@ -23,6 +23,7 @@ import com.google.inject.Inject;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.uri.ProxyUriManager;
@@ -132,7 +133,7 @@ public class ImageResizeRewriter extends DomWalker.Rewriter {
         String styleStr = imgElement.getAttribute("style");
 
         for (String attr : Splitter.on(';').split(styleStr)) {
-          String[] splits = attr.split(":");
+          String[] splits = StringUtils.split(attr, ':');
           if (splits.length != 2) {
             continue;
           }

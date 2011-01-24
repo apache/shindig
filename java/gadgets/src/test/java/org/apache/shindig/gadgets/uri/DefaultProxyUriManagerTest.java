@@ -56,7 +56,7 @@ public class DefaultProxyUriManagerTest extends UriManagerTestBase {
   private void checkQueryStyle(boolean debug, boolean noCache, String version) throws Exception {
     String host = "host.com";
     String path = "/proxy/path";
-    List<Uri> resources = ImmutableList.<Uri>of(RESOURCE_1);
+    List<Uri> resources = ImmutableList.of(RESOURCE_1);
     List<Uri> uris = makeAndGet(host, path, debug, noCache, resources, version);
     assertEquals(1, uris.size());
     verifyQueryUri(RESOURCE_1, uris.get(0), debug, noCache, version, host, path);
@@ -69,7 +69,7 @@ public class DefaultProxyUriManagerTest extends UriManagerTestBase {
     String version = "ver";
     String host = "host.com";
     String path = "/proxy/path";
-    List<Uri> resources = ImmutableList.<Uri>of(RESOURCE_4);
+    List<Uri> resources = ImmutableList.of(RESOURCE_4);
     List<Uri> uris = makeAndGet(host, path, debug, noCache, resources, version);
     assertEquals(1, uris.size());
     verifyQueryUri(new UriBuilder(RESOURCE_4).setScheme("http").toUri(),
@@ -194,7 +194,7 @@ public class DefaultProxyUriManagerTest extends UriManagerTestBase {
   private void checkChainedStyle(boolean debug, boolean noCache, String version) throws Exception {
     String host = "host.com";
     String path = "/proxy/" + DefaultProxyUriManager.CHAINED_PARAMS_TOKEN + "/path";
-    List<Uri> resources = ImmutableList.<Uri>of(RESOURCE_1);
+    List<Uri> resources = ImmutableList.of(RESOURCE_1);
     List<Uri> uris = makeAndGet(host, path, debug, noCache, resources, version);
     assertEquals(1, uris.size());
     verifyChainedUri(RESOURCE_1, uris.get(0), debug, noCache, version, false, host, path);
@@ -213,7 +213,7 @@ public class DefaultProxyUriManagerTest extends UriManagerTestBase {
   private void checkChainedStyleEndOfPath(boolean debug, boolean noCache, String version) throws Exception {
     String host = "host.com";
     String path = "/proxy/" + DefaultProxyUriManager.CHAINED_PARAMS_TOKEN;
-    List<Uri> resources = ImmutableList.<Uri>of(RESOURCE_1);
+    List<Uri> resources = ImmutableList.of(RESOURCE_1);
     List<Uri> uris = makeAndGet(host, path, debug, noCache, resources, version);
     assertEquals(1, uris.size());
     verifyChainedUri(RESOURCE_1, uris.get(0), debug, noCache, version, true, host, path);
@@ -223,7 +223,7 @@ public class DefaultProxyUriManagerTest extends UriManagerTestBase {
   public void batchedProxyQueryStyle() throws Exception {
     String host = "host.com";
     String path = "/proxy/path";
-    List<Uri> resources = ImmutableList.<Uri>of(RESOURCE_1, RESOURCE_2, RESOURCE_3);
+    List<Uri> resources = ImmutableList.of(RESOURCE_1, RESOURCE_2, RESOURCE_3);
     String[] versions = new String[] { "v1", "v2", "v3" };
     List<Uri> uris = makeAndGet(host, path, true, true, resources, versions);
     assertEquals(3, uris.size());
@@ -236,7 +236,7 @@ public class DefaultProxyUriManagerTest extends UriManagerTestBase {
   public void batchedProxyChainedStyle() throws Exception {
     String host = "host.com";
     String path = "/proxy/" + DefaultProxyUriManager.CHAINED_PARAMS_TOKEN + "/path";
-    List<Uri> resources = ImmutableList.<Uri>of(RESOURCE_1, RESOURCE_2, RESOURCE_3);
+    List<Uri> resources = ImmutableList.of(RESOURCE_1, RESOURCE_2, RESOURCE_3);
     String[] versions = new String[] { "v1", "v2", "v3" };
     List<Uri> uris = makeAndGet(host, path, true, true, resources, versions);
     assertEquals(3, uris.size());
@@ -249,7 +249,7 @@ public class DefaultProxyUriManagerTest extends UriManagerTestBase {
   public void batchedProxyChainedStyleNoVerisons() throws Exception {
     String host = "host.com";
     String path = "/proxy/" + DefaultProxyUriManager.CHAINED_PARAMS_TOKEN + "/path";
-    List<Uri> resources = ImmutableList.<Uri>of(RESOURCE_1, RESOURCE_2, RESOURCE_3);
+    List<Uri> resources = ImmutableList.of(RESOURCE_1, RESOURCE_2, RESOURCE_3);
     List<Uri> uris = makeAndGet(host, path, true, true, resources);
     assertEquals(3, uris.size());
     for (int i = 0; i < 3; ++i) {

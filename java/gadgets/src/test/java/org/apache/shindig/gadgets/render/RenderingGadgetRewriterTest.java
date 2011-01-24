@@ -108,7 +108,7 @@ public class RenderingGadgetRewriterTest {
   @Before
   public void setUp() throws Exception {
     featureRegistry = createMock(FeatureRegistry.class);
-    Map<String, ConfigContributor> configContributors = ImmutableMap.<String,ConfigContributor>of(
+    Map<String, ConfigContributor> configContributors = ImmutableMap.of(
         "core.util", new CoreUtilConfigContributor(featureRegistry),
         "shindig.xhrwrapper", new XhrwrapperConfigContributor()
     );

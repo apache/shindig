@@ -214,7 +214,7 @@ public class BrowserSpecificFeatureResource implements FeatureResource {
       return false;
     }
     
-    private static final VersionNumber num(String str) {
+    private static VersionNumber num(String str) {
       return new VersionNumber(str);
     }
     

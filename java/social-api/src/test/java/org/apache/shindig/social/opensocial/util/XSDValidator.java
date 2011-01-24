@@ -105,6 +105,7 @@ public class XSDValidator {
 
       validator.validate(new StreamSource(xml));
     } catch (IOException e) {
+      // ignore
     } catch (SAXException e) {
       errors.append(e.getMessage()).append('\n');
     }

@@ -201,8 +201,9 @@ public class RewriteModule extends AbstractModule {
       AbsolutePathReferenceRewriter absolutePathReferenceRewriter,
       StyleTagProxyEmbeddedUrlsRewriter styleTagProxyEmbeddedUrlsRewriter,
       ProxyingContentRewriter proxyingContentRewriter) {
-    return ImmutableList.of((ResponseRewriter) absolutePathReferenceRewriter,
-        (ResponseRewriter) styleTagProxyEmbeddedUrlsRewriter,
-        (ResponseRewriter) proxyingContentRewriter);
+    return ImmutableList.<ResponseRewriter>of(
+        absolutePathReferenceRewriter,
+        styleTagProxyEmbeddedUrlsRewriter,
+        proxyingContentRewriter);
   }
 }

@@ -90,7 +90,7 @@ public class DefaultConcatUriManagerTest extends UriManagerTestBase {
     // Unique to type=CSS, split isn't supported.
     Gadget gadget = mockGadget(false, false);
     DefaultConcatUriManager manager = makeManager("host.com", "/foo", "token", null);
-    List<List<Uri>> resourceUris = ImmutableList.<List<Uri>>of(RESOURCES_ONE);
+    List<List<Uri>> resourceUris = ImmutableList.of(RESOURCES_ONE);
     manager.make(fromList(gadget, resourceUris, ConcatUriManager.Type.CSS), false);
   }
 
@@ -121,7 +121,7 @@ public class DefaultConcatUriManagerTest extends UriManagerTestBase {
     ConcatUriManager.Versioner versioner = makeVersioner(null, versions);
     DefaultConcatUriManager manager = makeManager(host, path, splitParam, versioner);
     List<List<Uri>> resourceUris =
-        ImmutableList.<List<Uri>>of(RESOURCES_ONE, RESOURCES_TWO, RESOURCES_ONE);
+        ImmutableList.of(RESOURCES_ONE, RESOURCES_TWO, RESOURCES_ONE);
 
     List<ConcatData> concatUris =
         manager.make(fromList(gadget, resourceUris, type), false);
@@ -167,7 +167,7 @@ public class DefaultConcatUriManagerTest extends UriManagerTestBase {
     String[] versions = new String[] { "v1" };  // Only one for three resources.
     ConcatUriManager.Versioner versioner = makeVersioner(null, versions);
     DefaultConcatUriManager manager = makeManager(host, path, "token", versioner);
-    List<List<Uri>> resourceUris = ImmutableList.<List<Uri>>of(RESOURCES_ONE, RESOURCES_ONE);
+    List<List<Uri>> resourceUris = ImmutableList.of(RESOURCES_ONE, RESOURCES_ONE);
     manager.make(fromList(gadget, resourceUris, ConcatUriManager.Type.JS), true);
   }
 
@@ -359,7 +359,7 @@ public class DefaultConcatUriManagerTest extends UriManagerTestBase {
     String host = "host.com";
     String path = "/concat/path";
     DefaultConcatUriManager manager = makeManager(host, path, "token", null);
-    List<List<Uri>> resourceUris = ImmutableList.<List<Uri>>of(RESOURCES_ONE);
+    List<List<Uri>> resourceUris = ImmutableList.of(RESOURCES_ONE);
 
     List<ConcatData> concatUris =
       manager.make(fromList(gadget, resourceUris, type), true);
@@ -390,7 +390,7 @@ public class DefaultConcatUriManagerTest extends UriManagerTestBase {
     String version = "version";
     ConcatUriManager.Versioner versioner = makeVersioner(null, version);
     DefaultConcatUriManager manager = makeManager(host, path, "token", versioner);
-    List<List<Uri>> resourceUris = ImmutableList.<List<Uri>>of(RESOURCES_ONE);
+    List<List<Uri>> resourceUris = ImmutableList.of(RESOURCES_ONE);
 
     List<ConcatData> concatUris =
       manager.make(fromList(gadget, resourceUris, type), true);
@@ -424,7 +424,7 @@ public class DefaultConcatUriManagerTest extends UriManagerTestBase {
     ConcatUriManager.Versioner versioner = makeVersioner(null, versions);
     DefaultConcatUriManager manager = makeManager(host, path, "token", versioner);
     List<List<Uri>> resourceUris =
-        ImmutableList.<List<Uri>>of(RESOURCES_ONE, RESOURCES_TWO, RESOURCES_ONE);
+        ImmutableList.of(RESOURCES_ONE, RESOURCES_TWO, RESOURCES_ONE);
 
     List<ConcatData> concatUris =
       manager.make(fromList(gadget, resourceUris, type), true);
@@ -462,7 +462,7 @@ public class DefaultConcatUriManagerTest extends UriManagerTestBase {
     ConcatUriManager.Versioner versioner = makeVersioner(UriStatus.VALID_VERSIONED, versions);
     DefaultConcatUriManager manager = makeManager(host, path, "token", versioner);
     List<List<Uri>> resourceUris =
-        ImmutableList.<List<Uri>>of(RESOURCES_ONE, RESOURCES_TWO, RESOURCES_ONE);
+        ImmutableList.of(RESOURCES_ONE, RESOURCES_TWO, RESOURCES_ONE);
 
     List<ConcatData> concatUris =
         manager.make(fromList(gadget, resourceUris, type), true);
@@ -485,21 +485,21 @@ public class DefaultConcatUriManagerTest extends UriManagerTestBase {
     String[] versions = new String[] { "v1" };  // Only one for three resources.
     ConcatUriManager.Versioner versioner = makeVersioner(null, versions);
     DefaultConcatUriManager manager = makeManager(host, path, "token", versioner);
-    List<List<Uri>> resourceUris = ImmutableList.<List<Uri>>of(RESOURCES_ONE, RESOURCES_ONE);
+    List<List<Uri>> resourceUris = ImmutableList.of(RESOURCES_ONE, RESOURCES_ONE);
     manager.make(fromList(gadget, resourceUris, type), true);
   }
 
   private void checkMissingHostConfig(ConcatUriManager.Type type) throws Exception {
     Gadget gadget = mockGadget(false, false);
     DefaultConcatUriManager manager = makeManager(null, "/foo", "token", null);
-    List<List<Uri>> resourceUris = ImmutableList.<List<Uri>>of(RESOURCES_ONE);
+    List<List<Uri>> resourceUris = ImmutableList.of(RESOURCES_ONE);
     manager.make(fromList(gadget, resourceUris, type), true);
   }
 
   private void checkMissingPathConfig(ConcatUriManager.Type type) throws Exception {
     Gadget gadget = mockGadget(false, false);
     DefaultConcatUriManager manager = makeManager("host.com", null, "token", null);
-    List<List<Uri>> resourceUris = ImmutableList.<List<Uri>>of(RESOURCES_ONE);
+    List<List<Uri>> resourceUris = ImmutableList.of(RESOURCES_ONE);
     manager.make(fromList(gadget, resourceUris, type), false);
   }
 

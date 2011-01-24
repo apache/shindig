@@ -24,6 +24,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.uri.Uri;
 
 import java.lang.reflect.InvocationHandler;
@@ -62,7 +63,7 @@ public class BeanDelegator {
    * Convert field names to common name - no underscore and lower case
    */
   public static String normalizeName(String name) {
-    return name.replaceAll("_", "").toLowerCase();
+    return StringUtils.remove(name, '_').toLowerCase();
   }
 
   /**
@@ -318,10 +319,7 @@ public class BeanDelegator {
 
     // Primitive types
     if (dataType == interfaceType) {
-      if (!PRIMITIVE_TYPE_CLASSES.contains(dataType) && !((Class<?>) dataType).isPrimitive()) {
-        return false;
-      }
-      return true;
+        return !(!PRIMITIVE_TYPE_CLASSES.contains(dataType) && !((Class<?>) dataType).isPrimitive());
     }
 
     // Check all enum values are accounted for

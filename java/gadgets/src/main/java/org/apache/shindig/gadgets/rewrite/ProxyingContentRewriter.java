@@ -18,6 +18,7 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
+import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
@@ -52,7 +53,7 @@ public class ProxyingContentRewriter extends DomWalker.Rewriter {
     // Note that concat is including with proxy in order to prevent 
     // proxying the rewritten concat url
     // Basically Url rewritters should all be in one dom walker.
-    return Arrays.<Visitor>asList(
+    return ImmutableList.of(
         new ConcatVisitor.Js(config, concatUriManager),
         new ConcatVisitor.Css(config, concatUriManager),
         new ProxyingVisitor(config, proxyUriManager,

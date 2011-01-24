@@ -25,6 +25,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.HeaderElement;
@@ -178,7 +179,7 @@ public class BasicHttpFetcher implements HttpFetcher {
 
     // Set proxy if set via guice.
     if (!Strings.isNullOrEmpty(basicHttpFetcherProxy)) {
-      String[] splits = basicHttpFetcherProxy.split(":");
+      String[] splits = StringUtils.split(basicHttpFetcherProxy, ':');
       ConnRouteParams.setDefaultProxy(
           client.getParams(), new HttpHost(splits[0], Integer.parseInt(splits[1]), "http"));
     }
@@ -500,7 +501,7 @@ public class BasicHttpFetcher implements HttpFetcher {
 
     InputStream instream = entity.getContent();
     if (instream == null) {
-      return new byte[] {};
+      return ArrayUtils.EMPTY_BYTE_ARRAY;
     }
     Preconditions.checkArgument(entity.getContentLength() < Integer.MAX_VALUE, "HTTP entity too large to be buffered in memory");
 

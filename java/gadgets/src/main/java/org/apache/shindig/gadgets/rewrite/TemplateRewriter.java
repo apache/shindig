@@ -246,7 +246,7 @@ public class TemplateRewriter implements GadgetRewriter {
           // Suppress exceptions due to malformed template libraries
           if (LOG.isLoggable(Level.WARNING)) {
             LOG.logp(Level.WARNING, classname, "loadTemplateLibraries", MessageKeys.MALFORMED_TEMPLATE_LIB);
-            LOG.log(Level.WARNING, te.getMessage(),te);;
+            LOG.log(Level.WARNING, te.getMessage(),te);
           }
         }
       }

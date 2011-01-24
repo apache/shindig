@@ -17,6 +17,7 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.JsonSerializer;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.GadgetContext;
@@ -123,7 +124,7 @@ public class JsHandler {
         String prevExport = null;
         for (String export : rawExports) {
           if (!export.equals(prevExport)) {
-            String[] pieces = export.split("\\.");
+            String[] pieces = StringUtils.split(export, "\\.");
             String base = "window";
             for (int i = 0; i < pieces.length; ++i) {
               String symExported = (i == 0) ? pieces[0] : base + "." + pieces[i];

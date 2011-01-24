@@ -101,7 +101,7 @@ public class BeanFilterTest extends Assert {
 
   @Test
   public void testMap() throws Exception {
-    List<String> list = ImmutableList.<String>of("test");
+    List<String> list = ImmutableList.of("test");
     SimpleBean data = new SimpleBean().setS("Main").setBeanMap(
         ImmutableMap.<String, SimpleBean>of( "s1", new SimpleBean().setS("sub1").setList(list),
           "s2", new SimpleBean().setS("sub2").setList(list).setBeanMap(

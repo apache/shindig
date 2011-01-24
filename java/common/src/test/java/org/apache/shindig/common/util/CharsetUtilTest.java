@@ -21,6 +21,7 @@ package org.apache.shindig.common.util;
 
 import static org.junit.Assert.assertEquals;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.junit.Test;
 
 import junitx.framework.ArrayAssert;
@@ -33,7 +34,7 @@ public class CharsetUtilTest {
   @Test
   public void testGetUtf8String() {
     ArrayAssert.assertEquals(new byte[] { 0x69, 0x6e }, CharsetUtil.getUtf8Bytes("in"));
-    ArrayAssert.assertEquals(new byte[] {}, CharsetUtil.getUtf8Bytes(null));
+    ArrayAssert.assertEquals(ArrayUtils.EMPTY_BYTE_ARRAY, CharsetUtil.getUtf8Bytes(null));
     testStringOfLength(0);
     testStringOfLength(10);
     testStringOfLength(100);

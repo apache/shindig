@@ -117,7 +117,7 @@ public class GadgetsHandlerApi {
   }
 
   public enum UserPrefDataType {
-    STRING, HIDDEN, BOOL, ENUM, LIST, NUMBER;
+    STRING, HIDDEN, BOOL, ENUM, LIST, NUMBER
   }
 
   public interface UserPref {
@@ -216,7 +216,7 @@ public class GadgetsHandlerApi {
     // but progress should continue in case further messages shed more info
     ERROR,
     // Indicative of a problem that prevents usable further processing
-    FATAL_ERROR;
+    FATAL_ERROR
   }
 
   public interface ProxyRequest extends BaseRequest {

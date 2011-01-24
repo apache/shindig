@@ -33,7 +33,7 @@ import java.util.logging.Logger;
  */
 public class BMPOptimizerTest extends BaseOptimizerTest {
 
-  Logger log = Logger.getLogger(BMPOptimizerTest.class.getName());
+  static final Logger log = Logger.getLogger(BMPOptimizerTest.class.getName());
 
   @Test
   public void testSimpleImage() throws Exception {

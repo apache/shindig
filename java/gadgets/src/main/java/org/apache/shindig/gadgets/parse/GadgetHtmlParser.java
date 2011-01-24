@@ -18,7 +18,6 @@
 package org.apache.shindig.gadgets.parse;
 
 import com.google.common.collect.Lists;
-import com.google.inject.ImplementedBy;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
@@ -27,7 +26,6 @@ import org.apache.shindig.common.cache.CacheProvider;
 import org.apache.shindig.common.logging.i18n.MessageKeys;
 import org.apache.shindig.common.util.HashUtil;
 import org.apache.shindig.gadgets.GadgetException;
-import org.apache.shindig.gadgets.parse.nekohtml.NekoSimplifiedHtmlParser;
 import org.w3c.dom.Attr;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.DOMImplementation;
@@ -45,7 +43,7 @@ import java.util.logging.Logger;
 /**
  * Parser for arbitrary HTML content
  */
-@ImplementedBy(NekoSimplifiedHtmlParser.class)
+
 public abstract class GadgetHtmlParser {
   
   //class name for logging purpose

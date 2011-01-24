@@ -28,7 +28,6 @@ import org.apache.shindig.gadgets.RenderingContext;
 import org.apache.shindig.gadgets.uri.UriCommon.Param;
 
 import com.google.common.base.Objects;
-import com.google.inject.ImplementedBy;
 
 /**
  * Interface defining methods used to generate Uris for the /js servlet.
@@ -133,7 +132,6 @@ public interface JsUriManager {
     }
   }
 
-  @ImplementedBy(DefaultJsVersioner.class)
   public interface Versioner {
     /**
      * @param gadgetUri Gadget for which extern Uri was generated.

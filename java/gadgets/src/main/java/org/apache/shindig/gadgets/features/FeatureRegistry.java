@@ -199,12 +199,9 @@ public class FeatureRegistry {
       return cache.get(cacheKey);
     }
 
-    List<FeatureNode> featureNodes = null;
-    if (transitive) {
-      featureNodes = getTransitiveDeps(needed, unsupported);
-    } else {
-      featureNodes = getRequestedNodes(needed, unsupported);
-    }
+    List<FeatureNode> featureNodes = transitive ?
+        getTransitiveDeps(needed, unsupported) : getRequestedNodes(needed, unsupported);
+
 
     String targetBundleType = ctx.getRenderingContext().getFeatureBundleTag();
     ImmutableList.Builder<FeatureBundle> bundlesBuilder =

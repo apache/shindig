@@ -568,7 +568,9 @@ public class ModulePrefs {
           xformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
           xformer.transform(source, result);
         } catch (TransformerConfigurationException e) {
+          // ignore
         } catch (TransformerException e) {
+          // ignore
         }
         buf.append(sw.toString());
       }

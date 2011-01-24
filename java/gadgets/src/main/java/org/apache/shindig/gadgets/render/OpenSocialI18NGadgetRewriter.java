@@ -97,14 +97,18 @@ public class OpenSocialI18NGadgetRewriter implements GadgetRewriter {
       try {
         attemptToLoadDateConstants(language);
         localeName = language; 
-      } catch (IOException e) { }
+      } catch (IOException e) {
+        // ignore
+      }
     }
 
     if (!country.equalsIgnoreCase("ALL")) {
       try {
         attemptToLoadDateConstants(localeName + '_' + country);
         localeName += '_' + country;
-      } catch (IOException e) { }
+      } catch (IOException e) {
+        // ignore
+      }
     } 
     return localeName;
   }

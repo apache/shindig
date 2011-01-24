@@ -191,7 +191,7 @@ public class CajaCssSanitizer {
 
   private static String rewriteUri(ProxyUriManager proxyUriManager, String input,
                                    final Uri context, GadgetContext gadgetContext) {
-    Uri inboundUri = null;
+    Uri inboundUri;
     try {
       inboundUri = Uri.parse(input);
     } catch (IllegalArgumentException e) {

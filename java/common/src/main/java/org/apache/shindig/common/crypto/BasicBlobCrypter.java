@@ -18,7 +18,10 @@
  */
 package org.apache.shindig.common.crypto;
 
+import com.google.common.base.CharMatcher;
 import com.google.common.base.Charsets;
+import com.google.common.base.Splitter;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.google.common.base.Preconditions;
 
@@ -38,6 +41,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.security.GeneralSecurityException;
+import java.util.Iterator;
 import java.util.Map;
 
 /**
@@ -207,7 +211,7 @@ public class BasicBlobCrypter implements BlobCrypter {
   }
 
   private Map<String, String> deserialize(byte[] plain)
-  throws UnsupportedEncodingException {
+      throws UnsupportedEncodingException {
     String base = new String(plain, UTF8);
     // replaces [&=] regex
     String[] items = StringUtils.splitPreserveAllTokens(base, "&=");

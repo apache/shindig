@@ -50,7 +50,7 @@ public class BeanDelegatorTest extends Assert {
     public String getPrivateData(); // delegated class method is private
 
     // Test enum
-    public enum Style { A, B; }
+    public enum Style { A, B }
     public Style getStyle();
 
     // Test of required
@@ -90,7 +90,8 @@ public class BeanDelegatorTest extends Assert {
     private String getPrivateData() { return "this is private"; }
 
     // Enum data:
-    public enum RealStyle { R_A, R_B; }
+    public enum RealStyle { R_A, R_B
+    }
     RealStyle style;
     public RealStyle getStyle() { return style; }
     public SimpleBean setStyle(RealStyle style) { this.style = style; return this; }

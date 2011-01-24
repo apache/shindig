@@ -17,6 +17,7 @@
  */
 package org.apache.shindig.gadgets.spec;
 
+import com.google.common.base.Splitter;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.xml.XmlUtil;
 import org.apache.shindig.gadgets.AuthType;
@@ -62,7 +63,7 @@ public class Preload implements RequestAuthenticationInfo {
     if (viewNames.length() == 0) {
       this.views = ImmutableSet.of();
     } else {
-      this.views = ImmutableSet.copyOf(viewNames.trim().split("\\s*,+\\s*"));
+      this.views = ImmutableSet.copyOf(Splitter.on(',').trimResults().omitEmptyStrings().split(viewNames));
     }
 
     auth = AuthType.parse(XmlUtil.getAttribute(preload, "authz"));

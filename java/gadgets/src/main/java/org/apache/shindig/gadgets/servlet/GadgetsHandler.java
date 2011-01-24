@@ -432,7 +432,7 @@ public class GadgetsHandler {
 
     private List<String> processFields(BaseRequestItem request, List<String> defaultList) {
       List<String> value = request.getListParameter(BaseRequestItem.FIELDS);
-      return ((value == null || value.size() == 0) ? defaultList : value);
+      return ((value == null || value.isEmpty()) ? defaultList : value);
     }
   }
 

@@ -38,7 +38,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
-import org.w3c.dom.Text;
 
 import java.util.List;
 
@@ -176,7 +175,7 @@ public class OsTemplateXmlLoaderRewriter extends DomWalker.Rewriter {
       for (Node child = elem.getFirstChild(); child != null; child = child.getNextSibling()) {
         switch (child.getNodeType()) {
         case Node.TEXT_NODE:
-          children.put(((Text)child).getNodeValue());
+          children.put(child.getNodeValue());
           break;
         case Node.DOCUMENT_NODE:
         case Node.ELEMENT_NODE:

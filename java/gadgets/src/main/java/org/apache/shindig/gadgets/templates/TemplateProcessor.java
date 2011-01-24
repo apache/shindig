@@ -22,14 +22,11 @@ import org.w3c.dom.DocumentFragment;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
-import com.google.inject.ImplementedBy;
-
 import javax.el.ELResolver;
 
 /**
  * A Template Processor can process templates and evaluate expressions.
  */
-@ImplementedBy(DefaultTemplateProcessor.class)
 public interface TemplateProcessor {
 
   /**

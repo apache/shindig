@@ -104,7 +104,7 @@ public class StyleTagExtractorVisitorTest extends DomWalkerTestBase {
     replay(cssRewriter);
     
     // Tag name isn't inspected since visit() filters this.
-    List<Node> nodes = ImmutableList.<Node>of();
+    List<Node> nodes = ImmutableList.of();
     Node head = addNodesToHtml(nodes);
     
     assertFalse(getRevisitStatus(gadget, true, cssRewriter, nodes));

@@ -86,7 +86,7 @@ public class SocialApiGuiceModule extends AbstractModule {
    * to add or replace additional handlers.
    */
   protected Set<Class<?>> getHandlers() {
-    return ImmutableSet.<Class<?>> of(ActivityHandler.class, AppDataHandler.class,
+    return ImmutableSet.of(ActivityHandler.class, AppDataHandler.class,
             PersonHandler.class, MessageHandler.class, AlbumHandler.class,
             MediaItemHandler.class, ActivityStreamHandler.class);
   }

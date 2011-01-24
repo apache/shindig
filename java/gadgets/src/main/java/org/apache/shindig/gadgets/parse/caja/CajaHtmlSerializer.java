@@ -18,6 +18,7 @@
  */
 package org.apache.shindig.gadgets.parse.caja;
 
+import com.google.caja.reporting.MarkupRenderMode;
 import org.apache.shindig.gadgets.parse.HtmlSerialization;
 import org.apache.shindig.gadgets.parse.HtmlSerializer;
 import org.w3c.dom.Document;
@@ -36,6 +37,8 @@ import java.io.StringWriter;
 public class CajaHtmlSerializer implements HtmlSerializer {
   public String serialize(Document doc) {
     StringWriter sw = HtmlSerialization.createWriter(doc);
-    return Nodes.render(doc, new RenderContext(new Concatenator(sw, null)).asXml());
+    return Nodes.render(doc,
+            new RenderContext(new Concatenator(sw, null)).asXml() ? MarkupRenderMode.XML : MarkupRenderMode.HTML
+    );
   }
 }
