@@ -31,12 +31,10 @@ import org.apache.shindig.protocol.RestHandler;
 import org.apache.shindig.protocol.conversion.BeanJsonConverter;
 import org.apache.shindig.social.opensocial.spi.AlbumService;
 import org.json.JSONObject;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.List;
-import java.util.Map;
 
 public class AlbumHandlerTest extends EasyMockTestCase {
   private AlbumService albumService;

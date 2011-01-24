@@ -37,10 +37,8 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 import java.util.Map;
-import java.util.concurrent.AbstractExecutorService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 public class ConcatProxyServletTest extends ServletTestFixture {
   private static final String REQUEST_DOMAIN = "example.org";

@@ -18,6 +18,7 @@
  */
 package org.apache.shindig.common.servlet;
 
+import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 
 import com.google.inject.Guice;
@@ -54,7 +55,7 @@ public class GuiceServletContextListener implements ServletContextListener {
     String moduleNames = context.getInitParameter(MODULES_ATTRIBUTE);
     List<Module> modules = Lists.newLinkedList();
     if (moduleNames != null) {
-      for (String moduleName : StringUtils.split(moduleNames, ':')) {
+      for (String moduleName : Splitter.on(':').split(moduleNames)) {
         try {
           moduleName = moduleName.trim();
           if (moduleName.length() > 0) {
@@ -102,13 +103,13 @@ public class GuiceServletContextListener implements ServletContextListener {
     String key=null;
     String value=null;
     if(systemProperties!=null && systemProperties.trim().length()>0){
-      for (String prop : StringUtils.split(systemProperties, '\n')){
-      String[] keyAndvalue = StringUtils.split(prop.trim(), "=",2);
+      for (String prop : Splitter.on('\n').trimResults().split(systemProperties)){
+        String[] keyAndvalue = StringUtils.split(prop, "=", 2);
         if(keyAndvalue.length==2){
-        key=keyAndvalue[0];
+          key=keyAndvalue[0];
           value=keyAndvalue[1];
           //set the system property if they are not empty
-          if(key!=null && key.trim().length()>0 && value!=null && value.trim().length()>0){
+          if (key!=null && key.trim().length()>0 && value!=null && value.trim().length()>0){
             System.setProperty(key,value);
           }
         }

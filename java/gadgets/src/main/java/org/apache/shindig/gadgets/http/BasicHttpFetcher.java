@@ -17,6 +17,7 @@
  */
 package org.apache.shindig.gadgets.http;
 
+import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
@@ -345,7 +346,7 @@ public class BasicHttpFetcher implements HttpFetcher {
         httpMethod = new HttpDelete(requestUri);
       }
       for (Map.Entry<String, List<String>> entry : request.getHeaders().entrySet()) {
-        httpMethod.addHeader(entry.getKey(), StringUtils.join(entry.getValue(), ','));
+        httpMethod.addHeader(entry.getKey(), Joiner.on(',').join(entry.getValue()));
       }
 
       // Disable following redirects.

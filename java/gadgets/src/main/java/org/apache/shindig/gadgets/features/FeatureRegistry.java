@@ -19,6 +19,7 @@ package org.apache.shindig.gadgets.features;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Objects;
+import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
@@ -37,8 +38,6 @@ import org.apache.shindig.common.util.ResourceLoader;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.RenderingContext;
-
-import org.apache.commons.lang.StringUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -62,6 +61,7 @@ import java.util.logging.Level;
 public class FeatureRegistry {
   public static final String RESOURCE_SCHEME = "res";
   public static final String FILE_SCHEME = "file";
+  public static final Splitter CRLF_SPLITTER = Splitter.onPattern("[\r\n]+").trimResults().omitEmptyStrings();
 
   //class name for logging purpose
   private static final String classname = FeatureRegistry.class.getName();
@@ -145,11 +145,10 @@ public class FeatureRegistry {
           }
           if (location.endsWith(".txt")) {
             // Text file contains a list of other resource files to load
-            for (String resource : resourceLoader.getResourceContent(location).split("[\r\n]+")) {
-              resource = resource.trim();
-              if (resource.length () > 0 && resource.charAt(0) != '#') {
-                // Skip blank/commented lines.
-                resource = getComponentUri(resource.trim()).getPath();
+            for (String resource : CRLF_SPLITTER.split(resourceLoader.getResourceContent(location))) {
+              if (resource.charAt(0) != '#') {
+                // Skip commented lines.
+                resource = getComponentUri(resource).getPath();
                 resources.add(resource);
               }
             }
@@ -354,8 +353,8 @@ public class FeatureRegistry {
   }
 
   private boolean containerMatch(String containerAttrib, String container) {
-    for (String attr : StringUtils.split(containerAttrib, ',')) {
-      if (attr.trim().equals(container)) return true;
+    for (String attr : Splitter.on(',').trimResults().split(containerAttrib)) {
+      if (attr.equals(container)) return true;
     }
     return false;
   }

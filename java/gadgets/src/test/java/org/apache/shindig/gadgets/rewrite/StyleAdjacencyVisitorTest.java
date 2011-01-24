@@ -23,7 +23,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
-import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.rewrite.DomWalker.Visitor.VisitStatus;
 
 import org.w3c.dom.Node;

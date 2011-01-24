@@ -32,7 +32,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 
-import org.apache.shindig.common.util.CharsetUtil;
 import org.junit.Test;
 
 import java.util.Arrays;

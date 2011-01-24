@@ -17,7 +17,8 @@
  */
 package org.apache.shindig.gadgets.spec;
 
-import org.apache.commons.lang.StringUtils;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Splitter;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.util.HashUtil;
 import org.apache.shindig.common.xml.XmlUtil;
@@ -86,8 +87,7 @@ public class GadgetSpec {
       }
       if ("Content".equals(name)) {
         String viewNames = XmlUtil.getAttribute(element, "view", "default");
-        for (String view : StringUtils.split(viewNames, ',')) {
-          view = view.trim();
+        for (String view : Splitter.on(',').trimResults().split(viewNames)) {
           List<Element> viewElements = views.get(view);
           if (viewElements == null) {
             viewElements = Lists.newLinkedList();
@@ -120,6 +120,7 @@ public class GadgetSpec {
   /**
    * Use for testing.
    */
+  @VisibleForTesting
   public GadgetSpec(Uri url, String xml) throws SpecParserException {
     this(url, XmlUtil.parseSilent(xml), xml);
   }

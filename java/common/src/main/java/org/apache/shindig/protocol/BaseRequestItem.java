@@ -17,8 +17,10 @@
  */
 package org.apache.shindig.protocol;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Objects;
-import org.apache.commons.lang.StringUtils;
+import com.google.common.base.Splitter;
+import com.google.common.collect.ImmutableList;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.protocol.conversion.BeanConverter;
 import org.apache.shindig.protocol.conversion.BeanJsonConverter;
@@ -35,7 +37,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
@@ -249,7 +250,7 @@ public class BaseRequestItem implements RequestItem {
       return Collections.emptyList();
     }
     if (param instanceof String && ((String)param).indexOf(',') != -1) {
-      List<String> listParam = Arrays.asList(StringUtils.split((String)param, ','));
+      List<String> listParam = ImmutableList.copyOf(Splitter.on(',').split((String) param));
       this.parameters.put(paramName, listParam);
       return listParam;
     }
@@ -273,8 +274,7 @@ public class BaseRequestItem implements RequestItem {
     }
   }
 
-
-  // Exposed for testing only
+  @VisibleForTesting
   public void setParameter(String paramName, Object paramValue) {
     if (paramValue instanceof String[]) {
       String[] arr = (String[])paramValue;

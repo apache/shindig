@@ -17,6 +17,7 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
+import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSortedSet;
@@ -27,7 +28,6 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
@@ -187,10 +187,8 @@ public class ContentRewriterFeature {
 
       // Parse includeTags
       ImmutableSet.Builder<String> includeTagsBuilder = ImmutableSet.builder();
-      for (String s : COMMA_WHITESPACE_PATTERN.split(paramTrim(defaultTags).toLowerCase())) {
-        if (s != null && s.length() > 0) {
-          includeTagsBuilder.add(s);
-        }
+      for (String s : Splitter.on(',').trimResults().omitEmptyStrings().split(defaultTags.toLowerCase())) {
+        includeTagsBuilder.add(s);
       }
       this.includeTags = includeTagsBuilder.build();
 
@@ -252,10 +250,8 @@ public class ContentRewriterFeature {
       Set<String> tagsVal = null;
       if (f != null && f.getParams().containsKey(INCLUDE_TAGS)) {
         tagsVal = Sets.newTreeSet();
-        for (String tag : StringUtils.split(f.getParam(INCLUDE_TAGS), ',')) {
-          if (!Strings.isNullOrEmpty(tag)) {
-            tagsVal.add(tag.trim().toLowerCase());
-          }
+        for (String tag : Splitter.on(',').trimResults().omitEmptyStrings().split(f.getParam(INCLUDE_TAGS))) {
+          tagsVal.add(tag.toLowerCase());
         }
         if (onlyAllowExcludes) {
           // Only excludes are allowed. Keep only subset of

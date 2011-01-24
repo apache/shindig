@@ -18,6 +18,7 @@
  */
 package org.apache.shindig.gadgets;
 
+import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 
 import com.google.inject.AbstractModule;
@@ -27,8 +28,6 @@ import com.google.inject.Singleton;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
-
-import org.apache.commons.lang.StringUtils;
 
 import org.apache.shindig.common.servlet.GuiceServletContextListener;
 import org.apache.shindig.gadgets.config.DefaultConfigContributorModule;
@@ -113,7 +112,10 @@ public class DefaultGuiceModule extends AbstractModule {
   @Named("org.apache.shindig.features")
   protected List<String> defaultFeatures(@Named("shindig.features.default")String features,
                                          @Named("org.apache.shindig.features-extended")Set<String> extended) {
-    return ImmutableList.<String>builder().addAll(extended).add(StringUtils.split(features, ',')).build();
+    return ImmutableList.<String>builder()
+        .addAll(extended)
+        .addAll(Splitter.on(',').split(features))
+        .build();
   }
 
   /**

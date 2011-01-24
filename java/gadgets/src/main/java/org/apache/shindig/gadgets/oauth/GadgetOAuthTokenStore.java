@@ -34,10 +34,9 @@ import org.apache.shindig.gadgets.spec.OAuthService.Location;
 import org.apache.shindig.gadgets.spec.OAuthService.Method;
 
 import com.google.inject.Inject;
+import com.google.common.base.Joiner;
 
 import net.oauth.OAuthServiceProvider;
-
-import org.apache.commons.lang.StringUtils;
 
 /**
  * Higher-level interface that allows callers to store and retrieve
@@ -138,7 +137,7 @@ public class GadgetOAuthTokenStore {
       throw new OAuthRequestException(OAuthError.BAD_OAUTH_CONFIGURATION,
           "Failed to retrieve OAuth URLs, spec for gadget does not contain OAuth service " +
           arguments.getServiceName() + ".  Known services: " +
-          StringUtils.join(oauthSpec.getServices().keySet(), ',') + '.');
+          Joiner.on(',').join(oauthSpec.getServices().keySet()) + '.');
     }
     // In theory some one could specify different parameter locations for request token and
     // access token requests, but that's probably not useful.  We just use the request token

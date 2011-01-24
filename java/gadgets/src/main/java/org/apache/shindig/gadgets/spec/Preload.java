@@ -22,10 +22,10 @@ import org.apache.shindig.common.xml.XmlUtil;
 import org.apache.shindig.gadgets.AuthType;
 import org.apache.shindig.gadgets.variables.Substitutions;
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 
-import org.apache.commons.lang.StringUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -153,7 +153,10 @@ public class Preload implements RequestAuthenticationInfo {
     StringBuilder buf = new StringBuilder();
     buf.append("<Preload href='").append(href).append('\'')
        .append(" authz='").append(auth.toString().toLowerCase()).append('\'')
-       .append(" views='").append(StringUtils.join(views, ',')).append('\'');
+       .append(" views='");
+    Joiner.on(',').appendTo(buf, views);
+    buf.append('\'');
+
     for (Map.Entry<String, String> entry : attributes.entrySet()) {
       buf.append(' ').append(entry.getKey()).append("='").append(entry.getValue())
          .append('\'');

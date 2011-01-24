@@ -18,6 +18,7 @@
  */
 package org.apache.shindig.expressions;
 
+import com.google.common.annotations.VisibleForTesting;
 import org.apache.shindig.common.cache.CacheProvider;
 import org.apache.shindig.expressions.juel.JuelProvider;
 import org.apache.shindig.expressions.juel.JuelTypeConverter;
@@ -59,6 +60,7 @@ public class Expressions {
    * Returns an instance of Expressions that doesn't require
    * any functions or perform any caching.  Use only for testing.
    */
+  @VisibleForTesting
   public static Expressions forTesting(Functions functions) {
     return new Expressions(functions, null, new JuelTypeConverter(), new JuelProvider());
   }
@@ -67,6 +69,7 @@ public class Expressions {
    * Returns an instance of Expressions that doesn't require
    * any functions or perform any caching.  Use only for testing.
    */
+  @VisibleForTesting
   public static Expressions forTesting() {
     return new Expressions(null, null, new JuelTypeConverter(), new JuelProvider());
   }

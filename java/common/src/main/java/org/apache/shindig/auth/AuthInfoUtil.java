@@ -17,6 +17,8 @@
  */
 package org.apache.shindig.auth;
 
+import com.google.common.annotations.VisibleForTesting;
+
 import javax.servlet.http.HttpServletRequest;
 
 /**
@@ -31,9 +33,8 @@ public final class AuthInfoUtil {
 
   /**
    * Constants for request attribute keys
-   *
-   * This is only public for testing.
    */
+  @VisibleForTesting
   public enum Attribute {
     /** The security token */
     SECURITY_TOKEN,

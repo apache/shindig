@@ -18,7 +18,7 @@
  */
 package org.apache.shindig.gadgets.uri;
 
-import com.google.common.collect.Lists;
+import com.google.common.collect.ImmutableList;
 import com.google.inject.ImplementedBy;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
@@ -38,7 +38,6 @@ import org.apache.shindig.gadgets.spec.View;
 import org.apache.shindig.gadgets.uri.UriCommon.Param;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -81,11 +80,11 @@ public class DefaultIframeUriManager implements IframeUriManager, ContainerConfi
   public void containersChanged(
       ContainerConfig config, Collection<String> changed, Collection<String> removed) {
     Collection<String> containers = config.getContainers();
-    List<String> ldSuffixes = Lists.newArrayListWithCapacity(containers.size());
+    ImmutableList.Builder<String> ldSuffixes = ImmutableList.builder();
     for (String container : containers) {
       ldSuffixes.add(getReqVal(container, LOCKED_DOMAIN_SUFFIX_KEY));
     }
-    this.ldSuffixes = Collections.unmodifiableList(ldSuffixes);
+    this.ldSuffixes = ldSuffixes.build();
   }
 
   @Inject(optional = true)

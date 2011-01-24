@@ -20,7 +20,6 @@ package org.apache.shindig.gadgets.parse.caja;
 import com.google.caja.parser.html.Nodes;
 import com.google.caja.render.Concatenator;
 import com.google.caja.reporting.RenderContext;
-import org.apache.shindig.gadgets.parse.DefaultHtmlSerializer;
 import org.apache.shindig.gadgets.parse.HtmlSerialization;
 import org.apache.shindig.gadgets.parse.HtmlSerializer;
 import org.w3c.dom.Document;

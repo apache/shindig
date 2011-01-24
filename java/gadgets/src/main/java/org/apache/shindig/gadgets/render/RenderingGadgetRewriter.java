@@ -18,6 +18,7 @@
  */
 package org.apache.shindig.gadgets.render;
 
+import com.google.common.base.Splitter;
 import org.apache.shindig.common.JsonSerializer;
 import org.apache.shindig.common.logging.i18n.MessageKeys;
 import org.apache.shindig.common.uri.Uri;
@@ -48,7 +49,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.Text;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -125,7 +125,7 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
   @Inject
   public void setDefaultForcedLibs(@Named("shindig.gadget-rewrite.default-forced-libs")String forcedLibs) {
     if (StringUtils.isNotBlank(forcedLibs)) {
-      defaultExternLibs = ImmutableSortedSet.copyOf(StringUtils.split(forcedLibs, ':'));
+      defaultExternLibs = ImmutableSortedSet.copyOf(Splitter.on(':').split(forcedLibs));
     }
   }
 
@@ -228,7 +228,7 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
     // gather the libraries we'll need to generate the extern libs
     String externParam = context.getParameter("libs");
     if (StringUtils.isNotBlank(externParam)) {
-      externForcedLibs = Sets.newTreeSet(Arrays.asList(StringUtils.split(externParam, ':')));
+      externForcedLibs = Sets.newTreeSet(Splitter.on(':').split(externParam));
     }
 
     if (!externForcedLibs.isEmpty()) {

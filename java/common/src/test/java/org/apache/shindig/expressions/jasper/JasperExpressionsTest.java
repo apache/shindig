@@ -38,6 +38,7 @@ public class JasperExpressionsTest  extends ExpressionsTest{
   }
   
   @Ignore
+  @Test
   public void booleanCoercionOfStringsFails() throws Exception{
     // Case-sensitive coercion:  FALSE is true
     // Test fails because Jasper type conversion routines does not recognize FALSE.
@@ -49,7 +50,8 @@ public class JasperExpressionsTest  extends ExpressionsTest{
     assertFalse(evaluate("${!bool}", Boolean.class));
   }
   
-  @Ignore  
+  @Ignore
+  @Test
   public void booleanCoercionOfNumbersFails() throws Exception {
     // These test cases will not pass with Jasper due to ELSupport exceptions
     // thrown when coercing Integer to Boolean

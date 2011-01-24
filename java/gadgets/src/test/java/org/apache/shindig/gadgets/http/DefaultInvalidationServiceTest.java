@@ -25,7 +25,6 @@ import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.AuthType;
 import org.apache.shindig.gadgets.oauth.OAuthArguments;
 import org.apache.shindig.gadgets.rewrite.DefaultResponseRewriterRegistry;
-import org.easymock.EasyMock;
 import org.easymock.IMocksControl;
 import org.junit.Assert;
 import org.junit.Before;

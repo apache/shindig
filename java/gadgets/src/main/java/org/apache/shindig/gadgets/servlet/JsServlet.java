@@ -204,7 +204,7 @@ public class JsServlet extends InjectedServlet {
   @VisibleForTesting
   String createJsloadScript(Uri uri) {
     String uriString = uri.toString();
-    return String.format(JSLOAD_JS_TPL, uriString, uriString);
+    return String.format(JSLOAD_JS_TPL, uriString);
   }
 
   /**

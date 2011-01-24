@@ -17,6 +17,7 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
+import com.google.common.base.Joiner;
 import com.google.inject.util.Providers;
 import org.apache.shindig.common.PropertiesModule;
 import org.apache.shindig.common.uri.Uri;
@@ -31,9 +32,6 @@ import org.apache.shindig.gadgets.http.RequestPipeline;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
 import org.apache.shindig.gadgets.parse.ParseModule;
 import org.apache.shindig.gadgets.parse.nekohtml.NekoSimplifiedHtmlParser;
-import org.apache.shindig.gadgets.rewrite.ContentRewriterFeature;
-import org.apache.shindig.gadgets.rewrite.GadgetRewriter;
-import org.apache.shindig.gadgets.rewrite.MutableContent;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 
 import com.google.inject.AbstractModule;
@@ -42,7 +40,6 @@ import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.util.Modules;
 
-import org.apache.commons.lang.StringUtils;
 import org.easymock.EasyMock;
 import org.easymock.IMocksControl;
 import org.junit.Before;
@@ -111,7 +108,7 @@ public abstract class BaseRewriterTestCase {
     if(exclude != null)
       xml.append("      <Param name=\"exclude-urls\">" + exclude + "</Param>\n");
     if(tags != null)
-      xml.append("      <Param name=\"include-tags\">" + StringUtils.join(tags, ",") + "</Param>\n");
+      xml.append("      <Param name=\"include-tags\">" + Joiner.on(',').join(tags) + "</Param>\n");
     xml.append("</Optional>");
     xml.append("</ModulePrefs>");
     xml.append("<Content type=\"html\">Hello!</Content>");
@@ -136,7 +133,7 @@ public abstract class BaseRewriterTestCase {
         xml.append("      <Param name=\"exclude-url\">" + exclude + "</Param>\n");
       }
     if(tags != null)
-      xml.append("      <Param name=\"include-tags\">" + StringUtils.join(tags, ",") + "</Param>\n");
+      xml.append("      <Param name=\"include-tags\">" + Joiner.on(',').join(tags) + "</Param>\n");
     xml.append("</Optional>");
     xml.append("</ModulePrefs>");
     xml.append("<Content type=\"html\">Hello!</Content>");

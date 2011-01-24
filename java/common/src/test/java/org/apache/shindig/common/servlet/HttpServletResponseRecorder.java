@@ -20,8 +20,6 @@ package org.apache.shindig.common.servlet;
 
 import org.apache.shindig.common.util.DateUtil;
 
-import com.google.common.collect.Maps;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;

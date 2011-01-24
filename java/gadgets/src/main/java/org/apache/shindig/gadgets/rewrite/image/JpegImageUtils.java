@@ -24,7 +24,6 @@ import org.apache.sanselan.common.byteSources.ByteSourceInputStream;
 import org.apache.sanselan.formats.jpeg.JpegUtils;
 import org.apache.sanselan.formats.jpeg.JpegConstants;
 
-import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.io.ByteArrayInputStream;

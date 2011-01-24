@@ -19,10 +19,11 @@
 
 package org.apache.shindig.config;
 
+import com.google.common.base.Splitter;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 
-import org.apache.commons.lang.StringUtils;
+import com.google.common.collect.Maps;
 import org.apache.shindig.common.logging.i18n.MessageKeys;
 import org.apache.shindig.common.util.ResourceLoader;
 import org.apache.shindig.config.ContainerConfig.Transaction;
@@ -32,7 +33,6 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -40,7 +40,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.regex.Pattern;
 
 /**
  * A class to build container configurations from JSON notation.
@@ -57,8 +56,8 @@ import java.util.regex.Pattern;
 public class JsonContainerConfigLoader {
 
   private static final String classname = JsonContainerConfigLoader.class.getName();
-  private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
-  private static final Pattern CRLF_PATTERN = Pattern.compile("[\r\n]+");
+  private static final Logger LOG = Logger.getLogger(classname, MessageKeys.MESSAGES);
+  private static final Splitter CRLF_SPLITTER = Splitter.onPattern("[\r\n]+");
 
   public static final char FILE_SEPARATOR = ',';
   public static final String SERVER_PORT = "SERVER_PORT";
@@ -138,16 +137,16 @@ public class JsonContainerConfigLoader {
       throws ContainerConfigException {
     List<Map<String, Object>> all = Lists.newArrayList();
     try {
-      for (String location : StringUtils.split(path, FILE_SEPARATOR)) {
+      for (String location : Splitter.on(FILE_SEPARATOR).split(path)) {
         if (location.startsWith("res://")) {
           location = location.substring(6);
           if (LOG.isLoggable(Level.INFO)) {
             LOG.logp(Level.INFO, classname, "loadContainers", MessageKeys.LOAD_RESOURCES_FROM, new Object[] {location});
           }          
           if (path.endsWith(".txt")) {
-            loadResources(CRLF_PATTERN.split(ResourceLoader.getContent(location)), all);
+            loadResources(CRLF_SPLITTER.split(ResourceLoader.getContent(location)), all);
           } else {
-            loadResources(new String[] {location}, all);
+            loadResources(ImmutableList.of(location), all);
           }
         } else {
           if (LOG.isLoggable(Level.INFO)) {
@@ -170,7 +169,7 @@ public class JsonContainerConfigLoader {
    * Only files with a .js or .json extension will be loaded.
    *
    * @param files The files to examine.
-   * @throws ContainerConfigException
+   * @throws ContainerConfigException when IO exceptions occur
    */
   private static void loadFiles(File[] files, List<Map<String, Object>> all)
       throws ContainerConfigException {
@@ -204,9 +203,9 @@ public class JsonContainerConfigLoader {
    * Loads resources recursively.
    *
    * @param files The base paths to look for container.xml
-   * @throws ContainerConfigException
+   * @throws ContainerConfigException when IO errors occur
    */
-  private static void loadResources(String[] files, List<Map<String, Object>> all)
+  private static void loadResources(Iterable<String> files, List<Map<String, Object>> all)
       throws ContainerConfigException {
     try {
       for (String entry : files) {
@@ -226,8 +225,8 @@ public class JsonContainerConfigLoader {
   /**
    * Processes a container file.
    *
-   * @param json
-   * @throws ContainerConfigException
+   * @param json json to parse and load
+   * @throws ContainerConfigException when invalid json is encountered
    */
   private static Map<String, Object> loadFromString(String json) throws ContainerConfigException {
     try {
@@ -250,11 +249,11 @@ public class JsonContainerConfigLoader {
       return json.toString();
     } else if (json instanceof JSONArray) {
       JSONArray jsonArray = (JSONArray) json;
-      List<Object> values = new ArrayList<Object>(jsonArray.length());
+      ImmutableList.Builder<Object> values = ImmutableList.builder();
       for (int i = 0, j = jsonArray.length(); i < j; ++i) {
         values.add(jsonToConfig(jsonArray.opt(i)));
       }
-      return Collections.unmodifiableList(values);
+      return values.build();
     } else if (json instanceof JSONObject) {
       return jsonToMap((JSONObject) json);
     }

@@ -19,7 +19,7 @@
 package org.apache.shindig.protocol;
 
 import com.google.common.base.Strings;
-import org.apache.commons.lang.StringUtils;
+import com.google.common.base.Joiner;
 
 import com.google.common.collect.ImmutableSet;
 
@@ -87,7 +87,7 @@ public final class ContentTypes {
     if (Strings.isNullOrEmpty(contentType)) {
       throw new InvalidContentTypeException(
           "No Content-Type specified. One of "
-              + StringUtils.join(allowedContentTypes, ", ") + " is required");
+              + Joiner.on(", ").join(allowedContentTypes) + " is required");
     }
 
     contentType = ContentTypes.extractMimePart(contentType);
@@ -103,7 +103,7 @@ public final class ContentTypes {
         "Unsupported Content-Type "
             + contentType
             + ". One of "
-            + StringUtils.join(allowedContentTypes, ", ")
+            + Joiner.on(", ").join(allowedContentTypes)
             + " is required");
   }
 

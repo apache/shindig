@@ -1,8 +1,6 @@
 package org.apache.shindig.auth;
 
-import com.google.common.collect.ImmutableMap;
 import org.apache.shindig.common.testing.FakeHttpServletRequest;
-import org.easymock.EasyMock;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

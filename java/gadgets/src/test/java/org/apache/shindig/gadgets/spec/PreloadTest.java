@@ -21,6 +21,7 @@ package org.apache.shindig.gadgets.spec;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableSet;
 
 import org.apache.shindig.common.uri.Uri;
@@ -28,7 +29,6 @@ import org.apache.shindig.common.xml.XmlUtil;
 import org.apache.shindig.gadgets.AuthType;
 import org.apache.shindig.gadgets.variables.Substitutions;
 
-import org.apache.commons.lang.StringUtils;
 import org.junit.Test;
 
 import java.util.Set;
@@ -86,7 +86,7 @@ public class PreloadTest {
   @Test
   public void multipleViews() throws Exception {
     String xml = "<Preload href='" + HREF + '\'' +
-                 " views='" + StringUtils.join(VIEWS, ',') + "'/>";
+                 " views='" + Joiner.on(',').join(VIEWS) + "'/>";
 
     Preload preload = new Preload(XmlUtil.parse(xml), SPEC_URL);
 
@@ -135,7 +135,7 @@ public class PreloadTest {
     String xml = "<Preload" +
                  " href='" + HREF + '\'' +
                  " authz='signed'" +
-                 " views='" + StringUtils.join(VIEWS, ',') + '\'' +
+                 " views='" + Joiner.on(',').join(VIEWS) + '\'' +
                  " some_attribute='yes' />";
 
     Preload preload = new Preload(XmlUtil.parse(xml), SPEC_URL);

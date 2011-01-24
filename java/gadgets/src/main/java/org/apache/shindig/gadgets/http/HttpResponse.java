@@ -18,13 +18,7 @@
 package org.apache.shindig.gadgets.http;
 
 import com.google.common.base.Supplier;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
-import com.google.common.collect.MapMaker;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Multimaps;
+import com.google.common.collect.*;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
@@ -181,8 +175,7 @@ public final class HttpResponse implements Externalizable {
     // Copy headers after builder.getResponse(), since that can modify Content-Type.
     headerCopy.putAll(builder.getHeaders());
 
-    Map<String, String> metadataCopy = Maps.newHashMap(builder.getMetadata());
-    metadata = Collections.unmodifiableMap(metadataCopy);
+    metadata = ImmutableMap.copyOf(builder.getMetadata());
 
     // We want to modify the headers to ensure that the proper Content-Type and Date headers
     // have been set. This allows us to avoid these expensive calculations from the cache.

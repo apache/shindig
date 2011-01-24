@@ -17,10 +17,10 @@
  */
 package org.apache.shindig.social.dataservice.integration;
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.protocol.ContentTypes;
 import org.apache.shindig.protocol.model.Enum;
 import org.apache.shindig.protocol.model.EnumImpl;
@@ -213,7 +213,7 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
     // TODO(doll): Test all of the date fields
 
     Map<String, String> extraParams = Maps.newHashMap();
-    extraParams.put("fields", StringUtils.join(Person.Field.ALL_FIELDS, ','));
+    extraParams.put("fields", Joiner.on(',').join(Person.Field.ALL_FIELDS));
 
     // Currently, for Shindig {pid}/@all/{uid} == {uid}/@self
     String resp = getResponse("/people/canonical/@self", "GET", extraParams, null,

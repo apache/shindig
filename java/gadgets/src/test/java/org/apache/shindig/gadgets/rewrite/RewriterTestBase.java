@@ -17,6 +17,7 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
+import com.google.common.base.Joiner;
 import com.google.inject.util.Providers;
 import org.apache.shindig.common.PropertiesModule;
 import org.apache.shindig.common.uri.Uri;
@@ -39,7 +40,6 @@ import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.util.Modules;
 
-import org.apache.commons.lang.StringUtils;
 import org.easymock.EasyMock;
 import org.easymock.IMocksControl;
 import org.junit.Before;
@@ -108,7 +108,7 @@ public abstract class RewriterTestBase {
     if(exclude != null)
       xml.append("      <Param name=\"exclude-urls\">" + exclude + "</Param>\n");
     if(tags != null)
-      xml.append("      <Param name=\"include-tags\">" + StringUtils.join(tags, ",") + "</Param>\n");
+      xml.append("      <Param name=\"include-tags\">" + Joiner.on(',').join(tags) + "</Param>\n");
     xml.append("</Optional>");
     xml.append("</ModulePrefs>");
     xml.append("<Content type=\"html\">Hello!</Content>");
@@ -133,7 +133,7 @@ public abstract class RewriterTestBase {
         xml.append("      <Param name=\"exclude-url\">" + exclude + "</Param>\n");
       }
     if(tags != null)
-      xml.append("      <Param name=\"include-tags\">" + StringUtils.join(tags, ",") + "</Param>\n");
+      xml.append("      <Param name=\"include-tags\">" + Joiner.on(',').join(tags) + "</Param>\n");
     xml.append("</Optional>");
     xml.append("</ModulePrefs>");
     xml.append("<Content type=\"html\">Hello!</Content>");

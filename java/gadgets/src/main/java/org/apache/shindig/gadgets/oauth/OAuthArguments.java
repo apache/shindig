@@ -18,7 +18,7 @@
  */
 package org.apache.shindig.gadgets.oauth;
 
-import org.apache.commons.lang.StringUtils;
+import com.google.common.base.Objects;
 import org.apache.shindig.gadgets.AuthType;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpResponse;
@@ -360,17 +360,10 @@ public class OAuthArguments {
 
   @Override
   public int hashCode() {
-    int result = (bypassSpecCache ? 1231 : 1237);
-    result = 31 * result + ((origClientState == null) ? 0 : origClientState.hashCode());
-    result = 31 * result + (proxiedContentRequest ? 1231 : 1237);
-    result = 31 * result + ((requestToken == null) ? 0 : requestToken.hashCode());
-    result = 31 * result + ((requestTokenSecret == null) ? 0 : requestTokenSecret.hashCode());
-    result = 31 * result + ((serviceName == null) ? 0 : serviceName.hashCode());
-    result = 31 * result + (signOwner ? 1231 : 1237);
-    result = 31 * result + (signViewer ? 1231 : 1237);
-    result = 31 * result + ((tokenName == null) ? 0 : tokenName.hashCode());
-    result = 31 * result + ((useToken == null) ? 0 : useToken.hashCode());
-    return result;
+      return Objects.hashCode(bypassSpecCache, origClientState, origClientState,
+          proxiedContentRequest, requestToken, requestTokenSecret, requestTokenSecret,
+          serviceName, serviceName, signOwner,
+          signViewer, tokenName, useToken);
   }
 
   @Override
@@ -384,11 +377,11 @@ public class OAuthArguments {
 
     OAuthArguments other = (OAuthArguments) obj;
     return (bypassSpecCache == other.bypassSpecCache
-        && StringUtils.equals(origClientState, other.origClientState)
+        && Objects.equal(origClientState, other.origClientState)
         && proxiedContentRequest == other.proxiedContentRequest
-        && StringUtils.equals(requestToken, other.requestToken)
-        && StringUtils.equals(requestTokenSecret, other.requestTokenSecret)
-        && StringUtils.equals(tokenName, other.tokenName)
+        && Objects.equal(requestToken, other.requestToken)
+        && Objects.equal(requestTokenSecret, other.requestTokenSecret)
+        && Objects.equal(tokenName, other.tokenName)
         && signViewer == other.signViewer
         && useToken == other.useToken);
   }

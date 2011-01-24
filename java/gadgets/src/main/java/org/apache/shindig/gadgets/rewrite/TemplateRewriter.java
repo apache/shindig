@@ -17,14 +17,15 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
+import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.JsonSerializer;
 import org.apache.shindig.common.logging.i18n.MessageKeys;
 import org.apache.shindig.common.uri.Uri;
@@ -307,14 +308,14 @@ public class TemplateRewriter implements GadgetRewriter {
         continue;
       }
       
-      String [] nameParts = StringUtils.splitPreserveAllTokens(template.getAttribute("tag"), ':');
+      Iterable<String> nameParts = Splitter.on(':').split(template.getAttribute("tag"));
       // At this time, we only support 
-      if (nameParts.length != 2) {
+      if (Iterables.size(nameParts) != 2) {
         continue;
       }
-      String namespaceUri = template.lookupNamespaceURI(nameParts[0]);      
+      String namespaceUri = template.lookupNamespaceURI(Iterables.get(nameParts, 0));
       if (namespaceUri != null) {
-        handlers.add(new TemplateBasedTagHandler(template, namespaceUri, nameParts[1]));
+        handlers.add(new TemplateBasedTagHandler(template, namespaceUri, Iterables.get(nameParts, 1)));
       }
     }
     

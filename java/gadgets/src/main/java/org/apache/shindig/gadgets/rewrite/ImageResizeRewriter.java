@@ -19,6 +19,8 @@
 package org.apache.shindig.gadgets.rewrite;
 
 import com.google.inject.Inject;
+
+import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 
 import org.apache.shindig.gadgets.Gadget;
@@ -129,7 +131,7 @@ public class ImageResizeRewriter extends DomWalker.Rewriter {
       if (!"".equals(imgElement.getAttribute("style"))) {
         String styleStr = imgElement.getAttribute("style");
 
-        for (String attr : styleStr.split(";")) {
+        for (String attr : Splitter.on(';').split(styleStr)) {
           String[] splits = attr.split(":");
           if (splits.length != 2) {
             continue;

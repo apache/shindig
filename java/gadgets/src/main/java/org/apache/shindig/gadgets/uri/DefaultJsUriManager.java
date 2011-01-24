@@ -18,20 +18,20 @@
  */
 package org.apache.shindig.gadgets.uri;
 
+import com.google.common.base.Joiner;
+import com.google.common.base.Splitter;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.GadgetException;
-import org.apache.shindig.gadgets.RenderingContext;
 import org.apache.shindig.gadgets.GadgetException.Code;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.uri.UriCommon.Param;
 
-import java.util.Arrays;
 import java.util.Collection;
 
 /**
@@ -163,11 +163,13 @@ public class DefaultJsUriManager implements JsUriManager {
   }
 
   static String addJsLibs(Collection<String> extern) {
-    return StringUtils.join(extern, JS_DELIMITER);
+    return Joiner.on(JS_DELIMITER).join(extern);
   }
 
   static Collection<String> getJsLibs(String path) {
-    return Arrays.asList(StringUtils.split(path, JS_DELIMITER));
+    return ImmutableList.copyOf(Splitter.on(JS_DELIMITER)
+            .trimResults()
+            .omitEmptyStrings().split(path));
   }
 
   private String getReqConfig(String container, String key) {

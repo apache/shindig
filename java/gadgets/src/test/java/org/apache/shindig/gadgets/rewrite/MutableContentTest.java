@@ -21,7 +21,6 @@ package org.apache.shindig.gadgets.rewrite;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.shindig.common.PropertiesModule;
-import org.apache.shindig.common.util.CharsetUtil;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
 import org.apache.shindig.gadgets.parse.ParseModule;
 
