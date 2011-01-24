@@ -1,5 +1,6 @@
 *~
 *.swp
+.idea
 
 # output of git svn show-ignore below
 # /
