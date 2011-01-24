@@ -33,7 +33,7 @@
 
 if (typeof wave == "undefined") {
   wave = {};
-};
+}
 
 if (typeof wave.ui == "undefined") {
 /**
@@ -41,7 +41,7 @@ if (typeof wave.ui == "undefined") {
  * look & feel inside a gadget.
  */
   wave.ui = {};
-};
+}
 
 wave.ui.BASE = 'http://wave-api.appspot.com/public/';
 
@@ -59,12 +59,12 @@ wave.ui.loadCss = function() {
     return;
   }
   wave.ui.cssLoaded = true;
-  var fileref = document.createElement("link")
-  fileref.setAttribute("rel", "stylesheet")
-  fileref.setAttribute("type", "text/css")
-  fileref.setAttribute("href", wave.ui.BASE + "wave.ui.css")
-  document.getElementsByTagName("head")[0].appendChild(fileref)
-}
+  var fileref = document.createElement("link");
+  fileref.setAttribute("rel", "stylesheet");
+  fileref.setAttribute("type", "text/css");
+  fileref.setAttribute("href", wave.ui.BASE + "wave.ui.css");
+  document.getElementsByTagName("head")[0].appendChild(fileref);
+};
 
 /**
  * Converts the passed in target into a wave-styled button.

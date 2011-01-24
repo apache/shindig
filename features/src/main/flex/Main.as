@@ -65,7 +65,7 @@ class Main {
         if ((to_origin === "*" || to_origin === my_origin) && target_id === channel_recv_id) {
           ExternalInterface.call("gadgets.rpctx.flash._receiveMessage", target_id, message, from_origin, to_origin);
         }
-      }
+      };
 
       ExternalInterface.addCallback("sendMessage_" + channel_recv_id, { }, function(message:String, to_origin:String) {
         if (!to_origin) to_origin = "*";

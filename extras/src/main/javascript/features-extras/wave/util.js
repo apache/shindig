@@ -29,7 +29,7 @@ wave.util.SPACES_ = '                                                 ';
 
 wave.util.toSpaces_ = function(tabs) {
   return wave.util.SPACES_.substring(0, tabs * 2);
-}
+};
 
 wave.util.isArray_ = function(obj) {
   try {

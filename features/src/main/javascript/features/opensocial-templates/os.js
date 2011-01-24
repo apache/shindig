@@ -38,7 +38,7 @@ os.defineBuiltinTags = function() {
       value = node.innerHTML;
     }
     
-    var parsedValue = gadgets.json.parse(value)
+    var parsedValue = gadgets.json.parse(value);
      
     if (parsedValue) {
       value = parsedValue;

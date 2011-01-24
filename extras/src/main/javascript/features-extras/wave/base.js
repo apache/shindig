@@ -103,7 +103,7 @@ wave.Mode = {
    * @desc The blip containing the gadget is in playback mode.
    */
   PLAYBACK: 4
-}
+};
 
 wave.API_PARAM_ = "wave";
 

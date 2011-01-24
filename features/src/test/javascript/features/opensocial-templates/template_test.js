@@ -148,8 +148,8 @@ function assertTemplateDomEquals(lhs, rhs) {
  *
  * @param {string} templateText The text of the inline template to evaluate
  * @param {string} output The expected output
- * @param {?Object} context The data context
- * @param {?Array<String>} namedTemplates Array of text of namedTemplates
+ * @param {Object=} context The data context
+ * @param {Array<String>=} namedTemplates Array of text of namedTemplates
  */
 function assertTemplateOutput(templateText, output, context,
     namedTemplates) {
@@ -706,7 +706,7 @@ function testOnAttachAttribute() {
 
 function testSpacesAmongTags() {
   var tryTemplateContent = function(templateText) {
-    var output = os.compileTemplateString(templateText).render();
+   var output = os.compileTemplateString(templateText).render();
     assertEquals('Hello world!', domutil.getVisibleTextTrim(output));
   };
 
@@ -737,7 +737,7 @@ function testVariablePrecedence() {
   var tryTemplateContent = function(templateText, data) {
     var output = os.compileTemplateString(templateText).render(data);
     assertEquals('Right', domutil.getVisibleTextTrim(output));
-  }
+  };
   os.Loader.loadContent('<Templates xmlns:os="uri:unused">' + 
     '<Template tag="os:msg">${Value}</Template></Templates>');
   

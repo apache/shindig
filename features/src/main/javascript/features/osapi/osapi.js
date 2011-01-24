@@ -53,7 +53,7 @@
             feralCallback.call(that, batchResult[method]);
           }
         });
-      }
+      };
       if (has___) {
         ___.markInnocent(boundCall.execute, 'execute');
       }

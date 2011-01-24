@@ -422,7 +422,7 @@ shindig.container.ContainerRender.WIDTH = 'width';
 
 /**
  * Add list of gadgets to preload list
- * @param {Object} hash of gadgets data
+ * @param {Object} response hash of gadgets data
  * @private
  */
 shindig.container.Container.prototype.addPreloadGadgets_ = function(response) {
@@ -437,7 +437,7 @@ shindig.container.Container.prototype.addPreloadGadgets_ = function(response) {
       }
     }
   }
-}
+};
 
 
 /**
@@ -457,7 +457,7 @@ shindig.container.Container.prototype.preloadFromConfig_ = function(config) {
   this.service_.addGadgetMetadatas(gadgets, refTime);
   this.service_.addGadgetTokens(tokens, refTime);
   this.addPreloadGadgets_(gadgets);
-}
+};
 
 
 /**

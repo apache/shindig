@@ -162,7 +162,7 @@ ServiceTest.prototype.testUpdateResponse = function() {
   service.addGadgetMetadatas({'id' : data}, 104);
   this.assertEquals("id", data.url);
   this.assertEquals(121, data.localExpireTimeMs);
-}
+};
 
 ServiceTest.prototype.testAddToCache = function() {
   var service = new shindig.container.Service();
@@ -176,6 +176,6 @@ ServiceTest.prototype.testAddToCache = function() {
   
   this.assertTrue(122, cache["id1"].localExpireTimeMs);
   this.assertTrue(152, cache["id2"].localExpireTimeMs);
-}
+};
   
 

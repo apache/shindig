@@ -239,7 +239,7 @@ gadgets.io = function() {
    * @param {function(string,function(Object),Object,Object)}
    *     processResponseFunction The function that should process the
    *     response from the sever before calling the callback.
-   * @param {string=} opt_contentType - Optional content type defaults to
+   * @param {string=} opt_headers - Optional headers including a Content-Type that defaults to
    *     'application/x-www-form-urlencoded'.
    */
   function makeXhrRequest(realUrl, proxyUrl, callback, paramData, method,
@@ -426,7 +426,7 @@ gadgets.io = function() {
       var proxyUrl = config.jsonProxyUrl.replace('%host%', document.location.host);
 
       // FIXME -- processResponse is not used in call
-      if (!respondWithPreload(paramData, params, callback, processResponse)) {
+      if (!respondWithPreload(paramData, params, callback)) {
         if (httpMethod === 'GET' && refreshInterval > 0) {
           // this content should be cached
           // Add paramData to the URL

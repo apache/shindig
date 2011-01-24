@@ -79,7 +79,7 @@ DataContextTest.prototype.testRegisterListener = function() {
   listenerCalledWithKey = null;
   context.putDataSet('key', 3);
   this.assertEquals('key', listenerCalledWithKey[0]);
-}
+};
 
 /**
  * Test registerListener()
@@ -104,7 +104,7 @@ DataContextTest.prototype.testRegisterListenerWithArray = function() {
 
   context.putDataSet('aone', 3);
   this.assertEquals('aone', listenerCalledWithKey[0]);
-}
+};
 
 /**
  * Test registerListener() with '*'
@@ -126,7 +126,7 @@ DataContextTest.prototype.testRegisterListenerWithStar = function() {
 
   context.putDataSet('two', 2);
   this.assertEquals('two', listenerCalledWithKey[0]);
-}
+};
 
 /**
  * Test getData()
@@ -142,7 +142,7 @@ DataContextTest.prototype.testGetData = function() {
   var data = context.getData();
   data['key'] = 'ball';
   this.assertEquals('value2', context.getDataSet('key'));
-}
+};
 
 /**
  * Test putDataSets()
@@ -154,7 +154,7 @@ DataContextTest.prototype.testPutDataSets = function() {
   var listener = function(keys) {
     counter++;
     passedKeys = keys;
-  }
+  };
   context.registerListener(['sets1', 'sets2'], listener);
   context.putDataSets({ sets1: 'a', sets2: 'b' });
   this.assertEquals('a', context.getDataSet('sets1'));
@@ -165,7 +165,7 @@ DataContextTest.prototype.testPutDataSets = function() {
   
   // Test that listener was passed both keys.
   this.assertEquals(2, passedKeys.length);
-}
+};
 
 /**
  * Test registerOneTimeListener_()
@@ -175,10 +175,10 @@ DataContextTest.prototype.testOneTimeListener = function() {
   var counter = 0;
   var listener = function(keys) {
     counter++;
-  }
+  };
   context.registerOneTimeListener_('oneTime', listener);
   context.putDataSet('oneTime', 'foo');
   this.assertEquals(1, counter);
   context.putDataSet('oneTime', 'bar');
   this.assertEquals(1, counter);
-}
+};

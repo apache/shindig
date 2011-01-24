@@ -33,7 +33,7 @@ gadgets.util.getUrlParameters = function() {
   params[waveParamName] = true;
   params.hasOwnProperty = function(key) {
     return !!this[key];
-  }
+  };
   return params;
 };
 
