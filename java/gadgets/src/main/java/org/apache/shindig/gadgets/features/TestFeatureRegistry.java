@@ -21,6 +21,8 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
 
+import org.apache.shindig.common.cache.Cache;
+import org.apache.shindig.common.cache.CacheProvider;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.GadgetException;
 
@@ -28,6 +30,7 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.MapMaker;
 import com.google.common.collect.Maps;
 
 import java.util.List;
@@ -57,6 +60,7 @@ public class TestFeatureRegistry extends FeatureRegistry {
     public TestFeatureRegistry build(String useFeature) throws GadgetException {
       return new TestFeatureRegistry(
           new TestFeatureResourceLoader(resourceMock),
+          new TestCacheProvider(),
           useFeature);
     }
     
@@ -87,15 +91,27 @@ public class TestFeatureRegistry extends FeatureRegistry {
   
   /* Actual class contents here */
   private final TestFeatureResourceLoader resourceLoader;
+  private final TestCacheProvider cacheProvider;
   private TestFeatureRegistry(
       TestFeatureResourceLoader resourceLoader,
+      TestCacheProvider cacheProvider,
       String featureFiles) throws GadgetException {
-    super(resourceLoader, ImmutableList.<String>of(featureFiles));
+    super(resourceLoader, cacheProvider, ImmutableList.<String>of(featureFiles));
     this.resourceLoader = resourceLoader;
+    this.cacheProvider = cacheProvider;
   }
   
   public Map<String, String> getLastAttribs() {
     return Collections.unmodifiableMap(resourceLoader.lastAttribs);
+  }
+  
+  @SuppressWarnings("unchecked")
+  public Cache<String, LookupResult> getLookupCache() {
+    Cache<?, ?> cacheEntry = cacheProvider.caches.get(FeatureRegistry.CACHE_NAME);
+    if (cacheEntry == null) {
+      return null;
+    }
+    return (Cache<String, LookupResult>)cacheEntry;
   }
   
   private static class TestFeatureResourceLoader extends FeatureResourceLoader {
@@ -140,5 +156,46 @@ public class TestFeatureRegistry extends FeatureRegistry {
       // Resource loading doesn't support leading '/'
       return key.startsWith("/") ? key.substring(1) : key;
     }
+  }
+  
+  // TODO: generalize the below into common classes
+  private static class TestCacheProvider implements CacheProvider {
+    private final Map<String, Cache<?, ?>> caches = new MapMaker().makeMap();
+
+    @SuppressWarnings("unchecked")
+    public <K, V> Cache<K, V> createCache(String name) {
+      Cache<K, V> cache = (Cache<K, V>)caches.get(name);
+      if (cache == null) {
+        cache = new MapCache<K, V>();
+        caches.put(name, cache);
+      }
+      return cache;
+    }
+  }
+  
+  private static class MapCache<K, V> implements Cache<K, V> {
+    private final Map<K, V> cache = new MapMaker().makeMap();
+
+    public void addElement(K key, V value) {
+      cache.put(key, value);
+    }
+
+    public long getCapacity() {
+      // Memory-bounded.
+      return Integer.MAX_VALUE;
+    }
+
+    public V getElement(K key) {
+      return cache.get(key);
+    }
+
+    public long getSize() {
+      return cache.size();
+    }
+
+    public V removeElement(K key) {
+      return cache.get(key);
+    }
+    
   }
 }

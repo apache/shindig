@@ -18,26 +18,26 @@
 package org.apache.shindig.gadgets.features;
 
 import com.google.common.base.Joiner;
-import com.google.common.base.Objects;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import com.google.common.collect.MapMaker;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.Pair;
+import org.apache.shindig.common.cache.Cache;
+import org.apache.shindig.common.cache.CacheProvider;
 import org.apache.shindig.common.logging.i18n.MessageKeys;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.common.util.ResourceLoader;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
-import org.apache.shindig.gadgets.RenderingContext;
 
 import java.io.File;
 import java.io.IOException;
@@ -59,6 +59,7 @@ import java.util.logging.Level;
  */
 @Singleton
 public class FeatureRegistry {
+  public static final String CACHE_NAME = "FeatureJsCache";
   public static final String RESOURCE_SCHEME = "res";
   public static final String FILE_SCHEME = "file";
   public static final Splitter CRLF_SPLITTER = Splitter.onPattern("[\r\n]+").trimResults().omitEmptyStrings();
@@ -68,7 +69,7 @@ public class FeatureRegistry {
   private static final Logger LOG = Logger.getLogger(classname, MessageKeys.MESSAGES);
 
   // Map keyed by FeatureNode object created as a lookup for transitive feature deps.
-  private final Map<FeatureCacheKey, LookupResult> cache = new MapMaker().makeMap();
+  private final Cache<String, LookupResult> cache;
 
   private final FeatureParser parser;
   private final FeatureResourceLoader resourceLoader;
@@ -86,6 +87,7 @@ public class FeatureRegistry {
  */
   @Inject
   public FeatureRegistry(FeatureResourceLoader resourceLoader,
+                         CacheProvider cacheProvider,
                          @Named("org.apache.shindig.features") List<String> features)
       throws GadgetException {
     this.parser = new FeatureParser();
@@ -96,9 +98,8 @@ public class FeatureRegistry {
     // Connect the dependency graph made up of all features and validate there
     // are no circular deps.
     connectDependencyGraph();
-
-    // Clear caches.
-    cache.clear();
+    
+    this.cache = cacheProvider.createCache(CACHE_NAME);
   }
 
   /**
@@ -193,10 +194,13 @@ public class FeatureRegistry {
   public LookupResult getFeatureResources(
       GadgetContext ctx, Collection<String> needed, List<String> unsupported, boolean transitive) {
     boolean useCache = (transitive && !ctx.getIgnoreCache());
-    FeatureCacheKey cacheKey = new FeatureCacheKey(needed, ctx, unsupported != null);
+    String cacheKey = makeCacheKey(needed, ctx, unsupported);
 
-    if (useCache && cache.containsKey(cacheKey)) {
-      return cache.get(cacheKey);
+    if (useCache) {
+      LookupResult lookup = cache.getElement(cacheKey);
+      if (lookup != null) {
+        return lookup;
+      }
     }
 
     List<FeatureNode> featureNodes = transitive ?
@@ -233,7 +237,7 @@ public class FeatureRegistry {
 
     LookupResult result = new LookupResult(bundlesBuilder.build());
     if (useCache && (unsupported == null || unsupported.isEmpty())) {
-      cache.put(cacheKey, result);
+      cache.addElement(cacheKey, result);
     }
 
     return result;
@@ -477,6 +481,16 @@ public class FeatureRegistry {
     featureMapBuilder.put(parsed.getName(),
         new FeatureNode(parsed.getName(), bundles, parsed.getDeps()));
   }
+  
+  protected String makeCacheKey(Collection<String> needed, GadgetContext ctx, List<String> unsupported) {
+    List<String> neededList = Lists.newArrayList(needed);
+    Collections.sort(neededList);
+    return new StringBuilder().append(StringUtils.join(neededList, ":"))
+        .append("|").append(ctx.getRenderingContext().name())
+        .append("|").append(ctx.getContainer())
+        .append("|").append(unsupported != null)
+        .toString();
+  }
 
   private Map<String, String> getResourceAttribs(Map<String, String> bundleAttribs,
       Map<String, String> resourceAttribs) {
@@ -507,7 +521,7 @@ public class FeatureRegistry {
     private final List<FeatureBundle> bundles;
     private final List<FeatureResource> allResources;
 
-    private LookupResult(List<FeatureBundle> bundles) {
+    public LookupResult(List<FeatureBundle> bundles) {
       this.bundles = bundles;
       ImmutableList.Builder<FeatureResource> resourcesBuilder = ImmutableList.builder();
       for (FeatureBundle bundle : getBundles()) {
@@ -529,8 +543,8 @@ public class FeatureRegistry {
     private final FeatureParser.ParsedFeature.Bundle bundle;
     private final List<FeatureResource> resources;
 
-    private FeatureBundle(FeatureParser.ParsedFeature.Bundle bundle,
-                          List<FeatureResource> resources) {
+    public FeatureBundle(FeatureParser.ParsedFeature.Bundle bundle,
+                         List<FeatureResource> resources) {
       this.bundle = bundle;
       this.resources = ImmutableList.copyOf(resources);
     }
@@ -626,41 +640,6 @@ public class FeatureRegistry {
 
     public List<FeatureNode> getTransitiveDeps() {
       return this.transitiveDeps;
-    }
-  }
-
-  private static final class FeatureCacheKey {
-    private final Collection<String> needed;
-    private final RenderingContext rCtx;
-    private final String container;
-    private final boolean useUnsupported;
-
-    private FeatureCacheKey(Collection<String> needed, GadgetContext ctx, boolean useUnsupported) {
-      this.needed = needed;
-      this.rCtx = ctx.getRenderingContext();
-      this.container = ctx.getContainer();
-      this.useUnsupported = useUnsupported;
-    }
-
-    @Override
-    public boolean equals(Object other) {
-      if (other == this) {
-        return true;
-      }
-      if (!(other instanceof FeatureCacheKey)) {
-        return false;
-      }
-      FeatureCacheKey otherKey = (FeatureCacheKey)other;
-      return otherKey.needed.equals(this.needed) &&
-             otherKey.rCtx == this.rCtx &&
-             otherKey.container.equals(this.container) &&
-             otherKey.useUnsupported == this.useUnsupported;
-    }
-
-    @Override
-    public int hashCode() {
-      // Doesn't need to be good, just cheap and consistent.
-      return Objects.hashCode(needed, rCtx, container, useUnsupported);
     }
   }
 }
