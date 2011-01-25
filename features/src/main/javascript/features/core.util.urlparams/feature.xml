@@ -21,8 +21,14 @@
   <dependency>globals</dependency>
   <gadget>
     <script src="urlparams.js"/>
+    <api>
+      <exports type="js">gadgets.util.getUrlParameters</exports>
+    </api>
   </gadget>
   <container>
     <script src="urlparams.js"/>
+    <api>
+      <exports type="js">gadgets.util.getUrlParameters</exports>
+    </api>
   </container>
 </feature>

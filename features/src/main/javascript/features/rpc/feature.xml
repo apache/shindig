@@ -40,6 +40,26 @@ useLegacyProtocol: Boolean
     <script src="rmr.transport.js"/>
     <script src="ifpc.transport.js"/>
     <script src="rpc.js"/>
+    <api>
+      <exports type="js">gadgets.rpc.config</exports>
+      <exports type="js">gadgets.rpc.register</exports>
+      <exports type="js">gadgets.rpc.unregister</exports>
+      <exports type="js">gadgets.rpc.registerDefault</exports>
+      <exports type="js">gadgets.rpc.unregisterDefault</exports>
+      <exports type="js">gadgets.rpc.forceParentVerifiable</exports>
+      <exports type="js">gadgets.rpc.call</exports>
+      <exports type="js">gadgets.rpc.getRelayUrl</exports>
+      <exports type="js">gadgets.rpc.setRelayUrl</exports>
+      <exports type="js">gadgets.rpc.setAuthToken</exports>
+      <exports type="js">gadgets.rpc.setupReceiver</exports>
+      <exports type="js">gadgets.rpc.getAuthToken</exports>
+      <exports type="js">gadgets.rpc.removeReceiver</exports>
+      <exports type="js">gadgets.rpc.getRelayChannel</exports>
+      <exports type="js">gadgets.rpc.receive</exports>
+      <exports type="js">gadgets.rpc.receiveSameDomain</exports>
+      <exports type="js">gadgets.rpc.getOrigin</exports>
+      <exports type="js">gadgets.rpc.getReceiverOrigin</exports>
+    </api>
   </gadget>
   <container>
     <script src="wpm.transport.js"/>
@@ -48,5 +68,25 @@ useLegacyProtocol: Boolean
     <script src="rmr.transport.js"/>
     <script src="ifpc.transport.js"/>
     <script src="rpc.js"/>
+    <api>
+      <exports type="js">gadgets.rpc.config</exports>
+      <exports type="js">gadgets.rpc.register</exports>
+      <exports type="js">gadgets.rpc.unregister</exports>
+      <exports type="js">gadgets.rpc.registerDefault</exports>
+      <exports type="js">gadgets.rpc.unregisterDefault</exports>
+      <exports type="js">gadgets.rpc.forceParentVerifiable</exports>
+      <exports type="js">gadgets.rpc.call</exports>
+      <exports type="js">gadgets.rpc.getRelayUrl</exports>
+      <exports type="js">gadgets.rpc.setRelayUrl</exports>
+      <exports type="js">gadgets.rpc.setAuthToken</exports>
+      <exports type="js">gadgets.rpc.setupReceiver</exports>
+      <exports type="js">gadgets.rpc.getAuthToken</exports>
+      <exports type="js">gadgets.rpc.removeReceiver</exports>
+      <exports type="js">gadgets.rpc.getRelayChannel</exports>
+      <exports type="js">gadgets.rpc.receive</exports>
+      <exports type="js">gadgets.rpc.receiveSameDomain</exports>
+      <exports type="js">gadgets.rpc.getOrigin</exports>
+      <exports type="js">gadgets.rpc.getReceiverOrigin</exports>
+    </api>
   </container>
 </feature>

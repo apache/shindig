@@ -22,8 +22,14 @@ specific language governing permissions and limitations under the License.
   <dependency>dynamic-height.util</dependency>
   <gadget>
     <script src="dynamic-height-height.js"/>
+    <apis>
+      <exports type="js">gadgets.window.getHeight</exports>
+    </apis>
   </gadget>
   <container>
     <script src="dynamic-height-height.js"/>
+    <apis>
+      <exports type="js">gadgets.window.getHeight</exports>
+    </apis>
   </container>
 </feature>
