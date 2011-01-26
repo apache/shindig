@@ -20,6 +20,9 @@
 
 class ContentFilesServlet extends FilesServlet
 {
+  /**
+   * @return string
+   */
   protected function getPath() {
     return Config::get('javascript_path');
   }

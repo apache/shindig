@@ -56,7 +56,7 @@ if (Config::get('debug')) {
 // To load these, we scan our entire directory structure
 function __autoload($className) {
   $locations = array('src/common', 'src/common/sample', 'src/gadgets', 'src/gadgets/servlet', 
-      'src/gadgets/oauth', 'src/gadgets/sample', 'src/social', 'src/social/servlet', 
+      'src/gadgets/oauth', 'src/gadgets/render', 'src/gadgets/sample', 'src/social', 'src/social/servlet',
       'src/social/service', 'src/social/opensocial', 'src/social/model', 'src/social/spi', 
       'src/social/converters', 'src/social/oauth', 'src/social/sample');
   $extension_class_paths = Config::get('extension_class_paths');

@@ -20,6 +20,9 @@
 
 class ResourcesFilesServlet extends FilesServlet
 {
+  /**
+   * @return string
+   */
   protected function getPath() {
     return Config::get('resources_path');
   }

@@ -39,8 +39,15 @@ require_once 'src/gadgets/rewrite/GadgetRewriter.php';
 require_once 'src/gadgets/rewrite/DomRewriter.php';
 
 class GadgetRenderingServlet extends HttpServlet {
+  /**
+   *
+   * @var GadgetContext
+   */
   protected $context;
 
+  /**
+   * @throws GadgetException
+   */
   public function doGet() {
     try {
       if (empty($_GET['url'])) {
@@ -70,23 +77,58 @@ class GadgetRenderingServlet extends HttpServlet {
     }
   }
 
+  /**
+   *
+   * @param Gadget $gadget
+   * @throws GadgetException
+   */
   protected function renderGadget(Gadget $gadget) {
     $view = $gadget->getView($this->context->getView());
-    if ($view['type'] == 'URL') {
-      require_once "src/gadgets/render/GadgetUrlRenderer.php";
-      $gadgetRenderer = new GadgetUrlRenderer($this->context);
-    } elseif ($view['type'] == 'HTML' && empty($view['href'])) {
-      require_once "src/gadgets/render/GadgetHtmlRenderer.php";
-      $gadgetRenderer = new GadgetHtmlRenderer($this->context);
-    } elseif (empty($view['type']) || ! empty($view['href'])) {
-      require_once "src/gadgets/render/GadgetHrefRenderer.php";
-      $gadgetRenderer = new GadgetHrefRenderer($this->context);
-    } else {
-      throw new GadgetException("Invalid view type");
+    $renderClasses = Config::get('gadget_renderer');
+
+    foreach ($renderClasses as $renderClass => $constraints) {
+      // if current view meets the configurated renderer constraints
+      // render the gadget and stop checking
+      if ($this->checkConstraints($view, $constraints)) {
+        $gadgetRenderer = new $renderClass($this->context);
+        $gadgetRenderer->renderGadget($gadget, $view);
+        return;
+      }
     }
-    $gadgetRenderer->renderGadget($gadget, $view);
+
+    throw new GadgetException("Invalid view type");   
   }
 
+  /**
+   * checks if the current view meets the given gadget renderer constraints
+   *
+   * constraint format:
+   * 
+   * array(
+   *   attributeName => expectedValue or boolean to indicate if the attribute is 
+   *                      required or not
+   * )
+   *
+   * @param array $view
+   * @param array $constraints
+   * @return boolean
+   */
+  public function checkConstraints($view, $constraints) {
+    foreach ($constraints as $attribute => $expected) {
+      if ($expected === false && isset($view[$attribute]) && $view[$attribute]) {
+        return false;
+      } else if ($expected === true && !(isset($view[$attribute]) && $view[$attribute])) {
+        return false;
+      } else if (! is_bool($expected) && $view[$attribute] !== $expected) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /**
+   * 
+   */
   protected function setCachingHeaders() {
     $this->setContentType("text/html; charset=UTF-8");
     if ($this->context->getIgnoreCache()) {
@@ -101,6 +143,10 @@ class GadgetRenderingServlet extends HttpServlet {
     }
   }
 
+  /**
+   *
+   * @param Exception $e
+   */
   protected function showError($e) {
     header("HTTP/1.0 400 Bad Request", true, 400);
     echo "<html><body>";

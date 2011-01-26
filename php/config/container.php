@@ -184,6 +184,16 @@ $shindigConfig = array(
     'mediaitems' => array('class' => 'InputMediaItemsConverter', 'targetField' => 'mediaItem'),
   ),
  
+  // available gadget renderer with the class as key and the needed attributes in the
+  // view's content block to choose this renderer. If constraint's value is a string
+  // the attribute value has to match this string, if it's a boolean the attribute
+  // just has to be available or not available
+  'gadget_renderer' => array(
+    'GadgetHtmlRenderer' => array('type' => 'HTML', 'href' => false),
+    'GadgetHrefRenderer' => array('type' => 'HTML', 'href' => true),
+    'GadgetUrlRenderer'  => array('type' => 'URL'),
+    //'GadgetUrlAuthRenderer'  => array('type' => 'URL'),
+  ),
  
   'gadget_class' => 'Gadget',
   'gadget_context_class' => 'GadgetContext',
@@ -215,6 +225,8 @@ $shindigConfig = array(
   'media_item_service' => 'JsonDbOpensocialService',
 
   // Also scan these directories when looking for <Class>.php files. You can include multiple paths by seperating them with a ,
+  // To enable classes in the extras package you have to add this class path
+  // 'extension_class_paths' => '../extras/src/main/php/extras',
   'extension_class_paths' => '',
 
   'userpref_param_prefix' => 'up_',
