@@ -22,6 +22,8 @@
  */
 (function() {
 
+  var useOAuth2;
+  
   /**
    * Called by a batch to execute all requests
    * @param {Object} requests
@@ -63,13 +65,19 @@
     var url = this.name;
     var token = shindig.auth.getSecurityToken();
     if (token) {
-      headers['Authorization'] = 'OAuth2 ' + token;
+      if (useOAuth2) {
+        headers['Authorization'] = 'OAuth2 ' + token;
+      } else {
+        url += '?st=';
+        url += encodeURIComponent(token);
+      }
     }
     gadgets.io.makeNonProxiedRequest(url, processResponse, request, headers);
   }
 
   function init(config) {
     var services = config['osapi.services'];
+    useOAuth2 = config['osapi.useOAuth2'];
     if (services) {
       // Iterate over the defined services, extract the http endpoints and
       // create a transport per-endpoint

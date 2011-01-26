@@ -50,6 +50,9 @@ var JsonRpcContainer = function(configParams) {
   this.environment_ = new opensocial.Environment(configParams.domain,
       supportedFieldsMap);
 
+  // Enable usage of Auth2 token passing in rpc
+  this.useOAuth2 = configParams.useOAuth2;
+
   this.securityToken_ = shindig.auth.getSecurityToken();
 
   gadgets.rpc.register('shindig.requestShareApp_callback',
@@ -218,13 +221,18 @@ var JsonRpcRequestItem = function(rpc, opt_processData) {
     };
 
     var headers = {'Content-Type':'application/json'};
-
+    var url = [this.path_];
+    
     var token = shindig.auth.getSecurityToken();
     if (token) {
-      headers['Authorization'] = 'OAuth2 ' + token;
+      if (this.useOAuth2) {
+        headers['Authorization'] = 'OAuth2 ' + token;
+      } else {
+        url.push('?st=', encodeURIComponent(token));
+      }
     }
 
-    this.sendRequest(this.path_, sendResponse, makeRequestParams, headers);
+    this.sendRequest(url.join(''), sendResponse, makeRequestParams, headers);
   };
 
   JsonRpcContainer.prototype.sendRequest = function(relativeUrl, callback, params, headers) {
@@ -457,12 +465,17 @@ var JsonRpcRequestItem = function(rpc, opt_processData) {
     };
 
     var headers = {'Content-Type': 'application/json'};
+    var url = [this.invalidatePath_];
     var token = shindig.auth.getSecurityToken();
     if (token) {
-      headers['Authorization'] = 'OAuth2 ' + token;
+      if (this.useOAuth2) {
+        headers['Authorization'] = 'OAuth2 ' + token;
+      } else {
+        url.push('?st=', encodeURIComponent(token));
+      }
     }
 
-    this.sendRequest(this.invalidatePath_, null, makeRequestParams, headers);
+    this.sendRequest(url.join(''), null, makeRequestParams, headers);
   };
 
 })();
