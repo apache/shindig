@@ -28,6 +28,7 @@ import org.apache.shindig.gadgets.RenderingContext;
 import org.apache.shindig.gadgets.uri.UriCommon.Param;
 
 import com.google.common.base.Objects;
+import com.google.common.collect.ImmutableList;
 
 /**
  * Interface defining methods used to generate Uris for the /js servlet.
@@ -49,12 +50,14 @@ public interface JsUriManager {
   JsUri processExternJsUri(Uri uri) throws GadgetException;
 
   public static class JsUri extends ProxyUriBase {
+    private final static Collection<String> EMPTY_COLL = ImmutableList.<String>of();
     private final Collection<String> libs;
+    private final Collection<String> loadedLibs;
     private final String onload;
     private final boolean jsload;
     private final RenderingContext context;
 
-    public JsUri(UriStatus status, Uri origUri, Collection<String> libs) {
+    public JsUri(UriStatus status, Uri origUri, Collection<String> libs, Collection<String> have) {
       super(status, origUri);
       if (origUri != null) {
         String param = origUri.getQueryParameter(Param.CONTAINER_MODE.getKey());
@@ -67,10 +70,11 @@ public interface JsUriManager {
         this.onload = null;
       }
       this.libs = libs;
+      this.loadedLibs = have;
     }
 
-    public JsUri(UriStatus status, Collection<String> libs) {
-      this(status, null, libs);
+    public JsUri(UriStatus status) {
+      this(status, null, EMPTY_COLL, EMPTY_COLL);
     }
 
     public JsUri(UriStatus status, Collection<String> libs, RenderingContext context,
@@ -80,6 +84,7 @@ public interface JsUriManager {
       this.onload = onload;
       this.jsload = jsload;
       this.libs = libs;
+      this.loadedLibs = EMPTY_COLL;
     }
 
     public JsUri(Gadget gadget, Collection<String> libs) {
@@ -88,6 +93,7 @@ public interface JsUriManager {
       this.jsload = false;
       this.context = RenderingContext.GADGET;
       this.libs = libs;
+      this.loadedLibs = EMPTY_COLL;
     }
 
     public JsUri(Integer refresh, boolean debug, boolean noCache, String container, String gadget,
@@ -97,10 +103,20 @@ public interface JsUriManager {
       this.jsload = jsload;
       this.context = context;
       this.libs = libs;
+      this.loadedLibs = EMPTY_COLL;
     }
 
     public Collection<String> getLibs() {
-      return Collections.unmodifiableCollection(libs);
+      return nonNullLibs(libs);
+    }
+    
+    public Collection<String> getLoadedLibs() {
+      return nonNullLibs(loadedLibs);
+    }
+    
+    private Collection<String> nonNullLibs(Collection<String> in) {
+      in = in != null ? in : EMPTY_COLL;
+      return Collections.unmodifiableCollection(in);
     }
 
     public RenderingContext getContext() {
@@ -126,6 +142,7 @@ public interface JsUriManager {
       JsUri objUri = (JsUri) obj;
       return (super.equals(obj)
           && Objects.equal(this.libs, objUri.libs)
+          && Objects.equal(this.loadedLibs, objUri.loadedLibs)
           && Objects.equal(this.onload, objUri.onload)
           && Objects.equal(this.jsload, objUri.jsload)
           && Objects.equal(this.context, objUri.context));

@@ -48,6 +48,8 @@ import com.google.inject.Singleton;
  */
 @Singleton
 public class JsHandler {
+  private static final Collection<String> EMPTY_SET = Sets.newHashSet();
+  
   protected final FeatureRegistry registry;
   protected final ContainerConfig containerConfig;
   protected final Map<String, ConfigContributor> configContributors;
@@ -87,6 +89,13 @@ public class JsHandler {
     boolean isProxyCacheable = true;
     
     FeatureRegistry.LookupResult lookup = registry.getFeatureResources(ctx, needed, null);
+    
+    // Quick-and-dirty implementation of incremental JS loading.
+    Collection<String> alreadyLoaded = EMPTY_SET;
+    Collection<String> alreadyHaveLibs = jsUri.getLoadedLibs();
+    if (alreadyHaveLibs.size() > 0) {
+      alreadyLoaded = registry.getFeatures(alreadyHaveLibs);
+    }
 
     // Collate all JS desired for the current request.
     StringBuilder jsData = new StringBuilder();
@@ -94,6 +103,7 @@ public class JsHandler {
     boolean doCompile = !jsUri.isDebug() && shouldUseCompiler(jsUri);
     Set<String> everythingExported = Sets.newHashSet();
     for (FeatureRegistry.FeatureBundle bundle : lookup.getBundles()) {
+      if (alreadyLoaded.contains(bundle.getName())) continue;
       for (FeatureResource featureResource : bundle.getResources()) {
         String content = jsUri.isDebug() || doCompile
            ? featureResource.getDebugContent() : featureResource.getContent();

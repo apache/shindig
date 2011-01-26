@@ -40,7 +40,7 @@ import java.util.Collection;
 public class DefaultJsUriManager implements JsUriManager {
   static final String JS_HOST_PARAM = "gadgets.uri.js.host";
   static final String JS_PATH_PARAM = "gadgets.uri.js.path";
-  static final JsUri INVALID_URI = new JsUri(UriStatus.BAD_URI, Lists.<String>newArrayList());
+  static final JsUri INVALID_URI = new JsUri(UriStatus.BAD_URI);
   protected static final String JS_SUFFIX = ".js";
   protected static final String JS_DELIMITER = ":";
 
@@ -152,6 +152,11 @@ public class DefaultJsUriManager implements JsUriManager {
     }
 
     Collection<String> libs = getJsLibs(path);
+    String haveParam = uri.getQueryParameter(Param.ALREADY_HAVE.getKey());
+    if (haveParam == null) {
+      haveParam = "";
+    }
+    Collection<String> have = getJsLibs(haveParam);
     UriStatus status = UriStatus.VALID_UNVERSIONED;
     String version = uri.getQueryParameter(Param.VERSION.getKey());
     if (version != null && versioner != null) {
@@ -159,7 +164,7 @@ public class DefaultJsUriManager implements JsUriManager {
       status = versioner.validate(gadgetParam, container, libs, version);
     }
 
-    return new JsUri(status, uri, libs);
+    return new JsUri(status, uri, libs, have);
   }
 
   static String addJsLibs(Collection<String> extern) {

@@ -37,49 +37,53 @@ import java.util.List;
 public class JsUriManagerTest extends UriManagerTestBase {
   private static final UriStatus STATUS = UriStatus.VALID_UNVERSIONED;
   private static final List<String> LIBS = Lists.newArrayList("feat1", "feat2");
+  private static final List<String> HAVE = Lists.newArrayList("have1", "have2");
   private static final String CONTAINER_VALUE = "ig";
   private static final String ONLOAD_VALUE = "ol";
 
   @Test
   public void newJsUriWithOriginalUri() throws Exception {
     UriBuilder builder = newTestUriBuilder(RenderingContext.CONTAINER);
-    JsUriManager.JsUri jsUri = new JsUriManager.JsUri(STATUS, builder.toUri(), LIBS);
+    JsUriManager.JsUri jsUri = new JsUriManager.JsUri(STATUS, builder.toUri(), LIBS, HAVE);
     assertEquals(RenderingContext.CONTAINER, jsUri.getContext());
     assertEquals(CONTAINER_VALUE, jsUri.getContainer());
     assertTrue(jsUri.isJsload());
     assertTrue(jsUri.isNoCache());
     assertEquals(ONLOAD_VALUE, jsUri.getOnload());
     assertEquals(LIBS, Lists.newArrayList(jsUri.getLibs()));
+    assertEquals(HAVE, Lists.newArrayList(jsUri.getLoadedLibs()));
   }
 
   @Test
   public void newJsUriWithConfiguredGadgetContext() throws Exception {
     UriBuilder builder = newTestUriBuilder(RenderingContext.CONFIGURED_GADGET);
-    JsUriManager.JsUri jsUri = new JsUriManager.JsUri(STATUS, builder.toUri(), LIBS);
+    JsUriManager.JsUri jsUri = new JsUriManager.JsUri(STATUS, builder.toUri(), LIBS, HAVE);
     assertEquals(RenderingContext.CONFIGURED_GADGET, jsUri.getContext());
     assertEquals(CONTAINER_VALUE, jsUri.getContainer());
     assertTrue(jsUri.isJsload());
     assertTrue(jsUri.isNoCache());
     assertEquals(ONLOAD_VALUE, jsUri.getOnload());
     assertEquals(LIBS, Lists.newArrayList(jsUri.getLibs()));
+    assertEquals(HAVE, Lists.newArrayList(jsUri.getLoadedLibs()));
   }
 
   @Test
   public void newJsUriWithEmptyOriginalUri() throws Exception {
     JsUriManager.JsUri jsUri = new JsUriManager.JsUri(STATUS, null,
-        Collections.<String>emptyList()); // Null URI.
+        Collections.<String>emptyList(), null); // Null URI.
     assertEquals(RenderingContext.GADGET, jsUri.getContext());
     assertEquals(ContainerConfig.DEFAULT_CONTAINER, jsUri.getContainer());
     assertFalse(jsUri.isJsload());
     assertFalse(jsUri.isNoCache());
     assertNull(jsUri.getOnload());
     assertTrue(jsUri.getLibs().isEmpty());
+    assertTrue(jsUri.getLoadedLibs().isEmpty());
   }
 
   private UriBuilder newTestUriBuilder(RenderingContext context) {
     UriBuilder builder = new UriBuilder();
     builder.setScheme("http");
-    builder.setAuthority("localohst");
+    builder.setAuthority("localhost");
     builder.setPath("/gadgets/js/feature.js");
     builder.addQueryParameter(Param.CONTAINER.getKey(), CONTAINER_VALUE);
     builder.addQueryParameter(Param.CONTAINER_MODE.getKey(), context.getParamValue());
