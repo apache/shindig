@@ -79,6 +79,9 @@ public class GadgetException extends Exception {
 
     // Signed fetch
     REQUEST_SIGNING_FAILURE,
+    
+    // Error in the JavaScript processing pipeline
+    JS_PROCESSING_ERROR,
   }
 
   private final Code code;

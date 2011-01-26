@@ -22,17 +22,30 @@ import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.isA;
 
 import com.google.caja.util.Lists;
+import com.google.common.collect.ImmutableList;
 
 import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.RenderingContext;
+import org.apache.shindig.gadgets.js.AddOnloadFunctionProcessor;
+import org.apache.shindig.gadgets.js.DefaultJsProcessorRegistry;
+import org.apache.shindig.gadgets.js.DefaultJsServingPipeline;
+import org.apache.shindig.gadgets.js.GetJsContentProcessor;
+import org.apache.shindig.gadgets.js.IfModifiedSinceProcessor;
+import org.apache.shindig.gadgets.js.JsLoadProcessor;
+import org.apache.shindig.gadgets.js.JsProcessor;
+import org.apache.shindig.gadgets.js.JsProcessorRegistry;
+import org.apache.shindig.gadgets.js.JsRequestBuilder;
 import org.apache.shindig.gadgets.uri.JsUriManager;
 import org.apache.shindig.gadgets.uri.JsUriManager.JsUri;
+import org.apache.shindig.gadgets.uri.UriStatus;
 import org.junit.Before;
 import org.junit.Test;
 
 import javax.servlet.http.HttpServletResponse;
 
 public class JsServletTest extends ServletTestFixture {
+  private static final String EXAMPLE_JS_CODE = "some javascript code";
   private static final String CONTAINER_PARAM = "im_a_container";
   private static final String ONLOAD_PARAM = "onload_me";
   private static final int REFRESH_INTERVAL_SEC = 200;
@@ -42,17 +55,27 @@ public class JsServletTest extends ServletTestFixture {
   private JsServlet.CachingSetter httpUtilMock;
   private JsHandler jsHandlerMock;
   private JsUriManager jsUriManagerMock;
+  private JsLoadProcessor jsLoadProcessor;
+  private DefaultJsServingPipeline jsServingPipeline;
 
   @Before
   public void setUp() throws Exception {
     httpUtilMock = mock(JsServlet.CachingSetter.class);
     servlet.setCachingSetter(httpUtilMock);
 
-    jsHandlerMock = mock(JsHandler.class);
-    servlet.setJsHandler(jsHandlerMock);
-
     jsUriManagerMock = mock(JsUriManager.class);
-    servlet.setUrlGenerator(jsUriManagerMock);
+    servlet.setJsRequestBuilder(new JsRequestBuilder(jsUriManagerMock));
+
+    jsHandlerMock = mock(JsHandler.class);
+    
+    jsLoadProcessor = new JsLoadProcessor(jsUriManagerMock, 0);
+    JsProcessorRegistry jsProcessorRegistry =
+        new DefaultJsProcessorRegistry(
+            ImmutableList.<JsProcessor>of(jsLoadProcessor, new IfModifiedSinceProcessor(),
+                new GetJsContentProcessor(jsHandlerMock), new AddOnloadFunctionProcessor()));
+
+    jsServingPipeline = new DefaultJsServingPipeline(jsProcessorRegistry);
+    servlet.setJsServingPipeline(jsServingPipeline);
 
     // TODO: Abstract this out into a helper function associated with Uri class.
     expect(request.getScheme()).andReturn("http");
@@ -63,7 +86,8 @@ public class JsServletTest extends ServletTestFixture {
   }
 
   private JsUri mockJsUri(String container, RenderingContext context, boolean debug,
-      boolean jsload, boolean nocache, String onload, int refresh, String... libs) {
+      boolean jsload, boolean nocache, String onload, int refresh, UriStatus status,
+      String... libs) {
     JsUri result = mock(JsUri.class);
     expect(result.getContainer()).andReturn(container).anyTimes();
     expect(result.getContext()).andReturn(context).anyTimes();
@@ -72,6 +96,7 @@ public class JsServletTest extends ServletTestFixture {
     expect(result.isDebug()).andReturn(debug).anyTimes();
     expect(result.isNoCache()).andReturn(nocache).anyTimes();
     expect(result.isJsload()).andReturn(jsload).anyTimes();
+    expect(result.getStatus()).andReturn(status).anyTimes();
     if (libs != null) {
       expect(result.getLibs()).andReturn(Lists.newArrayList(libs)).anyTimes();
     }
@@ -79,20 +104,62 @@ public class JsServletTest extends ServletTestFixture {
   }
 
   @Test
+  public void testJsServletGivesErrorWhenUriManagerThrowsException() throws Exception {
+    expect(jsUriManagerMock.processExternJsUri(isA(Uri.class))).andThrow(new GadgetException(null));
+    replay();
+    
+    servlet.doGet(request, recorder);
+    assertEquals(HttpServletResponse.SC_BAD_REQUEST, recorder.getHttpStatusCode());
+    verify();
+  }
+  
+  @Test
+  public void testWithIfModifiedSinceHeaderPresentAndVersionReturnsNotModified() throws Exception {
+    JsUri jsUri = mockJsUri(CONTAINER_PARAM, RenderingContext.CONTAINER, false, false, false,
+        null, REFRESH_INTERVAL_SEC, UriStatus.VALID_VERSIONED);
+    expect(jsUriManagerMock.processExternJsUri(isA(Uri.class))).andReturn(jsUri);
+    expect(request.getHeader("If-Modified-Since")).andReturn("12345");
+    replay();
+
+    servlet.doGet(request, recorder);
+    assertEquals(HttpServletResponse.SC_NOT_MODIFIED, recorder.getHttpStatusCode());
+    verify();
+  }
+  
+  @Test
+  public void testWithIfModifiedSinceHeaderPresentButNoVersionActsNormal() throws Exception {
+    JsUri jsUri = mockJsUri(CONTAINER_PARAM, RenderingContext.CONTAINER, false, false, false,
+        null, REFRESH_INTERVAL_SEC, UriStatus.VALID_UNVERSIONED);
+    expect(jsUriManagerMock.processExternJsUri(isA(Uri.class))).andReturn(jsUri);
+    expect(request.getHeader("If-Modified-Since")).andReturn("12345");
+    JsHandler.Response response = new JsHandler.Response(new StringBuilder(EXAMPLE_JS_CODE), true);
+    expect(request.getHeader("Host")).andReturn("localhost");
+    expect(jsHandlerMock.getJsContent(jsUri, "localhost")).andReturn(response);
+    replay();
+
+    servlet.doGet(request, recorder);
+    assertEquals(HttpServletResponse.SC_OK, recorder.getHttpStatusCode());
+    assertEquals(EXAMPLE_JS_CODE, recorder.getResponseAsString());
+    verify();
+  }
+  
+  @Test
+  @SuppressWarnings("unchecked")
   public void testDoJsloadNormal() throws Exception {
     String url = "http://localhost/gadgets/js/feature.js?v=abc&nocache=0&onload=" + ONLOAD_PARAM;
     JsUri jsUri = mockJsUri(CONTAINER_PARAM, RenderingContext.CONTAINER, true, true, false,
-        ONLOAD_PARAM, REFRESH_INTERVAL_SEC);
+        ONLOAD_PARAM, REFRESH_INTERVAL_SEC, UriStatus.VALID_VERSIONED);
 
     expect(jsUriManagerMock.processExternJsUri(isA(Uri.class))).andReturn(jsUri);
     expect(jsUriManagerMock.makeExternJsUri(isA(JsUri.class)))
-        .andReturn(Uri.parse(url + "&jsload=1"));
+        .andReturn(Uri.parse(url));
     httpUtilMock.setCachingHeaders(recorder, REFRESH_INTERVAL_SEC, false);
     replay();
 
     servlet.doGet(request, recorder);
     assertEquals(HttpServletResponse.SC_OK, recorder.getHttpStatusCode());
-    assertEquals(String.format(JsServlet.JSLOAD_JS_TPL, url), recorder.getResponseAsString());
+    assertEquals(String.format(JsLoadProcessor.JSLOAD_JS_TPL, url),
+        recorder.getResponseAsString());
     verify();
   }
 
@@ -100,18 +167,19 @@ public class JsServletTest extends ServletTestFixture {
   public void testDoJsloadWithJsLoadTimeout() throws Exception {
     String url = "http://localhost/gadgets/js/feature.js?v=abc&nocache=0&onload=" + ONLOAD_PARAM;
     JsUri jsUri = mockJsUri(CONTAINER_PARAM, RenderingContext.CONTAINER, true, true,
-        false, ONLOAD_PARAM, -1); // Disable refresh interval.
+        false, ONLOAD_PARAM, -1, UriStatus.VALID_VERSIONED); // Disable refresh interval.
 
     expect(jsUriManagerMock.processExternJsUri(isA(Uri.class))).andReturn(jsUri);
     expect(jsUriManagerMock.makeExternJsUri(isA(JsUri.class)))
-        .andReturn(Uri.parse(url + "&jsload=1"));
-    servlet.setJsloadTtlSecs(TIMEOUT_SEC); // Enable JS load timeout.
+        .andReturn(Uri.parse(url));
+    jsLoadProcessor.setJsloadTtlSecs(TIMEOUT_SEC); // Enable JS load timeout.
     httpUtilMock.setCachingHeaders(recorder, TIMEOUT_SEC, false);
     replay();
 
     servlet.doGet(request, recorder);
     assertEquals(HttpServletResponse.SC_OK, recorder.getHttpStatusCode());
-    assertEquals(String.format(JsServlet.JSLOAD_JS_TPL, url), recorder.getResponseAsString());
+    assertEquals(String.format(JsLoadProcessor.JSLOAD_JS_TPL, url),
+        recorder.getResponseAsString());
     verify();
   }
 
@@ -119,13 +187,13 @@ public class JsServletTest extends ServletTestFixture {
   public void testDoJsloadNoOnload() throws Exception {
     JsUri jsUri = mockJsUri(CONTAINER_PARAM, RenderingContext.CONTAINER, true, true, false,
         null, // lacks &onload=
-        REFRESH_INTERVAL_SEC);
+        REFRESH_INTERVAL_SEC, UriStatus.VALID_VERSIONED);
     expect(jsUriManagerMock.processExternJsUri(isA(Uri.class))).andReturn(jsUri);
     replay();
 
     servlet.doGet(request, recorder);
     assertEquals(HttpServletResponse.SC_BAD_REQUEST, recorder.getHttpStatusCode());
-    assertEquals(JsServlet.JSLOAD_ONLOAD_ERROR, recorder.getResponseAsString());
+    assertEquals(JsLoadProcessor.JSLOAD_ONLOAD_ERROR, recorder.getResponseAsString());
     verify();
   }
 
@@ -134,17 +202,18 @@ public class JsServletTest extends ServletTestFixture {
     String url = "http://localhost/gadgets/js/feature.js?v=abc&nocache=1&onload=" + ONLOAD_PARAM;
     JsUri jsUri = mockJsUri(CONTAINER_PARAM, RenderingContext.CONTAINER, true, true,
         true, // Set to no cache.
-        ONLOAD_PARAM, REFRESH_INTERVAL_SEC);
+        ONLOAD_PARAM, REFRESH_INTERVAL_SEC, UriStatus.VALID_VERSIONED);
 
     expect(jsUriManagerMock.processExternJsUri(isA(Uri.class))).andReturn(jsUri);
     expect(jsUriManagerMock.makeExternJsUri(isA(JsUri.class)))
-        .andReturn(Uri.parse(url + "&jsload=1"));
+        .andReturn(Uri.parse(url));
     httpUtilMock.setCachingHeaders(recorder, 0, false); // TTL of 0 is set.
     replay();
 
     servlet.doGet(request, recorder);
     assertEquals(HttpServletResponse.SC_OK, recorder.getHttpStatusCode());
-    assertEquals(String.format(JsServlet.JSLOAD_JS_TPL, url), recorder.getResponseAsString());
+    assertEquals(String.format(JsLoadProcessor.JSLOAD_JS_TPL, url),
+        recorder.getResponseAsString());
     verify();
   }
 }

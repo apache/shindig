@@ -54,7 +54,7 @@ public interface JsUriManager {
     private final Collection<String> libs;
     private final Collection<String> loadedLibs;
     private final String onload;
-    private final boolean jsload;
+    private boolean jsload;
     private final RenderingContext context;
 
     public JsUri(UriStatus status, Uri origUri, Collection<String> libs, Collection<String> have) {
@@ -129,6 +129,10 @@ public interface JsUriManager {
 
     public boolean isJsload() {
       return jsload;
+    }
+    
+    public void setJsload(boolean jsload) {
+      this.jsload = jsload;
     }
 
     @Override
