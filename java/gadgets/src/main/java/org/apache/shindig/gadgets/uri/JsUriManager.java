@@ -50,7 +50,7 @@ public interface JsUriManager {
   JsUri processExternJsUri(Uri uri) throws GadgetException;
 
   public static class JsUri extends ProxyUriBase {
-    private final static Collection<String> EMPTY_COLL = ImmutableList.<String>of();
+    private final static Collection<String> EMPTY_COLL = ImmutableList.of();
     private final Collection<String> libs;
     private final Collection<String> loadedLibs;
     private final String onload;
@@ -69,8 +69,8 @@ public interface JsUriManager {
         this.jsload = false;
         this.onload = null;
       }
-      this.libs = libs;
-      this.loadedLibs = have;
+      this.libs = nonNullLibs(libs);
+      this.loadedLibs = nonNullLibs(have);
     }
 
     public JsUri(UriStatus status) {
@@ -107,11 +107,11 @@ public interface JsUriManager {
     }
 
     public Collection<String> getLibs() {
-      return nonNullLibs(libs);
+      return libs;
     }
     
     public Collection<String> getLoadedLibs() {
-      return nonNullLibs(loadedLibs);
+      return loadedLibs;
     }
     
     private Collection<String> nonNullLibs(Collection<String> in) {
