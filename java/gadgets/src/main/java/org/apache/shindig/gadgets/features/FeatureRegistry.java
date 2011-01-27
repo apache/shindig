@@ -486,7 +486,7 @@ public class FeatureRegistry {
     List<String> neededList = Lists.newArrayList(needed);
     Collections.sort(neededList);
     return new StringBuilder().append(StringUtils.join(neededList, ":"))
-        .append("|").append(ctx.getRenderingContext().name())
+        .append("|").append(ctx.getRenderingContext())
         .append("|").append(ctx.getContainer())
         .append("|").append(unsupported != null)
         .toString();
