@@ -21,7 +21,6 @@ package org.apache.shindig.gadgets.uri;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 
 import org.apache.shindig.common.uri.Uri;
@@ -95,6 +94,10 @@ public class DefaultJsUriManager implements JsUriManager {
 
     if (ctx.isJsload()) {
       uri.addQueryParameter(Param.JSLOAD.getKey(), "1");
+    }
+    
+    if (ctx.isNohint()) {
+      uri.addQueryParameter(Param.NO_HINT.getKey(), "1");
     }
 
     // Finally, version it, but only if !nocache.

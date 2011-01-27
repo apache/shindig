@@ -37,12 +37,13 @@ public class JavascriptModule extends AbstractModule {
   
   @Provides
   @Inject
-  public List<JsProcessor> provideProcessors(JsLoadProcessor jsLoaderGeneratorProcessor,
-      IfModifiedSinceProcessor ifModifiedSinceProcessor,
+  public List<JsProcessor> provideProcessors(
+      InjectJsInfoVariableProcessor injectJsInfoVariableProcessor,
+      JsLoadProcessor jsLoaderGeneratorProcessor, IfModifiedSinceProcessor ifModifiedSinceProcessor,
       GetJsContentProcessor getJsContentProcessor,
       AddOnloadFunctionProcessor addOnloadFunctionProcessor) {
-    return ImmutableList.of(jsLoaderGeneratorProcessor, ifModifiedSinceProcessor,
-        getJsContentProcessor, addOnloadFunctionProcessor);
+    return ImmutableList.of(injectJsInfoVariableProcessor, jsLoaderGeneratorProcessor,
+        ifModifiedSinceProcessor, getJsContentProcessor, addOnloadFunctionProcessor);
   }
   
 }

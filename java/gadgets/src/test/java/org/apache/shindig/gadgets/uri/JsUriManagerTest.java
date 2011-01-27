@@ -18,6 +18,7 @@
  */
 package org.apache.shindig.gadgets.uri;
 
+import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -25,9 +26,11 @@ import static org.junit.Assert.assertTrue;
 
 import com.google.caja.util.Lists;
 
+import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.RenderingContext;
+import org.apache.shindig.gadgets.uri.JsUriManager.JsUri;
 import org.apache.shindig.gadgets.uri.UriCommon.Param;
 import org.junit.Test;
 
@@ -43,28 +46,32 @@ public class JsUriManagerTest extends UriManagerTestBase {
 
   @Test
   public void newJsUriWithOriginalUri() throws Exception {
-    UriBuilder builder = newTestUriBuilder(RenderingContext.CONTAINER);
-    JsUriManager.JsUri jsUri = new JsUriManager.JsUri(STATUS, builder.toUri(), LIBS, HAVE);
+    Uri uri = newTestUriBuilder(RenderingContext.CONTAINER).toUri();
+    JsUriManager.JsUri jsUri = new JsUriManager.JsUri(STATUS, uri, LIBS, HAVE);
     assertEquals(RenderingContext.CONTAINER, jsUri.getContext());
     assertEquals(CONTAINER_VALUE, jsUri.getContainer());
     assertTrue(jsUri.isJsload());
     assertTrue(jsUri.isNoCache());
+    assertTrue(jsUri.isNohint());
     assertEquals(ONLOAD_VALUE, jsUri.getOnload());
     assertEquals(LIBS, Lists.newArrayList(jsUri.getLibs()));
     assertEquals(HAVE, Lists.newArrayList(jsUri.getLoadedLibs()));
+    assertEquals(uri, jsUri.getOrigUri());
   }
 
   @Test
   public void newJsUriWithConfiguredGadgetContext() throws Exception {
-    UriBuilder builder = newTestUriBuilder(RenderingContext.CONFIGURED_GADGET);
-    JsUriManager.JsUri jsUri = new JsUriManager.JsUri(STATUS, builder.toUri(), LIBS, HAVE);
+    Uri uri = newTestUriBuilder(RenderingContext.CONFIGURED_GADGET).toUri();
+    JsUriManager.JsUri jsUri = new JsUriManager.JsUri(STATUS, uri, LIBS, HAVE);
     assertEquals(RenderingContext.CONFIGURED_GADGET, jsUri.getContext());
     assertEquals(CONTAINER_VALUE, jsUri.getContainer());
     assertTrue(jsUri.isJsload());
     assertTrue(jsUri.isNoCache());
+    assertTrue(jsUri.isNohint());
     assertEquals(ONLOAD_VALUE, jsUri.getOnload());
     assertEquals(LIBS, Lists.newArrayList(jsUri.getLibs()));
     assertEquals(HAVE, Lists.newArrayList(jsUri.getLoadedLibs()));
+    assertEquals(uri, jsUri.getOrigUri());
   }
 
   @Test
@@ -75,9 +82,19 @@ public class JsUriManagerTest extends UriManagerTestBase {
     assertEquals(ContainerConfig.DEFAULT_CONTAINER, jsUri.getContainer());
     assertFalse(jsUri.isJsload());
     assertFalse(jsUri.isNoCache());
+    assertFalse(jsUri.isNohint());
     assertNull(jsUri.getOnload());
     assertTrue(jsUri.getLibs().isEmpty());
     assertTrue(jsUri.getLoadedLibs().isEmpty());
+    assertNull(jsUri.getOrigUri());
+  }
+  
+  @Test
+  public void newJsUriCopyOfOtherJsUri() throws Exception {
+    Uri uri = newTestUriBuilder(RenderingContext.CONTAINER).toUri();
+    JsUriManager.JsUri jsUri = new JsUriManager.JsUri(STATUS, uri, LIBS, HAVE);
+    JsUriManager.JsUri jsUriCopy = new JsUriManager.JsUri(jsUri);
+    assertEquals(jsUri, jsUriCopy);
   }
 
   private UriBuilder newTestUriBuilder(RenderingContext context) {
@@ -89,6 +106,7 @@ public class JsUriManagerTest extends UriManagerTestBase {
     builder.addQueryParameter(Param.CONTAINER_MODE.getKey(), context.getParamValue());
     builder.addQueryParameter(Param.JSLOAD.getKey(), "1");
     builder.addQueryParameter(Param.NO_CACHE.getKey(), "1");
+    builder.addQueryParameter(Param.NO_HINT.getKey(), "1");
     builder.addQueryParameter(Param.ONLOAD.getKey(), ONLOAD_VALUE);
     return builder;
   }

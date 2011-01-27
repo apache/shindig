@@ -565,7 +565,7 @@ public class GadgetsHandlerTest extends EasyMockTestCase {
     JSONObject results = new JSONObject(converter.convertToString(responseObj));
     assertEquals(jsUri.toString(), results.getString("jsUrl"));
     JsUri expectedUri = new JsUri(null, false, false, CONTAINER, GADGET1_URL,
-        features, null, false, RenderingContext.GADGET);
+        features, null, false, false, RenderingContext.GADGET, null);
     assertEquals(expectedUri, captureUri.getValue());
     assertFalse(results.has("error"));
     assertFalse(results.has("jsContent"));
@@ -607,7 +607,7 @@ public class GadgetsHandlerTest extends EasyMockTestCase {
     JSONObject results = new JSONObject(converter.convertToString(responseObj));
     assertEquals(jsUri.toString(), results.getString("jsUrl"));
     JsUri expectedUri = new JsUri(123, true, true, CONTAINER, GADGET1_URL,
-        features, onload, false, RenderingContext.CONTAINER);
+        features, onload, false, false, RenderingContext.CONTAINER, null);
     assertEquals(expectedUri, captureUri.getValue());
     assertFalse(results.has("error"));
     assertEquals(jsContent, results.getString("jsContent"));

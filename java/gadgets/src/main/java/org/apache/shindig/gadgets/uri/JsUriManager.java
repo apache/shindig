@@ -55,7 +55,9 @@ public interface JsUriManager {
     private final Collection<String> loadedLibs;
     private final String onload;
     private boolean jsload;
+    private boolean nohint;
     private final RenderingContext context;
+    private final Uri origUri;
 
     public JsUri(UriStatus status, Uri origUri, Collection<String> libs, Collection<String> have) {
       super(status, origUri);
@@ -64,13 +66,16 @@ public interface JsUriManager {
         this.context = RenderingContext.valueOfParam(param);
         this.jsload = "1".equals(origUri.getQueryParameter(Param.JSLOAD.getKey()));
         this.onload = origUri.getQueryParameter(Param.ONLOAD.getKey());
+        this.nohint = "1".equals(origUri.getQueryParameter(Param.NO_HINT.getKey()));
       } else {
         this.context = RenderingContext.GADGET;
         this.jsload = false;
         this.onload = null;
+        this.nohint = false;
       }
       this.libs = nonNullLibs(libs);
       this.loadedLibs = nonNullLibs(have);
+      this.origUri = origUri;
     }
 
     public JsUri(UriStatus status) {
@@ -78,32 +83,53 @@ public interface JsUriManager {
     }
 
     public JsUri(UriStatus status, Collection<String> libs, RenderingContext context,
-                 String onload, boolean jsload) {
+                 String onload, boolean jsload, boolean nohint) {
       super(status, null);
       this.context = context;
       this.onload = onload;
       this.jsload = jsload;
+      this.nohint = nohint;
       this.libs = libs;
       this.loadedLibs = EMPTY_COLL;
+      this.origUri = null;
     }
 
     public JsUri(Gadget gadget, Collection<String> libs) {
       super(gadget);
       this.onload = null;
       this.jsload = false;
+      this.nohint = false;
       this.context = RenderingContext.GADGET;
       this.libs = libs;
       this.loadedLibs = EMPTY_COLL;
+      this.origUri = null;
     }
 
     public JsUri(Integer refresh, boolean debug, boolean noCache, String container, String gadget,
-        Collection<String> libs, String onload, boolean jsload, RenderingContext context) {
+        Collection<String> libs, String onload, boolean jsload, boolean nohint, RenderingContext context, Uri origUri) {
       super(null, refresh, debug, noCache, container, gadget);
       this.onload = onload;
       this.jsload = jsload;
+      this.nohint = nohint;
       this.context = context;
       this.libs = libs;
       this.loadedLibs = EMPTY_COLL;
+      this.origUri = origUri;
+    }
+    
+    public JsUri(JsUri origJsUri) {
+      super(origJsUri.getStatus(), origJsUri.getRefresh(),
+          origJsUri.isDebug(),
+          origJsUri.isNoCache(),
+          origJsUri.getContainer(),
+          origJsUri.getGadget());
+      this.libs = origJsUri.getLibs();
+      this.loadedLibs = origJsUri.getLoadedLibs();
+      this.onload = origJsUri.getOnload();
+      this.jsload = origJsUri.isJsload();
+      this.nohint = origJsUri.isNohint();
+      this.context = origJsUri.getContext();
+      this.origUri = origJsUri.getOrigUri();
     }
 
     public Collection<String> getLibs() {
@@ -134,6 +160,18 @@ public interface JsUriManager {
     public void setJsload(boolean jsload) {
       this.jsload = jsload;
     }
+    
+    public boolean isNohint() {
+      return nohint;
+    }
+    
+    public void setNohint(boolean nohint) {
+      this.nohint = nohint;
+    }
+    
+    public Uri getOrigUri() {
+      return origUri;
+    }
 
     @Override
     public boolean equals(Object obj) {
@@ -149,7 +187,9 @@ public interface JsUriManager {
           && Objects.equal(this.loadedLibs, objUri.loadedLibs)
           && Objects.equal(this.onload, objUri.onload)
           && Objects.equal(this.jsload, objUri.jsload)
-          && Objects.equal(this.context, objUri.context));
+          && Objects.equal(this.nohint, objUri.nohint)
+          && Objects.equal(this.context, objUri.context))
+          && Objects.equal(this.origUri, objUri.origUri);
     }
   }
 

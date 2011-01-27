@@ -385,7 +385,9 @@ public class DefaultJsUriManagerTest {
     expect(context.getLibs()).andStubReturn(extern);
     expect(context.getOnload()).andStubReturn(null);
     expect(context.isJsload()).andStubReturn(false);
+    expect(context.isNohint()).andStubReturn(false);
     expect(context.getExtensionParams()).andStubReturn(params);
+    expect(context.getOrigUri()).andStubReturn(null);
     replay(context);
     return context;
   }

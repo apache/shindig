@@ -112,7 +112,7 @@ public class ProxyUriBase {
     }
     ProxyUriBase objUri = (ProxyUriBase) obj;
     return (Objects.equal(this.status, objUri.status)
-        && Objects.equal(this.refresh, objUri.refresh)
+        && (noCache || Objects.equal(this.refresh, objUri.refresh))
         && Objects.equal(this.container, objUri.container)
         && Objects.equal(this.gadget, objUri.gadget)
         && Objects.equal(this.rewriteMimeType, objUri.rewriteMimeType)

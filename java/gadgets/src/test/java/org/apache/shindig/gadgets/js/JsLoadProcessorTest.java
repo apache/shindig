@@ -111,6 +111,7 @@ public class JsLoadProcessorTest {
     EasyMock.expect(jsUri.isJsload()).andReturn(true);
     EasyMock.expect(jsUri.getOnload()).andReturn(ONLOAD_FUNCTION);
     jsUri.setJsload(false);
+    jsUri.setNohint(true);
     EasyMock.expect(jsUriManager.makeExternJsUri(jsUri)).andReturn(uri);
     EasyMock.expect(jsUri.isNoCache()).andReturn(noCache);
     if (!noCache) {

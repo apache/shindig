@@ -82,12 +82,13 @@ public class JsLoadProcessor implements JsProcessor {
     }
 
     jsUri.setJsload(false);
+    jsUri.setNohint(true);
     Uri incUri = jsUriManager.makeExternJsUri(jsUri);
 
     int refresh = getCacheTtlSecs(jsUri);
     resp.setCacheTtlSecs(refresh);
     resp.setProxyCacheable(true);
-    resp.setJsCode(createJsloadScript(incUri));
+    resp.addJsCode(createJsloadScript(incUri));
   }
 
   private int getCacheTtlSecs(JsUri jsUri) {

@@ -50,6 +50,7 @@ public interface UriCommon {
     JSLOAD("jsload"),
     ONLOAD("onload"),
     ALREADY_HAVE("loaded"),
+    NO_HINT("nohint"),
 
     // Proxy resize params:
     RESIZE_HEIGHT("resize_h"),
