@@ -111,7 +111,6 @@ public class GadgetsHandlerApi {
     public ViewContentType getType();
     public Uri getHref();
     public boolean getQuirks();
-    public String getContent();
     public int getPreferredHeight(); // Default to 0
     public int getPreferredWidth();  // Default to 0
   }
