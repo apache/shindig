@@ -122,7 +122,7 @@ public interface ConcatUriManager {
     }
   }
   
-  public static final class ConcatUri extends ProxyUriBase {
+  public static class ConcatUri extends ProxyUriBase {
     private final List<Uri> batch;
     private final Type type;
     private final String splitParam;
