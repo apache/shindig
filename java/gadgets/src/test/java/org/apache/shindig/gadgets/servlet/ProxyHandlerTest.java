@@ -19,6 +19,7 @@
 package org.apache.shindig.gadgets.servlet;
 
 import com.google.common.base.Objects;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 
 import org.apache.shindig.common.EasyMockTestCase;
@@ -224,11 +225,20 @@ public class ProxyHandlerTest extends EasyMockTestCase {
 
   @Test
   public void testNoContentDispositionForFlash() throws Exception {
+    assertNoContentDispositionForFlash("application/x-shockwave-flash");
+  }
+
+  @Test
+  public void testNoContentDispositionForFlashUtf8() throws Exception {
+    assertNoContentDispositionForFlash("application/x-shockwave-flash;charset=utf-8");
+  }
+
+  private void assertNoContentDispositionForFlash(String contentType) throws Exception {
     // Some headers may be blacklisted. These are OK.
     String url = "http://example.org/file.evil";
     String domain = "example.org";
-    Map<String, List<String>> headers = Maps.newHashMap();
-    headers.put("Content-Type", Arrays.asList("application/x-shockwave-flash"));
+    Map<String, List<String>> headers =
+        ImmutableMap.of("Content-Type", Arrays.asList(contentType));
 
     setupNoArgsProxyRequestMock(domain, url);
     expectGetAndReturnHeaders(url, headers);
@@ -237,7 +247,7 @@ public class ProxyHandlerTest extends EasyMockTestCase {
     HttpResponse response = proxyHandler.fetch(request);
     verify();
 
-    assertEquals("application/x-shockwave-flash", response.getHeader("Content-Type"));
+    assertEquals(contentType, response.getHeader("Content-Type"));
     assertNull(response.getHeader("Content-Disposition"));
     assertTrue(rewriter.responseWasRewritten());
   }

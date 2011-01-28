@@ -24,6 +24,7 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpRequest;
@@ -141,13 +142,26 @@ public class ProxyHandler {
     // We're skipping the content disposition header for flash due to an issue with Flash player 10
     // This does make some sites a higher value phishing target, but this can be mitigated by
     // additional referer checks.
-    if (!"application/x-shockwave-flash".equalsIgnoreCase(results.getHeader("Content-Type")) &&
-        !"application/x-shockwave-flash".equalsIgnoreCase(response.getHeader("Content-Type"))) {
+    if (!isFlash(response.getHeader("Content-Type"), results.getHeader("Content-Type"))) {
       response.setHeader("Content-Disposition", "attachment;filename=p.txt");
     }
     if (results.getHeader("Content-Type") == null) {
       response.setHeader("Content-Type", "application/octet-stream");
     }
+  }
+
+  private static final String FLASH_CONTENT_TYPE = "application/x-shockwave-flash";
+
+  /**
+   * Test for presence of flash
+   *
+   * @param responseContentType the Content-Type header from the HttpResponseBuilder
+   * @param resultsContentType the Content-Type header from the HttpResponse
+   * @return true if either content type matches that of Flash
+   */
+  private boolean isFlash(String responseContentType, String resultsContentType) {
+    return StringUtils.startsWithIgnoreCase(responseContentType, FLASH_CONTENT_TYPE)
+        || StringUtils.startsWithIgnoreCase(resultsContentType, FLASH_CONTENT_TYPE);
   }
 
   /**
