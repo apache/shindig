@@ -250,6 +250,10 @@ public class MutableContent {
     }
     return document;
   }
+  
+  public GadgetHtmlParser getContentParser() {
+    return contentParser;
+  }
 
   public int getNumChanges() {
     return numChanges;

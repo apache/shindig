@@ -33,6 +33,7 @@ import com.google.inject.name.Names;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
 import org.apache.shindig.gadgets.render.CajaResponseRewriter;
+import org.apache.shindig.gadgets.render.DropCommentsGadgetRewriter;
 import org.apache.shindig.gadgets.render.OpenSocialI18NGadgetRewriter;
 import org.apache.shindig.gadgets.render.RenderingGadgetRewriter;
 import org.apache.shindig.gadgets.render.SanitizingGadgetRewriter;
@@ -135,6 +136,7 @@ public class RewriteModule extends AbstractModule {
   private void configureRewriters() {
     Multibinder<GadgetRewriter> multibinder = Multibinder.newSetBinder(binder(),
         GadgetRewriter.class, Names.named("shindig.rewriters.gadget.set"));
+    multibinder.addBinding().to(DropCommentsGadgetRewriter.class);
     multibinder.addBinding().to(PipelineDataGadgetRewriter.class);
     multibinder.addBinding().to(TemplateRewriter.class);
     multibinder.addBinding().to(AbsolutePathReferenceRewriter.class);
