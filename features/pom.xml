@@ -251,15 +251,15 @@
 	      <!--<workingDirectory>/tmp</workingDirectory>-->
 	      <arguments>
 	        <!--  -header 1:1:1 -v  -main -version 8 -swf xpc.swf src/main/flex/Main.as -->
-		<argument>-header</argument>
-		<argument>1:1:1</argument>
-		<argument>-v</argument>
-		<argument>-main</argument>
-		<argument>-version</argument>
-		<argument>8</argument>
-		<argument>-swf</argument>
-		<argument>../content/xpc.swf</argument>
-		<argument>src/main/flex/Main.as</argument>
+          <argument>-header</argument>
+          <argument>1:1:1</argument>
+          <argument>-v</argument>
+          <argument>-main</argument>
+          <argument>-version</argument>
+          <argument>8</argument>
+          <argument>-swf</argument>
+          <argument>../content/xpc.swf</argument>
+          <argument>src/main/flex/Main.as</argument>
 	      </arguments>
 	    </configuration>
 	  </plugin>
