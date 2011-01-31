@@ -56,12 +56,103 @@
  */
 
 gadgets.config = function() {
+  var ___jsl;
   var components = {};
   var configuration;
 
+  function foldConfig(origConfig, updConfig) {
+    for (var key in updConfig) {
+      if (!updConfig.hasOwnProperty(key)) {
+        continue;
+      }
+      if (typeof origConfig[key] === "object" &&
+          typeof updConfig[key] === "object") {
+        // Both have the same key with an object value. Recurse.
+        foldConfig(origConfig[key], updConfig[key]);
+      } else {
+        // If updConfig has a new key, or a value of different type
+        // than the original config for the same key, or isn't an object
+        // type, then simply replace the value for the key.
+        origConfig[key] = updConfig[key];
+      }
+    }
+  }
+
+  function getLoadingScript() {
+    // Attempt to retrieve config augmentation from latest script node.
+    var scripts = document.scripts || document.getElementsByTagName("script");
+    if (!scripts || scripts.length == 0) return null;
+    var scriptTag;
+    if (___jsl.u) {
+      for (var i = 0; !scriptTag && i < scripts.length; ++i) {
+        var candidate = scripts[i];
+        if (candidate.src &&
+            candidate.src.indexOf(___jsl.u) == 0) {
+          // Do indexOf test to allow for fragment info
+          scriptTag = candidate;
+        }
+      }
+    }
+    if (!scriptTag) {
+      scriptTag = scripts[scripts.length - 1];
+    }
+    if (!scriptTag.src) return null;
+    return scriptTag;
+  }
+
+  function getInnerText(scriptNode) {
+    var scriptText = "";
+    if (scriptNode.nodeType == 3 || scriptNode.nodeType == 4) {
+      scriptText = scriptNode.nodeValue;
+    } else if (scriptNode.innerText) {
+      scriptText = scriptNode.innerText;
+    } else if (scriptNode.firstChild) {
+      var content = [];
+      for (var child = scriptNode.firstChild; child; child = child.nextSibling) {
+        content.push(getInnerText(child));
+      }
+      scriptText = content.join('');
+    }
+    return scriptText;
+  }
+
+  function parseConfig(configText) {
+    var config;
+    try {
+      eval("config=(" + configText + "\n)");
+    } catch (e) { }
+    if (typeof config === "object") {
+      return config;
+    }
+    try {
+      eval("config=({" + configText + "\n})");
+    } catch (e) { }
+    return typeof config === "object" ? config : {};
+  }
+
+  function augmentConfig(baseConfig) {
+    var loadScript = getLoadingScript();
+    if (!loadScript) {
+      return;
+    }
+    var scriptText = getInnerText(loadScript);
+    var configAugment = parseConfig(scriptText);
+    if (___jsl.f && ___jsl.f.length == 1) {
+      // Single-feature load on current request.
+      // Augmentation adds to just this feature's config if
+      // "short-form" syntax is used ie. skipping top-level feature key.
+      var feature = ___jsl.f[0];
+      if (!configAugment[feature]) {
+        var newConfig = {};
+        newConfig[___jsl.f[0]] = configAugment;
+        configAugment = newConfig;
+      }
+    }
+    foldConfig(baseConfig, configAugment);
+  }
+
   return {
-    'register':
-        /**
+    /**
      * Registers a configurable component and its configuration parameters.
      * Multiple callbacks may be registered for a single component if needed.
      *
@@ -84,21 +175,20 @@ gadgets.config = function() {
      * @name register
      * @function
      */
-        function(component, opt_validators, opt_callback) {
-          var registered = components[component];
-          if (!registered) {
-            registered = [];
-            components[component] = registered;
-          }
+    'register': function(component, opt_validators, opt_callback) {
+      var registered = components[component];
+      if (!registered) {
+        registered = [];
+        components[component] = registered;
+      }
 
-          registered.push({
-            validators: opt_validators || {},
-            callback: opt_callback
-          });
-        },
+      registered.push({
+        validators: opt_validators || {},
+        callback: opt_callback
+      });
+    },
 
-    'get':
-        /**
+    /**
      * Retrieves configuration data on demand.
      *
      * @param {string=} opt_component The component to fetch. If not provided
@@ -109,12 +199,12 @@ gadgets.config = function() {
      * @name get
      * @function
      */
-        function(opt_component) {
-          if (opt_component) {
-            return configuration[opt_component] || {};
-          }
-          return configuration;
-        },
+    'get': function(opt_component) {
+      if (opt_component) {
+        return configuration[opt_component] || {};
+      }
+      return configuration;
+    },
 
     /**
      * Initializes the configuration.
@@ -127,11 +217,17 @@ gadgets.config = function() {
      * @function
      */
     'init': function(config, opt_noValidation) {
-      configuration = config;
+      ___jsl = window["___jsl"] || {};
+      if (configuration) {
+        // init(...) has already been called. Merge rather than override config.
+        foldConfig(configuration, config);
+      } else {
+        configuration = config;
+      }
+      augmentConfig(configuration);
       for (var name in components) {
         if (components.hasOwnProperty(name)) {
-          var componentList = components[name],
-              conf = config[name];
+          var componentList = components[name], conf = configuration[name];
 
           for (var i = 0, j = componentList.length; i < j; ++i) {
             var component = componentList[i];
@@ -149,122 +245,22 @@ gadgets.config = function() {
             }
 
             if (component.callback) {
-              component.callback(config);
+              component.callback(configuration);
             }
           }
         }
       }
     },
 
-    // Standard validators go here.
-
     /**
-     * Ensures that data is one of a fixed set of items.
-     * Also supports argument sytax: EnumValidator("Dog", "Cat", "Fish");
-     *
-     * @param {Array.<string>} list The list of valid values.
-     *
-     * @member gadgets.config
-     * @name  EnumValidator
-     * @function
+     * Method largely for dev and debugging purposes that
+     * replaces or manually updates feature config.
+     * @param updateConfig {Object} Config object, with keys for features.
+     * @param opt_replace {Boolean} true to replace all configuration.
      */
-    'EnumValidator': function(list) {
-      var listItems = [];
-      if (arguments.length > 1) {
-        for (var i = 0, arg; (arg = arguments[i]); ++i) {
-          listItems.push(arg);
-        }
-      } else {
-        listItems = list;
-      }
-      return function(data) {
-        for (var i = 0, test; (test = listItems[i]); ++i) {
-          if (data === listItems[i]) {
-            return true;
-          }
-        }
-        return false;
-      };
-    },
-
-    /**
-     * Tests the value against a regular expression.
-     * @member gadgets.config
-     * @name RegexValidator
-     * @function
-     */
-    'RegExValidator': function(re) {
-      return function(data) {
-        return re.test(data);
-      };
-    },
-
-    /**
-     * Validates that a value was provided.
-     * @param {*} data
-     * @member gadgets.config
-     * @name ExistsValidator
-     * @function
-     */
-    'ExistsValidator': function(data) {
-      return typeof data !== 'undefined';
-    },
-
-    /**
-     * Validates that a value is a non-empty string.
-     * @param {*} data
-     * @member gadgets.config
-     * @name NonEmptyStringValidator
-     * @function
-     */
-    'NonEmptyStringValidator': function(data) {
-      return typeof data === 'string' && data.length > 0;
-    },
-
-    /**
-     * Validates that the value is a boolean.
-     * @param {*} data
-     * @member gadgets.config
-     * @name BooleanValidator
-     * @function
-     */
-    'BooleanValidator': function(data) {
-      return typeof data === 'boolean';
-    },
-
-    /**
-     * Similar to the ECMAScript 4 virtual typing system, ensures that
-     * whatever object was passed in is "like" the existing object.
-     * Doesn't actually do type validation though, but instead relies
-     * on other validators.
-     *
-     * This can be used recursively as well to validate sub-objects.
-     *
-     * @example
-     *
-     *  var validator = new gadgets.config.LikeValidator(
-     *    "booleanField" : gadgets.config.BooleanValidator,
-     *    "regexField" : new gadgets.config.RegExValidator(/foo.+/);
-     *  );
-     *
-     *
-     * @param {Object} test The object to test against.
-     * @member gadgets.config
-     * @name BooleanValidator
-     * @function
-     */
-    'LikeValidator' : function(test) {
-      return function(data) {
-        for (var member in test) {
-          if (test.hasOwnProperty(member)) {
-            var t = test[member];
-            if (!t(data[member])) {
-              return false;
-            }
-          }
-        }
-        return true;
-      };
+    'update': function(updateConfig, opt_replace) {
+      configuration = opt_replace ? {} : configuration;
+      foldConfig(configuration, updateConfig);
     }
-  };
+  }
 }();

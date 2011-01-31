@@ -23,13 +23,29 @@ function ConfigTest(name) {
 
 ConfigTest.inherits(TestCase);
 
+ConfigTest.prototype.setUp = function() {
+  this.script1 = { nodeType: 3, src: "http://www.1.com/js/1.js", nodeValue: "{data:'value1'}" };
+  this.script2 = { nodeType: 3, src: "http://www.2.com/js/2.js", nodeValue: "{data:'value2'}" };
+  this.script3 = { nodeType: 3, src: "http://www.3.com/js/3.js", nodeValue: "{data:'value3'}" };
+  document.scripts = [ this.script1, this.script2, this.script3 ];
+  this.defaultConfig = {
+    testBasic: { data: "Hello, World!", untouched: "Goodbye" },
+    testSecond: { foo: "Bar" }
+  };
+};
+
+ConfigTest.prototype.tearDown = function() {
+  gadgets.config.update({}, true);  // "reset" gadgets lib
+  window["___jsl"] = undefined;
+};
+
 ConfigTest.prototype.testBasic = function() {
   var testBasicConfig;
   gadgets.config.register("testBasic", null, function(config) {
     testBasicConfig = config.testBasic;
   });
 
-  gadgets.config.init({testBasic: {data: "Hello, World!"}});
+  gadgets.config.init(this.defaultConfig);
 
   this.assertEquals("Hello, World!", testBasicConfig.data);
 };
@@ -49,6 +65,100 @@ ConfigTest.prototype.testMultiple = function() {
 
   this.assertEquals("Hello, World!", testMultiple0.data);
   this.assertEquals("Hello, World!", testMultiple1.data);
+};
+
+ConfigTest.prototype.testFindScriptLastNoHint = function() {
+  var testListen;
+  gadgets.config.register("testBasic", null, function(config) {
+    testListen = config;
+  });
+  this.script3.nodeValue = "{ testBasic: { data: 'News' } }";
+
+  gadgets.config.init(this.defaultConfig);
+
+  this.assertEquals("News", testListen.testBasic.data);
+  this.assertEquals("Goodbye", testListen.testBasic.untouched);
+};
+
+ConfigTest.prototype.testFindScriptLastHintMismatch = function() {
+  var testListen;
+  gadgets.config.register("testBasic", null, function(config) {
+    testListen = config;
+  });
+  this.script3.nodeValue = " testBasic: { data: 'AgainNew' } ";
+
+  window["___jsl"] = { u: "http://nomatch.com/foo.js" };
+  gadgets.config.init(this.defaultConfig);
+
+  this.assertEquals("AgainNew", testListen.testBasic.data);
+  this.assertEquals("Goodbye", testListen.testBasic.untouched);
+};
+
+ConfigTest.prototype.testFindScriptHintExact = function() {
+  var testListen;
+  gadgets.config.register("testBasic", null, function(config) {
+    testListen = config;
+  });
+  this.script2.nodeValue = "data: 'Override'";
+  window["___jsl"] = { u: "http://www.2.com/js/2.js", f: [ "testBasic" ]};
+  gadgets.config.init(this.defaultConfig);
+  this.assertEquals("Override", testListen.testBasic.data);
+  this.assertEquals("Goodbye", testListen.testBasic.untouched);
+};
+
+ConfigTest.prototype.testFindScriptHintPrefixMatch = function() {
+  var testListen;
+  gadgets.config.register("testBasic", null, function(config) {
+    testListen = config;
+  });
+  this.script2.src = "http://www.2.com/js/2.js#hash=1";
+  this.script2.nodeValue = "testBasic: { data: 'Override' }, testSecond: [ 'difftype' ]";
+  window["___jsl"] = { u: "http://www.2.com/js/2.js", f: [ "testBasic", "testSecond" ]};
+  gadgets.config.init(this.defaultConfig);
+  this.assertEquals("Override", testListen.testBasic.data);
+  this.assertEquals("Goodbye", testListen.testBasic.untouched);
+  this.assertEquals("difftype", testListen.testSecond[0]);
+};
+
+ConfigTest.prototype.testInitMergesNotOverwrites = function() {
+  var testListen;
+  gadgets.config.register("testBasic", null, function(config) {
+    testListen = config;
+  });
+  gadgets.config.init(this.defaultConfig);
+  this.assertEquals("Hello, World!", testListen.testBasic.data);
+  this.assertEquals("Goodbye", testListen.testBasic.untouched);
+  this.assertEquals("Bar", testListen.testSecond.foo);
+
+  gadgets.config.init({ testBasic: { data: "Override" } });
+  this.assertEquals("Override", testListen.testBasic.data);
+  this.assertEquals("Goodbye", testListen.testBasic.untouched);
+  this.assertEquals("Bar", testListen.testSecond.foo);
+};
+
+ConfigTest.prototype.testUpdateMerge = function() {
+  var testListen;
+  gadgets.config.register("one", null, function(config) {
+    testListen = config;
+  });
+  gadgets.config.init({
+    one: { oneKey1: { oneSubkey1: "oneVal1" }, oneKey2: "data" },
+    two: "twoVal1"
+  });
+  this.assertEquals("oneVal1", testListen.one.oneKey1.oneSubkey1);
+  this.assertEquals("data", testListen.one.oneKey2);
+  this.assertEquals("twoVal1", testListen.two);
+  gadgets.config.update({
+    one: { oneKey1: { oneSubkey1: "updated", oneSubkey2: "newpair" } },
+    two: [ "newtype" ],
+    three: { foo: 123 }
+  });
+  testListen = gadgets.config.get();
+  this.assertEquals("updated", testListen.one.oneKey1.oneSubkey1);
+  this.assertEquals("newpair", testListen.one.oneKey1.oneSubkey2);
+  this.assertEquals("data", testListen.one.oneKey2);
+  this.assertEquals("newtype", testListen.two[0]);
+  this.assertEquals(123, testListen.three.foo);
 };
 
 ConfigTest.prototype.testValidator = function() {

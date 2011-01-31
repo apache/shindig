@@ -32,6 +32,7 @@ BatchTest.prototype.setUp = function() {
   window._setTimeout = window.setTimeout;
   window.setTimeout = function(fn, time) { fn.call()};
 
+  document.scripts = [];
   gadgets.config.init({ "osapi.services" : {
       "http://%host%/social/rpc" : ["system.listMethods", "people.get", "activities.get", 
         "activities.create", "appdata.get", "appdata.update", "appdata.delete"] }

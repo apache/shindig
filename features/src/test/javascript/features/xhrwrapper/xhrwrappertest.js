@@ -42,6 +42,7 @@ XhrWrapperTest.prototype.setUp = function() {
   gadgets.io.makeRequest = this.mockMakeRequest(this.madeRequest);
   window.location = { 'href': 'http://shindig/gadgets/ifr?url=blah' };
   opensocial.xmlutil.parseXML = XhrWrapperTest.mockParseXML;
+  document.scripts = [];
   gadgets.config.init(
     {"shindig.xhrwrapper": {"contentUrl": "http://foo.bar/baz/bax.html"}});
 };

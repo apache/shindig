@@ -24,7 +24,6 @@ function IoTest(name) {
 IoTest.inherits(TestCase);
 
 IoTest.prototype.setUp = function() {
-  this.oldGetUrlParameters = gadgets.util.getUrlParameters;
   gadgets.util.getUrlParameters = function() {
     return { "st" : "authtoken", "url" : "http://www.gadget.com/gadget.xml", "container" : "foo" };
   };
@@ -38,6 +37,7 @@ IoTest.prototype.setUp = function() {
   window.XMLHttpRequest = this.fakeXhrs.getXhrConstructor();
   shindig.xhrwrapper = undefined;
 
+  document.scripts = [];
   gadgets.config.init({ "core.io" : {
       "proxyUrl" : "http://example.com/proxy?url=%url%&refresh=%refresh%&g=%gadget%&c=%container%",
       "jsonProxyUrl" : "http://example.com/json" }});
@@ -52,7 +52,6 @@ IoTest.prototype.setSchemaless = function() {
 };
 
 IoTest.prototype.tearDown = function() {
-  gadgets.util.getUrlParameters = this.oldGetUrlParameters;
   window.XMLHttpRequest = this.oldXMLHTTPRequest;
   shindig.xhrwrapper = this.oldXhrWrapper;
 };

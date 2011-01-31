@@ -37,6 +37,7 @@ ViewsInitTest.prototype.testObjectParams = function() {
     return {"view-params": gadgets.json.stringify({foo: "bar"})};
   };
 
+  document.scripts = [];
   gadgets.config.init({views:{}});
 
   this.assertEquals("bar", gadgets.views.getParams().foo);
@@ -50,6 +51,7 @@ ViewsInitTest.prototype.testStringParams = function() {
     return {"view-params": gadgets.json.stringify(path)};
   };
 
+  document.scripts = [];
   gadgets.config.init({views:{}});
 
   this.assertEquals(path, gadgets.views.getParams());
@@ -66,6 +68,7 @@ ViewsInitTest.prototype.testRewriteLinksStandards = function() {
     }
   };
 
+  document.scripts = [];
   gadgets.config.init({views:{rewriteLinks: true}});
 
   this.assertEquals("click", name);
@@ -85,6 +88,7 @@ ViewsInitTest.prototype.testRewriteLinksIe = function() {
     addEventListener: undefined
   };
 
+  document.scripts = [];
   gadgets.config.init({views:{rewriteLinks: true}});
 
   this.assertEquals("onclick", name);

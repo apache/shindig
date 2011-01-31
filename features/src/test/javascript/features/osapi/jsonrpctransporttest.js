@@ -43,6 +43,7 @@ JsonRpcTransportTest.prototype.setUp = function() {
   gadgets.io._makeNonProxiedRequest = gadgets.io.makeNonProxiedRequest;
   gadgets.io.makeNonProxiedRequest = this.dummyXhr;
   lastXhr = {};
+  document.scripts = [];
   gadgets.config.init({ "osapi.services" : {
       "http://%host%/social/rpc" : ["system.listMethods", "people.get", "activities.get", 
         "activities.create", "appdata.get", "appdata.update", "appdata.delete"] }
