@@ -28,10 +28,7 @@ import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -44,7 +41,7 @@ public final class UriUtils {
   public static final String CHARSET = "charset";
   //class name for logging purpose
   private static final String classname = UriUtils.class.getName();
-  private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
+  private static final Logger LOG = Logger.getLogger(classname, MessageKeys.MESSAGES);
 
   private UriUtils() {}
   

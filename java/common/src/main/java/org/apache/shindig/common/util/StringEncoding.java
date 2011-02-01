@@ -33,7 +33,10 @@ public class StringEncoding {
   private final int SHIFT;
   private final int MASK;
 
-  /** Creates a new encoding based on the supplied set of digits. */
+  /**
+   * Creates a new encoding based on the supplied set of digits.
+   * @param userDigits set of characters to map bytes to
+   */
   public StringEncoding(final char[] userDigits) {
     TreeSet<Character> t = Sets.newTreeSet();
     for (char c : userDigits) {
@@ -52,7 +55,11 @@ public class StringEncoding {
     }
   }
   
-  /** Returns the given bytes in their encoded form. */
+  /**
+   * Returns the given bytes in their encoded form.
+   * @param data bytes to convert to string
+   * @return the encoded string
+   */
   public String encode(byte[] data) {
     if (data.length == 0) {
       return "";
@@ -81,7 +88,11 @@ public class StringEncoding {
     return result.toString();
   }
   
-  /** Decodes the given encoded string and returns the original raw bytes. */
+  /**
+   * Decodes the given encoded string and returns the original raw bytes.
+   * @param encoded String to encode
+   * @return bytes matching the string
+   */
   public byte[] decode(String encoded) {
     if (encoded.length() == 0) {
       return ArrayUtils.EMPTY_BYTE_ARRAY;

@@ -101,7 +101,7 @@ public class BasicImageRewriter implements ResponseRewriter {
 
   private final OptimizerConfig config;
 
-  private class ImageResizeData {
+  private static class ImageResizeData {
     private Integer requestedWidth;
     private Integer requestedHeight;
     private Integer widthDelta;

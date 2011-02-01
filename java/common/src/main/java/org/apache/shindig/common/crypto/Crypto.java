@@ -18,6 +18,7 @@
  */
 package org.apache.shindig.common.crypto;
 
+import com.google.common.primitives.Bytes;
 import org.apache.commons.codec.binary.Hex;
 
 import java.security.GeneralSecurityException;
@@ -169,7 +170,7 @@ public final class Crypto {
   throws GeneralSecurityException {
     Cipher cipher = Cipher.getInstance(CIPHER_TYPE);
     byte iv[] = getRandomBytes(cipher.getBlockSize());
-    return concat(iv, aes128cbcEncryptWithIV(key, iv, plain));
+    return Bytes.concat(iv, aes128cbcEncryptWithIV(key, iv, plain));
   }
 
   /**
@@ -230,17 +231,5 @@ public final class Crypto {
     IvParameterSpec ivSpec = new IvParameterSpec(iv);
     cipher.init(Cipher.DECRYPT_MODE, cipherKey, ivSpec);
     return cipher.doFinal(cipherText, offset, cipherText.length-offset);
-  }
-
-  /**
-   * Concatenate two byte arrays.
-   */
-  public static byte[] concat(byte[] a, byte[] b) {
-    byte[] out = new byte[a.length + b.length];
-    int cursor = 0;
-    System.arraycopy(a, 0, out, cursor, a.length);
-    cursor += a.length;
-    System.arraycopy(b, 0, out, cursor, b.length);
-    return out;
   }
 }

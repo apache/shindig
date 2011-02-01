@@ -50,7 +50,7 @@ public class ActivityStreamHandler {
   /**
    * <p>Constructor for ActivityStreamsHandler.</p>
    *
-   * @param service a {@link org.apache.shindig.extras.as.opensocial.spi.ActivityStreamService} object.
+   * @param service a {@link org.apache.shindig.social.opensocial.spi.ActivityStreamService} object.
    * @param config a {@link org.apache.shindig.config.ContainerConfig} object.
    */
   @Inject

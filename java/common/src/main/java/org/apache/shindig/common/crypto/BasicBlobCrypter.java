@@ -25,6 +25,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.google.common.base.Preconditions;
 
+import com.google.common.primitives.Bytes;
 import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.util.CharsetUtil;
 import org.apache.shindig.common.util.TimeSource;
@@ -131,7 +132,7 @@ public class BasicBlobCrypter implements BlobCrypter {
    * @return a derived key of the specified length
    */
   private byte[] deriveKey(byte label, byte[] masterKey, int len) {
-    byte[] base = Crypto.concat(new byte[] { label }, masterKey);
+    byte[] base = Bytes.concat(new byte[] { label }, masterKey);
     byte[] hash = DigestUtils.sha(base);
     if (len == 0) {
       return hash;
@@ -153,7 +154,7 @@ public class BasicBlobCrypter implements BlobCrypter {
       byte[] encoded = serializeAndTimestamp(in);
       byte[] cipherText = Crypto.aes128cbcEncrypt(cipherKey, encoded);
       byte[] hmac = Crypto.hmacSha1(hmacKey, cipherText);
-      byte[] b64 = Base64.encodeBase64URLSafe(Crypto.concat(cipherText, hmac));
+      byte[] b64 = Base64.encodeBase64URLSafe(Bytes.concat(cipherText, hmac));
       return new String(b64, UTF8);
     } catch (UnsupportedEncodingException e) {
       throw new BlobCrypterException(e);

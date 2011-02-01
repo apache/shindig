@@ -89,7 +89,7 @@ public class MultipleResourceHttpFetcher {
     return httpFetcher;
   }
 
-  private class HttpFetchCallable implements Callable<RequestContext> {
+  private static class HttpFetchCallable implements Callable<RequestContext> {
     private final HttpRequest httpReq;
     private final RequestPipeline requestPipeline;
 

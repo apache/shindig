@@ -19,6 +19,7 @@
 
 package org.apache.shindig.gadgets.servlet;
 
+import com.google.common.base.Objects;
 import org.apache.shindig.auth.AuthInfoUtil;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.uri.Uri;
@@ -73,36 +74,24 @@ public class HttpGadgetContext extends GadgetContext {
 
   @Override
   public String getContainer() {
-    if (container == null) {
-      return super.getContainer();
-    }
-    return container;
+    return container == null ? super.getContainer() : container;
   }
 
   @Override
   public String getHost() {
     String host = request.getHeader("Host");
-    if (host == null) {
-      return super.getHost();
-    }
-    return host;
+    return host == null ? super.getHost() : host;
   }
 
   @Override
   public String getUserIp() {
     String ip = request.getRemoteAddr();
-    if (ip == null) {
-      return super.getUserIp();
-    }
-    return ip;
+    return ip == null ? super.getUserIp() : ip;
   }
 
   @Override
   public boolean getDebug() {
-    if (debug == null) {
-      return super.getDebug();
-    }
-    return debug;
+    return debug == null ? super.getDebug(): debug;
   }
 
   @Override
@@ -115,26 +104,17 @@ public class HttpGadgetContext extends GadgetContext {
 
   @Override
   public Locale getLocale() {
-    if (locale == null) {
-      return super.getLocale();
-    }
-    return locale;
+    return locale == null ? super.getLocale() : locale;
   }
 
   @Override
   public int getModuleId() {
-    if (moduleId == null) {
-      return super.getModuleId();
-    }
-    return moduleId;
+    return moduleId == null ? super.getModuleId() : moduleId;
   }
 
   @Override
   public RenderingContext getRenderingContext() {
-    if (renderingContext == null) {
-      return super.getRenderingContext();
-    }
-    return renderingContext;
+    return renderingContext == null ? super.getRenderingContext() : renderingContext;
   }
 
   @Override
@@ -144,10 +124,7 @@ public class HttpGadgetContext extends GadgetContext {
 
   @Override
   public Uri getUrl() {
-    if (url == null) {
-      return super.getUrl();
-    }
-    return url;
+    return url == null ? super.getUrl() : url;
   }
 
   @Override

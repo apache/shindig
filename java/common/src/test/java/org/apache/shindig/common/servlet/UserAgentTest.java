@@ -50,4 +50,9 @@ public class UserAgentTest extends Assert {
   public void testVersionNumberParsingEmbeddedInTheMiddle() {
     assertEquals(1.5, getUaEntry("beta 1.5 rc 5").getVersionNumber(), 0);
   }
+
+  @Test
+  public void testVersionNumberParsingNoMatch() {
+    assertEquals(-1, getUaEntry("invalid").getVersionNumber(), 0);
+  }
 }

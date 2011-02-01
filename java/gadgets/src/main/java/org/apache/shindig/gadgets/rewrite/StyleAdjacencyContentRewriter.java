@@ -18,8 +18,6 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
-import org.apache.shindig.gadgets.rewrite.DomWalker;
-
 /**
  * Merges adjacent style tags.
  *

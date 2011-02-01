@@ -581,7 +581,7 @@ public class GadgetsHandlerService {
             fields);
   }
 
-  private class MessageImpl implements GadgetsHandlerApi.Message {
+  private static class MessageImpl implements GadgetsHandlerApi.Message {
     private final GadgetsHandlerApi.MessageLevel level;
     private final String message;
     private final String name;
