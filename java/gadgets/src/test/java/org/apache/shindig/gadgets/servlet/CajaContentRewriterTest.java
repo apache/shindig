@@ -37,7 +37,11 @@ import org.apache.shindig.gadgets.parse.caja.CajaHtmlParser;
 import org.apache.shindig.gadgets.parse.nekohtml.NekoSimplifiedHtmlParser;
 import org.apache.shindig.gadgets.rewrite.MutableContent;
 import org.apache.shindig.gadgets.rewrite.RewriterTestBase;
+import org.apache.shindig.gadgets.uri.ProxyUriManager;
+import org.apache.shindig.gadgets.uri.ProxyUriManager.ProxyUri;
+import org.easymock.Capture;
 import org.easymock.EasyMock;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.DOMImplementation;
@@ -51,7 +55,8 @@ import static org.junit.Assert.assertTrue;
 public class CajaContentRewriterTest extends RewriterTestBase {
   private List<GadgetHtmlParser> parsers;
   private CajaContentRewriter rewriter;
-
+  private ProxyUriManager proxyUriManager;
+  
   @Before
   public void setUp() throws Exception {
     super.setUp();
@@ -67,7 +72,8 @@ public class CajaContentRewriterTest extends RewriterTestBase {
     CacheProvider lru = new LruCacheProvider(3);
     RequestPipeline pipeline = EasyMock.createNiceMock(RequestPipeline.class);
     DefaultHtmlSerializer defaultSerializer = new DefaultHtmlSerializer();
-    rewriter = new CajaContentRewriter(lru, pipeline, defaultSerializer) {
+    proxyUriManager = EasyMock.createNiceMock(ProxyUriManager.class);
+    rewriter = new CajaContentRewriter(lru, pipeline, defaultSerializer, proxyUriManager) {
       @Override
       protected PluginCompiler makePluginCompiler(PluginMeta m, MessageQueue q) {
         BuildInfo bi = EasyMock.createNiceMock(BuildInfo.class);
@@ -134,10 +140,41 @@ public class CajaContentRewriterTest extends RewriterTestBase {
     testMarkup(markup, expected, messages);
   }
 
+  @Test
+  public void testUrlRewrite() throws Exception {
+    String uri = "http://www.example.com/";
+    String unproxied = uri;
+    String proxied = "http://shindig.com/gadgets/proxy?url=" + uri;
+    
+    expect(proxyUriManager.make(EasyMock.anyObject(List.class), EasyMock.isNull(Integer.class)))
+        .andReturn(ImmutableList.<Uri>of(Uri.parse(proxied))).anyTimes();
+    replay(proxyUriManager);
+
+    // Uris that transistion the page
+    assertUrlRewritten("a", "href", uri, unproxied);
+    assertUrlRewritten("area", "href", uri, unproxied);
+    
+    // Uris that load media
+    assertUrlRewritten("img", "src", uri, proxied);
+    
+    // Uris that have no effect on the document
+    assertUrlRewritten("blockquote", "cite", uri, unproxied);
+    assertUrlRewritten("q", "cite", uri, unproxied);
+    assertUrlRewritten("del", "cite", uri, unproxied);
+    assertUrlRewritten("ins", "cite", uri, unproxied);
+  }
+  
   private void testMarkup(String markup, String expected) throws GadgetException{
     testMarkup(markup, expected, null);
   }
 
+  private void assertUrlRewritten(String tagName, String attr, String orig, String rewritten)
+      throws Exception {
+    String markUp = "<" + tagName + " " + attr + "=\"" + orig + "\">";
+    String expected = attr + "=\"" + rewritten + "\"";
+    testMarkup(markUp, expected);
+  }
+  
   private void testMarkup(String markup, String expected, List<String> msgs) throws GadgetException{
     Gadget gadget = makeGadget();
     for (GadgetHtmlParser parser : parsers) {

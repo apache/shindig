@@ -186,7 +186,7 @@ public class GadgetsHandlerTest extends EasyMockTestCase {
   }
 
   private CajoledResult cajole(Uri uri, String mime, String content) throws ParseException {
-    CajaContentRewriter rw = new CajaContentRewriter(null, null, null);
+    CajaContentRewriter rw = new CajaContentRewriter(null, null, null, proxyUriManager);
     InputSource is = new InputSource(uri.toJavaUri());
     MessageQueue mq = new SimpleMessageQueue();
     CharProducer cp = CharProducer.Factory.create(new StringReader(content), is);

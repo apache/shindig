@@ -58,6 +58,7 @@ import com.google.caja.reporting.SimpleMessageQueue;
 import com.google.caja.reporting.SnippetProducer;
 import com.google.caja.service.ServiceMessageType;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 
@@ -77,6 +78,8 @@ import org.apache.shindig.gadgets.parse.HtmlSerialization;
 import org.apache.shindig.gadgets.parse.HtmlSerializer;
 import org.apache.shindig.gadgets.rewrite.GadgetRewriter;
 import org.apache.shindig.gadgets.rewrite.MutableContent;
+import org.apache.shindig.gadgets.uri.ProxyUriManager;
+import org.apache.shindig.gadgets.uri.UriStatus;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -103,10 +106,11 @@ public class CajaContentRewriter implements GadgetRewriter {
   private final Cache<String, Element> cajoledCache;
   private final RequestPipeline requestPipeline;
   private final HtmlSerializer htmlSerializer;
+  private final ProxyUriManager proxyUriManager;
 
   @Inject
   public CajaContentRewriter(CacheProvider cacheProvider, RequestPipeline requestPipeline,
-      HtmlSerializer htmlSerializer) {
+      HtmlSerializer htmlSerializer, ProxyUriManager proxyUriManager) {
     if (null == cacheProvider) {
       this.cajoledCache = null;
     } else {
@@ -118,6 +122,7 @@ public class CajaContentRewriter implements GadgetRewriter {
     }
     this.requestPipeline = requestPipeline;
     this.htmlSerializer = htmlSerializer;
+    this.proxyUriManager = proxyUriManager;
   }
   
   public class CajoledResult {
@@ -338,14 +343,25 @@ public class CajaContentRewriter implements GadgetRewriter {
     };
   }
   
-  private UriPolicy makePolicy(final Uri gadgetUri) {
+  protected UriPolicy makePolicy(final Uri gadgetUri) {
     return new UriPolicy() {
       public String rewriteUri(ExternalReference ref, UriEffect effect,
           LoaderType loader, Map<String, ?> hints) {
-        URI uri = ref.getUri();
-        if (uri.getScheme().equalsIgnoreCase("https") ||
-            uri.getScheme().equalsIgnoreCase("http")) {
-          return gadgetUri.resolve(Uri.fromJavaUri(uri)).toString();
+        try {
+          switch(effect) {
+            case SAME_DOCUMENT:
+                ProxyUriManager.ProxyUri proxyUri =
+                    new ProxyUriManager.ProxyUri(
+                        UriStatus.VALID_UNVERSIONED, Uri.fromJavaUri(ref.getUri()), null);
+                return proxyUriManager.make(ImmutableList.of(proxyUri), null).get(0).toString();
+            case NEW_DOCUMENT:
+            case NOT_LOADED:
+                return ref.getUri().toString();
+            default:
+                return null;
+          }
+        } catch (RuntimeException e) {
+          // if there are unexpected errors, fail safe - drop the uri
         }
         return null;
       }

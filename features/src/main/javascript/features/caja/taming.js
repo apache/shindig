@@ -26,16 +26,13 @@ var caja___ = (function() {
   var uriCallback = {
     rewrite: function rewrite(uri, mimeTypes) {
       uri = String(uri);
-      // By default, only allow references to anchors.
+      // Allow references to anchors within the gadget
       if (/^#/.test(uri)) {
         return '#' + encodeURIComponent(decodeURIComponent(uri.substring(1)));
-        // and files on the same host
-      } else if (/^\/(?:[^\/][^?#]*)?$/.test(uri)) {
-        return encodeURI(decodeURI(uri));
+      } else {
+        // Proxy all other dynamically constructed urls
+        return gadgets.io.getProxyUrl(uri);
       }
-      // This callback can be replaced with one that passes the URL through
-      // a proxy that checks the mimetype.
-      return null;
     }
   };
 
