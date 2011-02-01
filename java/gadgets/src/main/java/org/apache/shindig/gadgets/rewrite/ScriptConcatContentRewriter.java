@@ -19,34 +19,51 @@
 package org.apache.shindig.gadgets.rewrite;
 
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
+import org.apache.shindig.gadgets.http.HttpCache;
+import org.apache.shindig.gadgets.http.RequestPipeline;
+import org.apache.shindig.gadgets.rewrite.DomWalker;
 import org.apache.shindig.gadgets.rewrite.DomWalker.Visitor;
 import org.apache.shindig.gadgets.uri.ConcatUriManager;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 /**
- * REwrites scripts.
- *
+ * Concatenates non-private and cached script resources.
+ * CacheEnforcementVisitor is used to rewrite only non-private & cached scripts.
  * @since 2.0.0
  */
 public class ScriptConcatContentRewriter extends DomWalker.Rewriter {
   private final ContentRewriterFeature.Factory featureConfigFactory;
   private final ConcatUriManager concatUriManager;
+  private final Executor executor;
+  private final RequestPipeline requestPipeline;
+  private final HttpCache cache;
   
   @Inject
-  public ScriptConcatContentRewriter(ContentRewriterFeature.Factory featureConfigFactory,
-      ConcatUriManager concatUriManager) {
-    this.featureConfigFactory = featureConfigFactory;
+  public ScriptConcatContentRewriter(ConcatUriManager concatUriManager,
+                                     ContentRewriterFeature.Factory featureConfigFactory,
+                                     @Named("shindig.concat.executor") Executor executor,
+                                     HttpCache cache,
+                                     RequestPipeline requestPipeline) {
     this.concatUriManager = concatUriManager;
+    this.featureConfigFactory = featureConfigFactory;
+    this.executor = executor;
+    this.cache = cache;
+    this.requestPipeline = requestPipeline;
   }
   
   @Override
   protected List<Visitor> makeVisitors(Gadget context, Uri gadgetUri) {
     ContentRewriterFeature.Config config = featureConfigFactory.get(gadgetUri);
-    return Arrays.<Visitor>asList(new ConcatVisitor.Js(config, concatUriManager));
+    return Arrays.<Visitor>asList(
+        new CacheEnforcementVisitor(config, executor, cache, requestPipeline,
+            CacheEnforcementVisitor.Tags.SCRIPT),
+        new ConcatVisitor.Js(config, concatUriManager));
   }
 }
