@@ -296,7 +296,7 @@ public class HttpRequestHandler {
     } else if ("json".equalsIgnoreCase(request.format)) {
       try {
         body = body.trim();
-        if(body.charAt(0) == '[') {
+        if(body.length() > 0 && body.charAt(0) == '[') {
           return new JSONArray(body);
         } else {
           return new JSONObject(body);
