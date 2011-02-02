@@ -106,10 +106,10 @@
                 <source>../../../../src/test/javascript/features/mocks/window.js</source>
                 <source>../../../../src/test/javascript/features/mocks/xhr.js</source>
                 <source>globals/globals.js</source>
-                <source>core.config/config.js</source>
+                <source>core.config.base/config.js</source>
+                <source>core.config.base/configcontainer.js</source>
+                <source>core.config.base/configgadget.js</source>
                 <source>core.config/validators.js</source>
-                <source>core.config/configcontainer.js</source>
-                <source>core.config/configgadget.js</source>
                 <source>core.json/json-native.js</source>
                 <source>core.json/json-jsimpl.js</source>
                 <source>core.json/json-flatten.js</source>
