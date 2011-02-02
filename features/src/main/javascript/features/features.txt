@@ -26,6 +26,7 @@ features/caja-debug/feature.xml
 features/container/feature.xml
 features/content-rewrite/feature.xml
 features/core.config/feature.xml
+features/core.config.base/feature.xml
 features/core.io/feature.xml
 features/core.json/feature.xml
 features/core.legacy/feature.xml

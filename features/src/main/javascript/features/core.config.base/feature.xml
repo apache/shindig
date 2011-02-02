@@ -17,29 +17,26 @@
   specific language governing permissions and limitations under the License.
 -->
 <feature>
-  <name>core.config</name>
+  <name>core.config.base</name>
   <dependency>globals</dependency>
-  <dependency>core.config.base</dependency>
   <gadget>
-    <script src="validators.js"/>
+    <script src="config.js"/>
+    <script src="configgadget.js"/>
     <api>
-      <exports type="js">gadgets.config.EnumValidator</exports>
-      <exports type="js">gadgets.config.RegExValidator</exports>
-      <exports type="js">gadgets.config.ExistsValidator</exports>
-      <exports type="js">gadgets.config.NonEmptyStringValidator</exports>
-      <exports type="js">gadgets.config.BooleanValidator</exports>
-      <exports type="js">gadgets.config.LikeValidator</exports>
+      <exports type="js">gadgets.config.register</exports>
+      <exports type="js">gadgets.config.get</exports>
+      <exports type="js">gadgets.config.init</exports>
+      <exports type="js">gadgets.config.isGadget</exports>
     </api>
   </gadget>
   <container>
-    <script src="validators.js"/>
+    <script src="config.js"/>
+    <script src="configcontainer.js"/>
     <api>
-      <exports type="js">gadgets.config.EnumValidator</exports>
-      <exports type="js">gadgets.config.RegExValidator</exports>
-      <exports type="js">gadgets.config.ExistsValidator</exports>
-      <exports type="js">gadgets.config.NonEmptyStringValidator</exports>
-      <exports type="js">gadgets.config.BooleanValidator</exports>
-      <exports type="js">gadgets.config.LikeValidator</exports>
+      <exports type="js">gadgets.config.register</exports>
+      <exports type="js">gadgets.config.get</exports>
+      <exports type="js">gadgets.config.init</exports>
+      <exports type="js">gadgets.config.isContainer</exports>
     </api>
   </container>
 </feature>
