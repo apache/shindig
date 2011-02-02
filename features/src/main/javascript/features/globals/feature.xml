@@ -19,19 +19,19 @@
 <feature>
   <name>globals</name>
   <gadget>
-    <script src="globals.js"/>
     <api>
       <exports type="js">gadgets</exports>
-      <exports type="js">osapi</exports>
       <exports type="js">shindig</exports>
+      <exports type="js">osapi</exports>
     </api>
+    <script src="globals.js"/>
   </gadget>
   <container>
-    <script src="globals.js"/>
     <api>
       <exports type="js">gadgets</exports>
       <exports type="js">osapi</exports>
       <exports type="js">shindig</exports>
     </api>
+    <script src="globals.js"/>
   </container>
 </feature>
