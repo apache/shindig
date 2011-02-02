@@ -17,30 +17,14 @@ KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 -->
 <feature>
-<!--
-Required config:
-
-parentRelayUrl: The url of the relay file for this service.
-
-Optional config:
-
-useLegacyProtocol: Boolean
-(if true, all calls to rpc.call will use the same wire format as ifpc).
--->
   <name>rpc</name>
   <dependency>globals</dependency>
-  <dependency>core.config</dependency>
-  <dependency>core.log</dependency>
+  <dependency>core.config.base</dependency>
   <dependency>core.json</dependency>
-  <dependency>core.util</dependency>
+  <dependency>core.util.urlparams</dependency>
   <gadget>
-    <script src="wpm.transport.js"/>
-    <script src="fe.transport.js"/>
-    <script src="nix.transport.js"/>
-    <script src="rmr.transport.js"/>
-    <script src="ifpc.transport.js"/>
-    <script src="rpc.js"/>
     <api>
+      <exports type="js">gadgets.rpc</exports>
       <exports type="js">gadgets.rpc.config</exports>
       <exports type="js">gadgets.rpc.register</exports>
       <exports type="js">gadgets.rpc.unregister</exports>
@@ -60,15 +44,16 @@ useLegacyProtocol: Boolean
       <exports type="js">gadgets.rpc.getOrigin</exports>
       <exports type="js">gadgets.rpc.getReceiverOrigin</exports>
     </api>
+    <script src="wpm.transport.js"/>
+    <script src="fe.transport.js"/>
+    <script src="nix.transport.js"/>
+    <script src="rmr.transport.js"/>
+    <script src="ifpc.transport.js"/>
+    <script src="rpc.js"/>
   </gadget>
   <container>
-    <script src="wpm.transport.js"/>
-    <script src="fe.transport.js"/>
-    <script src="nix.transport.js"/>
-    <script src="rmr.transport.js"/>
-    <script src="ifpc.transport.js"/>
-    <script src="rpc.js"/>
     <api>
+      <exports type="js">gadgets.rpc</exports>
       <exports type="js">gadgets.rpc.config</exports>
       <exports type="js">gadgets.rpc.register</exports>
       <exports type="js">gadgets.rpc.unregister</exports>
@@ -88,5 +73,11 @@ useLegacyProtocol: Boolean
       <exports type="js">gadgets.rpc.getOrigin</exports>
       <exports type="js">gadgets.rpc.getReceiverOrigin</exports>
     </api>
+    <script src="wpm.transport.js"/>
+    <script src="fe.transport.js"/>
+    <script src="nix.transport.js"/>
+    <script src="rmr.transport.js"/>
+    <script src="ifpc.transport.js"/>
+    <script src="rpc.js"/>
   </container>
 </feature>

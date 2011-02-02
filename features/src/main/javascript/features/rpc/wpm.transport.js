@@ -50,6 +50,22 @@ if (!gadgets.rpctx.wpm) {  // make lib resilient to double-inclusion
     var pmEventDomain = false;
     var isForceSecure = false;
 
+    function attachBrowserEvent(eventName, callback, useCapture) {
+      if (typeof window.addEventListener != 'undefined') {
+        window.addEventListener(eventName, callback, useCapture);
+      } else if (typeof window.attachEvent != 'undefined') {
+        window.attachEvent('on' + eventName, callback);
+      }
+    }
+
+    function removeBrowserEvent(eventName, callback, useCapture) {
+      if (window.removeEventListener) {
+        window.removeEventListener(eventName, callback, useCapture);
+      } else if (window.detachEvent) {
+        window.detachEvent('on' + eventName, callback);
+      }
+    }
+
     // Some browsers (IE, Opera) have an implementation of postMessage that is
     // synchronous, although HTML5 specifies that it should be asynchronous.  In
     // order to make all browsers behave consistently, we run a small test to detect
@@ -60,7 +76,6 @@ if (!gadgets.rpctx.wpm) {  // make lib resilient to double-inclusion
     // event.origin does not exist, use event.domain.  The other difference is that
     // while event.origin looks like <scheme>://<hostname>:<port>, event.domain
     // consists only of <hostname>.
-    //
     function testPostMessage() {
       var hit = false;
 
@@ -73,7 +88,7 @@ if (!gadgets.rpctx.wpm) {  // make lib resilient to double-inclusion
         }
       }
 
-      gadgets.util.attachBrowserEvent(window, 'message', receiveMsg, false);
+      attachBrowserEvent('message', receiveMsg, false);
       window.postMessage('postmessage.test', '*');
 
       // if 'hit' is true here, then postMessage is synchronous
@@ -81,7 +96,7 @@ if (!gadgets.rpctx.wpm) {  // make lib resilient to double-inclusion
         pmSync = true;
       }
 
-      gadgets.util.removeBrowserEvent(window, 'message', receiveMsg, false);
+      removeBrowserEvent('message', receiveMsg, false);
     }
 
     function onmessage(packet) {
@@ -101,22 +116,6 @@ if (!gadgets.rpctx.wpm) {  // make lib resilient to double-inclusion
         }
       }
       process(rpc);
-    }
-
-    function getTargetOrigin(id, parentUrl) {
-      var siblingId = gadgets.rpc._parseSiblingId(id);
-      if (siblingId) {
-        // sibling
-        return siblingId.origin;
-      }
-
-      if (id == '..') {
-        // parent
-        return parentUrl;
-      } else {
-        // child
-        return document.getElementById(id).src;
-      }
     }
 
     return {
@@ -146,7 +145,7 @@ if (!gadgets.rpctx.wpm) {  // make lib resilient to double-inclusion
         }
 
         // Set up native postMessage handler.
-        gadgets.util.attachBrowserEvent(window, 'message', onmessage, false);
+        attachBrowserEvent('message', onmessage, false);
 
         ready('..', true);  // Immediately ready to send to parent.
         return true;
@@ -167,11 +166,9 @@ if (!gadgets.rpctx.wpm) {  // make lib resilient to double-inclusion
       },
 
       call: function(targetId, from, rpc) {
-        var targetWin = gadgets.rpc._getTargetWin(targetId);
         // targetOrigin = canonicalized relay URL
-        var origRelay = gadgets.rpc.getRelayUrl(targetId) ||
-            getTargetOrigin(targetId, gadgets.util.getUrlParameters()['parent']);
-        var origin = gadgets.rpc.getOrigin(origRelay);
+        var origin = gadgets.rpc.getTargetOrigin(targetId);
+        var targetWin = gadgets.rpc._getTargetWin(targetId);
         if (origin) {
           postMessage(targetWin, gadgets.json.stringify(rpc), origin);
         } else {

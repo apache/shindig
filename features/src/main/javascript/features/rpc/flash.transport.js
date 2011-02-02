@@ -33,8 +33,7 @@ if (!gadgets.rpctx.flash) {  // make lib resilient to double-inclusion
 
   gadgets.rpctx.flash = function() {
     // TODO: provide method to override this
-    // TODO: implement xpc swf servlet
-    var swfUrl = "//flashrpctx.googleusercontent.com/xpc.swf";
+    var swfUrl = "//flashrpc.googleusercontent.com/xpc.swf";
     var process = null;
     var ready = null;
     var secureReceivers = {};
