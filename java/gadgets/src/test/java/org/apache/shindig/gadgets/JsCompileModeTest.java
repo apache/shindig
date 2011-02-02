@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.shindig.gadgets;
 
 import static org.junit.Assert.assertEquals;
@@ -26,9 +25,9 @@ import org.junit.Test;
 public class JsCompileModeTest {
   @Test
   public void testValueOfParam() {
-    assertEquals(JsCompileMode.DEBUG, JsCompileMode.valueOfParam(null));
-    assertEquals(JsCompileMode.DEBUG, JsCompileMode.valueOfParam("0"));
-    assertEquals(JsCompileMode.BUILD_TIME_COMPILE, JsCompileMode.valueOfParam("1"));
-    assertEquals(JsCompileMode.RUN_TIME_COMPILE, JsCompileMode.valueOfParam("2"));
+    assertEquals(JsCompileMode.BUILD_TIME, JsCompileMode.valueOfParam(null));
+    assertEquals(JsCompileMode.BUILD_TIME, JsCompileMode.valueOfParam("0"));
+    assertEquals(JsCompileMode.ALL_RUN_TIME, JsCompileMode.valueOfParam("1"));
+    assertEquals(JsCompileMode.EXPLICIT_RUN_TIME, JsCompileMode.valueOfParam("2"));
   }
 }

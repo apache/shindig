@@ -21,6 +21,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.JsonSerializer;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.GadgetContext;
+import org.apache.shindig.gadgets.JsCompileMode;
 import org.apache.shindig.gadgets.RenderingContext;
 import org.apache.shindig.gadgets.config.ConfigContributor;
 import org.apache.shindig.gadgets.features.ApiDirective;
@@ -49,7 +50,7 @@ import com.google.inject.Singleton;
 @Singleton
 public class JsHandler {
   private static final Collection<String> EMPTY_SET = Sets.newHashSet();
-  
+
   protected final FeatureRegistry registry;
   protected final ContainerConfig containerConfig;
   protected final Map<String, ConfigContributor> configContributors;
@@ -64,14 +65,17 @@ public class JsHandler {
     this.containerConfig = containerConfig;
     this.configContributors = configContributors;
   }
-  
+
   @Inject(optional = true)
   public void setSupportCompiler(JsCompiler compiler) {
     this.compiler = compiler;
   }
-  
-  protected boolean shouldUseCompiler(JsUri jsUri) {
-    return compiler != null;
+
+  protected boolean willCompile(JsUri jsUri) {
+    JsCompileMode mode = jsUri.getCompileMode();
+    return (compiler != null) && !jsUri.isDebug() && (
+       mode == JsCompileMode.ALL_RUN_TIME ||
+       mode == JsCompileMode.EXPLICIT_RUN_TIME);
   }
 
   /**
@@ -87,9 +91,9 @@ public class JsHandler {
     Collection<String> needed = jsUri.getLibs();
     String container = ctx.getContainer();
     boolean isProxyCacheable = true;
-    
+
     FeatureRegistry.LookupResult lookup = registry.getFeatureResources(ctx, needed, null);
-    
+
     // Quick-and-dirty implementation of incremental JS loading.
     Collection<String> alreadyLoaded = EMPTY_SET;
     Collection<String> alreadyHaveLibs = jsUri.getLoadedLibs();
@@ -98,14 +102,15 @@ public class JsHandler {
     }
 
     // Collate all JS desired for the current request.
+    boolean willCompile = willCompile(jsUri);
     StringBuilder jsData = new StringBuilder();
-    List<String> externs = Lists.newArrayList();
-    boolean doCompile = !jsUri.isDebug() && shouldUseCompiler(jsUri);
-    Set<String> everythingExported = Sets.newHashSet();
+    List<String> allExterns = Lists.newArrayList();
+    Set<String> allExports = Sets.newHashSet();
+
     for (FeatureRegistry.FeatureBundle bundle : lookup.getBundles()) {
       if (alreadyLoaded.contains(bundle.getName())) continue;
       for (FeatureResource featureResource : bundle.getResources()) {
-        String content = jsUri.isDebug() || doCompile
+        String content = jsUri.isDebug() || willCompile
            ? featureResource.getDebugContent() : featureResource.getContent();
         if (content == null) content = "";
         if (!featureResource.isExternal()) {
@@ -117,19 +122,25 @@ public class JsHandler {
         isProxyCacheable = isProxyCacheable && featureResource.isProxyCacheable();
         jsData.append(";\n");
       }
-    
-      if (doCompile) {
-        // Add all needed exports while collecting externs.
+
+      if (willCompile) {
+
         List<String> rawExports = Lists.newArrayList();
-        for (ApiDirective api : bundle.getApis()) {
-          if (api.getType() == ApiDirective.Type.JS) {
-            if (api.isExports()) {
-              rawExports.add(api.getValue());
-            } else if (api.isUses()) {
-              externs.add(api.getValue());
-            }
+
+        // Add exports of bundle, regardless.
+        if (jsUri.getCompileMode() == JsCompileMode.ALL_RUN_TIME) {
+          appendExportsForBundle(bundle, rawExports);
+
+        // Add exports of bundle if it is an explicitly-specified feature.
+        } else if (jsUri.getCompileMode() == JsCompileMode.EXPLICIT_RUN_TIME) {
+          if (needed.contains(bundle.getName())) {
+            appendExportsForBundle(bundle, rawExports);
           }
         }
+
+        // Add externs for this bundle.
+        appendExternsForBundle(bundle, allExterns);
+
         Collections.sort(rawExports);
         String prevExport = null;
         for (String export : rawExports) {
@@ -138,10 +149,10 @@ public class JsHandler {
             String base = "window";
             for (int i = 0; i < pieces.length; ++i) {
               String symExported = (i == 0) ? pieces[0] : base + "." + pieces[i];
-              if (!everythingExported.contains(symExported)) {
+              if (!allExports.contains(symExported)) {
                 String curExport = base + "['" + pieces[i] + "']=" + symExported + ";\n";
                 jsData.append(curExport);
-                everythingExported.add(symExported);
+                allExports.add(symExported);
               }
               base = symExported;
             }
@@ -150,11 +161,11 @@ public class JsHandler {
         }
       }
     }
-    
+
     // Compile if desired. Specific compiler options are provided to the JsCompiler instance.
-    if (doCompile) {
+    if (willCompile) {
       StringBuilder compiled = new StringBuilder();
-      JsCompiler.Result result = compiler.compile(jsData.toString(), externs);
+      JsCompiler.Result result = compiler.compile(jsData.toString(), allExterns);
       String code = result.getCode();
       if (code != null) {
         compiled.append(code);
@@ -187,9 +198,25 @@ public class JsHandler {
         jsData.append("gadgets.config.init(").append(JsonSerializer.serialize(config)).append(");\n");
       }
     }
-    
+
     // Wrap up the response.
     return new Response(jsData, isProxyCacheable);
+  }
+
+  private void appendExternsForBundle(FeatureRegistry.FeatureBundle bundle, List<String> externs) {
+    for (ApiDirective api : bundle.getApis()) {
+      if (api.getType() == ApiDirective.Type.JS && api.isUses()) {
+        externs.add(api.getValue());
+      }
+    }
+  }
+
+  private void appendExportsForBundle(FeatureRegistry.FeatureBundle bundle, List<String> exports) {
+    for (ApiDirective api : bundle.getApis()) {
+      if (api.getType() == ApiDirective.Type.JS && api.isExports()) {
+        exports.add(api.getValue());
+      }
+    }
   }
 
   /**

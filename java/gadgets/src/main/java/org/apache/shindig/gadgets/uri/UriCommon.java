@@ -47,6 +47,7 @@ public interface UriCommon {
 
     // JS request params
     CONTAINER_MODE("c"),
+    COMPILE_MODE("compile"),
     JSLOAD("jsload"),
     ONLOAD("onload"),
     ALREADY_HAVE("loaded"),

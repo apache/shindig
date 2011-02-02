@@ -24,6 +24,7 @@ import java.util.Collections;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.JsCompileMode;
 import org.apache.shindig.gadgets.RenderingContext;
 import org.apache.shindig.gadgets.uri.UriCommon.Param;
 
@@ -54,6 +55,7 @@ public interface JsUriManager {
     private final Collection<String> libs;
     private final Collection<String> loadedLibs;
     private final String onload;
+    private final JsCompileMode compileMode;
     private boolean jsload;
     private boolean nohint;
     private final RenderingContext context;
@@ -62,13 +64,16 @@ public interface JsUriManager {
     public JsUri(UriStatus status, Uri origUri, Collection<String> libs, Collection<String> have) {
       super(status, origUri);
       if (origUri != null) {
-        String param = origUri.getQueryParameter(Param.CONTAINER_MODE.getKey());
-        this.context = RenderingContext.valueOfParam(param);
+        String contextParam = origUri.getQueryParameter(Param.CONTAINER_MODE.getKey());
+        this.context = RenderingContext.valueOfParam(contextParam);
+        String compileParam = origUri.getQueryParameter(Param.COMPILE_MODE.getKey());
+        this.compileMode = JsCompileMode.valueOfParam(compileParam);
         this.jsload = "1".equals(origUri.getQueryParameter(Param.JSLOAD.getKey()));
         this.onload = origUri.getQueryParameter(Param.ONLOAD.getKey());
         this.nohint = "1".equals(origUri.getQueryParameter(Param.NO_HINT.getKey()));
       } else {
         this.context = RenderingContext.GADGET;
+        this.compileMode = JsCompileMode.BUILD_TIME;
         this.jsload = false;
         this.onload = null;
         this.nohint = false;
@@ -85,10 +90,11 @@ public interface JsUriManager {
     public JsUri(UriStatus status, Collection<String> libs, RenderingContext context,
                  String onload, boolean jsload, boolean nohint) {
       super(status, null);
-      this.context = context;
+      this.compileMode = JsCompileMode.BUILD_TIME;
       this.onload = onload;
       this.jsload = jsload;
       this.nohint = nohint;
+      this.context = context;
       this.libs = libs;
       this.loadedLibs = EMPTY_COLL;
       this.origUri = null;
@@ -96,6 +102,7 @@ public interface JsUriManager {
 
     public JsUri(Gadget gadget, Collection<String> libs) {
       super(gadget);
+      this.compileMode = JsCompileMode.BUILD_TIME;
       this.onload = null;
       this.jsload = false;
       this.nohint = false;
@@ -108,6 +115,7 @@ public interface JsUriManager {
     public JsUri(Integer refresh, boolean debug, boolean noCache, String container, String gadget,
         Collection<String> libs, String onload, boolean jsload, boolean nohint, RenderingContext context, Uri origUri) {
       super(null, refresh, debug, noCache, container, gadget);
+      this.compileMode = JsCompileMode.BUILD_TIME;
       this.onload = onload;
       this.jsload = jsload;
       this.nohint = nohint;
@@ -116,7 +124,7 @@ public interface JsUriManager {
       this.loadedLibs = EMPTY_COLL;
       this.origUri = origUri;
     }
-    
+
     public JsUri(JsUri origJsUri) {
       super(origJsUri.getStatus(), origJsUri.getRefresh(),
           origJsUri.isDebug(),
@@ -128,6 +136,7 @@ public interface JsUriManager {
       this.onload = origJsUri.getOnload();
       this.jsload = origJsUri.isJsload();
       this.nohint = origJsUri.isNohint();
+      this.compileMode = origJsUri.getCompileMode();
       this.context = origJsUri.getContext();
       this.origUri = origJsUri.getOrigUri();
     }
@@ -135,11 +144,11 @@ public interface JsUriManager {
     public Collection<String> getLibs() {
       return libs;
     }
-    
+
     public Collection<String> getLoadedLibs() {
       return loadedLibs;
     }
-    
+
     private Collection<String> nonNullLibs(Collection<String> in) {
       in = in != null ? in : EMPTY_COLL;
       return Collections.unmodifiableCollection(in);
@@ -149,6 +158,10 @@ public interface JsUriManager {
       return context;
     }
 
+    public JsCompileMode getCompileMode() {
+      return compileMode;
+    }
+
     public String getOnload() {
       return onload;
     }
@@ -156,19 +169,19 @@ public interface JsUriManager {
     public boolean isJsload() {
       return jsload;
     }
-    
+
     public void setJsload(boolean jsload) {
       this.jsload = jsload;
     }
-    
+
     public boolean isNohint() {
       return nohint;
     }
-    
+
     public void setNohint(boolean nohint) {
       this.nohint = nohint;
     }
-    
+
     public Uri getOrigUri() {
       return origUri;
     }
@@ -188,8 +201,9 @@ public interface JsUriManager {
           && Objects.equal(this.onload, objUri.onload)
           && Objects.equal(this.jsload, objUri.jsload)
           && Objects.equal(this.nohint, objUri.nohint)
-          && Objects.equal(this.context, objUri.context))
-          && Objects.equal(this.origUri, objUri.origUri);
+          && Objects.equal(this.compileMode, objUri.compileMode)
+          && Objects.equal(this.context, objUri.context)
+          && Objects.equal(this.origUri, objUri.origUri));
     }
 
     @Override

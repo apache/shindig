@@ -18,9 +18,17 @@
 package org.apache.shindig.gadgets;
 
 public enum JsCompileMode {
-  DEBUG("0"),
-  BUILD_TIME_COMPILE("1"),
-  RUN_TIME_COMPILE("2");
+  // Concats all build-time compile-version JS.
+  BUILD_TIME("0"),
+  // Performs run-time compilation of concatenated built-time debug-version JS.
+  // All symbols exported (and as long as in transitive dependency) are
+  // retained/unbofuscated.
+  ALL_RUN_TIME("1"),
+  // Like run ALL_RUN_TIME, except the only retained/unobfuscated symbols are
+  // ones exported from the explicitly-requested features, ie: if feature=foo
+  // depends on feature=bar, /gadgets/js/foo will expose foo.* exported APIs,
+  // not bar.* exported APIs. This can potentially eliminate all un-used code.
+  EXPLICIT_RUN_TIME("2");
 
   private final String paramValue;
 
@@ -39,7 +47,7 @@ public enum JsCompileMode {
         return mode;
       }
     }
-    return JsCompileMode.DEBUG;
+    return JsCompileMode.BUILD_TIME;
   }
 
 }
