@@ -31,6 +31,7 @@ public class OptimizerConfig {
   private final float jpegCompression;
   private final int minThresholdBytes;
   private final boolean jpegHuffmanOptimization;
+  private final boolean jpegRetainSubsampling;
 
   @Inject
   public OptimizerConfig(
@@ -39,7 +40,8 @@ public class OptimizerConfig {
       @Named("shindig.image-rewrite.allow-jpeg-conversion") boolean jpegConversionAllowed,
       @Named("shindig.image-rewrite.jpeg-compression") float jpegCompression,
       @Named("shindig.image-rewrite.min-threshold-bytes") int minThresholdBytes,
-      @Named("shindig.image-rewrite.jpeg-huffman-optimization") boolean jpegHuffmanOptimization) {
+      @Named("shindig.image-rewrite.jpeg-huffman-optimization") boolean jpegHuffmanOptimization,
+      @Named("shindig.image-rewrite.jpeg-retain-subsampling") boolean jpegRetainSubsampling) {
     this.maxInMemoryBytes = maxInMemoryBytes;
     this.maxPaletteSize = maxPaletteSize;
     this.jpegConversionAllowed = jpegConversionAllowed;
@@ -48,13 +50,14 @@ public class OptimizerConfig {
     this.jpegCompression = Math.min(0.9f,Math.max(0.5f, jpegCompression));
     this.minThresholdBytes = minThresholdBytes;
     this.jpegHuffmanOptimization = jpegHuffmanOptimization;
+    this.jpegRetainSubsampling = jpegRetainSubsampling;
   }
 
   /**
    * Defaults for usage in tests.
    */
   public OptimizerConfig() {
-    this(1024 * 1024, 256, true, 0.90f, 200, false);
+    this(1024 * 1024, 256, true, 0.90f, 200, false, false);
   }
 
   /**
@@ -102,4 +105,12 @@ public class OptimizerConfig {
   public boolean getJpegHuffmanOptimization() {
     return jpegHuffmanOptimization;
   }
+
+  /**
+   * Indicate if we want to do retian original jpeg subsampling while encoding the jpeg's.
+   */
+  public boolean getJpegRetainSubsampling() {
+    return jpegRetainSubsampling;
+  }
+
 }

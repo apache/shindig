@@ -304,6 +304,11 @@ public class BasicImageRewriter implements ResponseRewriter {
         return;
       }
 
+      JpegImageUtils.JpegImageParams jpegImageParams = null;
+      if (imageFormat == ImageFormat.IMAGE_FORMAT_JPEG) {
+        jpegImageParams = JpegImageUtils.getJpegImageData(response.getContentBytes(), uri.getPath());
+      }
+
       // Step#1: Read the image using appropriate readers for the corresponding image format.
       BufferedImage image = readImage(imageFormat, response);
 
@@ -324,7 +329,7 @@ public class BasicImageRewriter implements ResponseRewriter {
 
       // Step#5: Optimize the supported image formats viz PNG, GIF, JPG & BMP using 'BaseOptimizer'
       // and it's subclass implementations for the above four formats.
-      applyOptimizer(response, imageFormat, image, config);
+      applyOptimizer(response, imageFormat, jpegImageParams, image, config);
     } catch (IOException ioe) {
       if (LOG.isLoggable(Level.WARNING)) {
         LOG.logp(Level.WARNING, classname, "rewrite", MessageKeys.IO_ERROR_REWRITING_IMG, new Object[] {request.toString(),ioe.getMessage()});
@@ -433,7 +438,8 @@ public class BasicImageRewriter implements ResponseRewriter {
   }
 
   protected void applyOptimizer(HttpResponseBuilder response, ImageFormat imageFormat,
-      BufferedImage image, OptimizerConfig config) throws IOException {
+      JpegImageUtils.JpegImageParams jpegImageParams, BufferedImage image,
+      OptimizerConfig config) throws IOException {
     if (imageFormat == ImageFormat.IMAGE_FORMAT_GIF) {
       // Detecting the existence of the NETSCAPE2.0 extension by string comparison
       // is not exactly clean but is good enough to determine if a GIF is animated
@@ -444,7 +450,7 @@ public class BasicImageRewriter implements ResponseRewriter {
     } else if (imageFormat == ImageFormat.IMAGE_FORMAT_PNG) {
       new PNGOptimizer(config, response).rewrite(image);
     } else if (imageFormat == ImageFormat.IMAGE_FORMAT_JPEG) {
-      new JPEGOptimizer(config, response).rewrite(image);
+      new JPEGOptimizer(config, response, jpegImageParams).rewrite(image);
     } else if (imageFormat == ImageFormat.IMAGE_FORMAT_BMP) {
       new BMPOptimizer(config, response).rewrite(image);
     }

@@ -22,10 +22,15 @@ import org.apache.sanselan.ImageWriteException;
 import org.apache.sanselan.Sanselan;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
-import com.google.common.base.Objects;
 
+import com.sun.imageio.plugins.jpeg.JPEG;
 import com.sun.imageio.plugins.jpeg.JPEGImageWriter;
 
 import java.awt.image.BufferedImage;
@@ -40,8 +45,9 @@ import javax.imageio.ImageIO;
 import javax.imageio.ImageTypeSpecifier;
 import javax.imageio.ImageWriteParam;
 import javax.imageio.ImageWriter;
-import javax.imageio.plugins.jpeg.JPEGImageWriteParam;
+import javax.imageio.metadata.IIOInvalidTreeException;
 import javax.imageio.metadata.IIOMetadata;
+import javax.imageio.plugins.jpeg.JPEGImageWriteParam;
 
 /**
  * Base class for image optimizers
@@ -59,13 +65,19 @@ abstract class BaseOptimizer {
   protected ImageOutputter outputter;
   protected byte[] minBytes;
   protected int minLength;
+  protected JpegImageUtils.JpegImageParams sourceImageParams;
   int reductionPct;
 
-
   public BaseOptimizer(OptimizerConfig config, HttpResponseBuilder response) {
+    this(config, response, null);
+  }
+
+  public BaseOptimizer(OptimizerConfig config, HttpResponseBuilder response,
+                       JpegImageUtils.JpegImageParams sourceImageParams) {
     this.config = config;
     this.response = response;
     this.minLength = response.getContentLength();
+    this.sourceImageParams = sourceImageParams;
     this.outputter = getOutputter();
   }
 
@@ -82,7 +94,12 @@ abstract class BaseOptimizer {
                 config.getJpegHuffmanOptimization());
         }
       }
-      return new ImageIOOutputter(writer, param);
+
+      JpegImageUtils.SamplingModes samplingMode = JpegImageUtils.SamplingModes.DEFAULT;
+      if (config.getJpegRetainSubsampling() && sourceImageParams != null) {
+        samplingMode = sourceImageParams.getSamplingMode();
+      }
+      return new ImageIOOutputter(writer, param, samplingMode);
     }
     return new SanselanOutputter(FORMAT_NAME_TO_IMAGE_FORMAT.get(getOriginalFormatName()));
   }
@@ -94,6 +111,7 @@ abstract class BaseOptimizer {
     if (image == null) {
       return;
     }
+    
     byte[] bytes = outputter.toBytes(image);
     if (minLength > bytes.length) {
       minBytes = bytes;
@@ -156,9 +174,17 @@ abstract class BaseOptimizer {
     ImageWriter writer;
     ByteArrayOutputStream baos;
     ImageWriteParam writeParam;
+    JpegImageUtils.SamplingModes jpegSamplingMode;
+
     public ImageIOOutputter(ImageWriter writer, ImageWriteParam writeParam) {
+      this(writer, writeParam, JpegImageUtils.SamplingModes.DEFAULT);
+    }
+
+    public ImageIOOutputter(ImageWriter writer, ImageWriteParam writeParam,
+                            JpegImageUtils.SamplingModes jpegSamplingMode) {
       this.writer = writer;
       this.writeParam = Objects.firstNonNull(writeParam, writer.getDefaultWriteParam());
+      this.jpegSamplingMode = jpegSamplingMode;
     }
 
     public byte[] toBytes(BufferedImage image) throws IOException {
@@ -185,10 +211,54 @@ abstract class BaseOptimizer {
       IIOMetadata metadata = writer.getDefaultImageMetadata(
           new ImageTypeSpecifier(image.getColorModel(), image.getSampleModel()),
           metaImageWriteParam);
+      
+      if (jpegSamplingMode.getModeValue() > 0 && writer instanceof JPEGImageWriter) {
+        setJpegSubsamplingMode(metadata);
+      }
+
       writer.write(null, new IIOImage(image, Collections.<BufferedImage>emptyList(), metadata),
                    metaImageWriteParam == null ? writeParam : null);
 
       return baos.toByteArray();
+    }
+
+    private void setJpegSubsamplingMode(IIOMetadata metadata)
+        throws IIOInvalidTreeException {
+      // Tweaking the image metadata to override default subsampling(4:2:0) with
+      // 4:4:4.
+      Node rootNode = metadata.getAsTree(JPEG.nativeImageMetadataFormatName);
+      boolean metadataUpdated = false;
+      // The top level root node has two children, out of which the second one will
+      // contain all the information related to image markers.
+      if (rootNode.getLastChild() != null) {
+        Node markerNode = rootNode.getLastChild();
+        NodeList markers = markerNode.getChildNodes();
+        // Search for 'SOF' marker where subsampling information is stored.
+        for (int i = 0; i < markers.getLength(); i++) {
+          Node node = markers.item(i);
+          // 'SOF' marker can have
+          //   1 child node if the color representation is greyscale,
+          //   3 child nodes if the color representation is YCbCr, and
+          //   4 child nodes if the color representation is YCMK.
+          // This subsampling applies only to YCbCr.
+          if (node.getNodeName().equalsIgnoreCase("sof") && node.hasChildNodes() &&
+              node.getChildNodes().getLength() == 3) {
+            // In 'SOF' marker, first child corresponds to the luminance channel, and setting
+            // the HsamplingFactor and VsamplingFactor to 1, will imply 4:4:4 chroma subsampling.
+            NamedNodeMap attrMap = node.getFirstChild().getAttributes();
+            int samplingMode = jpegSamplingMode.getModeValue();
+            attrMap.getNamedItem("HsamplingFactor").setNodeValue((samplingMode & 0xf) + "");
+            attrMap.getNamedItem("VsamplingFactor").setNodeValue(((samplingMode >> 4) & 0xf) + "");
+            metadataUpdated = true;
+            break;
+          }
+        }
+      }
+
+      // Read the updated metadata from the metadata node tree.
+      if (metadataUpdated) {
+        metadata.setFromTree(JPEG.nativeImageMetadataFormatName, rootNode);
+      }
     }
   }
 

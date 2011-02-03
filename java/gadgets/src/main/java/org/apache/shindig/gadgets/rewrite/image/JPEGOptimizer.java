@@ -57,6 +57,11 @@ public class JPEGOptimizer extends BaseOptimizer {
     super(config, response);
   }
 
+  public JPEGOptimizer(OptimizerConfig config, HttpResponseBuilder response,
+                       JpegImageUtils.JpegImageParams sourceImageParams) {
+    super(config, response, sourceImageParams);
+  }
+
   @Override
   protected void rewriteImpl(BufferedImage image) throws IOException {
     int pngLength = Integer.MAX_VALUE;
@@ -64,7 +69,8 @@ public class JPEGOptimizer extends BaseOptimizer {
       // Create a new optimizer config and disable JPEG conversion
       OptimizerConfig pngConfig = new OptimizerConfig(config.getMaxInMemoryBytes(),
           config.getMaxPaletteSize(), false, config.getJpegCompression(),
-          config.getMinThresholdBytes(), config.getJpegHuffmanOptimization());
+          config.getMinThresholdBytes(), config.getJpegHuffmanOptimization(),
+          config.getJpegRetainSubsampling());
 
       // Output the image as PNG
       PNGOptimizer pngOptimizer = new PNGOptimizer(pngConfig, response);

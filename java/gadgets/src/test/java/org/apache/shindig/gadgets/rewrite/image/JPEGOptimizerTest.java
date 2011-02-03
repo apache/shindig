@@ -48,6 +48,28 @@ public class JPEGOptimizerTest extends BaseOptimizerTest {
   }
 
   @Test
+  public void testRetainSubsmaplingDisabled() throws Exception {
+    HttpResponse resp =
+        createResponse("org/apache/shindig/gadgets/rewrite/image/testImage444.jpg", "image/jpeg");
+    HttpResponse rewritten = rewrite(resp, getConfigWithRetainSampling(false, 0.70f));
+    JpegImageUtils.JpegImageParams params =
+        JpegImageUtils.getJpegImageData(rewritten.getResponse(), "");
+    assertTrue(rewritten.getContentLength() < resp.getContentLength());
+    assertEquals(JpegImageUtils.SamplingModes.YUV420, params.getSamplingMode());
+  }
+
+  @Test
+  public void testRetainSubsmaplingEnabled() throws Exception {
+    HttpResponse resp =
+        createResponse("org/apache/shindig/gadgets/rewrite/image/testImage444.jpg", "image/jpeg");
+    HttpResponse rewritten = rewrite(resp, getConfigWithRetainSampling(true, 0.70f));
+    JpegImageUtils.JpegImageParams params =
+        JpegImageUtils.getJpegImageData(rewritten.getResponse(), "");
+    assertTrue(rewritten.getContentLength() < resp.getContentLength());
+    assertEquals(JpegImageUtils.SamplingModes.YUV444, params.getSamplingMode());
+  }
+
+  @Test
   public void testLargeJPEG() throws Exception {
     HttpResponse resp =
         createResponse("org/apache/shindig/gadgets/rewrite/image/large.jpg", "image/jpeg");
@@ -115,8 +137,9 @@ public class JPEGOptimizerTest extends BaseOptimizerTest {
   HttpResponse rewrite(HttpResponse original, OptimizerConfig config)
       throws IOException, ImageReadException {
     HttpResponseBuilder builder = new HttpResponseBuilder(original);
-    new JPEGOptimizer(config, builder).rewrite(
-        JPEGOptimizer.readJpeg(original.getResponse()));
+    new JPEGOptimizer(config, builder,
+                      JpegImageUtils.getJpegImageData(builder.getContentBytes(), ""))
+        .rewrite(JPEGOptimizer.readJpeg(original.getResponse()));
     return builder.create();
   }
 
@@ -125,6 +148,14 @@ public class JPEGOptimizerTest extends BaseOptimizerTest {
     return new OptimizerConfig(defaultConfig.getMaxInMemoryBytes(),
     defaultConfig.getMaxPaletteSize(), false,
     defaultConfig.getJpegCompression(), defaultConfig.getMinThresholdBytes(),
-    defaultConfig.getJpegHuffmanOptimization());
+    defaultConfig.getJpegHuffmanOptimization(), defaultConfig.getJpegRetainSubsampling());
+  }
+
+  OptimizerConfig getConfigWithRetainSampling(boolean enabled, float quality) {
+    OptimizerConfig defaultConfig = new OptimizerConfig();
+    return new OptimizerConfig(defaultConfig.getMaxInMemoryBytes(),
+       defaultConfig.getMaxPaletteSize(), defaultConfig.isJpegConversionAllowed(),
+       quality, defaultConfig.getMinThresholdBytes(), defaultConfig.getJpegHuffmanOptimization(),
+       enabled);
   }
 }
