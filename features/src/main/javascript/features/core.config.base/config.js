@@ -225,6 +225,8 @@ gadgets.config = function() {
         configuration = config;
       }
       augmentConfig(configuration);
+      var inlineOverride = window["___config"] || {};
+      foldConfig(configuration, inlineOverride);
       for (var name in components) {
         if (components.hasOwnProperty(name)) {
           var componentList = components[name], conf = configuration[name];

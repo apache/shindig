@@ -37,6 +37,7 @@ ConfigTest.prototype.setUp = function() {
 ConfigTest.prototype.tearDown = function() {
   gadgets.config.update({}, true);  // "reset" gadgets lib
   window["___jsl"] = undefined;
+  window["___config"] = undefined;
 };
 
 ConfigTest.prototype.testBasic = function() {
@@ -159,6 +160,21 @@ ConfigTest.prototype.testUpdateMerge = function() {
   this.assertEquals("data", testListen.one.oneKey2);
   this.assertEquals("newtype", testListen.two[0]);
   this.assertEquals(123, testListen.three.foo);
+};
+
+ConfigTest.prototype.testMergeFromInlineConfig = function() {
+  var testListen;
+  gadgets.config.register("one", null, function(config) {
+    testListen = config;
+  });
+  window["___config"] = { one: { oneKey1: { oneSubkey1: "override" } } };
+  gadgets.config.init({
+    one: { oneKey1: { oneSubkey1: "oneVal1" }, oneKey2: "data" },
+    two: "twoVal1"
+  });
+  this.assertEquals("override", testListen.one.oneKey1.oneSubkey1);
+  this.assertEquals("data", testListen.one.oneKey2);
+  this.assertEquals("twoVal1", testListen.two);
 };
 
 ConfigTest.prototype.testValidator = function() {
