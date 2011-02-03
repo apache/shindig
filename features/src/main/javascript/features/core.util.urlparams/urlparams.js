@@ -81,7 +81,11 @@ gadgets['util'] = function() {
         // argname. Unclear on if it should do:
         // argname = argname.replace(/\+/g, " ");
         value = value.replace(/\+/g, ' ');
-        parsed[argName] = unesc(value);
+        try {
+          parsed[argName] = unesc(value);
+        } catch (e) {
+          // Undecodable/invalid value; ignore.
+        }
       }
       if (no_opt_url) {
         // Cache current-window params in parameters var.
