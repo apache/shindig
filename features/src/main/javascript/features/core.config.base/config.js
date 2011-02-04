@@ -55,6 +55,7 @@
  * configuration.
  */
 
+if (!gadgets.config) {
 gadgets.config = function() {
   var ___jsl;
   var components = {};
@@ -266,3 +267,4 @@ gadgets.config = function() {
     }
   }
 }();
+} // ! end double inclusion guard
