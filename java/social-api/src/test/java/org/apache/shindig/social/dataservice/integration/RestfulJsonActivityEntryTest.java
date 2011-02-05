@@ -135,8 +135,8 @@ public class RestfulJsonActivityEntryTest extends AbstractLargeRestfulTests {
 
   @Test
   public void testCreateActivityEntry() throws Exception {
-    String postData = "{title : 'hi mom!', body : 'and dad.', object : {id: '1'}}";
     // Create the activity entry
+    String postData = "{title : 'hi mom!', body : 'and dad.', object : {id: '1'}}";
     getResponse("/activitystreams/john.doe/@self", "POST", postData, null,
         ContentTypes.OUTPUT_JSON_CONTENT_TYPE);
 
@@ -144,7 +144,6 @@ public class RestfulJsonActivityEntryTest extends AbstractLargeRestfulTests {
     String resp = getResponse("/activitystreams/john.doe/@self", "GET", null,
         ContentTypes.OUTPUT_JSON_CONTENT_TYPE);
     JSONObject result = getJson(resp);
-
     assertEquals(3, result.getInt("totalResults"));
     assertEquals(0, result.getInt("startIndex"));
 
@@ -161,6 +160,43 @@ public class RestfulJsonActivityEntryTest extends AbstractLargeRestfulTests {
     assertEquals("hi mom!", jsonEntry.getString("title"));
     assertEquals("and dad.", jsonEntry.getString("body"));
     assertEquals("1", jsonEntry.getJSONObject("object").getString("id"));
+  }
+  
+  @Test
+  public void testUpdateActivityEntry() throws Exception {
+    // Create an activity entry
+    String postData = "{title : 'hi mom!', body : 'and dad.', object : {id: '1'}}";
+    getResponse("/activitystreams/john.doe/@self", "POST", postData, null,
+        ContentTypes.OUTPUT_JSON_CONTENT_TYPE);
+    
+    // Verify it can be retrieved
+    String resp = getResponse("/activitystreams/john.doe/@self", "GET", null,
+        ContentTypes.OUTPUT_JSON_CONTENT_TYPE);
+    JSONObject result = getJson(resp);
+    assertEquals(3, result.getInt("totalResults"));
+    assertEquals(0, result.getInt("startIndex"));
+    
+    // Update activity entry
+    postData = "{title: 'hi mom2!', body: 'and dad2.', object: {id: '1'}}";
+    getResponse("/activitystreams/john.doe/@self", "PUT", postData, null,
+        ContentTypes.OUTPUT_JSON_CONTENT_TYPE);
+    
+    // Retrieve activities and verify PUT was successful
+    resp = getResponse("/activitystreams/john.doe/@self", "GET", null,
+        ContentTypes.OUTPUT_JSON_CONTENT_TYPE);
+    result = getJson(resp);
+    assertEquals(3, result.getInt("totalResults"));
+    assertEquals(0, result.getInt("startIndex"));
+    
+    // Find updated entry and test
+    JSONArray entries = result.getJSONArray("entry");
+    for(int i = 0; i < entries.length(); i++) {
+      JSONObject entry = entries.getJSONObject(i);
+      if (entry.getJSONObject("object").getString("id").equals("1")) {
+        assertEquals("hi mom2!", entry.getString("title"));
+        assertEquals("and dad2.", entry.getString("body"));
+      }
+    }
   }
 
   // TODO: Add tests for the fields= parameter

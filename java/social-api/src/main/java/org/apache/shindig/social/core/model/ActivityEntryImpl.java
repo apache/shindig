@@ -42,7 +42,7 @@ public class ActivityEntryImpl implements ActivityEntry {
   private ActivityObject provider;
   private String title;
   private String body;
-  private Map<String, List<StandardLink>> standardLinks;
+  private Map<String, List<StandardLink>> links;
   private List<String> to;
   private List<String> cc;
   private List<String> bcc;
@@ -154,13 +154,13 @@ public class ActivityEntryImpl implements ActivityEntry {
   }
 
   /** {@inheritDoc} */
-  public Map<String, List<StandardLink>> getStandardLinks() {
-    return standardLinks;
+  public Map<String, List<StandardLink>> getLinks() {
+    return links;
   }
 
   /** {@inheritDoc} */
-  public void setStandardLinks(Map<String, List<StandardLink>> standardLinks) {
-    this.standardLinks = standardLinks;
+  public void setLinks(Map<String, List<StandardLink>> links) {
+    this.links = links;
   }
   
   /** {@inheritDoc} */

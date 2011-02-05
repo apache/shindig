@@ -1183,8 +1183,6 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
         jsonEntry.put(ActivityEntry.Field.OBJECT.toString(), jsonEntryObject);
       }
 
-      // TODO: bug fixed: jsonArray will not be null; will throw exception!
-      // Fix in createActivity()
       JSONArray jsonArray;
       if (db.getJSONObject(ACTIVITYSTREAMS_TABLE).has(userId.getUserId(token))) {
         jsonArray = db.getJSONObject(ACTIVITYSTREAMS_TABLE).getJSONArray(userId.getUserId(token));
@@ -1192,7 +1190,17 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
         jsonArray = new JSONArray();
         db.getJSONObject(ACTIVITYSTREAMS_TABLE).put(userId.getUserId(token), jsonArray);
       }
-      jsonArray.put(jsonEntry);
+      
+      // Check for object's ID in array; replace entry if found
+      boolean found = false;
+      for (int i = 0; i < jsonArray.length(); i++) {
+        JSONObject entry = jsonArray.getJSONObject(i);
+        if (entry.getJSONObject("object").getString("id").equals(jsonEntry.getJSONObject("object").getString("id"))) {
+          jsonArray.put(i, jsonEntry);
+          found = true;
+        }
+      }
+      if (!found) jsonArray.put(jsonEntry);
       return ImmediateFuture.newInstance(null);
     } catch (JSONException je) {
       throw new ProtocolException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, je.getMessage(), je);

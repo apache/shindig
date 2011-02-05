@@ -164,7 +164,7 @@ public class XStream081Configuration implements XStreamConfiguration {
         new ClassFieldMapping("activity", Activity.class),
         new ClassFieldMapping("activityEntry", ActivityEntry.class),
         new ClassFieldMapping("object", ActivityObject.class),
-        new ClassFieldMapping("standardLink", StandardLink.class),
+        new ClassFieldMapping("link", StandardLink.class),
         new ClassFieldMapping("actionLink", ActionLink.class),
         new ClassFieldMapping("mediaLink", MediaLink.class),
         new ClassFieldMapping("account", Account.class),
@@ -204,7 +204,7 @@ public class XStream081Configuration implements XStreamConfiguration {
         new ClassFieldMapping("activity", Activity.class),
         new ClassFieldMapping("activityEntry", ActivityEntry.class),
         new ClassFieldMapping("object", ActivityObject.class),
-        new ClassFieldMapping("standardLink", StandardLink.class),
+        new ClassFieldMapping("link", StandardLink.class),
         new ClassFieldMapping("actionLink", ActionLink.class),
         new ClassFieldMapping("mediaLink", MediaLink.class),
         new ClassFieldMapping("account", Account.class),
@@ -245,7 +245,7 @@ public class XStream081Configuration implements XStreamConfiguration {
         .put("activity", Activity.class)
         .put("activityEntry", ActivityEntry.class)
         .put("object", ActivityObject.class)
-        .put("standardLink", StandardLink.class)
+        .put("link", StandardLink.class)
         .put("actionLink", ActionLink.class)
         .put("mediaLink", MediaLink.class)
         .put("account", Account.class)

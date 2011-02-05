@@ -50,7 +50,7 @@ public interface ActivityObject {
     ACTION_LINKS("actionLinks"),
     UPSTREAM_DUPLICATES("upstreamDuplicates"),
     DOWNSTREAM_DUPLICATES("downstreamDuplicates"),
-    STANDARD_LINKS("standardLinks");
+    LINKS("links");
     
     /*
      * The name of the JSON element.
@@ -259,12 +259,12 @@ public interface ActivityObject {
    *
    * @return Map<String, List<StandardLink>> is the list of StandardLinks
    */
-  Map<String, List<StandardLink>> getStandardLinks();
+  Map<String, List<StandardLink>> getLinks();
 
   /**
-   * Set the standard link string
+   * Set the standard links
    *
-   * @param standardLinks the list of standard links
+   * @param links the list of standard links
    */
-  void setStandardLinks(Map<String, List<StandardLink>> standardLinks);
+  void setLinks(Map<String, List<StandardLink>> links);
 }

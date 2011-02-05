@@ -67,7 +67,7 @@ public class RestfulXmlActivityEntryTest extends AbstractLargeRestfulTests {
     actor.setDisplayName("John Doe");
     
     MediaLink image = new MediaLinkImpl();
-    image.setUrl("https://docs.google.com/uc?id=0B-zwcqgujo7CMTRmZTg3Y2UtZGZlYS00MTY4LWFjOTItNDRiNmY3MzRmYzQ5&export=download&hl=en");
+    image.setUrl("http://www.example.com/johnsalbum/cover.jpg");
     image.setType("http://activitystrea.ms/schema/1.0/picture");
     image.setWidth(400);
     image.setHeight(300);
@@ -75,25 +75,25 @@ public class RestfulXmlActivityEntryTest extends AbstractLargeRestfulTests {
     
     ActionLink actionLink1 = new ActionLinkImpl();
     actionLink1.setCaption("Frozen at the top of the German Alps");
-    actionLink1.setTarget("http://johnsalbums/germany123/mediaItem3");
+    actionLink1.setTarget("http://example.com/johnsalbum/frozen.jpg");
     ActionLink actionLink2 = new ActionLinkImpl();
     actionLink2.setCaption("Sign of Garmisch-Partenkirchen");
-    actionLink2.setTarget("http://johnsalbums/germany123/mediaItem6");
+    actionLink2.setTarget("http://example.com/johnsalbum/sign.jpg");
     List<ActionLink> actionLinks = new ArrayList<ActionLink>();
     actionLinks.add(actionLink1);
     actionLinks.add(actionLink2);
     
     StandardLink standardLink1 = new StandardLinkImpl();
-    standardLink1.setHref("www.mypics.com/1");
+    standardLink1.setHref("http://www.example.com/johnsalbum/1.jpg");
     standardLink1.setType("image/jpg");
     StandardLink standardLink2 = new StandardLinkImpl();
-    standardLink2.setHref("www.mypics.com/2");
+    standardLink2.setHref("http://www.example.com/johnsalbum/2.jpg");
     standardLink2.setType("image/jpg");
     StandardLink standardLink3 = new StandardLinkImpl();
-    standardLink3.setHref("www.mypics.com/3");
+    standardLink3.setHref("http://www.example.com/johnsalbum/3.jpg");
     standardLink3.setType("image/jpg");
     StandardLink standardLink4 = new StandardLinkImpl();
-    standardLink4.setHref("www.mypics.com/4");
+    standardLink4.setHref("http://www.example.com/johnsalbum/4.jpg");
     standardLink4.setType("image/jpg");
     List<StandardLink> standardLinksList1 = new ArrayList<StandardLink>();
     standardLinksList1.add(standardLink1);
@@ -108,7 +108,7 @@ public class RestfulXmlActivityEntryTest extends AbstractLargeRestfulTests {
     ActivityObject johnsObject = new ActivityObjectImpl();
     johnsObject.setId("object1");
     johnsObject.setDisplayName("Frozen Eric");
-    johnsObject.setLink("http://www.johnsalbums/germany123");
+    johnsObject.setLink("http://www.example.com/johnsalbum");
     johnsObject.setObjectType("picture");
     johnsObject.setImage(image);
     johnsObject.setActionLinks(actionLinks);
@@ -126,7 +126,7 @@ public class RestfulXmlActivityEntryTest extends AbstractLargeRestfulTests {
     entry.setActor(actor);
     entry.setVerb("post");
     entry.setObject(johnsObject);
-    entry.setStandardLinks(standardLinks);
+    entry.setLinks(standardLinks);
     entry.setTo(to);
     entry.setCc(cc);
     return entry;
@@ -239,7 +239,7 @@ public class RestfulXmlActivityEntryTest extends AbstractLargeRestfulTests {
       assertListsStringEqual(entry.getBcc(), (NodeList)xpath.evaluate("bcc", entryNode, XPathConstants.NODESET));
       
       // Test ActivityEntry's Map<String, List<StandardLink>>
-      assertStandardLinkMapsEqual(entry.getStandardLinks(), (Node)xpath.evaluate("standardLinks", entryNode, XPathConstants.NODE));
+      assertStandardLinkMapsEqual(entry.getLinks(), (Node)xpath.evaluate("links", entryNode, XPathConstants.NODE));
     } else {
       assertNull("EntryNode should be null", entryNode);
     }
@@ -267,7 +267,7 @@ public class RestfulXmlActivityEntryTest extends AbstractLargeRestfulTests {
       assertActivityObjectsEqual(object.getInReplyTo(), (Node)xpath.evaluate("inReplyTo", objectNode, XPathConstants.NODE));
       
       // Test ActivityObject's Map<String, List<StandardLink>> standardLinks
-      assertStandardLinkMapsEqual(object.getStandardLinks(), (Node)xpath.evaluate("standardLinks", objectNode, XPathConstants.NODE));
+      assertStandardLinkMapsEqual(object.getLinks(), (Node)xpath.evaluate("links", objectNode, XPathConstants.NODE));
       
       // Test ActivityObject's List<ActivityObject> elements
       assertListsActivityObjectEqual(object.getAttachedObjects(), (NodeList)xpath.evaluate("attachedObjects", objectNode, XPathConstants.NODESET));
@@ -296,7 +296,7 @@ public class RestfulXmlActivityEntryTest extends AbstractLargeRestfulTests {
       for (String rel : map.keySet()) {
         Node relNode = findNode("key", rel, entries);
         assertNotNull("'" + rel + "' rel not found", relNode);
-        NodeList standardLinkNodes = (NodeList)xpath.evaluate("value/standardLink", relNode, XPathConstants.NODESET);
+        NodeList standardLinkNodes = (NodeList)xpath.evaluate("value/link", relNode, XPathConstants.NODESET);
         List<StandardLink> standardLinks = map.get(rel);
         assertListsStandardLinkEqual(standardLinks, standardLinkNodes);
       }

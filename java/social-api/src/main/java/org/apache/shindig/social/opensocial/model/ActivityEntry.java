@@ -51,7 +51,7 @@ public interface ActivityEntry {
     PROVIDER("provider"),
     TITLE("title"),
     BODY("body"),
-    STANDARD_LINKS("standardLinks"),
+    LINKS("links"),
     TO("to"),
     CC("cc"),
     BCC("bcc");
@@ -261,18 +261,18 @@ public interface ActivityEntry {
   void setBody(String body);
 
   /**
-   * <p>getStandardLinks</p>
+   * <p>links</p>
    *
    * @return a {@link java.util.Map} object.
    */
-  Map<String, List<StandardLink>> getStandardLinks();
+  Map<String, List<StandardLink>> getLinks();
 
   /**
-   * <p>setStandardLinks</p>
+   * <p>setLinks</p>
    *
-   * @param standardLinks a {@link java.util.Map} object.
+   * @param links a {@link java.util.Map} object.
    */
-  void setStandardLinks(Map<String, List<StandardLink>> standardLinks);
+  void setLinks(Map<String, List<StandardLink>> links);
   
   /**
    * <p>getTo</p>

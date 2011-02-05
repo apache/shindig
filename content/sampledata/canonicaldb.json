@@ -361,21 +361,21 @@
 		"to": ["jane.doe", "canonical"],
 		"cc": ["george.doe"],
 		"verb": "post",
-		"standardLinks": {
+		"links": {
 			"myRel1": 
-				[{"href": "www.mypics.com/1", "type": "image/jpg"},
-				{"href": "www.mypics.com/2", "type": "image/jpg"}],
+				[{"href": "http://www.example.com/johnsalbum/1.jpg", "type": "image/jpg"},
+				{"href": "http://www.example.com/johnsalbum/2.jpg", "type": "image/jpg"}],
 			"myRel2":
-				[{"href": "www.mypics.com/3", "type": "image/jpg"},
-				{"href": "www.mypics.com/4", "type": "image/jpg"}]
+				[{"href": "http://www.example.com/johnsalbum/3.jpg", "type": "image/jpg"},
+				{"href": "http://www.example.com/johnsalbum/4.jpg", "type": "image/jpg"}]
 		},
 		"object": {
 			"id": "object1",
 			"displayName": "Frozen Eric",
-			"link": "http://www.johnsalbums/germany123",
+			"link": "http://www.example.com/johnsalbum",
 			"objectType": "picture",
 			"image": {
-				"url": "https://docs.google.com/uc?id=0B-zwcqgujo7CMTRmZTg3Y2UtZGZlYS00MTY4LWFjOTItNDRiNmY3MzRmYzQ5&export=download&hl=en",
+				"url": "http://www.example.com/johnsalbum/cover.jpg",
 				"type": "http://activitystrea.ms/schema/1.0/picture",
 				"width": 400,
 				"height": 300,
@@ -383,10 +383,10 @@
 			},
 			"actionLinks": [
 				{
-					"target": "http://johnsalbums/germany123/mediaItem3",
+					"target": "http://example.com/johnsalbum/frozen.jpg",
 					"caption": "Frozen at the top of the German Alps"
 				}, {
-					"target": "http://johnsalbums/germany123/mediaItem6",
+					"target": "http://example.com/johnsalbum/sign.jpg",
 					"caption": "Sign of Garmisch-Partenkirchen"
 				}
 			]

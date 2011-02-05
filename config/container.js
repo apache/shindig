@@ -253,6 +253,8 @@
        "activity" : ["appId", "body", "bodyId", "externalId", "id", "mediaItems", "postedTime", "priority", 
                      "streamFaviconUrl", "streamSourceUrl", "streamTitle", "streamUrl", "templateParams", "title",
                      "url", "userId"],
+       "activityEntry" : ["icon", "postedTime", "actor", "verb", "object", "target", "generator", "provider", "title",
+                          "body", "standardLinks", "to", "cc", "bcc"],
        "album" : ["id", "thumbnailUrl", "title", "description", "location", "ownerId"],
        "mediaItem" : ["album_id", "created", "description", "duration", "file_size", "id", "language", "last_updated",
                       "location", "mime_type", "num_comments", "num_views", "num_votes", "rating", "start_time",

@@ -45,7 +45,7 @@ public class ActivityObjectImpl implements ActivityObject {
   private List<ActionLink> actionLinks;
   private List<String> upstreamDuplicates;
   private List<String> downstreamDuplicates;
-  private Map<String, List<StandardLink>> standardLinks;
+  private Map<String, List<StandardLink>> links;
   
   /**
    * A simple implementation of an ActivtyObject
@@ -184,12 +184,12 @@ public class ActivityObjectImpl implements ActivityObject {
   }
 
   /** {@inheritDoc} */
-  public Map<String, List<StandardLink>> getStandardLinks() {
-    return standardLinks;
+  public Map<String, List<StandardLink>> getLinks() {
+    return links;
   }
 
   /** {@inheritDoc} */
-  public void setStandardLinks(Map<String, List<StandardLink>> standardLinks) {
-    this.standardLinks = standardLinks;
+  public void setLinks(Map<String, List<StandardLink>> links) {
+    this.links = links;
   }
 }
