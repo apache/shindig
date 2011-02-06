@@ -205,7 +205,7 @@ public class DataServiceServlet extends ApiServlet {
 
   public BeanConverter getConverterForRequest(HttpServletRequest servletRequest) {
     String formatString = null;
-    BeanConverter converter = null;
+    BeanConverter converter = jsonConverter; // default is jsonConverter
     String contentType = null;
 
     try {
@@ -227,7 +227,6 @@ public class DataServiceServlet extends ApiServlet {
       }
     }
 
-
     if (contentType != null) {
       if (ContentTypes.ALLOWED_JSON_CONTENT_TYPES.contains(contentType)) {
         converter = jsonConverter;
@@ -235,9 +234,6 @@ public class DataServiceServlet extends ApiServlet {
         converter = atomConverter;
       } else if (ContentTypes.ALLOWED_XML_CONTENT_TYPES.contains(contentType)) {
         converter = xmlConverter;
-      } else if (formatString == null) {
-        // takes care of cases where content!= null but is ""
-        converter = jsonConverter;
       }
     } else if (formatString != null) {
       if (formatString.equals(ATOM_FORMAT)) {
@@ -247,8 +243,6 @@ public class DataServiceServlet extends ApiServlet {
       } else {
         converter = jsonConverter;
       }
-    } else {
-      converter = jsonConverter;
     }
     return converter;
   }
