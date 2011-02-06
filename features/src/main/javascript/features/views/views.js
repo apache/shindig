@@ -28,6 +28,11 @@
 gadgets.views = function() {
 
   /**
+   * all view constants
+   */
+  var _viewType = {};
+
+  /**
    * Reference to the current view object.
    */
   var currentView = null;
@@ -95,6 +100,8 @@ gadgets.views = function() {
         // TODO: Fix this by moving view names / config into a sub property.
         if (s != 'rewriteLinks') {
           var obj = conf[s];
+          var constantName = s.toUpperCase();
+          _viewType[constantName] = constantName;
           if (!obj) {
             continue;
           }
@@ -317,7 +324,9 @@ gadgets.views = function() {
      */
     getParams: function() {
       return params;
-    }
+    },
+    
+    ViewType: _viewType
   };
 }();
 
@@ -376,9 +385,3 @@ gadgets.views.View.prototype.bind = function(environment) {
 gadgets.views.View.prototype.isOnlyVisibleGadget = function() {
   return this.isOnlyVisible_;
 };
-
-gadgets.views.ViewType = gadgets.util.makeEnum([
-  'CANVAS', 'HOME', 'PREVIEW', 'PROFILE',
-  // TODO Deprecate the following ViewTypes.
-  'FULL_PAGE', 'DASHBOARD', 'POPUP'
-]);
