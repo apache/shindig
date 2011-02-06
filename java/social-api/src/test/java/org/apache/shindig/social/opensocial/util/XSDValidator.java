@@ -18,6 +18,7 @@
 package org.apache.shindig.social.opensocial.util;
 
 import org.apache.shindig.common.logging.i18n.MessageKeys;
+import org.apache.shindig.common.util.CharsetUtil;
 import org.w3c.dom.ls.LSInput;
 import org.w3c.dom.ls.LSResourceResolver;
 import org.xml.sax.SAXException;
@@ -25,7 +26,6 @@ import org.xml.sax.SAXException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
@@ -63,11 +63,7 @@ public class XSDValidator {
    * @return a list of errors or a 0 lenght string if none.
    */
   public static String validate(String xml, InputStream schema) {
-    try {
-      return validate(new ByteArrayInputStream(xml.getBytes("UTF-8")), schema);
-    } catch (UnsupportedEncodingException e) {
-      return e.getMessage();
-    }
+    return validate(new ByteArrayInputStream(CharsetUtil.getUtf8Bytes(xml)), schema);
   }
 
   /**

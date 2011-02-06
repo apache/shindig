@@ -21,6 +21,7 @@ package org.apache.shindig.gadgets.templates;
 import org.apache.shindig.common.cache.Cache;
 import org.apache.shindig.common.cache.CacheProvider;
 import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.common.util.CharsetUtil;
 import org.apache.shindig.common.util.HashUtil;
 import org.apache.shindig.common.xml.XmlException;
 import org.apache.shindig.common.xml.XmlUtil;
@@ -30,8 +31,6 @@ import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.RequestPipeline;
 import org.w3c.dom.Element;
-
-import java.io.UnsupportedEncodingException;
 
 import com.google.inject.Inject;
 
@@ -76,12 +75,8 @@ public class TemplateLibraryFactory {
       String key = null;
       Element element = null;
       if (!context.getIgnoreCache()) {
-        try {
-          key = HashUtil.checksum(content.getBytes("UTF-8"));
-          element = parsedXmlCache.getElement(key);
-        } catch (UnsupportedEncodingException e) {
-          // this won't happen, but if it does, cache won't be used.
-        }
+        key = HashUtil.checksum(CharsetUtil.getUtf8Bytes(content));
+        element = parsedXmlCache.getElement(key);
       }
 
       if (element == null) {

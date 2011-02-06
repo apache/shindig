@@ -23,6 +23,7 @@ import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.common.util.CharsetUtil;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.AuthType;
 import org.apache.shindig.gadgets.oauth.OAuthArguments;
@@ -33,7 +34,6 @@ import com.google.common.collect.Maps;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -371,11 +371,7 @@ public class HttpRequest {
    *     Content-Type header.
    */
   public String getPostBodyAsString() {
-    try {
-      return new String(postBody, "UTF-8");
-    } catch (UnsupportedEncodingException ignore) {
-      return "";
-    }
+    return CharsetUtil.newUtf8String(postBody);
   }
 
   /**

@@ -31,6 +31,13 @@ public final class CharsetUtil {
   private CharsetUtil() {}
   
   /**
+   * A clean version of String#getBytes that does not throw exceptions for
+   * the UTF-8 Charset.
+   *
+   * Replace all Callers with getBytes(Charsets.UTF_8) once
+   * we move to Java 6.
+   *
+   * @param s a string to convert
    * @return UTF-8 byte array for the input string.
    */
   public static byte[] getUtf8Bytes(String s) {
@@ -40,5 +47,18 @@ public final class CharsetUtil {
     ByteBuffer bb = Charsets.UTF_8.encode(s);
     return ArrayUtils.subarray(bb.array(), 0, bb.limit());
     
+  }
+
+  /**
+   * A clean version of new String(byte[], "UTF-8")
+   *
+   * Replace all callers with new String(b, Charsets.UTF_8) when
+   * we move to Java 6.
+   *
+   * @param b a byte array of UTF-8 bytes
+   * @return a UTF-8 encoded string
+   */
+  public static String newUtf8String(byte[] b) {
+    return Charsets.UTF_8.decode(ByteBuffer.wrap(b)).toString();
   }
 }

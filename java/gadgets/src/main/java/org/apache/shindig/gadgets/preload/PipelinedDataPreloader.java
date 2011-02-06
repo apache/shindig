@@ -255,7 +255,7 @@ public class PipelinedDataPreloader {
       String params = preload.getAttributes().get("params");
       if ((params != null) && !"".equals(params)) {
         if ("POST".equalsIgnoreCase(request.getMethod())) {
-          request.setPostBody(params.getBytes("UTF-8"));
+          request.setPostBody(CharsetUtil.getUtf8Bytes(params));
           request.setHeader("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
         } else {
           UriBuilder uriBuilder = new UriBuilder(request.getUri());

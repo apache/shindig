@@ -19,7 +19,6 @@
 
 package org.apache.shindig.gadgets.servlet;
 
-import com.google.common.base.Objects;
 import org.apache.shindig.auth.AuthInfoUtil;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.uri.Uri;

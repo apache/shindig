@@ -42,7 +42,7 @@ import java.util.Enumeration;
 import java.util.Map;
 
 /**
- * Jtility routines for dealing with servlets.
+ * Utility routines for dealing with servlets.
  *
  * @since 2.0.0
  */

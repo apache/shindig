@@ -100,183 +100,123 @@ public class OAuthEntry implements Serializable {
     return new Date(expirationTime);
   }
 
-
-  public String getAppId()
-  {
+  public String getAppId() {
     return appId;
   }
 
-
-  public String getCallbackUrl()
-  {
+  public String getCallbackUrl() {
     return callbackUrl;
   }
 
-
-  public boolean isCallbackUrlSigned()
-  {
+  public boolean isCallbackUrlSigned() {
     return callbackUrlSigned;
   }
 
-
-  public String getUserId()
-  {
+  public String getUserId() {
     return userId;
   }
 
-
-  public String getToken()
-  {
+  public String getToken() {
     return token;
   }
 
-
-  public String getTokenSecret()
-  {
+  public String getTokenSecret() {
     return tokenSecret;
   }
 
-
-  public boolean isAuthorized()
-  {
+  public boolean isAuthorized() {
     return authorized;
   }
 
-
-  public String getConsumerKey()
-  {
+  public String getConsumerKey() {
     return consumerKey;
   }
 
-
-  public Type getType()
-  {
+  public Type getType() {
     return type;
   }
 
-
-  public Date getIssueTime()
-  {
+  public Date getIssueTime() {
     return issueTime;
   }
 
-
-  public String getDomain()
-  {
+  public String getDomain() {
     return domain;
   }
 
-
-  public String getContainer()
-  {
+  public String getContainer() {
     return container;
   }
 
-
-  public String getOauthVersion()
-  {
+  public String getOauthVersion() {
     return oauthVersion;
   }
 
-
-  public String getCallbackToken()
-  {
+  public String getCallbackToken() {
     return callbackToken;
   }
 
-
-  public int getCallbackTokenAttempts()
-  {
+  public int getCallbackTokenAttempts() {
     return callbackTokenAttempts;
   }
 
-
-  public void setAppId(String appId)
-  {
+  public void setAppId(String appId) {
     this.appId = appId;
   }
 
-
-  public void setCallbackUrl(String callbackUrl)
-  {
+  public void setCallbackUrl(String callbackUrl) {
     this.callbackUrl = callbackUrl;
   }
 
-
-  public void setCallbackUrlSigned(boolean callbackUrlSigned)
-  {
+  public void setCallbackUrlSigned(boolean callbackUrlSigned) {
     this.callbackUrlSigned = callbackUrlSigned;
   }
 
-
-  public void setUserId(String userId)
-  {
+  public void setUserId(String userId) {
     this.userId = userId;
   }
 
-
-  public void setToken(String token)
-  {
+  public void setToken(String token) {
     this.token = token;
   }
 
-
-  public void setTokenSecret(String tokenSecret)
-  {
+  public void setTokenSecret(String tokenSecret) {
     this.tokenSecret = tokenSecret;
   }
 
-
-  public void setAuthorized(boolean authorized)
-  {
+  public void setAuthorized(boolean authorized) {
     this.authorized = authorized;
   }
 
-
-  public void setConsumerKey(String consumerKey)
-  {
+  public void setConsumerKey(String consumerKey) {
     this.consumerKey = consumerKey;
   }
 
-
-  public void setType(Type type)
-  {
+  public void setType(Type type) {
     this.type = type;
   }
 
-
-  public void setIssueTime(Date issueTime)
-  {
+  public void setIssueTime(Date issueTime) {
     this.issueTime = issueTime;
   }
 
-
-  public void setDomain(String domain)
-  {
+  public void setDomain(String domain) {
     this.domain = domain;
   }
 
-
-  public void setContainer(String container)
-  {
+  public void setContainer(String container) {
     this.container = container;
   }
 
-
-  public void setOauthVersion(String oauthVersion)
-  {
+  public void setOauthVersion(String oauthVersion) {
     this.oauthVersion = oauthVersion;
   }
 
-
-  public void setCallbackToken(String callbackToken)
-  {
+  public void setCallbackToken(String callbackToken) {
     this.callbackToken = callbackToken;
   }
 
-
-  public void setCallbackTokenAttempts(int callbackTokenAttempts)
-  {
+  public void setCallbackTokenAttempts(int callbackTokenAttempts) {
     this.callbackTokenAttempts = callbackTokenAttempts;
   }
 }

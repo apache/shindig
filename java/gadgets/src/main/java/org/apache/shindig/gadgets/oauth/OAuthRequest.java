@@ -16,7 +16,6 @@
  */
 package org.apache.shindig.gadgets.oauth;
 
-import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
@@ -539,7 +538,7 @@ public class OAuthRequest {
         try {
           byte[] body = IOUtils.toByteArray(base.getPostBody());
           byte[] hash = DigestUtils.sha(body);
-          String b64 = new String(Base64.encodeBase64(hash), Charsets.UTF_8.name());
+          String b64 = CharsetUtil.newUtf8String(Base64.encodeBase64(hash));
           params.add(new Parameter(OAuthConstants.OAUTH_BODY_HASH, b64));
         } catch (IOException e) {
           throw new OAuthRequestException(OAuthError.UNKNOWN_PROBLEM,

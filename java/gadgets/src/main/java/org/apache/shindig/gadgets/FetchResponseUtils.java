@@ -68,9 +68,8 @@ public final class FetchResponseUtils {
       resp.put("headers", headers);
     }
     // Merge in additional response data
-    for (Map.Entry<String, String> entry : response.getMetadata().entrySet()) {
-      resp.put(entry.getKey(), entry.getValue());
-    }
+    resp.putAll(response.getMetadata());
+
     return resp;
   }
 

@@ -22,8 +22,8 @@ import com.google.common.collect.Maps;
 
 import org.apache.shindig.common.logging.i18n.MessageKeys;
 import org.apache.shindig.common.util.Base32;
+import org.apache.shindig.common.util.CharsetUtil;
 
-import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Map;
@@ -68,17 +68,12 @@ public class HttpResponseMetadataHelper {
       MessageDigest md5 = MessageDigest.getInstance("MD5");
       md5.update(response.getResponseAsBytes());
       byte[] md5val = md5.digest();
-      return new String(Base32.encodeBase32(md5val), "UTF-8");
+      return CharsetUtil.newUtf8String(Base32.encodeBase32(md5val));
     } catch (NoSuchAlgorithmException e) {
       // Should not happen
       if (LOG.isLoggable(Level.INFO)) {
         LOG.logp(Level.INFO, classname, "getHash", MessageKeys.ERROR_GETTING_MD5);
       } 
-    } catch (UnsupportedEncodingException e) {
-      // Should not happen
-      if (LOG.isLoggable(Level.INFO)) {
-        LOG.logp(Level.INFO, classname, "getHash", MessageKeys.ERROR_PARSING_MD5);
-      }     
     }
     return null;
   }

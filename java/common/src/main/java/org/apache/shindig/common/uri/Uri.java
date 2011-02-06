@@ -21,13 +21,12 @@ package org.apache.shindig.common.uri;
 import com.google.common.base.Strings;
 
 import com.google.common.base.Objects;
-import com.google.common.collect.Maps;
+import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -61,10 +60,8 @@ public final class Uri {
     path = builder.getPath();
     query = builder.getQuery();
     fragment = builder.getFragment();
-    queryParameters
-        = Collections.unmodifiableMap(Maps.newLinkedHashMap(builder.getQueryParameters()));
-    fragmentParameters
-        = Collections.unmodifiableMap(Maps.newLinkedHashMap(builder.getFragmentParameters()));
+    queryParameters = ImmutableMap.copyOf(builder.getQueryParameters());
+    fragmentParameters = ImmutableMap.copyOf(builder.getFragmentParameters());
 
     StringBuilder out = new StringBuilder();
 
@@ -112,6 +109,8 @@ public final class Uri {
 
   /**
    * Convert a java.net.URI to a Uri.
+   * @param uri the uri to convert
+   * @return a shindig Uri
    */
   public static Uri fromJavaUri(URI uri) {
     if (uri.isOpaque()) {

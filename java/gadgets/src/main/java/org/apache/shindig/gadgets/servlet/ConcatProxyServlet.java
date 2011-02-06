@@ -30,6 +30,7 @@ import org.apache.shindig.common.servlet.InjectedServlet;
 import org.apache.shindig.common.Pair;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
+import org.apache.shindig.common.util.CharsetUtil;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
@@ -47,6 +48,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -79,13 +81,7 @@ public class ConcatProxyServlet extends InjectedServlet {
   private transient ResponseRewriterRegistry contentRewriterRegistry;
 
   // Sequential version of 'execute' by default.
-  private transient Executor executor = new Executor() {
-    // Execute the comman within current thread
-    public void execute(Runnable run) {
-      run.run();
-    }
-
-  };
+  private transient Executor executor = Executors.newSingleThreadExecutor();
 
   @Inject
   public void setRequestPipeline(RequestPipeline requestPipeline) {
@@ -323,13 +319,15 @@ public class ConcatProxyServlet extends InjectedServlet {
 
     @Override
     public void print(String data) throws IOException {
-      write(data.getBytes("UTF8"));
+      write(CharsetUtil.getUtf8Bytes(data));
     }
+
+    private byte[] CRLF_BYTES = CharsetUtil.getUtf8Bytes("\r\n");
 
     @Override
     public void println(String data) throws IOException {
       print(data);
-      write("\r\n".getBytes("UTF8"));
+      write(CRLF_BYTES);
     }
   }
 

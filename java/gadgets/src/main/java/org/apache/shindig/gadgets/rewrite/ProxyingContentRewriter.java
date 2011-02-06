@@ -26,7 +26,6 @@ import org.apache.shindig.gadgets.rewrite.DomWalker.Visitor;
 import org.apache.shindig.gadgets.uri.ConcatUriManager;
 import org.apache.shindig.gadgets.uri.ProxyUriManager;
 
-import java.util.Arrays;
 import java.util.List;
 
 /**

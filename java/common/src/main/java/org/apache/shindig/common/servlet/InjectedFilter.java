@@ -27,7 +27,7 @@ import javax.servlet.ServletException;
 import javax.servlet.UnavailableException;
 
 /**
- * A Filter that can use Guice for injecting. Compliments InjectedServlet.
+ * A Filter that can use Guice for injecting. Complements InjectedServlet.
  */
 public abstract class InjectedFilter implements Filter {
   protected Injector injector;

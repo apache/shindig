@@ -22,6 +22,7 @@ import com.google.inject.Inject;
 
 import org.apache.shindig.common.servlet.HttpUtil;
 import org.apache.shindig.common.servlet.InjectedServlet;
+import org.apache.shindig.common.util.CharsetUtil;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.js.JsException;
 import org.apache.shindig.gadgets.js.JsRequest;
@@ -105,7 +106,7 @@ public class JsServlet extends InjectedServlet {
 
     resp.setStatus(jsResponse.getStatusCode());
     resp.setContentType("text/javascript; charset=utf-8");
-    byte[] response = jsResponse.getJsCode().toString().getBytes("UTF-8");
+    byte[] response = CharsetUtil.getUtf8Bytes(jsResponse.getJsCode());
     resp.setContentLength(response.length);
     resp.getOutputStream().write(response);
   }

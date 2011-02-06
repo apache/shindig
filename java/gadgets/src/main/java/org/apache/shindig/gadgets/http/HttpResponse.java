@@ -164,6 +164,7 @@ public final class HttpResponse implements Externalizable {
 
   /**
    * Construct an HttpResponse from a builder (called by HttpResponseBuilder.create).
+   * @param builder a valid builder
    */
   HttpResponse(HttpResponseBuilder builder) {
     httpStatusCode = builder.getHttpStatusCode();

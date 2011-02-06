@@ -18,10 +18,7 @@
  */
 package org.apache.shindig.common.crypto;
 
-import com.google.common.base.CharMatcher;
 import com.google.common.base.Charsets;
-import com.google.common.base.Splitter;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.google.common.base.Preconditions;
 
@@ -32,17 +29,14 @@ import org.apache.shindig.common.util.TimeSource;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.shindig.common.util.Utf8UrlCoder;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.security.GeneralSecurityException;
-import java.util.Iterator;
 import java.util.Map;
 
 /**
@@ -62,8 +56,6 @@ public class BasicBlobCrypter implements BlobCrypter {
 
   /** allow three minutes for clock skew */
   private static final long CLOCK_SKEW_ALLOWANCE = 180;
-
-  private static final String UTF8 = "UTF-8";
 
   public TimeSource timeSource = new TimeSource();
   private byte[] cipherKey;
@@ -155,9 +147,7 @@ public class BasicBlobCrypter implements BlobCrypter {
       byte[] cipherText = Crypto.aes128cbcEncrypt(cipherKey, encoded);
       byte[] hmac = Crypto.hmacSha1(hmacKey, cipherText);
       byte[] b64 = Base64.encodeBase64URLSafe(Bytes.concat(cipherText, hmac));
-      return new String(b64, UTF8);
-    } catch (UnsupportedEncodingException e) {
-      throw new BlobCrypterException(e);
+      return CharsetUtil.newUtf8String(b64);
     } catch (GeneralSecurityException e) {
       throw new BlobCrypterException(e);
     }
@@ -166,21 +156,21 @@ public class BasicBlobCrypter implements BlobCrypter {
   /**
    * Encode the input for transfer.  We use something a lot like HTML form
    * encodings.  The time stamp is in seconds since the epoch.
+   * @param in map of parameters to encode
    */
-  private byte[] serializeAndTimestamp(Map<String, String> in)
-  throws UnsupportedEncodingException {
+  private byte[] serializeAndTimestamp(Map<String, String> in) {
     StringBuilder sb = new StringBuilder();
 
     for (Map.Entry<String, String> val : in.entrySet()) {
-      sb.append(URLEncoder.encode(val.getKey(), UTF8));
+      sb.append(Utf8UrlCoder.encode(val.getKey()));
       sb.append('=');
-      sb.append(URLEncoder.encode(val.getValue(), UTF8));
+      sb.append(Utf8UrlCoder.encode(val.getValue()));
       sb.append('&');
     }
     sb.append(TIMESTAMP_KEY);
     sb.append('=');
     sb.append(timeSource.currentTimeMillis()/1000);
-    return sb.toString().getBytes(UTF8);
+    return CharsetUtil.getUtf8Bytes(sb.toString());
   }
 
   /* (non-Javadoc)
@@ -189,7 +179,7 @@ public class BasicBlobCrypter implements BlobCrypter {
   public Map<String, String> unwrap(String in, int maxAgeSec)
   throws BlobCrypterException {
     try {
-      byte[] bin = Base64.decodeBase64(in.getBytes("UTF-8"));
+      byte[] bin = Base64.decodeBase64(CharsetUtil.getUtf8Bytes(in));
       byte[] hmac = new byte[Crypto.HMAC_SHA1_LEN];
       byte[] cipherText = new byte[bin.length-Crypto.HMAC_SHA1_LEN];
       System.arraycopy(bin, 0, cipherText, 0, cipherText.length);
@@ -205,21 +195,18 @@ public class BasicBlobCrypter implements BlobCrypter {
       throw new BlobCrypterException("Invalid token format", e);
     } catch (NegativeArraySizeException e) {
       throw new BlobCrypterException("Invalid token format", e);
-    } catch (UnsupportedEncodingException e) {
-      throw new BlobCrypterException(e);
     }
 
   }
 
-  private Map<String, String> deserialize(byte[] plain)
-      throws UnsupportedEncodingException {
-    String base = new String(plain, UTF8);
+  private Map<String, String> deserialize(byte[] plain) {
+    String base = CharsetUtil.newUtf8String(plain);
     // replaces [&=] regex
     String[] items = StringUtils.splitPreserveAllTokens(base, "&=");
     Map<String, String> map = Maps.newHashMapWithExpectedSize(items.length);
     for (int i=0; i < items.length; ) {
-      String key = URLDecoder.decode(items[i++], UTF8);
-      String val = URLDecoder.decode(items[i++], UTF8);
+      String key = Utf8UrlCoder.decode(items[i++]);
+      String val = Utf8UrlCoder.decode(items[i++]);
       map.put(key, val);
     }
     return map;

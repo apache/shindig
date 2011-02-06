@@ -20,13 +20,12 @@ package org.apache.shindig.expressions;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.shindig.common.util.CharsetUtil;
 import org.apache.shindig.common.util.Utf8UrlCoder;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.io.UnsupportedEncodingException;
 
 import javax.el.ELException;
 
@@ -67,14 +66,8 @@ public final class OpensocialFunctions {
       return null;
     }
     
-    try {
-      // TODO: allow a charset to be passed in?
-      return new String(Base64.decodeBase64(text.getBytes("UTF-8")),
-          "UTF-8");
-    } catch (UnsupportedEncodingException uee) {
-      // UTF-8 will be supported everywhere
-      throw new RuntimeException(uee);
-    }
+    // TODO: allow a charset to be passed in?
+    return CharsetUtil.newUtf8String(Base64.decodeBase64(CharsetUtil.getUtf8Bytes(text)));
   }
 
   /**
