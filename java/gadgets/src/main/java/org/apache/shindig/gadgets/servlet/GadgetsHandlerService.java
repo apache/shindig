@@ -87,7 +87,7 @@ public class GadgetsHandlerService {
 
   // Map shindig data class to API interfaces
   @VisibleForTesting
-  static final Map<Class<?>, Class<?>> apiClasses =
+  static final Map<Class<?>, Class<?>> API_CLASSES =
       new ImmutableMap.Builder<Class<?>, Class<?>>()
           .put(View.class, GadgetsHandlerApi.View.class)
           .put(UserPref.class, GadgetsHandlerApi.UserPref.class)
@@ -103,7 +103,7 @@ public class GadgetsHandlerService {
 
   // Provide mapping for internal enums to api enums
   @VisibleForTesting
-  static final Map<Enum<?>, Enum<?>> enumConversionMap =
+  static final Map<Enum<?>, Enum<?>> ENUM_CONVERSION_MAP =
       new ImmutableMap.Builder<Enum<?>, Enum<?>>()
           // View.ContentType mapping
           .putAll(BeanDelegator.createDefaultEnumMap(View.ContentType.class,
@@ -147,7 +147,7 @@ public class GadgetsHandlerService {
     this.beanFilter = beanFilter;
     this.cajaContentRewriter = cajaContentRewriter;
 
-    this.beanDelegator = new BeanDelegator(apiClasses, enumConversionMap);
+    this.beanDelegator = new BeanDelegator(API_CLASSES, ENUM_CONVERSION_MAP);
   }
 
   /**

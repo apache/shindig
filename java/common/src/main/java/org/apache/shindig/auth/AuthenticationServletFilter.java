@@ -56,13 +56,13 @@ public class AuthenticationServletFilter extends InjectedFilter {
   public static final String AUTH_TYPE_OAUTH = "OAuth";
 
   // At some point change this to a container specific realm
-  private static final String realm = "shindig";
+  private static final String REALM = "shindig";
  
   private List<AuthenticationHandler> handlers;
 
   //class name for logging purpose
-  private static final String classname = AuthenticationServletFilter.class.getName();
-  private static final Logger LOG = Logger.getLogger(classname, MessageKeys.MESSAGES);
+  private static final String CLASSNAME = AuthenticationServletFilter.class.getName();
+  private static final Logger LOG = Logger.getLogger(CLASSNAME, MessageKeys.MESSAGES);
   
   @Inject
   public void setAuthenticationHandlers(List<AuthenticationHandler> handlers) {
@@ -90,7 +90,7 @@ public class AuthenticationServletFilter extends InjectedFilter {
           callChain(chain, req, resp);
           return;
         } else {
-          String authHeader = handler.getWWWAuthenticateHeader(realm);
+          String authHeader = handler.getWWWAuthenticateHeader(REALM);
           if (authHeader != null) {
               resp.addHeader("WWW-Authenticate", authHeader);
           }
@@ -103,7 +103,7 @@ public class AuthenticationServletFilter extends InjectedFilter {
       Throwable cause = iae.getCause();
 
       if (LOG.isLoggable(Level.INFO)) {
-        LOG.logp(Level.INFO, classname, "doFilter", MessageKeys.ERROR_PARSING_SECURE_TOKEN, cause);
+        LOG.logp(Level.INFO, CLASSNAME, "doFilter", MessageKeys.ERROR_PARSING_SECURE_TOKEN, cause);
       }
            
       if (iae.getAdditionalHeaders() != null) {

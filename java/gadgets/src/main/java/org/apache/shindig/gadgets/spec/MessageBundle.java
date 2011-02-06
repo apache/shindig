@@ -39,7 +39,7 @@ import java.util.Map;
 public class MessageBundle {
   public static final MessageBundle EMPTY = new MessageBundle();
 
-  private static final DefaultHtmlSerializer htmlSerializer = new DefaultHtmlSerializer();
+  private static final DefaultHtmlSerializer HTML_SERIALIZER = new DefaultHtmlSerializer();
   private final ImmutableMap<String, String> messages;
   private final String languageDirection;
 
@@ -162,7 +162,7 @@ public class MessageBundle {
             // Workaround to treat CDATA as text.
             sw.append(msgChildren.item(child).getTextContent());
           } else {
-            htmlSerializer.serialize(msgChildren.item(child), sw);
+            HTML_SERIALIZER.serialize(msgChildren.item(child), sw);
           }
         } catch (IOException e) {
           throw new SpecParserException("Unexpected error getting value of msg node",

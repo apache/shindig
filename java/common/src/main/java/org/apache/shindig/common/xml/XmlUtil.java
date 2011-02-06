@@ -43,10 +43,11 @@ import javax.xml.parsers.ParserConfigurationException;
  * loading of external files (xinclude, external entities, DTDs, etc.) are disabled.
  */
 public final class XmlUtil {
-  private static final String classname = XmlUtil.class.getName();
-  private static final Logger LOG = Logger.getLogger(classname, MessageKeys.MESSAGES);
+  private static final String CLASSNAME = XmlUtil.class.getName();
+  private static final Logger LOG = Logger.getLogger(CLASSNAME, MessageKeys.MESSAGES);
+
   // Handles xml errors so that they're not logged to stderr.
-  private static final ErrorHandler errorHandler = new ErrorHandler() {
+  private static final ErrorHandler ERROR_HANDLER = new ErrorHandler() {
     public void error(SAXParseException exception) throws SAXException {
       throw exception;
     }
@@ -55,24 +56,24 @@ public final class XmlUtil {
     }
     public void warning(SAXParseException exception) {
       if (LOG.isLoggable(Level.INFO)) {
-        LOG.logp(Level.INFO, classname, "warning", MessageKeys.ERROR_PARSING_XML, exception);
+        LOG.logp(Level.INFO, CLASSNAME, "warning", MessageKeys.ERROR_PARSING_XML, exception);
       }
     }
   };
 
   private static boolean canReuseBuilders = false;
 
-  private static final DocumentBuilderFactory builderFactory
+  private static final DocumentBuilderFactory BUILDER_FACTORY
       = DocumentBuilderFactory.newInstance();
 
-  private static final ThreadLocal<DocumentBuilder> reusableBuilder
+  private static final ThreadLocal<DocumentBuilder> REUSABLE_BUILDER
       = new ThreadLocal<DocumentBuilder>() {
           @Override
           protected DocumentBuilder initialValue() {
             try {
               if (LOG.isLoggable(Level.FINE))
                 LOG.fine("Created a new document builder");
-              return builderFactory.newDocumentBuilder();
+              return BUILDER_FACTORY.newDocumentBuilder();
             } catch (ParserConfigurationException e) {
               throw new RuntimeException(e);
             }
@@ -81,70 +82,70 @@ public final class XmlUtil {
 
   static {
     // Namespace support is required for <os:> elements
-    builderFactory.setNamespaceAware(true);
+    BUILDER_FACTORY.setNamespaceAware(true);
 
     // Disable various insecure and/or expensive options.
-    builderFactory.setValidating(false);
+    BUILDER_FACTORY.setValidating(false);
 
     // Can't disable doctypes entirely because they're usually harmless. External entity
     // resolution, however, is both expensive and insecure.
     try {
-      builderFactory.setAttribute(
+      BUILDER_FACTORY.setAttribute(
           "http://xml.org/sax/features/external-general-entities", false);
     } catch (IllegalArgumentException e) {
       // Not supported by some very old parsers.
       if (LOG.isLoggable(Level.INFO)) {
-        LOG.logp(Level.INFO, classname, "static block", MessageKeys.ERROR_PARSING_EXTERNAL_ENTITIES);
+        LOG.logp(Level.INFO, CLASSNAME, "static block", MessageKeys.ERROR_PARSING_EXTERNAL_ENTITIES);
       }	
     }
 
     try {
-      builderFactory.setAttribute(
+      BUILDER_FACTORY.setAttribute(
           "http://xml.org/sax/features/external-parameter-entities", false);
     } catch (IllegalArgumentException e) {
       // Not supported by some very old parsers.
       if (LOG.isLoggable(Level.INFO)) {
-        LOG.logp(Level.INFO, classname, "static block", MessageKeys.ERROR_PARSING_EXTERNAL_ENTITIES);
+        LOG.logp(Level.INFO, CLASSNAME, "static block", MessageKeys.ERROR_PARSING_EXTERNAL_ENTITIES);
       }
     }
 
     try {
-      builderFactory.setAttribute(
+      BUILDER_FACTORY.setAttribute(
           "http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
     } catch (IllegalArgumentException e) {
       // Only supported by Apache's XML parsers.
       if (LOG.isLoggable(Level.INFO)) {
-        LOG.logp(Level.INFO, classname, "static block", MessageKeys.ERROR_PARSING_EXTERNAL_DTD);
+        LOG.logp(Level.INFO, CLASSNAME, "static block", MessageKeys.ERROR_PARSING_EXTERNAL_DTD);
       }      
     }
 
     try {
-      builderFactory.setAttribute(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+      BUILDER_FACTORY.setAttribute(XMLConstants.FEATURE_SECURE_PROCESSING, true);
     } catch (IllegalArgumentException e) {
       // Not supported by older parsers.
       if (LOG.isLoggable(Level.INFO)) {
-        LOG.logp(Level.INFO, classname, "static block", MessageKeys.ERROR_PARSING_SECURE_XML);
+        LOG.logp(Level.INFO, CLASSNAME, "static block", MessageKeys.ERROR_PARSING_SECURE_XML);
       }
     }
 
     try {
-      DocumentBuilder builder = builderFactory.newDocumentBuilder();
+      DocumentBuilder builder = BUILDER_FACTORY.newDocumentBuilder();
       builder.reset();
       canReuseBuilders = true;
       if (LOG.isLoggable(Level.INFO)) {
-        LOG.logp(Level.INFO, classname, "static block", MessageKeys.REUSE_DOC_BUILDERS);
+        LOG.logp(Level.INFO, CLASSNAME, "static block", MessageKeys.REUSE_DOC_BUILDERS);
       }      
     } catch (UnsupportedOperationException e) {
       // Only supported by newer parsers (xerces 2.8.x+ for instance).
       canReuseBuilders = false;
       if (LOG.isLoggable(Level.INFO)) {
-        LOG.logp(Level.INFO, classname, "static block", MessageKeys.NOT_REUSE_DOC_BUILDERS);
+        LOG.logp(Level.INFO, CLASSNAME, "static block", MessageKeys.NOT_REUSE_DOC_BUILDERS);
       } 
     } catch (ParserConfigurationException e) {
       // Only supported by newer parsers (xerces 2.8.x+ for instance).
       canReuseBuilders = false;
       if (LOG.isLoggable(Level.INFO)) {
-        LOG.logp(Level.INFO, classname, "static block", MessageKeys.NOT_REUSE_DOC_BUILDERS);
+        LOG.logp(Level.INFO, CLASSNAME, "static block", MessageKeys.NOT_REUSE_DOC_BUILDERS);
       }
     }
   }
@@ -297,12 +298,12 @@ public final class XmlUtil {
   private static DocumentBuilder getBuilder() throws ParserConfigurationException {
     DocumentBuilder builder;
     if (canReuseBuilders) {
-      builder = reusableBuilder.get();
+      builder = REUSABLE_BUILDER.get();
       builder.reset();
     } else {
-      builder = builderFactory.newDocumentBuilder();
+      builder = BUILDER_FACTORY.newDocumentBuilder();
     }
-    builder.setErrorHandler(errorHandler);
+    builder.setErrorHandler(ERROR_HANDLER);
     return builder;
   }
 

@@ -69,7 +69,7 @@ public class GadgetsHandlerServiceTest extends EasyMockTestCase {
   private static final String FALLBACK = "http://example.com/data2";
 
   private final BeanDelegator delegator = new BeanDelegator(
-    GadgetsHandlerService.apiClasses, GadgetsHandlerService.enumConversionMap);
+    GadgetsHandlerService.API_CLASSES, GadgetsHandlerService.ENUM_CONVERSION_MAP);
 
   private final FakeTimeSource timeSource = new FakeTimeSource(CURRENT_TIME_MS);
   private final FeatureRegistry mockRegistry = mock(FeatureRegistry.class);

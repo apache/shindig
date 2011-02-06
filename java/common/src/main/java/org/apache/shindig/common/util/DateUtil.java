@@ -32,12 +32,12 @@ import java.util.Locale;
  */
 public final class DateUtil {
     
-  private static final DateTimeFormatter rfc1123DateFormat = DateTimeFormat
+  private static final DateTimeFormatter RFC1123_DATE_FORMAT = DateTimeFormat
       .forPattern("EEE, dd MMM yyyy HH:mm:ss 'GMT'")
       .withLocale(Locale.US)
       .withZone(DateTimeZone.UTC);
 
-  private static final DateTimeFormatter iso8601DateFormat = ISODateTimeFormat.dateTime()
+  private static final DateTimeFormatter ISO8601_DATE_FORMAT = ISODateTimeFormat.dateTime()
       .withZone(DateTimeZone.UTC); 
  
   private DateUtil() {}
@@ -51,7 +51,7 @@ public final class DateUtil {
    */
   public static Date parseRfc1123Date(String dateStr) {
     try {
-      return rfc1123DateFormat.parseDateTime(dateStr).toDate();
+      return RFC1123_DATE_FORMAT.parseDateTime(dateStr).toDate();
     } catch (Exception e) {
       // Don't care.
       return null;
@@ -85,7 +85,7 @@ public final class DateUtil {
    * Formats an ISO 8601 format date.
    */
   public static String formatIso8601Date(long time) {      
-      return iso8601DateFormat.print(time);
+      return ISO8601_DATE_FORMAT.print(time);
   }
 
   /**
@@ -99,7 +99,7 @@ public final class DateUtil {
    * Formats an RFC 1123 format date.
    */
   public static String formatRfc1123Date(long timeStamp) {
-    return rfc1123DateFormat.print(timeStamp);
+    return RFC1123_DATE_FORMAT.print(timeStamp);
   }
 
 }
