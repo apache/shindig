@@ -267,6 +267,7 @@
         </plugins>
       </build>
     </profile>
+
     <profile>
       <id>reporting</id>
       <build>
@@ -274,7 +275,7 @@
           <plugin>
             <groupId>nl.windgazer</groupId>
             <artifactId>jsdoctk-plugin</artifactId>
-            <version>2.3.0-RC1</version>
+            <version>2.3.2</version>
             <configuration>
               <recurse>3</recurse><!-- This is the level of recursion, not a boolean -->
               <srcDir>${basedir}/src/main/javascript/features</srcDir>
