@@ -239,7 +239,7 @@ gadgets.io = function() {
    * @param {function(string,function(Object),Object,Object)}
    *     processResponseFunction The function that should process the
    *     response from the sever before calling the callback.
-   * @param {string=} opt_headers - Optional headers including a Content-Type that defaults to
+   * @param {Object=} opt_headers - Optional headers including a Content-Type that defaults to
    *     'application/x-www-form-urlencoded'.
    */
   function makeXhrRequest(realUrl, proxyUrl, callback, paramData, method,
@@ -257,8 +257,15 @@ gadgets.io = function() {
     }
     if (paramData !== null) {
       var contentTypeHeader = 'Content-Type';
+      var contentType = 'application/x-www-form-urlencoded';
+      if (typeof opt_headers === "string") {
+        // This turned out to come directly from a public API, so we need to
+        // keep compatibility...
+        contentType = opt_headers;
+        opt_headers = {};
+      }
       var headers = opt_headers || {};
-      if (!headers[contentTypeHeader]) headers[contentTypeHeader] = 'application/x-www-form-urlencoded';
+      if (!headers[contentTypeHeader]) headers[contentTypeHeader] = contentType;
 
       for (var headerName in headers) {
         xhr.setRequestHeader(headerName, headers[headerName]);
@@ -266,8 +273,6 @@ gadgets.io = function() {
     }
     xhr.send(paramData);
   }
-
-
 
   /**
    * Satisfy a request with data that is prefetched as per the gadget Preload
