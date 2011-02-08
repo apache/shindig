@@ -26,15 +26,24 @@ import static org.junit.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+import com.google.inject.AbstractModule;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.google.inject.Module;
+import com.google.inject.name.Names;
+import com.google.inject.util.Modules;
 
 import org.apache.shindig.auth.BasicSecurityToken;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.common.PropertiesModule;
 import org.apache.shindig.gadgets.AuthType;
+import org.apache.shindig.gadgets.parse.ParseModule;
 import org.apache.shindig.gadgets.oauth.OAuthArguments;
 import org.apache.shindig.gadgets.spec.RequestAuthenticationInfo;
 import org.apache.shindig.gadgets.uri.UriCommon.Param;
 import org.easymock.EasyMock;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Map;
@@ -49,6 +58,22 @@ public class AbstractHttpCacheTest {
   private static final String CONTAINER_NAME = "container";
 
   private final TestHttpCache cache = new TestHttpCache();
+  // Cache designed to return 86400 for strictNoCacheResourceTtl.
+  private TestHttpCache extendedStrictNoCacheTtlCache;
+
+  @Before
+  public void setUp() {
+    Module module = new AbstractModule() {
+      @Override
+      public void configure() {
+        binder().bindConstant()
+            .annotatedWith(Names.named("shindig.cache.http.strict-no-cache-resource.max-age"))
+            .to(86400L);
+      }
+    };
+    Injector injector = Guice.createInjector(module);
+    extendedStrictNoCacheTtlCache = injector.getInstance(TestHttpCache.class);
+  }
 
   @Test
   public void createKeySimple() {
@@ -228,6 +253,9 @@ public class AbstractHttpCacheTest {
     cache.map.put(key, response);
 
     assertEquals(response, cache.getResponse(request));
+
+    extendedStrictNoCacheTtlCache.map.put(key, response);
+    assertEquals(response, extendedStrictNoCacheTtlCache.getResponse(request));
   }
 
   @Test
@@ -239,6 +267,10 @@ public class AbstractHttpCacheTest {
     cache.map.put(key, response);
 
     assertNull("Did not return null when method was POST", cache.getResponse(request));
+
+    extendedStrictNoCacheTtlCache.map.put(key, response);
+    assertNull("Did not return null when method was POST",
+               extendedStrictNoCacheTtlCache.getResponse(request));
   }
 
   @Test
@@ -251,6 +283,9 @@ public class AbstractHttpCacheTest {
     cache.map.put(key, response);
 
     assertEquals(response, cache.getResponse(request));
+
+    extendedStrictNoCacheTtlCache.map.put(key, response);
+    assertEquals(response, extendedStrictNoCacheTtlCache.getResponse(request));
   }
 
   @Test
@@ -263,15 +298,23 @@ public class AbstractHttpCacheTest {
     request.setIgnoreCache(true);
 
     assertNull("Did not return null when ignoreCache was true", cache.getResponse(request));
+
+    extendedStrictNoCacheTtlCache.map.put(key, response);
+    assertNull("Did not return null when ignoreCache was true",
+               extendedStrictNoCacheTtlCache.getResponse(request));
   }
 
   @Test
   public void getResponseNotCacheable() {
     HttpRequest request = new HttpRequest(DEFAULT_URI);
+    String key = cache.createKey(request);
     HttpResponse response = new HttpResponseBuilder().setStrictNoCache().create();
-    cache.addResponse(request, response);
+    cache.map.put(key, response);
 
     assertNull("Did not return null when response was uncacheable", cache.getResponse(request));
+
+    extendedStrictNoCacheTtlCache.map.put(key, response);
+    assertEquals(response, extendedStrictNoCacheTtlCache.getResponse(request));
   }
 
   @Test
@@ -281,8 +324,11 @@ public class AbstractHttpCacheTest {
     String key = cache.createKey(request);
 
     assertTrue("response should have been cached", cache.addResponse(request, response));
-
     assertEquals(response, cache.map.get(key));
+
+    assertTrue("response should have been cached",
+               extendedStrictNoCacheTtlCache.addResponse(request, response));
+    assertEquals(response, extendedStrictNoCacheTtlCache.map.get(key));
   }
 
   @Test
@@ -292,26 +338,39 @@ public class AbstractHttpCacheTest {
     HttpResponse response = new HttpResponse("does not matter");
 
     assertFalse("response should not have been cached", cache.addResponse(request, response));
-
     assertEquals(0, cache.map.size());
+
+    assertFalse("response should not have been cached",
+                extendedStrictNoCacheTtlCache.addResponse(request, response));
+    assertEquals(0, extendedStrictNoCacheTtlCache.map.size());
   }
 
   @Test
   public void addResponseNotCacheable() {
     HttpRequest request = new HttpRequest(DEFAULT_URI);
     HttpResponse response = new HttpResponseBuilder().setStrictNoCache().create();
-    assertFalse(cache.addResponse(request, response));
+    String key = cache.createKey(request);
 
+    assertFalse(cache.addResponse(request, response));
     assertEquals(0, cache.map.size());
+
+    assertTrue("response should have been cached",
+               extendedStrictNoCacheTtlCache.addResponse(request, response));
+    assertEquals(
+        extendedStrictNoCacheTtlCache.buildStrictNoCacheHttpResponse(request, response).create(),
+        extendedStrictNoCacheTtlCache.map.get(key));
   }
 
   @Test
   public void addResponseIfModifiedSince() {
     HttpRequest request = new HttpRequest(DEFAULT_URI);
     HttpResponse response = new HttpResponseBuilder().setHttpStatusCode(HttpResponse.SC_NOT_MODIFIED).create();
-    assertFalse(cache.addResponse(request, response));
 
+    assertFalse(cache.addResponse(request, response));
     assertEquals(0, cache.map.size());
+
+    assertFalse(extendedStrictNoCacheTtlCache.addResponse(request, response));
+    assertEquals(0, extendedStrictNoCacheTtlCache.map.size());
   }
 
   @Test
@@ -319,9 +378,12 @@ public class AbstractHttpCacheTest {
     HttpRequest request = new HttpRequest(DEFAULT_URI)
         .setMethod("POST");
     HttpResponse response = new HttpResponse("does not matter");
-    assertFalse(cache.addResponse(request, response));
 
+    assertFalse(cache.addResponse(request, response));
     assertEquals(0, cache.map.size());
+
+    assertFalse(extendedStrictNoCacheTtlCache.addResponse(request, response));
+    assertEquals(0, extendedStrictNoCacheTtlCache.map.size());
   }
 
   @Test
@@ -333,8 +395,10 @@ public class AbstractHttpCacheTest {
     String key = cache.createKey(request);
 
     assertTrue(cache.addResponse(request, response));
-
     assertEquals(response, cache.map.get(key));
+
+    assertTrue(extendedStrictNoCacheTtlCache.addResponse(request, response));
+    assertEquals(response, extendedStrictNoCacheTtlCache.map.get(key));
   }
 
   @Test
@@ -348,6 +412,10 @@ public class AbstractHttpCacheTest {
     assertTrue(cache.addResponse(request, response));
 
     assertEquals("public,max-age=10", cache.map.get(key).getHeader("Cache-Control"));
+
+    assertTrue(extendedStrictNoCacheTtlCache.addResponse(request, response));
+    assertEquals("public,max-age=10",
+                 extendedStrictNoCacheTtlCache.map.get(key).getHeader("Cache-Control"));
   }
 
   @Test
@@ -364,6 +432,10 @@ public class AbstractHttpCacheTest {
     assertTrue(cache.addResponse(request, response));
 
     assertEquals("public,max-age=10", cache.map.get(key).getHeader("Cache-Control"));
+
+    assertTrue(extendedStrictNoCacheTtlCache.addResponse(request, response));
+    assertEquals("public,max-age=10",
+                 extendedStrictNoCacheTtlCache.map.get(key).getHeader("Cache-Control"));
   }
 
   @Test
@@ -376,6 +448,42 @@ public class AbstractHttpCacheTest {
     assertTrue(cache.addResponse(request, response));
 
     assertEquals("no headers", cache.map.get(key).getResponseAsString());
+
+    assertTrue(extendedStrictNoCacheTtlCache.addResponse(request, response));
+    assertEquals("no headers", extendedStrictNoCacheTtlCache.map.get(key).getResponseAsString());
+  }
+
+  @Test
+  public void buildStrictNoCacheHttpResponse() {
+    HttpResponse response = new HttpResponseBuilder()
+        .setResponseString("result")
+        .addHeader("Cache-Control", "private")
+        .addHeader("X-Method-Override", "GET")
+        .create();
+    assertTrue(response.isStrictNoCache());
+    HttpResponse builtResponse = extendedStrictNoCacheTtlCache
+        .buildStrictNoCacheHttpResponse(new HttpRequest(DEFAULT_URI), response).create();
+
+    assertTrue(builtResponse.isStrictNoCache());
+    assertEquals("", builtResponse.getResponseAsString());
+    assertEquals("private,max-age=86400", builtResponse.getHeader("Cache-Control"));
+    assertNull(builtResponse.getHeader("X-Method-Override"));
+  }
+
+  @Test
+  public void buildStrictNoCacheHttpResponseWithPragmaHeader() {
+    HttpResponse response = new HttpResponseBuilder()
+        .setResponseString("result")
+        .addHeader("Pragma", "no-cache")
+        .create();
+    assertTrue(response.isStrictNoCache());
+    HttpResponse builtResponse = cache
+        .buildStrictNoCacheHttpResponse(new HttpRequest(DEFAULT_URI), response).create();
+
+    assertTrue(builtResponse.isStrictNoCache());   
+    assertEquals("", builtResponse.getResponseAsString());
+    assertEquals("max-age=-1", builtResponse.getHeader("Cache-Control"));
+    assertEquals("no-cache", builtResponse.getHeader("Pragma"));
   }
 
   @Test

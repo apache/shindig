@@ -17,8 +17,12 @@
  */
 package org.apache.shindig.gadgets.http;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
+
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.gadgets.AuthType;
 import org.apache.shindig.gadgets.uri.UriCommon;
@@ -26,6 +30,10 @@ import org.apache.shindig.gadgets.uri.UriCommon;
 /**
  * Base class for content caches. Defines cache expiration rules and
  * and restrictions on allowed content.
+ *
+ * Note that in the case where strictNoCacheResourceTtlInSeconds is non-negative, strict no-cache
+ * resources are stored in the cache. In this case, only the Cache-Control/Pragma headers are stored
+ * and not the original content or other headers.
  *
  * Implementations that override this are discouraged from using custom cache keys unless there is
  * actually customization in the request object itself. It is highly recommended that you still
@@ -37,6 +45,13 @@ public abstract class AbstractHttpCache implements HttpCache {
   private static final String RESIZE_WIDTH = UriCommon.Param.RESIZE_WIDTH.getKey();
   private static final String RESIZE_QUALITY = UriCommon.Param.RESIZE_QUALITY.getKey();
 
+  // TTL to use for strict no-cache response. A value of -1 indicates that a strict no-cache
+  // resource is never cached.
+  static final long DEFAULT_STRICT_NO_CACHE_RESOURCE_TTL_SEC = -1;
+
+  @Inject(optional = true) @Named("shindig.cache.http.strict-no-cache-resource.max-age")
+  private long strictNoCacheResourceTtlInSeconds = DEFAULT_STRICT_NO_CACHE_RESOURCE_TTL_SEC;
+
   // Implement these methods to create a concrete HttpCache class.
   protected abstract HttpResponse getResponseImpl(String key);
   protected abstract void addResponseImpl(String key, HttpResponse response);
@@ -46,7 +61,8 @@ public abstract class AbstractHttpCache implements HttpCache {
     if (isCacheable(request)) {
       String keyString = createKey(request);
       HttpResponse cached = getResponseImpl(keyString);
-      if (responseStillUsable(cached)) {
+      if (responseStillUsable(cached) &&
+          (!cached.isStrictNoCache() || strictNoCacheResourceTtlInSeconds > 0)) {
         return cached;
       }
     }
@@ -54,21 +70,34 @@ public abstract class AbstractHttpCache implements HttpCache {
   }
 
   public boolean addResponse(HttpRequest request, HttpResponse response) {
-    if (isCacheable(request, response)) {
-      // Both are cacheable. Check for forced cache TTL overrides.
-      HttpResponseBuilder responseBuilder = new HttpResponseBuilder(response);
-      int forcedTtl = request.getCacheTtl();
-      if (forcedTtl != -1) {
-        responseBuilder.setCacheTtl(forcedTtl);
+    HttpResponseBuilder responseBuilder;
+    boolean storeStrictNoCacheResources = (strictNoCacheResourceTtlInSeconds >= 0);
+    if (isCacheable(request, response, storeStrictNoCacheResources)) {
+      if (storeStrictNoCacheResources && response.isStrictNoCache()) {
+        responseBuilder = buildStrictNoCacheHttpResponse(request, response);
+      } else {
+        responseBuilder = new HttpResponseBuilder(response);
       }
-
-      response = responseBuilder.create();
-      String keyString = createKey(request);
-      addResponseImpl(keyString, response);
-      return true;
+    } else {
+      return false;
     }
+    int forcedTtl = request.getCacheTtl();
+    if (forcedTtl != -1) {
+      responseBuilder.setCacheTtl(forcedTtl);
+    }
+    response = responseBuilder.create();
+    String keyString = createKey(request);
+    addResponseImpl(keyString, response);
+    return true;
+  }
 
-    return false;
+  @VisibleForTesting
+  HttpResponseBuilder buildStrictNoCacheHttpResponse(HttpRequest request, HttpResponse response) {
+    HttpResponseBuilder responseBuilder = new HttpResponseBuilder();
+    responseBuilder.setHeader("Cache-Control", response.getHeader("Cache-Control"));
+    responseBuilder.setHeader("Pragma", response.getHeader("Pragma"));
+    responseBuilder.setCacheControlMaxAge(strictNoCacheResourceTtlInSeconds);
+    return responseBuilder;
   }
 
   public HttpResponse removeResponse(HttpRequest request) {
@@ -89,7 +118,8 @@ public abstract class AbstractHttpCache implements HttpCache {
             "GET".equals(request.getHeader("X-Method-Override")));
   }
 
-  protected boolean isCacheable(HttpRequest request, HttpResponse response) {
+  protected boolean isCacheable(HttpRequest request, HttpResponse response,
+                                boolean allowStrictNoCacheResponses) {
     if (!isCacheable(request)) {
       return false;
     }
@@ -104,8 +134,8 @@ public abstract class AbstractHttpCache implements HttpCache {
       return false;
     }
 
-    // If the HTTP response allows for it, we can cache.
-    return !response.isStrictNoCache();
+    // If we allow strict no-cache responses or the HTTP response allows for it, we can cache.
+    return allowStrictNoCacheResponses || !response.isStrictNoCache();
   }
 
   /**

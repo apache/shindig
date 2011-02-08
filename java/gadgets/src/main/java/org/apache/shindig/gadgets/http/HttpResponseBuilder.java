@@ -34,7 +34,9 @@ import org.w3c.dom.Document;
 import org.w3c.dom.DocumentFragment;
 
 import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.ListIterator;
 import java.util.List;
 import java.util.Map;
 
@@ -228,6 +230,22 @@ public class HttpResponseBuilder extends MutableContent {
     headers.removeAll("Pragma");
     headers.put("Expires", DateUtil.formatRfc1123Date(expirationTime));
     incrementNumChanges();
+    return this;
+  }
+
+  public HttpResponseBuilder setCacheControlMaxAge(long expirationTime) {
+    String cacheControl = getHeader("Cache-Control");
+    List<String> directives = Lists.newArrayList();
+    if (cacheControl != null) {
+      for (String directive : StringUtils.split(cacheControl, ',')) {
+        directive = directive.trim();
+        if (!directive.startsWith("max-age") || StringUtils.split(directive, '=').length != 2) {
+          directives.add(directive);
+        }
+      }
+    }
+    directives.add("max-age=" + expirationTime);
+    setHeader("Cache-Control", StringUtils.join(directives, ','));
     return this;
   }
 

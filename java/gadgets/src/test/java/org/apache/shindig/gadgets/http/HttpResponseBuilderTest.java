@@ -106,6 +106,57 @@ public class HttpResponseBuilderTest {
   }
 
   @Test
+  public void setCacheControlMaxAge() {
+    HttpResponseBuilder builder = new HttpResponseBuilder()
+        .addHeader("Cache-Control", "public,max-age=100")
+        .setCacheControlMaxAge(12345);
+
+    Multimap<String, String> headers = builder.getHeaders();
+    assertEquals("public,max-age=12345", headers.get("Cache-Control").iterator().next());
+  }
+
+  @Test
+  public void setCacheControlMaxAgeWithSpacesInCacheControlHeader() {
+    HttpResponseBuilder builder = new HttpResponseBuilder()
+        .addHeader("Cache-Control", "public, max-age=123, no-transform ")
+        .setCacheControlMaxAge(12345);
+
+    Multimap<String, String> headers = builder.getHeaders();
+    assertEquals("public,no-transform,max-age=12345",
+                 headers.get("Cache-Control").iterator().next());
+  }
+
+  @Test
+  public void setCacheControlMaxAgeWithBadMaxAgeFormat() {
+    HttpResponseBuilder builder = new HttpResponseBuilder()
+        .addHeader("Cache-Control", "public, max-age=12=ab")
+        .setCacheControlMaxAge(12345);
+
+    Multimap<String, String> headers = builder.getHeaders();
+    assertEquals("public,max-age=12=ab,max-age=12345",
+                 headers.get("Cache-Control").iterator().next());
+  }
+
+  @Test
+  public void setCacheControlMaxAgeWithNoInitialMaxAge() {
+    HttpResponseBuilder builder = new HttpResponseBuilder()
+        .addHeader("Cache-Control", "private")
+        .setCacheControlMaxAge(10000);
+
+    Multimap<String, String> headers = builder.getHeaders();
+    assertEquals("private,max-age=10000", headers.get("Cache-Control").iterator().next());
+  }
+
+  @Test
+  public void setCacheControlMaxAgeWithNoCacheControlHeader() {
+    HttpResponseBuilder builder = new HttpResponseBuilder()
+        .setCacheControlMaxAge(86400);
+
+    Multimap<String, String> headers = builder.getHeaders();
+    assertEquals("max-age=86400", headers.get("Cache-Control").iterator().next());
+  }
+
+  @Test
   public void setCacheTtl() {
     HttpResponseBuilder builder = new HttpResponseBuilder()
         .addHeader("Pragma", "no-cache")

@@ -80,8 +80,9 @@ public class DefaultRequestPipeline implements RequestPipeline {
     if (!request.getIgnoreCache()) {
       HttpResponse cachedResponse = httpCache.getResponse(request);
       // Note that we don't remove invalidated entries from the cache as we want them to be
-      // available in the event of a backend fetch failure
-      if (cachedResponse != null) {
+      // available in the event of a backend fetch failure.
+      // Note that strict no-cache entries are dummy responses and should not be used.
+      if (cachedResponse != null && !cachedResponse.isStrictNoCache()) {
         if (!cachedResponse.isStale()) {
           if(invalidationService.isValid(request, cachedResponse)) {
             return cachedResponse;
