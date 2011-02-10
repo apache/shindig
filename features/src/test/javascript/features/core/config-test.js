@@ -162,6 +162,23 @@ ConfigTest.prototype.testUpdateMerge = function() {
   this.assertEquals(123, testListen.three.foo);
 };
 
+ConfigTest.prototype.testUpdateBeforeInit = function() {
+  var testListen = null;
+  gadgets.config.register("one", null, function(config) {
+    testListen = config;
+  });
+  gadgets.config.update({
+    one: { oneKey1: { oneSubkey1: "oneVal1", sticks: "stones" }, breaks: "bones" }
+  });
+  this.assertTrue(testListen === null);
+  gadgets.config.init({
+    one: { oneKey1: { oneSubkey1: "overwrite" } }
+  });
+  this.assertEquals("overwrite", testListen.one.oneKey1.oneSubkey1);
+  this.assertEquals("stones", testListen.one.oneKey1.sticks);
+  this.assertEquals("bones", testListen.one.breaks);
+};
+
 ConfigTest.prototype.testMergeFromInlineConfig = function() {
   var testListen;
   gadgets.config.register("one", null, function(config) {

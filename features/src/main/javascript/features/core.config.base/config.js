@@ -262,7 +262,7 @@ gadgets.config = function() {
      * @param opt_replace {Boolean} true to replace all configuration.
      */
     'update': function(updateConfig, opt_replace) {
-      configuration = opt_replace ? {} : configuration;
+      configuration = opt_replace ? {} : configuration || {};
       foldConfig(configuration, updateConfig);
     }
   }
