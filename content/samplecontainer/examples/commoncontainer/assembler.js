@@ -21,10 +21,6 @@ var testConfig =  testConfig || {};
 testConfig[shindig.container.ServiceConfig.API_PATH] = '/rpc';	
 testConfig[shindig.container.ContainerConfig.RENDER_DEBUG] = "1";
 
-//Default the security token for testing.
-shindig.auth.updateSecurityToken('john.doe:john.doe:appid:cont:url:0:default');
-
-
 //  Create the new CommonContainer 
 var CommonContainer = new shindig.container.Container(testConfig);
 
