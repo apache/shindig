@@ -28,6 +28,7 @@ import org.apache.shindig.gadgets.LockedDomainService;
 import org.apache.shindig.gadgets.process.ProcessingException;
 import org.apache.shindig.gadgets.process.Processor;
 import org.apache.shindig.gadgets.spec.View;
+import org.apache.shindig.gadgets.uri.UriCommon;
 
 import com.google.inject.Inject;
 
@@ -82,7 +83,7 @@ public class Renderer {
             "Requested: '" + gadget.getContext().getView() +
             "' Available: " + gadget.getSpec().getViews().keySet(), HttpServletResponse.SC_NOT_FOUND);
       }
-      
+
       if (gadget.getCurrentView().getType() == View.ContentType.URL) {
         if (requiresCaja(gadget)) {
           return RenderingResults.error("Caja does not support url type gadgets.",
@@ -124,9 +125,9 @@ public class Renderer {
    */
   private boolean requiresCaja(Gadget gadget) {
     return gadget.getSpec().getModulePrefs().getFeatures().containsKey("caja")
-        || "1".equals(gadget.getContext().getParameter("caja"));
+        || "1".equals(gadget.getContext().getParameter(UriCommon.Param.CAJOLE.getKey()));
   }
-  
+
   /**
    * Validates that the parent parameter was acceptable.
    *

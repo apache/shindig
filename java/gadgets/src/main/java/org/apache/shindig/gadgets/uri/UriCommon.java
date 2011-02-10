@@ -43,7 +43,7 @@ public interface UriCommon {
     TYPE("type"),
     REWRITE_MIME_TYPE("rewriteMime"),
     SANITIZE("sanitize"),
-    CAJOLE("cajole"),
+    CAJOLE("caja"),
 
     // JS request params
     CONTAINER_MODE("c"),

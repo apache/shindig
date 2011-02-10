@@ -79,6 +79,7 @@ import org.apache.shindig.gadgets.parse.HtmlSerializer;
 import org.apache.shindig.gadgets.rewrite.GadgetRewriter;
 import org.apache.shindig.gadgets.rewrite.MutableContent;
 import org.apache.shindig.gadgets.uri.ProxyUriManager;
+import org.apache.shindig.gadgets.uri.UriCommon;
 import org.apache.shindig.gadgets.uri.UriStatus;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -124,7 +125,7 @@ public class CajaContentRewriter implements GadgetRewriter {
     this.htmlSerializer = htmlSerializer;
     this.proxyUriManager = proxyUriManager;
   }
-  
+
   public class CajoledResult {
     public final Node html;
     public final CajoledModule js;
@@ -136,11 +137,12 @@ public class CajaContentRewriter implements GadgetRewriter {
       this.messages = messages;
       this.hasErrors= hasErrors;
     }
+    @Override
     public String toString() {
-      return "[html:'" + html + "', js: '" + js + "', messages: '" + messages + "']"; 
+      return "[html:'" + html + "', js: '" + js + "', messages: '" + messages + "']";
     }
   }
-  
+
   @VisibleForTesting
   ParseTreeNode parse(InputSource is, CharProducer cp, String mime, MessageQueue mq)
       throws ParseException {
@@ -159,7 +161,7 @@ public class CajaContentRewriter implements GadgetRewriter {
     }
     return ptn;
   }
-  
+
   public CajoledResult rewrite(Uri uri, String container, String mime,
       boolean es53, boolean debug) {
     URI javaUri = uri.toJavaUri();
@@ -185,7 +187,7 @@ public class CajaContentRewriter implements GadgetRewriter {
     }
     return new CajoledResult(null, null, mq.getMessages(), /* hasErrors */ true);
   }
-  
+
   public CajoledResult rewrite(Uri gadgetUri, String container,
       ParseTreeNode root, boolean es53, boolean debug) {
     UriFetcher fetcher = makeFetcher(gadgetUri, container);
@@ -210,8 +212,8 @@ public class CajaContentRewriter implements GadgetRewriter {
       hasErrors = true;
     }
 
-    return new CajoledResult(compiler.getStaticHtml(), 
-        compiler.getJavascript(), 
+    return new CajoledResult(compiler.getStaticHtml(),
+        compiler.getJavascript(),
         compiler.getMessageQueue().getMessages(),
         hasErrors);
   }
@@ -244,7 +246,7 @@ public class CajaContentRewriter implements GadgetRewriter {
         // This will load cajita-debugmode.js
         gadget.addFeature("caja-debug");
       }
-      
+
       InputSource is = new InputSource(gadgetContext.getUrl().toJavaUri());
       // TODO(jasvir): Turn on es53 once gadgets apis support it
       CajoledResult result =
@@ -269,7 +271,7 @@ public class CajaContentRewriter implements GadgetRewriter {
         script.setAttributeNS(
             Namespaces.HTML_NAMESPACE_URI, "type", "text/javascript");
         script.appendChild(doc.createTextNode(scriptBody.toString()));
-        
+
 
         Element cajoledOutput = doc.createElement("div");
         cajoledOutput.setAttribute("id", "cajoled-output");
@@ -279,7 +281,7 @@ public class CajaContentRewriter implements GadgetRewriter {
         cajoledOutput.appendChild(doc.adoptNode(html));
         cajoledOutput.appendChild(tameCajaClientApi(doc));
         cajoledOutput.appendChild(doc.adoptNode(script));
-        
+
         List<Message> messages = result.messages;
         Element messagesNode = formatErrors(doc, is, docContent, messages,
             /* invisible */ false);
@@ -306,7 +308,7 @@ public class CajaContentRewriter implements GadgetRewriter {
 
   protected boolean cajaEnabled(Gadget gadget) {
     return (gadget.getAllFeatures().contains("caja") ||
-        "1".equals(gadget.getContext().getParameter("caja")));
+        "1".equals(gadget.getContext().getParameter(UriCommon.Param.CAJOLE.getKey())));
   }
 
   UriFetcher makeFetcher(final Uri gadgetUri, final String container) {
@@ -316,7 +318,7 @@ public class CajaContentRewriter implements GadgetRewriter {
         if (LOG.isLoggable(Level.INFO)) {
           LOG.logp(Level.INFO, classname, "makeFetcher", MessageKeys.RETRIEVE_REFERENCE,
               new Object[] {ref.toString()});
-        }        
+        }
         Uri resourceUri = gadgetUri.resolve(Uri.fromJavaUri(ref.getUri()));
         HttpRequest request =
             new HttpRequest(resourceUri).setContainer(container).setGadget(gadgetUri);
@@ -339,10 +341,10 @@ public class CajaContentRewriter implements GadgetRewriter {
           throw new UriFetchException(ref, mimeType, e);
         }
       }
-      
+
     };
   }
-  
+
   protected UriPolicy makePolicy(final Uri gadgetUri) {
     return new UriPolicy() {
       public String rewriteUri(ExternalReference ref, UriEffect effect,
@@ -430,7 +432,7 @@ public class CajaContentRewriter implements GadgetRewriter {
           new Object[] {errbuilder});
     }
   }
-  
+
   protected PluginCompiler makePluginCompiler(
       PluginMeta meta, MessageQueue mq) {
     PluginCompiler compiler = new PluginCompiler(
