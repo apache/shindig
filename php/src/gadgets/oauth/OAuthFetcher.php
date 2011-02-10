@@ -227,10 +227,11 @@ class OAuthFetcher extends RemoteContentFetcher {
     $tokenKey->setAppId($this->authToken->getAppId());
     $tokenKey->setServiceName($this->requestParams->getServiceName());
     $tokenKey->setTokenName($this->requestParams->getTokenName());
-    // At some point we might want to let gadgets specify whether to use OAuth
-    // for the owner, the viewer, or someone else. For now always using the
-    // owner identity seems reasonable.
-    $tokenKey->setUserId($this->authToken->getOwnerId());
+    // We should always use the current viewer id as a token key. Using the owner id
+    // would mean, that a private access token (with possible write access to the api)
+    // could be accessable to other viewers that are visiting the gadget of another
+    // owner
+    $tokenKey->setUserId($this->authToken->getViewerId());
     return $tokenKey;
   }
 
