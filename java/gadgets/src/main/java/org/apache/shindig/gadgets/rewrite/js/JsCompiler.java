@@ -20,7 +20,23 @@ package org.apache.shindig.gadgets.rewrite.js;
 import java.util.List;
 
 public interface JsCompiler {
+  /**
+   * Compiles the provided code with the provided list of external symbols.
+   * 
+   * @param jsData The code to compile.
+   * @param externs The list of external symbols.
+   * @return A compilation result object.
+   */
   public Result compile(String jsData, List<String> externs);
+  
+  /**
+   * Generates a sequence of statements to mark the specified symbols as
+   * exported.
+   *
+   * @param symbols The symbols to export.
+   * @return A sequence of JavaScript statements to export those symbols.
+   */
+  public String generateExportStatements(List<String> symbols);
   
   public static class Result {
     private final String compiled;

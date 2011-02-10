@@ -17,7 +17,6 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.JsonSerializer;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.GadgetContext;
@@ -31,10 +30,8 @@ import org.apache.shindig.gadgets.rewrite.js.JsCompiler;
 import org.apache.shindig.gadgets.uri.JsUriManager.JsUri;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import com.google.caja.util.Join;
 import com.google.caja.util.Sets;
@@ -81,9 +78,8 @@ public class JsHandler {
   /**
    * Get the content of the feature resources and push it to jsData.
    *
-   * @param req The HttpServletRequest object.
-   * @param ctx GadgetContext object.
-   * @param needed Set of requested feature names.
+   * @param jsUri A JsUri object that describes the resources to get.
+   * @param host The name of the host the request was directed to.
    * @return JsHandlerResponse object that contains JavaScript data and cacheable flag.
    */
   public Response getJsContent(final JsUri jsUri, String host) {
@@ -105,7 +101,6 @@ public class JsHandler {
     boolean willCompile = willCompile(jsUri);
     StringBuilder jsData = new StringBuilder();
     List<String> allExterns = Lists.newArrayList();
-    Set<String> allExports = Sets.newHashSet();
 
     for (FeatureRegistry.FeatureBundle bundle : lookup.getBundles()) {
       if (alreadyLoaded.contains(bundle.getName())) continue;
@@ -141,24 +136,7 @@ public class JsHandler {
         // Add externs for this bundle.
         appendExternsForBundle(bundle, allExterns);
 
-        Collections.sort(rawExports);
-        String prevExport = null;
-        for (String export : rawExports) {
-          if (!export.equals(prevExport)) {
-            String[] pieces = StringUtils.split(export, "\\.");
-            String base = "window";
-            for (int i = 0; i < pieces.length; ++i) {
-              String symExported = (i == 0) ? pieces[0] : base + "." + pieces[i];
-              if (!allExports.contains(symExported)) {
-                String curExport = base + "['" + pieces[i] + "']=" + symExported + ";\n";
-                jsData.append(curExport);
-                allExports.add(symExported);
-              }
-              base = symExported;
-            }
-          }
-          prevExport = export;
-        }
+        jsData.append(compiler.generateExportStatements(rawExports));
       }
     }
 
