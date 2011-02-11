@@ -18,20 +18,29 @@
 package org.apache.shindig.gadgets.rewrite;
 
 import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.createStrictMock;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import com.google.common.collect.Maps;
+import com.google.inject.AbstractModule;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.google.inject.Module;
+import com.google.inject.name.Names;
 
 import org.apache.shindig.common.uri.Uri;
-import org.apache.shindig.common.cache.LruCacheProvider;
-import org.apache.shindig.common.cache.CacheProvider;
+import org.apache.shindig.gadgets.http.AbstractHttpCache;
+import org.apache.shindig.gadgets.http.HttpCache;
 import org.apache.shindig.gadgets.http.HttpRequest;
+import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.http.RequestPipeline;
-import org.apache.shindig.gadgets.http.HttpCache;
-import org.apache.shindig.gadgets.http.DefaultHttpCache;
 import org.apache.shindig.gadgets.parse.ParseModule.DOMImplementationProvider;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Attr;
@@ -59,8 +68,16 @@ public class CacheEnforcementVisitorTest extends DomWalkerTestBase {
     executor = Executors.newSingleThreadExecutor();
     DOMImplementationProvider domImpl = new DOMImplementationProvider();
     doc = domImpl.get().createDocument(null, null, null);
-    CacheProvider cacheProvider = new LruCacheProvider(10);
-    cache = new DefaultHttpCache(cacheProvider);
+    Module module = new AbstractModule() {
+      public void configure() {
+        binder().bindConstant()
+            .annotatedWith(Names.named("shindig.cache.http.strict-no-cache-resource.max-age"))
+            .to(86400L);
+        requestStaticInjection(HttpResponse.class);
+      }
+    };
+    Injector injector = Guice.createInjector(module);
+    cache = injector.getInstance(TestHttpCache.class);
  }
 
   @Test
@@ -72,19 +89,19 @@ public class CacheEnforcementVisitorTest extends DomWalkerTestBase {
   }
 
   @Test
-  public void testStaleImgWithZeroMaxAgeReservedAndFetchTriggered() throws Exception {
+  public void testStaleImgWithZeroMaxAgeReservedAndFetchNotTriggered() throws Exception {
     cache.addResponse(new HttpRequest(Uri.parse(IMG_URL)),
                       new HttpResponseBuilder().setResponseString("test")
                           .addHeader("Cache-Control", "max-age=0").create());
-    checkVisitBypassedAndFetchTriggered("img", IMG_URL, false, true);
+    checkVisitBypassedAndFetchTriggered("img", IMG_URL, false, false);
   }
 
   @Test
-  public void testImgWithErrorResponseReservedAndFetchTriggered() throws Exception {
+  public void testImgWithErrorResponseReservedAndFetchNotTriggered() throws Exception {
     cache.addResponse(new HttpRequest(Uri.parse(IMG_URL)),
                       new HttpResponseBuilder().setResponseString("test")
                           .setHttpStatusCode(404).create());
-    checkVisitBypassedAndFetchTriggered("img", IMG_URL, false, true);
+    checkVisitBypassedAndFetchTriggered("img", IMG_URL, false, false);
   }
 
   @Test
@@ -96,6 +113,8 @@ public class CacheEnforcementVisitorTest extends DomWalkerTestBase {
 
   @Test
   public void testEmbedImgBypassedAndFetchNotTriggered() throws Exception {
+    // This test checks that non img nodes are always bypassed and fetches are not triggered for
+    // them, since they aren't in the tags specified in CacheEnforcementVisitor.
     checkVisitBypassedAndFetchTriggered("embed", IMG_URL, true, false);
     cache.addResponse(new HttpRequest(Uri.parse(IMG_URL)),
                       new HttpResponseBuilder().setResponseString("test").create());
@@ -105,6 +124,51 @@ public class CacheEnforcementVisitorTest extends DomWalkerTestBase {
   @Test
   public void testImgNotInCacheReservedAndFetchTriggered() throws Exception {
     checkVisitBypassedAndFetchTriggered("img", IMG_URL, false, true);
+  }
+
+  @Test
+  public void testImgWithCacheControlPrivateReservedAndFetchNotTriggered() throws Exception {
+    cache.addResponse(new HttpRequest(Uri.parse(IMG_URL)),
+                      new HttpResponseBuilder().setResponseString("test")
+                          .addHeader("Cache-Control", "private").create());
+    // Ensure that the strict no-cache resource is cached.
+    assertTrue(cache.getResponse(new HttpRequest(Uri.parse(IMG_URL))) != null);
+    checkVisitBypassedAndFetchTriggered("img", IMG_URL, false, false);
+  }
+
+  @Test
+  public void testImgWithCacheControlNoCacheReservedAndFetchNotTriggered() throws Exception {
+
+    cache.addResponse(new HttpRequest(Uri.parse(IMG_URL)),
+                      new HttpResponseBuilder().setResponseString("test")
+                          .addHeader("Cache-Control", "no-cache").create());
+    checkVisitBypassedAndFetchTriggered("img", IMG_URL, false, false);
+  }
+
+  @Test
+  public void testImgWithCacheControlNoStoreReservedAndFetchNotTriggered() throws Exception {
+    cache.addResponse(new HttpRequest(Uri.parse(IMG_URL)),
+                      new HttpResponseBuilder().setResponseString("test")
+                          .addHeader("Cache-Control", "no-store").create());
+    checkVisitBypassedAndFetchTriggered("img", IMG_URL, false, false);
+  }
+
+  @Test
+  public void testImgWithPragmaNoCacheReservedAndFetchNotTriggered() throws Exception {
+    cache.addResponse(new HttpRequest(Uri.parse(IMG_URL)),
+                      new HttpResponseBuilder().setResponseString("test")
+                          .addHeader("Pragma", "no-cache").create());
+    checkVisitBypassedAndFetchTriggered("img", IMG_URL, false, false);
+  }
+
+  @Test
+  public void testImgWithSetCookieButNotStrictNoCacheReservedAndFetchNotTriggered()
+      throws Exception {
+    cache.addResponse(new HttpRequest(Uri.parse(IMG_URL)),
+                      new HttpResponseBuilder().setResponseString("test")
+                          .addHeader("Cache-Control", "public,max-age=86400")
+                          .addHeader("Set-Cookie", "name=val").create());
+    checkVisitBypassedAndFetchTriggered("img", IMG_URL, false, false);
   }
 
   /**
@@ -133,10 +197,10 @@ public class CacheEnforcementVisitorTest extends DomWalkerTestBase {
     node.setAttributeNode(attr);
 
     // Mock the RequestPipeline.
-    RequestPipeline requestPipeline = createMock(RequestPipeline.class);
+    RequestPipeline requestPipeline = createStrictMock(RequestPipeline.class);
     if (expectFetch) {
       expect(requestPipeline.execute(new HttpRequest(Uri.parse(url))))
-          .andReturn(new HttpResponseBuilder().setResponseString("test").create());
+          .andReturn(new HttpResponseBuilder().setResponseString("test").create()).once();
     }
     replay(requestPipeline);
 
@@ -144,6 +208,7 @@ public class CacheEnforcementVisitorTest extends DomWalkerTestBase {
     expect(config.shouldRewriteURL(IMG_URL)).andReturn(true).anyTimes();
     expect(config.shouldRewriteTag("img")).andReturn(true).anyTimes();
     replay(config);
+
     CacheEnforcementVisitor visitor = new CacheEnforcementVisitor(
         config, executor, cache, requestPipeline,
         ProxyingVisitor.Tags.SCRIPT, ProxyingVisitor.Tags.STYLESHEET,
@@ -158,4 +223,25 @@ public class CacheEnforcementVisitorTest extends DomWalkerTestBase {
 
     assertEquals(expectBypass, status == DomWalker.Visitor.VisitStatus.BYPASS);
   }
+
+  private static class TestHttpCache extends AbstractHttpCache {
+    protected final Map<String, HttpResponse> map;
+
+    public TestHttpCache() {
+      map = Maps.newHashMap();
+    }
+
+    public void addResponseImpl(String key, HttpResponse response) {
+      map.put(key, response);
+    }
+
+    public HttpResponse getResponseImpl(String key) {
+      return map.get(key);
+    }
+
+    public HttpResponse removeResponseImpl(String key) {
+      return map.remove(key);
+    }
+  }
+
 }

@@ -121,6 +121,12 @@ public final class HttpResponse implements Externalizable {
   // Default TTL for an entry in the cache that does not have any cache control headers.
   static final long DEFAULT_TTL = 5L * 60L * 1000L;
 
+  // TTL to use for strict no-cache response. A value of -1 indicates that a strict no-cache
+  // resource is never cached. This is also used to indicate if strict no-cache responses should
+  // be considered as expired. A non-negative value indicates that such responses should not be
+  // considered as expired as long as they are haven't expired otherwise.
+  static final long DEFAULT_STRICT_NO_CACHE_RESOURCE_TTL = -1;
+
   static final Charset DEFAULT_ENCODING = Charset.forName("UTF-8");
 
   @Inject(optional = true) @Named("shindig.cache.http.negativeCacheTtl")
@@ -131,6 +137,9 @@ public final class HttpResponse implements Externalizable {
 
   @Inject(optional = true) @Named("shindig.http.fast-encoding-detection")
   private static boolean fastEncodingDetection = true;
+
+  @Inject(optional = true) @Named("shindig.cache.http.strict-no-cache-resource.max-age")
+  private static long strictNoCacheResourceTtl = DEFAULT_STRICT_NO_CACHE_RESOURCE_TTL;
 
   // Support injection of smarter encoding detection
   @Inject(optional = true)
@@ -336,7 +345,7 @@ public final class HttpResponse implements Externalizable {
       return date + negativeCacheTtl;
     }
 
-    if (isStrictNoCache()) {
+    if (isStrictNoCache() && strictNoCacheResourceTtl < 0) {
       return -1;
     }
     long maxAge = getCacheControlMaxAge();
@@ -419,7 +428,7 @@ public final class HttpResponse implements Externalizable {
   /**
    * @return max-age value or -1 if invalid or not set
    */
-  private long getCacheControlMaxAge() {
+  public long getCacheControlMaxAge() {
     String cacheControl = getHeader("Cache-Control");
     if (cacheControl != null) {
       String[] directives = StringUtils.split(cacheControl, ',');

@@ -41,15 +41,21 @@ import java.util.logging.Logger;
  * Visitor that walks over html tags as specified by {@code resourceTags} and
  * reserves html tag nodes whose uri attributes are either not in cache, or are
  * in cache, but the response in cache is either stale or an error response. In
- * all the above mentioned cases, we trigger a background fetch for the
- * resource. This visitor should be used by a rewriter in conjuction with other
- * visitors which depend on the uri of the html node being in cache.
+ * all the above mentioned cases except for the error case, we trigger a
+ * background fetch for the resource. This visitor should be used by a rewriter
+ * in conjuction with other visitors which depend on the uri of the html node
+ * being in cache.
+ *
+ * Note that in order to use the CacheEnforcementVisitor effectively, the
+ * shindig property shindig.cache.http.strict-no-cache-resource.max-age should
+ * be set to a positive value, so that strict no-cache resources are stored in
+ * cache with this ttl, and unnecessary fetches are not triggered each time for
+ * such resources.
  *
  */
 public class CacheEnforcementVisitor extends ResourceMutateVisitor {
 
-  private static final Logger logger = Logger.getLogger(
-      CacheEnforcementVisitor.class.getName());
+  private static final Logger logger = Logger.getLogger(CacheEnforcementVisitor.class.getName());
   private final HttpCache cache;
   private final RequestPipeline requestPipeline;
   private final Executor executor;
@@ -95,15 +101,28 @@ public class CacheEnforcementVisitor extends ResourceMutateVisitor {
    * @return The visit status of the node.
    */
   protected VisitStatus handleResponseInCache(String uri, HttpResponse response) {
-    // TODO: If the response is strict no cache, then we should reserve the node.
-    // Currently, we will keep triggering fetches for these resources.
-    // Also, investigate the Cache-Control=no-cache case. Should we proxy resources in this case?
-    // Also, investigate when Cache-Control is max-age=0. We are currently triggering a fetch in
-    // this case. We should look at the TTL of the original response and if that is zero, we
-    // shouldn't trigger a fetch for the resource.
-    if (response.isStale() || response.isError()) {
-      // Trigger a fetch if the response is stale or an error, and reserve the node.
-      triggerFetch(uri);
+    if (response.isStale()) {
+      // Reserve the node if the response is stale.
+      if (response.getCacheControlMaxAge() != 0) {
+        // If the cache-control max-age of the original response is zero, it doesn't make sense to
+        // trigger a pre-fetch for it, since by the time the request for it comes in, it will
+        // already be stale. Such resources will continuously be prefetched, but the fetched
+        // response will never be used.
+        // TODO: While we definitely should not be pre-fetching resources with a max-age of 0, other
+        // cases with a very small max-age(say 1s) should also probably not be pre-fetched either
+        // since the response might not be usable by the time the actual request comes in. Also
+        // we should consider the cases with no max-age, but instead an Expires header which is
+        // close to, or the same as the Date header.
+        triggerFetch(uri);        
+      }
+      return VisitStatus.RESERVE_NODE;
+    } else if (response.isStrictNoCache() || response.getHeader("Set-Cookie") != null ||
+               response.isError()) {
+      // If the response is strict no-cache, or has a Set-Cookie header or is an error response,
+      // reserve the node. Do not trigger a fetch, since pre-fetching the resource doesn't help as
+      // the response will not be cached. Also, for the error case, since we already set the
+      // ttl for such resources to 30 seconds, we should not keep pre-fetching these till they
+      // become stale.
       return VisitStatus.RESERVE_NODE;
     } else {
       // Otherwise, we assume the cached response is valid and bypass the node.
