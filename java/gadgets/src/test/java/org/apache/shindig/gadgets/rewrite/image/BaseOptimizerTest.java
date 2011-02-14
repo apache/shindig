@@ -34,4 +34,11 @@ public abstract class BaseOptimizerTest extends Assert {
     return new HttpResponseBuilder().addHeader("Content-Type", mimeType)
             .setResponse(bytes).create();
   }
+
+  protected HttpResponseBuilder createResponseBuilder(String resource, String mimeType)
+      throws IOException {
+    byte[] bytes = IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream(resource));
+    return new HttpResponseBuilder().addHeader("Content-Type", mimeType)
+        .setResponse(bytes);
+  }
 }

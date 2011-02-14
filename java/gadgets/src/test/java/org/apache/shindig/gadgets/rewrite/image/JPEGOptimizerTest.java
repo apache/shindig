@@ -78,6 +78,20 @@ public class JPEGOptimizerTest extends BaseOptimizerTest {
     assertTrue(rewritten.getContentLength() <= resp.getContentLength());
   }
 
+  @Test
+  public void testLargeJPEGWithEtagAndCacheHeaders() throws Exception {
+    HttpResponseBuilder responseBuilder =
+        createResponseBuilder("org/apache/shindig/gadgets/rewrite/image/large.jpg", "image/jpeg");
+    responseBuilder.addHeader("ETag", "wereertret");
+    responseBuilder.addHeader("Cache-Control", "public, max-age=86400");
+    HttpResponse resp = responseBuilder.create();
+    HttpResponse rewritten = rewrite(resp, getConfigWithRetainSampling(false, 0.70f));
+    assertEquals("image/jpeg", resp.getHeader("Content-Type"));
+    assertEquals("public, max-age=86400", resp.getHeader("Cache-Control"));
+    assertNull(rewritten.getHeader("ETag"));
+    assertTrue(rewritten.getContentLength() < resp.getContentLength());
+  }
+
   @Test(expected=Throwable.class)
   public void testBadImage() throws Exception {
     // Not a JPEG
@@ -88,7 +102,7 @@ public class JPEGOptimizerTest extends BaseOptimizerTest {
 
   @Test(expected=Throwable.class)
   public void xtestBadICC1() throws Exception {
-    // ICC section too long 
+    // ICC section too long
     HttpResponse resp = createResponse("org/apache/shindig/gadgets/rewrite/image/badicc.jpg", "image/jpeg");
     rewrite(resp);
   }

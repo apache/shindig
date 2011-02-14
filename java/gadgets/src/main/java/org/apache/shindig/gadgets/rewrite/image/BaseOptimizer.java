@@ -53,7 +53,6 @@ import javax.imageio.plugins.jpeg.JPEGImageWriteParam;
  * Base class for image optimizers
  */
 abstract class BaseOptimizer {
-
   static final Map<String, ImageFormat> FORMAT_NAME_TO_IMAGE_FORMAT = ImmutableMap.of(
       "png", ImageFormat.IMAGE_FORMAT_PNG,
       "gif", ImageFormat.IMAGE_FORMAT_GIF,
@@ -111,7 +110,7 @@ abstract class BaseOptimizer {
     if (image == null) {
       return;
     }
-    
+
     byte[] bytes = outputter.toBytes(image);
     if (minLength > bytes.length) {
       minBytes = bytes;
@@ -137,7 +136,10 @@ abstract class BaseOptimizer {
         rewriteMsg.append(";o=").append(getOriginalContentType());
       }
       rewriteMsg.append(";t=").append(time);
-      response.clearAllHeaders()
+
+      // Removing the original 'Etag' header as we have updated the content.
+      response.removeHeader("ETag");
+      response
           .setHeader("Content-Type", getOutputContentType())
           .setHeader("X-Shindig-Rewrite", rewriteMsg.toString())
           .setResponse(minBytes);
@@ -194,7 +196,7 @@ abstract class BaseOptimizer {
         baos.reset();
       }
       writer.setOutput(ImageIO.createImageOutputStream(baos));
-      
+
       // Create a new empty metadata set
       ImageWriteParam metaImageWriteParam = writeParam;
       if (writer instanceof JPEGImageWriter) {
@@ -202,7 +204,7 @@ abstract class BaseOptimizer {
         // writer.getDefaultImageMetadata(new ImageTypeSpecifier(image.getColorModel(),
         //    image.getSampleModel()), writeParam);
         //
-        // does buggy processing for compression ratio parameter in ImageWriteParam. 
+        // does buggy processing for compression ratio parameter in ImageWriteParam.
         // Hence passing null as ImageWriteParam here to ignore this processing and
         // passing the ImageWriteParam later in the writer.write() call.
         metaImageWriteParam = null;
@@ -211,7 +213,7 @@ abstract class BaseOptimizer {
       IIOMetadata metadata = writer.getDefaultImageMetadata(
           new ImageTypeSpecifier(image.getColorModel(), image.getSampleModel()),
           metaImageWriteParam);
-      
+
       if (jpegSamplingMode.getModeValue() > 0 && writer instanceof JPEGImageWriter) {
         setJpegSubsamplingMode(metadata);
       }
