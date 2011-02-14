@@ -27,7 +27,7 @@ class JsonRpcServlet extends ApiServlet {
 
   /**
    * Single request through GET
-   * http://api.example.org/rpc?method=people.get&id=myself&userid=@me&groupid=@self
+   * http://api.example.org/rpc?method=people.get&id=myself&params.userId=@me&params.groupId=@self
    */
   public function doGet() {
     $token = $this->getSecurityToken();
@@ -35,9 +35,86 @@ class JsonRpcServlet extends ApiServlet {
       $this->sendSecurityError();
       return;
     }
-    // Request object == GET params
-    $request = $_GET;
+
+    $request = $this->parseGetRequest($_SERVER['QUERY_STRING']);
+
     $this->dispatch($request, $token);
+  }
+
+  /**
+   * parses all $_GET parameters according to rpc spec
+   * @see http://opensocial-resources.googlecode.com/svn/spec/1.1/Core-API-Server.xml#urlAddressing
+   *
+   * @param string $parameters should be $_GET on production
+   * @return array
+   */
+  public function parseGetRequest($parameterString)
+  {
+    // we have to parse the query parameters by hand because parse_str or the built in
+    // $_GET replace '.' with '_' in parameter keys
+    $parameters = array();
+    $pairs = explode('&', $parameterString);
+    foreach ($pairs as $pair) {
+      if (strpos($pair, '=') !== false) {
+        list($key, $value) = explode('=', $pair);
+        $parameters[$key] = urldecode($value);
+      }
+    }
+    $request = array();
+    foreach($parameters as $key => $value) {
+      // parse value lists like field=1,2,3,4,5
+      if (strpos($value, ',') !== false) {
+        $parsedValue = explode(',', $value);
+      } else {
+        $parsedValue = $value;
+      }
+      // handle multidimensional nested keys like field.nested=value
+      if (strpos($key, '.') > 0) {
+        $keyParts = explode('.', $key);
+        $request = $this->getMultiDimensionalArray($request, $keyParts, $parsedValue);
+      } else {
+        $request = $this->getMultiDimensionalArray($request, array($key), $parsedValue);
+      }
+    }
+    return $request;
+  }
+
+  /**
+   * parses a multidimensional parameter
+   * e.g. params.foo=bar to 'params' => array('foo' => 'bar')
+   *
+   * @param array $request
+   * @param array $keyParts
+   * @param mixed $value
+   * @return array
+   */
+  private function getMultiDimensionalArray($request, $keyParts, $value)
+  {
+    if (! $keyParts) {
+      return $value;
+    }
+    $key = array_shift($keyParts);
+
+    $matches = array();
+
+    // handle something like field(0).nested1=value1&field(1).nested2=value2
+    if (preg_match('/^([a-zA-Z0-9]*)\(([0-9]*)\)$/', $key, $matches)) {
+      $key = $matches[1];
+      array_unshift($keyParts, $matches[2]);
+    }
+
+    if (! isset($request[$key])) {
+      $request[$key] = array();
+    }
+    $value = $this->getMultiDimensionalArray($request[$key], $keyParts, $value);
+
+    if (is_array($value)) {
+      $request[$key] = $value + $request[$key];
+    } else {
+      $request[$key] = $value;
+    }
+
+    return $request;
   }
 
   /**
@@ -107,7 +184,8 @@ class JsonRpcServlet extends ApiServlet {
     $requestItem = new RpcRequestItem($request, $token);
     // Resolve each Future into a response.
     // TODO: should use shared deadline across each request
-    $response = $this->getResponseItem($this->handleRequestItem($requestItem));
+    $a = $this->handleRequestItem($requestItem);
+    $response = $this->getResponseItem($a);
     $result = $this->getJSONResponse($key, $response);
     $this->encodeAndSendResponse($result);
   }
@@ -160,7 +238,7 @@ class JsonRpcServlet extends ApiServlet {
   /**
    * encodes data to json, adds jsonp callback if requested and sends response
    * to client
-   * 
+   *
    * @param array $data
    * @return string
    */
