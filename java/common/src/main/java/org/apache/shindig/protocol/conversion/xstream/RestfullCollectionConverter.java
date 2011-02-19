@@ -58,28 +58,24 @@ public class RestfullCollectionConverter extends AbstractCollectionConverter {
    */
   @Override
   public void marshal(Object source, HierarchicalStreamWriter writer, MarshallingContext context) {
-
     RestfulCollection<?> collection = (RestfulCollection<?>) source;
 
-    // Required per spec
+    writer.startNode("itemsPerPage");
+    writer.setValue(String.valueOf(collection.getItemsPerPage()));
+    writer.endNode();
     writer.startNode("startIndex");
     writer.setValue(String.valueOf(collection.getStartIndex()));
     writer.endNode();
     writer.startNode("totalResults");
     writer.setValue(String.valueOf(collection.getTotalResults()));
     writer.endNode();
-    writer.startNode("itemsPerPage");
-    writer.setValue(String.valueOf(collection.getItemsPerPage()));
-    writer.endNode();
-
-    // Optional
-    writer.startNode("isFiltered");
+    writer.startNode("filtered");
     writer.setValue(String.valueOf(collection.isFiltered()));
     writer.endNode();
-    writer.startNode("isSorted");
+    writer.startNode("sorted");
     writer.setValue(String.valueOf(collection.isSorted()));
     writer.endNode();
-    writer.startNode("isUpdatedSince");
+    writer.startNode("updatedSince");
     writer.setValue(String.valueOf(collection.isUpdatedSince()));
     writer.endNode();
 
@@ -102,5 +98,4 @@ public class RestfullCollectionConverter extends AbstractCollectionConverter {
     // TODO Auto-generated method stub
     return null;
   }
-
 }

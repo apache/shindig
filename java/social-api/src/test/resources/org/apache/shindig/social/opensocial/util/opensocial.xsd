@@ -21,34 +21,49 @@
   elementFormDefault="qualified"
   targetNamespace="http://ns.opensocial.org/2008/opensocial"
   xmlns:xs="http://www.w3.org/2001/XMLSchema">
-  
-  <!--  this is a proposal for the OpenSocial 0.9 XSD. -->
+
   <xs:element name="person" type="tns:Person" />
   <xs:element name="group" type="tns:Group" />
   <xs:element name="activity" type="tns:Activity" />
   <xs:element name="appdata" type="tns:Appdata" />
   
   <xs:element name="response" type="tns:Response" />
-  
-  
+
   <xs:complexType name="Response">
     <xs:choice minOccurs="0" maxOccurs="unbounded" >
-      <xs:element minOccurs="0" name="itemsPerPage" type="xs:int" />
-      <xs:element minOccurs="0" name="startIndex" type="xs:long" />
-      <xs:element minOccurs="0" name="totalResults" type="xs:long" />
-      <xs:element minOccurs="0" name="isFiltered" type="xs:boolean" />
-      <xs:element minOccurs="0" name="isSorted" type="xs:boolean" />
-      <xs:element minOccurs="0" name="isUpdatedSince" type="xs:boolean" />
       <xs:element minOccurs="0" name="group" type="tns:Group" />
       <xs:element minOccurs="0" name="activity" type="tns:Activity" />
       <xs:element minOccurs="0" name="person" type="tns:Person" />
-      <xs:element minOccurs="0"  maxOccurs="unbounded" name="entry" type="tns:Entry" />
+
+      <xs:group ref="tns:collection" />
+      <xs:element minOccurs="0" name="invalidationKeys" type="tns:InvalidationKeys" />
+
       <!--  this is to allow responses to create to validate -->
       <xs:element minOccurs="0" name="map" type="xs:anyType" />
       <xs:element minOccurs="0" name="list.container" type="xs:anyType" />
     </xs:choice>
   </xs:complexType>
-  
+
+  <!-- update for OpenSocial 1.1 XSD -->
+  <!-- (see http://opensocial-resources.googlecode.com/svn/spec/1.1/Core-API-Server.xml#XML_format_XSD) -->
+  <xs:group name="collection">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="itemsPerPage" type="xs:int"/>
+      <xs:element minOccurs="0" name="startIndex" type="xs:long"/>
+      <xs:element minOccurs="0" name="totalResults" type="xs:long"/>
+      <xs:element minOccurs="0" name="filtered" type="xs:boolean"/>
+      <xs:element minOccurs="0" name="sorted" type="xs:boolean"/>
+      <xs:element minOccurs="0" name="updatedSince" type="xs:boolean"/>
+      <xs:element name="entry" type="tns:Entry" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:group>
+
+  <xs:complexType name="InvalidationKeys">
+    <xs:sequence>
+      <xs:element name="invalidationKey" type="xs:string" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
   <xs:complexType name="Entry" >
     <xs:choice>
       <xs:element minOccurs="0" name="activity" type="tns:Activity" />
@@ -56,7 +71,7 @@
       <xs:element minOccurs="0" name="group" type="tns:Group" />
     </xs:choice>
   </xs:complexType>
-  
+
     
   <xs:complexType name="Activity">
     <xs:choice minOccurs="0" maxOccurs="unbounded">
@@ -251,6 +266,20 @@
       <xs:element minOccurs="0" name="value" type="xs:string" />
       <xs:element minOccurs="0" name="linkText" type="xs:string" />
       <xs:element minOccurs="0" name="type" type="xs:string" />
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="Album">
+    <xs:all>
+      <xs:element minOccurs="0" name="id" type="xs:string" />
+      <xs:element minOccurs="0" name="thumbnailUrl" type="xs:string" />
+      <xs:element minOccurs="0" name="title" type="xs:string" />
+      <xs:element minOccurs="0" name="description" type="xs:string" />
+      <xs:element minOccurs="0" name="location" type="tns:Address" />
+      <xs:element minOccurs="0" name="ownerId" type="xs:string" />
+      <xs:element minOccurs="0" name="mediaType" type="tns:MediaItemType" />
+      <xs:element minOccurs="0" name="mediaMimeType" type="xs:string" />
+      <xs:element minOccurs="0" name="mediaItemCount" type="xs:integer" />
     </xs:all>
   </xs:complexType>
   
