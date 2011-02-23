@@ -50,7 +50,7 @@ shindig.random = (function() {
 
   window.onmousemove = function(e) {
     if (window.event) {
-      e = event;
+      e = window.event;
     }
 
     var ac = (e.screenX + e.clientX) << 16;

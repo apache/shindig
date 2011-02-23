@@ -27,7 +27,7 @@
  * @name gadgets.util
  */
 
-gadgets['util'] = function() {
+gadgets.util = function() {
   var parameters = null;
 
   /**

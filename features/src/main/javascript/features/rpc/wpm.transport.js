@@ -102,12 +102,12 @@ if (!gadgets.rpctx.wpm) {  // make lib resilient to double-inclusion
     function onmessage(packet) {
       var rpc = gadgets.json.parse(packet.data);
       if (isForceSecure) {
-        if (!rpc || !rpc.f) {
+        if (!rpc || !rpc['f']) {
           return;
         }
 
         // for security, check origin against expected value
-        var origRelay = gadgets.rpc.getRelayUrl(rpc.f) ||
+        var origRelay = gadgets.rpc.getRelayUrl(rpc['f']) ||
             gadgets.util.getUrlParameters()['parent'];
         var origin = gadgets.rpc.getOrigin(origRelay);
         if (!pmEventDomain ? packet.origin !== origin :

@@ -176,7 +176,7 @@ gadgets.config = function() {
      * @name register
      * @function
      */
-    'register': function(component, opt_validators, opt_callback) {
+    register: function(component, opt_validators, opt_callback) {
       var registered = components[component];
       if (!registered) {
         registered = [];
@@ -200,7 +200,7 @@ gadgets.config = function() {
      * @name get
      * @function
      */
-    'get': function(opt_component) {
+    get: function(opt_component) {
       if (opt_component) {
         return configuration[opt_component] || {};
       }
@@ -217,7 +217,7 @@ gadgets.config = function() {
      * @name init
      * @function
      */
-    'init': function(config, opt_noValidation) {
+    init: function(config, opt_noValidation) {
       ___jsl = window["___jsl"] || {};
       if (configuration) {
         // init(...) has already been called. Merge rather than override config.
@@ -261,7 +261,7 @@ gadgets.config = function() {
      * @param updateConfig {Object} Config object, with keys for features.
      * @param opt_replace {Boolean} true to replace all configuration.
      */
-    'update': function(updateConfig, opt_replace) {
+    update: function(updateConfig, opt_replace) {
       configuration = opt_replace ? {} : configuration || {};
       foldConfig(configuration, updateConfig);
     }

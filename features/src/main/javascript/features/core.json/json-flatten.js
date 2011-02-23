@@ -24,7 +24,7 @@
  * @param {Object} obj
  * @return {Object} object with only string values.
  */
-gadgets['json'].flatten = function(obj) {
+gadgets.json.flatten = function(obj) {
   var flat = {};
 
   if (obj === null || obj === undefined) return flat;

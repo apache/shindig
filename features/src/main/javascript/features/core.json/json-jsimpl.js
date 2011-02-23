@@ -44,7 +44,7 @@ if (!(window.JSON && window.JSON.parse && window.JSON.stringify)) {
    * Port of the public domain JSON library by Douglas Crockford.
    * See: http://www.json.org/json2.js
    */
-  gadgets['json'] = function() {
+  gadgets.json = function() {
 
     /**
      * Formats integers to 2 digits.
@@ -153,8 +153,8 @@ if (!(window.JSON && window.JSON.parse && window.JSON.stringify)) {
     }
 
     return {
-      'stringify': stringify,
-      'parse': function(text) {
+      stringify: stringify,
+      parse: function(text) {
         // Parsing happens in three stages. In the first stage, we run the text against
         // regular expressions that look for non-JSON patterns. We are especially
         // concerned with '()' and 'new' because they can cause invocation, and '='

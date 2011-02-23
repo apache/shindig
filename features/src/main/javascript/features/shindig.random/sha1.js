@@ -67,6 +67,18 @@ shindig.sha1 = (function() {
    * @private
    */
   var pad_ = [];
+  
+  /**
+   * @type {number}
+   * @private
+   */
+  var inbuf_;
+  
+  /**
+   * @type {number}
+   * @private
+   */
+  var total_;
 
   pad_[0] = 128;
   for (var i = 1; i < 64; ++i) {

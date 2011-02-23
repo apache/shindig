@@ -125,7 +125,8 @@ if (!gadgets.rpc) { // make lib resilient to double-inclusion
     // Fallback transport is simply a dummy impl that emits no errors
     // and logs info on calls it receives, to avoid undesired side-effects
     // from falling back to IFPC or some other transport.
-    var clog = window['console'] && console.log ? console.log : function(){};
+    var console = window['console'];
+    var clog = console && console.log ? console.log : function(){};
     var fallbackTransport = (function() {
       function logFn(name) {
         return function() {
@@ -133,12 +134,12 @@ if (!gadgets.rpc) { // make lib resilient to double-inclusion
         };
       }
       return {
-        getCode: function() { return 'noop'; },
+        'getCode': function() { return 'noop'; },
         // Not really, but prevents transport assignment to IFPC.
-        isParentVerifiable: function() { return true; },
-        init: logFn('init'),
-        setup: logFn('setup'),
-        call: logFn('call')
+        'isParentVerifiable': function() { return true; },
+        'init': logFn('init'),
+        'setup': logFn('setup'),
+        'call': logFn('call')
       };
     })();
 
@@ -192,8 +193,8 @@ if (!gadgets.rpc) { // make lib resilient to double-inclusion
       for (var i = 0; i < earlyQueue.length; ++i) {
         var rpc = earlyQueue[i];
         // There was no auth/rpc token set before, so set it now.
-        rpc.t = getAuthToken(receiverId);
-        tx.call(receiverId, rpc.f, rpc);
+        rpc['t'] = getAuthToken(receiverId);
+        tx.call(receiverId, rpc['f'], rpc);
       }
 
       // Clear the queue so it won't be sent again.
@@ -253,22 +254,22 @@ if (!gadgets.rpc) { // make lib resilient to double-inclusion
       //   a: The arguments for this RPC call.
       //   t: The authentication token.
       //
-      if (rpc && typeof rpc.s === 'string' && typeof rpc.f === 'string' &&
-          rpc.a instanceof Array) {
+      if (rpc && typeof rpc['s'] === 'string' && typeof rpc['f'] === 'string' &&
+          rpc['a'] instanceof Array) {
 
         // Validate auth token.
-        if (authToken[rpc.f]) {
+        if (authToken[rpc['f']]) {
           // We don't do type coercion here because all entries in the authToken
           // object are strings, as are all url params. See setupReceiver(...).
-          if (authToken[rpc.f] !== rpc.t) {
-            gadgets.error('Invalid auth token. ' + authToken[rpc.f] + ' vs ' + rpc.t);
-            securityCallback(rpc.f, FORGED_MSG);
+          if (authToken[rpc['f']] !== rpc['t']) {
+            gadgets.error('Invalid auth token. ' + authToken[rpc['f']] + ' vs ' + rpc['t']);
+            securityCallback(rpc['f'], FORGED_MSG);
           }
         }
 
-        if (rpc.s === ACK) {
+        if (rpc['s'] === ACK) {
           // Acknowledgement API, used to indicate a receiver is ready.
-          window.setTimeout(function() { transportReady(rpc.f, true); }, 0);
+          window.setTimeout(function() { transportReady(rpc['f'], true); }, 0);
           return;
         }
 
@@ -289,21 +290,21 @@ if (!gadgets.rpc) { // make lib resilient to double-inclusion
         //     me.callback(param);
         //   }, 1000);
         // }
-        if (rpc.c) {
+        if (rpc['c']) {
           rpc['callback'] = function(result) {
-            gadgets.rpc.call(rpc.f, CALLBACK_NAME, null, rpc.c, result);
+            gadgets.rpc.call(rpc['f'], CALLBACK_NAME, null, rpc['c'], result);
           };
         }
 
         // Call the requested RPC service.
-        var result = (services[rpc.s] ||
-            services[DEFAULT_NAME]).apply(rpc, rpc.a);
+        var result = (services[rpc['s']] ||
+            services[DEFAULT_NAME]).apply(rpc, rpc['a']);
 
         // If the rpc request handler returns a value, immediately pass it back
         // to the callback. Otherwise, do nothing, assuming that the rpc handler
         // will make an asynchronous call later.
-        if (rpc.c && typeof result !== 'undefined') {
-          gadgets.rpc.call(rpc.f, CALLBACK_NAME, null, rpc.c, result);
+        if (rpc['c'] && typeof result !== 'undefined') {
+          gadgets.rpc.call(rpc['f'], CALLBACK_NAME, null, rpc['c'], result);
         }
       }
     }
@@ -816,7 +817,7 @@ if (!gadgets.rpc) { // make lib resilient to double-inclusion
           from = rpcId;
         } else if (targetId.charAt(0) == '/') {
           // sending to sibling
-          from = makeSiblingId(rpcId, gadgets.rpc.getOrigin(location.href));
+          from = makeSiblingId(rpcId, gadgets.rpc.getOrigin(window.location.href));
         }
 
         ++callId;
@@ -825,12 +826,12 @@ if (!gadgets.rpc) { // make lib resilient to double-inclusion
         }
 
         var rpc = {
-          s: serviceName,
-          f: from,
-          c: callback ? callId : 0,
-          a: Array.prototype.slice.call(arguments, 3),
-          t: authToken[targetId],
-          l: useLegacyProtocol[targetId]
+          's': serviceName,
+          'f': from,
+          'c': callback ? callId : 0,
+          'a': Array.prototype.slice.call(arguments, 3),
+          't': authToken[targetId],
+          'l': useLegacyProtocol[targetId]
         };
 
         if (targetId !== '..' &&
@@ -931,7 +932,7 @@ if (!gadgets.rpc) { // make lib resilient to double-inclusion
        */
       receiveSameDomain: function(rpc) {
         // Pass through to local process method but converting to a local Array
-        rpc.a = Array.prototype.slice.call(rpc.a);
+        rpc['a'] = Array.prototype.slice.call(rpc['a']);
         window.setTimeout(function() { process(rpc); }, 0);
       },
 

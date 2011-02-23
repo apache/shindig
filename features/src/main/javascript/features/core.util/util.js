@@ -29,7 +29,7 @@ var __getUrlParameters = gadgets.util.getUrlParameters;
  * @class Provides general-purpose utility functions.
  * @name gadgets.util
  */
-gadgets['util'] = function() {
+gadgets.util = function() {
   var features = {};
   var services = {};
   var onLoadHandlers = [];
@@ -97,7 +97,7 @@ gadgets['util'] = function() {
      * @member gadgets.util
      * @private Implementation detail.
      */
-    'getUrlParameters' : __getUrlParameters,
+    getUrlParameters : __getUrlParameters,
 
     /**
      * Creates a closure that is suitable for passing as a callback.
@@ -115,7 +115,7 @@ gadgets['util'] = function() {
      * @member gadgets.util
      * @private Implementation detail.
      */
-    'makeClosure' : function(scope, callback, var_args) {
+    makeClosure : function(scope, callback, var_args) {
       // arguments isn't a real array, so we copy it into one.
       var baseArgs = [];
       for (var i = 2, j = arguments.length; i < j; ++i) {
@@ -140,7 +140,7 @@ gadgets['util'] = function() {
      *
      * @private Implementation detail.
      */
-    'makeEnum' : function(values) {
+    makeEnum : function(values) {
       var i, v, obj = {};
       for (i = 0; (v = values[i]); ++i) {
         obj[v] = v;
@@ -156,7 +156,7 @@ gadgets['util'] = function() {
      *
      * @member gadgets.util
      */
-    'getFeatureParameters' : function(feature) {
+    getFeatureParameters : function(feature) {
       return typeof features[feature] === 'undefined' ? null : features[feature];
     },
 
@@ -168,7 +168,7 @@ gadgets['util'] = function() {
      *
      * @member gadgets.util
      */
-    'hasFeature' : function(feature) {
+    hasFeature : function(feature) {
       return typeof features[feature] !== 'undefined';
     },
 
@@ -180,7 +180,7 @@ gadgets['util'] = function() {
      *
      * @member gadgets.util
      */
-    'getServices' : function() {
+    getServices : function() {
       return services;
     },
 
@@ -190,7 +190,7 @@ gadgets['util'] = function() {
      *
      * @member gadgets.util
      */
-    'registerOnLoadHandler' : function(callback) {
+    registerOnLoadHandler : function(callback) {
       onLoadHandlers.push(callback);
     },
 
@@ -198,7 +198,7 @@ gadgets['util'] = function() {
      * Runs all functions registered via registerOnLoadHandler.
      * @private Only to be used by the container, not gadgets.
      */
-    'runOnLoadHandlers' : function() {
+    runOnLoadHandlers : function() {
       for (var i = 0, j = onLoadHandlers.length; i < j; ++i) {
         onLoadHandlers[i]();
       }
@@ -220,7 +220,7 @@ gadgets['util'] = function() {
      * @return {Object} The escaped object.
      * @private Only to be used by the container, not gadgets.
      */
-    'escape' : function(input, opt_escapeObjects) {
+    escape : function(input, opt_escapeObjects) {
       if (!input) {
         return input;
       } else if (typeof input === 'string') {
@@ -253,7 +253,7 @@ gadgets['util'] = function() {
      * @param {string} str The string to escape.
      * @return {string} The escaped string.
      */
-    'escapeString' : function(str) {
+    escapeString : function(str) {
       if (!str) return str;
       var out = [], ch, shouldEscape;
       for (var i = 0, j = str.length; i < j; ++i) {
@@ -275,7 +275,7 @@ gadgets['util'] = function() {
      * @param {string} str The string to unescape.
      * @return {string}
      */
-    'unescapeString' : function(str) {
+    unescapeString : function(str) {
       if (!str) return str;
       return str.replace(/&#([0-9]+);/g, unescapeEntity);
     },
@@ -289,7 +289,7 @@ gadgets['util'] = function() {
      * @param {function()} callback  Invoked when specified event occurs.
      * @param {boolean} useCapture  If true, initiates capture.
      */
-    'attachBrowserEvent': function(elem, eventName, callback, useCapture) {
+    attachBrowserEvent : function(elem, eventName, callback, useCapture) {
       if (typeof elem.addEventListener != 'undefined') {
         elem.addEventListener(eventName, callback, useCapture);
       } else if (typeof elem.attachEvent != 'undefined') {
@@ -308,7 +308,7 @@ gadgets['util'] = function() {
      * @param {boolean} useCapture  Specifies whether listener being removed was added with
      *                              capture enabled.
      */
-    'removeBrowserEvent': function(elem, eventName, callback, useCapture) {
+    removeBrowserEvent : function(elem, eventName, callback, useCapture) {
       if (elem.removeEventListener) {
         elem.removeEventListener(eventName, callback, useCapture);
       } else if (elem.detachEvent) {

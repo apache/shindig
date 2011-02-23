@@ -342,7 +342,7 @@ if (!gadgets.rpctx.rmr) {  // make lib resilient to double-inclusion
         // If we receive an ACK message, then mark the current
         // handler as no longer waiting and send out the next
         // queued message.
-        if (rpc.s === gadgets.rpc.ACK) {
+        if (rpc['s'] === gadgets.rpc.ACK) {
           // ACK received - whether this came from a handshake or
           // an active call, in either case it indicates readiness to
           // send messages to the from frame.
@@ -508,7 +508,7 @@ if (!gadgets.rpctx.rmr) {  // make lib resilient to double-inclusion
       },
 
       call: function(targetId, from, rpc) {
-        return callRmr(targetId, rpc.s, from, rpc);
+        return callRmr(targetId, rpc['s'], from, rpc);
       }
     };
   }();

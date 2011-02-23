@@ -36,7 +36,7 @@
  * @name gadgets.log
  */
 
-gadgets['log'] = (function() {
+gadgets.log = (function() {
   /** @const */
   var info_ = 1;
   /** @const */
@@ -82,7 +82,7 @@ gadgets['log'] = (function() {
  * @member gadgets.log
  * @name setLogLevel
  */
-  gadgets['setLogLevel'] = function(logLevel) {
+  gadgets.setLogLevel = function(logLevel) {
     logLevelThreshold_ = logLevel;
   };
 

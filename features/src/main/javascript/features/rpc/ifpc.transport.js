@@ -138,9 +138,9 @@ if (!gadgets.rpctx.ifpc) {  // make lib resilient to double-inclusion
         if (rpc.l) {
           // Use legacy protocol.
           // Format: #iframe_id&callId&num_packets&packet_num&block_of_data
-          var callArgs = rpc.a;
+          var callArgs = rpc['a'];
           src = [relay, '#', encodeLegacyData([from, callId, 1, 0,
-            encodeLegacyData([from, rpc.s, '', '', from].concat(
+            encodeLegacyData([from, rpc['s'], '', '', from].concat(
                 callArgs))])].join('');
         } else {
           // Format: #targetId & sourceId@callId & packetNum & packetId & packetData
