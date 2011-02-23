@@ -107,6 +107,8 @@ gadgets.config = function() {
       scriptText = scriptNode.nodeValue;
     } else if (scriptNode.innerText) {
       scriptText = scriptNode.innerText;
+    } else if (scriptNode.innerHTML) {
+      scriptText = scriptNode.innerHTML;
     } else if (scriptNode.firstChild) {
       var content = [];
       for (var child = scriptNode.firstChild; child; child = child.nextSibling) {
