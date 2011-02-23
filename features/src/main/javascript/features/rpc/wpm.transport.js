@@ -115,7 +115,7 @@ if (!gadgets.rpctx.wpm) {  // make lib resilient to double-inclusion
           return;
         }
       }
-      process(rpc);
+      process(rpc, packet.origin);
     }
 
     return {

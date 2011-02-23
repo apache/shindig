@@ -98,6 +98,18 @@ if (!gadgets.rpc) { // make lib resilient to double-inclusion
      */
     var ID_ORIGIN_DELIMITER = '|';
 
+    /**
+     * @const
+     * @private
+     */
+    var RPC_KEY_CALLBACK = 'callback';
+
+    /**
+     * @const
+     * @private
+     */
+    var RPC_KEY_ORIGIN = 'origin';
+
     var services = {};
     var relayUrl = {};
     var useLegacyProtocol = {};
@@ -241,11 +253,15 @@ if (!gadgets.rpc) { // make lib resilient to double-inclusion
     }
 
     /**
-     * Helper function to process an RPC request
+     * Helper function that performs actual processing of an RPC request.
+     * Origin is passed in separately to ensure that it cannot be spoofed,
+     * and guard code in the method ensures the same before dispatching
+     * any service handler.
      * @param {Object} rpc RPC request object.
+     * @param {String} opt_origin Verified origin of the rpc sender, if available.
      * @private
      */
-    function process(rpc) {
+    function process(rpc, opt_origin) {
       //
       // RPC object contents:
       //   s: Service Name
@@ -291,10 +307,14 @@ if (!gadgets.rpc) { // make lib resilient to double-inclusion
         //   }, 1000);
         // }
         if (rpc['c']) {
-          rpc['callback'] = function(result) {
+          rpc[RPC_KEY_CALLBACK] = function(result) {
             gadgets.rpc.call(rpc['f'], CALLBACK_NAME, null, rpc['c'], result);
           };
         }
+
+        // Set the requestor origin.
+        // If not passed by the transport, then this simply sets to undefined.
+        rpc[RPC_KEY_ORIGIN] = opt_origin;
 
         // Call the requested RPC service.
         var result = (services[rpc['s']] ||

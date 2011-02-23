@@ -54,6 +54,8 @@ if (!gadgets.rpctx.rmr) {  // make lib resilient to double-inclusion
     // per gadget stored under the gadget's ID.
     var rmr_channels = {};
 
+    var parentParam = gadgets.util.getUrlParameters()['parent'];
+
     var process;
     var ready;
 
@@ -134,7 +136,7 @@ if (!gadgets.rpctx.rmr) {  // make lib resilient to double-inclusion
       var relayUri = gadgets.rpc.getRelayUrl(frameId);
       if (!relayUri) {
         relayUri =
-            gadgets.rpc.getOrigin(gadgets.util.getUrlParameters()['parent']) +
+            gadgets.rpc.getOrigin(parentParam);
             '/robots.txt';
       }
 
@@ -369,7 +371,12 @@ if (!gadgets.rpctx.rmr) {  // make lib resilient to double-inclusion
         }
 
         ++channel.recvId;
-        process(rpc);  // actually dispatch the message
+
+        // Best-effort at determining origin. Use parent param if relayUri's
+        // origin matches that of the relayUri; else use relayUri.
+        var origin = gadgets.rpc.getOrigin(parentParam) == gadgets.rpc.getOrigin(channel.relayUri)
+            ? parentParam : channel.relayUri;
+        process(rpc, origin);  // actually dispatch the message
       }
 
       // Send an ACK indicating that we got/processed the message(s).
