@@ -23,7 +23,6 @@ features/analytics/feature.xml
 features/auth-refresh/feature.xml
 features/caja/feature.xml
 features/caja-debug/feature.xml
-features/cloo/feature.xml
 features/container/feature.xml
 features/content-rewrite/feature.xml
 features/core.config/feature.xml
