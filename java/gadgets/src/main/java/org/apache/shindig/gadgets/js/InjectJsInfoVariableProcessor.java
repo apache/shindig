@@ -39,7 +39,11 @@ import java.util.List;
 public class InjectJsInfoVariableProcessor implements JsProcessor {
 
   @VisibleForTesting
-  static final String HINT_TEMPLATE = "window['___jsl']={'u':'%s','f':[%s]};\n";
+  static final String HINT_TEMPLATE = "(function(){" + 
+  "var j=window['___jsl']=window['___jsl']||{};" +
+  "j['u']='%s';" +
+  "j['f']=[%s];" +
+  "})();";
 
   private final JsUriManager jsUriManager;
 
