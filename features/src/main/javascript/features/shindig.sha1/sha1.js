@@ -67,23 +67,23 @@ shindig.sha1 = (function() {
    * @private
    */
   var pad_ = [];
-  
-  /**
-   * @type {number}
-   * @private
-   */
-  var inbuf_;
-  
-  /**
-   * @type {number}
-   * @private
-   */
-  var total_;
 
   pad_[0] = 128;
   for (var i = 1; i < 64; ++i) {
     pad_[i] = 0;
   }
+
+  /**
+   * @type {number}
+   * @private
+   */
+  var inbuf_;
+
+  /**
+   * @type {number}
+   * @private
+   */
+  var total_;
 
   /**
    * Resets the internal accumulator.
@@ -244,11 +244,24 @@ shindig.sha1 = (function() {
     return digest;
   }
 
+  /**
+   * @return {String} Hex-encoded string containing finalized hash.
+   */
+  function digestString() {
+    var arr = digest();
+    var hash = '';
+    for (var i = 0; i < arr.length; i++) {
+      hash += hex.charAt(Math.floor(arr[i] / 16)) + hex.charAt(arr[i] % 16);
+    }
+    return hash;
+  }
+
   reset();
 
   return {
     reset: reset,
     update: update,
-    digest: digest
+    digest: digest,
+    digestString: digestString
   };
 });

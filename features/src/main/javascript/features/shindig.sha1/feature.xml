@@ -18,21 +18,26 @@ specific language governing permissions and limitations under the License.
 -->
 <feature>
 <!--
-A JavaScript "more-secure-random" implementation.
+A JavaScript sha1 imlementation.
 -->
-  <name>shindig.random</name>
+  <name>shindig.sha1</name>
   <dependency>globals</dependency>
-  <dependency>shindig.sha1</dependency>
   <gadget>
     <api>
-      <exports type="js">shindig.random</exports>
+      <exports type="js">shindig.sha1.reset</exports>
+      <exports type="js">shindig.sha1.update</exports>
+      <exports type="js">shindig.sha1.digest</exports>
+      <exports type="js">shindig.sha1.digestString</exports>
     </api>
-    <script src="random.js"/>
+    <script src="sha1.js"/>
   </gadget>
   <container>
     <api>
-      <exports type="js">shindig.random</exports>
+      <exports type="js">shindig.sha1.reset</exports>
+      <exports type="js">shindig.sha1.update</exports>
+      <exports type="js">shindig.sha1.digest</exports>
+      <exports type="js">shindig.sha1.digestString</exports>
     </api>
-    <script src="random.js"/>
+    <script src="sha1.js"/>
   </container>
 </feature>

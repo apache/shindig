@@ -35,17 +35,6 @@ shindig.random = (function() {
   var start = 1;
   var m = ((screen.width * screen.width) + screen.height) * 1e6;
 
-  function sha1(str) {
-    var s = shindig.sha1();
-    s.update(str);
-    var arr = s.digest();
-    var hash = '';
-    for (var i = 0; i < arr.length; i++) {
-      hash += hex.charAt(Math.floor(arr[i] / 16)) + hex.charAt(arr[i] % 16);
-    }
-    return hash;
-  }
-
   var orig_onmousemove = window.onmousemove || function() { return false; };
 
   window.onmousemove = function(e) {
@@ -59,6 +48,12 @@ shindig.random = (function() {
     start = (start * ac) % m;
     return orig_onmousemove.call(window, Array.prototype.slice.call(arguments));
   };
+
+  function sha1(str) {
+    var sha1 = shindig.sha1();
+    sha1.update(str);
+    return sha1.digestString();
+  }
 
   var seed = sha1(
       document.cookie + '|' + document.location + '|' + (new Date()).getTime() + '|' + oth);
