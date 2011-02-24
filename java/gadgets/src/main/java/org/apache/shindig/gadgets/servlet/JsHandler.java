@@ -136,7 +136,7 @@ public class JsHandler {
         // Add externs for this bundle.
         appendExternsForBundle(bundle, allExterns);
 
-        jsData.append(compiler.generateExportStatements(rawExports));
+        jsData.append(compiler.generateExportStatements(ctx, rawExports));
       }
     }
 

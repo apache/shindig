@@ -17,45 +17,48 @@
  */
 package org.apache.shindig.gadgets.rewrite.js;
 
+import org.apache.shindig.gadgets.GadgetContext;
+
 import java.util.List;
 
 public interface JsCompiler {
   /**
    * Compiles the provided code with the provided list of external symbols.
-   * 
+   *
    * @param jsData The code to compile.
    * @param externs The list of external symbols.
    * @return A compilation result object.
    */
   public Result compile(String jsData, List<String> externs);
-  
+
   /**
    * Generates a sequence of statements to mark the specified symbols as
    * exported.
    *
+   * @param context The gadget context.
    * @param symbols The symbols to export.
    * @return A sequence of JavaScript statements to export those symbols.
    */
-  public String generateExportStatements(List<String> symbols);
-  
+  public String generateExportStatements(GadgetContext context, List<String> symbols);
+
   public static class Result {
     private final String compiled;
     private final List<String> errors;
-    
+
     public Result(String compiled) {
       this.compiled = compiled;
       this.errors = null;
     }
-    
+
     public Result(List<String> errors) {
       this.compiled = null;
       this.errors = errors;
     }
-    
+
     public String getCode() {
       return compiled;
     }
-    
+
     public List<String> getErrors() {
       return errors;
     }

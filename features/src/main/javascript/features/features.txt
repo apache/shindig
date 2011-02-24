@@ -39,6 +39,7 @@ features/core/feature.xml
 features/dynamic-height.height/feature.xml
 features/dynamic-height.util/feature.xml
 features/dynamic-height/feature.xml
+features/exportjs/feature.xml
 features/flash/feature.xml
 features/i18n/feature.xml
 features/jsondom/feature.xml
