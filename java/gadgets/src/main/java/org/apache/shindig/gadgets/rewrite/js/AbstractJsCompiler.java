@@ -109,7 +109,7 @@ public abstract class AbstractJsCompiler implements JsCompiler {
   }
 
   private Collection<Input> generateInputs(List<String> symbols) {
-    Map<String, Input> result = Maps.newHashMap();
+    Map<String, Input> result = Maps.newLinkedHashMap();
     for (String symbol : symbols) {
       String ns = getNamespace(symbol);
       Input input = result.get(ns);
