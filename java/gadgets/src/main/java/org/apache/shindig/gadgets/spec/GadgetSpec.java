@@ -65,7 +65,7 @@ public class GadgetSpec {
     NodeList children = doc.getChildNodes();
 
     ModulePrefs modulePrefs = null;
-    ImmutableMap.Builder<String,UserPref> prefsBuilder = ImmutableMap.builder();
+    Map<String,UserPref> prefsBuilder = Maps.newHashMap();
     Map<String, List<Element>> views = Maps.newHashMap();
     for (int i = 0, j = children.getLength(); i < j; ++i) {
       Node child = children.item(i);
@@ -83,6 +83,9 @@ public class GadgetSpec {
       }
       if ("UserPref".equals(name)) {
         UserPref pref = new UserPref(element);
+        if (prefsBuilder.containsKey(pref.getName())) {
+          throw new SpecParserException("Duplicate value for user pref " + pref.getName());
+        }
         prefsBuilder.put(pref.getName(), pref);
       }
       if ("Content".equals(name)) {
@@ -114,7 +117,7 @@ public class GadgetSpec {
       }
       this.views = ImmutableMap.copyOf(tmpViews);
     }
-    this.userPrefs = prefsBuilder.build();
+    this.userPrefs = ImmutableMap.copyOf(prefsBuilder);
   }
 
   /**
@@ -236,7 +239,7 @@ public class GadgetSpec {
 
     return spec;
   }
-  
+
   /**
    * Returns a copy of the spec with all type=url views removed.
    */

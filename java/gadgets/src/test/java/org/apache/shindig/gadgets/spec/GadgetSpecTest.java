@@ -93,6 +93,17 @@ public class GadgetSpecTest extends Assert {
     new GadgetSpec(SPEC_URL, xml);
   }
 
+  @Test(expected=SpecParserException.class)
+  public void testEnforceUserPrefNoDuplicate() throws Exception {
+    String xml = "<Module>" +
+                 "<ModulePrefs title=\"hello\"/>" +
+                 "<UserPref name=\"foo\" datatype=\"string\"/>" +
+                 "<UserPref name=\"foo\" datatype=\"int\"/>" +
+                 "<Content type=\"html\"/>" +
+                 "</Module>";
+    new GadgetSpec(SPEC_URL, xml);
+  }
+
   @Test
   public void testSubstitutions() throws Exception {
     Substitutions substituter = new Substitutions();
