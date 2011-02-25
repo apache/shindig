@@ -42,8 +42,8 @@ gadgets.flash.getMajorVersion = function() {
   if (navigator.plugins && navigator.mimeTypes && navigator.mimeTypes.length) {
     // Flash detection for browsers using Netscape's plugin architecture
     var i = navigator.plugins['Shockwave Flash'];
-    if (i && i.description) {
-      flashMajorVersion = parseInt(i.description.match(/[0-9]+/)[0], 10);
+    if (i && i['description']) {
+      flashMajorVersion = parseInt(i['description'].match(/[0-9]+/)[0], 10);
     }
   } else {
     // Flash detection for IE
@@ -108,29 +108,29 @@ gadgets.flash.embedFlash = function(swfUrl, swfContainer, swfVersion, opt_params
     }
     if (ver >= swfVer) {
       // Set default size
-      if (opt_params.width === void 0) {
-        opt_params.width = '100%';
+      if (opt_params['width'] === void 0) {
+        opt_params['width'] = '100%';
       }
-      if (opt_params.height === void 0) {
-        opt_params.height = '100%';
+      if (opt_params['height'] === void 0) {
+        opt_params['height'] = '100%';
       }
       // Set the default "base" attribute
-      if (typeof opt_params.base !== 'string') {
+      if (typeof opt_params['base'] !== 'string') {
         var a = document.createElement('a');
         a.href = swfUrl;
         // Get the part up to the last slash
-        opt_params.base = a.href.match(/^(.*\/)[^\/]*$/)[1];
+        opt_params['base'] = a.href.match(/^(.*\/)[^\/]*$/)[1];
       }
       // Set wmode to "opaque" if it's not defined. The default value
       // "window" is undesirable because browsers will render Flash
       // on top of other html elements.
-      if (typeof opt_params.wmode !== 'string') {
-        opt_params.wmode = 'opaque';
+      if (typeof opt_params['wmode'] !== 'string') {
+        opt_params['wmode'] = 'opaque';
       }
-      while (!opt_params.id) {
+      while (!opt_params['id']) {
         var newId = 'swfContainer' + gadgets.flash.swfContainerId_++;
         if (!document.getElementById(newId)) {
-          opt_params.id = newId;
+          opt_params['id'] = newId;
         }
       }
       // Prepare flash object
@@ -138,8 +138,8 @@ gadgets.flash.embedFlash = function(swfUrl, swfContainer, swfVersion, opt_params
       if (navigator.plugins && navigator.mimeTypes &&
           navigator.mimeTypes.length) {
         // Use <embed> tag for Netscape and Mozilla browsers
-        opt_params.type = 'application/x-shockwave-flash';
-        opt_params.src = swfUrl;
+        opt_params['type'] = 'application/x-shockwave-flash';
+        opt_params['src'] = swfUrl;
 
         flashObj = document.createElement('embed');
         for (var prop in opt_params) {
@@ -161,14 +161,14 @@ gadgets.flash.embedFlash = function(swfUrl, swfContainer, swfVersion, opt_params
           return !/["<>]/.test(val);
         };
 
-        opt_params.movie = swfUrl;
+        opt_params['movie'] = swfUrl;
         var attr = {
-          width: opt_params.width,
-          height: opt_params.height,
-          classid: 'clsid:D27CDB6E-AE6D-11CF-96B8-444553540000'
+          'width': opt_params['width'],
+          'height': opt_params['height'],
+          'classid': 'clsid:D27CDB6E-AE6D-11CF-96B8-444553540000'
         };
-        if (opt_params.id) {
-          attr.id = opt_params.id;
+        if (opt_params['id']) {
+          attr['id'] = opt_params['id'];
         }
 
         var html = '<object';
@@ -234,7 +234,7 @@ var _IG_GetFlashMajorVersion = gadgets.flash.getMajorVersion;
  * @see gadgets.flash.embedFlash
  */
 var _IG_EmbedFlash = function(swfUrl, swfContainer, opt_params) {
-  return gadgets.flash.embedFlash(swfUrl, swfContainer, opt_params.swf_version,
+  return gadgets.flash.embedFlash(swfUrl, swfContainer, opt_params['swf_version'],
       opt_params);
 };
 
@@ -244,7 +244,7 @@ var _IG_EmbedFlash = function(swfUrl, swfContainer, opt_params) {
  * @see gadgets.flash.embedCachedFlash
  */
 var _IG_EmbedCachedFlash = function(swfUrl, swfContainer, opt_params) {
-  return gadgets.flash.embedCachedFlash(swfUrl, swfContainer, opt_params.swf_version,
+  return gadgets.flash.embedCachedFlash(swfUrl, swfContainer, opt_params['swf_version'],
       opt_params);
 };
 
