@@ -67,7 +67,7 @@
             IframeHubClient: {}
         }
     };
-    if (gadgets.util.getUrlParameters().forcesecure) {
+    if (gadgets.util.getUrlParameters()['forcesecure']) {
         gadgets.HubSettings.params.IframeHubClient.requireParentVerifiable = true;
     }
     

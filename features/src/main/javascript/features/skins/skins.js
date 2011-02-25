@@ -34,7 +34,7 @@ gadgets.skins = function() {
   };
 
   gadgets.config.register('skins', requiredConfig, function(config) {
-    skinProperties = config['skins'].properties;
+    skinProperties = config['skins']['properties'];
   });
 
 

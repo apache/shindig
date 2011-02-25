@@ -520,20 +520,21 @@ OpenAjax.hub.IframeHubClient = function( params )
     }
     
     this._init = function() {
-        var urlParams = OpenAjax.gadgets.util.getUrlParameters();
+        var oaGadgets = OpenAjax.gadgets;
+        var urlParams = oaGadgets.util.getUrlParameters();
         if ( ! urlParams.parent ) {
             // The RMR transport does not require a valid relay file, but does need a URL
             // in the parent's domain. The URL does not need to point to valid file, so just
             // point to 'robots.txt' file. See RMR transport code for more info.
-            var parent = urlParams.oahParent + "/robots.txt";
-            OpenAjax.gadgets.rpc.setupReceiver( "..", parent );
+            var parent = urlParams['oahParent'] + "/robots.txt";
+            oaGadgets.rpc.setupReceiver( "..", parent );
         }
         
         if ( params.IframeHubClient && params.IframeHubClient.requireParentVerifiable &&
-             OpenAjax.gadgets.rpc.getReceiverOrigin( ".." ) === null ) {
+                oaGadgets.rpc.getReceiverOrigin( ".." ) === null ) {
             // If user set 'requireParentVerifiable' to true but RPC transport does not
             // support this, throw error.
-            OpenAjax.gadgets.rpc.removeReceiver( ".." );
+            oaGadgets.rpc.removeReceiver( ".." );
             throw new Error( OpenAjax.hub.Error.IncompatBrowser );
         }
         
@@ -544,7 +545,7 @@ OpenAjax.hub.IframeHubClient = function( params )
 //        securityToken = generateSecurityToken( params, scope, log );
 
         clientID = OpenAjax.gadgets.rpc.RPC_ID;
-        if ( urlParams.oahId ) {
+        if ( urlParams['oahId'] ) {
             clientID = clientID.substring( 0, clientID.lastIndexOf('_') );
         }
     };

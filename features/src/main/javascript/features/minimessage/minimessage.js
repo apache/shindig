@@ -212,7 +212,7 @@ gadgets.MiniMessage.prototype.dismissMessage = function(message) {
 // Injects the default stylesheet for mini-messages.
 gadgets.config.register('minimessage', {}, function(configuration) {
   // Injects the default stylesheet for mini-messages
-  gadgets.MiniMessage.addCSS_(configuration.minimessage.css.join(''));
+  gadgets.MiniMessage.addCSS_(configuration['minimessage']['css'].join(''));
 });
 
 // Alias for legacy code

@@ -442,7 +442,7 @@ if (!gadgets.rpc) { // make lib resilient to double-inclusion
           targetRelay = siblingId.origin;
         } else if (id == '..') {
           // parent
-          targetRelay = params.parent;
+          targetRelay = params['parent'];
         } else {
           // child
           targetRelay = document.getElementById(id).src;
@@ -528,7 +528,8 @@ if (!gadgets.rpc) { // make lib resilient to double-inclusion
         var targetEl = getTargetWin(target);
         try {
           // If this succeeds, then same-domain policy applied
-          sameDomain[target] = targetEl.gadgets.rpc.receiveSameDomain;
+          var targetGadgets = targetEl['gadgets'];
+          sameDomain[target] = targetGadgets.rpc.receiveSameDomain;
         } catch (e) {
           // Shouldn't happen due to origin check. Caught to emit
           // more meaningful error to the caller.
@@ -621,21 +622,21 @@ if (!gadgets.rpc) { // make lib resilient to double-inclusion
 
     function setupContainerGadgetContext(rpctoken, opt_forcesecure) {
       function init(config) {
-        var cfg = config ? config.rpc : {};
-        var configLegacy = cfg.useLegacyProtocol;
+        var cfg = config ? config['rpc'] : {};
+        var configLegacy = cfg['useLegacyProtocol'];
         if (typeof configLegacy === "string") {
           configLegacy = configLegacy === "true";
         }
         // Parent-relative only.
-        var parentRelayUrl = cfg.parentRelayUrl || "";
-        parentRelayUrl = getOrigin(params.parent) + parentRelayUrl;
+        var parentRelayUrl = cfg['parentRelayUrl'] || "";
+        parentRelayUrl = getOrigin(params['parent']) + parentRelayUrl;
         var useLegacy = !!configLegacy;
         setRelayUrl('..', parentRelayUrl, useLegacy);
         if (useLegacy) {
           transport = gadgets.rpctx.ifpc;
           transport.init(process, transportReady);
         }
-        setAuthToken('..', rpctoken, opt_forcesecure || params.forcesecure);
+        setAuthToken('..', rpctoken, opt_forcesecure || params['forcesecure']);
       }
       gadgets.config.register('rpc', null, init);
     }
@@ -645,8 +646,8 @@ if (!gadgets.rpc) { // make lib resilient to double-inclusion
       // Use the opt_parent param if provided, or the "parent" query param
       // if found -- otherwise, do nothing since this call might be initiated
       // automatically at first, then actively later in IFRAME code.
-      var forcesecure = opt_forcesecure || params.forcesecure || false;
-      var parent = opt_parent || params.parent;
+      var forcesecure = opt_forcesecure || params['forcesecure'] || false;
+      var parent = opt_parent || params['parent'];
       if (parent) {
         setRelayUrl('..', parent);
         setAuthToken('..', rpctoken, forcesecure);
@@ -673,8 +674,8 @@ if (!gadgets.rpc) { // make lib resilient to double-inclusion
 
       // The auth token is parsed from child params (rpctoken) or overridden.
       var childParams = gadgets.util.getUrlParameters(relayUrl);
-      var rpctoken = opt_authtoken || childParams.rpctoken;
-      var forcesecure = opt_forcesecure || childParams.forcesecure;
+      var rpctoken = opt_authtoken || childParams['rpctoken'];
+      var forcesecure = opt_forcesecure || childParams['forcesecure'];
       setAuthToken(gadgetId, rpctoken, forcesecure);
     }
 
@@ -725,7 +726,7 @@ if (!gadgets.rpc) { // make lib resilient to double-inclusion
     function setupReceiver(targetId, opt_receiverurl, opt_authtoken, opt_forcesecure) {
       if (targetId === '..') {
         // Gadget/IFRAME to container.
-        var rpctoken = opt_authtoken || params.rpctoken || params.ifpctok || '';
+        var rpctoken = opt_authtoken || params['rpctoken'] || params['ifpctok'] || '';
         if (window['__isgadget'] === true) {
           setupContainerGadgetContext(rpctoken, opt_forcesecure);
         } else {

@@ -139,10 +139,10 @@ shindig.Auth = function() {
 
     // Auth token - might be injected into the gadget directly, or might
     // be on the URL (hopefully on the fragment).
-    if (config.authToken) {
-      authToken = config.authToken;
-    } else if (urlParams.st) {
-      authToken = urlParams.st;
+    if (config['authToken']) {
+      authToken = config['authToken'];
+    } else if (urlParams['st']) {
+      authToken = urlParams['st'];
     }
     if (authToken !== null) {
       addParamsToToken(urlParams);
@@ -150,8 +150,8 @@ shindig.Auth = function() {
 
     // Trusted JSON.  We use eval directly because this was injected by the
     // container server and json parsing is slow in IE.
-    if (config.trustedJson) {
-      trusted = eval('(' + config.trustedJson + ')');
+    if (config['trustedJson']) {
+      trusted = eval('(' + config['trustedJson'] + ')');
     }
   }
 

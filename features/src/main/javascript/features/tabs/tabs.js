@@ -128,7 +128,7 @@ gadgets.TabSet = function(opt_moduleId, opt_defaultTab, opt_container) {
 
 gadgets.config.register('tabset', {}, function(configuration) {
   // Injects the default stylesheet for tabs
-  gadgets.TabSet.addCSS_(configuration.tabs.css.join(''));
+  gadgets.TabSet.addCSS_(configuration['tabs']['css'].join(''));
 });
 
 

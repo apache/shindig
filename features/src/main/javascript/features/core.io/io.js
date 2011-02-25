@@ -404,10 +404,10 @@ gadgets.io = function() {
         getSummaries: !!params.GET_SUMMARIES,
         signOwner: signOwner,
         signViewer: signViewer,
-        gadget: urlParams.url,
-        container: urlParams.container || urlParams.synd || 'default',
+        gadget: urlParams['url'],
+        container: urlParams['container'] || urlParams['synd'] || 'default',
         // should we bypass gadget spec cache (e.g. to read OAuth provider URLs)
-        bypassSpecCache: gadgets.util.getUrlParameters().nocache || '',
+        bypassSpecCache: gadgets.util.getUrlParameters()['nocache'] || '',
         getFullHeaders: !!params.GET_FULL_HEADERS
       };
 
@@ -428,7 +428,7 @@ gadgets.io = function() {
         }
       }
 
-      var proxyUrl = config.jsonProxyUrl.replace('%host%', document.location.host);
+      var proxyUrl = config['jsonProxyUrl'].replace('%host%', document.location.host);
 
       // FIXME -- processResponse is not used in call
       if (!respondWithPreload(paramData, params, callback)) {
@@ -525,12 +525,12 @@ gadgets.io = function() {
 
       var rewriteMimeParam =
           params.rewriteMime ? '&rewriteMime=' + encodeURIComponent(params.rewriteMime) : '';
-      var ret = config.proxyUrl.replace('%url%', encodeURIComponent(url)).
+      var ret = config['proxyUrl'].replace('%url%', encodeURIComponent(url)).
           replace('%host%', document.location.host).
           replace('%rawurl%', url).
           replace('%refresh%', encodeURIComponent(refresh)).
-          replace('%gadget%', encodeURIComponent(urlParams.url)).
-          replace('%container%', encodeURIComponent(urlParams.container || urlParams.synd || 'default')).
+          replace('%gadget%', encodeURIComponent(urlParams['url'])).
+          replace('%container%', encodeURIComponent(urlParams['container'] || urlParams['synd'] || 'default')).
           replace('%rewriteMime%', rewriteMimeParam);
       if (ret.indexOf('//') == 0) {
         ret = window.location.protocol + ret;

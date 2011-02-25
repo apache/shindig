@@ -137,12 +137,12 @@ shindig.xhrwrapper = shindig.xhrwrapper || {};
     this.requestHeaders_ = {};
     this.responseHeaders_ = {};
 
-    this.baseUrl_ = new Url(this.config_.contentUrl);
+    this.baseUrl_ = new Url(this.config_['contentUrl']);
 
     this.fixRequestUrl_();
 
     if (!this.baseUrl_.hasSameOrigin(this.url_)) {
-      throw new Error('A gadget at ' + this.config_.contentUrl +
+      throw new Error('A gadget at ' + this.config_['contentUrl'] +
                       ' tried to access ' + url + ' via XMLHttpRequest.');
     }
 
@@ -176,14 +176,14 @@ shindig.xhrwrapper = shindig.xhrwrapper || {};
       params[gadgets.io.RequestParameters.HEADERS] = this.requestHeaders_;
       params[gadgets.io.RequestParameters.GET_FULL_HEADERS] = true;
       params[gadgets.io.RequestParameters.POST_DATA] = opt_data;
-      if (this.config_.authorization) {
-        if (this.config_.authorization == 'oauth') {
+      if (this.config_['authorization']) {
+        if (this.config_['authorization'] == 'oauth') {
           params[gadgets.io.RequestParameters.AUTHORIZATION] = gadgets.io.AuthorizationType.OAUTH;
-          params[gadgets.io.RequestParameters.OAUTH_SERVICE_NAME] = this.config_.oauthService;
-          if (this.config_.oauthTokenName) {
-            params[gadgets.io.RequestParameters.OAUTH_TOKEN_NAME] = this.config_.oauthTokenName;
+          params[gadgets.io.RequestParameters.OAUTH_SERVICE_NAME] = this.config_['oauthService'];
+          if (this.config_['oauthTokenName']) {
+            params[gadgets.io.RequestParameters.OAUTH_TOKEN_NAME] = this.config_['oauthTokenName'];
           }
-        } else if (this.config_.authorization == 'signed') {
+        } else if (this.config_['authorization'] == 'signed') {
           params[gadgets.io.RequestParameters.AUTHORIZATION] = gadgets.io.AuthorizationType.SIGNED;
         }
       }

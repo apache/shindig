@@ -94,7 +94,7 @@ gadgets.views = function() {
    *
    */
   function init(config) {
-    var conf = config.views || {};
+    var conf = config['views'] || {};
     for (var s in conf) {
       if (conf.hasOwnProperty(s)) {
         // TODO: Fix this by moving view names / config into a sub property.
@@ -106,9 +106,9 @@ gadgets.views = function() {
             continue;
           }
           supportedViews[s] = new gadgets.views.View(s, obj.isOnlyVisible);
-          var aliases = obj.aliases || [];
+          var aliases = obj['aliases'] || [];
           for (var i = 0, alias; (alias = aliases[i]); ++i) {
-            supportedViews[alias] = new gadgets.views.View(s, obj.isOnlyVisible);
+            supportedViews[alias] = new gadgets.views.View(s, obj['isOnlyVisible']);
           }
         }
       }
@@ -119,7 +119,7 @@ gadgets.views = function() {
     if (urlParams['view-params']) {
       params = gadgets.json.parse(urlParams['view-params']) || params;
     }
-    currentView = supportedViews[urlParams.view] || supportedViews['default'];
+    currentView = supportedViews[urlParams['view']] || supportedViews['default'];
 
     if (conf.rewriteLinks) {
       gadgets.util.attachBrowserEvent(document, 'click', forceNavigate, false);
