@@ -111,7 +111,7 @@ public class HttpRequestHandler {
       Provider<FeedProcessor> feedProcessorProvider) {
     this.requestPipeline = requestPipeline;
     this.contentRewriterRegistry = contentRewriterRegistry;
-	this.feedProcessorProvider = feedProcessorProvider;
+    this.feedProcessorProvider = feedProcessorProvider;
   }
 
 

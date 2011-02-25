@@ -1529,7 +1529,7 @@
      <dependency>
        <groupId>caja</groupId>
        <artifactId>caja</artifactId>
-       <version>r4314</version>
+       <version>r4374</version>
        <scope>compile</scope>
        <exclusions>
          <!-- force use of xml-apis until caja fixes their pom -->

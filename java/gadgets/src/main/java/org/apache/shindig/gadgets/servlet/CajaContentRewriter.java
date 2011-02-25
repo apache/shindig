@@ -35,6 +35,7 @@ import com.google.caja.parser.html.DomParser;
 import com.google.caja.parser.html.Namespaces;
 import com.google.caja.parser.js.CajoledModule;
 import com.google.caja.parser.js.Parser;
+import com.google.caja.plugin.Job;
 import com.google.caja.plugin.PipelineMaker;
 import com.google.caja.plugin.PluginCompiler;
 import com.google.caja.plugin.PluginMeta;
@@ -97,29 +98,29 @@ import java.util.logging.Logger;
  * A GadgetRewriter based on caja technology
  */
 public class CajaContentRewriter implements GadgetRewriter {
-  public static final String CAJOLED_DOCUMENTS = "cajoledDocuments";
+  public static final String CAJOLED_MODULES = "cajoledModules";
 
   //class name for logging purpose
-  private static final String classname = CajaContentRewriter.class.getName();
-  private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
+  private static final String CLASS_NAME = CajaContentRewriter.class.getName();
+  private static final Logger LOG = Logger.getLogger(CLASS_NAME, MessageKeys.MESSAGES);
 
 
-  private final Cache<String, Element> cajoledCache;
+  private final Cache<ModuleCacheKey, ImmutableList<Job>> moduleCache;
   private final RequestPipeline requestPipeline;
   private final HtmlSerializer htmlSerializer;
   private final ProxyUriManager proxyUriManager;
 
   @Inject
   public CajaContentRewriter(CacheProvider cacheProvider, RequestPipeline requestPipeline,
-      HtmlSerializer htmlSerializer, ProxyUriManager proxyUriManager) {
+                             HtmlSerializer htmlSerializer, ProxyUriManager proxyUriManager) {
     if (null == cacheProvider) {
-      this.cajoledCache = null;
+      this.moduleCache = null;
     } else {
-      this.cajoledCache = cacheProvider.createCache(CAJOLED_DOCUMENTS);
+      this.moduleCache = cacheProvider.createCache(CAJOLED_MODULES);
     }
     if (LOG.isLoggable(Level.INFO)) {
-      LOG.logp(Level.INFO, classname, "CajaContentRewriter", MessageKeys.CAJOLED_CACHE_CREATED,
-          new Object[] {cajoledCache});
+      LOG.logp(Level.INFO, CLASS_NAME, "CajaContentRewriter", MessageKeys.CAJOLED_CACHE_CREATED,
+               new Object[] {moduleCache});
     }
     this.requestPipeline = requestPipeline;
     this.htmlSerializer = htmlSerializer;
@@ -144,7 +145,7 @@ public class CajaContentRewriter implements GadgetRewriter {
   }
 
   @VisibleForTesting
-  ParseTreeNode parse(InputSource is, CharProducer cp, String mime, MessageQueue mq)
+  static ParseTreeNode parse(InputSource is, CharProducer cp, String mime, MessageQueue mq)
       throws ParseException {
     ParseTreeNode ptn;
     if (mime.contains("javascript")) {
@@ -171,11 +172,11 @@ public class CajaContentRewriter implements GadgetRewriter {
       UriFetcher fetcher = makeFetcher(uri, container);
       ExternalReference extRef = new ExternalReference(javaUri,
           FilePosition.instance(is, /*lineNo*/ 1, /*charInFile*/ 1, /*charInLine*/ 1));
-        // If the fetch fails, a UriFetchException is thrown and serialized as part of the
-        // message queue.
-        CharProducer cp = fetcher.fetch(extRef, mime).getTextualContent();
-        ParseTreeNode ptn = parse(is, cp, mime, mq);
-        return rewrite(uri, container, ptn, es53, debug);
+      // If the fetch fails, a UriFetchException is thrown and serialized as part of the
+      // message queue.
+      CharProducer cp = fetcher.fetch(extRef, mime).getTextualContent();
+      ParseTreeNode ptn = parse(is, cp, mime, mq);
+      return rewrite(uri, container, ptn, es53, debug);
     } catch (UnsupportedEncodingException e) {
       LOG.severe("Unexpected inability to recognize mime type: " + mime);
       mq.addMessage(ServiceMessageType.UNEXPECTED_INPUT_MIME_TYPE,
@@ -198,6 +199,9 @@ public class CajaContentRewriter implements GadgetRewriter {
     PluginMeta meta = new PluginMeta(fetcher, policy);
     PluginCompiler compiler = makePluginCompiler(meta, mq);
     compiler.setMessageContext(context);
+    if (moduleCache != null) {
+      compiler.setJobCache(new ModuleCache(moduleCache));
+    }
 
     if (debug) {
       compiler.setGoals(compiler.getGoals()
@@ -227,19 +231,10 @@ public class CajaContentRewriter implements GadgetRewriter {
 
     // Serialize outside of MutableContent, to prevent a re-parse.
     String docContent = HtmlSerialization.serialize(doc);
-    String cacheKey = HashUtil.checksum(docContent.getBytes());
     Node root = doc.createDocumentFragment();
     root.appendChild(doc.getDocumentElement());
 
     Node cajoledData = null;
-    if (cajoledCache != null && !debug) {
-      Element cajoledOutput = cajoledCache.getElement(cacheKey);
-      if (cajoledOutput != null) {
-        cajoledData = doc.adoptNode(cajoledOutput);
-        createContainerFor(doc, cajoledData);
-        mc.documentChanged();
-      }
-    }
 
     if (cajoledData == null) {
       if (debug) {
@@ -286,9 +281,6 @@ public class CajaContentRewriter implements GadgetRewriter {
         Element messagesNode = formatErrors(doc, is, docContent, messages,
             /* invisible */ false);
         cajoledOutput.appendChild(messagesNode);
-        if (cajoledCache != null && !debug) {
-          cajoledCache.addElement(cacheKey, cajoledOutput);
-        }
 
         cajoledData = cajoledOutput;
         createContainerFor(doc, cajoledData);
@@ -316,7 +308,7 @@ public class CajaContentRewriter implements GadgetRewriter {
       public FetchedData fetch(ExternalReference ref, String mimeType)
           throws UriFetchException {
         if (LOG.isLoggable(Level.INFO)) {
-          LOG.logp(Level.INFO, classname, "makeFetcher", MessageKeys.RETRIEVE_REFERENCE,
+          LOG.logp(Level.INFO, CLASS_NAME, "makeFetcher", MessageKeys.RETRIEVE_REFERENCE,
               new Object[] {ref.toString()});
         }
         Uri resourceUri = gadgetUri.resolve(Uri.fromJavaUri(ref.getUri()));
@@ -329,13 +321,13 @@ public class CajaContentRewriter implements GadgetRewriter {
               new InputSource(ref.getUri()));
         } catch (GadgetException e) {
           if (LOG.isLoggable(Level.INFO)) {
-            LOG.logp(Level.INFO, classname, "makeFetcher", MessageKeys.FAILED_TO_RETRIEVE,
+            LOG.logp(Level.INFO, CLASS_NAME, "makeFetcher", MessageKeys.FAILED_TO_RETRIEVE,
                 new Object[] {ref.toString()});
           }
           throw new UriFetchException(ref, mimeType, e);
         } catch (IOException e) {
           if (LOG.isLoggable(Level.INFO)) {
-            LOG.logp(Level.INFO, classname, "makeFetcher", MessageKeys.FAILED_TO_READ,
+            LOG.logp(Level.INFO, CLASS_NAME, "makeFetcher", MessageKeys.FAILED_TO_READ,
                 new Object[] {ref.toString()});
           }
           throw new UriFetchException(ref, mimeType, e);
@@ -428,7 +420,7 @@ public class CajaContentRewriter implements GadgetRewriter {
       errbuilder.append(m.format(mc)).append('\n');
     }
     if (LOG.isLoggable(Level.INFO)) {
-      LOG.logp(Level.INFO, classname, methodname, MessageKeys.UNABLE_TO_CAJOLE,
+      LOG.logp(Level.INFO, CLASS_NAME, methodname, MessageKeys.UNABLE_TO_CAJOLE,
           new Object[] {errbuilder});
     }
   }
