@@ -611,6 +611,57 @@ public class FeatureRegistryTest {
     assertEquals("attrib-three", lastAttribs.get("three"));
   }
   
+  @Test
+  public void testGetGadgetFromMixedRegistry() throws Exception {
+    setupMixedFullRegistry();
+
+    GadgetContext ctx = getCtx(RenderingContext.GADGET, null);
+    List<String> needed = Lists.newArrayList("top");
+    List<String> unsupported = Lists.newLinkedList();
+    
+    List<FeatureResource> resources = registry.getFeatureResources(ctx, needed, unsupported).getResources();
+    
+    assertEquals(4, resources.size());
+    assertEquals("bottom();all();", resources.get(0).getContent());
+    assertEquals("mid_b();gadget();", resources.get(1).getContent());
+    assertEquals("mid_a();all();", resources.get(2).getContent());
+    assertEquals("top();gadget();", resources.get(3).getContent());
+  }
+  
+  @Test
+  public void testGetContainerFromMixedRegistry() throws Exception {
+    setupMixedFullRegistry();
+
+    GadgetContext ctx = getCtx(RenderingContext.CONTAINER, null);
+    List<String> needed = Lists.newArrayList("top");
+    List<String> unsupported = Lists.newLinkedList();
+    
+    List<FeatureResource> resources = registry.getFeatureResources(ctx, needed, unsupported).getResources();
+    
+    assertEquals(4, resources.size());
+    assertEquals("bottom();all();", resources.get(0).getContent());
+    assertEquals("mid_b();container();", resources.get(1).getContent());
+    assertEquals("mid_a();container();", resources.get(2).getContent());
+    assertEquals("top();all();", resources.get(3).getContent());
+  }
+  
+  @Test
+  public void testGetConfiguredGadgetFromMixedRegistry() throws Exception {
+    setupMixedFullRegistry();
+
+    GadgetContext ctx = getCtx(RenderingContext.CONFIGURED_GADGET, null);
+    List<String> needed = Lists.newArrayList("top");
+    List<String> unsupported = Lists.newLinkedList();
+    
+    List<FeatureResource> resources = registry.getFeatureResources(ctx, needed, unsupported).getResources();
+    
+    assertEquals(4, resources.size());
+    assertEquals("bottom();all();", resources.get(0).getContent());
+    assertEquals("mid_b();gadget();", resources.get(1).getContent());
+    assertEquals("mid_a();all();", resources.get(2).getContent());
+    assertEquals("top();gadget();", resources.get(3).getContent());
+  }
+  
   private GadgetContext getCtx(final RenderingContext rctx, final String container) {
     return getCtx(rctx, container, false);
   }
@@ -633,6 +684,64 @@ public class FeatureRegistryTest {
         return ignoreCache;
       }
     };
+  }
+  
+  private void setupMixedFullRegistry() throws Exception {
+    // Sets up a "full" gadget feature registry with several features registered in linear
+    // dependency order: top -> mid_a -> mid_b -> bottom
+    // The content registered for each is equal to the feature's name, for simplicity.
+    // Also, all content is loaded as inline, also for simplicity.
+    TestFeatureRegistry.Builder builder = TestFeatureRegistry.newBuilder();
+    
+    Uri topUri = builder.expectResource(
+      "<feature>" +
+        "<name>top</name>" +
+        "<dependency>mid_a</dependency>" +
+        "<dependency>mid_b</dependency>" +
+        "<gadget>" +
+        "  <script>top();gadget();</script>" +
+        "</gadget>" +
+        "<all>" +
+        "  <script>top();all();</script>" +
+        "</all>" +
+      "</feature>"
+    );
+    Uri midAUri = builder.expectResource(
+      "<feature>" +
+        "<name>mid_a</name>" +
+        "<dependency>mid_b</dependency>" +
+        "<container>" +
+        "  <script>mid_a();container();</script>" +
+        "</container>" +
+        "<all>" +
+        "  <script>mid_a();all();</script>" +
+        "</all>" +
+      "</feature>"
+    );
+    Uri midBUri = builder.expectResource(
+      "<feature>" +
+        "<name>mid_b</name>" +
+        "<dependency>bottom</dependency>" +
+        "<container>" +
+        "  <script>mid_b();container();</script>" +
+        "</container>" +
+        "<gadget>" +
+        "  <script>mid_b();gadget();</script>" +
+        "</gadget>" +
+      "</feature>"
+    );
+    Uri bottomUri = builder.expectResource(
+        "<feature>" +
+          "<name>bottom</name>" +
+          "<all>" +
+          "  <script>bottom();all();</script>" +
+          "</all>" +
+        "</feature>"
+      );
+    Uri txtFile = builder.expectResource(topUri.toString() + '\n' +
+        midAUri.toString() + '\n' + midBUri.toString() + '\n' + bottomUri.toString(), ".txt");
+    
+    registry = builder.build(txtFile.toString());
   }
   
   private void setupFullRegistry(String type, String containers) throws Exception {

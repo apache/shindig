@@ -38,12 +38,14 @@ import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.common.util.ResourceLoader;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.RenderingContext;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -207,25 +209,22 @@ public class FeatureRegistry {
         getTransitiveDeps(needed, unsupported) : getRequestedNodes(needed, unsupported);
 
 
-    String targetBundleType = ctx.getRenderingContext().getFeatureBundleTag();
     ImmutableList.Builder<FeatureBundle> bundlesBuilder =
         new ImmutableList.Builder<FeatureBundle>();
 
     for (FeatureNode entry : featureNodes) {
       boolean specificContainerMatched = false;
       List<FeatureBundle> noContainerBundles = Lists.newLinkedList();
-      for (FeatureBundle bundle : entry.getBundles()) {
-        if (bundle.getType().equals(targetBundleType)) {
-          String containerAttrib = bundle.getAttribs().get("container");
-          if (containerAttrib != null) {
-            if (containerMatch(containerAttrib, ctx.getContainer())) {
-              bundlesBuilder.add(bundle);
-              specificContainerMatched = true;
-            }
-          } else {
-            // Applies only if there were no specific container matches.
-            noContainerBundles.add(bundle);
+      for (FeatureBundle bundle : entry.getBundles(ctx.getRenderingContext())) {
+        String containerAttrib = bundle.getAttribs().get("container");
+        if (containerAttrib != null) {
+          if (containerMatch(containerAttrib, ctx.getContainer())) {
+            bundlesBuilder.add(bundle);
+            specificContainerMatched = true;
           }
+        } else {
+          // Applies only if there were no specific container matches.
+          noContainerBundles.add(bundle);
         }
       }
       if (!specificContainerMatched) {
@@ -588,8 +587,57 @@ public class FeatureRegistry {
       this.calculatedDepsStale = false;
     }
 
-    public List<FeatureBundle> getBundles() {
-      return bundles;
+    /**
+     * Returns all bundles matching the given rendering context.
+     * If there's >= 1 bundle matching a non-ALL context, return it.
+     * Otherwise, return any ALL bundles.
+     * @param rctx
+     * @return
+     */
+    public Iterable<FeatureBundle> getBundles(RenderingContext rctx) {
+      String tagMatch = null;
+      String directTag = rctx.getFeatureBundleTag();
+      for (FeatureBundle bundle : bundles) {
+        if (directTag.equalsIgnoreCase(bundle.getType())) {
+          tagMatch = directTag;
+        }
+      }
+      if (tagMatch == null) {
+        tagMatch = RenderingContext.ALL.getFeatureBundleTag();
+      }
+      final String useForMatching = tagMatch;
+      
+      // Return an Iterator rather than coping a new
+      // list containing the types over which to iterate.
+      return new Iterable<FeatureBundle>() {
+        public Iterator<FeatureBundle> iterator() {
+          return new Iterator<FeatureBundle>() {
+            private FeatureBundle next;
+            private Iterator<FeatureBundle> it = bundles.iterator();
+            
+            public boolean hasNext() {
+              while (next == null && it.hasNext()) {
+                FeatureBundle candidate = it.next();
+                if (useForMatching.equalsIgnoreCase(candidate.getType())) {
+                  next = candidate;
+                }
+              }
+              return next != null;
+            }
+
+            public FeatureBundle next() {
+              hasNext();
+              FeatureBundle ret = next;
+              next = null;
+              return ret;
+            }
+
+            public void remove() {
+              throw new UnsupportedOperationException("Can't remove from bundle iterator");
+            }
+          };
+        }
+      };
     }
 
     public List<String> getRawDeps() {

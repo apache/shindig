@@ -37,7 +37,13 @@ public enum RenderingContext {
   // Used when retrieving metadata about a gadget. Processing is generally
   // identical to processing under GADGET, but some operations may be safely
   // skipped, such as preload processing.
-  METADATA(null, null, null);
+  METADATA(null, null, null),
+  
+  // Allows specification of feature JS with an <all> tag. Specially handled in
+  // FeatureRegistry: content specified in an <all> tag is chosen if there are
+  // no <gadget> or <container> sections. This avoids, for many libs where the JS
+  // is equivalent, copying sections all over the place.
+  ALL("all", "3", true);
 
   private final String featureBundleTag;
   private final String paramValue;
