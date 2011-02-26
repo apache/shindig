@@ -19,6 +19,7 @@
 -->
 <feature>
   <name>opensocial-reference</name>
+  <dependency>taming</dependency>
   <dependency>core.util</dependency>
   <gadget>
     <script src="opensocial.js"/>

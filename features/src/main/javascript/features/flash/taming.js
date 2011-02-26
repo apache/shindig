@@ -21,8 +21,6 @@
  * @class
  * Tame and expose core gadgets.flash.* API to cajoled gadgets
  */
-var tamings___ = tamings___ || [];
-var bridge___;
 
 tamings___.push(function(imports) {
   ___.tamesTo(gadgets.flash.embedFlash, (function() {

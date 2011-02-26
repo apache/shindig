@@ -21,7 +21,6 @@
  * @class
  * Tame and expose core gadgets.views.* API to cajoled gadgets
  */
-var tamings___ = tamings___ || [];
 tamings___.push(function(imports) {
   caja___.whitelistCtors([
     [gadgets.views, 'View', Object]

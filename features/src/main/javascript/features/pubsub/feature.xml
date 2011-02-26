@@ -19,6 +19,7 @@ specific language governing permissions and limitations under the License.
 <feature>
   <name>pubsub</name>
   <dependency>globals</dependency>
+  <dependency>taming</dependency>
   <dependency>rpc</dependency>
   <gadget>
     <script src="pubsub.js"/>

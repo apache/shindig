@@ -21,7 +21,6 @@
  * @class
  * Tame and expose opensocial.* API to cajoled gadgets
  */
-var tamings___ = tamings___ || [];
 tamings___.push(function(imports) {
   ___.grantRead(opensocial, 'CreateActivityPriority');
   ___.grantRead(opensocial, 'EscapeType');

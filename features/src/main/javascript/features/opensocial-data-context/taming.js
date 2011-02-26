@@ -21,7 +21,6 @@
  * @class
  * Tame and expose the opensocial.data.DataContext API to cajoled gadgets
  */
-var tamings___ = tamings___ || [];
 tamings___.push(function(imports) {
   caja___.whitelistFuncs([
     [opensocial.data, 'getDataContext'],

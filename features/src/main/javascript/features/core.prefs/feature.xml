@@ -19,6 +19,7 @@
 <feature>
   <name>core.prefs</name>
   <dependency>globals</dependency>
+  <dependency>taming</dependency>
   <dependency>core.util</dependency>
   <gadget>
     <script src="prefs.js"/>

@@ -22,7 +22,6 @@
  * Tame and expose core gadgets.pubsub.* API to cajoled gadgets
  */
 // XXX not sure what to do here
-//var tamings___ = tamings___ || [];
 //tamings___.push(function(imports) {
 //  caja___.whitelistFuncs([
 //    [gadgets.pubsub, 'publish'],

@@ -20,16 +20,28 @@
  * @namespace The global safeJSON namespace
  * @type {Object}
  */
-var safeJSON = safeJSON || {};
+var safeJSON = window['safeJSON'];
 
 /**
  * @namespace The global tamings___ namespace
  * @type {Array.<Function>}
  */
-var tamings___ = tamings___ || [];
+var tamings___ = window['tamings___'] || [];
+
+/**
+ * @namespace The global bridge___ namespace
+ * @type {Object}
+ */
+var bridge___;
+
+/**
+ * @namespace The global caja___ namespace
+ * @type {Object}
+ */
+var caja = window['caja___'];
 
 /**
  * @namespace The global ___ namespace
  * @type {Object}
  */
-var ___ = ___ || {};
+var ___ = window['___'];

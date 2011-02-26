@@ -21,7 +21,6 @@
  * @class
  * Tame and expose core osapi.* API to cajoled gadgets
  */
-var tamings___ = tamings___ || [];
 tamings___.push(function(imports) {
 
   ___.tamesTo(osapi.newBatch, ___.markFuncFreeze(function() {

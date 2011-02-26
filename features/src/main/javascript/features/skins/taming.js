@@ -21,7 +21,6 @@
  * @class
  * Tame and expose core gadgets.skin.* API to cajoled gadgets
  */
-var tamings___ = tamings___ || [];
 tamings___.push(function(imports) {
   caja___.whitelistFuncs([
     [gadgets.skins, 'getProperty']

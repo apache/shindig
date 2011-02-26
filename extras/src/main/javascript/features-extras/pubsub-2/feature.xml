@@ -19,6 +19,7 @@ specific language governing permissions and limitations under the License.
 <feature>
   <name>pubsub-2</name>
   <dependency>globals</dependency>
+  <dependency>taming</dependency>
   <dependency>org.openajax.hub-2.0.5</dependency>
   <gadget>
     <script src="pubsub-2.js"/>

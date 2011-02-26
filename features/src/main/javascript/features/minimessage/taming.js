@@ -22,7 +22,6 @@
  * Tame and expose gadgets.MiniMessage.* API to cajoled gadgets
  */
 
-var tamings___ = tamings___ || [];
 tamings___.push(function(imports) {
   caja___.whitelistCtors([
     [gadgets, 'MiniMessage', Object]

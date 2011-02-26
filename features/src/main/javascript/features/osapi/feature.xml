@@ -20,6 +20,7 @@
 <feature>
   <name>osapi</name>
   <dependency>globals</dependency>
+  <dependency>taming</dependency>
   <dependency>shindig.auth</dependency>
   <dependency>core.config</dependency>
   <dependency>core.io</dependency>

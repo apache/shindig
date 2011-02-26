@@ -21,7 +21,7 @@
  * This file tames the APIs that are exposed to a gadget.
  */
 
-var caja___ = (function() {
+caja___ = (function() {
   // URI policy: Rewrites all uris in a cajoled gadget
   var uriCallback = {
     rewrite: function rewrite(uri, mimeTypes) {
@@ -108,7 +108,6 @@ var caja___ = (function() {
 })();
 
 // Expose alert and console.log to cajoled programs
-var tamings___ = tamings___ || [];
 tamings___.push(function(imports) {
   imports.outers.alert = function(msg) { alert(msg); };
   ___.grantFunc(imports.outers, 'alert');

@@ -19,6 +19,7 @@
 -->
 <feature>
   <name>opensocial-data-context</name>
+  <dependency>taming</dependency>
   <gadget>    
     <script src="datacontext.js"></script>
     <script src="taming.js"></script>

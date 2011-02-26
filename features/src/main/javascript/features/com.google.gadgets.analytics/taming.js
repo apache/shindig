@@ -21,7 +21,6 @@
  * @class
  * Tame and expose Google Analytics API to cajoled gadgets
  */
-var tamings___ = tamings___ || [];
 tamings___.push(function(imports) {
   caja___.whitelistCtors([
     [gadgets, 'analytics', Object]

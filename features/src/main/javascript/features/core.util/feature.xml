@@ -19,6 +19,7 @@
 <feature>
   <name>core.util</name>
   <dependency>globals</dependency>
+  <dependency>taming</dependency>
   <dependency>core.config</dependency>
   <dependency>core.util.urlparams</dependency>
   <gadget>

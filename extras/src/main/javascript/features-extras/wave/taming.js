@@ -19,9 +19,6 @@
  * @fileoverview  Tame and expose wave.* API to cajoled gadgets.
  */
 
-var tamings___ = tamings___ || [];
-var caja___;
-var ___;
 tamings___.push(function(imports) {
   // wave.Mode is an object literal that holds only constants
   ___.grantRead(wave, 'Mode');

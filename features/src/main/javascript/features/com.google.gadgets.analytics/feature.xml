@@ -18,6 +18,7 @@ specific language governing permissions and limitations under the License.
 -->
 <feature>
   <name>com.google.gadgets.analytics</name>
+  <dependency>taming</dependency>
   <dependency>core.legacy</dependency>
   <gadget>
     <script inline="true" src="http://www.google.com/ig/lib/libga.js"/>

@@ -22,7 +22,6 @@
  * Tame and expose gadgets.Tabs and gadgets.TabSet API to cajoled gadgets
  */
 
-var tamings___ = tamings___ || [];
 tamings___.push(function(imports) {
   caja___.whitelistMeths([
     [gadgets.Tab, 'getCallback'],

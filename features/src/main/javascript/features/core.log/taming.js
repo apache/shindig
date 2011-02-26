@@ -21,7 +21,6 @@
  * @class
  * Tame and expose core gadgets.* API to cajoled gadgets
  */
-var tamings___ = tamings___ || [];
 tamings___.push(function(imports) {
   ___.grantRead(gadgets.log, 'INFO');
   ___.grantRead(gadgets.log, 'WARNING');
