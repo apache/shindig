@@ -26,6 +26,9 @@ require_once 'external/jsmin-php/jsmin.php';
  *
  */
 class GadgetFeatureRegistry {
+  const FEATURE_CONTEXT_GADGET = 'gadget';
+  const FEATURE_CONTEXT_CONTAINER = 'container';
+
   /**
    * @var array
    */
@@ -284,7 +287,7 @@ class GadgetFeatureRegistry {
    * @param string $path
    * @return array
    */
-  private function parse($content, $path) {
+  protected function parse($content, $path) {
     $doc = simplexml_load_string($content);
     $feature = array();
     $feature['deps'] = array();
@@ -293,11 +296,23 @@ class GadgetFeatureRegistry {
       throw new GadgetException('Invalid name in feature: ' . $path);
     }
     $feature['name'] = trim($doc->name);
-    foreach ($doc->gadget as $gadget) {
-      $this->processContext($feature, $gadget, false);
+    if ($doc->gadget) {
+      foreach ($doc->gadget as $gadget) {
+        $this->processContext($feature, $gadget, self::FEATURE_CONTEXT_GADGET);
+      }
+    } else if ($doc->all) {
+      foreach ($doc->all as $container) {
+        $this->processContext($feature, $container, self::FEATURE_CONTEXT_GADGET);
+      }
     }
-    foreach ($doc->container as $container) {
-      $this->processContext($feature, $container, true);
+    if ($doc->container) {
+      foreach ($doc->container as $container) {
+        $this->processContext($feature, $container, self::FEATURE_CONTEXT_CONTAINER);
+      }
+    } else if ($doc->all) {
+      foreach ($doc->all as $container) {
+        $this->processContext($feature, $container, self::FEATURE_CONTEXT_CONTAINER);
+      }
     }
     foreach ($doc->dependency as $dependency) {
       $feature['deps'][trim($dependency)] = trim($dependency);
@@ -310,9 +325,9 @@ class GadgetFeatureRegistry {
    *
    * @param array $feature
    * @param string $context
-   * @param boolean $isContainer
+   * @param string $envContext container or gadget
    */
-  private function processContext(&$feature, $context, $isContainer) {
+  private function processContext(&$feature, $context, $envContext) {
     foreach ($context->script as $script) {
       $attributes = $script->attributes();
       if (! isset($attributes['src'])) {
@@ -351,10 +366,13 @@ class GadgetFeatureRegistry {
 
       $library = array('type' => $type, 'content' => $content);
       if ($library != null) {
-        if ($isContainer) {
-          $feature['containerJs'][] = $library;
-        } else {
-          $feature['gadgetJs'][] = $library;
+        switch ($envContext) {
+          case self::FEATURE_CONTEXT_GADGET:
+            $feature['gadgetJs'][] = $library;
+            break;
+          case self::FEATURE_CONTEXT_CONTAINER:
+            $feature['containerJs'][] = $library;
+            break;
         }
       }
     }

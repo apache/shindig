@@ -33,7 +33,7 @@ class GadgetFeatureRegistryTest extends PHPUnit_Framework_TestCase {
    */
   protected function setUp() {
     parent::setUp();
-    $this->GadgetFeatureRegistry = new GadgetFeatureRegistry(Config::get('features_path'));
+    $this->GadgetFeatureRegistry = new TestGadgetFeatureRegistry(Config::get('features_path'));
   }
 
   /**
@@ -50,4 +50,196 @@ class GadgetFeatureRegistryTest extends PHPUnit_Framework_TestCase {
   public function test__construct() {
     $this->GadgetFeatureRegistry->__construct(Config::get('features_path'));
   }
+
+  public function testParseFeatureFileWithContainerGadgetAndAll() {
+    $content = '<?xml version="1.0"?>
+<feature>
+  <name>featureName</name>
+  <dependency>dependency1</dependency>
+  <dependency>dependency2</dependency>
+  <gadget>
+    <script src="gadgetFile1.js"/>
+    <script src="gadgetFile2.js"/>
+    <script>alert(1);</script>
+    <script src="res://example.com/file.js" />
+  </gadget>
+  <container>
+    <script src="containerFile1.js"/>
+    <script src="containerFile2.js"/>
+    <script src="http://example.com/file.js" />
+  </container>
+  <all>
+    <script src="file1.js"/>
+    <script src="file2.js"/>
+    <script src="https://example.com/file.js" />
+  </all>
+</feature>';
+    $basePath = '/path';
+    $feature = $this->GadgetFeatureRegistry->_parse($content, $basePath);
+
+    $expected = array(
+        'deps' => array(
+            'dependency1' => 'dependency1',
+            'dependency2' => 'dependency2',
+        ),
+        'basePath' => '/path',
+        'name' => 'featureName',
+        'gadgetJs' => array(
+            array(
+                'type' => 'FILE',
+                'content' => 'gadgetFile1.js',
+            ),
+            array(
+                'type' => 'FILE',
+                'content' => 'gadgetFile2.js',
+            ),
+            array(
+                'type' => 'INLINE',
+                'content' => 'alert(1);',
+            ),
+            array(
+                'type' => 'URL',
+                'content' => 'http://localhost/gadgets/resources/example.com/file.js',
+            ),
+        ),
+        'containerJs' => array(
+            array(
+                'type' => 'FILE',
+                'content' => 'containerFile1.js',
+            ),
+            array(
+                'type' => 'FILE',
+                'content' => 'containerFile2.js',
+            ),
+            array(
+                'type' => 'URL',
+                'content' => 'http://example.com/file.js',
+            ),
+        )
+    );
+
+    $this->assertEquals($expected, $feature);
+  }
+
+  public function testParseFeatureFileWithContainerAndAllBlock() {
+    $content = '<?xml version="1.0"?>
+<feature>
+  <name>featureName</name>
+  <dependency>dependency1</dependency>
+  <dependency>dependency2</dependency>
+  <all>
+    <script src="file1.js"/>
+    <script src="file2.js"/>
+    <script src="https://example.com/file.js" />
+  </all>
+</feature>';
+    $basePath = '/path';
+    $feature = $this->GadgetFeatureRegistry->_parse($content, $basePath);
+
+    $expected = array(
+        'deps' => array(
+            'dependency1' => 'dependency1',
+            'dependency2' => 'dependency2',
+        ),
+        'basePath' => '/path',
+        'name' => 'featureName',
+        'gadgetJs' => array(
+            array(
+                'type' => 'FILE',
+                'content' => 'file1.js',
+            ),
+            array(
+                'type' => 'FILE',
+                'content' => 'file2.js',
+            ),
+            array(
+                'type' => 'URL',
+                'content' => 'https://example.com/file.js',
+            ),
+        ),
+        'containerJs' => array(
+            array(
+                'type' => 'FILE',
+                'content' => 'file1.js',
+            ),
+            array(
+                'type' => 'FILE',
+                'content' => 'file2.js',
+            ),
+            array(
+                'type' => 'URL',
+                'content' => 'https://example.com/file.js',
+            ),
+        )
+    );
+
+    $this->assertEquals($expected, $feature);
+  }
+
+  public function testParseFeatureFileWithAllBlock() {
+    $content = '<?xml version="1.0"?>
+<feature>
+  <name>featureName</name>
+  <dependency>dependency1</dependency>
+  <dependency>dependency2</dependency>
+  <container>
+    <script src="containerFile1.js"/>
+    <script src="containerFile2.js"/>
+    <script src="http://example.com/file.js" />
+  </container>
+  <all>
+    <script src="file1.js"/>
+    <script src="file2.js"/>
+    <script src="https://example.com/file.js" />
+  </all>
+</feature>';
+    $basePath = '/path';
+    $feature = $this->GadgetFeatureRegistry->_parse($content, $basePath);
+
+    $expected = array(
+        'deps' => array(
+            'dependency1' => 'dependency1',
+            'dependency2' => 'dependency2',
+        ),
+        'basePath' => '/path',
+        'name' => 'featureName',
+        'gadgetJs' => array(
+            array(
+                'type' => 'FILE',
+                'content' => 'file1.js',
+            ),
+            array(
+                'type' => 'FILE',
+                'content' => 'file2.js',
+            ),
+            array(
+                'type' => 'URL',
+                'content' => 'https://example.com/file.js',
+            ),
+        ),
+        'containerJs' => array(
+            array(
+                'type' => 'FILE',
+                'content' => 'containerFile1.js',
+            ),
+            array(
+                'type' => 'FILE',
+                'content' => 'containerFile2.js',
+            ),
+            array(
+                'type' => 'URL',
+                'content' => 'http://example.com/file.js',
+            ),
+        )
+    );
+
+    $this->assertEquals($expected, $feature);
+  }
+}
+
+class TestGadgetFeatureRegistry extends GadgetFeatureRegistry
+{
+    public function _parse($content, $basePath) {
+        return $this->parse($content, $basePath);
+    }
 }
