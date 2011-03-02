@@ -467,6 +467,7 @@ public class AbstractHttpCacheTest {
     assertTrue(builtResponse.isStrictNoCache());
     assertEquals("", builtResponse.getResponseAsString());
     assertEquals("private,max-age=86400", builtResponse.getHeader("Cache-Control"));
+    assertFalse(builtResponse.getHeaders().containsKey("Pragma"));
     assertNull(builtResponse.getHeader("X-Method-Override"));
   }
 
@@ -480,7 +481,7 @@ public class AbstractHttpCacheTest {
     HttpResponse builtResponse = cache
         .buildStrictNoCacheHttpResponse(new HttpRequest(DEFAULT_URI), response).create();
 
-    assertTrue(builtResponse.isStrictNoCache());   
+    assertTrue(builtResponse.isStrictNoCache());
     assertEquals("", builtResponse.getResponseAsString());
     assertEquals("max-age=-1", builtResponse.getHeader("Cache-Control"));
     assertEquals("no-cache", builtResponse.getHeader("Pragma"));

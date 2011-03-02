@@ -94,10 +94,22 @@ public abstract class AbstractHttpCache implements HttpCache {
   @VisibleForTesting
   HttpResponseBuilder buildStrictNoCacheHttpResponse(HttpRequest request, HttpResponse response) {
     HttpResponseBuilder responseBuilder = new HttpResponseBuilder();
-    responseBuilder.setHeader("Cache-Control", response.getHeader("Cache-Control"));
-    responseBuilder.setHeader("Pragma", response.getHeader("Pragma"));
+    copyHeaderIfPresent("Cache-Control", response, responseBuilder);
+    copyHeaderIfPresent("Pragma", response, responseBuilder);
     responseBuilder.setCacheControlMaxAge(strictNoCacheResourceTtlInSeconds);
     return responseBuilder;
+  }
+
+  /**
+   * Copy the specified header from response into builder if it exists.
+   */
+  private void copyHeaderIfPresent(String header,
+                                   HttpResponse response,
+                                   HttpResponseBuilder builder) {
+    String headerValue = response.getHeader(header);
+    if (headerValue != null) {
+      builder.setHeader(header, headerValue);
+    }
   }
 
   public HttpResponse removeResponse(HttpRequest request) {
