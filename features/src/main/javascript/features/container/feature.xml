@@ -34,5 +34,41 @@ under the License.
     <script src="gadget_site.js"/>
     <script src="container.js"/>
     <script src="init.js"/>
+    <api>
+      <exports type="js">shindig.container.Container</exports>
+      <exports type="js">shindig.container.Container.prototype.newGadgetSite</exports>
+      <exports type="js">shindig.container.Container.prototype.navigateGadget</exports>
+      <exports type="js">shindig.container.Container.prototype.closeGadget</exports>
+      <exports type="js">shindig.container.Container.prototype.preloadGadget</exports>
+      <exports type="js">shindig.container.Container.prototype.preloadGadgets</exports>
+      <exports type="js">shindig.container.Container.prototype.unloadGadget</exports>
+      <exports type="js">shindig.container.Container.prototype.unloadGadgets</exports>
+      <exports type="js">shindig.container.Container.prototype.getGadgetMetadata</exports>
+      <exports type="js">shindig.container.Container.prototype.rpcRegister</exports>
+      <exports type="js">shindig.container.Container.prototype.onConstructed</exports>
+      <exports type="js">shindig.container.ContainerConfig.RENDER_CAJOLE</exports>
+      <exports type="js">shindig.container.ContainerConfig.RENDER_DEBUG</exports>
+      <exports type="js">shindig.container.ContainerConfig.RENDER_DEBUG_PARAM</exports>
+      <exports type="js">shindig.container.ContainerConfig.RENDER_TEST</exports>
+      <exports type="js">shindig.container.ContainerConfig.TOKEN_REFRESH_INTERVAL</exports>
+      <exports type="js">shindig.container.ContainerConfig.NAVIGATE_CALLBACK</exports>
+      <exports type="js">shindig.container.ContainerConfig.PRELOAD_REF_TIME</exports>
+      <exports type="js">shindig.container.ContainerConfig.PRELOAD_METADATAS</exports>
+      <exports type="js">shindig.container.ContainerConfig.PRELOAD_TOKENS</exports>
+      <exports type="js">shindig.container.ContainerRender.ALLOW_DEFAULT_VIEW</exports>
+      <exports type="js">shindig.container.ContainerRender.CLASS</exports>
+      <exports type="js">shindig.container.ContainerRender.DEBUG</exports>
+      <exports type="js">shindig.container.ContainerRender.HEIGHT</exports>
+      <exports type="js">shindig.container.ContainerRender.TEST</exports>
+      <exports type="js">shindig.container.ContainerRender.VIEW</exports>
+      <exports type="js">shindig.container.ContainerRender.WIDTH</exports>
+      <exports type="js">shindig.container.GadgetSite</exports>
+      <exports type="js">shindig.container.GadgetSite.prototype.setHeight</exports>
+      <exports type="js">shindig.container.GadgetSite.prototype.setWidth</exports>
+      <exports type="js">shindig.container.GadgetSite.prototype.getId</exports>
+      <exports type="js">shindig.container.GadgetSite.prototype.getActiveGadgetHolder</exports>
+      <exports type="js">shindig.container.GadgetSite.prototype.rpcCall</exports>
+      <exports type="js">shindig.container.GadgetSite.prototype.close</exports>
+    </api>
   </container>
 </feature>

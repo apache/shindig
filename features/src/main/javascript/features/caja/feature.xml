@@ -27,5 +27,9 @@ The javascript referenced here should be found in the caja jar.
     <script src="caja.js"/>
     <script src="res://com/google/caja/plugin/valija.out.js"/>
     <script src="taming.js"/>
+    <exports type="js">caja___.enable</exports>
+    <exports type="js">caja___.whitelistCtors</exports>
+    <exports type="js">caja___.whitelistFuncs</exports>
+    <exports type="js">caja___.whitelistMeths</exports>
   </gadget>
 </feature>

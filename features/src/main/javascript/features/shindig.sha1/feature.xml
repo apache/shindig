@@ -22,7 +22,7 @@ A JavaScript sha1 imlementation.
 -->
   <name>shindig.sha1</name>
   <dependency>globals</dependency>
-  <gadget>
+  <all>
     <api>
       <exports type="js">shindig.sha1.reset</exports>
       <exports type="js">shindig.sha1.update</exports>
@@ -30,14 +30,5 @@ A JavaScript sha1 imlementation.
       <exports type="js">shindig.sha1.digestString</exports>
     </api>
     <script src="sha1.js"/>
-  </gadget>
-  <container>
-    <api>
-      <exports type="js">shindig.sha1.reset</exports>
-      <exports type="js">shindig.sha1.update</exports>
-      <exports type="js">shindig.sha1.digest</exports>
-      <exports type="js">shindig.sha1.digestString</exports>
-    </api>
-    <script src="sha1.js"/>
-  </container>
+  </all>
 </feature>

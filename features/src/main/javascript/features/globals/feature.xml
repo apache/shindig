@@ -18,20 +18,12 @@
 -->
 <feature>
   <name>globals</name>
-  <gadget>
+  <all>
     <api>
       <exports type="js">gadgets</exports>
       <exports type="js">shindig</exports>
       <exports type="js">osapi</exports>
     </api>
     <script src="globals.js"/>
-  </gadget>
-  <container>
-    <api>
-      <exports type="js">gadgets</exports>
-      <exports type="js">osapi</exports>
-      <exports type="js">shindig</exports>
-    </api>
-    <script src="globals.js"/>
-  </container>
+  </all>
 </feature>

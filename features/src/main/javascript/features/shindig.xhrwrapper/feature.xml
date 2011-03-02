@@ -22,5 +22,15 @@ specific language governing permissions and limitations under the License.
   <dependency>xmlutil</dependency>
   <gadget>
     <script src="xhrwrapper.js"/>
+    <api>
+      <exports type="js">shindig.xhrwrapper.createXHR</exports>
+      <exports type="js">shindig.xhrwrapper.XhrWrapper</exports>
+      <exports type="js">shindig.xhrwrapper.XhrWrapper.prototype.abort</exports>
+      <exports type="js">shindig.xhrwrapper.XhrWrapper.prototype.getAllResponseHeaders</exports>
+      <exports type="js">shindig.xhrwrapper.XhrWrapper.prototype.getResponseHeader</exports>
+      <exports type="js">shindig.xhrwrapper.XhrWrapper.prototype.open</exports>
+      <exports type="js">shindig.xhrwrapper.XhrWrapper.prototype.send</exports>
+      <exports type="js">shindig.xhrwrapper.XhrWrapper.prototype.setRequestHeader</exports>
+    </api>
   </gadget>
 </feature>

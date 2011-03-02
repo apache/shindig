@@ -32,5 +32,8 @@ specific language governing permissions and limitations under the License.
   <dependency>xmlutil</dependency>
   <gadget>
     <script src="jsondom.js"/>
+    <api>
+      <exports type="js">gadgets.jsondom.parse</exports>
+    </api>
   </gadget>
 </feature>

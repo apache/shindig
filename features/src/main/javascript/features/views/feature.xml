@@ -33,5 +33,18 @@ A map of view names to view attributes. Examples:
   <gadget>
     <script src="views.js"/>
     <script src="taming.js"/>
+    <api>
+      <exports type="js">gadgets.views.bind</exports>
+      <exports type="js">gadgets.views.requestNavigateTo</exports>
+      <exports type="js">gadgets.views.getCurrentView</exports>
+      <exports type="js">gadgets.views.getSupportedViews</exports>
+      <exports type="js">gadgets.views.getParams</exports>
+      <exports type="js">gadgets.views.ViewType</exports>
+      <exports type="js">gadgets.views.View</exports>
+      <exports type="js">gadgets.views.View.prototype.getName</exports>
+      <exports type="js">gadgets.views.View.prototype.getUrlTemplate</exports>
+      <exports type="js">gadgets.views.View.prototype.bind</exports>
+      <exports type="js">gadgets.views.View.prototype.isOnlyVisibleGadget</exports>
+    </api>
   </gadget>
 </feature>

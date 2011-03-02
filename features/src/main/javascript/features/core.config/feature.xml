@@ -20,7 +20,7 @@
   <name>core.config</name>
   <dependency>globals</dependency>
   <dependency>core.config.base</dependency>
-  <gadget>
+  <all>
     <script src="validators.js"/>
     <api>
       <exports type="js">gadgets.config.EnumValidator</exports>
@@ -30,16 +30,5 @@
       <exports type="js">gadgets.config.BooleanValidator</exports>
       <exports type="js">gadgets.config.LikeValidator</exports>
     </api>
-  </gadget>
-  <container>
-    <script src="validators.js"/>
-    <api>
-      <exports type="js">gadgets.config.EnumValidator</exports>
-      <exports type="js">gadgets.config.RegExValidator</exports>
-      <exports type="js">gadgets.config.ExistsValidator</exports>
-      <exports type="js">gadgets.config.NonEmptyStringValidator</exports>
-      <exports type="js">gadgets.config.BooleanValidator</exports>
-      <exports type="js">gadgets.config.LikeValidator</exports>
-    </api>
-  </container>
+  </all>
 </feature>

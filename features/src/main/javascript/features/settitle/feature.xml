@@ -23,5 +23,9 @@ specific language governing permissions and limitations under the License.
   <dependency>rpc</dependency>
   <gadget>
     <script src="settitle.js"/>
+    <api>
+      <exports type="js">gadgets.window.setTitle</exports>
+      <exports type="js">_IG_SetTitle</exports>
+    </api>
   </gadget>
 </feature>

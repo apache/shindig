@@ -22,10 +22,26 @@ specific language governing permissions and limitations under the License.
   -->
   <name>shindig.uri</name>
   <dependency>globals</dependency>
-  <gadget>
+  <all>
     <script src="uri.js"/>
-  </gadget>
-  <container>
-    <script src="uri.js"/>
-  </container>
+    <api>
+      <exports type="js">shindig.uri.getSchema</exports>
+      <exports type="js">shindig.uri.getAuthority</exports>
+      <exports type="js">shindig.uri.getOrigin</exports>
+      <exports type="js">shindig.uri.getPath</exports>
+      <exports type="js">shindig.uri.getQuery</exports>
+      <exports type="js">shindig.uri.getFragment</exports>
+      <exports type="js">shindig.uri.getQP</exports>
+      <exports type="js">shindig.uri.getFP</exports>
+      <exports type="js">shindig.uri.setSchema</exports>
+      <exports type="js">shindig.uri.setAuthority</exports>
+      <exports type="js">shindig.uri.setPath</exports>
+      <exports type="js">shindig.uri.setQuery</exports>
+      <exports type="js">shindig.uri.setFragment</exports>
+      <exports type="js">shindig.uri.setQP</exports>
+      <exports type="js">shindig.uri.setFP</exports>
+      <exports type="js">shindig.uri.setExistingP</exports>
+      <exports type="js">shindig.uri.toString</exports>
+    </api>
+  </all>
 </feature>

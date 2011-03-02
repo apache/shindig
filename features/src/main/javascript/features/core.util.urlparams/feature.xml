@@ -19,16 +19,10 @@
 <feature>
   <name>core.util.urlparams</name>
   <dependency>globals</dependency>
-  <gadget>
+  <all>
     <script src="urlparams.js"/>
     <api>
       <exports type="js">gadgets.util.getUrlParameters</exports>
     </api>
-  </gadget>
-  <container>
-    <script src="urlparams.js"/>
-    <api>
-      <exports type="js">gadgets.util.getUrlParameters</exports>
-    </api>
-  </container>
+  </all>
 </feature>

@@ -20,12 +20,13 @@
   <name>shindig.auth</name>
   <dependency>core.config</dependency>
   <dependency>core.util</dependency>
-  <gadget>
+  <all>
     <script src="auth.js"/>
     <script src="auth-init.js"/>
-  </gadget>
-  <container>
-    <script src="auth.js"/>
-    <script src="auth-init.js"/>
-  </container>
+    <api>
+      <exports type="js">shindig.Auth.getSecurityToken</exports>
+      <exports type="js">shindig.Auth.updateSecurityToken</exports>
+      <exports type="js">shindig.Auth.getTrustedData</exports>
+    </api>
+  </all>
 </feature>

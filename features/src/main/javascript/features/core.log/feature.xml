@@ -20,30 +20,16 @@
   <name>core.log</name>
   <dependency>globals</dependency>
   <dependency>taming</dependency>
-  <gadget>
+  <all>
     <script src="log.js"/>
     <script src="taming.js"/>
     <api>
       <exports type="js">gadgets.error</exports>
-      <exports type="js">gadgets.log</exports>
       <exports type="js">gadgets.log.INFO</exports>
       <exports type="js">gadgets.log.WARNING</exports>
       <exports type="js">gadgets.log.NONE</exports>
       <exports type="js">gadgets.setLogLevel</exports>
       <exports type="js">gadgets.warn</exports>
     </api>
-  </gadget>
-  <container>
-    <script src="log.js"/>
-    <script src="taming.js"/>
-    <api>
-      <exports type="js">gadgets.error</exports>
-      <exports type="js">gadgets.log</exports>
-      <exports type="js">gadgets.log.INFO</exports>
-      <exports type="js">gadgets.log.WARNING</exports>
-      <exports type="js">gadgets.log.NONE</exports>
-      <exports type="js">gadgets.setLogLevel</exports>
-      <exports type="js">gadgets.warn</exports>
-    </api>
-  </container>
+  </all>
 </feature>

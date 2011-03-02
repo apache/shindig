@@ -18,16 +18,12 @@
 -->
 <feature>
   <name>cloo</name>
-  <gadget>
-    <api>
-      <exports type="js">cloo</exports>
-    </api>
+  <all>
     <script src="cloo.js"/>
-  </gadget>
-  <container>
     <api>
-      <exports type="js">cloo</exports>
+      <exports type="js">cloo.interfc</exports>
+      <exports type="js">cloo.obj</exports>
+      <exports type="js">cloo.me</exports>
     </api>
-    <script src="cloo.js"/>
-  </container>
+  </all>
 </feature>

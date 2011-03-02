@@ -26,6 +26,7 @@
       <exports type="js">gadgets.config.register</exports>
       <exports type="js">gadgets.config.get</exports>
       <exports type="js">gadgets.config.init</exports>
+      <exports type="js">gadgets.config.update</exports>      
       <exports type="js">gadgets.config.isGadget</exports>
     </api>
   </gadget>
@@ -36,6 +37,7 @@
       <exports type="js">gadgets.config.register</exports>
       <exports type="js">gadgets.config.get</exports>
       <exports type="js">gadgets.config.init</exports>
+      <exports type="js">gadgets.config.update</exports>
       <exports type="js">gadgets.config.isContainer</exports>
     </api>
   </container>

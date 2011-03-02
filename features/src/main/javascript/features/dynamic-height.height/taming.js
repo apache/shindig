@@ -23,6 +23,6 @@
  */
 tamings___.push(function(imports) {
   caja___.whitelistFuncs([
-    [gadgets.window, 'adjustHeight']
+    [gadgets.window, 'getHeight']
   ]);
 });

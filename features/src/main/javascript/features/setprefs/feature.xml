@@ -23,5 +23,10 @@ specific language governing permissions and limitations under the License.
   <dependency>rpc</dependency>
   <gadget>
     <script src="setprefs.js"/>
+    <api>
+      <exports type="js">gadgets.Prefs</exports>
+      <exports type="js">gadgets.Prefs.prototype.set</exports>
+      <exports type="js">gadgets.Prefs.prototype.setArray</exports>
+    </api>
   </gadget>
 </feature>

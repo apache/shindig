@@ -20,8 +20,10 @@ specific language governing permissions and limitations under the License.
   <name>exportjs</name>
   <gadget>
     <script src="exportjs.js"/>
+    <!-- do not api+export exportJs -->
   </gadget>
   <container>
     <script src="exportjs.js"/>
+    <!-- do not api+export exportJs -->
   </container>
 </feature>

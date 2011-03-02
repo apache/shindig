@@ -17,9 +17,6 @@
  * under the License.
  */
 
-/*global gadgets */
-var gadgets;
-
 /**
  * @fileoverview All functions in this file should be treated as deprecated legacy routines.
  * Gadget authors are explicitly discouraged from using any of them.

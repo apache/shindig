@@ -22,7 +22,7 @@
   <dependency>taming</dependency>
   <dependency>core.config</dependency>
   <dependency>core.util.urlparams</dependency>
-  <gadget>
+  <all>
     <script src="util.js"/>
     <script src="taming.js"/>
     <api>
@@ -40,24 +40,5 @@
       <exports type="js">gadgets.util.attachBrowserEvent</exports>
       <exports type="js">gadgets.util.removeBrowserEvent</exports>
     </api>
-  </gadget>
-  <container>
-    <script src="util.js"/>
-    <script src="taming.js"/>
-    <api>
-      <exports type="js">gadgets.util.getUrlParameters</exports>
-      <exports type="js">gadgets.util.makeClosure</exports>
-      <exports type="js">gadgets.util.makeEnum</exports>
-      <exports type="js">gadgets.util.getFeatureParameters</exports>
-      <exports type="js">gadgets.util.hasFeature</exports>
-      <exports type="js">gadgets.util.getServices</exports>
-      <exports type="js">gadgets.util.registerOnLoadHandler</exports>
-      <exports type="js">gadgets.util.runOnLoadHandlers</exports>
-      <exports type="js">gadgets.util.escape</exports>
-      <exports type="js">gadgets.util.escapeString</exports>
-      <exports type="js">gadgets.util.unescapeString</exports>
-      <exports type="js">gadgets.util.attachBrowserEvent</exports>
-      <exports type="js">gadgets.util.removeBrowserEvent</exports>
-    </api>
-  </container>
+  </all>
 </feature>

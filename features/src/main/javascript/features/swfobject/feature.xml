@@ -21,5 +21,22 @@ specific language governing permissions and limitations under the License.
   <name>swfobject</name>
   <gadget>
     <script src="swfobject.js"/>
+    <api>
+      <exports type="js">swfobject.registerObject</exports>
+      <exports type="js">swfobject.getObjectById</exports>
+      <exports type="js">swfobject.embedSWF</exports>
+      <exports type="js">swfobject.switchOffAutoHideShow</exports>
+      <exports type="js">swfobject.ua</exports>
+      <exports type="js">swfobject.getFlashPlayerVersion</exports>
+      <exports type="js">swfobject.hasFlashPlayerVersion</exports>
+      <exports type="js">swfobject.createSWF</exports>
+      <exports type="js">swfobject.showExpressInstall</exports>
+      <exports type="js">swfobject.removeSWF</exports>
+      <exports type="js">swfobject.createCSS</exports>
+      <exports type="js">swfobject.addDomLoadEvent</exports>
+      <exports type="js">swfobject.addLoadEvent</exports>
+      <exports type="js">swfobject.getQueryParamValue</exports>
+      <exports type="js">swfobject.expressInstallCallback</exports>
+    </api>
   </gadget>
 </feature>

@@ -24,5 +24,13 @@ specific language governing permissions and limitations under the License.
   <gadget>
     <script src="minimessage.js"/>
     <script src="taming.js"/>
+    <api>
+      <exports type="js">gadgets.MiniMessage</exports>
+      <exports type="js">gadgets.MiniMessage.prototype.createDismissibleMessage</exports>
+      <exports type="js">gadgets.MiniMessage.prototype.createTimerMessage</exports>
+      <exports type="js">gadgets.MiniMessage.prototype.createStaticMessage</exports>
+      <exports type="js">gadgets.MiniMessage.prototype.dismissMessage</exports>
+      <exports type="js">_IG_MiniMessage</exports>
+    </api>
   </gadget>
 </feature>

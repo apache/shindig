@@ -18,11 +18,39 @@
 -->
 <feature>
   <name>core.legacy</name>
+  <dependency>globals</dependency>
   <dependency>core.json</dependency>
   <dependency>core.io</dependency>
   <dependency>core.prefs</dependency>
   <dependency>core.util</dependency>
   <gadget>
     <script src="legacy.js"/>
+    <api>
+      <exports type="js">JSON</exports>
+      <exports type="js">_IG_Prefs</exports>
+      <exports type="js">_IG_Fetch_wrapper</exports>
+      <exports type="js">_IG_FetchContent</exports>
+      <exports type="js">_IG_FetchXmlContent</exports>
+      <exports type="js">_IG_FetchFeedAsJSON</exports>
+      <exports type="js">_IG_GetCachedUrl</exports>
+      <exports type="js">_IG_GetImageUrl</exports>
+      <exports type="js">_IG_GetImage</exports>
+      <exports type="js">_IG_RegisterOnloadHandler</exports>
+      <exports type="js">_IG_Callback</exports>
+      <exports type="js">_IG_AddDOMEventHandler</exports>
+      <exports type="js">_gel</exports>
+      <exports type="js">_gelstn</exports>
+      <exports type="js">_gelsbyregex</exports>
+      <exports type="js">_esc</exports>
+      <exports type="js">_unesc</exports>
+      <exports type="js">_hesc</exports>
+      <exports type="js">_striptags</exports>
+      <exports type="js">_trim</exports>
+      <exports type="js">_toggle</exports>
+      <exports type="js">_uid</exports>
+      <exports type="js">_min</exports>
+      <exports type="js">_max</exports>
+      <exports type="js">_exportSymbols</exports>
+    </api>
   </gadget>
 </feature>

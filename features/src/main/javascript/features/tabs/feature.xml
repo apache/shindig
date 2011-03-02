@@ -25,5 +25,25 @@ specific language governing permissions and limitations under the License.
   <gadget>
     <script src="tabs.js"/>
     <script src="taming.js"/>
+    <api>
+      <exports type="js">gadgets.Tab</exports>
+      <exports type="js">gadgets.Tab.prototype.getName</exports>
+      <exports type="js">gadgets.Tab.prototype.getNameContainer</exports>
+      <exports type="js">gadgets.Tab.prototype.getContentContainer</exports>
+      <exports type="js">gadgets.Tab.prototype.getCallback</exports>
+      <exports type="js">gadgets.Tab.prototype.getIndex</exports>
+      <exports type="js">gadgets.TabSet</exports>
+      <exports type="js">gadgets.TabSet.prototype.addTab</exports>
+      <exports type="js">gadgets.TabSet.prototype.removeTab</exports>
+      <exports type="js">gadgets.TabSet.prototype.getSelectedTab</exports>
+      <exports type="js">gadgets.TabSet.prototype.setSelectedTab</exports>
+      <exports type="js">gadgets.TabSet.prototype.swapTabs</exports>
+      <exports type="js">gadgets.TabSet.prototype.getTabs</exports>
+      <exports type="js">gadgets.TabSet.prototype.alignTabs</exports>
+      <exports type="js">gadgets.TabSet.prototype.displayTabs</exports>
+      <exports type="js">gadgets.TabSet.prototype.getHeaderContainer</exports>
+      <exports type="js">_IG_Tabs</exports>
+      <exports type="js">_IG_Tabs.prototype.addDynamicTab</exports>
+    </api>
   </gadget>
 </feature>

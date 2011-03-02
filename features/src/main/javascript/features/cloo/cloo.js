@@ -74,7 +74,7 @@
  * var myClassInstance = MyClass({}, { height: 12, color: "red"});
  */
 
-window['cloo'] = (function() {
+var cloo = (function() {
   var UNKNOWN_NAME = "(n/a)";
   var selfs = [];
 

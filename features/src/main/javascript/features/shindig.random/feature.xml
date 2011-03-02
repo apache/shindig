@@ -23,16 +23,10 @@ A JavaScript "more-secure-random" implementation.
   <name>shindig.random</name>
   <dependency>globals</dependency>
   <dependency>shindig.sha1</dependency>
-  <gadget>
+  <all>
     <api>
       <exports type="js">shindig.random</exports>
     </api>
     <script src="random.js"/>
-  </gadget>
-  <container>
-    <api>
-      <exports type="js">shindig.random</exports>
-    </api>
-    <script src="random.js"/>
-  </container>
+  </all>
 </feature>

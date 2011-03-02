@@ -21,12 +21,16 @@ specific language governing permissions and limitations under the License.
   <dependency>globals</dependency>
   <dependency>taming</dependency>
   <dependency>core.io</dependency>
-  <gadget>
+  <all>
     <script src="flash.js"/>
     <script src="taming.js"/>
-  </gadget>
-  <container>
-    <script src="flash.js"/>
-    <script src="taming.js"/>
-  </container>
+    <api>
+      <exports type="js">gadgets.flash.getMajorVersion</exports>
+      <exports type="js">gadgets.flash.embedFlash</exports>
+      <exports type="js">gadgets.flash.embedCachedFlash</exports>
+      <exports type="js">_IG_GetFlashMajorVersion</exports>
+      <exports type="js">_IG_EmbedFlash</exports>
+      <exports type="js">_IG_EmbedCachedFlash</exports>
+    </api>
+  </all>
 </feature>
