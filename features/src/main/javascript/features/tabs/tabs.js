@@ -429,6 +429,7 @@ gadgets.TabSet.prototype.createTabTable_ = function() {
   leftNav.onclick = function(event) {
     me.smoothScroll_(wrapper, -120);
 
+    event = event || window.event;
     if (event.stopPropagation) {
       event.stopPropagation();
     } else {
@@ -443,6 +444,7 @@ gadgets.TabSet.prototype.createTabTable_ = function() {
   rightNav.onclick = function(event) {
     me.smoothScroll_(wrapper, 120);
 
+    event = event || window.event;
     if (event.stopPropagation) {
       event.stopPropagation();
     } else {
