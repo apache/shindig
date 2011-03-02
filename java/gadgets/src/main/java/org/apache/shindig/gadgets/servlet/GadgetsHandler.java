@@ -110,6 +110,7 @@ public class GadgetsHandler {
     RESIZE_WIDTH(UriCommon.Param.RESIZE_WIDTH),
     RESIZE_QUALITY(UriCommon.Param.RESIZE_QUALITY),
     FEATURES("features"),
+    LOADED_FEATURES("loadedFeatures"),
     CONTAINER_MODE(UriCommon.Param.CONTAINER_MODE),
     ONLOAD(UriCommon.Param.ONLOAD),
     MIME_TYPE("mime_type");
@@ -441,6 +442,7 @@ public class GadgetsHandler {
     private final boolean debug;
     private final boolean ignoreCache;
     private final List<String> features;
+    private final List<String> loadedFeatures;
     private final RenderingContext context;
     private final String onload;
     private final String gadget;
@@ -451,6 +453,7 @@ public class GadgetsHandler {
       this.debug = getBooleanParam(request, Param.DEBUG);
       this.refresh = getIntegerParam(request, Param.REFRESH);
       this.features = getListParam(request, Param.FEATURES);
+      this.loadedFeatures = getListParam(request, Param.LOADED_FEATURES);
       this.context = getRenderingContext(getParam(request, Param.CONTAINER_MODE));
       this.onload = getParam(request, Param.ONLOAD);
       this.gadget = getParam(request, Param.GADGET);
@@ -459,6 +462,7 @@ public class GadgetsHandler {
     public RenderingContext getContext() { return context; }
     public boolean getDebug() { return debug; }
     public List<String> getFeatures() { return features; }
+    public List<String> getLoadedFeatures() { return loadedFeatures; }
     public boolean getIgnoreCache() { return ignoreCache; }
     public String getOnload() { return onload; }
     public Integer getRefresh() { return refresh; }

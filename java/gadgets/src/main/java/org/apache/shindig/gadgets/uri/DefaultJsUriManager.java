@@ -69,6 +69,11 @@ public class DefaultJsUriManager implements JsUriManager {
     jsPath.append(JS_SUFFIX);
     uri.setPath(jsPath.toString());
 
+    // Add the list of already-loaded libs
+    if (!ctx.getLoadedLibs().isEmpty()) {
+      uri.addQueryParameter(Param.LOADED_LIBS.getKey(), addJsLibs(ctx.getLoadedLibs()));
+    }
+    
     // Standard container param, as JS may be container-specific.
     uri.addQueryParameter(Param.CONTAINER.getKey(), container);
 
@@ -155,7 +160,7 @@ public class DefaultJsUriManager implements JsUriManager {
     }
 
     Collection<String> libs = getJsLibs(path);
-    String haveParam = uri.getQueryParameter(Param.ALREADY_HAVE.getKey());
+    String haveParam = uri.getQueryParameter(Param.LOADED_LIBS.getKey());
     if (haveParam == null) {
       haveParam = "";
     }

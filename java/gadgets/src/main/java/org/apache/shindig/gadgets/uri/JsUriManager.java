@@ -29,7 +29,7 @@ import org.apache.shindig.gadgets.RenderingContext;
 import org.apache.shindig.gadgets.uri.UriCommon.Param;
 
 import com.google.common.base.Objects;
-import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 
 /**
  * Interface defining methods used to generate Uris for the /js servlet.
@@ -51,7 +51,7 @@ public interface JsUriManager {
   JsUri processExternJsUri(Uri uri) throws GadgetException;
 
   public static class JsUri extends ProxyUriBase {
-    private final static Collection<String> EMPTY_COLL = ImmutableList.of();
+    private final static Collection<String> EMPTY_COLL = Collections.emptyList();
     private final Collection<String> libs;
     private final Collection<String> loadedLibs;
     private final String onload;
@@ -95,7 +95,7 @@ public interface JsUriManager {
       this.jsload = jsload;
       this.nohint = nohint;
       this.context = context;
-      this.libs = libs;
+      this.libs = nonNullLibs(libs);
       this.loadedLibs = EMPTY_COLL;
       this.origUri = null;
     }
@@ -107,21 +107,21 @@ public interface JsUriManager {
       this.jsload = false;
       this.nohint = false;
       this.context = RenderingContext.GADGET;
-      this.libs = libs;
+      this.libs = nonNullLibs(libs);
       this.loadedLibs = EMPTY_COLL;
       this.origUri = null;
     }
 
     public JsUri(Integer refresh, boolean debug, boolean noCache, String container, String gadget,
-        Collection<String> libs, String onload, boolean jsload, boolean nohint, RenderingContext context, Uri origUri) {
+        Collection<String> libs, Collection<String> loadedLibs, String onload, boolean jsload, boolean nohint, RenderingContext context, Uri origUri) {
       super(null, refresh, debug, noCache, container, gadget);
       this.compileMode = JsCompileMode.BUILD_TIME;
       this.onload = onload;
       this.jsload = jsload;
       this.nohint = nohint;
       this.context = context;
-      this.libs = libs;
-      this.loadedLibs = EMPTY_COLL;
+      this.libs = nonNullLibs(libs);
+      this.loadedLibs = nonNullLibs(loadedLibs);
       this.origUri = origUri;
     }
 
@@ -150,8 +150,7 @@ public interface JsUriManager {
     }
 
     private Collection<String> nonNullLibs(Collection<String> in) {
-      in = in != null ? in : EMPTY_COLL;
-      return Collections.unmodifiableCollection(in);
+      return in != null ? Collections.unmodifiableList(Lists.newArrayList(in)) : EMPTY_COLL;
     }
 
     public RenderingContext getContext() {

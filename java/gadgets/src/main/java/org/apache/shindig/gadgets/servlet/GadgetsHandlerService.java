@@ -473,8 +473,8 @@ public class GadgetsHandlerService {
         : RenderingContext.GADGET);
 
     return new JsUri(request.getRefresh(), request.getDebug(), request.getIgnoreCache(),
-        request.getContainer(), request.getGadget(), request.getFeatures(), request.getOnload(),
-        false, false, context, request.getUrl());
+        request.getContainer(), request.getGadget(), request.getFeatures(),
+        request.getLoadedFeatures(), request.getOnload(), false, false, context, request.getUrl());
   }
 
   @VisibleForTesting

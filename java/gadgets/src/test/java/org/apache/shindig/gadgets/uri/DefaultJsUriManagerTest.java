@@ -23,11 +23,9 @@ import static org.apache.shindig.gadgets.uri.DefaultJsUriManager.addJsLibs;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.replay;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 
@@ -88,7 +86,7 @@ public class DefaultJsUriManagerTest {
     ContainerConfig config = mockConfig("http://www.js.org", "/gadgets/js/");
     TestDefaultJsUriManager manager = makeManager(config, null);
     List<String> extern = Lists.newArrayList("feature");
-    JsUri ctx = mockGadgetContext(false, false, extern, false, ImmutableMap.of("test", "1"));
+    JsUri ctx = mockGadgetContext(false, false, extern, null, false, ImmutableMap.of("test", "1"));
     Uri jsUri = manager.makeExternJsUri(ctx);
     assertFalse(manager.hadError());
     assertEquals("http", jsUri.getScheme());
@@ -163,7 +161,7 @@ public class DefaultJsUriManagerTest {
     ContainerConfig config = mockConfig("http://www.js.org", "/gadgets/js/");
     TestDefaultJsUriManager manager = makeManager(config, null);
     List<String> extern = Lists.newArrayList("feature", "another");
-    JsUri ctx = mockGadgetContext(false, false, extern, true, null);
+    JsUri ctx = mockGadgetContext(false, false, extern, null, true, null);
     Uri jsUri = manager.makeExternJsUri(ctx);
     assertFalse(manager.hadError());
     assertEquals("http", jsUri.getScheme());
@@ -173,6 +171,26 @@ public class DefaultJsUriManagerTest {
     assertEquals("0", jsUri.getQueryParameter(Param.NO_CACHE.getKey()));
     assertEquals("0", jsUri.getQueryParameter(Param.DEBUG.getKey()));
     assertEquals(RenderingContext.CONTAINER.getParamValue(),
+        jsUri.getQueryParameter(Param.CONTAINER_MODE.getKey()));
+  }
+  
+  @Test
+  public void makeJsUriWithLoadedLibraries() throws Exception {
+    ContainerConfig config = mockConfig("http://www.js.org", "/gadgets/js/");
+    TestDefaultJsUriManager manager = makeManager(config, null);
+    List<String> extern = Lists.newArrayList("feature", "another");
+    List<String> loaded = Lists.newArrayList("another", "onemore");
+    JsUri ctx = mockGadgetContext(false, false, extern, loaded);
+    Uri jsUri = manager.makeExternJsUri(ctx);
+    assertFalse(manager.hadError());
+    assertEquals("http", jsUri.getScheme());
+    assertEquals("www.js.org", jsUri.getAuthority());
+    assertEquals("/gadgets/js/" + addJsLibs(extern) + JS_SUFFIX, jsUri.getPath());
+    assertEquals("another:onemore", jsUri.getQueryParameter(Param.LOADED_LIBS.getKey()));
+    assertEquals(CONTAINER, jsUri.getQueryParameter(Param.CONTAINER.getKey()));
+    assertEquals("0", jsUri.getQueryParameter(Param.NO_CACHE.getKey()));
+    assertEquals("0", jsUri.getQueryParameter(Param.DEBUG.getKey()));
+    assertEquals(RenderingContext.GADGET.getParamValue(),
         jsUri.getQueryParameter(Param.CONTAINER_MODE.getKey()));
   }
 
@@ -369,12 +387,18 @@ public class DefaultJsUriManagerTest {
   }
 
   private JsUri mockGadgetContext(boolean nocache, boolean debug, List<String> extern) {
-    return mockGadgetContext(nocache, debug, extern, false, null);
+    return mockGadgetContext(nocache, debug, extern, ImmutableList.<String>of(), false,
+    null);
+  }
+
+  private JsUri mockGadgetContext(
+      boolean nocache, boolean debug, List<String> extern, List<String> loaded) {
+    return mockGadgetContext(nocache, debug, extern, loaded, false, null);
   }
 
   private JsUri mockGadgetContext(boolean nocache, boolean debug,
-                                  List<String> extern, boolean isContainer,
-                                  Map<String, String> params) {
+                                  List<String> extern, List<String> loaded,
+                                  boolean isContainer, Map<String, String> params) {
     JsUri context = createMock(JsUri.class);
     expect(context.getContainer()).andStubReturn(CONTAINER);
     expect(context.isNoCache()).andStubReturn(nocache);
@@ -383,6 +407,8 @@ public class DefaultJsUriManagerTest {
     expect(context.getContext()).andStubReturn(
         isContainer ? RenderingContext.CONTAINER : RenderingContext.GADGET);
     expect(context.getLibs()).andStubReturn(extern);
+    expect(context.getLoadedLibs()).andStubReturn(
+        loaded == null ? ImmutableList.<String>of() : loaded);
     expect(context.getOnload()).andStubReturn(null);
     expect(context.isJsload()).andStubReturn(false);
     expect(context.isNohint()).andStubReturn(false);

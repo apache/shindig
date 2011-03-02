@@ -260,6 +260,7 @@ public class GadgetsHandlerApi {
     public boolean getDebug();
     public boolean getIgnoreCache();
     public List<String> getFeatures();
+    public List<String> getLoadedFeatures();
     public String getOnload();
     public RenderingContext getContext();
   }

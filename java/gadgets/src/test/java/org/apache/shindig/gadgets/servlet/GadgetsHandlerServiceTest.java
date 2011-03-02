@@ -284,7 +284,7 @@ public class GadgetsHandlerServiceTest extends EasyMockTestCase {
 
     GadgetsHandlerApi.JsResponse response = gadgetHandler.getJs(request);
     JsUri expectedUri = new JsUri(null, false, false, CONTAINER, null,
-        features, null, false, false, RenderingContext.GADGET, null);
+        features, null, null, false, false, RenderingContext.GADGET, null);
     assertEquals(expectedUri, uriCapture.getValue());
     assertEquals(resUri, response.getJsUrl());
     assertNull(response.getJsContent());
@@ -319,7 +319,7 @@ public class GadgetsHandlerServiceTest extends EasyMockTestCase {
 
     GadgetsHandlerApi.JsResponse response = gadgetHandler.getJs(request);
     JsUri expectedUri = new JsUri(null, false, false, CONTAINER, FakeProcessor.SPEC_URL.toString(),
-        features, onload, false, false, RenderingContext.CONTAINER, null);
+        features, null, onload, false, false, RenderingContext.CONTAINER, null);
     assertEquals(expectedUri, uriCapture.getValue());
     assertNull(response.getJsUrl());
     assertEquals(jsContent, response.getJsContent());
