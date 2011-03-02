@@ -143,7 +143,7 @@ class GadgetHtmlRendererTest extends PHPUnit_Framework_TestCase {
                     $this->fail('two entries with script type extern');
                 }
                 $hasExtern = true;
-                $this->assertEquals(0, strpos($script['content'], '/gadgets/js/views:dynamic-height.js?'));
+                $this->assertEquals(0, strpos($script['content'], '/gadgets/js/dynamic-height:views.js?'));
                 break;
             case 'inline':
                 if ($hasInline) {

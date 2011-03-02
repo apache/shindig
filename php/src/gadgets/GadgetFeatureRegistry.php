@@ -212,27 +212,22 @@ class GadgetFeatureRegistry {
   private function processFeatures() {
     // Determine the core features
     $this->coreFeatures = array();
-    foreach ($this->features as $entry) {
-      if (strtolower(substr($entry['name'], 0, strlen('core'))) == 'core') {
-        $this->coreFeatures[$entry['name']] = $entry['name'];
-      }
-    }
-    // And make sure non-core features depend on core.
-    foreach ($this->features as $key => $entry) {
-      if ($entry == null) {
-        continue;
-      }
-      $featureName = strtolower(substr($entry['name'], 0, strlen('core')));
-      if ($featureName != 'core' && $featureName != 'glob' && $entry['name'] != 'shindig.auth') {
-        $this->features[$key]['deps'] = array_merge($entry['deps'], $this->coreFeatures);
+    $sortedFeatures = array();
+    foreach ($this->features as $feature) {
+      if (strtolower(substr($feature['name'], 0, strlen('core'))) == 'core') {
+        $this->coreFeatures[$feature['name']] = $feature['name'];
+        // first add all core features so that they are sorted to the beginning
+        $features[] = $feature['name'];
       }
     }
     // Topologically sort all features according to their dependency
     $features = array();
     foreach ($this->features as $feature) {
+      if (isset($this->coreFeatures[$feature['name']])) {
+        continue;
+      }
       $features[] = $feature['name'];
     }
-    $sortedFeatures = array();
     $reverseDeps = array();
     foreach ($features as $feature) {
       $reverseDeps[$feature] = array();
