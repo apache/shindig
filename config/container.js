@@ -227,7 +227,10 @@
 
     // If true, this will use the legacy ifpc wire format when making rpc
     // requests.
-    "useLegacyProtocol" : false
+    "useLegacyProtocol" : false,
+
+    // Path to the cross-domain enabling SWF for rpc's Flash transport.
+    "commSwf": "/xpc.swf"
   },
   // Skin defaults
   "skins" : {

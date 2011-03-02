@@ -180,6 +180,7 @@ if (!gadgets.rpc) { // make lib resilient to double-inclusion
      * @member gadgets.rpc
      */
     function getTransport() {
+      if (params['flash'] == "1") return gadgets.rpctx.flash;
       return typeof window.postMessage === 'function' ? gadgets.rpctx.wpm :
           typeof window.postMessage === 'object' ? gadgets.rpctx.wpm :
           window.ActiveXObject ? gadgets.rpctx.nix :
@@ -872,7 +873,7 @@ if (!gadgets.rpc) { // make lib resilient to double-inclusion
         // target is misconfigured, it won't affect the others.
         // In the case of a sibling relay, channel is not found
         // in the receiverTx map but in the transport itself.
-        var channel = receiverTx[targetId] || transport;
+        var channel = receiverTx[targetId]; // || transport;
 
         if (!channel) {
           // Not set up yet. Enqueue the rpc for such time as it is.
@@ -1024,7 +1025,7 @@ if (!gadgets.rpc) { // make lib resilient to double-inclusion
 
       ACK: ACK,
 
-      RPC_ID: rpcId,
+      RPC_ID: rpcId || "_top",
 
       SEC_ERROR_LOAD_TIMEOUT: LOAD_TIMEOUT,
       SEC_ERROR_FRAME_PHISH: FRAME_PHISH,

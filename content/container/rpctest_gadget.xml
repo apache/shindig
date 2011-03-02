@@ -64,7 +64,7 @@
     </script>
     <div>gadgets.rpc Performance: "Gadget" page</div><hr/>
     <script>
-      document.write("<div>Parent relay: " + gadgets.rpc.getRelayUrl('..') + "</div><hr/>");
+      document.write("<div>Parent relay: " + gadgets.rpc.getRelayUrl('..') + "<br/>method: " + gadgets.rpc.getRelayChannel() + "</div><hr/>");
     </script>
     <div>Test<br/>
       <ul>

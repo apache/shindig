@@ -36,7 +36,7 @@ class Main {
     } else {
       my_origin = _level0.origin;
     }
-    
+
     var domain:String = my_origin.substr(my_origin.indexOf("//") + 2, my_origin.length);
     
     if (my_origin.substr(0,5)==="http:") {
@@ -45,34 +45,41 @@ class Main {
       security.allowDomain(domain);
     }
     
-    ExternalInterface.addCallback("setup", { }, function(channel_recv_id:String, role:String) {
-      if (channel_recv_id.indexOf(":") > -1) {
+    ExternalInterface.addCallback("setup", { }, function(my_id:String, target_id:String) {
+      if (target_id.indexOf(":") > -1) {
         return;
       }
 
+      var role:String;
       var other_role:String;
-      
-      if (role == "INNER") {
+      var channel_recv_id:String;
+
+      if (target_id == "..") {
+        role = "INNER";
         other_role = "OUTER";
+        channel_recv_id = my_id;
       } else {
         role = "OUTER";
         other_role = "INNER";
+        channel_recv_id = target_id;
       }
 
       var receiving_lc:LocalConnection = new LocalConnection();
       var sending_lc:LocalConnection = new LocalConnection();
-      receiving_lc.receiveMessage = function(to_origin:String, from_origin:String, target_id:String, message:String) {
-        if ((to_origin === "*" || to_origin === my_origin) && target_id === channel_recv_id) {
-          ExternalInterface.call("gadgets.rpctx.flash._receiveMessage", target_id, message, from_origin, to_origin);
+      receiving_lc.receiveMessage = function(to_origin:String, from_origin:String, from_id:String, message:String) {
+        //ExternalInterface.call("alert", "receiving_lc.receiveMessage(), to_origin=" + to_origin + ", from_origin=" + from_origin + ", from_id=" + from_id + ", my_origin=" + my_origin + ", target_id=" + target_id + ", channel_recv_id=" + channel_recv_id + ", check1=" + (to_origin===my_origin) + ", check2.1=" + (from_id === target_id) + ", check2.2=" + (from_id === "_top") + ", check2.3=" + (target_id === ".."));
+        if ((to_origin === "*" || to_origin === my_origin) && ((from_id === target_id) || (from_id === "_top" && target_id === ".."))) {
+          ExternalInterface.call("gadgets.rpctx.flash._receiveMessage", from_id, message, from_origin, to_origin);
         }
       };
 
-      ExternalInterface.addCallback("sendMessage_" + channel_recv_id, { }, function(message:String, to_origin:String) {
+      ExternalInterface.addCallback("sendMessage_" + target_id, { }, function(message:String, to_origin:String) {
         if (!to_origin) to_origin = "*";
-        sending_lc.send(channel_recv_id + "_" + other_role, "receiveMessage", to_origin, my_origin, channel_recv_id, message);
-      } );
+        //ExternalInterface.call("alert", "attempting to send message: " + message + " to=" + to_origin + ", channel=" + channel_recv_id + "_" + other_role + ", target_id=" + target_id);
+        sending_lc.send(channel_recv_id + "_" + other_role, "receiveMessage", to_origin, my_origin, my_id, message);
+      });
       receiving_lc.connect(channel_recv_id + "_" + role);
-    } );
+    });
     ExternalInterface.call("gadgets.rpctx.flash._ready");
   }
   

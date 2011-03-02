@@ -32,8 +32,8 @@ gadgets.rpctx = gadgets.rpctx || {};
 if (!gadgets.rpctx.flash) {  // make lib resilient to double-inclusion
 
   gadgets.rpctx.flash = function() {
-    // TODO: provide method to override this
-    var swfUrl = "//flashrpc.googleusercontent.com/xpc.swf";
+    var swfUrl = null;
+    var usingFlash = false;
     var process = null;
     var ready = null;
     var secureReceivers = {};
@@ -45,13 +45,24 @@ if (!gadgets.rpctx.flash) {  // make lib resilient to double-inclusion
     var setupHandle = null;
     var setupAttempts = 0;
 
-    var myLoc = window.location.href;
+    var myLoc = window.location.protocol + "//" + window.location.host;
+
+    function init(config) {
+      if (usingFlash) {
+        swfUrl = config['rpc']['commSwf'] || "/xpc.swf";
+      }
+    }
+    gadgets.config.register('rpc', null, init);
 
     function relayLoader() {
-      if (relayHandle === null && document.body) {
+      if (relayHandle === null && document.body && swfUrl) {
         relayHandle = document.createElement('embed');
-        relayHandle.allowScriptAccess = true;
+        relayHandle.setAttribute("allowScriptAccess", "always");
         relayHandle.src = swfUrl + '?origin=' + myLoc;
+        relayHandle.style.top = -1;
+        relayHandle.style.left = -1;
+        relayHandle.style.height = 1;
+        relayHandle.style.width = 1;
         document.body.appendChild(relayHandle);
       }
       ++setupAttempts;
@@ -65,7 +76,8 @@ if (!gadgets.rpctx.flash) {  // make lib resilient to double-inclusion
       if (relayHandle !== null) {
         while (pendingHandshakes.length > 0) {
           var shake = pendingHandshakes.shift();
-          relayHandle.setup(shake.id, shake.role);
+          relayHandle['setup'](shake.myId, shake.targetId);
+          ready(shake.targetId, true);
         }
       }
     }
@@ -83,6 +95,7 @@ if (!gadgets.rpctx.flash) {  // make lib resilient to double-inclusion
       init: function(processFn, readyFn) {
         process = processFn;
         ready = readyFn;
+        usingFlash = true;
         return true;
       },
 
@@ -95,8 +108,7 @@ if (!gadgets.rpctx.flash) {  // make lib resilient to double-inclusion
         // otherwise polling will occur until the SWF has completed loading, at
         // which point all connections will complete their handshake.
         secureReceivers[receiverId] = !!forceSecure;
-        var role = targetId === ".." ? "OUTER" : "INNER";
-        pendingHandshakes.push({ id: targetId, role: role });
+        pendingHandshakes.push({ myId: gadgets.rpc.RPC_ID, targetId: receiverId });
         if (relayHandle === null && setupHandle === null) {
           setupHandle = window.setTimeout(relayLoader, LOADER_TIMEOUT_MS);
         }
@@ -106,13 +118,14 @@ if (!gadgets.rpctx.flash) {  // make lib resilient to double-inclusion
 
       call: function(targetId, from, rpc) {
         var targetOrigin = gadgets.rpc.getTargetOrigin(targetId);;
-        relayHandle["sendMessage_" + targetId](gadgets.json.stringify(rpc), targetOrigin);
+        var messageHandler = relayHandle["sendMessage_" + targetId];
+        messageHandler.call(relayHandle, gadgets.json.stringify(rpc), targetOrigin);
         return true;
       },
 
       // Methods called by relay SWF. Should be considered private.
-      _receiveMessage: function(targetId, message, fromOrigin, toOrigin) {
-        // TODO: validate targetId for sanity, and fromOrigin/toOrigin for domain verification.
+      _receiveMessage: function(fromId, message, fromOrigin, toOrigin) {
+        // TODO: validate fromId for sanity, and fromOrigin/toOrigin for domain verification.
         window.setTimeout(function() { process(gadgets.json.parse(message)); }, 0);
       },
 

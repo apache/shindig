@@ -45,6 +45,7 @@ specific language governing permissions and limitations under the License.
       <exports type="js">gadgets.rpc.getReceiverOrigin</exports>
     </api>
     <script src="wpm.transport.js"/>
+    <script src="flash.transport.js"/>
     <script src="fe.transport.js"/>
     <script src="nix.transport.js"/>
     <script src="rmr.transport.js"/>

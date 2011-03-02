@@ -37,7 +37,6 @@
   This test container/gadget pair is configurable via two other options:
   * &gadgetdeferred=1 - tests early-message queueing from container to
     gadget, by preventing attachment of gadget until a button is pressed.
-  * &uselegacy=1 - tests legacy IFPC functionality.
   * &uabackward=1 - tests "incorrect" rpc.js setup in container:
     gadgets.rpc.setAuthToken(...) called before, not after, gadget frame exists.
 
@@ -50,29 +49,18 @@
       // Configurable test harness options.
       var gadgethost = 'http://' + window.location.search.substring(1).split('&')[0];
       var gadgetdeferred = window.location.search.indexOf('&gadgetdeferred=1') !== -1;
-      var uselegacy = window.location.search.indexOf('&uselegacy=1') !== -1;
       var uabackward = window.location.search.indexOf('&uabackward=1') !== -1;
+      var flash = window.location.search.indexOf('&flash=1') !== -1;
 
       // Useful per-page variables.
       var gadgeturl = gadgethost + '/container/rpctest_gadget.xml';
       var cachebust = 'cachebust=' + Math.random();
-      var gadgetrenderingurl = gadgethost + '/gadgets/ifr?url=' + gadgeturl + '&libs=rpc&parent=' + window.location.protocol + '//' + window.location.host + '&debug=1&' + cachebust;
+      var gadgetrenderingurl = gadgethost + '/gadgets/ifr?url=' + gadgeturl + '&libs=rpc&parent=' + window.location.protocol + '//' + window.location.host + '&debug=1&nocache=1&' + cachebust + (flash ? '&flash=1' : '');
       var gadgetrelay = gadgethost + '/container/rpc_relay.uncompressed.html';
-
-      // Set up faux gadgets.config(...)
-      var gadgets = {};
-      gadgets.config = {
-        register: function(rpc, requiredConfig, callback) {
-          // rpc === "rpc", requiredConfig is ignored here.
-          // Just call the callback (function init(...) in rpc.js)
-          // with a dummy config object.
-          callback({ rpc: { parentRelayUrl: "", uselegacyProtocol: uselegacy } });
-        }
-      };
 
       // Include rpc.js. Append random cache-busting param to ensure caching doesn't occur.
       document.write('<scr' + 'ipt language="JavaScript" type="text/javascript" src="' +
-                     '/gadgets/js/rpc.js?c=1&debug=1&' + cachebust + '"></scr' + 'ipt>');
+                     '/gadgets/js/rpc.js?c=1&nocache=1&debug=1&' + cachebust + '"></scr' + 'ipt>');
 
       // Include rpctest_perf.js JS test helper, also with cachebusting.
       document.write('<scr' + 'ipt language="JavaScript" type="text/javascript" src="' +
