@@ -125,8 +125,8 @@ if (!gadgets.rpctx.flash) {  // make lib resilient to double-inclusion
 
       // Methods called by relay SWF. Should be considered private.
       _receiveMessage: function(fromId, message, fromOrigin, toOrigin) {
-        // TODO: validate fromId for sanity, and fromOrigin/toOrigin for domain verification.
-        window.setTimeout(function() { process(gadgets.json.parse(message)); }, 0);
+        if (fromId !== this['f']) { /* TODO: anything? */ }
+        window.setTimeout(function() { process(gadgets.json.parse(message, fromOrigin)); }, 0);
       },
 
       _ready: function() {

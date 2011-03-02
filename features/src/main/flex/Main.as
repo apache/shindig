@@ -30,7 +30,7 @@ class Main {
     SINGLETON = true;
     
     var my_origin:String;
-    
+
     if (_level0.origin == undefined){
       my_origin = "http://*";
     } else {
@@ -67,7 +67,6 @@ class Main {
       var receiving_lc:LocalConnection = new LocalConnection();
       var sending_lc:LocalConnection = new LocalConnection();
       receiving_lc.receiveMessage = function(to_origin:String, from_origin:String, from_id:String, message:String) {
-        //ExternalInterface.call("alert", "receiving_lc.receiveMessage(), to_origin=" + to_origin + ", from_origin=" + from_origin + ", from_id=" + from_id + ", my_origin=" + my_origin + ", target_id=" + target_id + ", channel_recv_id=" + channel_recv_id + ", check1=" + (to_origin===my_origin) + ", check2.1=" + (from_id === target_id) + ", check2.2=" + (from_id === "_top") + ", check2.3=" + (target_id === ".."));
         if ((to_origin === "*" || to_origin === my_origin) && ((from_id === target_id) || (from_id === "_top" && target_id === ".."))) {
           ExternalInterface.call("gadgets.rpctx.flash._receiveMessage", from_id, message, from_origin, to_origin);
         }
@@ -75,10 +74,9 @@ class Main {
 
       ExternalInterface.addCallback("sendMessage_" + target_id, { }, function(message:String, to_origin:String) {
         if (!to_origin) to_origin = "*";
-        //ExternalInterface.call("alert", "attempting to send message: " + message + " to=" + to_origin + ", channel=" + channel_recv_id + "_" + other_role + ", target_id=" + target_id);
-        sending_lc.send(channel_recv_id + "_" + other_role, "receiveMessage", to_origin, my_origin, my_id, message);
+        sending_lc.send("channel_" + channel_recv_id + "_" + other_role, "receiveMessage", to_origin, my_origin, my_id, message);
       });
-      receiving_lc.connect(channel_recv_id + "_" + role);
+      receiving_lc.connect("channel_" + channel_recv_id + "_" + role);
     });
     ExternalInterface.call("gadgets.rpctx.flash._ready");
   }
