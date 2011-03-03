@@ -66,6 +66,7 @@
         <directory>${basedir}/../../content/</directory>
         <targetPath>files</targetPath>
         <includes>
+          <include>xpc.swf</include>
           <include>container/rpc_relay.html</include>
           <include>container/cookiebaseduserprefstore.js</include>
         </includes>
