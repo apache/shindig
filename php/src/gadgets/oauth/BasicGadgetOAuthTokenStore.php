@@ -100,12 +100,12 @@ class BasicGadgetOAuthTokenStore extends GadgetOAuthTokenStore {
           $strip_this = array(" ", "\n", "\r");
           //removes breaklines and trim.
           $rsa_private_key = trim(str_replace($strip_this, "", $key));
-          $consumerSecret = OAuth::$BEGIN_PRIVATE_KEY . "\n";
+          $consumerSecret = ShindigOAuth::$BEGIN_PRIVATE_KEY . "\n";
           $chunks = str_split($rsa_private_key, 64);
           foreach ($chunks as $chunk) {
             $consumerSecret .= $chunk . "\n";
           }
-          $consumerSecret .= OAuth::$END_PRIVATE_KEY;
+          $consumerSecret .= ShindigOAuth::$END_PRIVATE_KEY;
         } else {
           $consumerSecret = $key;
         }
