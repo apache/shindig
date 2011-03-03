@@ -34,9 +34,9 @@ import java.util.List;
  * @since 2.0.0
  */
 public class StyleTagProxyEmbeddedUrlsRewriter extends DomWalker.Rewriter {
-  private final ContentRewriterFeature.Config config;
-  private final ProxyUriManager proxyUriManager;
-  private final CssResponseRewriter cssRewriter;
+  protected final ContentRewriterFeature.Config config;
+  protected final ProxyUriManager proxyUriManager;
+  protected final CssResponseRewriter cssRewriter;
 
   @Inject
   public StyleTagProxyEmbeddedUrlsRewriter(ContentRewriterFeature.DefaultConfig config,

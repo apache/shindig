@@ -61,8 +61,8 @@ public class CssResponseRewriter implements ResponseRewriter {
   private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
 
   private final CajaCssParser cssParser;
-  private final ProxyUriManager proxyUriManager;
-  private final ContentRewriterFeature.Factory rewriterFeatureFactory;
+  protected final ProxyUriManager proxyUriManager;
+  protected final ContentRewriterFeature.Factory rewriterFeatureFactory;
 
   @Inject
   public CssResponseRewriter(CajaCssParser cssParser,
@@ -222,11 +222,11 @@ public class CssResponseRewriter implements ResponseRewriter {
     return new UriMaker(wrapped, config);
   }
 
-  public static final class UriMaker {
-    private final ProxyUriManager wrapped;
-    private final ContentRewriterFeature.Config config;
+  public static class UriMaker {
+    protected final ProxyUriManager wrapped;
+    protected final ContentRewriterFeature.Config config;
 
-    private UriMaker(ProxyUriManager wrapped, ContentRewriterFeature.Config config) {
+    public UriMaker(ProxyUriManager wrapped, ContentRewriterFeature.Config config) {
       this.wrapped = wrapped;
       this.config = config;
     }
