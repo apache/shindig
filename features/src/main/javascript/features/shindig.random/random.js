@@ -35,7 +35,7 @@ shindig.random = (function() {
   var start = 1;
   var m = ((screen.width * screen.width) + screen.height) * 1e6;
 
-  var orig_onmousemove = window.onmousemove || function() { return false; };
+  var orig_onmousemove = window.onmousemove || function() { };
 
   window.onmousemove = function(e) {
     if (window.event) {
