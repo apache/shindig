@@ -139,7 +139,7 @@ public final class HttpResponse implements Externalizable {
   private static boolean fastEncodingDetection = true;
 
   @Inject(optional = true) @Named("shindig.cache.http.strict-no-cache-resource.max-age")
-  private static long strictNoCacheResourceTtl = DEFAULT_STRICT_NO_CACHE_RESOURCE_TTL;
+  private long strictNoCacheResourceTtl = DEFAULT_STRICT_NO_CACHE_RESOURCE_TTL;
 
   // Support injection of smarter encoding detection
   @Inject(optional = true)
