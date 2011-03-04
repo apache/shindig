@@ -80,6 +80,9 @@ class GadgetHtmlRendererTest extends PHPUnit_Framework_TestCase {
    * Prepares the environment before running a test.
    */
   protected function setUp() {
+    $featureCache = Cache::createCache(Config::get('feature_cache'), 'FeatureCache');
+    $key = md5(implode(',', Config::get('features_path')));
+    $featureCache->delete($key);
     parent::setUp();
 
     $this->gadgetContext = new GadgetContext('GADGET');
