@@ -61,9 +61,9 @@
      * @param {Object} request
      */
     var toJsonRpc = function(request) {
-      var jsonRpc = { 'method': request.request.method, 'id': request.key};
-      if (request.request.rpc) {
-        jsonRpc.params = request.request.rpc;
+      var jsonRpc = { 'method': request['request']['method'], 'id': request['key'] };
+      if (request['request']['rpc']) {
+        jsonRpc['params'] = request['request']['rpc'];
       }
       return jsonRpc;
     };
