@@ -32,6 +32,7 @@ gadgets.rpctx = gadgets.rpctx || {};
 if (!gadgets.rpctx.flash) {  // make lib resilient to double-inclusion
 
   gadgets.rpctx.flash = function() {
+    var swfId = "___xpcswf";
     var swfUrl = null;
     var usingFlash = false;
     var process = null;
@@ -56,14 +57,27 @@ if (!gadgets.rpctx.flash) {  // make lib resilient to double-inclusion
 
     function relayLoader() {
       if (relayHandle === null && document.body && swfUrl) {
-        relayHandle = document.createElement('embed');
-        relayHandle.setAttribute("allowScriptAccess", "always");
-        relayHandle.src = swfUrl + '?origin=' + myLoc;
-        relayHandle.style.top = -1;
-        relayHandle.style.left = -1;
-        relayHandle.style.height = 1;
-        relayHandle.style.width = 1;
-        document.body.appendChild(relayHandle);
+        var theSwf = swfUrl + '?origin=' + myLoc;
+
+        var containerDiv = document.createElement('div');
+        containerDiv.style.height = '1px';
+        containerDiv.style.width = '1px';
+        var html = '<object height="1" width="1" id="' + swfId +
+            '" type="application/x-shockwave-flash">' +
+            '<param name="allowScriptAccess" value="always"></param>' +
+            '<param name="movie" value="' + theSwf + '"></param>' +
+            '</object>';
+
+        var embedElem = document.createElement('embed');
+        embedElem.setAttribute("allowScriptAccess", "always");
+        embedElem.setAttribute("src", theSwf);
+        embedElem.setAttribute("height", "1");
+        embedElem.setAttribute("width", "1");
+
+        document.body.appendChild(containerDiv);
+        containerDiv.innerHTML = html;
+
+        relayHandle = containerDiv.firstChild;
       }
       ++setupAttempts;
       if (setupHandle !== null &&
