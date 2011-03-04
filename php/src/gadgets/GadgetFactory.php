@@ -135,9 +135,6 @@ class GadgetFactory {
     } else {
       $gadget->substitutions->addSubstitution('MODULE', "ID", 0);
     }
-    if ($gadget->gadgetSpec->locales) {
-      $gadget->substitutions->addSubstitutions('MSG', $gadget->gadgetSpec->locales);
-    }
     $gadget->substitutions->addSubstitution('BIDI', "START_EDGE", $gadget->rightToLeft ? "right" : "left");
     $gadget->substitutions->addSubstitution('BIDI', "END_EDGE", $gadget->rightToLeft ? "left" : "right");
     $gadget->substitutions->addSubstitution('BIDI', "DIR", $gadget->rightToLeft ? "rtl" : "ltr");
@@ -186,6 +183,7 @@ class GadgetFactory {
       if ($full) $gadget->gadgetSpec->locales = array_merge($full, $gadget->gadgetSpec->locales);
       if ($partial) $gadget->gadgetSpec->locales = array_merge($partial, $gadget->gadgetSpec->locales);
       if ($all) $gadget->gadgetSpec->locales = array_merge($all, $gadget->gadgetSpec->locales);
+      $gadget->substitutions->addSubstitutions('MSG', $gadget->gadgetSpec->locales);
     }
   }
 

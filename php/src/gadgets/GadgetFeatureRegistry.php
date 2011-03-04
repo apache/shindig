@@ -37,11 +37,6 @@ class GadgetFeatureRegistry {
   /**
    * @var array
    */
-  private $coreFeatures;
-
-  /**
-   * @var array
-   */
   private $sortedFeatures;
 
   /**
@@ -136,9 +131,8 @@ class GadgetFeatureRegistry {
   public function resolveFeatures($needed, &$resultsFound, &$resultsMissing) {
     $resultsFound = array();
     $resultsMissing = array();
-    if (! count($needed)) {
-      $needed = $this->coreFeatures;
-    }
+    $this->addFeatureToResults($resultsFound, $this->features['core']);
+
     foreach ($needed as $featureName) {
       $feature = isset($this->features[$featureName]) ? $this->features[$featureName] : null;
       if ($feature == null) {
@@ -210,22 +204,10 @@ class GadgetFeatureRegistry {
    * gets core features and sorts features
    */
   private function processFeatures() {
-    // Determine the core features
-    $this->coreFeatures = array();
     $sortedFeatures = array();
-    foreach ($this->features as $feature) {
-      if (strtolower(substr($feature['name'], 0, strlen('core'))) == 'core') {
-        $this->coreFeatures[$feature['name']] = $feature['name'];
-        // first add all core features so that they are sorted to the beginning
-        $features[] = $feature['name'];
-      }
-    }
     // Topologically sort all features according to their dependency
     $features = array();
     foreach ($this->features as $feature) {
-      if (isset($this->coreFeatures[$feature['name']])) {
-        continue;
-      }
       $features[] = $feature['name'];
     }
     $reverseDeps = array();

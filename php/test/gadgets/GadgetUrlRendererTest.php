@@ -77,7 +77,7 @@ class GadgetUrlRendererTest extends PHPUnit_Framework_TestCase {
     parse_str($parsedUrl['query'], $queryParameters);
     $this->assertEquals('example.com', $parsedUrl['host']);
     $this->assertEquals('/gadget.php', $parsedUrl['path']);
-    $this->assertEquals('dynamic-height:opensocial-0.8.js', $queryParameters['libs']);
+    $this->assertEquals('dynamic-height:core:opensocial-0.8.js', $queryParameters['libs']);
     $this->assertEquals('en', $queryParameters['lang']);
     $this->assertEquals('US', $queryParameters['country']);
     $this->assertEquals('value',$queryParameters['up_key']);
@@ -93,7 +93,7 @@ class GadgetUrlRendererTest extends PHPUnit_Framework_TestCase {
     parse_str($parsedUrl['query'], $queryParameters);
     $this->assertEquals('example.com', $parsedUrl['host']);
     $this->assertEquals('/gadget.php', $parsedUrl['path']);
-    $this->assertEquals('dynamic-height:opensocial-0.8.js', $queryParameters['libs']);
+    $this->assertEquals('dynamic-height:core:opensocial-0.8.js', $queryParameters['libs']);
     $this->assertEquals('en', $queryParameters['lang']);
     $this->assertEquals('US', $queryParameters['country']);
     $this->assertEquals('bar',$queryParameters['foo']);

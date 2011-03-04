@@ -22,7 +22,7 @@ class MockHtmlGadgetFactory extends GadgetFactory {
   public function __construct(GadgetContext $context, $token) {
     parent::__construct($context, $token);
   }
-  
+
   protected function fetchGadget($gadgetUrl) {
     return '<?xml version="1.0" encoding="UTF-8" ?>
 <Module>
@@ -50,27 +50,27 @@ class GadgetHtmlRendererTest extends PHPUnit_Framework_TestCase {
    * @var Gadget
    */
   private $gadget;
-  
+
   /**
    * @var GadgetContext
    */
   private $gadgetContext;
-  
+
   /**
    * @var GadgetHtmlRender
    */
   private $gadgetHtmlRenderer;
-  
+
   /**
    * @var view
    */
   private $view;
-  
+
   /**
    * @var DomElement
    */
   private $domElement;
-  
+
   /**
    * @var DomDocument
    */
@@ -95,7 +95,7 @@ class GadgetHtmlRendererTest extends PHPUnit_Framework_TestCase {
     $this->domDocument->preserveWhiteSpace = true;
     $this->domDocument->formatOutput = false;
     $this->domDocument->strictErrorChecking = false;
-    $this->domDocument->recover = false;    
+    $this->domDocument->recover = false;
 
     // init $this->element
     $this->domElement = $this->domDocument->createElement('test');
@@ -143,7 +143,7 @@ class GadgetHtmlRendererTest extends PHPUnit_Framework_TestCase {
                     $this->fail('two entries with script type extern');
                 }
                 $hasExtern = true;
-                $this->assertEquals(0, strpos($script['content'], '/gadgets/js/dynamic-height:views.js?'));
+                $this->assertEquals(0, strpos($script['content'], '/gadgets/js/dynamic-height:views:core.js?'), 'could not find string "/gadgets/js/dynamic-height:views:core.js?" in: '.  PHP_EOL . $script['content']);
                 break;
             case 'inline':
                 if ($hasInline) {
