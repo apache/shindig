@@ -30,24 +30,23 @@
    * @param {function(Object)} callback
    */
   function execute(requests, callback) {
-
     function processResponse(response) {
       // Convert an XHR failure to a JSON-RPC error
-      if (response.errors[0]) {
+      if (response['errors'][0]) {
         callback({
           error: {
-            code: response.rc,
-            message: response.text
+            'code': response['rc'],
+            'message': response['text']
           }
         });
       } else {
-        var jsonResponse = response.result || response.data;
-        if (jsonResponse.error) {
+        var jsonResponse = response['result'] || response['data'];
+        if (jsonResponse['error']) {
           callback(jsonResponse);
         } else {
           var responseMap = {};
           for (var i = 0; i < jsonResponse.length; i++) {
-            responseMap[jsonResponse[i].id] = jsonResponse[i];
+            responseMap[jsonResponse[i]['id']] = jsonResponse[i];
           }
           callback(responseMap);
         }
@@ -87,7 +86,7 @@
               endpointName.indexOf('//') == 0) {
             // Expand the host & append the security token
             var endpointUrl = endpointName.replace('%host%', document.location.host);
-            var transport = { name: endpointUrl, 'execute' : execute };
+            var transport = { 'name' : endpointUrl, 'execute' : execute };
             var methods = services[endpointName];
             for (var i = 0; i < methods.length; i++) {
               osapi._registerMethod(methods[i], transport);

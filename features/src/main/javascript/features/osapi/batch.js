@@ -61,7 +61,7 @@
      * @param {Object} request
      */
     var toJsonRpc = function(request) {
-      var jsonRpc = {method: request.request.method, id: request.key};
+      var jsonRpc = { 'method': request.request.method, 'id': request.key};
       if (request.request.rpc) {
         jsonRpc.params = request.request.rpc;
       }
@@ -86,35 +86,35 @@
       var transports = [];
       for (var i = 0; i < keyedRequests.length; i++) {
         // Batch requests per-transport
-        var transport = keyedRequests[i].request.transport;
-        if (!perTransportBatch[transport.name]) {
+        var transport = keyedRequests[i]['request']['transport'];
+        if (!perTransportBatch[transport['name']]) {
           transports.push(transport);
           latchCount++;
         }
-        perTransportBatch[transport.name] = perTransportBatch[transport.name] || [];
+        perTransportBatch[transport['name']] = perTransportBatch[transport['name']] || [];
 
         // Transform the request into JSON-RPC form before sending to the transport
-        perTransportBatch[transport.name].push(toJsonRpc(keyedRequests[i]));
+        perTransportBatch[transport['name']].push(toJsonRpc(keyedRequests[i]));
       }
 
       // Define callback for transports
       var transportCallback = function(transportBatchResult) {
-        if (transportBatchResult.error) {
-          batchResult.error = transportBatchResult.error;
+        if (transportBatchResult['error']) {
+          batchResult['error'] = transportBatchResult['error'];
         }
         // Merge transport results into overall result and hoist data.
         // All transport results are required to be of the format
         // { <key> : <JSON-RPC response>, ...}
         for (var i = 0; i < keyedRequests.length; i++) {
-          var key = keyedRequests[i].key;
+          var key = keyedRequests[i]['key'];
           var response = transportBatchResult[key];
           if (response) {
-            if (response.error) {
+            if (response['error']) {
               // No need to hoist error responses
               batchResult[key] = response;
             } else {
               // Handle both compliant and non-compliant JSON-RPC data responses.
-              batchResult[key] = response.data || response.result;
+              batchResult[key] = response['data'] || response['result'];
             }
           }
         }
@@ -128,7 +128,7 @@
 
       // For each transport execute its local batch of requests
       for (var j = 0; j < transports.length; j++) {
-        transports[j].execute(perTransportBatch[transports[j].name], transportCallback);
+        transports[j].execute(perTransportBatch[transports[j]['name']], transportCallback);
       }
 
       // Force the callback to occur asynchronously even if there were no actual calls

@@ -52,7 +52,7 @@ if (gadgets && gadgets.rpc) { //Dont bind if gadgets.rpc not defined
     }
 
     function init(config) {
-      var transport = { name: 'gadgets.rpc', 'execute' : execute };
+      var transport = { 'name': 'gadgets.rpc', 'execute' : execute };
       var services = config['osapi.services'];
       if (services) {
         // Iterate over the defined services, extract the gadget.rpc endpoint and

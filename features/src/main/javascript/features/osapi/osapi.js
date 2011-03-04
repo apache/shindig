@@ -60,13 +60,13 @@
       // TODO: This shouldnt really be necessary. The spec should be clear enough about
       // defaults that we dont have to populate this.
       rpc = rpc || {};
-      rpc.userId = rpc.userId || '@viewer';
-      rpc.groupId = rpc.groupId || '@self';
+      rpc['userId'] = rpc['userId'] || '@viewer';
+      rpc['groupId'] = rpc['groupId'] || '@self';
 
       // Decorate the execute method with the information necessary for batching
-      boundCall.method = method;
-      boundCall.transport = transport;
-      boundCall.rpc = rpc;
+      boundCall['method'] = method;
+      boundCall['transport'] = transport;
+      boundCall['rpc'] = rpc;
 
       return boundCall;
     };
@@ -75,7 +75,7 @@
     }
 
     if (last[parts[parts.length - 1]]) {
-      gadgets.warn('Skipping duplicate osapi method definition ' + method + ' on transport ' + transport.name);
+      gadgets.warn('Skipping duplicate osapi method definition ' + method + ' on transport ' + transport['name']);
     } else {
       last[parts[parts.length - 1]] = apiMethod;
     }
