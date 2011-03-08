@@ -21,6 +21,8 @@ package org.apache.shindig.gadgets.uri;
 import com.google.common.base.Objects;
 
 import com.google.common.base.Strings;
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
@@ -39,6 +41,11 @@ import java.util.Map;
  * @since 2.0.0
  */
 public class ProxyUriBase {
+
+  @Inject(optional=true)
+  @Named("org.apache.shindig.gadgets.uri.setAuthorityAsGadgetParam")
+  static private boolean setAuthorityAsGadgetParam = false;
+
   private UriStatus status = null;
   private Integer refresh = null;
   private boolean debug = false;
@@ -57,7 +64,8 @@ public class ProxyUriBase {
          gadget.getContext().getDebug(),
          gadget.getContext().getIgnoreCache(),
          gadget.getContext().getContainer(),
-         gadget.getSpec().getUrl().toString());
+         setAuthorityAsGadgetParam ? gadget.getSpec().getUrl().getAuthority() :
+             gadget.getSpec().getUrl().toString());
   }
 
   protected ProxyUriBase(UriStatus status, Uri origUri) {

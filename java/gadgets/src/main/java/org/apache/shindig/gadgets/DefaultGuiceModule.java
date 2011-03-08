@@ -41,6 +41,7 @@ import org.apache.shindig.gadgets.rewrite.RewriteModule;
 import org.apache.shindig.gadgets.servlet.GadgetsHandler;
 import org.apache.shindig.gadgets.servlet.HttpRequestHandler;
 import org.apache.shindig.gadgets.templates.TemplateModule;
+import org.apache.shindig.gadgets.uri.ProxyUriBase;
 import org.apache.shindig.gadgets.uri.UriModule;
 
 import org.apache.shindig.gadgets.variables.SubstituterModule;
@@ -80,7 +81,7 @@ public class DefaultGuiceModule extends AbstractModule {
 
     // We perform static injection on HttpResponse for cache TTLs.
     requestStaticInjection(HttpResponse.class);
-
+    requestStaticInjection(ProxyUriBase.class);
     registerGadgetHandlers();
     registerFeatureHandlers();
   }
