@@ -295,6 +295,6 @@
 
   <servlet-mapping>
     <servlet-name>rpcSwf</servlet-name>
-    <url-pattern>/xpc</url-pattern>
+    <url-pattern>/xpc*</url-pattern>
   </servlet-mapping>
 </web-app>

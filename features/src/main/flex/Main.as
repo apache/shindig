@@ -25,7 +25,30 @@ import System.security;
  */
 class Main {
   private static var SINGLETON:Boolean = false;
+
+  public static function replace(str:String, from_str:String, to_str:String):String {
+    var out_str:String = "";
+    var search_ix:Number = 0;
+    while (search_ix < str.length) {
+      var found_ix:Number = str.indexOf(from_str, search_ix);
+      if (found_ix != -1) {
+        out_str = out_str.concat(str.substring(search_ix, found_ix)).concat(to_str);
+        search_ix = found_ix + from_str.length;
+      } else {
+        out_str = out_str.concat(str.substring(search_ix));
+        search_ix = str.length;
+      }
+    }
+    return out_str;
+  }
+
+  public static function esc(str:String):String {
+    return replace(str, "\\", "\\\\");
+  }
+
   public static function main(swfRoot:MovieClip):Void {
+    var escFn:Function = esc;
+    
     if (SINGLETON) return;
     SINGLETON = true;
     
@@ -44,7 +67,7 @@ class Main {
     } else {
       security.allowDomain(domain);
     }
-    
+
     ExternalInterface.addCallback("setup", { }, function(my_id:String, target_id:String) {
       if (target_id.indexOf(":") > -1) {
         return;
@@ -68,7 +91,7 @@ class Main {
       var sending_lc:LocalConnection = new LocalConnection();
       receiving_lc.receiveMessage = function(to_origin:String, from_origin:String, from_id:String, message:String) {
         if ((to_origin === "*" || to_origin === my_origin) && ((from_id === target_id) || (from_id === "_top" && target_id === ".."))) {
-          ExternalInterface.call("gadgets.rpctx.flash._receiveMessage", from_id, message, from_origin, to_origin);
+          ExternalInterface.call("gadgets.rpctx.flash._receiveMessage", escFn(from_id), escFn(message), escFn(from_origin), escFn(to_origin));
         }
       };
 
