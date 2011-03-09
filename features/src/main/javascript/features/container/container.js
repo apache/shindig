@@ -114,6 +114,8 @@ shindig.container.Container = function(opt_config) {
    */
   this.tokenRefreshTimer_ = null;
 
+  this.initializeMixins_();
+
   this.preloadFromConfig_(config);
 
   this.registerRpcServices_();
@@ -293,6 +295,17 @@ shindig.container.Container.prototype.rpcRegister = function(service, callback) 
 shindig.container.Container.prototype.onConstructed = function(opt_config) {};
 
 
+/**
+ * Adds a new namespace to the Container object.  The namespace
+ * will contain the result of calling the function passed in.
+ * @param {string} namespace
+ * @param {function} func to call when creating the namespace
+ */
+shindig.container.Container.addMixin = function(namespace, func) {
+   shindig.container.Container.prototype.mixins_[namespace] = func;
+};
+
+
 // -----------------------------------------------------------------------------
 // Valid JSON keys.
 // -----------------------------------------------------------------------------
@@ -419,6 +432,27 @@ shindig.container.ContainerRender.WIDTH = 'width';
 // -----------------------------------------------------------------------------
 // Private variables and methods.
 // -----------------------------------------------------------------------------
+
+
+/**
+ * Adds the ability for features to extend the container with
+ * their own functionality that may be specific to that feature.
+ * @type {Object}
+ * @private
+ */
+shindig.container.Container.prototype.mixins_ = {};
+
+
+/**
+ * Called from the constructor to add any namespace extensions.
+ * @private
+ */
+shindig.container.Container.prototype.initializeMixins_ = function() {
+  for (var i in this.mixins_) { 
+    this[i] = new this.mixins_[i](this);  
+  }
+};
+
 
 /**
  * Add list of gadgets to preload list

@@ -112,6 +112,38 @@ ContainerTest.prototype.testNewGadgetSite = function() {
   this.assertTrue(container.sites_[2] != null);
 };
 
+ContainerTest.prototype.testMixinViaPrototype = function() {
+  this.setupGadgetsRpcRegister();
+  shindig.container.Container.prototype.mixins_['test'] = function(context) {
+    return {
+      'getSitesLength' : function() {
+        return context.sites_.length;
+      }
+    };
+  };
+  var container = new shindig.container.Container();
+  this.setupGadgetSite(1, {}, null);
+  container.newGadgetSite(null);
+  this.assertTrue(container.sites_[1] != null);
+  this.assertEquals(container.sites_.length, container.test.getSitesLength());
+};
+
+ContainerTest.prototype.testMixinViaAdd = function() {
+  this.setupGadgetsRpcRegister();
+  shindig.container.Container.addMixin('test2', function(context) {
+    return {
+      'getSitesLength' : function() {
+        return context.sites_.length;
+      }
+    };
+  });
+  var container = new shindig.container.Container();
+  this.setupGadgetSite(1, {}, null);
+  container.newGadgetSite(null);
+  this.assertTrue(container.sites_[1] != null);
+  this.assertEquals(container.sites_.length, container.test2.getSitesLength());
+};
+
 ContainerTest.prototype.setupGadgetSite = function(id, gadgetInfo, gadgetHolder) {
   var self = this;
   shindig.container.GadgetSite = function() {
