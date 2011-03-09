@@ -26,9 +26,11 @@ import static org.easymock.EasyMock.isA;
 import static org.easymock.EasyMock.replay;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableList;
 import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang.RandomStringUtils;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
@@ -38,7 +40,7 @@ import org.apache.shindig.gadgets.uri.UriCommon.Param;
 import org.junit.Test;
 
 import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.HashMap;
 
 public class DefaultConcatUriManagerTest extends UriManagerTestBase {
   private static final Uri RESOURCE_1 = Uri.parse("http://example.com/one.dat");
@@ -68,11 +70,6 @@ public class DefaultConcatUriManagerTest extends UriManagerTestBase {
   @Test
   public void typeCssValidatedGeneratedBatch() throws Exception {
     checkValidatedBatchAdjacent(ConcatUriManager.Type.CSS);
-  }
-
-  @Test(expected = NoSuchElementException.class)
-  public void typeCssBatchInsufficientVersions() throws Exception {
-    checkBatchInsufficientVersions(ConcatUriManager.Type.CSS);
   }
 
   @Test(expected = RuntimeException.class)
@@ -117,58 +114,48 @@ public class DefaultConcatUriManagerTest extends UriManagerTestBase {
     String path = "/concat/path";
     ConcatUriManager.Type type = ConcatUriManager.Type.JS;
     String splitParam = "token";
-    String[] versions = new String[] { "version1", "v2", "v3" };
+    String[] versions = new String[] { "version1" };
     ConcatUriManager.Versioner versioner = makeVersioner(null, versions);
     DefaultConcatUriManager manager = makeManager(host, path, splitParam, versioner);
     List<List<Uri>> resourceUris =
         ImmutableList.of(RESOURCES_ONE, RESOURCES_TWO, RESOURCES_ONE);
-
+    HashMap<String, String> jsonParams = new HashMap<String, String>();
     List<ConcatData> concatUris =
         manager.make(fromList(gadget, resourceUris, type), false);
     assertEquals(3, concatUris.size());
 
     for (int i = 0; i < 3; ++i) {
       ConcatData uri = concatUris.get(i);
-      assertEquals(DefaultConcatUriManager.getJsSnippet(splitParam, RESOURCE_1),
+      assertEquals(1, uri.getUris().size());
+      String json = uri.getUris().get(0).getQueryParameter(
+          (Param.JSON.toString().toLowerCase()));
+      assertTrue(json.startsWith(splitParam));
+      String currentUri = uri.getUris().get(0).toString();
+      if (jsonParams.keySet().contains(currentUri)) {
+        assertEquals(jsonParams.get(currentUri), json);
+      } else {
+        jsonParams.put(currentUri, json);
+      }
+
+      assertEquals(DefaultConcatUriManager.getJsSnippet(json, RESOURCE_1),
           uri.getSnippet(RESOURCE_1));
-      assertEquals(DefaultConcatUriManager.getJsSnippet(splitParam, RESOURCE_2),
+      assertEquals(DefaultConcatUriManager.getJsSnippet(json, RESOURCE_2),
           uri.getSnippet(RESOURCE_2));
       assertNull(uri.getSnippet(RESOURCE_3_NOSCHEMA));
-      assertEquals(DefaultConcatUriManager.getJsSnippet(splitParam, RESOURCE_3_HTTP),
+      assertEquals(DefaultConcatUriManager.getJsSnippet(json, RESOURCE_3_HTTP),
           uri.getSnippet(RESOURCE_3_HTTP));
-      assertNull(uri.getUri().getScheme());
-      assertEquals(host, uri.getUri().getAuthority());
-      assertEquals(path, uri.getUri().getPath());
-      assertEquals(10, uri.getUri().getQueryParameters().size());
-      assertEquals(CONTAINER, uri.getUri().getQueryParameter(Param.CONTAINER.getKey()));
-      assertEquals(SPEC_URI.toString(), uri.getUri().getQueryParameter(Param.GADGET.getKey()));
-      assertEquals(type.getType(), uri.getUri().getQueryParameter(Param.TYPE.getKey()));
-      assertEquals("0", uri.getUri().getQueryParameter(Param.DEBUG.getKey()));
-      assertEquals("0", uri.getUri().getQueryParameter(Param.NO_CACHE.getKey()));
-      assertEquals(type.getType(), uri.getUri().getQueryParameter(Param.TYPE.getKey()));
+      checkBasicUriParameters(uri.getUris().get(0), host, path, 10, type, "0", "0", versions[0]);
       List<Uri> resList = (i % 2 == 0) ? RESOURCES_ONE : RESOURCES_TWO;
-      assertEquals(resList.get(0).toString(), uri.getUri().getQueryParameter("1"));
-      assertEquals(resList.get(1).toString(), uri.getUri().getQueryParameter("2"));
-      assertEquals(resList.get(2).toString(), uri.getUri().getQueryParameter("3"));
-      assertEquals(versions[i], uri.getUri().getQueryParameter(Param.VERSION.getKey()));
+      assertEquals(resList.get(0).toString(), uri.getUris().get(0).getQueryParameter("1"));
+      assertEquals(resList.get(1).toString(), uri.getUris().get(0).getQueryParameter("2"));
+      assertEquals(resList.get(2).toString(), uri.getUris().get(0).getQueryParameter("3"));
     }
+    assertEquals(2, jsonParams.size());
   }
 
   @Test
   public void typeJsValidatedGeneratedBatch() throws Exception {
     checkValidatedBatchAdjacent(ConcatUriManager.Type.JS);
-  }
-
-  @Test(expected=NoSuchElementException.class)
-  public void typeJsBatchInsufficientVersions() throws Exception {
-    Gadget gadget = mockGadget(true, true);
-    String host = "bar.com";
-    String path = "/other/path";
-    String[] versions = new String[] { "v1" };  // Only one for three resources.
-    ConcatUriManager.Versioner versioner = makeVersioner(null, versions);
-    DefaultConcatUriManager manager = makeManager(host, path, "token", versioner);
-    List<List<Uri>> resourceUris = ImmutableList.of(RESOURCES_ONE, RESOURCES_ONE);
-    manager.make(fromList(gadget, resourceUris, ConcatUriManager.Type.JS), true);
   }
 
   @Test(expected = RuntimeException.class)
@@ -194,7 +181,8 @@ public class DefaultConcatUriManagerTest extends UriManagerTestBase {
     List<List<Uri>> resourceUris = ImmutableList.<List<Uri>>of(ImmutableList.of(RESOURCE_1));
     List<ConcatData> concatUris = manager.make(fromList(gadget, resourceUris, ConcatUriManager.Type.JS), false);
     assertEquals(1, concatUris.size());
-    assertNull(concatUris.get(0).getUri().getQueryParameter(Param.JSON.getKey()));
+    assertEquals(1, concatUris.get(0).getUris().size());
+    assertNull(concatUris.get(0).getUris().get(0).getQueryParameter(Param.JSON.getKey()));
   }
 
   @Test
@@ -311,6 +299,124 @@ public class DefaultConcatUriManagerTest extends UriManagerTestBase {
     checkValidateUri(UriStatus.INVALID_VERSION, ConcatUriManager.Type.JS, true);
   }
 
+  @Test
+  public void dontConcatMultipleResourceBeyoundUrlLimitSplitBatched() throws Exception {
+    Gadget gadget = mockGadget(true, true);
+    String host = "bar.com";
+    String path = "/other/path";
+    ConcatUriManager.Type type = ConcatUriManager.Type.JS;
+
+    String[] versions = new String[] { "v1" };
+    ConcatUriManager.Versioner versioner = makeVersioner(null, versions);
+    DefaultConcatUriManager manager = makeManager(host, path, "token", versioner);
+
+    Uri urlA = Uri.parse(generateUrl(manager.getUrlMaxLength() / 4));
+    Uri urlB = Uri.parse(generateUrl(manager.getUrlMaxLength() / 4));
+    Uri urlC = Uri.parse(generateUrl(manager.getUrlMaxLength() / 2));
+
+    List<Uri> urlList = ImmutableList.of(urlA, urlB, urlC);
+    List<List<Uri>> resourceUris = ImmutableList.of(urlList);
+    List<ConcatData> concatUris =
+        manager.make(fromList(gadget, resourceUris, type), false);
+
+    assertEquals(2, concatUris.get(0).getUris().size());
+
+    String jsonFirst = concatUris.get(0).getUris().get(0).getQueryParameter(
+        (Param.JSON.toString().toLowerCase()));
+    checkBasicUriParameters(concatUris.get(0).getUris().get(0), host, path, 9, type,
+        "1", "1", versions[0]);
+    assertEquals(urlA.toString(), concatUris.get(0).getUris().get(0).getQueryParameter("1"));
+    assertEquals(DefaultConcatUriManager.getJsSnippet(jsonFirst, urlA),
+        concatUris.get(0).getSnippet(urlA));
+    assertEquals(urlB.toString(), concatUris.get(0).getUris().get(0).getQueryParameter("2"));
+    assertEquals(DefaultConcatUriManager.getJsSnippet(jsonFirst, urlB),
+        concatUris.get(0).getSnippet(urlB));
+    assertNull(concatUris.get(0).getUris().get(0).getQueryParameter("3"));
+
+    String jsonSecond = concatUris.get(0).getUris().get(1).getQueryParameter(
+            (Param.JSON.toString().toLowerCase()));
+    checkBasicUriParameters(concatUris.get(0).getUris().get(1), host, path, 8, type,
+        "1", "1", versions[0]);
+    assertEquals(urlC.toString(), concatUris.get(0).getUris().get(1).getQueryParameter("1"));
+    assertEquals(DefaultConcatUriManager.getJsSnippet(jsonSecond, urlC),
+        concatUris.get(0).getSnippet(urlC));
+    assertNull(concatUris.get(0).getUris().get(1).getQueryParameter("2"));
+
+  }
+
+  @Test
+  public void dontConcatMultipleResourceBeyoundUrlLimitAdjacentBatched() throws Exception {
+    Gadget gadget = mockGadget(true, true);
+    String host = "bar.com";
+    String path = "/other/path";
+    ConcatUriManager.Type type = ConcatUriManager.Type.JS;
+
+    String[] versions = new String[] { "v1" };
+    ConcatUriManager.Versioner versioner = makeVersioner(null, versions);
+    DefaultConcatUriManager manager = makeManager(host, path, null, versioner);
+
+    Uri urlA = Uri.parse(generateUrl(manager.getUrlMaxLength() / 4));
+    Uri urlB = Uri.parse(generateUrl(manager.getUrlMaxLength() / 4));
+    Uri urlC = Uri.parse(generateUrl(manager.getUrlMaxLength() / 2));
+
+    List<Uri> urlList = ImmutableList.of(urlA, urlB, urlC);
+    List<List<Uri>> resourceUris = ImmutableList.of(urlList);
+    List<ConcatData> concatUris =
+        manager.make(fromList(gadget, resourceUris, type), true);
+
+    assertEquals(2, concatUris.get(0).getUris().size());
+
+    checkBasicUriParameters(concatUris.get(0).getUris().get(0), host, path, 8, type,
+        "1", "1", versions[0]);
+    assertEquals(urlA.toString(), concatUris.get(0).getUris().get(0).getQueryParameter("1"));
+    assertNull(concatUris.get(0).getSnippet(urlA));
+    assertEquals(urlB.toString(), concatUris.get(0).getUris().get(0).getQueryParameter("2"));
+    assertNull(concatUris.get(0).getSnippet(urlB));
+    assertNull(concatUris.get(0).getUris().get(0).getQueryParameter("3"));
+
+    checkBasicUriParameters(concatUris.get(0).getUris().get(1), host, path, 7, type,
+        "1", "1", versions[0]);
+    assertEquals(urlC.toString(), concatUris.get(0).getUris().get(1).getQueryParameter("1"));
+    assertNull(concatUris.get(0).getSnippet(urlC));
+    assertNull(concatUris.get(0).getUris().get(1).getQueryParameter("2"));
+  }
+
+  /**
+   * Contains Uri Basic Assert Checks
+   */
+  private void checkBasicUriParameters(Uri uri,
+                                       String host,
+                                       String path,
+                                       int queryParameterSize,
+                                       ConcatUriManager.Type type,
+                                       String debug,
+                                       String noCache) {
+    assertNull(uri.getScheme());
+    assertEquals(host, uri.getAuthority());
+    assertEquals(path, uri.getPath());
+    assertEquals(queryParameterSize, uri.getQueryParameters().size());
+    assertEquals(CONTAINER, uri.getQueryParameter(Param.CONTAINER.getKey()));
+    assertEquals(SPEC_URI.toString(), uri.getQueryParameter(Param.GADGET.getKey()));
+    assertEquals(type.getType(), uri.getQueryParameter(Param.TYPE.getKey()));
+    assertEquals(debug, uri.getQueryParameter(Param.DEBUG.getKey()));
+    assertEquals(noCache, uri.getQueryParameter(Param.NO_CACHE.getKey()));
+  }
+
+  /**
+   * Contains Uri Basic Assert Checks
+   */
+  private void checkBasicUriParameters(Uri uri,
+                                       String host,
+                                       String path,
+                                       int queryParameterSize,
+                                       ConcatUriManager.Type type,
+                                       String debug,
+                                       String noCache,
+                                       String version) {
+    checkBasicUriParameters(uri, host, path, queryParameterSize, type, debug, noCache);
+    assertEquals(version, uri.getQueryParameter(Param.VERSION.getKey()));
+  }
+
   private void checkUnversionedUri(ConcatUriManager.Type type, boolean hasSplit) {
     // Returns VALID_VERSIONED, but no version is present.
     ConcatUriManager.Versioner versioner = makeVersioner(UriStatus.VALID_VERSIONED);
@@ -369,18 +475,11 @@ public class DefaultConcatUriManagerTest extends UriManagerTestBase {
     assertNull(uri.getSnippet(RESOURCE_1));
     assertNull(uri.getSnippet(RESOURCE_2));
     assertNull(uri.getSnippet(RESOURCE_3_NOSCHEMA));
-    assertNull(uri.getUri().getScheme());
-    assertEquals(host, uri.getUri().getAuthority());
-    assertEquals(path, uri.getUri().getPath());
-    assertEquals(8, uri.getUri().getQueryParameters().size());
-    assertEquals(CONTAINER, uri.getUri().getQueryParameter(Param.CONTAINER.getKey()));
-    assertEquals(SPEC_URI.toString(), uri.getUri().getQueryParameter(Param.GADGET.getKey()));
-    assertEquals("0", uri.getUri().getQueryParameter(Param.DEBUG.getKey()));
-    assertEquals("0", uri.getUri().getQueryParameter(Param.NO_CACHE.getKey()));
-    assertEquals(type.getType(), uri.getUri().getQueryParameter(Param.TYPE.getKey()));
-    assertEquals(RESOURCES_ONE.get(0).toString(), uri.getUri().getQueryParameter("1"));
-    assertEquals(RESOURCES_ONE.get(1).toString(), uri.getUri().getQueryParameter("2"));
-    assertEquals(RESOURCES_ONE.get(2).toString(), uri.getUri().getQueryParameter("3"));
+    assertEquals(1, uri.getUris().size());
+    checkBasicUriParameters(uri.getUris().get(0), host, path, 8, type, "0", "0");
+    assertEquals(RESOURCES_ONE.get(0).toString(), uri.getUris().get(0).getQueryParameter("1"));
+    assertEquals(RESOURCES_ONE.get(1).toString(), uri.getUris().get(0).getQueryParameter("2"));
+    assertEquals(RESOURCES_ONE.get(2).toString(), uri.getUris().get(0).getQueryParameter("3"));
   }
 
   private void checkAltParams(ConcatUriManager.Type type) throws Exception {
@@ -400,27 +499,18 @@ public class DefaultConcatUriManagerTest extends UriManagerTestBase {
     assertNull(uri.getSnippet(RESOURCE_1));
     assertNull(uri.getSnippet(RESOURCE_2));
     assertNull(uri.getSnippet(RESOURCE_3_NOSCHEMA));
-    assertNull(uri.getUri().getScheme());
-    assertEquals(host, uri.getUri().getAuthority());
-    assertEquals(path, uri.getUri().getPath());
-    assertEquals(9, uri.getUri().getQueryParameters().size());
-    assertEquals(CONTAINER, uri.getUri().getQueryParameter(Param.CONTAINER.getKey()));
-    assertEquals(SPEC_URI.toString(), uri.getUri().getQueryParameter(Param.GADGET.getKey()));
-    assertEquals("1", uri.getUri().getQueryParameter(Param.DEBUG.getKey()));
-    assertEquals("1", uri.getUri().getQueryParameter(Param.NO_CACHE.getKey()));
-    assertEquals(type.getType(),
-        uri.getUri().getQueryParameter(Param.TYPE.getKey()));
-    assertEquals(RESOURCES_ONE.get(0).toString(), uri.getUri().getQueryParameter("1"));
-    assertEquals(RESOURCES_ONE.get(1).toString(), uri.getUri().getQueryParameter("2"));
-    assertEquals(RESOURCES_ONE.get(2).toString(), uri.getUri().getQueryParameter("3"));
-    assertEquals(version, uri.getUri().getQueryParameter(Param.VERSION.getKey()));
+    assertEquals(1, uri.getUris().size());
+    checkBasicUriParameters(uri.getUris().get(0), host, path, 9, type, "1", "1", version);
+    assertEquals(RESOURCES_ONE.get(0).toString(), uri.getUris().get(0).getQueryParameter("1"));
+    assertEquals(RESOURCES_ONE.get(1).toString(), uri.getUris().get(0).getQueryParameter("2"));
+    assertEquals(RESOURCES_ONE.get(2).toString(), uri.getUris().get(0).getQueryParameter("3"));
   }
 
   private void checkBatchAdjacent(ConcatUriManager.Type type) throws Exception {
     Gadget gadget = mockGadget(true, true);
     String host = "bar.com";
     String path = "/other/path";
-    String[] versions = new String[] { "version1", "v2", "v3" };
+    String[] versions = new String[] { "version1"};
     ConcatUriManager.Versioner versioner = makeVersioner(null, versions);
     DefaultConcatUriManager manager = makeManager(host, path, "token", versioner);
     List<List<Uri>> resourceUris =
@@ -435,20 +525,12 @@ public class DefaultConcatUriManagerTest extends UriManagerTestBase {
       assertNull(uri.getSnippet(RESOURCE_1));
       assertNull(uri.getSnippet(RESOURCE_2));
       assertNull(uri.getSnippet(RESOURCE_3_NOSCHEMA));
-      assertNull(uri.getUri().getScheme());
-      assertEquals(host, uri.getUri().getAuthority());
-      assertEquals(path, uri.getUri().getPath());
-      assertEquals(9, uri.getUri().getQueryParameters().size());
-      assertEquals(CONTAINER, uri.getUri().getQueryParameter(Param.CONTAINER.getKey()));
-      assertEquals(SPEC_URI.toString(), uri.getUri().getQueryParameter(Param.GADGET.getKey()));
-      assertEquals("1", uri.getUri().getQueryParameter(Param.DEBUG.getKey()));
-      assertEquals("1", uri.getUri().getQueryParameter(Param.NO_CACHE.getKey()));
-      assertEquals(type.getType(), uri.getUri().getQueryParameter(Param.TYPE.getKey()));
+      assertEquals(1, uri.getUris().size());
+      checkBasicUriParameters(uri.getUris().get(0), host, path, 9, type, "1", "1", versions[0]);
       List<Uri> resList = (i % 2 == 0) ? RESOURCES_ONE : RESOURCES_TWO;
-      assertEquals(resList.get(0).toString(), uri.getUri().getQueryParameter("1"));
-      assertEquals(resList.get(1).toString(), uri.getUri().getQueryParameter("2"));
-      assertEquals(resList.get(2).toString(), uri.getUri().getQueryParameter("3"));
-      assertEquals(versions[i], uri.getUri().getQueryParameter(Param.VERSION.getKey()));
+      assertEquals(resList.get(0).toString(), uri.getUris().get(0).getQueryParameter("1"));
+      assertEquals(resList.get(1).toString(), uri.getUris().get(0).getQueryParameter("2"));
+      assertEquals(resList.get(2).toString(), uri.getUris().get(0).getQueryParameter("3"));
     }
   }
 
@@ -458,7 +540,7 @@ public class DefaultConcatUriManagerTest extends UriManagerTestBase {
     Gadget gadget = mockGadget(true, true);
     String host = "bar.com";
     String path = "/other/path";
-    String[] versions = new String[] { "version1", "v2", "v3" };
+    String[] versions = new String[] { "version1"};
     ConcatUriManager.Versioner versioner = makeVersioner(UriStatus.VALID_VERSIONED, versions);
     DefaultConcatUriManager manager = makeManager(host, path, "token", versioner);
     List<List<Uri>> resourceUris =
@@ -470,7 +552,7 @@ public class DefaultConcatUriManagerTest extends UriManagerTestBase {
 
     for (int i = 0; i < 3; ++i) {
       ConcatUriManager.ConcatUri validated =
-          manager.process(concatUris.get(i).getUri());
+          manager.process(concatUris.get(i).getUris().get(0));
       assertEquals(UriStatus.VALID_VERSIONED, validated.getStatus());
       List<Uri> resList = (i % 2 == 0) ? RESOURCES_ONE : RESOURCES_TWO;
       assertEquals(resList, validated.getBatch());
@@ -478,17 +560,10 @@ public class DefaultConcatUriManagerTest extends UriManagerTestBase {
     }
   }
 
-  private void checkBatchInsufficientVersions(ConcatUriManager.Type type) throws Exception {
-    Gadget gadget = mockGadget(true, true);
-    String host = "bar.com";
-    String path = "/other/path";
-    String[] versions = new String[] { "v1" };  // Only one for three resources.
-    ConcatUriManager.Versioner versioner = makeVersioner(null, versions);
-    DefaultConcatUriManager manager = makeManager(host, path, "token", versioner);
-    List<List<Uri>> resourceUris = ImmutableList.of(RESOURCES_ONE, RESOURCES_ONE);
-    manager.make(fromList(gadget, resourceUris, type), true);
+  private String generateUrl(int length) {
+    return "http://www.url.com/" + RandomStringUtils.randomAlphanumeric(length - 22) + ".js";
   }
-
+  
   private void checkMissingHostConfig(ConcatUriManager.Type type) throws Exception {
     Gadget gadget = mockGadget(false, false);
     DefaultConcatUriManager manager = makeManager(null, "/foo", "token", null);

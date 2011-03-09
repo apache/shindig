@@ -184,12 +184,14 @@ public class ConcatVisitor implements DomWalker.Visitor {
       List<Element> sourceBatch = elemBatchIt.next();
       List<Uri> sourceUris = uriBatchIt.next();
 
-      // Regardless what happens, inject a copy of the first node,
-      // with new (concat) URI, immediately ahead of the first elem.
+      // Regardless what happens, inject as many copies of the first node
+      // as needed, with new (concat) URI, immediately ahead of the first elem.
       Element firstElem = sourceBatch.get(0);
-      Element elemConcat = (Element)firstElem.cloneNode(true);
-      elemConcat.setAttribute(type.getSrcAttrib(), concatUri.getUri().toString());
-      firstElem.getParentNode().insertBefore(elemConcat, firstElem);
+      for (Uri uri : concatUri.getUris()) {
+        Element elemConcat = (Element)firstElem.cloneNode(true);
+        elemConcat.setAttribute(type.getSrcAttrib(), uri.toString());
+        firstElem.getParentNode().insertBefore(elemConcat, firstElem);
+      }
 
       // Now for all Elements, either A) remove them or B) replace each
       // with a <script> node with snippet of code configuring/evaluating

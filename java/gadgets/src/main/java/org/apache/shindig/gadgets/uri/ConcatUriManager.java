@@ -24,6 +24,7 @@ import com.google.common.collect.Lists;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -83,7 +84,7 @@ public interface ConcatUriManager {
       return null;
     }
   }
-  
+
   /**
    * Generate Uris that concatenate all given resources together.
    * @param batches List of batches to concatenate
@@ -104,18 +105,18 @@ public interface ConcatUriManager {
    * in their correct original position.
    */
   public static class ConcatData {
-    private final Uri uri;
+    private final List<Uri> uris;
     private final Map<Uri, String> snippets;
-    
-    public ConcatData(Uri uri, Map<Uri, String> snippets) {
-      this.uri = uri;
+
+    public ConcatData(List<Uri> uris, Map<Uri, String> snippets) {
+      this.uris = Collections.unmodifiableList(uris);
       this.snippets = snippets;
     }
-    
-    public Uri getUri() {
-      return uri;
+
+    public List<Uri> getUris() {
+      return uris;
     }
-    
+
     public String getSnippet(Uri orig) {
       return snippets == null || !snippets.containsKey(orig) ?
           null : snippets.get(orig);
@@ -173,7 +174,7 @@ public interface ConcatUriManager {
     public String getSplitParam() {
       return splitParam;
     }
-    
+
     public static List<ConcatUri> fromList(Gadget gadget, List<List<Uri>> batches, Type type) {
       List<ConcatUri> ctx = Lists.newArrayListWithCapacity(batches.size());
       for (List<Uri> batch : batches) {

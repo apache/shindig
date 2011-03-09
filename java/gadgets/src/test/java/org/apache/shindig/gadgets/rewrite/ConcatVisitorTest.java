@@ -908,7 +908,7 @@ public class ConcatVisitorTest extends DomWalkerTestBase {
           }
           uriBuilder.addQueryParameter("SPLIT", "1");
         }
-        results.add(new ConcatData(uriBuilder.toUri(), snippets));
+        results.add(new ConcatData(Lists.newArrayList(uriBuilder.toUri()), snippets));
       }
       return results;
     }
