@@ -110,7 +110,10 @@ public class ConcatProxyServletTest extends ServletTestFixture {
    */
   private String addVar(String url, String data) {
     return '\"' + url + "\":\"" + data +"\",\r\n";
-    
+  }
+
+  private String addLastVar(String url, String data) {
+    return '\"' + url + "\":\"" + data +"\"";
   }
 
   /**
@@ -199,7 +202,7 @@ public class ConcatProxyServletTest extends ServletTestFixture {
   public void testAsJsonConcat() throws Exception {
     String results = "_js={\r\n"
         + addVar(URL1.toString(), SCRT1_ESCAPED)
-        + addVar(URL2.toString(), SCRT2_ESCAPED)
+        + addLastVar(URL2.toString(), SCRT2_ESCAPED)
         + "};\r\n";
     runConcat(sequentialExecutor, results, "_js", URL1, URL2);
   }
@@ -209,7 +212,7 @@ public class ConcatProxyServletTest extends ServletTestFixture {
     String results = "_js={\r\n"
         + addVar(URL1.toString(), SCRT1_ESCAPED)
         + addVar(URL2.toString(), SCRT2_ESCAPED)
-        + addVar(URL3.toString(), SCRT3_ESCAPED)
+        + addLastVar(URL3.toString(), SCRT3_ESCAPED)
         + "};\r\n";
     runConcat(sequentialExecutor, results, "_js", URL1, URL2, URL3);
   }
@@ -233,7 +236,7 @@ public class ConcatProxyServletTest extends ServletTestFixture {
     expect(pipeline.execute(req)).andReturn(resp).anyTimes();
 
     String results = "_js={\r\n"
-        + addVar(URL1.toString(), SCRT1_ESCAPED)
+        + addLastVar(URL1.toString(), SCRT1_ESCAPED)
         + "/* ---- Error 404 (http://example.org/4.js) ---- */\r\n"
         + "};\r\n";
     runConcat(sequentialExecutor, results, "_js", URL1, URL4);
@@ -251,7 +254,7 @@ public class ConcatProxyServletTest extends ServletTestFixture {
     servlet.doGet(request, recorder);
     verify();
     String results = "_js={\r\n"
-      + addVar(URL1.toString(), SCRT1_ESCAPED)
+      + addLastVar(URL1.toString(), SCRT1_ESCAPED)
       + addConcatErrComment(GadgetException.Code.FAILED_TO_RETRIEVE_CONTENT, URL4.toString()) + "};\r\n";
     assertEquals(results, recorder.getResponseAsString());
     assertEquals(400, recorder.getHttpStatusCode());
@@ -266,7 +269,7 @@ public class ConcatProxyServletTest extends ServletTestFixture {
         new GadgetException(GadgetException.Code.HTML_PARSE_ERROR)).anyTimes();
 
     String results = "_js={\r\n"
-        + addVar(URL1.toString(), SCRT1_ESCAPED)
+        + addLastVar(URL1.toString(), SCRT1_ESCAPED)
         + addConcatErrComment(GadgetException.Code.HTML_PARSE_ERROR, URL4.toString()) + "};\r\n";
 
     expectRequestWithUris(Lists.newArrayList(URL1, URL4), "_js");

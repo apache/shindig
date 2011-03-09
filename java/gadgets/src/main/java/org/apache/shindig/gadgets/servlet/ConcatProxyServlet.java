@@ -345,18 +345,26 @@ public class ConcatProxyServlet extends InjectedServlet {
   }
 
   private static class JsonConcatOutputStream extends ConcatOutputStream {
+    private boolean firstEntry;
+
     public JsonConcatOutputStream(ServletOutputStream wrapped, String tok) throws IOException {
       super(wrapped);
       this.println(tok + "={");
+      this.firstEntry = true;
     }
 
     @Override
     protected void outputJs(Uri uri, String data) throws IOException {
+      if (!firstEntry) {
+        println(",");
+      }
+      firstEntry = false;
+
       print("\"");
       print(uri.toString());
       print("\":\"");
       print(StringEscapeUtils.escapeJavaScript(data));
-      println("\",");
+      print("\"");
     }
 
     @Override
@@ -367,4 +375,3 @@ public class ConcatProxyServlet extends InjectedServlet {
 
   }
 }
-
