@@ -55,7 +55,7 @@ public class HtmlAccelServlet extends InjectedServlet {
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("Accel request = " + request.toString());
     }
-    
+
     HttpRequest req = ServletUtil.fromHttpServletRequest(request);
     req.setContainer(AccelUriManager.CONTAINER);
     HttpResponse response = null;
@@ -64,8 +64,8 @@ public class HtmlAccelServlet extends InjectedServlet {
     } catch (GadgetException e) {
       response = ServletUtil.errorResponse(e);
     }
-    
-    ServletUtil.copyToServletResponseAndOverrideCacheHeaders(response, servletResponse);
+
+    ServletUtil.copyToServletResponse(response, servletResponse);
   }
 
   @Override

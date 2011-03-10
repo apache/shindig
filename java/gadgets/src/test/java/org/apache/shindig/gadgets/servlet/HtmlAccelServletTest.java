@@ -20,6 +20,8 @@ package org.apache.shindig.gadgets.servlet;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
+
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.config.BasicContainerConfig;
 import org.apache.shindig.config.ContainerConfig;
@@ -333,5 +335,67 @@ public class HtmlAccelServletTest extends ServletTestFixture {
     assertEquals(REWRITE_CONTENT, recorder.getResponseAsString());
     assertEquals(200, recorder.getHttpStatusCode());
     assertTrue(rewriter.responseWasRewritten());    
+  }
+
+  @Test
+  public void testCacheControlExpiresAndDateHeadersPassed() throws Exception {
+    String url = "http://example.org/data.html";
+    String data = "<html><body>Hello World</body></html>";
+
+    ((FakeCaptureRewriter) rewriter).setContentToRewrite(REWRITE_CONTENT);
+    HttpRequest req = new HttpRequest(Uri.parse(url));
+    req.addHeader("Host", Uri.parse(url).getAuthority());
+
+    Map<String, String> headersMap = Maps.newHashMap();
+    headersMap.put("Set-Cookie", "name=value");
+    headersMap.put("Set-Cookie2", "name2=value2");
+    headersMap.put("Date", "Mon, 01 Jan 1970 00:00:00 GMT");
+    headersMap.put("Cache-Control", "private,max-age=10,no-transform,proxy-revalidate");
+    headersMap.put("Pragma", "no-cache");
+    headersMap.put("Expires", "123");
+
+    HttpResponse resp = new HttpResponseBuilder()
+        .setResponse(data.getBytes())
+        .addHeaders(headersMap)
+        .setHeader("Content-Type", "text/html")
+        .setHttpStatusCode(200)
+        .create();
+    expect(pipeline.execute(req)).andReturn(resp).once();
+    expectRequest("", url);
+    replay();
+
+    servlet.doGet(request, recorder);
+    verify();
+    for (Map.Entry<String, String> header : headersMap.entrySet()) {
+      assertEquals(recorder.getHeader(header.getKey()), header.getValue());
+    }    
+    assertEquals(REWRITE_CONTENT, recorder.getResponseAsString());
+    assertEquals(200, recorder.getHttpStatusCode());
+    assertTrue(rewriter.responseWasRewritten());
+  }
+
+  @Test
+  public void testNoCacheControlHeaderSetIfAbsent() throws Exception {
+    String url = "http://example.org/data.html";
+    String data = "<html><body>Hello World</body></html>";
+
+    ((FakeCaptureRewriter) rewriter).setContentToRewrite(REWRITE_CONTENT);
+    HttpRequest req = new HttpRequest(Uri.parse(url));
+    req.addHeader("Host", Uri.parse(url).getAuthority());
+    HttpResponse resp = new HttpResponseBuilder()
+        .setResponse(data.getBytes())
+        .setHeader("Content-Type", "text/html")
+        .setHttpStatusCode(200)
+        .create();
+    expect(pipeline.execute(req)).andReturn(resp).once();
+    expectRequest("", url);
+    replay();
+
+    servlet.doGet(request, recorder);
+    verify();
+    assertNull(recorder.getHeader("Cache-Control"));
+    assertEquals(REWRITE_CONTENT, recorder.getResponseAsString());
+    assertEquals(200, recorder.getHttpStatusCode());
+    assertTrue(rewriter.responseWasRewritten());
   }
 }
