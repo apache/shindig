@@ -65,7 +65,7 @@ public class HtmlAccelServlet extends InjectedServlet {
       response = ServletUtil.errorResponse(e);
     }
     
-    ServletUtil.copyResponseToServlet(response, servletResponse);
+    ServletUtil.copyToServletResponseAndOverrideCacheHeaders(response, servletResponse);
   }
 
   @Override

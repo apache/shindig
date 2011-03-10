@@ -104,6 +104,6 @@ public class ProxyServlet extends InjectedServlet {
           HttpServletResponse.SC_BAD_REQUEST));
     }
     
-    ServletUtil.copyResponseToServlet(response, servletResponse);
+    ServletUtil.copyToServletResponseAndOverrideCacheHeaders(response, servletResponse);
   }
 }

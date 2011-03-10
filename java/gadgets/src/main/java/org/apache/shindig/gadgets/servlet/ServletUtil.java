@@ -95,15 +95,32 @@ public final class ServletUtil {
     }
   }
 
-  public static void copyResponseToServlet(HttpResponse response, HttpServletResponse servletResponse)
+  public static void copyToServletResponseAndOverrideCacheHeaders(
+      HttpResponse response, HttpServletResponse servletResponse)
       throws IOException {
-    servletResponse.setStatus(response.getHttpStatusCode());
+    copyHeadersAndStatusToServletResponse(response, servletResponse);
+    HttpUtil.setCachingHeaders(servletResponse, (int)(response.getCacheTtl() / 1000L));
+    copyContentToServletResponse(response, servletResponse);
+  }
+
+  public static void copyToServletResponse(
+      HttpResponse response, HttpServletResponse servletResponse) throws IOException {
+    copyHeadersAndStatusToServletResponse(response, servletResponse);
+    copyContentToServletResponse(response, servletResponse);
+  }
+
+  public static void copyContentToServletResponse(
+      HttpResponse response, HttpServletResponse servletResponse) throws IOException {
     servletResponse.setContentLength(response.getContentLength());
+    IOUtils.copy(response.getResponse(), servletResponse.getOutputStream());
+
+  }
+  public static void copyHeadersAndStatusToServletResponse(
+      HttpResponse response, HttpServletResponse servletResponse) {
+    servletResponse.setStatus(response.getHttpStatusCode());
     for (Map.Entry<String, String> header : response.getHeaders().entries()) {
       servletResponse.addHeader(header.getKey(), header.getValue());
     }
-    HttpUtil.setCachingHeaders(servletResponse, (int)(response.getCacheTtl() / 1000L));
-    IOUtils.copy(response.getResponse(), servletResponse.getOutputStream());
   }
 
   /**

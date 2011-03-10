@@ -22,6 +22,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.shindig.common.servlet.HttpServletResponseRecorder;
 import org.apache.shindig.common.servlet.HttpUtil;
 import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.common.util.DateUtil;
 import org.apache.shindig.common.util.FakeTimeSource;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpRequest;
@@ -39,6 +40,9 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Vector;
+
+import static junitx.framework.ComparableAssert.assertGreater;
+import static junitx.framework.ComparableAssert.assertLesser;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -209,7 +213,7 @@ public class ServletUtilTest {
   }
   
   @Test
-  public void testCopyResponseToServlet() throws Exception {
+  public void testCopyToServletResponseAndOverrideCacheHeadersForPublic() throws Exception {
     FakeTimeSource fakeTime = new FakeTimeSource();
     HttpUtil.setTimeSource(fakeTime);
 
@@ -220,7 +224,7 @@ public class ServletUtilTest {
     HttpServletResponse servletResponse = EasyMock.createMock(HttpServletResponse.class);
     HttpServletResponseRecorder recorder = new HttpServletResponseRecorder(servletResponse);
     
-    ServletUtil.copyResponseToServlet(response, recorder);
+    ServletUtil.copyToServletResponseAndOverrideCacheHeaders(response, recorder);
     
     assertEquals(200, recorder.getHttpStatusCode());
     assertEquals("response string", recorder.getResponseAsString());
@@ -228,9 +232,55 @@ public class ServletUtilTest {
     assertEquals("v2", recorder.getHeader("h2"));
     assertEquals("public,max-age=1000", recorder.getHeader("Cache-Control"));
   }
+
+  @Test
+  public void testCopyToServletResponse() throws Exception {
+    HttpResponse response = new HttpResponseBuilder()
+        .setResponseString("response string").setHttpStatusCode(200).addHeader("h1", "v1")
+        .addHeader("h2", "v2").addHeader("Cache-Control", "private,no-store,max-age=10")
+        .addHeader("Expires", "123").create();
+
+    HttpServletResponse servletResponse = EasyMock.createMock(HttpServletResponse.class);
+    HttpServletResponseRecorder recorder = new HttpServletResponseRecorder(servletResponse);
+
+    ServletUtil.copyToServletResponse(response, recorder);
+
+    assertEquals(200, recorder.getHttpStatusCode());
+    assertEquals("response string", recorder.getResponseAsString());
+    assertEquals("v1", recorder.getHeader("h1"));
+    assertEquals("v2", recorder.getHeader("h2"));
+    assertEquals("private,no-store,max-age=10", recorder.getHeader("Cache-Control"));
+    assertEquals("123", recorder.getHeader("Expires"));
+  }
+
+  @Test
+  public void testCopyToServletResponseAndOverrideCacheHeadersForPrivate()
+      throws Exception {
+    FakeTimeSource fakeTime = new FakeTimeSource();
+    HttpUtil.setTimeSource(fakeTime);
+
+    HttpResponse response = new HttpResponseBuilder()
+        .setResponseString("response string").setHttpStatusCode(200).addHeader("h1", "v1")
+        .addHeader("h2", "v2").addHeader("Cache-Control", "private,no-store,max-age=10")
+        .addHeader("Expires", "123").create();
+
+    HttpServletResponse servletResponse = EasyMock.createMock(HttpServletResponse.class);
+    HttpServletResponseRecorder recorder = new HttpServletResponseRecorder(servletResponse);
+    long testStartTime = fakeTime.currentTimeMillis();
+    ServletUtil.copyToServletResponseAndOverrideCacheHeaders(response, recorder);
+    assertEquals(200, recorder.getHttpStatusCode());    
+    assertEquals("response string", recorder.getResponseAsString());
+    assertEquals("v1", recorder.getHeader("h1"));
+    assertEquals("v2", recorder.getHeader("h2"));
+    assertEquals("no-cache", recorder.getHeader("Cache-Control"));
+    long expires = DateUtil.parseRfc1123Date(recorder.getHeader("Expires")).getTime();
+    assertGreater(testStartTime - 2000L, expires);
+    assertLesser(testStartTime + 2000L, expires);
+  }
   
   @Test
-  public void testCopyResponseToServletNoCache() throws Exception {
+  public void testCopyToServletResponseAndOverrideCacheHeadersForStrictNoCache()
+      throws Exception {
     HttpResponse response = new HttpResponseBuilder()
         .setResponseString("response string").setHttpStatusCode(200).addHeader("h1", "v1")
         .addHeader("h2", "v2").setStrictNoCache().create();
@@ -240,7 +290,7 @@ public class ServletUtilTest {
     
     FakeTimeSource fakeTime = new FakeTimeSource();
     HttpUtil.setTimeSource(fakeTime);
-    ServletUtil.copyResponseToServlet(response, recorder);
+    ServletUtil.copyToServletResponseAndOverrideCacheHeaders(response, recorder);
     
     assertEquals(200, recorder.getHttpStatusCode());
     assertEquals("response string", recorder.getResponseAsString());
