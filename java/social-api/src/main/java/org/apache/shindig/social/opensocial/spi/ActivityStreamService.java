@@ -26,7 +26,7 @@ import org.apache.shindig.protocol.RestfulCollection;
 import org.apache.shindig.social.opensocial.model.ActivityEntry;
 
 /**
- * The ActivityService interface defines the service provider interface to retrieve activities from
+ * The ActivityStreamService interface defines the service provider interface to retrieve activities from
  * the underlying SNS.
  */
 public interface ActivityStreamService {
@@ -96,6 +96,23 @@ public interface ActivityStreamService {
    */
   Future<Void> deleteActivityEntries(UserId userId, GroupId groupId, String appId,
       Set<String> activityIds, SecurityToken token) throws ProtocolException;
+  
+  /**
+   * Updates the specified Activity.
+   * 
+   * @param userId      The id of the person to update the activity for
+   * @param groupId     The group
+   * @param appId       The app id
+   * @param fields      The fields to return
+   * @param activity    The updated activity
+   * @param activityId  The id of the existing activity to update
+   * @param token       A valid SecurityToken
+   * @return a response item containing any errors
+   * @throws org.apache.shindig.protocol.ProtocolException if any
+   */
+  Future<Void> updateActivityEntry(UserId userId, GroupId groupId, String appId,
+      Set<String> fields, ActivityEntry activity, String activityId,
+      SecurityToken token) throws ProtocolException;
 
   /**
    * Creates the passed in activity for the passed in user and group. Once createActivity is called,

@@ -1,0 +1,15 @@
+{
+   "entry":[
+     "actor",
+     "body",
+     "generator",
+     "icon",
+     "object",
+     "postedTime",
+     "provider",
+     "target",
+     "title",
+     "updatedTime",
+     "verb"
+   ]
+}

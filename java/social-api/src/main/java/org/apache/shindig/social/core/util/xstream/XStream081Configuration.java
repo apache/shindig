@@ -46,7 +46,6 @@ import org.apache.shindig.social.core.util.atom.AtomFeed;
 import org.apache.shindig.social.core.util.atom.AtomKeyValue;
 import org.apache.shindig.social.core.util.atom.AtomLinkConverter;
 import org.apache.shindig.social.opensocial.model.Account;
-import org.apache.shindig.social.opensocial.model.ActionLink;
 import org.apache.shindig.social.opensocial.model.Activity;
 import org.apache.shindig.social.opensocial.model.ActivityEntry;
 import org.apache.shindig.social.opensocial.model.ActivityObject;
@@ -60,7 +59,6 @@ import org.apache.shindig.social.opensocial.model.MessageCollection;
 import org.apache.shindig.social.opensocial.model.Name;
 import org.apache.shindig.social.opensocial.model.Organization;
 import org.apache.shindig.social.opensocial.model.Person;
-import org.apache.shindig.social.opensocial.model.StandardLink;
 import org.apache.shindig.social.opensocial.model.Url;
 
 import com.google.common.base.Objects;
@@ -164,8 +162,6 @@ public class XStream081Configuration implements XStreamConfiguration {
         new ClassFieldMapping("activity", Activity.class),
         new ClassFieldMapping("activityEntry", ActivityEntry.class),
         new ClassFieldMapping("object", ActivityObject.class),
-        new ClassFieldMapping("link", StandardLink.class),
-        new ClassFieldMapping("actionLink", ActionLink.class),
         new ClassFieldMapping("mediaLink", MediaLink.class),
         new ClassFieldMapping("account", Account.class),
         new ClassFieldMapping("address", Address.class),
@@ -204,8 +200,6 @@ public class XStream081Configuration implements XStreamConfiguration {
         new ClassFieldMapping("activity", Activity.class),
         new ClassFieldMapping("activityEntry", ActivityEntry.class),
         new ClassFieldMapping("object", ActivityObject.class),
-        new ClassFieldMapping("link", StandardLink.class),
-        new ClassFieldMapping("actionLink", ActionLink.class),
         new ClassFieldMapping("mediaLink", MediaLink.class),
         new ClassFieldMapping("account", Account.class),
         new ClassFieldMapping("address", Address.class),
@@ -245,8 +239,6 @@ public class XStream081Configuration implements XStreamConfiguration {
         .put("activity", Activity.class)
         .put("activityEntry", ActivityEntry.class)
         .put("object", ActivityObject.class)
-        .put("link", StandardLink.class)
-        .put("actionLink", ActionLink.class)
         .put("mediaLink", MediaLink.class)
         .put("account", Account.class)
         .put("address", Address.class)
@@ -295,9 +287,8 @@ public class XStream081Configuration implements XStreamConfiguration {
         new ImplicitCollectionFieldMapping(Message.class, "collectionIds", String.class, "collectionsIds"),
         new ImplicitCollectionFieldMapping(Message.class, "replies", String.class, "replies"),
         
-        new ImplicitCollectionFieldMapping(ActivityEntry.class, "to", String.class, "to"),
-        new ImplicitCollectionFieldMapping(ActivityEntry.class, "cc", String.class, "cc"),
-        new ImplicitCollectionFieldMapping(ActivityEntry.class, "bcc", String.class, "bcc"),
+        new ImplicitCollectionFieldMapping(ActivityObject.class, "downstreamDuplicates", String.class, "downstreamDuplicates"),
+        new ImplicitCollectionFieldMapping(ActivityObject.class, "upstreamDuplicates", String.class, "upstreamDuplicates"),
 
         new ImplicitCollectionFieldMapping(Activity.class, "mediaItems", MediaItem.class, "mediaItems"))
     );

@@ -351,47 +351,57 @@
 },
 "activityEntries" : {
 	"john.doe": [{
-		"title": "John posted a photo",
-		"body": "John Doe posted a photo to the album Germany 2009",
-		"postedTime": "2010-04-27T06:02:36+0000",
-		"actor": {
-			"id": "john.doe",
-			"displayName": "John Doe"
-		},
-		"to": ["jane.doe", "canonical"],
-		"cc": ["george.doe"],
-		"verb": "post",
-		"links": {
-			"myRel1": 
-				[{"href": "http://www.example.com/johnsalbum/1.jpg", "type": "image/jpg"},
-				{"href": "http://www.example.com/johnsalbum/2.jpg", "type": "image/jpg"}],
-			"myRel2":
-				[{"href": "http://www.example.com/johnsalbum/3.jpg", "type": "image/jpg"},
-				{"href": "http://www.example.com/johnsalbum/4.jpg", "type": "image/jpg"}]
-		},
-		"object": {
-			"id": "object1",
-			"displayName": "Frozen Eric",
-			"link": "http://www.example.com/johnsalbum",
-			"objectType": "picture",
-			"image": {
-				"url": "http://www.example.com/johnsalbum/cover.jpg",
-				"type": "http://activitystrea.ms/schema/1.0/picture",
-				"width": 400,
-				"height": 300,
-				"duration": 93
-			},
-			"actionLinks": [
-				{
-					"target": "http://example.com/johnsalbum/frozen.jpg",
-					"caption": "Frozen at the top of the German Alps"
-				}, {
-					"target": "http://example.com/johnsalbum/sign.jpg",
-					"caption": "Sign of Garmisch-Partenkirchen"
-				}
-			]
-		}
-	}, {
+      "verb": "post",
+      "postedTime": "2011-02-10T15:04:55Z",	
+      "generator": {
+        "url": "http://example.org/activities-app"
+      },
+      "provider": {
+        "url": "http://example.org/activity-stream"
+      },
+      "title": "John Doe posted a new video to his album.",
+      "target": {
+        "url": "http://example.org/album/",
+        "objectType": "http://activitystrea.ms/schema/1.0/photo-album",
+        "id": "tag:example.org,2011:abc123",
+        "displayName": "John's Photo Album",
+        "image": {
+          "url": "http://example.org/album/thumbnail.jpg",
+          "width": 250,
+          "height": 250
+        }
+      },
+      "object" : {
+        "url": "http://example.org/album/my_fluffy_cat.jpg",
+        "objectType": "http://activitystrea.ms/schema/1.0/photo",
+        "id": "object1",
+        "summary": "<body>My activity summary.</body>",
+        "image": {
+          "url": "http://example.org/album/my_fluffy_cat_thumb.jpg",
+          "width": 250,
+          "height": 250
+        },
+        "upstreamDuplicates": ["upstreamId1", "upstreamId2"],
+	    "attachedObjects": [{
+	     "url": "http://example.org/attached1",
+	      "id": "attached1"
+	    }, {
+	      "url": "http://example.org/attached2",
+	      "id": "attached2"
+	    }]
+      },
+      "actor": {
+        "url": "http://example.org/john",
+        "objectType": "person",
+        "id": "john.doe",
+        "image": {
+          "url": "http://example.org/john/image",
+          "width": 250,
+          "height": 250
+        },
+        "displayName": "John Doe"
+      }
+    }, {
 		"title": "Super simple ActivityEntry",
 		"actor": {
 			"id": "john.doe",

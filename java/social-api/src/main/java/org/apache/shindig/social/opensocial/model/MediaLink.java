@@ -22,12 +22,8 @@ import org.apache.shindig.social.core.model.MediaLinkImpl;
 
 import com.google.inject.ImplementedBy;
 
-/*
- * TODO: comment this class.
- */
 /**
  * <p>MediaLink interface.</p>
- *
  */
 @ImplementedBy(MediaLinkImpl.class)
 @Exportablebean
@@ -37,11 +33,10 @@ public interface MediaLink {
    * Fields that represent the JSON elements.
    */
   public static enum Field {
-    URL("url"),
-    TYPE("type"),
-    WIDTH("width"),
+    DURATION("duration"),
     HEIGHT("height"),
-    DURATION("duration");
+    URL("url"),
+    WIDTH("width");
     
     /**
      * The name of the JSON element.
@@ -68,72 +63,58 @@ public interface MediaLink {
   }
   
   /**
-   * Returns the target URL of this MediaLink
-   *
-   * @return a target
-   */
-  String getUrl();
-
-  /**
-   * Sets the target URL for this MediaLink
-   *
-   * @param target a target link
-   */
-  void setUrl(String url);
-  
-  /**
-   * Returns the Media's type.
-   * 
-   * @return String indicates the target Media's type
-   */
-  String getType();
-  
-  /**
-   * Sets the Media's type.
-   * 
-   * @param type is target Media's type
-   */
-  void setType(String type);
-
-  /**
-   * <p>getWidth</p>
-   *
-   * @return Integer the target's width
-   */
-  Integer getWidth();
-
-  /**
-   * Sets the Width of this mediaLink
-   *
-   * @param width is the target's width
-   */
-  void setWidth(Integer width);
-
-  /**
-   * Sets the Height of this mediaLink
-   *
-   * @return Integer the target's height
-   */
-  Integer getHeight();
-
-  /**
-   * Sets the Height of this mediaLink
-   *
-   * @param height is the target's height
-   */
-  void setHeight(Integer height);
-
-  /**
-   * Returns the duration of this mediaLink
+   * Returns the duration of this media.
    *
    * @return Integer is the target's duration
    */
   Integer getDuration();
 
   /**
-   * Sets the duration of this mediaLink
+   * Sets the duration of this media.
    *
    * @param duration is the target's duration
    */
   void setDuration(Integer duration);
+
+  /**
+   * Sets the height of this media.
+   *
+   * @return Integer the target's height
+   */
+  Integer getHeight();
+
+  /**
+   * Sets the height of this media.
+   *
+   * @param height is the target's height
+   */
+  void setHeight(Integer height);
+
+  /**
+   * Returns the target URL of this MediaLink.
+   *
+   * @return a target
+   */
+  String getUrl();
+
+  /**
+   * Sets the target URL for this MediaLink.
+   *
+   * @param target a target link
+   */
+  void setUrl(String url);
+
+  /**
+   * <p>Returns the width of this media.</p>
+   *
+   * @return Integer the target's width
+   */
+  Integer getWidth();
+
+  /**
+   * Sets the width of this media.
+   *
+   * @param width is the target's width
+   */
+  void setWidth(Integer width);
 }

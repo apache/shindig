@@ -38,17 +38,16 @@ import com.google.common.collect.Iterables;
 import com.google.inject.Inject;
 
 /**
- * <p>ActivityStreamsHandler class.</p>
- *
+ * <p>ActivityStreamHandler class.</p>
  */
-@Service(name = "activitystreams", path="/{userId}+/{groupId}/{appId}/{activityEntryId}+")
+@Service(name = "activitystreams", path="/{userId}+/{groupId}/{appId}/{activityId}+")
 public class ActivityStreamHandler {
 
   private final ActivityStreamService service;
   private final ContainerConfig config;
 
   /**
-   * <p>Constructor for ActivityStreamsHandler.</p>
+   * <p>Constructor for ActivityStreamHandler.</p>
    *
    * @param service a {@link org.apache.shindig.social.opensocial.spi.ActivityStreamService} object.
    * @param config a {@link org.apache.shindig.config.ContainerConfig} object.
@@ -60,9 +59,9 @@ public class ActivityStreamHandler {
   }
 
   /**
-   * Allowed end-points /activitiestreams/{userId}/@self/{actvityId}+
+   * Allowed end-points /activitystreams/{userId}/@self/{appId}/{activityId}+
    *
-   * examples: /activitiestreams/john.doe/@self/1
+   * Examples: /activitystreams/john.doe/@self/1/object1,object2
    *
    * @param request a {@link org.apache.shindig.social.opensocial.service.SocialRequestItem} object.
    * @return a {@link java.util.concurrent.Future} object.
@@ -73,64 +72,73 @@ public class ActivityStreamHandler {
       throws ProtocolException {
 
     Set<UserId> userIds = request.getUsers();
-    Set<String> activityEntryIds = ImmutableSet.copyOf(request.getListParameter("activityEntryId"));
+    Set<String> activityIds = ImmutableSet.copyOf(request.getListParameter("activityId"));
 
     HandlerPreconditions.requireNotEmpty(userIds, "No userId specified");
     HandlerPreconditions.requireSingular(userIds, "Multiple userIds not supported");
-    // Throws exceptions if userIds contains more than one element or zero elements
+    HandlerPreconditions.requireNotEmpty(activityIds, "At least one activity ID must be specified");
+    
     return service.deleteActivityEntries(Iterables.getOnlyElement(userIds), request.getGroup(),
-        request.getAppId(), activityEntryIds, request.getToken());
+        request.getAppId(), activityIds, request.getToken());
   }
 
   /**
-   * Allowed end-points /activitiestreams/{userId}/@self
+   * Allowed end-points /activitystreams/{userId}/@self/{appId}/{activityId}
    *
-   * examples: /activitiestreams/john.doe/@self - postBody is an activity object
-   *
-   * TODO: REST end-point
+   * Examples: /activitystreams/john.doe/@self/1/object2 - postBody is an activity object
    *
    * @param request a {@link org.apache.shindig.social.opensocial.service.SocialRequestItem} object.
    * @return a {@link java.util.concurrent.Future} object.
    * @throws org.apache.shindig.protocol.ProtocolException if any.
    */
-  @Operation(httpMethods="PUT", bodyParam = "activityEntry")
+  @Operation(httpMethods="PUT", bodyParam = "activity")
   public Future<?> update(SocialRequestItem request) throws ProtocolException {
-    return create(request);
-  }
-
-  /**
-   * Allowed end-points /activitiestreams/{userId}/@self
-   *
-   * examples: /activitiestreams/john.doe/@self - postBody is an activity object
-   *
-   * TODO: REST end-point
-   *
-   * @param request a {@link org.apache.shindig.social.opensocial.service.SocialRequestItem} object.
-   * @return a {@link java.util.concurrent.Future} object.
-   * @throws org.apache.shindig.protocol.ProtocolException if any.
-   */
-  @Operation(httpMethods="POST", bodyParam = "activityEntry")
-  public Future<?> create(SocialRequestItem request) throws ProtocolException {
     Set<UserId> userIds = request.getUsers();
-    List<String> activityEntryIds = request.getListParameter("activityEntryId");
+    List<String> activityIds = request.getListParameter("activityId");
 
     HandlerPreconditions.requireNotEmpty(userIds, "No userId specified");
     HandlerPreconditions.requireSingular(userIds, "Multiple userIds not supported");
-    // TODO(lryan) This seems reasonable to allow on PUT but we don't have an update verb.
-    HandlerPreconditions.requireEmpty(activityEntryIds, "Cannot specify activityEntryId in create");
+    HandlerPreconditions.requireSingular(activityIds, "Must specify exactly one activity ID");
 
-    return service.createActivityEntry(Iterables.getOnlyElement(userIds), request.getGroup(),
+    return service.updateActivityEntry(Iterables.getOnlyElement(userIds), request.getGroup(),
         request.getAppId(), request.getFields(),
-        request.getTypedParameter("activityEntry", ActivityEntry.class),
+        request.getTypedParameter("activity", ActivityEntry.class),
+        activityIds.iterator().next(),
         request.getToken());
   }
 
   /**
-   * Allowed end-points /activitiestreams/{userId}/{groupId}/{optionalActvityId}+
-   * /activitiestreams/{userId}+/{groupId}
+   * Allowed end-points /activitystreams/{userId}/@self/{appId}
    *
-   * examples: /activitiestreams/john.doe/@self/1 /activitiestreams/john.doe/@self
-   * /activitiestreams/john.doe,jane.doe/@friends
+   * Examples: /activitystreams/john.doe/@self/{appId} - postBody is an activity object
+   *
+   * @param request a {@link org.apache.shindig.social.opensocial.service.SocialRequestItem} object.
+   * @return a {@link java.util.concurrent.Future} object.
+   * @throws org.apache.shindig.protocol.ProtocolException if any.
+   */
+  @Operation(httpMethods="POST", bodyParam = "activity")
+  public Future<?> create(SocialRequestItem request) throws ProtocolException {
+    Set<UserId> userIds = request.getUsers();
+    List<String> activityIds = request.getListParameter("activityId");
+
+    HandlerPreconditions.requireNotEmpty(userIds, "No userId specified");
+    HandlerPreconditions.requireSingular(userIds, "Multiple userIds not supported");
+    HandlerPreconditions.requireEmpty(activityIds, "Cannot specify activity ID in create");
+
+    return service.createActivityEntry(Iterables.getOnlyElement(userIds), request.getGroup(),
+        request.getAppId(), request.getFields(),
+        request.getTypedParameter("activity", ActivityEntry.class),
+        request.getToken());
+  }
+
+  /**
+   * Allowed end-points:
+   *   /activitystreams/{userId}/{groupId}/{optionalActvityId}+
+   *   /activitystreams/{userId}+/{groupId}
+   *
+   * Examples:
+   *   /activitystreams/john.doe/@self/1
+   *   /activitystreams/john.doe,jane.doe/@friends
    *
    * @param request a {@link org.apache.shindig.social.opensocial.service.SocialRequestItem} object.
    * @return a {@link java.util.concurrent.Future} object.
@@ -140,14 +148,14 @@ public class ActivityStreamHandler {
   public Future<?> get(SocialRequestItem request)
       throws ProtocolException {
     Set<UserId> userIds = request.getUsers();
-    Set<String> optionalActivityIds = ImmutableSet.copyOf(request.getListParameter("activityEntryId"));
+    Set<String> optionalActivityIds = ImmutableSet.copyOf(request.getListParameter("activityId"));
 
     CollectionOptions options = new CollectionOptions(request);
 
     // Preconditions
     HandlerPreconditions.requireNotEmpty(userIds, "No userId specified");
     if (userIds.size() > 1 && !optionalActivityIds.isEmpty()) {
-      throw new IllegalArgumentException("Cannot fetch same activityEntryIds for multiple userIds");
+      throw new IllegalArgumentException("Cannot fetch activities by ID for multiple users");
     }
 
     if (!optionalActivityIds.isEmpty()) {

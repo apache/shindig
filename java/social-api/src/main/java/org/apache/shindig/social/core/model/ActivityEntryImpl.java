@@ -18,34 +18,26 @@
 
 package org.apache.shindig.social.core.model;
 
-import java.util.List;
-import java.util.Map;
-
 import org.apache.shindig.social.opensocial.model.ActivityEntry;
 import org.apache.shindig.social.opensocial.model.ActivityObject;
 import org.apache.shindig.social.opensocial.model.MediaLink;
-import org.apache.shindig.social.opensocial.model.StandardLink;
 
 /**
  * A simple bean implementation of an ActivityStream Entry.
- * 
  */
 public class ActivityEntryImpl implements ActivityEntry {
-
-  private MediaLink icon;
-  private String postedTime;
+  
   private ActivityObject actor;
-  private String verb;
-  private ActivityObject object;
-  private ActivityObject target;
-  private ActivityObject generator;
-  private ActivityObject provider;
-  private String title;
   private String body;
-  private Map<String, List<StandardLink>> links;
-  private List<String> to;
-  private List<String> cc;
-  private List<String> bcc;
+  private ActivityObject generator;
+  private MediaLink icon;
+  private ActivityObject object;
+  private String postedTime;
+  private ActivityObject provider;
+  private ActivityObject target;
+  private String title;
+  private String updatedTime;
+  private String verb;
 
   /**
    * Create a new empty ActivityEntry
@@ -54,28 +46,8 @@ public class ActivityEntryImpl implements ActivityEntry {
   }
 
   /** {@inheritDoc} */
-  public MediaLink getIcon() {
-    return icon;
-  }
-
-  /** {@inheritDoc} */
-  public void setIcon(MediaLink icon) {
-    this.icon = icon;
-  }
-
-  /** {@inheritDoc} */
-  public String getPostedTime() {
-    return postedTime;
-  }
-
-  /** {@inheritDoc} */
-  public void setPostedTime(String postedTime) {
-    this.postedTime = postedTime;
-  }
-
-  /** {@inheritDoc} */
   public ActivityObject getActor() {
-    return actor;
+    return this.actor;
   }
 
   /** {@inheritDoc} */
@@ -84,68 +56,8 @@ public class ActivityEntryImpl implements ActivityEntry {
   }
 
   /** {@inheritDoc} */
-  public String getVerb() {
-    return verb;
-  }
-
-  /** {@inheritDoc} */
-  public void setVerb(String verb) {
-    this.verb = verb;
-  }
-
-  /** {@inheritDoc} */
-  public ActivityObject getObject() {
-    return object;
-  }
-
-  /** {@inheritDoc} */
-  public void setObject(ActivityObject object) {
-    this.object = object;
-  }
-
-  /** {@inheritDoc} */
-  public ActivityObject getTarget() {
-    return target;
-  }
-
-  /** {@inheritDoc} */
-  public void setTarget(ActivityObject target) {
-    this.target = target;
-  }
-
-  /** {@inheritDoc} */
-  public ActivityObject getGenerator() {
-    return generator;
-  }
-
-  /** {@inheritDoc} */
-  public void setGenerator(ActivityObject generator) {
-    this.generator = generator;
-  }
-
-  /** {@inheritDoc} */
-  public ActivityObject getProvider() {
-    return provider;
-  }
-
-  /** {@inheritDoc} */
-  public void setProvider(ActivityObject provider) {
-    this.provider = provider;
-  }
-
-  /** {@inheritDoc} */
-  public String getTitle() {
-    return title;
-  }
-
-  /** {@inheritDoc} */
-  public void setTitle(String title) {
-    this.title = title;
-  }
-
-  /** {@inheritDoc} */
   public String getBody() {
-    return body;
+    return this.body;
   }
 
   /** {@inheritDoc} */
@@ -154,42 +66,92 @@ public class ActivityEntryImpl implements ActivityEntry {
   }
 
   /** {@inheritDoc} */
-  public Map<String, List<StandardLink>> getLinks() {
-    return links;
+  public ActivityObject getGenerator() {
+    return this.generator;
   }
 
   /** {@inheritDoc} */
-  public void setLinks(Map<String, List<StandardLink>> links) {
-    this.links = links;
-  }
-  
-  /** {@inheritDoc} */
-  public List<String> getTo() {
-    return to;
-  }
-  
-  /** {@inheritDoc} */
-  public void setTo(List<String> to) {
-    this.to = to;
-  }
-  
-  /** {@inheritDoc} */
-  public List<String> getCc() {
-    return cc;
-  }
-  
-  /** {@inheritDoc} */
-  public void setCc(List<String> cc) {
-    this.cc = cc;
+  public void setGenerator(ActivityObject generator) {
+    this.generator = generator;
   }
 
   /** {@inheritDoc} */
-  public List<String> getBcc() {
-    return bcc;
+  public MediaLink getIcon() {
+    return this.icon;
   }
-  
+
   /** {@inheritDoc} */
-  public void setBcc(List<String> bcc) {
-    this.bcc = bcc;
+  public void setIcon(MediaLink icon) {
+    this.icon = icon;
+  }
+
+  /** {@inheritDoc} */
+  public ActivityObject getObject() {
+    return this.object;
+  }
+
+  /** {@inheritDoc} */
+  public void setObject(ActivityObject object) {
+    this.object = object; 
+  }
+
+  /** {@inheritDoc} */
+  public String getPostedTime() {
+    return this.postedTime;
+  }
+
+  /** {@inheritDoc} */
+  public void setPostedTime(String postedTime) {
+    this.postedTime = postedTime;
+  }
+
+  /** {@inheritDoc} */
+  public ActivityObject getProvider() {
+    return this.provider;
+  }
+
+  /** {@inheritDoc} */
+  public void setProvider(ActivityObject provider) {
+    this.provider = provider;
+  }
+
+  /** {@inheritDoc} */
+  public ActivityObject getTarget() {
+    return this.target;
+  }
+
+  /** {@inheritDoc} */
+  public void setTarget(ActivityObject target) {
+    this.target = target;
+  }
+
+  /** {@inheritDoc} */
+  public String getTitle() {
+    return this.title;
+  }
+
+  /** {@inheritDoc} */
+  public void setTitle(String title) {
+    this.title = title;
+  }
+
+  /** {@inheritDoc} */
+  public String getUpdatedTime() {
+    return this.updatedTime;
+  }
+
+  /** {@inheritDoc} */
+  public void setUpdatedTime(String updatedTime) {
+    this.updatedTime = updatedTime;
+  }
+
+  /** {@inheritDoc} */
+  public String getVerb() {
+    return this.verb;
+  }
+
+  /** {@inheritDoc} */
+  public void setVerb(String verb) {
+    this.verb = verb;
   }
 }

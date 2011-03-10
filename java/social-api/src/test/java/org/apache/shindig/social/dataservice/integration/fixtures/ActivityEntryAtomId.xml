@@ -1,0 +1,73 @@
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:osearch="http://a9.com/-/spec/opensearch/1.1">
+  <entry>
+    <id>object1</id>
+    <title>John Doe posted a new video to his album.</title>
+    <summary>&lt;body&gt;My activity summary.&lt;/body&gt;</summary>
+    <author>
+      <uri>john.doe</uri>
+      <name xmlns="http://ns.opensocial.org/2008/opensocial">John Doe</name>
+    </author>
+    <content type="application/xml">
+      <activityEntry xmlns="http://ns.opensocial.org/2008/opensocial">
+        <actor>
+          <displayName>John Doe</displayName>
+          <id>john.doe</id>
+          <image>
+            <height>250</height>
+            <url>http://example.org/john/image</url>
+            <width>250</width>
+          </image>
+          <objectType>person</objectType>
+          <url>http://example.org/john</url>
+        </actor>
+        <generator>
+          <url>http://example.org/activities-app</url>
+        </generator>
+        <object>
+          <attachedObjects>
+            <object>
+              <id>attached1</id>
+              <url>http://example.org/attached1</url>
+            </object>
+            <object>
+              <id>attached2</id>
+              <url>http://example.org/attached2</url>
+            </object>
+          </attachedObjects>
+          <id>object1</id>
+          <image>
+            <height>250</height>
+            <url>http://example.org/album/my_fluffy_cat_thumb.jpg</url>
+            <width>250</width>
+          </image>
+          <objectType>http://activitystrea.ms/schema/1.0/photo</objectType>
+          <summary>&lt;body&gt;My activity summary.&lt;/body&gt;</summary>
+          <upstreamDuplicates>upstreamId1</upstreamDuplicates>
+          <upstreamDuplicates>upstreamId2</upstreamDuplicates>
+          <url>http://example.org/album/my_fluffy_cat.jpg</url>
+        </object>
+        <postedTime>2011-02-10T15:04:55Z</postedTime>
+        <provider>
+          <url>http://example.org/activity-stream</url>
+        </provider>
+        <target>
+          <displayName>John&apos;s Photo Album</displayName>
+          <id>tag:example.org,2011:abc123</id>
+          <image>
+            <height>250</height>
+            <url>http://example.org/album/thumbnail.jpg</url>
+            <width>250</width>
+          </image>
+          <objectType>http://activitystrea.ms/schema/1.0/photo-album</objectType>
+          <url>http://example.org/album/</url>
+        </target>
+        <title>John Doe posted a new video to his album.</title>
+        <verb>post</verb>
+      </activityEntry>
+    </content>
+  </entry>
+  <osearch:startIndex>0</osearch:startIndex>
+  <osearch:totalResults>1</osearch:totalResults>
+  <osearch:itemsPerPage>1</osearch:itemsPerPage>
+
+</feed>

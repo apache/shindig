@@ -89,7 +89,7 @@ public class AtomEntry {
       ActivityEntry activity = (ActivityEntry)o;
       id = activity.getObject().getId();
       title = activity.getTitle();
-      summary = activity.getBody();
+      summary = activity.getObject().getSummary();
       author = new AtomAuthor(activity);
       content = new AtomContent(activity);
       try {

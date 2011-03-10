@@ -1,0 +1,21 @@
+{
+   "startIndex":0,
+   "totalResults":1,
+   "entry":[
+      {
+         "title":"Super simple ActivityEntry",
+         "verb":"post",
+         "postedTime":"2010-04-27T06:02:36+0000",
+         "actor":{
+            "id":"john.doe",
+            "displayName":"John Doe"
+         },
+         "object":{
+            "id":"object2",
+            "displayName":"Super simple ActivityObject",
+            "objectType":"article"
+         }
+      }
+   ],
+   "itemsPerPage":1
+}

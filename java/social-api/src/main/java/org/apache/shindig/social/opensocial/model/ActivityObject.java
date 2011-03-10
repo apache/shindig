@@ -19,7 +19,6 @@
 package org.apache.shindig.social.opensocial.model;
 
 import java.util.List;
-import java.util.Map;
 
 import org.apache.shindig.protocol.model.Exportablebean;
 import org.apache.shindig.social.core.model.ActivityObjectImpl;
@@ -27,7 +26,7 @@ import org.apache.shindig.social.core.model.ActivityObjectImpl;
 import com.google.inject.ImplementedBy;
 
 /**
- * A representation of an ActivityStream object, a thing which participates in an Activity.
+ * A representation of an Activity's object.
  */
 @ImplementedBy(ActivityObjectImpl.class)
 @Exportablebean
@@ -37,20 +36,16 @@ public interface ActivityObject {
    * Fields that represent JSON elements for an activity entry.
    */
   public static enum Field {
-    ID("id"),
-    DISPLAY_NAME("displayName"),
-    SUMMARY("summary"),
-    IMAGE("image"),
-    LINK("link"),
-    OBJECT_TYPE("objectType"),
-    IN_REPLY_TO("inReplyTo"),
     ATTACHED_OBJECTS("attachedObjects"),
-    REPLIES("replies"),
-    REACTIONS("reactions"),
-    ACTION_LINKS("actionLinks"),
-    UPSTREAM_DUPLICATES("upstreamDuplicates"),
+    DISPLAY_NAME("displayName"),
     DOWNSTREAM_DUPLICATES("downstreamDuplicates"),
-    LINKS("links");
+    EMBED_CODE("embedCode"),
+    ID("id"),
+    IMAGE("image"),
+    OBJECT_TYPE("objectType"),
+    SUMMARY("summary"),
+    UPSTREAM_DUPLICATES("upstreamDuplicates"),
+    URL("url");
     
     /*
      * The name of the JSON element.
@@ -77,100 +72,6 @@ public interface ActivityObject {
   }
   
   /**
-   * Gets the absolute URI that uniquely identifies the object
-   *
-   * @return a non-null string
-   */
-  String getId();
-
-  /**
-   * Set the absolute URI that uniquely identifies the object
-   *
-   * @param id a non-null string
-   */
-  void setId(String id);
-
-  /**
-   * @return the human-readable name fo the object
-   */
-  String getDisplayName();
-
-  /**
-   * Sets the name
-   * @param name a human-readable name
-   */
-  void setDisplayName(String displayName);
-
-  /**
-   * Gets the human-readable summary for this object.
-   * @return the summary
-   */
-  String getSummary();
-
-  /**
-   * Sets the human-readable summary for this object.
-   *
-   * @param summary a summary
-   */
-  void setSummary(String summary);
-
-  /**
-   * Get the link to a representative image.
-   *
-   * @return a {@link org.apache.shindig.extras.as.opensocial.model.MediaLink} object.
-   */
-  MediaLink getImage();
-
-  /**
-   * Set the link to a representative image.
-   *
-   * @param image a {@link org.apache.shindig.extras.as.opensocial.model.MediaLink} object.
-   */
-  void setImage(MediaLink image);
-
-  /**
-   * Get the permanent link
-   *
-   * @return a permalink string, possibly null
-   */
-  String getLink();
-
-  /**
-   * Set the permanent link
-   *
-   * @param permalink a permalink string, possibly null
-   */
-  void setLink(String link);
-
-  /**
-   * Returns the ActivityObject's object type.
-   *
-   * @return String representing the object type
-   */
-  String getObjectType();
-
-  /**
-   * Set's the ActivityObject's object type.
-   *
-   * @param objectType is the object type
-   */
-  void setObjectType(String objectType);
-
-  /**
-   * Get the Activity this item is a response to
-   *
-   * @return a {@link org.apache.shindig.extras.as.opensocial.model.ActivityObject} 
-   */
-  ActivityObject getInReplyTo();
-
-  /**
-   * Set the Activity this item is a response to
-   *
-   * @param inReplyTo a {@link org.apache.shindig.extras.as.opensocial.model.ActivityObject} object.
-   */
-  void setInReplyTo(ActivityObject inReplyTo);
-
-  /**
    * Gets the list of Attached Activities for this entry
    *
    * @return a list of ActivityObjects
@@ -185,60 +86,15 @@ public interface ActivityObject {
   void setAttachedObjects(List<ActivityObject> attachedObjects);
 
   /**
-   * Gets the list of reply Activities for this entry
-   *
-   * @return a list of ActivityObjects
+   * @return the human-readable name of the object
    */
-  List<ActivityObject> getReplies();
+  String getDisplayName();
 
   /**
-   * Sets the list of reply Activities for this entry
-   *
-   * @param replies a list of ActivityObjects
+   * Sets the name
+   * @param name a human-readable name
    */
-  void setReplies(List<ActivityObject> replies);
-
-  /**
-   * Gets the list of reaction Activities for this entry
-   *
-   * @return a list of ActivityObjects
-   */
-  List<ActivityObject> getReactions();
-
-  /**
-   * Sets the list of reaction Activities for this entry
-   *
-   * @param reactions a list of ActivityObjects
-   */
-  void setReactions(List<ActivityObject> reactions);
-
-  /**
-   * Returns the ActionLinks for this object
-   *
-   * @return List<ActionLink> is the list of ActionLink objects
-   */
-  List<ActionLink> getActionLinks();
-
-  /**
-   * Sets the ActionLinks for this object
-   *
-   * @param actionLinks is the list of ActionLinks
-   */
-  void setActionLinks(List<ActionLink> actionLinks);
-
-  /**
-   * Get the list of upstream duplicates.
-   *
-   * @return a list of strings
-   */
-  List<String> getUpstreamDuplicates();
-
-  /**
-   * Set the list of upstream duplicates.
-   *
-   * @param upstreamDuplicates a list of strings containing duplicate IDs
-   */
-  void setUpstreamDuplicates(List<String> upstreamDuplicates);
+  void setDisplayName(String displayName);
 
   /**
    * Get the list of downstream duplicates.
@@ -255,16 +111,100 @@ public interface ActivityObject {
   void setDownstreamDuplicates(List<String> downstreamDuplicates);
 
   /**
-   * Return the Object's StandardLinks
-   *
-   * @return Map<String, List<StandardLink>> is the list of StandardLinks
+   * Returns the object's embedCode property.
+   * 
+   * @return String is the object's embedCode property.
    */
-  Map<String, List<StandardLink>> getLinks();
+  String getEmbedCode();
+  
+  /**
+   * Sets the objet's embedCode property.
+   * 
+   * @param embedCode is the value to set embedCode to
+   */
+  void setEmbedCode(String embedCode);
 
   /**
-   * Set the standard links
+   * Gets the absolute URI that uniquely identifies the object
    *
-   * @param links the list of standard links
+   * @return a non-null string
    */
-  void setLinks(Map<String, List<StandardLink>> links);
+  String getId();
+
+  /**
+   * Set the absolute URI that uniquely identifies the object
+   *
+   * @param id a non-null string
+   */
+  void setId(String id);
+
+  /**
+   * Get the link to a representative image.
+   *
+   * @return a {@link org.apache.shindig.extras.as.opensocial.model.MediaLink} object.
+   */
+  MediaLink getImage();
+
+  /**
+   * Set the link to a representative image.
+   *
+   * @param image a {@link org.apache.shindig.extras.as.opensocial.model.MediaLink} object.
+   */
+  void setImage(MediaLink image);
+
+  /**
+   * Returns the ActivityObject's object type.
+   *
+   * @return String representing the object type
+   */
+  String getObjectType();
+
+  /**
+   * Set's the ActivityObject's object type.
+   *
+   * @param objectType is the object type
+   */
+  void setObjectType(String objectType);
+
+  /**
+   * Get the list of upstream duplicates.
+   *
+   * @return a list of strings
+   */
+  List<String> getUpstreamDuplicates();
+
+  /**
+   * Set the list of upstream duplicates.
+   *
+   * @param upstreamDuplicates a list of strings containing duplicate IDs
+   */
+  void setUpstreamDuplicates(List<String> upstreamDuplicates);
+
+  /**
+   * Gets the human-readable summary for this object.
+   * @return the summary
+   */
+  String getSummary();
+
+  /**
+   * Sets the human-readable summary for this object.
+   *
+   * @param summary a summary
+   */
+  void setSummary(String summary);
+  
+  
+  /**
+   * Returns the object's URL.
+   * 
+   * @return String is the object's URL
+   */
+  String getUrl();
+  
+  /**
+   * Sets the object's URL.
+   * 
+   * @param url is the value to set the object's URL
+   */
+  void setUrl(String url);
 }

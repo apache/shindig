@@ -25,11 +25,10 @@ import org.apache.shindig.social.opensocial.model.MediaLink;
  */
 public class MediaLinkImpl implements MediaLink {
   
-  private String url;
-  private String type;
-  private Integer width;
-  private Integer height;
   private Integer duration;
+  private Integer height;
+  private String url;
+  private Integer width;  
   
   /**
    * Create a new MediaLink
@@ -38,33 +37,13 @@ public class MediaLinkImpl implements MediaLink {
   }
 
   /** {@inheritDoc} */
-  public String getUrl() {
-    return url;
+  public Integer getDuration() {
+    return duration;
   }
 
   /** {@inheritDoc} */
-  public void setUrl(String url) {
-    this.url = url;
-  }
-  
-  /** {@inheritDoc} */
-  public String getType() {
-    return type;
-  }
-
-  /** {@inheritDoc} */
-  public void setType(String type) {
-    this.type = type;
-  }
-
-  /** {@inheritDoc} */
-  public Integer getWidth() {
-    return width;
-  }
-
-  /** {@inheritDoc} */
-  public void setWidth(Integer width) {
-    this.width = width;
+  public void setDuration(Integer duration) {
+    this.duration = duration;
   }
 
   /** {@inheritDoc} */
@@ -78,12 +57,22 @@ public class MediaLinkImpl implements MediaLink {
   }
 
   /** {@inheritDoc} */
-  public Integer getDuration() {
-    return duration;
+  public String getUrl() {
+    return url;
   }
 
   /** {@inheritDoc} */
-  public void setDuration(Integer duration) {
-    this.duration = duration;
+  public void setUrl(String url) {
+    this.url = url;
+  }
+
+  /** {@inheritDoc} */
+  public Integer getWidth() {
+    return width;
+  }
+
+  /** {@inheritDoc} */
+  public void setWidth(Integer width) {
+    this.width = width;
   }
 }

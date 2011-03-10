@@ -62,7 +62,7 @@ public class ActivityStreamHandlerTest extends EasyMockTestCase {
   
   private ActivityStreamService service;
   
-  private ActivityStreamHandler handler; // TODO: Rename to ActivityStreamHandler
+  private ActivityStreamHandler handler;
   
   private FakeGadgetToken token;
   
@@ -168,7 +168,7 @@ public class ActivityStreamHandlerTest extends EasyMockTestCase {
   
   /* Helper for testing PUT and POST */
   private Future<?> setupBodyRequest(String method) throws ProtocolException {
-    String jsonActivityEntry = "{title: hi mom!, etc etc}";
+    String jsonActivityEntry = "{title: 'hi mom!', object: {id: 'testObject'}}";
 
     String path = "/activitystreams/john.doe/@self/@app";
     RestHandler operation = registry.getRestHandler(path, method);
@@ -188,7 +188,22 @@ public class ActivityStreamHandlerTest extends EasyMockTestCase {
   
   @Test
   public void testHandlePost() throws Exception {
-    Future<?> future = setupBodyRequest("POST");
+    String jsonActivityEntry = "{title: 'hi mom!', object: {id: 'testObject'}}";
+
+    String path = "/activitystreams/john.doe/@self/@app";
+    RestHandler operation = registry.getRestHandler(path, "POST");
+
+    ActivityEntry entry = new ActivityEntryImpl();
+    org.easymock.EasyMock.expect(converter.convertToObject(eq(jsonActivityEntry), eq(ActivityEntry.class)))
+        .andReturn(entry);
+
+    org.easymock.EasyMock.expect(service.createActivityEntry(eq(JOHN_DOE.iterator().next()),
+        eq(new GroupId(GroupId.Type.self, null)), eq("appId"), eq(ImmutableSet.<String>of()),
+        eq(entry), eq(token))).andReturn(ImmediateFuture.newInstance((Void) null));
+    replay();
+
+    Future<?> future = operation.execute(Maps.<String, String[]>newHashMap(),
+        new StringReader(jsonActivityEntry), token, converter);
     assertNull(future.get());
     verify();
     reset();
@@ -196,7 +211,22 @@ public class ActivityStreamHandlerTest extends EasyMockTestCase {
 
   @Test
   public void testHandlePut() throws Exception {
-    Future<?> future = setupBodyRequest("PUT");
+    String jsonActivityEntry = "{title: 'hi mom!', object: {id: 'testObject'}}";
+
+    String path = "/activitystreams/john.doe/@self/@app/testObject";
+    RestHandler operation = registry.getRestHandler(path, "PUT");
+
+    ActivityEntry entry = new ActivityEntryImpl();
+    org.easymock.EasyMock.expect(converter.convertToObject(eq(jsonActivityEntry), eq(ActivityEntry.class)))
+        .andReturn(entry);
+
+    org.easymock.EasyMock.expect(service.updateActivityEntry(eq(JOHN_DOE.iterator().next()),
+        eq(new GroupId(GroupId.Type.self, null)), eq("appId"), eq(ImmutableSet.<String>of()),
+        eq(entry), eq("testObject"), eq(token))).andReturn(ImmediateFuture.newInstance((Void) null));
+    replay();
+
+    Future<?> future = operation.execute(Maps.<String, String[]>newHashMap(),
+        new StringReader(jsonActivityEntry), token, converter);
     assertNull(future.get());
     verify();
     reset();

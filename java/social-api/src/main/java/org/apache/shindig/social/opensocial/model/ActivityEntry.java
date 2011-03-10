@@ -18,9 +18,6 @@
 
 package org.apache.shindig.social.opensocial.model;
 
-import java.util.List;
-import java.util.Map;
-
 import org.apache.shindig.protocol.model.Exportablebean;
 import org.apache.shindig.social.core.model.ActivityEntryImpl;
 
@@ -28,11 +25,7 @@ import com.google.inject.ImplementedBy;
 
 /**
  * <p>ActivityEntry interface.</p>
- * TODO: comment a description for this class
- * TODO: ensure verbs are up to date
- * TODO: comment all classes
  */
-
 @ImplementedBy(ActivityEntryImpl.class)
 @Exportablebean
 public interface ActivityEntry {
@@ -41,20 +34,17 @@ public interface ActivityEntry {
    * Fields that represent JSON elements for an activity entry.
    */
   public static enum Field {
-    ICON("icon"),
-    POSTED_TIME("postedTime"),
     ACTOR("actor"),
-    VERB("verb"),
-    OBJECT("object"),
-    TARGET("target"),
-    GENERATOR("generator"),
-    PROVIDER("provider"),
-    TITLE("title"),
     BODY("body"),
-    LINKS("links"),
-    TO("to"),
-    CC("cc"),
-    BCC("bcc");
+    GENERATOR("generator"),
+    ICON("icon"),
+    OBJECT("object"),
+    POSTED_TIME("postedTime"),
+    PROVIDER("provider"),
+    TARGET("target"),
+    TITLE("title"),
+    UPDATED_TIME("updatedTime"),
+    VERB("verb");
     
     /**
      * The name of the JSON element.
@@ -81,170 +71,18 @@ public interface ActivityEntry {
   }
   
   /**
-   * Possible verbs for an activity stream entry.
-   */
-  public static enum Verb {
-    MARK_AS_FAVORITE("markAsFavorite"),
-    START_FOLLOWING("startFollowing"),
-    MARK_AS_LIKED("markAsLiked"),
-    MAKE_FRIEND("makeFriend"),
-    JOIN("join"),
-    PLAY("play"),
-    POST("post"),
-    SAVE("save"),
-    SHARE("share"),
-    TAG("tag"),
-    UPDATE("update");
-    
-    /**
-     * The name of the JSON element.
-     */
-    private final String jsonString;
-    
-    /**
-     * Constructs the field base for the JSON element.
-     * 
-     * @param jsonString the name of the element
-     */
-    private Verb(String jsonString) {
-      this.jsonString = jsonString;
-    }
-    
-    /**
-     * Returns the name of the JSON element.
-     * 
-     * @return String the name of the JSON element
-     */
-    public String toString() {
-      return jsonString;
-    }
-  }
-  
-  /**
-   * <p>getIcon</p>
-   *
-   * @return a {@link org.apache.shindig.extras.as.opensocial.model.MediaLink} object.
-   */
-  MediaLink getIcon();
-
-  /**
-   * <p>setIcon</p>
-   *
-   * @param icon a {@link org.apache.shindig.extras.as.opensocial.model.MediaLink} object.
-   */
-  void setIcon(MediaLink icon);
-
-  /**
-   * <p>getPostedTime</p>
-   *
-   * @return a {@link java.lang.String} object.
-   */
-  String getPostedTime();
-
-  /**
-   * <p>setPostedTime</p>
-   *
-   * @param postedTime a {@link java.lang.String} object.
-   */
-  void setPostedTime(String postedTime);
-
-  /**
    * <p>getActor</p>
    *
-   * @return a {@link org.apache.shindig.extras.as.opensocial.model.ActivityObject} object.
+   * @return a {@link org.apache.shindig.social.opensocial.model.ActivityObject} object.
    */
   ActivityObject getActor();
 
   /**
    * <p>setActor</p>
    *
-   * @param actor a {@link org.apache.shindig.extras.as.opensocial.model.ActivityObject} object.
+   * @param actor a {@link org.apache.shindig.social.opensocial.model.ActivityObject} object.
    */
   void setActor(ActivityObject actor);
-
-  /**
-   * <p>getVerb</p>
-   *
-   * @return a {@link java.util.List} object.
-   */
-  String getVerb();
-
-  /**
-   * <p>setVerb</p>
-   *
-   * @param verb a {@link java.util.List} object.
-   */
-  void setVerb(String verb);
-
-  /**
-   * <p>getObject</p>
-   *
-   * @return a {@link org.apache.shindig.extras.as.opensocial.model.ActivityObject} object.
-   */
-  ActivityObject getObject();
-
-  /**
-   * <p>setObject</p>
-   *
-   * @param object a {@link org.apache.shindig.extras.as.opensocial.model.ActivityObject} object.
-   */
-  void setObject(ActivityObject object);
-  
-  /**
-   * <p>getTarget</p>
-   *
-   * @return a {@link org.apache.shindig.extras.as.opensocial.model.ActivityObject} object.
-   */
-  ActivityObject getTarget();
-  
-  /**
-   * <p>setTarget</p>
-   *
-   * @param target a {@link org.apache.shindig.extras.as.opensocial.model.ActivityObject} object.
-   */
-  void setTarget(ActivityObject target);
-  
-  /**
-   * <p>getGenerator</p>
-   *
-   * @return a {@link org.apache.shindig.extras.as.opensocial.model.ActivityObject} object.
-   */
-  ActivityObject getGenerator();
-
-  /**
-   * <p>setGenerator</p>
-   *
-   * @param generator a {@link org.apache.shindig.extras.as.opensocial.model.ActivityObject} object.
-   */
-  void setGenerator(ActivityObject generator);
-
-  /**
-   * <p>getProvider</p>
-   *
-   * @return a {@link org.apache.shindig.extras.as.opensocial.model.ActivityObject} object.
-   */
-  ActivityObject getProvider();
-
-  /**
-   * <p>setServiceProvider</p>
-   *
-   * @param provider a {@link org.apache.shindig.extras.as.opensocial.model.ActivityObject} object.
-   */
-  void setProvider(ActivityObject provider);
-
-  /**
-   * <p>getTitle</p>
-   *
-   * @return a {@link java.lang.String} object.
-   */
-  String getTitle();
-
-  /**
-   * <p>setTitle</p>
-   *
-   * @param title a {@link java.lang.String} object.
-   */
-  void setTitle(String title);
 
   /**
    * <p>getBody</p>
@@ -259,60 +97,130 @@ public interface ActivityEntry {
    * @param body a {@link java.lang.String} object.
    */
   void setBody(String body);
+  
+  /**
+   * <p>getGenerator</p>
+   *
+   * @return a {@link org.apache.shindig.social.opensocial.model.ActivityObject} object.
+   */
+  ActivityObject getGenerator();
 
   /**
-   * <p>links</p>
+   * <p>setGenerator</p>
    *
-   * @return a {@link java.util.Map} object.
+   * @param generator a {@link org.apache.shindig.social.opensocial.model.ActivityObject} object.
    */
-  Map<String, List<StandardLink>> getLinks();
+  void setGenerator(ActivityObject generator);
+  
+  /**
+   * <p>getIcon</p>
+   *
+   * @return a {@link org.apache.shindig.social.opensocial.model.MediaLink} object.
+   */
+  MediaLink getIcon();
 
   /**
-   * <p>setLinks</p>
+   * <p>setIcon</p>
    *
-   * @param links a {@link java.util.Map} object.
+   * @param icon a {@link org.apache.shindig.social.opensocial.model.MediaLink} object.
    */
-  void setLinks(Map<String, List<StandardLink>> links);
+  void setIcon(MediaLink icon);
+
+  /**
+   * <p>getObject</p>
+   *
+   * @return a {@link org.apache.shindig.social.opensocial.model.ActivityObject} object.
+   */
+  ActivityObject getObject();
+
+  /**
+   * <p>setObject</p>
+   *
+   * @param object a {@link org.apache.shindig.social.opensocial.model.ActivityObject} object.
+   */
+  void setObject(ActivityObject object);
+
+  /**
+   * <p>getPostedTime</p>
+   *
+   * @return a {@link java.lang.String} object.
+   */
+  String getPostedTime();
+
+  /**
+   * <p>setPostedTime</p>
+   *
+   * @param postedTime a {@link java.lang.String} object.
+   */
+  void setPostedTime(String postedTime);
   
   /**
-   * <p>getTo</p>
+   * <p>getProvider</p>
    *
-   * @return a List<String> of target recipients
+   * @return a {@link org.apache.shindig.social.opensocial.model.ActivityObject} object.
    */
-  List<String> getTo();
+  ActivityObject getProvider();
+
+  /**
+   * <p>setServiceProvider</p>
+   *
+   * @param provider a {@link org.apache.shindig.social.opensocial.model.ActivityObject} object.
+   */
+  void setProvider(ActivityObject provider);
   
   /**
-   * <p>setTo</p>
+   * <p>getTarget</p>
    *
-   * @param to is the list of target recipients
+   * @return a {@link org.apache.shindig.social.opensocial.model.ActivityObject} object.
    */
-  void setTo(List<String> to);
+  ActivityObject getTarget();
   
   /**
-   * <p>getCC</p>
+   * <p>setTarget</p>
    *
-   * @return a List<String> of carbon-copy recipients
+   * @param target a {@link org.apache.shindig.social.opensocial.model.ActivityObject} object.
    */
-  List<String> getCc();
+  void setTarget(ActivityObject target);
+
+  /**
+   * <p>getTitle</p>
+   *
+   * @return a {@link java.lang.String} object.
+   */
+  String getTitle();
+
+  /**
+   * <p>setTitle</p>
+   *
+   * @param title a {@link java.lang.String} object.
+   */
+  void setTitle(String title);
   
   /**
-   * <p>setCC</p>
+   * <p>getUpdatedTime</p>
    *
-   * @param cc is the list of carbon-copy recipients
+   * @return a {@link java.lang.String} object.
    */
-  void setCc(List<String> cc);
-  
+  String getUpdatedTime();
+
   /**
-   * <p>getBCC</p>
+   * <p>setUpdatedTime</p>
    *
-   * @return a List<String> of BCC recipients
+   * @param postedTime a {@link java.lang.String} object.
    */
-  List<String> getBcc();
-  
+  void setUpdatedTime(String updatedTime);
+
   /**
-   * <p>setBCC</p>
+   * <p>getVerb</p>
    *
-   * @param bcc is the list of BCC recipients
+   * @return a {@link java.lang.String} object.
    */
-  void setBcc(List<String> bcc);
+  String getVerb();
+
+  /**
+   * <p>setVerb</p>
+   *
+   * @param verb a {@link java.lang.String} object.
+   */
+  void setVerb(String verb);
 }

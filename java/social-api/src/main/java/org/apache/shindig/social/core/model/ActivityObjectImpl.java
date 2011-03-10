@@ -19,33 +19,25 @@
 package org.apache.shindig.social.core.model;
 
 import java.util.List;
-import java.util.Map;
 
-import org.apache.shindig.social.opensocial.model.ActionLink;
 import org.apache.shindig.social.opensocial.model.ActivityObject;
 import org.apache.shindig.social.opensocial.model.MediaLink;
-import org.apache.shindig.social.opensocial.model.StandardLink;
 
 /**
  * <p>ActivityObjectImpl class.</p>
- *
  */
 public class ActivityObjectImpl implements ActivityObject {
   
-  private String id;
-  private String displayName;
-  private String summary;
-  private MediaLink image;
-  private String link;
-  private String objectType;
-  private ActivityObject inReplyTo;
   private List<ActivityObject> attachedObjects;
-  private List<ActivityObject> replies;
-  private List<ActivityObject> reactions;
-  private List<ActionLink> actionLinks;
-  private List<String> upstreamDuplicates;
+  private String displayName;
   private List<String> downstreamDuplicates;
-  private Map<String, List<StandardLink>> links;
+  private String embedCode;
+  private String id;
+  private MediaLink image;
+  private String objectType;
+  private String summary;
+  private List<String> upstreamDuplicates;
+  private String url;
   
   /**
    * A simple implementation of an ActivtyObject
@@ -54,78 +46,8 @@ public class ActivityObjectImpl implements ActivityObject {
   }
 
   /** {@inheritDoc} */
-  public String getId() {
-    return id;
-  }
-
-  /** {@inheritDoc} */
-  public void setId(String id) {
-    this.id = id;
-  }
-
-  /** {@inheritDoc} */
-  public String getDisplayName() {
-    return displayName;
-  }
-
-  /** {@inheritDoc} */
-  public void setDisplayName(String displayName) {
-    this.displayName = displayName;
-  }
-
-  /** {@inheritDoc} */
-  public String getSummary() {
-    return summary;
-  }
-
-  /** {@inheritDoc} */
-  public void setSummary(String summary) {
-    this.summary = summary;
-  }
-
-  /** {@inheritDoc} */
-  public MediaLink getImage() {
-    return image;
-  }
-
-  /** {@inheritDoc} */
-  public void setImage(MediaLink image) {
-    this.image = image;
-  }
-
-  /** {@inheritDoc} */
-  public String getLink() {
-    return link;
-  }
-
-  /** {@inheritDoc} */
-  public void setLink(String link) {
-    this.link = link;
-  }
-
-  /** {@inheritDoc} */
-  public String getObjectType() {
-    return objectType;
-  }
-
-  /** {@inheritDoc} */
-  public void setObjectType(String objectType) {
-    this.objectType = objectType;
-  }
-
-  /** {@inheritDoc} */
-  public ActivityObject getInReplyTo() {
-    return inReplyTo;
-  }
-
-  /** {@inheritDoc} */
-  public void setInReplyTo(ActivityObject inReplyTo) {
-    this.inReplyTo = inReplyTo;
-  }
-
-  /** {@inheritDoc} */
   public List<ActivityObject> getAttachedObjects() {
-    return attachedObjects;
+    return this.attachedObjects;
   }
 
   /** {@inheritDoc} */
@@ -134,48 +56,18 @@ public class ActivityObjectImpl implements ActivityObject {
   }
 
   /** {@inheritDoc} */
-  public List<ActivityObject> getReplies() {
-    return replies;
+  public String getDisplayName() {
+    return this.displayName;
   }
 
   /** {@inheritDoc} */
-  public void setReplies(List<ActivityObject> replies) {
-    this.replies = replies;
-  }
-
-  /** {@inheritDoc} */
-  public List<ActivityObject> getReactions() {
-    return reactions;
-  }
-
-  /** {@inheritDoc} */
-  public void setReactions(List<ActivityObject> reactions) {
-    this.reactions = reactions;
-  }
-
-  /** {@inheritDoc} */
-  public List<ActionLink> getActionLinks() {
-    return actionLinks;
-  }
-
-  /** {@inheritDoc} */
-  public void setActionLinks(List<ActionLink> actionLinks) {
-    this.actionLinks = actionLinks;
-  }
-
-  /** {@inheritDoc} */
-  public List<String> getUpstreamDuplicates() {
-    return upstreamDuplicates;
-  }
-
-  /** {@inheritDoc} */
-  public void setUpstreamDuplicates(List<String> upstreamDuplicates) {
-    this.upstreamDuplicates = upstreamDuplicates;
+  public void setDisplayName(String displayName) {
+    this.displayName = displayName;
   }
 
   /** {@inheritDoc} */
   public List<String> getDownstreamDuplicates() {
-    return downstreamDuplicates;
+    return this.downstreamDuplicates;
   }
 
   /** {@inheritDoc} */
@@ -184,12 +76,72 @@ public class ActivityObjectImpl implements ActivityObject {
   }
 
   /** {@inheritDoc} */
-  public Map<String, List<StandardLink>> getLinks() {
-    return links;
+  public String getEmbedCode() {
+    return this.embedCode;
   }
 
   /** {@inheritDoc} */
-  public void setLinks(Map<String, List<StandardLink>> links) {
-    this.links = links;
+  public void setEmbedCode(String embedCode) {
+    this.embedCode = embedCode;
+  }
+
+  /** {@inheritDoc} */
+  public String getId() {
+    return this.id;
+  }
+
+  /** {@inheritDoc} */
+  public void setId(String id) {
+    this.id = id;
+  }
+
+  /** {@inheritDoc} */
+  public MediaLink getImage() {
+    return this.image;
+  }
+
+  /** {@inheritDoc} */
+  public void setImage(MediaLink image) {
+    this.image = image;
+  }
+
+  /** {@inheritDoc} */
+  public String getObjectType() {
+    return this.objectType;
+  }
+
+  /** {@inheritDoc} */
+  public void setObjectType(String objectType) {
+    this.objectType = objectType;
+  }
+
+  /** {@inheritDoc} */
+  public List<String> getUpstreamDuplicates() {
+    return this.upstreamDuplicates;
+  }
+
+  /** {@inheritDoc} */
+  public void setUpstreamDuplicates(List<String> upstreamDuplicates) {
+    this.upstreamDuplicates = upstreamDuplicates;
+  }
+
+  /** {@inheritDoc} */
+  public String getSummary() {
+    return this.summary;
+  }
+
+  /** {@inheritDoc} */
+  public void setSummary(String summary) {
+    this.summary = summary;
+  }
+
+  /** {@inheritDoc} */
+  public String getUrl() {
+    return this.url;
+  }
+
+  /** {@inheritDoc} */
+  public void setUrl(String url) {
+    this.url = url;
   }
 }

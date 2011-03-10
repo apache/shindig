@@ -1173,15 +1173,20 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
   
   // Are fields really needed here?
   /** {@inheritDoc} */
-  public Future<Void> createActivityEntry(UserId userId, GroupId groupId, String appId,
-        Set<String> fields, ActivityEntry activityEntry, SecurityToken token) throws ProtocolException {
+  public Future<Void> updateActivityEntry(UserId userId, GroupId groupId, String appId,
+        Set<String> fields, ActivityEntry activityEntry, String activityId, SecurityToken token) throws ProtocolException {
     try {
       JSONObject jsonEntry = convertFromActivityEntry(activityEntry, fields);
       JSONObject jsonEntryObject = jsonEntry.getJSONObject(ActivityEntry.Field.OBJECT.toString());
       if (!jsonEntryObject.has(ActivityObject.Field.ID.toString())) {
-        jsonEntryObject.put(ActivityObject.Field.ID.toString(), System.currentTimeMillis());
+        if (activityId != null) {
+          jsonEntryObject.put(ActivityObject.Field.ID.toString(), activityId);
+        } else {
+          jsonEntryObject.put(ActivityObject.Field.ID.toString(), System.currentTimeMillis());
+        }
         jsonEntry.put(ActivityEntry.Field.OBJECT.toString(), jsonEntryObject);
       }
+      String objectId = jsonEntry.getJSONObject(ActivityEntry.Field.OBJECT.toString()).getString(ActivityObject.Field.ID.toString());
 
       JSONArray jsonArray;
       if (db.getJSONObject(ACTIVITYSTREAMS_TABLE).has(userId.getUserId(token))) {
@@ -1191,16 +1196,51 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
         db.getJSONObject(ACTIVITYSTREAMS_TABLE).put(userId.getUserId(token), jsonArray);
       }
       
-      // Check for object's ID in array; replace entry if found
-      boolean found = false;
+      // Find & replace activity
       for (int i = 0; i < jsonArray.length(); i++) {
         JSONObject entry = jsonArray.getJSONObject(i);
-        if (entry.getJSONObject("object").getString("id").equals(jsonEntry.getJSONObject("object").getString("id"))) {
+        if (entry.getJSONObject(ActivityEntry.Field.OBJECT.toString())
+            .getString(ActivityObject.Field.ID.toString()).equals(objectId)) {
           jsonArray.put(i, jsonEntry);
-          found = true;
+          return ImmediateFuture.newInstance(null);
         }
       }
-      if (!found) jsonArray.put(jsonEntry);
+      throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST, "Activity not found: " + objectId);
+    } catch (JSONException je) {
+      throw new ProtocolException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, je.getMessage(), je);
+    }
+  }
+  
+  // Are fields really needed here?
+  /** {@inheritDoc} */
+  public Future<Void> createActivityEntry(UserId userId, GroupId groupId, String appId,
+        Set<String> fields, ActivityEntry activityEntry, SecurityToken token) throws ProtocolException {
+    try {
+      JSONObject jsonEntry = convertFromActivityEntry(activityEntry, fields);
+      JSONObject jsonEntryObject = jsonEntry.getJSONObject(ActivityEntry.Field.OBJECT.toString());
+      if (!jsonEntryObject.has(ActivityObject.Field.ID.toString())) {
+        jsonEntryObject.put(ActivityObject.Field.ID.toString(), System.currentTimeMillis());
+        jsonEntry.put(ActivityEntry.Field.OBJECT.toString(), jsonEntryObject);
+      }
+      String objectId = jsonEntry.getJSONObject(ActivityEntry.Field.OBJECT.toString()).getString(ActivityObject.Field.ID.toString());
+
+      JSONArray jsonArray;
+      if (db.getJSONObject(ACTIVITYSTREAMS_TABLE).has(userId.getUserId(token))) {
+        jsonArray = db.getJSONObject(ACTIVITYSTREAMS_TABLE).getJSONArray(userId.getUserId(token));
+      } else {
+        jsonArray = new JSONArray();
+        db.getJSONObject(ACTIVITYSTREAMS_TABLE).put(userId.getUserId(token), jsonArray);
+      }
+      
+      // Ensure activity does not already exist
+      for (int i = 0; i < jsonArray.length(); i++) {
+        JSONObject entry = jsonArray.getJSONObject(i);
+        if (entry.getJSONObject(ActivityEntry.Field.OBJECT.toString())
+            .getString(ActivityObject.Field.ID.toString()).equals(objectId)) {
+          throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST, "Activity already exists: " + objectId);
+        }
+      }
+      jsonArray.put(jsonEntry);
       return ImmediateFuture.newInstance(null);
     } catch (JSONException je) {
       throw new ProtocolException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, je.getMessage(), je);
@@ -1258,7 +1298,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
         }
       }
 
-      throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST, "ActivityEntry not found");
+      throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST, "Activity not found: " + activityId);
     } catch (JSONException je) {
       throw new ProtocolException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, je.getMessage(), je);
     }
@@ -1311,7 +1351,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
             }
           }
           if (!found) {
-            throw new ProtocolException(HttpServletResponse.SC_NOT_FOUND, "ActivityEntry not found: " + activityId);
+            throw new ProtocolException(HttpServletResponse.SC_NOT_FOUND, "Activity not found: " + activityId);
           }
         }
       }
