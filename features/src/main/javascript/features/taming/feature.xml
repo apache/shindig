@@ -18,10 +18,10 @@ specific language governing permissions and limitations under the License.
 -->
 <feature>
   <name>taming</name>
-  <gadget>
+  <all>
     <script src="taming.js"/>
-  </gadget>
-  <container>
-    <script src="taming.js"/>
-  </container>
+    <api>
+      <exports type="js">tamings___</exports>
+    </api>
+  </all>
 </feature>
