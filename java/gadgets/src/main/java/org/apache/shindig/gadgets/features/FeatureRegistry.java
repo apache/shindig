@@ -39,6 +39,7 @@ import org.apache.shindig.common.util.ResourceLoader;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.RenderingContext;
+import org.apache.shindig.gadgets.features.FeatureRegistry.FeatureBundle;
 
 import java.io.File;
 import java.io.IOException;
@@ -100,7 +101,7 @@ public class FeatureRegistry {
     // Connect the dependency graph made up of all features and validate there
     // are no circular deps.
     connectDependencyGraph();
-    
+
     this.cache = cacheProvider.createCache(CACHE_NAME);
   }
 
@@ -480,7 +481,7 @@ public class FeatureRegistry {
     featureMapBuilder.put(parsed.getName(),
         new FeatureNode(parsed.getName(), bundles, parsed.getDeps()));
   }
-  
+
   protected String makeCacheKey(Collection<String> needed, GadgetContext ctx, List<String> unsupported) {
     List<String> neededList = Lists.newArrayList(needed);
     Collections.sort(neededList);
@@ -538,7 +539,7 @@ public class FeatureRegistry {
     }
   }
 
-  public static final class FeatureBundle {
+  public static class FeatureBundle {
     private final FeatureParser.ParsedFeature.Bundle bundle;
     private final List<FeatureResource> resources;
 
@@ -566,6 +567,16 @@ public class FeatureRegistry {
 
     public List<ApiDirective> getApis() {
       return bundle.getApis();
+    }
+
+    public List<String> getApis(ApiDirective.Type type, boolean isExports) {
+      ImmutableList.Builder<String> builder = ImmutableList.builder();
+      for (ApiDirective api : bundle.getApis()) {
+        if (api.getType() == type && api.isExports() == isExports) {
+          builder.add(api.getValue());
+        }
+      }
+      return builder.build();
     }
   }
 
@@ -606,15 +617,15 @@ public class FeatureRegistry {
         tagMatch = RenderingContext.ALL.getFeatureBundleTag();
       }
       final String useForMatching = tagMatch;
-      
+
       // Return an Iterator rather than coping a new
       // list containing the types over which to iterate.
       return new Iterable<FeatureBundle>() {
         public Iterator<FeatureBundle> iterator() {
           return new Iterator<FeatureBundle>() {
             private FeatureBundle next;
-            private Iterator<FeatureBundle> it = bundles.iterator();
-            
+            private final Iterator<FeatureBundle> it = bundles.iterator();
+
             public boolean hasNext() {
               while (next == null && it.hasNext()) {
                 FeatureBundle candidate = it.next();

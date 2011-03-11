@@ -17,31 +17,38 @@
  */
 package org.apache.shindig.gadgets.rewrite.js;
 
-import org.apache.shindig.gadgets.GadgetContext;
+import com.google.inject.ImplementedBy;
+
+import org.apache.shindig.gadgets.features.FeatureRegistry.FeatureBundle;
+import org.apache.shindig.gadgets.uri.JsUriManager.JsUri;
 
 import java.util.List;
 
+/**
+ * Compiler to pre-process each feature independently and compile a
+ * concatenation of pre-processed data.
+ */
+@ImplementedBy(DefaultJsCompiler.class)
 public interface JsCompiler {
+
+  /**
+   * Pre-process feature JS.
+   * @param jsUri The JS uri making the request.
+   * @param bundle The feature bundle.
+   * @return Processed feature JS.
+   */
+  String getJsContent(JsUri jsUri, FeatureBundle bundle);
+
   /**
    * Compiles the provided code with the provided list of external symbols.
-   *
-   * @param jsData The code to compile.
-   * @param externs The list of external symbols.
+   * @param jsUri The JS uri making the request.
+   * @param content The raw/pre-processed JS code.
+   * @param externs The externs.
    * @return A compilation result object.
    */
-  public Result compile(String jsData, List<String> externs);
+  Result compile(JsUri jsUri, String content, List<String> externs);
 
-  /**
-   * Generates a sequence of statements to mark the specified symbols as
-   * exported.
-   *
-   * @param context The gadget context.
-   * @param symbols The symbols to export.
-   * @return A sequence of JavaScript statements to export those symbols.
-   */
-  public String generateExportStatements(GadgetContext context, List<String> symbols);
-
-  public static class Result {
+  static class Result {
     private final String compiled;
     private final List<String> errors;
 

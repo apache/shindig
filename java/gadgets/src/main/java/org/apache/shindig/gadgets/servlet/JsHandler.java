@@ -17,10 +17,16 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
+import com.google.caja.util.Sets;
+import com.google.common.base.Joiner;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
 import org.apache.shindig.common.JsonSerializer;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.GadgetContext;
-import org.apache.shindig.gadgets.JsCompileMode;
 import org.apache.shindig.gadgets.RenderingContext;
 import org.apache.shindig.gadgets.config.ConfigContributor;
 import org.apache.shindig.gadgets.features.ApiDirective;
@@ -32,13 +38,8 @@ import org.apache.shindig.gadgets.uri.JsUriManager.JsUri;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-
-import com.google.caja.util.Join;
-import com.google.caja.util.Sets;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Provide processing logic for the JsServlet to serve the JavsScript as features request.
@@ -47,6 +48,7 @@ import com.google.inject.Singleton;
 @Singleton
 public class JsHandler {
   private static final Collection<String> EMPTY_SET = Sets.newHashSet();
+  private static final Logger LOG = Logger.getLogger(JsHandler.class.getName());
 
   protected final FeatureRegistry registry;
   protected final ContainerConfig containerConfig;
@@ -68,13 +70,6 @@ public class JsHandler {
     this.compiler = compiler;
   }
 
-  protected boolean willCompile(JsUri jsUri) {
-    JsCompileMode mode = jsUri.getCompileMode();
-    return (compiler != null) && !jsUri.isDebug() && (
-       mode == JsCompileMode.ALL_RUN_TIME ||
-       mode == JsCompileMode.EXPLICIT_RUN_TIME);
-  }
-
   /**
    * Get the content of the feature resources and push it to jsData.
    *
@@ -85,7 +80,6 @@ public class JsHandler {
   public Response getJsContent(final JsUri jsUri, String host) {
     GadgetContext ctx = new JsGadgetContext(jsUri);
     Collection<String> needed = jsUri.getLibs();
-    String container = ctx.getContainer();
     boolean isProxyCacheable = true;
 
     FeatureRegistry.LookupResult lookup = registry.getFeatureResources(ctx, needed, null);
@@ -93,68 +87,38 @@ public class JsHandler {
     // Quick-and-dirty implementation of incremental JS loading.
     Collection<String> alreadyLoaded = EMPTY_SET;
     Collection<String> alreadyHaveLibs = jsUri.getLoadedLibs();
-    if (alreadyHaveLibs.size() > 0) {
+    if (!alreadyHaveLibs.isEmpty()) {
       alreadyLoaded = registry.getFeatures(alreadyHaveLibs);
     }
 
     // Collate all JS desired for the current request.
-    boolean willCompile = willCompile(jsUri);
     StringBuilder jsData = new StringBuilder();
     List<String> allExterns = Lists.newArrayList();
 
+    // Pre-process each feature.
     for (FeatureRegistry.FeatureBundle bundle : lookup.getBundles()) {
       if (alreadyLoaded.contains(bundle.getName())) continue;
+      jsData.append(compiler.getJsContent(jsUri, bundle));
+      allExterns.addAll(bundle.getApis(ApiDirective.Type.JS, false));
       for (FeatureResource featureResource : bundle.getResources()) {
-        String content = jsUri.isDebug() || willCompile
-           ? featureResource.getDebugContent() : featureResource.getContent();
-        if (content == null) content = "";
-        if (!featureResource.isExternal()) {
-          jsData.append(content);
-        } else {
-          // Support external/type=url feature serving through document.write()
-          jsData.append("document.write('<script src=\"").append(content).append("\"></script>')");
-        }
         isProxyCacheable = isProxyCacheable && featureResource.isProxyCacheable();
-        jsData.append(";\n");
-      }
-
-      if (willCompile) {
-
-        List<String> rawExports = Lists.newArrayList();
-
-        // Add exports of bundle, regardless.
-        if (jsUri.getCompileMode() == JsCompileMode.ALL_RUN_TIME) {
-          appendExportsForBundle(bundle, rawExports);
-
-        // Add exports of bundle if it is an explicitly-specified feature.
-        } else if (jsUri.getCompileMode() == JsCompileMode.EXPLICIT_RUN_TIME) {
-          if (needed.contains(bundle.getName())) {
-            appendExportsForBundle(bundle, rawExports);
-          }
-        }
-
-        // Add externs for this bundle.
-        appendExternsForBundle(bundle, allExterns);
-
-        jsData.append(compiler.generateExportStatements(ctx, rawExports));
       }
     }
 
-    // Compile if desired. Specific compiler options are provided to the JsCompiler instance.
-    if (willCompile) {
-      StringBuilder compiled = new StringBuilder();
-      JsCompiler.Result result = compiler.compile(jsData.toString(), allExterns);
-      String code = result.getCode();
-      if (code != null) {
-        compiled.append(code);
-        jsData = compiled;
-      } else {
-        System.err.println("JS Compilation error: " + Join.join(", ", result.getErrors()));
-      }
+    // Compile all pre-processed features.
+    JsCompiler.Result result = compiler.compile(jsUri, jsData.toString(), allExterns);
+
+    String code = result.getCode();
+    if (code != null) {
+      jsData = new StringBuilder(code);
+    } else {
+      warn(result);
     }
 
     // Append gadgets.config initialization if not in standard gadget mode.
     if (ctx.getRenderingContext() != RenderingContext.GADGET) {
+      String container = ctx.getContainer();
+
       // Append some container specific things
       Map<String, Object> features = containerConfig.getMap(container, "gadgets.features");
       Map<String, Object> config =
@@ -181,20 +145,9 @@ public class JsHandler {
     return new Response(jsData, isProxyCacheable);
   }
 
-  private void appendExternsForBundle(FeatureRegistry.FeatureBundle bundle, List<String> externs) {
-    for (ApiDirective api : bundle.getApis()) {
-      if (api.getType() == ApiDirective.Type.JS && api.isUses()) {
-        externs.add(api.getValue());
-      }
-    }
-  }
-
-  private void appendExportsForBundle(FeatureRegistry.FeatureBundle bundle, List<String> exports) {
-    for (ApiDirective api : bundle.getApis()) {
-      if (api.getType() == ApiDirective.Type.JS && api.isExports()) {
-        exports.add(api.getValue());
-      }
-    }
+  protected void warn(JsCompiler.Result result) {
+    LOG.log(Level.WARNING, "Continuing with un-compiled content. " +
+        "JS Compilation error: " + Joiner.on(", ").join(result.getErrors()));
   }
 
   /**
@@ -224,10 +177,12 @@ public class JsHandler {
   protected static class JsGadgetContext extends GadgetContext {
     private final RenderingContext renderingContext;
     private final String container;
+    private final boolean debug;
 
     public JsGadgetContext(JsUri ctx) {
       this.renderingContext = ctx.getContext();
       this.container = ctx.getContainer();
+      this.debug = ctx.isDebug();
     }
 
     @Override
@@ -238,6 +193,11 @@ public class JsHandler {
     @Override
     public String getContainer() {
       return container;
+    }
+
+    @Override
+    public boolean getDebug() {
+      return debug;
     }
   }
 }
