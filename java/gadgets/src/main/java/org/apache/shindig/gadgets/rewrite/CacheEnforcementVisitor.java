@@ -101,8 +101,8 @@ public class CacheEnforcementVisitor extends ResourceMutateVisitor {
    * @return The visit status of the node.
    */
   protected VisitStatus handleResponseInCache(String uri, HttpResponse response) {
-    if (response.isStale()) {
-      // Reserve the node if the response is stale.
+    if (response.shouldRefetch()) {
+      // Reserve the node if the response should be refetched.
       if (response.getCacheControlMaxAge() != 0) {
         // If the cache-control max-age of the original response is zero, it doesn't make sense to
         // trigger a pre-fetch for it, since by the time the request for it comes in, it will

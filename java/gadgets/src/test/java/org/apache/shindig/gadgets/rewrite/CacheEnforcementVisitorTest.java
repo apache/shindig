@@ -26,21 +26,15 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import com.google.common.collect.Maps;
-import com.google.inject.AbstractModule;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.google.inject.Module;
-import com.google.inject.name.Names;
+import com.google.common.util.concurrent.MoreExecutors;
 
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.http.AbstractHttpCache;
-import org.apache.shindig.gadgets.http.HttpCache;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.http.RequestPipeline;
 import org.apache.shindig.gadgets.parse.ParseModule.DOMImplementationProvider;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Attr;
@@ -49,7 +43,6 @@ import org.w3c.dom.Element;
 
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -57,7 +50,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class CacheEnforcementVisitorTest extends DomWalkerTestBase {
   private ExecutorService executor;
-  private HttpCache cache;
+  private TestHttpCache cache;
   protected Document doc;
   private static final Map<String, String> ALL_RESOURCES =
       CacheEnforcementVisitor.Tags.ALL_RESOURCES.getResourceTags();
@@ -65,20 +58,12 @@ public class CacheEnforcementVisitorTest extends DomWalkerTestBase {
 
   @Before
   public void setUp() {
-    executor = Executors.newSingleThreadExecutor();
+    executor = MoreExecutors.sameThreadExecutor();
     DOMImplementationProvider domImpl = new DOMImplementationProvider();
     doc = domImpl.get().createDocument(null, null, null);
-    Module module = new AbstractModule() {
-      public void configure() {
-        binder().bindConstant()
-            .annotatedWith(Names.named("shindig.cache.http.strict-no-cache-resource.max-age"))
-            .to(86400L);
-        requestStaticInjection(HttpResponse.class);
-      }
-    };
-    Injector injector = Guice.createInjector(module);
-    cache = injector.getInstance(TestHttpCache.class);
- }
+    cache = new TestHttpCache();
+    cache.setRefetchStrictNoCacheAfterMs(86400L);
+  }
 
   @Test
   public void testStaleImgWithNegativeTtlReservedAndFetchTriggered() throws Exception {

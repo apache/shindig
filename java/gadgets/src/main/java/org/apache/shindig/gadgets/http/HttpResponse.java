@@ -18,7 +18,14 @@
 package org.apache.shindig.gadgets.http;
 
 import com.google.common.base.Supplier;
-import com.google.common.collect.*;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
+import com.google.common.collect.MapMaker;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
@@ -121,25 +128,18 @@ public final class HttpResponse implements Externalizable {
   // Default TTL for an entry in the cache that does not have any cache control headers.
   static final long DEFAULT_TTL = 5L * 60L * 1000L;
 
-  // TTL to use for strict no-cache response. A value of -1 indicates that a strict no-cache
-  // resource is never cached. This is also used to indicate if strict no-cache responses should
-  // be considered as expired. A non-negative value indicates that such responses should not be
-  // considered as expired as long as they are haven't expired otherwise.
-  static final long DEFAULT_STRICT_NO_CACHE_RESOURCE_TTL = -1;
-
   static final Charset DEFAULT_ENCODING = Charset.forName("UTF-8");
 
   @Inject(optional = true) @Named("shindig.cache.http.negativeCacheTtl")
   private static long negativeCacheTtl = DEFAULT_NEGATIVE_CACHE_TTL;
 
+  // Default TTL for resources that are public and has no explicit Cache-Control max-age
+  // and expires headers. Resources without cache-control are considered public by default.
   @Inject(optional = true) @Named("shindig.cache.http.defaultTtl")
   private static long defaultTtl = DEFAULT_TTL;
 
   @Inject(optional = true) @Named("shindig.http.fast-encoding-detection")
   private static boolean fastEncodingDetection = true;
-
-  @Inject(optional = true) @Named("shindig.cache.http.strict-no-cache-resource.max-age")
-  private long strictNoCacheResourceTtl = DEFAULT_STRICT_NO_CACHE_RESOURCE_TTL;
 
   // Support injection of smarter encoding detection
   @Inject(optional = true)
@@ -165,6 +165,8 @@ public final class HttpResponse implements Externalizable {
   private int httpStatusCode;
   private Multimap<String, String> headers;
   private byte[] responseBytes;
+
+  private long refetchStrictNoCacheAfterMs;
 
   /**
    * Needed for serialization. Do not use this for any other purpose.
@@ -192,6 +194,7 @@ public final class HttpResponse implements Externalizable {
     date = getAndUpdateDate(headerCopy);
     encoding = getAndUpdateEncoding(headerCopy, responseBytes);
     headers = Multimaps.unmodifiableMultimap(headerCopy);
+    refetchStrictNoCacheAfterMs = builder.getRefetchStrictNoCacheAfterMs();
   }
 
   private HttpResponse(int httpStatusCode, String body) {
@@ -345,7 +348,7 @@ public final class HttpResponse implements Externalizable {
       return date + negativeCacheTtl;
     }
 
-    if (isStrictNoCache() && strictNoCacheResourceTtl < 0) {
+    if (isStrictNoCache()) {
       return -1;
     }
     long maxAge = getCacheControlMaxAge();
@@ -357,6 +360,17 @@ public final class HttpResponse implements Externalizable {
       return expiration;
     }
     return date + defaultTtl;
+  }
+
+  public long getRefetchStrictNoCacheAfterMs() {
+    return refetchStrictNoCacheAfterMs;
+  }
+
+  public boolean shouldRefetch() {
+    // Time after which resource should be refetched.
+    long refetchExpiration = isStrictNoCache() ?
+        date + getRefetchStrictNoCacheAfterMs() : getCacheExpiration();
+    return refetchExpiration <= getTimeSource().currentTimeMillis();
   }
 
   /**

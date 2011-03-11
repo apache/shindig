@@ -26,19 +26,11 @@ import static org.junit.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
-import com.google.inject.AbstractModule;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.google.inject.Module;
-import com.google.inject.name.Names;
-import com.google.inject.util.Modules;
 
 import org.apache.shindig.auth.BasicSecurityToken;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.uri.Uri;
-import org.apache.shindig.common.PropertiesModule;
 import org.apache.shindig.gadgets.AuthType;
-import org.apache.shindig.gadgets.parse.ParseModule;
 import org.apache.shindig.gadgets.oauth.OAuthArguments;
 import org.apache.shindig.gadgets.spec.RequestAuthenticationInfo;
 import org.apache.shindig.gadgets.uri.UriCommon.Param;
@@ -58,21 +50,13 @@ public class AbstractHttpCacheTest {
   private static final String CONTAINER_NAME = "container";
 
   private final TestHttpCache cache = new TestHttpCache();
-  // Cache designed to return 86400 for strictNoCacheResourceTtl.
+  // Cache designed to return 86400ms for refetchStrictNoCacheAfterMs.
   private TestHttpCache extendedStrictNoCacheTtlCache;
 
   @Before
   public void setUp() {
-    Module module = new AbstractModule() {
-      @Override
-      public void configure() {
-        binder().bindConstant()
-            .annotatedWith(Names.named("shindig.cache.http.strict-no-cache-resource.max-age"))
-            .to(86400L);
-      }
-    };
-    Injector injector = Guice.createInjector(module);
-    extendedStrictNoCacheTtlCache = injector.getInstance(TestHttpCache.class);
+    extendedStrictNoCacheTtlCache = new TestHttpCache();
+    extendedStrictNoCacheTtlCache.setRefetchStrictNoCacheAfterMs(86400L);
   }
 
   @Test
@@ -357,7 +341,7 @@ public class AbstractHttpCacheTest {
     assertTrue("response should have been cached",
                extendedStrictNoCacheTtlCache.addResponse(request, response));
     assertEquals(
-        extendedStrictNoCacheTtlCache.buildStrictNoCacheHttpResponse(request, response).create(),
+        extendedStrictNoCacheTtlCache.buildStrictNoCacheHttpResponse(response).create(),
         extendedStrictNoCacheTtlCache.map.get(key));
   }
 
@@ -457,16 +441,17 @@ public class AbstractHttpCacheTest {
   public void buildStrictNoCacheHttpResponse() {
     HttpResponse response = new HttpResponseBuilder()
         .setResponseString("result")
-        .addHeader("Cache-Control", "private")
+        .addHeader("Cache-Control", "private, max-age=1000")
         .addHeader("X-Method-Override", "GET")
         .create();
     assertTrue(response.isStrictNoCache());
     HttpResponse builtResponse = extendedStrictNoCacheTtlCache
-        .buildStrictNoCacheHttpResponse(new HttpRequest(DEFAULT_URI), response).create();
+        .buildStrictNoCacheHttpResponse(response).create();
 
     assertTrue(builtResponse.isStrictNoCache());
     assertEquals("", builtResponse.getResponseAsString());
-    assertEquals("private,max-age=86400", builtResponse.getHeader("Cache-Control"));
+    assertEquals("private, max-age=1000", builtResponse.getHeader("Cache-Control"));
+    assertEquals(86400, builtResponse.getRefetchStrictNoCacheAfterMs());
     assertFalse(builtResponse.getHeaders().containsKey("Pragma"));
     assertNull(builtResponse.getHeader("X-Method-Override"));
   }
@@ -479,11 +464,11 @@ public class AbstractHttpCacheTest {
         .create();
     assertTrue(response.isStrictNoCache());
     HttpResponse builtResponse = cache
-        .buildStrictNoCacheHttpResponse(new HttpRequest(DEFAULT_URI), response).create();
+        .buildStrictNoCacheHttpResponse(response).create();
 
     assertTrue(builtResponse.isStrictNoCache());
     assertEquals("", builtResponse.getResponseAsString());
-    assertEquals("max-age=-1", builtResponse.getHeader("Cache-Control"));
+    assertNull(builtResponse.getHeader("Cache-Control"));
     assertEquals("no-cache", builtResponse.getHeader("Pragma"));
   }
 

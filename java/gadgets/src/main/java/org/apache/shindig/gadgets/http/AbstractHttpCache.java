@@ -31,10 +31,43 @@ import org.apache.shindig.gadgets.uri.UriCommon;
  * Base class for content caches. Defines cache expiration rules and
  * and restrictions on allowed content.
  *
- * Note that in the case where strictNoCacheResourceTtlInSeconds is non-negative, strict no-cache
+ * Note that in the case where refetchStrictNoCacheAfterMs is non-negative, strict no-cache
  * resources are stored in the cache. In this case, only the Cache-Control/Pragma headers are stored
  * and not the original content or other headers.
  *
+ * This is used primarily for automatic fetches internal to shindig from triggering lots of
+ * back end fetches. Especially comes to play for fetch in CacheEnforcementVisitor. Now since this
+ * response is not usable for serving the content, we need to explicitly check if the content is
+ * strictNoCache. DefaultRequestPipeline does this correctly, and any implementation of
+ * RequestPipeline should do this as well. To prevent breakages for existing implementations, we
+ * are keeping the default value to -1.
+ *
+ * Example:
+ * GET /private.html \r\n
+ * Host: www.example.com \r\n
+ * Cache-Control: private, max-age=1000 \r\n
+ * \r\n
+ * My credit card number is 1234-5678-1234-5678
+ *
+ * And with refetch-after=3000, then we store the response as:
+ * GET /private.html \r\n
+ * Host: www.example.com \r\n
+ * Cache-Control: private, max-age=1000 \r\n
+ * \r\n
+ *
+ * For non user facing requests, www.example.com/private.html is considered as private and will not
+ * be refetched before 3000ms.
+ *
+ * For user facing requests, response.isStale() is always true, and will be fetched even before
+ * 1000ms. The max-age=1000 is completely ignored by shindig, because that value is for
+ * the client browser and not for proxies.
+ *
+ * isStale() = false always, for all time >= 0
+ * shouldRefetch() = false when time < date + 3000ms
+ * shouldRefetch() = true when time >= date + 3000ms
+ *
+ * Note that error cases are handled differently. (Even for strict no cache) 
+ *  
  * Implementations that override this are discouraged from using custom cache keys unless there is
  * actually customization in the request object itself. It is highly recommended that you still
  * use {@link #createKey} in the base class and append any custom data to the end of the key instead
@@ -45,12 +78,12 @@ public abstract class AbstractHttpCache implements HttpCache {
   private static final String RESIZE_WIDTH = UriCommon.Param.RESIZE_WIDTH.getKey();
   private static final String RESIZE_QUALITY = UriCommon.Param.RESIZE_QUALITY.getKey();
 
-  // TTL to use for strict no-cache response. A value of -1 indicates that a strict no-cache
-  // resource is never cached.
-  static final long DEFAULT_STRICT_NO_CACHE_RESOURCE_TTL_SEC = -1;
+  // Amount of time after which the entry in cache should be considered for a refetch for a
+  // non-userfacing internal fetch when the response is strict-no-cache. 
+  @Inject(optional = true) @Named("shindig.cache.http.strict-no-cache-resource.refetch-after-ms")
+  public static long REFETCH_STRICT_NO_CACHE_AFTER_MS_DEFAULT = -1L;
 
-  @Inject(optional = true) @Named("shindig.cache.http.strict-no-cache-resource.max-age")
-  private long strictNoCacheResourceTtlInSeconds = DEFAULT_STRICT_NO_CACHE_RESOURCE_TTL_SEC;
+  private long refetchStrictNoCacheAfterMs = REFETCH_STRICT_NO_CACHE_AFTER_MS_DEFAULT;
 
   // Implement these methods to create a concrete HttpCache class.
   protected abstract HttpResponse getResponseImpl(String key);
@@ -62,7 +95,7 @@ public abstract class AbstractHttpCache implements HttpCache {
       String keyString = createKey(request);
       HttpResponse cached = getResponseImpl(keyString);
       if (responseStillUsable(cached) &&
-          (!cached.isStrictNoCache() || strictNoCacheResourceTtlInSeconds > 0)) {
+          (!cached.isStrictNoCache() || refetchStrictNoCacheAfterMs >= 0)) {
         return cached;
       }
     }
@@ -71,10 +104,10 @@ public abstract class AbstractHttpCache implements HttpCache {
 
   public boolean addResponse(HttpRequest request, HttpResponse response) {
     HttpResponseBuilder responseBuilder;
-    boolean storeStrictNoCacheResources = (strictNoCacheResourceTtlInSeconds >= 0);
+    boolean storeStrictNoCacheResources = (refetchStrictNoCacheAfterMs >= 0);
     if (isCacheable(request, response, storeStrictNoCacheResources)) {
       if (storeStrictNoCacheResources && response.isStrictNoCache()) {
-        responseBuilder = buildStrictNoCacheHttpResponse(request, response);
+        responseBuilder = buildStrictNoCacheHttpResponse(response);
       } else {
         responseBuilder = new HttpResponseBuilder(response);
       }
@@ -92,11 +125,16 @@ public abstract class AbstractHttpCache implements HttpCache {
   }
 
   @VisibleForTesting
-  HttpResponseBuilder buildStrictNoCacheHttpResponse(HttpRequest request, HttpResponse response) {
+  public void setRefetchStrictNoCacheAfterMs(long refetchStrictNoCacheAfterMs) {
+    this.refetchStrictNoCacheAfterMs = refetchStrictNoCacheAfterMs;
+  }
+
+  @VisibleForTesting
+  HttpResponseBuilder buildStrictNoCacheHttpResponse(HttpResponse response) {
     HttpResponseBuilder responseBuilder = new HttpResponseBuilder();
     copyHeaderIfPresent("Cache-Control", response, responseBuilder);
     copyHeaderIfPresent("Pragma", response, responseBuilder);
-    responseBuilder.setCacheControlMaxAge(strictNoCacheResourceTtlInSeconds);
+    responseBuilder.setRefetchStrictNoCacheAfterMs(refetchStrictNoCacheAfterMs);
     return responseBuilder;
   }
 

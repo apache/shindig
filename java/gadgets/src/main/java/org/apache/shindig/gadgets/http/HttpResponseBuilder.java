@@ -34,9 +34,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.DocumentFragment;
 
 import java.nio.charset.Charset;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.ListIterator;
 import java.util.List;
 import java.util.Map;
 
@@ -48,19 +46,25 @@ public class HttpResponseBuilder extends MutableContent {
   private int httpStatusCode = HttpResponse.SC_OK;
   private final Multimap<String, String> headers = HttpResponse.newHeaderMultimap();
   private final Map<String, String> metadata = Maps.newHashMap();
-  
+
   // Stores the HttpResponse object, if any, from which this Builder is constructed.
   // This allows us to avoid creating a new HttpResponse in create() when no changes
   // have been made.
   private HttpResponse responseObj;
   private int responseObjNumChanges;
-  
+
+  /**
+   * @see {AbstractHttpCache.refetchStrictNoCacheAfterMs}
+   */
+  private long refetchStrictNoCacheAfterMs = -1;
+
   public HttpResponseBuilder(GadgetHtmlParser parser, HttpResponse response) {
     super(parser, response);
     if (response != null) {
       httpStatusCode = response.getHttpStatusCode();
       headers.putAll(response.getHeaders());
       metadata.putAll(response.getMetadata());
+      refetchStrictNoCacheAfterMs = response.getRefetchStrictNoCacheAfterMs();
     } else {
       setResponse(null);
     }
@@ -233,6 +237,12 @@ public class HttpResponseBuilder extends MutableContent {
     return this;
   }
 
+  public HttpResponseBuilder setRefetchStrictNoCacheAfterMs(long refetchStrictNoCacheAfterMs) {
+    this.refetchStrictNoCacheAfterMs = refetchStrictNoCacheAfterMs;
+    incrementNumChanges();
+    return this;
+  }
+
   public HttpResponseBuilder setCacheControlMaxAge(long expirationTime) {
     String cacheControl = getHeader("Cache-Control");
     List<String> directives = Lists.newArrayList();
@@ -246,6 +256,7 @@ public class HttpResponseBuilder extends MutableContent {
     }
     directives.add("max-age=" + expirationTime);
     setHeader("Cache-Control", StringUtils.join(directives, ','));
+    incrementNumChanges();
     return this;
   }
 
@@ -293,7 +304,11 @@ public class HttpResponseBuilder extends MutableContent {
   public int getHttpStatusCode() {
     return httpStatusCode;
   }
-  
+
+  public long getRefetchStrictNoCacheAfterMs() {
+    return refetchStrictNoCacheAfterMs;
+  }
+
   /**
    * Ensures that, when setting content bytes, the bytes' encoding is reflected
    * in the current Content-Type header.

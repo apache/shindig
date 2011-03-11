@@ -25,6 +25,10 @@ import com.google.inject.ImplementedBy;
 /**
  * Implements a complete HTTP request pipeline. Performs caching, authentication, and serves as an
  * injection point for any custom request pipeline injection.
+ *
+ * NOTE: When using cache, please ensure that you are checking response.isStrictNoCache() before
+ * serving out. Because cache may have private contents, even though marked stale.
+ * @see {AbstractHttpCache} for details. 
  */
 @ImplementedBy(DefaultRequestPipeline.class)
 public interface RequestPipeline {

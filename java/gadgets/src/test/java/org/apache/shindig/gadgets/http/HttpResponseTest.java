@@ -17,10 +17,10 @@
  */
 package org.apache.shindig.gadgets.http;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.shindig.common.servlet.HttpUtil;
 import org.apache.shindig.common.util.DateUtil;
 import org.apache.shindig.common.util.FakeTimeSource;
-
-import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -528,5 +528,90 @@ public class HttpResponseTest extends Assert {
         .create();
 
     assertEquals(expectedResponse, deserialized);
+  }
+
+  @Test
+  public void testCacheExpirationForStrictNoCacheResponse() throws Exception {
+    assertEquals(-1,
+        new HttpResponseBuilder()
+            .setStrictNoCache()
+            .setRefetchStrictNoCacheAfterMs(10000)
+            .create()
+            .getCacheExpiration());
+  }
+
+  @Test
+  public void testCacheExpirationForStrictNoCacheResponsePrivateLowMaxAge() throws Exception {
+    assertEquals(-1,
+        new HttpResponseBuilder()
+            .addHeader("Cache-Control", "private, max-age=5000")
+            .setRefetchStrictNoCacheAfterMs(10000)
+            .create()
+            .getCacheExpiration());
+  }
+
+  @Test
+  public void testCacheExpirationForStrictNoCacheResponsePrivateHighMaxAge() throws Exception {
+    assertEquals(-1,
+        new HttpResponseBuilder()
+            .addHeader("Cache-Control", "private, max-age=20000")
+            .setRefetchStrictNoCacheAfterMs(10000)
+            .create()
+            .getCacheExpiration());
+  }
+
+  @Test
+  public void testShouldRefetchForStrictNoCacheResponseCurrentTime() throws Exception {
+    assertEquals(false,
+        new HttpResponseBuilder()
+            .setStrictNoCache()
+            .setRefetchStrictNoCacheAfterMs(10000)
+            .create()
+            .shouldRefetch());
+  }
+
+  @Test
+  public void testShouldRefetchForStrictNoCacheResponseCurrentTimePrivateLowMaxAge() throws Exception {
+    assertEquals(false,
+        new HttpResponseBuilder()
+            .addHeader("Cache-Control", "private, max-age=5000")
+            .setRefetchStrictNoCacheAfterMs(10000)
+            .create()
+            .shouldRefetch());
+  }
+
+  @Test
+  public void testShouldRefetchForStrictNoCacheResponseCurrentTimePrivateHighMaxAge() throws Exception {
+    assertEquals(false,
+        new HttpResponseBuilder()
+            .addHeader("Cache-Control", "private, max-age=20000")
+            .setRefetchStrictNoCacheAfterMs(10000)
+            .create()
+            .shouldRefetch());
+  }
+
+  @Test
+  public void testShouldRefetchForStrictNoCacheResponsePastShouldRefetch() throws Exception {
+    assertEquals(true, new HttpResponseBuilder().setStrictNoCache()
+        .setHeader("Date",
+            DateUtil.formatRfc1123Date(HttpUtil.getTimeSource().currentTimeMillis() - 20000))
+        .setRefetchStrictNoCacheAfterMs(10000)
+        .create()
+        .shouldRefetch());
+  }
+
+  @Test
+  public void testShouldRefetchForStrictNoCacheResponsePastShouldNotRefetch() throws Exception {
+    assertEquals(false, new HttpResponseBuilder().setStrictNoCache()
+        .setHeader("Date",
+            DateUtil.formatRfc1123Date(HttpUtil.getTimeSource().currentTimeMillis() - 5000))
+        .setRefetchStrictNoCacheAfterMs(10000)
+        .create()
+        .shouldRefetch());
+  }
+
+  @Test
+  public void testCacheExpirationForStrictNoCacheResponseWithoutOverride() throws Exception {
+    assertEquals(-1, new HttpResponseBuilder().setStrictNoCache().create().getCacheExpiration());
   }
 }

@@ -31,6 +31,7 @@ import com.google.inject.name.Names;
 
 import org.apache.shindig.common.servlet.GuiceServletContextListener;
 import org.apache.shindig.gadgets.config.DefaultConfigContributorModule;
+import org.apache.shindig.gadgets.http.AbstractHttpCache;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.InvalidationHandler;
 import org.apache.shindig.gadgets.js.JavascriptModule;
@@ -81,6 +82,7 @@ public class DefaultGuiceModule extends AbstractModule {
 
     // We perform static injection on HttpResponse for cache TTLs.
     requestStaticInjection(HttpResponse.class);
+    requestStaticInjection(AbstractHttpCache.class);
     requestStaticInjection(ProxyUriBase.class);
     registerGadgetHandlers();
     registerFeatureHandlers();
