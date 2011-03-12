@@ -105,7 +105,7 @@ public class GadgetsHandlerServiceTest extends EasyMockTestCase {
   @Test
   public void testGetMetadata() throws Exception {
     GadgetsHandlerApi.MetadataRequest request = createMetadataRequest(
-        FakeProcessor.SPEC_URL, CONTAINER, "view",
+        FakeProcessor.SPEC_URL, CONTAINER, "default",
         createAuthContext(null, null), ImmutableList.of("*"));
     EasyMock.expect(mockRegistry.getFeatures(EasyMock.isA(List.class)))
         .andReturn(Lists.newArrayList("auth-refresh"));
@@ -142,6 +142,16 @@ public class GadgetsHandlerServiceTest extends EasyMockTestCase {
     assertNull(response.getUrl());
     assertEquals(1, response.getViews().size());
     verify();
+  }
+
+  @Test(expected = ProcessingException.class)
+  public void testGetMetadataNoView() throws Exception {
+    GadgetsHandlerApi.MetadataRequest request = createMetadataRequest(
+        FakeProcessor.SPEC_URL3, CONTAINER, "invalid_view",
+        createAuthContext(null, null), ImmutableList.of("*"));
+    replay();
+    GadgetsHandlerApi.MetadataResponse response =
+        gadgetHandler.getMetadata(request);
   }
 
   @Test(expected = ProcessingException.class)
@@ -185,7 +195,7 @@ public class GadgetsHandlerServiceTest extends EasyMockTestCase {
   @Test
   public void testGetMetadataNoToken() throws Exception {
     GadgetsHandlerApi.MetadataRequest request = createMetadataRequest(
-        FakeProcessor.SPEC_URL, CONTAINER, "view", null, ImmutableList.of("*"));
+        FakeProcessor.SPEC_URL, CONTAINER, "default", null, ImmutableList.of("*"));
     EasyMock.expect(mockRegistry.getFeatures(EasyMock.isA(List.class)))
         .andReturn(Lists.newArrayList("auth-refresh"));
     replay();

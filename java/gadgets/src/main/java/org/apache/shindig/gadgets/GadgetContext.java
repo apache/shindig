@@ -132,18 +132,25 @@ public class GadgetContext {
   public SecurityToken getToken() {
     return delegate == null ? null : delegate.getToken();
   }
-  
+
   /**
    * @return The user agent string, or null if not present.
    */
   public String getUserAgent() {
     return delegate == null ? null : delegate.getUserAgent();
   }
-  
+
   /**
    * @return Whether the gadget output should be sanitized.
    */
   public boolean getSanitize() {
     return delegate == null ? false : delegate.getSanitize();
+  }
+
+  /**
+   * @return Whether the gadget output should be cajoled.
+   */
+  public boolean getCajoled() {
+    return delegate == null ? false : delegate.getCajoled();
   }
 }

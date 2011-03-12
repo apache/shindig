@@ -51,35 +51,35 @@ public class UriManagerTestBase {
   // Used for "feature-focused" tests, eg. security token and locked domain
   protected Gadget mockGadget(String... features) {
     Map<String, String> prefs = Maps.newHashMap();
-    return mockGadget(SPEC_URI.toString(), false, false, false, false, prefs, prefs,
+    return mockGadget(SPEC_URI.toString(), false, false, false, false, false, prefs, prefs,
         false, Lists.newArrayList(features));
   }
 
   // Used for prefs-focused tests
   protected Gadget mockGadget(boolean prefsForRendering, Map<String, String> specPrefs,
       Map<String, String> inPrefs) {
-    return mockGadget(SPEC_URI.toString(), false, false, false, false, specPrefs,
+    return mockGadget(SPEC_URI.toString(), false, false, false, false, false, specPrefs,
         inPrefs, prefsForRendering, Lists.<String>newArrayList());
   }
 
   // Used for "base" tests.
   protected Gadget mockGadget(String targetUrl, boolean isTypeUrl, boolean isDebug,
-      boolean ignoreCache, boolean sanitize, Map<String, String> specPrefs,
+      boolean ignoreCache, boolean sanitize, boolean cajoled, Map<String, String> specPrefs,
       Map<String, String> inPrefs, boolean needsPrefSubst, List<String> features) {
     return mockGadget(targetUrl, isTypeUrl, VIEW, LANG, COUNTRY, isDebug, ignoreCache,
-        sanitize, specPrefs, inPrefs, needsPrefSubst, features);
+        sanitize, cajoled, specPrefs, inPrefs, needsPrefSubst, features);
   }
 
   // Used for tests that don't care much about prefs or gadget type.
   protected Gadget mockGadget(boolean isDebug, boolean ignoreCache) {
     return mockGadget(SPEC_URI.toString(), false, isDebug, ignoreCache,
-        false, Maps.<String, String>newHashMap(),
+        false, false, Maps.<String, String>newHashMap(),
         Maps.<String, String>newHashMap(), false, Lists.<String>newArrayList());
   }
 
   // Actually generates the mock gadget. Used for error (null value) tests.
   protected Gadget mockGadget(String targetUrl, boolean isTypeUrl, String viewStr, String lang,
-      String country, boolean isDebug, boolean ignoreCache, boolean sanitize,
+      String country, boolean isDebug, boolean ignoreCache, boolean sanitize, boolean cajoled,
       Map<String, String> specPrefs, Map<String, String> inPrefs, boolean needsPrefSubst, List<String> features) {
     View view = createMock(View.class);
     ModulePrefs modulePrefs = createMock(ModulePrefs.class);
@@ -107,6 +107,7 @@ public class UriManagerTestBase {
     expect(context.getIgnoreCache()).andReturn(ignoreCache).anyTimes();
     expect(context.getToken()).andReturn(null).anyTimes();
     expect(context.getSanitize()).andReturn(sanitize).anyTimes();
+    expect(context.getCajoled()).andReturn(cajoled).anyTimes();
 
     // All Features (doesn't distinguish between transitive and not)
     expect(gadget.getAllFeatures()).andReturn(features).anyTimes();

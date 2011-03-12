@@ -163,9 +163,12 @@ public class GadgetsHandlerService {
 
     GadgetContext context = new MetadataGadgetContext(request);
     Gadget gadget = processor.process(context);
-    String iframeUrl =
-        isFieldIncluded(fields, "iframeurl")  ?
-            iframeUriManager.makeRenderingUri(gadget).toString() : null;
+    boolean needIfrUrl = isFieldIncluded(fields, "iframeurl");
+    if (needIfrUrl && gadget.getCurrentView() == null) {
+      throw new ProcessingException("View " + request.getView() + " does not exist",
+          HttpResponse.SC_BAD_REQUEST);
+    }
+    String iframeUrl = needIfrUrl ? iframeUriManager.makeRenderingUri(gadget).toString() : null;
     Boolean needsTokenRefresh =
         isFieldIncluded(fields, "needstokenrefresh") ?
             gadget.getAllFeatures().contains("auth-refresh") : null;
@@ -401,6 +404,11 @@ public class GadgetsHandlerService {
     @Override
     public boolean getSanitize() {
       return (request.getRenderingType() == GadgetsHandlerApi.RenderingType.SANITIZED);
+    }
+
+    @Override
+    public boolean getCajoled() {
+      return (request.getRenderingType() == GadgetsHandlerApi.RenderingType.IFRAME_CAJOLED);
     }
   }
 

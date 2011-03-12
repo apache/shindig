@@ -140,7 +140,7 @@ public class DefaultIframeUriManager implements IframeUriManager, ContainerConfi
       } else {
         uri.setAuthority(gadgetUri.getAuthority());
         uri.setScheme(gadgetUri.getScheme());
-      }      
+      }
 
       // 4. Add the URL.
       uri.addQueryParameter(Param.URL.getKey(), context.getUrl().toString());
@@ -157,6 +157,9 @@ public class DefaultIframeUriManager implements IframeUriManager, ContainerConfi
     addParam(uri, Param.DEBUG.getKey(), context.getDebug() ? "1" : "0", useTpl, false);
     addParam(uri, Param.NO_CACHE.getKey(), context.getIgnoreCache() ? "1" : "0", useTpl, false);
     addParam(uri, Param.SANITIZE.getKey(), context.getSanitize() ? "1" : "0", useTpl, false);
+    if (context.getCajoled()) {
+      addParam(uri, Param.CAJOLE.getKey(), "1", useTpl, false);
+    }
 
     // Add all UserPrefs
     UserPrefs prefs = context.getUserPrefs();

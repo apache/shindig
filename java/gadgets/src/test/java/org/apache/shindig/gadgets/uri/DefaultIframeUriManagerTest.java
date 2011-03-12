@@ -88,6 +88,7 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
         false,  // isDebug
         false,  // ignoreCache
         false,  // sanitize
+        false,  // cajoled
         prefs,  // spec-contained prefs
         prefs,  // prefs supplied by the requester, same k/v as spec w/ default val for simplicity
         false,  // no pref substitution needed, ergo prefs in fragment
@@ -127,6 +128,51 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
   }
 
   @Test
+  public void typeHtmlCajoled() throws Exception {
+    String prefKey = "prefKey";
+    String prefVal = "prefVal";
+    Map<String, String> prefs = Maps.newHashMap();
+    prefs.put(prefKey, prefVal);
+    List<String> features = Lists.newArrayList();
+
+    // Make the gadget.
+    Gadget gadget = mockGadget(
+        SPEC_URI.toString(),
+        false,  // not type=url
+        false,  // isDebug
+        false,  // ignoreCache
+        false,  // sanitize
+        true,  // cajoled
+        prefs,  // spec-contained prefs
+        prefs,  // prefs supplied by the requester, same k/v as spec w/ default val for simplicity
+        false,  // no pref substitution needed, ergo prefs in fragment
+        features);
+
+    // Generate a default-option manager
+    TestDefaultIframeUriManager manager = makeManager(
+        false,   // security token beacon not required
+        false);  // locked domain not required
+
+    // Generate URI, turn into UriBuilder for validation
+    Uri result = manager.makeRenderingUri(gadget);
+    assertNotNull(result);
+
+    UriBuilder uri = new UriBuilder(result);
+    assertEquals("0", uri.getQueryParameter(Param.SANITIZE.getKey()));
+    assertEquals("1", uri.getQueryParameter(Param.CAJOLE.getKey()));
+    assertEquals(prefVal, uri.getFragmentParameter("up_" + prefKey));
+
+    // Cajoled is and added param
+    assertEquals(TYPE_HTML_NUM_BASE_PARAMS + 1, uri.getQueryParameters().size());
+    assertEquals(1, uri.getFragmentParameters().size());
+
+    assertFalse(manager.tokenForRenderingCalled());
+    assertTrue(manager.schemeCalled());
+    assertTrue(manager.ldExclusionCalled());
+    assertTrue(manager.addExtrasCalled());
+  }
+
+  @Test
   public void typeHtmlBasicOptionsTpl() throws Exception {
     String prefKey = "prefKey";
     String prefVal = "prefVal";
@@ -141,6 +187,7 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
         false,  // isDebug
         false,  // ignoreCache
         false,  // sanitize
+        false,  // cajoled
         prefs,  // spec-contained prefs
         prefs,  // prefs supplied by the requester, same k/v as spec w/ default val for simplicity
         false,  // no pref substitution needed, ergo prefs in fragment
@@ -198,6 +245,7 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
         true,   // isDebug
         true,   // ignoreCache
         true,   // sanitize
+        false,  // cajoled
         prefs,  // spec-contained prefs
         prefs,  // prefs supplied by the requester, same k/v as spec w/ default val for simplicity
         false,  // no pref substitution needed, ergo prefs in fragment
@@ -252,6 +300,7 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
         true,   // isDebug
         true,   // ignoreCache
         true,   // sanitize
+        false,  // cajoled
         prefs,  // spec-contained prefs
         prefs,  // prefs supplied by the requester, same k/v as spec w/ default val for simplicity
         false,  // no pref substitution needed, ergo prefs in fragment
@@ -596,7 +645,7 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
 
     Uri testUri = Uri.parse("http://foobar" + LD_SUFFIX + "/?url=http://example.com");
     assertEquals(UriStatus.INVALID_DOMAIN, manager.validateRenderingUri(testUri));
-    
+
     config.newTransaction().addContainer(ImmutableMap
         .<String, Object>builder()
         .put(ContainerConfig.CONTAINER_KEY, ContainerConfig.DEFAULT_CONTAINER)
@@ -604,7 +653,7 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
         .build()).commit();
     assertEquals(UriStatus.VALID_UNVERSIONED, manager.validateRenderingUri(testUri));
   }
-  
+
   private Uri makeValidationTestUri(String domain, String version) {
     UriBuilder uri = new UriBuilder();
     uri.setAuthority(domain);

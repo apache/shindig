@@ -36,6 +36,7 @@ public class FakeProcessor extends Processor {
   protected final Map<Uri, String> gadgets = Maps.newHashMap();
   public static final Uri SPEC_URL = Uri.parse("http://example.org/g.xml");
   public static final Uri SPEC_URL2 = Uri.parse("http://example.org/g2.xml");
+  public static final Uri SPEC_URL3 = Uri.parse("http://example.org/g3.xml");
   public static final String SPEC_TITLE = "JSON-TEST";
   public static final String SPEC_TITLE2 = "JSON-TEST2";
   public static final int PREFERRED_HEIGHT = 100;
@@ -65,6 +66,12 @@ public class FakeProcessor extends Processor {
           "<Content type=\"html\">Hello, world</Content>" +
           "</Module>";
 
+  public static final String SPEC_XML3 =
+      "<Module>" +
+      "<ModulePrefs title=\"" + SPEC_TITLE2 + "\"/>" +
+      "<Content name=\"canvas\">Hello, world</Content>" +
+      "</Module>";
+
   private final FeatureRegistry featureRegistry;
 
   public FakeProcessor() {
@@ -75,6 +82,7 @@ public class FakeProcessor extends Processor {
     super(null, null, null, null, null);
     this.gadgets.put(FakeProcessor.SPEC_URL, FakeProcessor.SPEC_XML);
     this.gadgets.put(FakeProcessor.SPEC_URL2, FakeProcessor.SPEC_XML2);
+    this.gadgets.put(FakeProcessor.SPEC_URL3, FakeProcessor.SPEC_XML3);
     this.featureRegistry = featureRegistry;
   }
 
