@@ -55,11 +55,11 @@ public interface JsUriManager {
     private final Collection<String> libs;
     private final Collection<String> loadedLibs;
     private final String onload;
-    private final JsCompileMode compileMode;
-    private boolean jsload;
-    private boolean nohint;
     private final RenderingContext context;
     private final Uri origUri;
+    private JsCompileMode compileMode;
+    private boolean jsload;
+    private boolean nohint;
 
     public JsUri(UriStatus status, Uri origUri, Collection<String> libs, Collection<String> have) {
       super(status, origUri);
@@ -72,8 +72,8 @@ public interface JsUriManager {
         this.onload = origUri.getQueryParameter(Param.ONLOAD.getKey());
         this.nohint = "1".equals(origUri.getQueryParameter(Param.NO_HINT.getKey()));
       } else {
-        this.context = RenderingContext.GADGET;
-        this.compileMode = JsCompileMode.BUILD_TIME;
+        this.context = RenderingContext.getDefault();
+        this.compileMode = JsCompileMode.getDefault();
         this.jsload = false;
         this.onload = null;
         this.nohint = false;
@@ -90,7 +90,7 @@ public interface JsUriManager {
     public JsUri(UriStatus status, Collection<String> libs, RenderingContext context,
                  String onload, boolean jsload, boolean nohint) {
       super(status, null);
-      this.compileMode = JsCompileMode.BUILD_TIME;
+      this.compileMode = JsCompileMode.getDefault();
       this.onload = onload;
       this.jsload = jsload;
       this.nohint = nohint;
@@ -102,11 +102,11 @@ public interface JsUriManager {
 
     public JsUri(Gadget gadget, Collection<String> libs) {
       super(gadget);
-      this.compileMode = JsCompileMode.BUILD_TIME;
+      this.compileMode = JsCompileMode.getDefault();
       this.onload = null;
       this.jsload = false;
       this.nohint = false;
-      this.context = RenderingContext.GADGET;
+      this.context = RenderingContext.getDefault();;
       this.libs = nonNullLibs(libs);
       this.loadedLibs = EMPTY_COLL;
       this.origUri = null;
@@ -115,7 +115,7 @@ public interface JsUriManager {
     public JsUri(Integer refresh, boolean debug, boolean noCache, String container, String gadget,
         Collection<String> libs, Collection<String> loadedLibs, String onload, boolean jsload, boolean nohint, RenderingContext context, Uri origUri) {
       super(null, refresh, debug, noCache, container, gadget);
-      this.compileMode = JsCompileMode.BUILD_TIME;
+      this.compileMode = JsCompileMode.getDefault();
       this.onload = onload;
       this.jsload = jsload;
       this.nohint = nohint;
@@ -159,6 +159,10 @@ public interface JsUriManager {
 
     public JsCompileMode getCompileMode() {
       return compileMode;
+    }
+
+    public void setCompileMode(JsCompileMode mode) {
+      this.compileMode = mode;
     }
 
     public String getOnload() {

@@ -36,13 +36,13 @@ if (gadgets && gadgets.rpc) { //Dont bind if gadgets.rpc not defined
     function execute(requests, callback) {
       var rpcCallback = function(response) {
         if (!response) {
-          callback({ code: 500, message: 'Container refused the request' });
-        } else if (response.error) {
+          callback({ 'code': 500, 'message': 'Container refused the request' });
+        } else if (response['error']) {
           callback(response);
         } else {
           var responseMap = {};
           for (var i = 0; i < response.length; i++) {
-            responseMap[response[i].id] = response[i];
+            responseMap[response[i]['id']] = response[i];
           }
           callback(responseMap);
         }
@@ -95,7 +95,7 @@ if (gadgets && gadgets.rpc) { //Dont bind if gadgets.rpc not defined
 
         // Call for the container methods and bind them to osapi.
         osapi.container.listMethods({}).execute(function(response) {
-          if (!response.error) {
+          if (!response['error']) {
             for (var i = 0; i < response.length; i++) {
               // do not rebind container.listMethods implementation
               if (response[i] != 'container.listMethods') {

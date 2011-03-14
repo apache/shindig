@@ -28,6 +28,7 @@ import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.GadgetException.Code;
+import org.apache.shindig.gadgets.JsCompileMode;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.uri.UriCommon.Param;
 
@@ -73,7 +74,7 @@ public class DefaultJsUriManager implements JsUriManager {
     if (!ctx.getLoadedLibs().isEmpty()) {
       uri.addQueryParameter(Param.LOADED_LIBS.getKey(), addJsLibs(ctx.getLoadedLibs()));
     }
-    
+
     // Standard container param, as JS may be container-specific.
     uri.addQueryParameter(Param.CONTAINER.getKey(), container);
 
@@ -100,9 +101,14 @@ public class DefaultJsUriManager implements JsUriManager {
     if (ctx.isJsload()) {
       uri.addQueryParameter(Param.JSLOAD.getKey(), "1");
     }
-    
+
     if (ctx.isNohint()) {
       uri.addQueryParameter(Param.NO_HINT.getKey(), "1");
+    }
+
+    JsCompileMode mode = ctx.getCompileMode();
+    if (mode != null && mode != JsCompileMode.getDefault()) {
+      uri.addQueryParameter(Param.COMPILE_MODE.getKey(), mode.getParamValue());
     }
 
     // Finally, version it, but only if !nocache.

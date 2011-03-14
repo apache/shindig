@@ -100,12 +100,12 @@ shindig.container.Service.prototype.getGadgetMetadata = function(
   } else {
     var self = this;
     request = shindig.container.util.newMetadataRequest(uncachedUrls);
-    osapi.gadgets.metadata(request).execute(function(response) {
+    osapi['gadgets']['metadata'](request).execute(function(response) {
 
       // If response entirely fails, augment individual errors.
-      if (response.error) {
-        for (var i = 0; i < request.ids.length; i++) {
-          finalResponse[id] = { 'error' : response.error };
+      if (response['error']) {
+        for (var i = 0; i < request['ids'].length; i++) {
+          finalResponse[id] = { 'error' : response['error'] };
         }
 
       // Otherwise, cache response. Augment final response with server response.
@@ -192,13 +192,13 @@ shindig.container.Service.prototype.getGadgetToken = function(
 
   // Do not check against cache. Always do a server fetch.
   var self = this;
-  osapi.gadgets.token(request).execute(function(response) {
+  osapi['gadgets']['token'](request).execute(function(response) {
     var finalResponse = {};
 
     // If response entirely fails, augment individual errors.
-    if (response.error) {
-      for (var i = 0; i < request.ids.length; i++) {
-        finalResponse[id] = { 'error' : response.error };
+    if (response['error']) {
+      for (var i = 0; i < request['ids'].length; i++) {
+        finalResponse[id] = { 'error' : response['error'] };
       }
 
     // Otherwise, cache response. Augment final response with server response.
@@ -308,8 +308,8 @@ shindig.container.Service.prototype.getUncachedDataByRequest_ = function(
 shindig.container.Service.prototype.filterCachedDataByRequest_ = function(
     data, request, filterFunc) {
   var result = {};
-  for (var i = 0; i < request.ids.length; i++) {
-    var id = request.ids[i];
+  for (var i = 0; i < request['ids'].length; i++) {
+    var id = request['ids'][i];
     var cachedData = data[id];
     if (filterFunc(cachedData)) {
       result[id] = cachedData;

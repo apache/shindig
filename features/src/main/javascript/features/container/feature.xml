@@ -62,13 +62,14 @@ under the License.
       <exports type="js">shindig.container.ContainerRender.TEST</exports>
       <exports type="js">shindig.container.ContainerRender.VIEW</exports>
       <exports type="js">shindig.container.ContainerRender.WIDTH</exports>
-      <exports type="js">shindig.container.GadgetSite</exports>
       <exports type="js">shindig.container.GadgetSite.prototype.setHeight</exports>
       <exports type="js">shindig.container.GadgetSite.prototype.setWidth</exports>
       <exports type="js">shindig.container.GadgetSite.prototype.getId</exports>
       <exports type="js">shindig.container.GadgetSite.prototype.getActiveGadgetHolder</exports>
       <exports type="js">shindig.container.GadgetSite.prototype.rpcCall</exports>
       <exports type="js">shindig.container.GadgetSite.prototype.close</exports>
+      <!-- TODO: deprecate this. It should have the same id as siteId -->
+      <exports type="js">shindig.container.GadgetHolder.prototype.getIframeId</exports>
     </api>
   </container>
 </feature>

@@ -38,7 +38,7 @@ public enum RenderingContext {
   // identical to processing under GADGET, but some operations may be safely
   // skipped, such as preload processing.
   METADATA(null, null, null),
-  
+
   // Allows specification of feature JS with an <all> tag. Specially handled in
   // FeatureRegistry: content specified in an <all> tag is chosen if there are
   // no <gadget> or <container> sections. This avoids, for many libs where the JS
@@ -69,16 +69,18 @@ public enum RenderingContext {
 
   public static RenderingContext valueOfParam(String param) {
     // Exception: when no &c= parameter provided or bad, default to GADGET.
-    RenderingContext c = RenderingContext.GADGET;
     if (param != null) {
       for (RenderingContext rc : RenderingContext.values()) {
         String rcParam = rc.getParamValue();
         if (rcParam != null && rcParam.equals(param)) {
-          c = rc;
-          break;
+          return rc;
         }
       }
     }
-    return c;
+    return getDefault();
+  }
+
+  public static RenderingContext getDefault() {
+    return RenderingContext.GADGET;
   }
 }

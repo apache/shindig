@@ -27,11 +27,11 @@
   function initializeConfig() {
     gadgets.config.init({
       'rpc': {
-        parentRelayUrl: ''
+        'parentRelayUrl': ''
       },
       'core.io': {
-        jsonProxyUrl: 'http://%host%/gadgets/makeRequest',
-        proxyUrl: 'http://%host%/gadgets/proxy' +
+        'jsonProxyUrl': 'http://%host%/gadgets/makeRequest',
+        'proxyUrl': 'http://%host%/gadgets/proxy' +
             '?refresh=%refresh%' +
             '&container=%container%%rewriteMime%' +
             '&gadget=%gadget%/%rawurl%'

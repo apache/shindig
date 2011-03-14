@@ -74,27 +74,27 @@ gadgets.io = function() {
    * @return {boolean} true if the xobj is not ready to be processed.
    */
   function hadError(xobj, callback) {
-    if (xobj.readyState !== 4) {
+    if (xobj['readyState'] !== 4) {
       return true;
     }
     try {
-      if (xobj.status !== 200) {
-        var error = ('' + xobj.status);
-        if (xobj.responseText) {
-          error = error + ' ' + xobj.responseText;
+      if (xobj['status'] !== 200) {
+        var error = ('' + xobj['status']);
+        if (xobj['responseText']) {
+          error = error + ' ' + xobj['responseText'];
         }
         callback({
-          errors: [error],
-          rc: xobj.status,
-          text: xobj.responseText
+          'errors': [error],
+          'rc': xobj['status'],
+          'text': xobj['responseText']
         });
         return true;
       }
     } catch (e) {
       callback({
-        errors: [e.number + ' Error not specified'],
-        rc: e.number,
-        text: e.description
+        'errors': [e['number'] + ' Error not specified'],
+        'rc': e['number'],
+        'text': e['description']
       });
       return true;
     }
@@ -114,7 +114,7 @@ gadgets.io = function() {
       return;
     }
     var data = {
-      body: xobj.responseText
+      'body': xobj['responseText']
     };
     callback(transformResponseData(params, data));
   }
@@ -133,7 +133,7 @@ gadgets.io = function() {
     if (hadError(xobj, callback)) {
       return;
     }
-    var txt = xobj.responseText;
+    var txt = xobj['responseText'];
 
     // remove unparseable cruft used to prevent cross-site script inclusion
     var offset = txt.indexOf(UNPARSEABLE_CRUFT) + UNPARSEABLE_CRUFT.length;
@@ -148,12 +148,12 @@ gadgets.io = function() {
     var data = eval('(' + txt + ')');
     data = data[url];
     // Save off any transient OAuth state the server wants back later.
-    if (data.oauthState) {
-      oauthState = data.oauthState;
+    if (data['oauthState']) {
+      oauthState = data['oauthState'];
     }
     // Update the security token if the server sent us a new one
-    if (data.st) {
-      shindig.auth.updateSecurityToken(data.st);
+    if (data['st']) {
+      shindig.auth.updateSecurityToken(data['st']);
     }
     callback(transformResponseData(params, data));
   }
@@ -168,32 +168,32 @@ gadgets.io = function() {
     // Sometimes rc is not present, generally when used
     // by jsonrpccontainer, so assume 200 in its absence.
     var resp = {
-      text: data.body,
-      rc: data.rc || 200,
-      headers: data.headers,
-      oauthApprovalUrl: data.oauthApprovalUrl,
-      oauthError: data.oauthError,
-      oauthErrorText: data.oauthErrorText,
-      errors: []
+      'text': data['body'],
+      'rc': data['rc'] || 200,
+      'headers': data['headers'],
+      'oauthApprovalUrl': data['oauthApprovalUrl'],
+      'oauthError': data['oauthError'],
+      'oauthErrorText': data['oauthErrorText'],
+      'errors': []
     };
 
-    if (resp.rc < 200 || resp.rc >= 400) {
-      resp.errors = [resp.rc + ' Error'];
-    } else if (resp.text) {
-      if (resp.rc >= 300 && resp.rc < 400) {
+    if (resp['rc'] < 200 || resp['rc'] >= 400) {
+      resp['errors'] = [resp['rc'] + ' Error'];
+    } else if (resp['text']) {
+      if (resp['rc'] >= 300 && resp['rc'] < 400) {
         // Redirect pages will usually contain arbitrary
         // HTML which will fail during parsing, inadvertently
         // causing a 500 response. Thus we treat as text.
-        params.CONTENT_TYPE = 'TEXT';
+        params['CONTENT_TYPE'] = 'TEXT';
       }
-      switch (params.CONTENT_TYPE) {
+      switch (params['CONTENT_TYPE']) {
         case 'JSON':
         case 'FEED':
-          resp.data = gadgets.json.parse(resp.text);
-          if (!resp.data) {
-            resp.errors.push('500 Failed to parse JSON');
-            resp.rc = 500;
-            resp.data = null;
+          resp['data'] = gadgets.json.parse(resp.text);
+          if (!resp['data']) {
+            resp['errors'].push('500 Failed to parse JSON');
+            resp['rc'] = 500;
+            resp['data'] = null;
           }
           break;
         case 'DOM':
@@ -203,25 +203,25 @@ gadgets.io = function() {
             dom.async = false;
             dom.validateOnParse = false;
             dom.resolveExternals = false;
-            if (!dom.loadXML(resp.text)) {
-              resp.errors.push('500 Failed to parse XML');
-              resp.rc = 500;
+            if (!dom.loadXML(resp['text'])) {
+              resp['errors'].push('500 Failed to parse XML');
+              resp['rc'] = 500;
             } else {
-              resp.data = dom;
+              resp['data'] = dom;
             }
           } else {
             var parser = new DOMParser();
-            dom = parser.parseFromString(resp.text, 'text/xml');
+            dom = parser.parseFromString(resp['text'], 'text/xml');
             if ('parsererror' === dom.documentElement.nodeName) {
-              resp.errors.push('500 Failed to parse XML');
-              resp.rc = 500;
+              resp['errors'].push('500 Failed to parse XML');
+              resp['rc'] = 500;
             } else {
-              resp.data = dom;
+              resp['data'] = dom;
             }
           }
           break;
         default:
-          resp.data = resp.text;
+          resp['data'] = resp['text'];
           break;
       }
     }
@@ -293,20 +293,20 @@ gadgets.io = function() {
           // Only satisfy once
           delete gadgets.io.preloaded_[i];
 
-          if (preload.rc !== 200) {
-            callback({rc: preload.rc, errors: [preload.rc + ' Error']});
+          if (preload['rc'] !== 200) {
+            callback({'rc': preload['rc'], 'errors': [preload['rc'] + ' Error']});
           } else {
-            if (preload.oauthState) {
-              oauthState = preload.oauthState;
+            if (preload['oauthState']) {
+              oauthState = preload['oauthState'];
             }
             var resp = {
-              body: preload.body,
-              rc: preload.rc,
-              headers: preload.headers,
-              oauthApprovalUrl: preload.oauthApprovalUrl,
-              oauthError: preload.oauthError,
-              oauthErrorText: preload.oauthErrorText,
-              errors: []
+              'body': preload['body'],
+              'rc': preload['rc'],
+              'headers': preload['headers'],
+              'oauthApprovalUrl': preload['oauthApprovalUrl'],
+              'oauthError': preload['oauthError'],
+              'oauthErrorText': preload['oauthErrorText'],
+              'errors': []
             };
             callback(transformResponseData(params, resp));
           }
@@ -326,8 +326,8 @@ gadgets.io = function() {
   }
 
   var requiredConfig = {
-    proxyUrl: new gadgets.config.RegExValidator(/.*%(raw)?url%.*/),
-    jsonProxyUrl: gadgets.config.NonEmptyStringValidator
+    'proxyUrl': new gadgets.config.RegExValidator(/.*%(raw)?url%.*/),
+    'jsonProxyUrl': gadgets.config.NonEmptyStringValidator
   };
   gadgets.config.register('core.io', requiredConfig, init);
 
@@ -358,13 +358,13 @@ gadgets.io = function() {
 
       var params = opt_params || {};
 
-      var httpMethod = params.METHOD || 'GET';
-      var refreshInterval = params.REFRESH_INTERVAL;
+      var httpMethod = params['METHOD'] || 'GET';
+      var refreshInterval = params['REFRESH_INTERVAL'];
 
       // Check if authorization is requested
       var auth, st;
-      if (params.AUTHORIZATION && params.AUTHORIZATION !== 'NONE') {
-        auth = params.AUTHORIZATION.toLowerCase();
+      if (params['AUTHORIZATION'] && params['AUTHORIZATION'] !== 'NONE') {
+        auth = params['AUTHORIZATION'].toLowerCase();
         st = shindig.auth.getSecurityToken();
       } else {
         // Unauthenticated GET requests are cacheable
@@ -375,17 +375,17 @@ gadgets.io = function() {
 
       // Include owner information?
       var signOwner = true;
-      if (typeof params.OWNER_SIGNED !== 'undefined') {
-        signOwner = params.OWNER_SIGNED;
+      if (typeof params['OWNER_SIGNED'] !== 'undefined') {
+        signOwner = params['OWNER_SIGNED'];
       }
 
       // Include viewer information?
       var signViewer = true;
-      if (typeof params.VIEWER_SIGNED !== 'undefined') {
-        signViewer = params.VIEWER_SIGNED;
+      if (typeof params['VIEWER_SIGNED'] !== 'undefined') {
+        signViewer = params['VIEWER_SIGNED'];
       }
 
-      var headers = params.HEADERS || {};
+      var headers = params['HEADERS'] || {};
       if (httpMethod === 'POST' && !headers['Content-Type']) {
         headers['Content-Type'] = 'application/x-www-form-urlencoded';
       }
@@ -393,31 +393,31 @@ gadgets.io = function() {
       var urlParams = gadgets.util.getUrlParameters();
 
       var paramData = {
-        url: url,
-        httpMethod: httpMethod,
-        headers: gadgets.io.encodeValues(headers, false),
-        postData: params.POST_DATA || '',
-        authz: auth || '',
-        st: st || '',
-        contentType: params.CONTENT_TYPE || 'TEXT',
-        numEntries: params.NUM_ENTRIES || '3',
-        getSummaries: !!params.GET_SUMMARIES,
-        signOwner: signOwner,
-        signViewer: signViewer,
-        gadget: urlParams['url'],
-        container: urlParams['container'] || urlParams['synd'] || 'default',
+        'url': url,
+        'httpMethod': httpMethod,
+        'headers': gadgets.io.encodeValues(headers, false),
+        'postData': params['POST_DATA'] || '',
+        'authz': auth || '',
+        'st': st || '',
+        'contentType': params['CONTENT_TYPE'] || 'TEXT',
+        'numEntries': params['NUM_ENTRIES'] || '3',
+        'getSummaries': !!params['GET_SUMMARIES'],
+        'signOwner': signOwner,
+        'signViewer': signViewer,
+        'gadget': urlParams['url'],
+        'container': urlParams['container'] || urlParams['synd'] || 'default',
         // should we bypass gadget spec cache (e.g. to read OAuth provider URLs)
-        bypassSpecCache: gadgets.util.getUrlParameters()['nocache'] || '',
-        getFullHeaders: !!params.GET_FULL_HEADERS
+        'bypassSpecCache': gadgets.util.getUrlParameters()['nocache'] || '',
+        'getFullHeaders': !!params['GET_FULL_HEADERS']
       };
 
       // OAuth goodies
       if (auth === 'oauth' || auth === 'signed') {
         if (gadgets.io.oauthReceivedCallbackUrl_) {
-          paramData.OAUTH_RECEIVED_CALLBACK = gadgets.io.oauthReceivedCallbackUrl_;
+          paramData['OAUTH_RECEIVED_CALLBACK'] = gadgets.io.oauthReceivedCallbackUrl_;
           gadgets.io.oauthReceivedCallbackUrl_ = null;
         }
-        paramData.oauthState = oauthState || '';
+        paramData['oauthState'] = oauthState || '';
         // Just copy the OAuth parameters into the req to the server
         for (var opt in params) {
           if (params.hasOwnProperty(opt)) {
@@ -458,8 +458,8 @@ gadgets.io = function() {
      */
     makeNonProxiedRequest: function(relativeUrl, callback, opt_params, opt_headers) {
       var params = opt_params || {};
-      makeXhrRequest(relativeUrl, relativeUrl, callback, params.POST_DATA,
-          params.METHOD, params, processNonProxiedResponse, opt_headers);
+      makeXhrRequest(relativeUrl, relativeUrl, callback, params['POST_DATA'],
+          params['METHOD'], params, processNonProxiedResponse, opt_headers);
     },
 
     /**
@@ -516,7 +516,7 @@ gadgets.io = function() {
      */
     getProxyUrl: function(url, opt_params) {
       var params = opt_params || {};
-      var refresh = params.REFRESH_INTERVAL;
+      var refresh = params['REFRESH_INTERVAL'];
       if (refresh === undefined) {
         refresh = '3600';
       }
@@ -524,7 +524,7 @@ gadgets.io = function() {
       var urlParams = gadgets.util.getUrlParameters();
 
       var rewriteMimeParam =
-          params.rewriteMime ? '&rewriteMime=' + encodeURIComponent(params.rewriteMime) : '';
+          params['rewriteMime'] ? '&rewriteMime=' + encodeURIComponent(params['rewriteMime']) : '';
       var ret = config['proxyUrl'].replace('%url%', encodeURIComponent(url)).
           replace('%host%', document.location.host).
           replace('%rawurl%', url).

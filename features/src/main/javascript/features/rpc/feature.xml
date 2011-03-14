@@ -24,7 +24,6 @@ specific language governing permissions and limitations under the License.
   <dependency>core.util.urlparams</dependency>
   <all>
     <api>
-      <exports type="js">gadgets.rpc</exports>
       <exports type="js">gadgets.rpc.config</exports>
       <exports type="js">gadgets.rpc.register</exports>
       <exports type="js">gadgets.rpc.unregister</exports>

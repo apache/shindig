@@ -50,4 +50,8 @@ public enum JsCompileMode {
     return JsCompileMode.BUILD_TIME;
   }
 
+  public static JsCompileMode getDefault() {
+    return JsCompileMode.BUILD_TIME;
+  }
+
 }
