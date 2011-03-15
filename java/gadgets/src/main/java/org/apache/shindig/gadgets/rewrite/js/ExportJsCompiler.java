@@ -59,10 +59,8 @@ public class ExportJsCompiler extends DefaultJsCompiler {
   public String getJsContent(JsUri jsUri, FeatureBundle bundle) {
     StringBuilder builder = new StringBuilder();
     builder.append("\n/* feature=").append(bundle.getName()).append(" */\n");
-    builder.append("(function() {");
     builder.append(super.getJsContent(jsUri, bundle));
     appendExportsForFeature(builder, jsUri, bundle);
-    builder.append("})();");
     builder.append("\n/* feature=").append(bundle.getName()).append(" */\n");
     return builder.toString();
   }
@@ -73,6 +71,7 @@ public class ExportJsCompiler extends DefaultJsCompiler {
     StringBuilder builder = new StringBuilder();
     builder.append(getExportJsFeature(ctx));
     builder.append(content);
+    // TODO: attach this to a real JS compiler jscomp.Compiler.
     return new Result(builder.toString());
   }
 

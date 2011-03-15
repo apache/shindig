@@ -142,8 +142,6 @@ public class ExportJsCompilerTest {
     String actual = compiler.getJsContent(jsUri, bundle);
     assertEquals(
         "\n/* feature=" + RESOURCE_NAME + " */\n" +
-        "(function() {" +
-        "})();" +
         "\n/* feature=" + RESOURCE_NAME + " */\n",
         actual);
   }
@@ -157,14 +155,12 @@ public class ExportJsCompilerTest {
     String actual = compiler.getJsContent(jsUri, bundle);
     assertEquals(
         "\n/* feature=" + RESOURCE_NAME + " */\n" +
-        "(function() {" +
         "document.write('<script src=\"" + RESOURCE_URL_DEB + "\"></script>');\n" +
         RESOURCE_CONTENT_DEB + ";\n" +
         "exportJs('gadgets',[gadgets]);" +
         "exportJs('cc',[cc]);" +
         "exportJs('gadgets.rpc',[gadgets,gadgets.rpc],{call:'call'});" +
         "exportJs('cc.prototype',[cc,cc.prototype],{site:'site'});" +
-        "})();" +
         "\n/* feature=" + RESOURCE_NAME + " */\n",
         actual);
   }
