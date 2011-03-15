@@ -29,12 +29,15 @@ import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.MoreExecutors;
 
 import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.gadgets.Gadget;
+import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.http.AbstractHttpCache;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.http.RequestPipeline;
 import org.apache.shindig.gadgets.parse.ParseModule.DOMImplementationProvider;
+import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Attr;
@@ -55,6 +58,8 @@ public class CacheEnforcementVisitorTest extends DomWalkerTestBase {
   private static final Map<String, String> ALL_RESOURCES =
       CacheEnforcementVisitor.Tags.ALL_RESOURCES.getResourceTags();
   private static final String IMG_URL = "http://www.example.org/1.gif";
+  private static final String CONTAINER = "test_container";
+  private static final String GADGET = "http://www.test.com";
 
   @Before
   public void setUp() {
@@ -63,6 +68,29 @@ public class CacheEnforcementVisitorTest extends DomWalkerTestBase {
     doc = domImpl.get().createDocument(null, null, null);
     cache = new TestHttpCache();
     cache.setRefetchStrictNoCacheAfterMs(86400L);
+  }
+
+  @Test
+  public void testCreateNewHttpRequest() throws Exception {
+    Gadget gadget = createMock(Gadget.class);
+    Uri uri = Uri.parse(GADGET);
+    GadgetSpec gadgetSpec = createMock(GadgetSpec.class);
+    expect(gadgetSpec.getUrl()).andReturn(uri);
+    expect(gadget.getSpec()).andReturn(gadgetSpec);
+    
+    GadgetContext context = createMock(GadgetContext.class);
+    expect(context.getContainer()).andReturn(CONTAINER);
+    expect(gadget.getContext()).andReturn(context);
+
+    replay(gadgetSpec);
+    replay(context);
+    replay(gadget);
+
+    CacheEnforcementVisitor visitor = new CacheEnforcementVisitor(
+        null, null, null, null, CacheEnforcementVisitor.Tags.ALL_RESOURCES);
+    HttpRequest newRequest = visitor.createNewHttpRequest(gadget, IMG_URL);
+    assertEquals(CONTAINER, newRequest.getContainer());
+    assertEquals(uri, newRequest.getGadget());
   }
 
   @Test

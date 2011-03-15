@@ -23,11 +23,13 @@ import com.google.common.collect.ImmutableList;
 import org.apache.shindig.common.Pair;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
+import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpCache;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.RequestPipeline;
+import org.apache.shindig.gadgets.spec.GadgetSpec;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -75,19 +77,37 @@ public class CacheEnforcementVisitor extends ResourceMutateVisitor {
     this.requestPipeline = requestPipeline;
   }
 
+  /**
+   * Constructs a new HttpRequest in the context of the gadget.
+   * For example, the implementation may choose to copy User Agent or referer etc.
+   */
+  protected HttpRequest createNewHttpRequest(Gadget gadget, String uriStr) {
+    HttpRequest request = new HttpRequest(Uri.parse(uriStr));
+    if (gadget != null) {
+      GadgetSpec spec = gadget.getSpec();
+      if (spec != null) {
+        request.setGadget(spec.getUrl());
+      }
+      GadgetContext context = gadget.getContext();
+      if (context != null) {
+        request.setContainer(context.getContainer());
+      }
+    }
+    return request;
+  }
+
   @Override
   public VisitStatus visit(Gadget gadget, Node node) throws RewritingException {
     if (super.visit(gadget, node).equals(VisitStatus.RESERVE_NODE)) {
       Element element = (Element) node;
       String nodeName = node.getNodeName().toLowerCase();
       String uriStr = element.getAttribute(resourceTags.get(nodeName)).trim();
-      // TODO: Construct other attributes of the HttpRequest using the passed in
-      // gadget.
-      HttpResponse response = cache.getResponse(new HttpRequest(Uri.parse(uriStr)));
+      HttpRequest request = createNewHttpRequest(gadget, uriStr);
+      HttpResponse response = cache.getResponse(request);
       if (response == null) {
-        return handleResponseNotInCache(uriStr);
+        return handleResponseNotInCache(request);
       } else {
-        return handleResponseInCache(uriStr, response);
+        return handleResponseInCache(request, response);
       }
     }
     return VisitStatus.BYPASS;
@@ -96,11 +116,11 @@ public class CacheEnforcementVisitor extends ResourceMutateVisitor {
   /**
    * The action to be performed if the response is in cache.
    *
-   * @param uri The uri of the node.
+   * @param request HttpRequest to fetch the resource of the node.
    * @param response The HttpResponse retrieved from cache.
    * @return The visit status of the node.
    */
-  protected VisitStatus handleResponseInCache(String uri, HttpResponse response) {
+  protected VisitStatus handleResponseInCache(HttpRequest request, HttpResponse response) {
     if (response.shouldRefetch()) {
       // Reserve the node if the response should be refetched.
       if (response.getCacheControlMaxAge() != 0) {
@@ -113,7 +133,7 @@ public class CacheEnforcementVisitor extends ResourceMutateVisitor {
         // since the response might not be usable by the time the actual request comes in. Also
         // we should consider the cases with no max-age, but instead an Expires header which is
         // close to, or the same as the Date header.
-        triggerFetch(uri);        
+        triggerFetch(request);
       }
       return VisitStatus.RESERVE_NODE;
     } else if (response.isStrictNoCache() || response.getHeader("Set-Cookie") != null ||
@@ -133,28 +153,28 @@ public class CacheEnforcementVisitor extends ResourceMutateVisitor {
   /**
    * The action to be performed if the response is not in cache.
    *
-   * @param uri The uri of the node.
+   * @param request HttpRequest to fetch the resource of the node.
    * @return The visit status of the node.
    */
-  protected VisitStatus handleResponseNotInCache(String uri) {
-    triggerFetch(uri);
+  protected VisitStatus handleResponseNotInCache(HttpRequest request) {
+    triggerFetch(request);
     return VisitStatus.RESERVE_NODE;
   }
 
   /**
    * Triggers a background fetch for a resource.
    *
-   * @param uri The uri
+   * @param request HttpRequest to fetch the resource of the node.
    */
-  protected void triggerFetch(final String uri) {
+  protected void triggerFetch(final HttpRequest request) {
 
     executor.execute(new Runnable() {
 
       public void run() {
         try {
-          requestPipeline.execute(new HttpRequest(Uri.parse(uri)));
+          requestPipeline.execute(request);
         } catch (GadgetException e) {
-          logger.log(Level.WARNING, "Triggered fetch failed for " + uri, e);
+          logger.log(Level.WARNING, "Triggered fetch failed for " + request, e);
         }
       }
     });
