@@ -325,11 +325,7 @@ gadgets.io = function() {
     config = configuration['core.io'] || {};
   }
 
-  var requiredConfig = {
-    'proxyUrl': new gadgets.config.RegExValidator(/.*%(raw)?url%.*/),
-    'jsonProxyUrl': gadgets.config.NonEmptyStringValidator
-  };
-  gadgets.config.register('core.io', requiredConfig, init);
+  gadgets.config.register('core.io', null, init);
 
   return /** @scope gadgets.io */ {
     /**
