@@ -25,7 +25,6 @@
   <dependency>core.config</dependency>
   <dependency>core.io</dependency>
   <dependency>core.json</dependency>
-  <dependency>core.log</dependency>
   <dependency>core.util</dependency>
   <dependency>rpc</dependency>
   <dependency>security-token</dependency>
