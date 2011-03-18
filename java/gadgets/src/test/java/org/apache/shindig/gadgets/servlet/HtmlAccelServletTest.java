@@ -31,6 +31,7 @@ import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.rewrite.CaptureRewriter;
 import org.apache.shindig.gadgets.rewrite.DefaultResponseRewriterRegistry;
 import org.apache.shindig.gadgets.rewrite.ResponseRewriter;
+import org.apache.shindig.gadgets.rewrite.RewritingException;
 import org.apache.shindig.gadgets.uri.AccelUriManager;
 import org.apache.shindig.gadgets.uri.DefaultAccelUriManager;
 import org.apache.shindig.gadgets.uri.DefaultProxyUriManager;
@@ -50,6 +51,11 @@ import static org.easymock.EasyMock.capture;
 import static org.easymock.EasyMock.expect;
 
 public class HtmlAccelServletTest extends ServletTestFixture {
+
+  private final ContainerConfig config = new FakeContainerConfig();
+
+  private final AccelUriManager accelUriManager = new DefaultAccelUriManager(
+      config, new DefaultProxyUriManager(config, null));
 
   private static class FakeContainerConfig extends BasicContainerConfig {
     protected final Map<String, Object> data = ImmutableMap.<String, Object>builder()
@@ -84,9 +90,6 @@ public class HtmlAccelServletTest extends ServletTestFixture {
 
   @Before
   public void setUp() throws Exception {
-    ContainerConfig config = new FakeContainerConfig();
-    AccelUriManager accelUriManager = new DefaultAccelUriManager(
-        config, new DefaultProxyUriManager(config, null));
 
     rewriter = new FakeCaptureRewriter();
     rewriterRegistry = new DefaultResponseRewriterRegistry(
@@ -397,5 +400,40 @@ public class HtmlAccelServletTest extends ServletTestFixture {
     assertEquals(REWRITE_CONTENT, recorder.getResponseAsString());
     assertEquals(200, recorder.getHttpStatusCode());
     assertTrue(rewriter.responseWasRewritten());
+  }
+
+  @Test
+  public void testReturnOriginalResponseIfRewritingFails() throws Exception {
+    ResponseRewriter throwingRewriter = new ResponseRewriter() {
+      public void rewrite(HttpRequest request, HttpResponseBuilder response)
+          throws RewritingException {
+        response.setContent(REWRITE_CONTENT);
+        throw new RewritingException("", 404);
+      }
+    };
+    rewriterRegistry = new DefaultResponseRewriterRegistry(
+        Arrays.<ResponseRewriter>asList(throwingRewriter), null);
+    servlet = new HtmlAccelServlet();
+    servlet.setHandler(new AccelHandler(pipeline, rewriterRegistry,
+                                        accelUriManager, true));
+    String url = "http://example.org/data.html";
+    String data = "<html><body>Hello World</body></html>";
+
+    HttpRequest req = new HttpRequest(Uri.parse(url));
+    req.addHeader("Host", Uri.parse(url).getAuthority());
+    HttpResponse resp = new HttpResponseBuilder()
+        .setResponse(data.getBytes())
+        .setHeader("Content-Type", "text/html")
+        .setHttpStatusCode(200)
+        .create();
+    expect(pipeline.execute(req)).andReturn(resp).once();
+    expectRequest("", url);
+    replay();
+
+    servlet.doGet(request, recorder);
+
+    verify();
+    assertEquals(data, recorder.getResponseAsString());
+    assertEquals(200, recorder.getHttpStatusCode());
   }
 }

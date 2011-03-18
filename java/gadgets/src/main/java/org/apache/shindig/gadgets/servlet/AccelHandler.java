@@ -42,6 +42,8 @@ import org.apache.shindig.gadgets.uri.UriUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Handles requests for accel servlet.
@@ -51,6 +53,8 @@ import java.io.IOException;
  */
 @Singleton
 public class AccelHandler {
+  private static final Logger logger = Logger.getLogger(
+      AccelHandler.class.getName());
   static final String ERROR_FETCHING_DATA = "Error fetching data";
   protected final RequestPipeline requestPipeline;
   protected final ResponseRewriterRegistry contentRewriterRegistry;
@@ -86,10 +90,8 @@ public class AccelHandler {
       try {
         results = contentRewriterRegistry.rewriteHttpResponse(req, results);
       } catch (RewritingException e) {
-        if (!isRecoverable(req, results, e)) {
-          throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, e,
-                                    e.getHttpStatusCode());
-        }
+        logger.log(Level.WARNING, "Rewriting failed, serving original results", e);
+        // In case of exception continue using original results.
       }
     } else {
       results = errorResponse;
@@ -143,28 +145,6 @@ public class AccelHandler {
   }
 
   /**
-   * Returns true in case the error encountered while rewriting the content
-   * is recoverable. The rationale behind it is that errors should be thrown
-   * only in case of serious grave errors (defined to be un recoverable).
-   * It should always be preferred to handle errors and return the original
-   * content at least.
-   *
-   * TODO: Think through all cases which are recoverable to enforce minimal
-   * possible set of constraints.
-   * TODO: Log the exception and context around it.
-   *
-   * @param req The http request for fetching the resource.
-   * @param results The result of rewriting.
-   * @param exception Exception caught.
-   * @return True if the error is recoverable, false otherwise.
-   */
-  protected boolean isRecoverable(HttpRequest req, HttpResponse results,
-                                  RewritingException exception) {
-    return !(Strings.isNullOrEmpty(results.getResponseAsString()) &&
-             results.getHeaders() == null);
-  }
-
-  /**
    * Build an HttpRequest object encapsulating the request details as requested
    * by the user.
    * @param httpRequest The http request.
@@ -188,7 +168,7 @@ public class AccelHandler {
 
     // Set and copy headers.
     ServletUtil.setXForwardedForHeader(httpRequest, req);
-    
+
     UriUtils.copyRequestHeaders(
         httpRequest, req,
         UriUtils.DisallowedHeaders.POST_INCOMPATIBLE_DIRECTIVES,
