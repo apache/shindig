@@ -25,12 +25,9 @@ import com.google.caja.reporting.EchoingMessageQueue;
 import com.google.caja.reporting.MessageContext;
 import com.google.caja.reporting.MessageQueue;
 import com.google.caja.util.ContentType;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
 
 import java.io.PrintWriter;
 import java.net.URI;
-import java.util.Set;
 
 import junit.framework.TestCase;
 

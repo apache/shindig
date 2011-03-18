@@ -26,7 +26,6 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
@@ -47,6 +46,8 @@ import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.RenderingContext;
 import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.js.JsException;
+import org.apache.shindig.gadgets.js.JsResponse;
 import org.apache.shindig.gadgets.process.ProcessingException;
 import org.apache.shindig.gadgets.process.Processor;
 import org.apache.shindig.gadgets.servlet.CajaContentRewriter.CajoledResult;
@@ -208,13 +209,13 @@ public class GadgetsHandlerService {
     String content = null;
     Long expireMs = null;
     if (isFieldIncluded(fields, "jsContent")) {
-      JsHandler.Response response = jsHandler.getJsContent(jsUri, servedUri.getAuthority());
-      content = response.getJsData().toString();
-      if (content.length() == 0) {
-        // No content, meaning no such feature
-        throw new ProcessingException("Feature(s) " + Joiner.on(",").join(jsUri.getLibs())
-            + " not found", HttpResponse.SC_NOT_FOUND);
+      JsResponse response = null;
+      try {
+        response = jsHandler.getJsContent(jsUri, servedUri.getAuthority());
+      } catch (JsException e) {
+        throw new ProcessingException(e.getMessage(), e.getStatusCode());
       }
+      content = response.getJsCode();
       if (response.isProxyCacheable()) {
         expireMs = timeSource.currentTimeMillis() + (HttpUtil.getDefaultTtl() * 1000);
       }

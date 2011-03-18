@@ -124,7 +124,7 @@ public class JsLoadProcessorTest {
     assertEquals(HttpServletResponse.SC_OK, response.getStatusCode());
     assertEquals(expectedTtl, response.getCacheTtlSecs());
     String expectedBody = String.format(JsLoadProcessor.JSLOAD_JS_TPL, uri.toString());
-    assertEquals(expectedBody, response.getJsCode().toString());
+    assertEquals(expectedBody, response.build().getJsCode());
   }
 
 }

@@ -21,8 +21,6 @@ package org.apache.shindig.gadgets.servlet;
 import com.google.caja.parser.ParseTreeNode;
 import com.google.caja.plugin.stages.JobCache;
 import com.google.caja.util.ContentType;
-import org.w3c.dom.Attr;
-import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NamedNodeMap;
 

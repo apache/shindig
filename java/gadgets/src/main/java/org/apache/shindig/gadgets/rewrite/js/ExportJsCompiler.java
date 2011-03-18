@@ -32,6 +32,9 @@ import org.apache.shindig.gadgets.features.FeatureRegistry;
 import org.apache.shindig.gadgets.features.FeatureRegistry.FeatureBundle;
 import org.apache.shindig.gadgets.features.FeatureRegistry.LookupResult;
 import org.apache.shindig.gadgets.features.FeatureResource;
+import org.apache.shindig.gadgets.js.JsContent;
+import org.apache.shindig.gadgets.js.JsResponse;
+import org.apache.shindig.gadgets.js.JsResponseBuilder;
 import org.apache.shindig.gadgets.uri.JsUriManager.JsUri;
 
 import java.util.Collection;
@@ -56,23 +59,27 @@ public class ExportJsCompiler extends DefaultJsCompiler {
   }
 
   @Override
-  public String getJsContent(JsUri jsUri, FeatureBundle bundle) {
-    StringBuilder builder = new StringBuilder();
-    builder.append("\n/* feature=").append(bundle.getName()).append(" */\n");
-    builder.append(super.getJsContent(jsUri, bundle));
-    appendExportsForFeature(builder, jsUri, bundle);
-    builder.append("\n/* feature=").append(bundle.getName()).append(" */\n");
-    return builder.toString();
+  public Iterable<JsContent> getJsContent(JsUri jsUri, FeatureBundle bundle) {
+    List<JsContent> jsContent = Lists.newLinkedList();
+    jsContent.add(new JsContent("\n/* [start] feature=" + bundle.getName() +
+        " */\n", "[comment-marker-start]", bundle.getName()));
+    for (JsContent jsc : super.getJsContent(jsUri, bundle)) {
+      jsContent.add(jsc);
+    }
+    jsContent.add(getExportsForFeature(jsUri, bundle));
+    jsContent.add(new JsContent("\n/* [end] feature=" + bundle.getName() +
+        " */\n", "[comment-marker-end]", bundle.getName()));
+    return jsContent;
   }
 
   @Override
-  public Result compile(JsUri jsUri, String content, List<String> externs) {
+  public JsResponse compile(JsUri jsUri, String content, List<String> externs) {
     GadgetContext ctx = new JsGadgetContext(jsUri);
     StringBuilder builder = new StringBuilder();
     builder.append(getExportJsFeature(ctx));
     builder.append(content);
     // TODO: attach this to a real JS compiler jscomp.Compiler.
-    return new Result(builder.toString());
+    return new JsResponseBuilder().appendJs(builder.toString(), "[export-compiled]").build();
   }
 
   @Override
@@ -80,7 +87,7 @@ public class ExportJsCompiler extends DefaultJsCompiler {
     return resource.getDebugContent();
   }
 
-  private void appendExportsForFeature(StringBuilder out, JsUri jsUri, FeatureBundle bundle) {
+  private JsContent getExportsForFeature(JsUri jsUri, FeatureBundle bundle) {
     List<String> exports = Lists.newArrayList();
 
     // Add exports of bundle, regardless.
@@ -94,9 +101,12 @@ public class ExportJsCompiler extends DefaultJsCompiler {
       }
     }
 
+    StringBuilder sb = new StringBuilder();
     for (Input input : generateInputs(exports)) {
-      out.append(input.toExportStatement());
+      sb.append(input.toExportStatement());
     }
+    
+    return new JsContent(sb.toString(), "[generated-symbol-exports]", bundle.getName());
   }
 
   private String getExportJsFeature(GadgetContext context) {

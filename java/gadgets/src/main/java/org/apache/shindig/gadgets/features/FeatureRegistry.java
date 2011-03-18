@@ -39,7 +39,6 @@ import org.apache.shindig.common.util.ResourceLoader;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.RenderingContext;
-import org.apache.shindig.gadgets.features.FeatureRegistry.FeatureBundle;
 
 import java.io.File;
 import java.io.IOException;
@@ -467,7 +466,7 @@ public class FeatureRegistry {
       List<FeatureResource> resources = Lists.newArrayList();
       for (FeatureParser.ParsedFeature.Resource parsedResource : parsedBundle.getResources()) {
         if (parsedResource.getSource() == null) {
-          resources.add(new InlineFeatureResource(parsedResource.getContent()));
+          resources.add(new InlineFeatureResource(parsed.getName() + ":inline.js", parsedResource.getContent()));
         } else {
           // Load using resourceLoader
           resources.add(resourceLoader.load(parsedResource.getSource(),
@@ -502,10 +501,12 @@ public class FeatureRegistry {
   }
 
   private static final class InlineFeatureResource extends FeatureResource.Default {
+    private final String name;
     private final String content;
 
-    private InlineFeatureResource(String content) {
+    private InlineFeatureResource(String name, String content) {
       this.content = content;
+      this.name = name;
     }
 
     public String getContent() {
@@ -514,6 +515,10 @@ public class FeatureRegistry {
 
     public String getDebugContent() {
       return content;
+    }
+    
+    public String getName() {
+      return name;
     }
   }
 

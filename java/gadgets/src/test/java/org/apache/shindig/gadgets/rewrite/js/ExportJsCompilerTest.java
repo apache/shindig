@@ -34,7 +34,8 @@ import org.apache.shindig.gadgets.features.FeatureRegistry;
 import org.apache.shindig.gadgets.features.FeatureRegistry.FeatureBundle;
 import org.apache.shindig.gadgets.features.FeatureRegistry.LookupResult;
 import org.apache.shindig.gadgets.features.FeatureResource;
-import org.apache.shindig.gadgets.rewrite.js.JsCompiler.Result;
+import org.apache.shindig.gadgets.js.JsContent;
+import org.apache.shindig.gadgets.js.JsResponse;
 import org.apache.shindig.gadgets.uri.JsUriManager.JsUri;
 import org.easymock.EasyMock;
 import org.junit.Before;
@@ -109,6 +110,7 @@ public class ExportJsCompilerTest {
     expect(result.getDebugContent()).andReturn(debContent).anyTimes();
     expect(result.getContent()).andReturn(optContent).anyTimes();
     expect(result.isExternal()).andReturn(external).anyTimes();
+    expect(result.getName()).andReturn("js").anyTimes();
     replay(result);
     return result;
   }
@@ -139,11 +141,11 @@ public class ExportJsCompilerTest {
   public void testGetJsContentEmpty() throws Exception {
     JsUri jsUri = mockJsUri(JsCompileMode.ALL_RUN_TIME);
     FeatureBundle bundle = mockBundle(Lists.<FeatureResource>newArrayList(), EMPTY, EMPTY); // empty
-    String actual = compiler.getJsContent(jsUri, bundle);
+    Iterable<JsContent> actual = compiler.getJsContent(jsUri, bundle);
     assertEquals(
-        "\n/* feature=" + RESOURCE_NAME + " */\n" +
-        "\n/* feature=" + RESOURCE_NAME + " */\n",
-        actual);
+        "\n/* [start] feature=" + RESOURCE_NAME + " */\n" +
+        "\n/* [end] feature=" + RESOURCE_NAME + " */\n",
+        getContent(actual));
   }
 
   @Test
@@ -152,30 +154,38 @@ public class ExportJsCompilerTest {
     FeatureResource extRes = mockResource(true, RESOURCE_URL_DEB, RESOURCE_URL_OPT);
     FeatureResource intRes = mockResource(false, RESOURCE_CONTENT_DEB, RESOURCE_CONTENT_OPT);
     FeatureBundle bundle = mockBundle(Lists.newArrayList(extRes, intRes), EXPORTS, EXTERNS);
-    String actual = compiler.getJsContent(jsUri, bundle);
+    Iterable<JsContent> actual = compiler.getJsContent(jsUri, bundle);
     assertEquals(
-        "\n/* feature=" + RESOURCE_NAME + " */\n" +
+        "\n/* [start] feature=" + RESOURCE_NAME + " */\n" +
         "document.write('<script src=\"" + RESOURCE_URL_DEB + "\"></script>');\n" +
         RESOURCE_CONTENT_DEB + ";\n" +
         "exportJs('gadgets',[gadgets]);" +
         "exportJs('cc',[cc]);" +
         "exportJs('gadgets.rpc',[gadgets,gadgets.rpc],{call:'call'});" +
         "exportJs('cc.prototype',[cc,cc.prototype],{site:'site'});" +
-        "\n/* feature=" + RESOURCE_NAME + " */\n",
-        actual);
+        "\n/* [end] feature=" + RESOURCE_NAME + " */\n",
+        getContent(actual));
   }
 
   @Test
   public void testCompileNotEmpty() throws Exception {
     JsUri jsUri = mockJsUri(JsCompileMode.ALL_RUN_TIME);
-    Result actual = compiler.compile(jsUri, COMPILE_CONTENT, EXTERNS);
-    assertEquals(EXPORT_JS_DEB + COMPILE_CONTENT, actual.getCode());
+    JsResponse actual = compiler.compile(jsUri, COMPILE_CONTENT, EXTERNS);
+    assertEquals(EXPORT_JS_DEB + COMPILE_CONTENT, actual.getJsCode());
   }
 
   @Test
   public void testCompileEmpty() throws Exception {
     JsUri jsUri = mockJsUri(JsCompileMode.ALL_RUN_TIME);
-    Result actual = compiler.compile(jsUri, "", EXTERNS);
-    assertEquals(EXPORT_JS_DEB, actual.getCode());
+    JsResponse actual = compiler.compile(jsUri, "", EXTERNS);
+    assertEquals(EXPORT_JS_DEB, actual.getJsCode());
+  }
+  
+  private String getContent(Iterable<JsContent> jsContent) {
+    StringBuilder sb = new StringBuilder();
+    for (JsContent js : jsContent) {
+      sb.append(js.get());
+    }
+    return sb.toString();
   }
 }

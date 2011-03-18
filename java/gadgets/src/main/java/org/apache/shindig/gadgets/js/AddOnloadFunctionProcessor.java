@@ -30,6 +30,7 @@ import javax.servlet.http.HttpServletResponse;
  * Adds code to call a function after the Javascript code has been interpreted.
  */
 public class AddOnloadFunctionProcessor implements JsProcessor {
+  private static final String CODE_ID = "[onload-processor]";
 
   @VisibleForTesting
   public static final String ONLOAD_FUNCTION_NAME_ERROR = "Invalid onload callback specified";
@@ -52,7 +53,7 @@ public class AddOnloadFunctionProcessor implements JsProcessor {
       if (!ONLOAD_FN_PATTERN.matcher(onloadStr).matches()) {
         throw new JsException(HttpServletResponse.SC_BAD_REQUEST, ONLOAD_FUNCTION_NAME_ERROR);
       }
-      builder.addJsCode(createOnloadScript(onloadStr));
+      builder.appendJs(createOnloadScript(onloadStr), CODE_ID);
     }
     return true;
   }

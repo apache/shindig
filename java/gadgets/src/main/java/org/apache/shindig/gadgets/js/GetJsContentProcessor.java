@@ -36,14 +36,14 @@ public class GetJsContentProcessor implements JsProcessor {
     this.jsHandler = jsHandler;
   }
   
-  public boolean process(JsRequest request, JsResponseBuilder builder) {
+  public boolean process(JsRequest request, JsResponseBuilder builder) throws JsException {
     // Get JavaScript content from features aliases request.
     JsUri jsUri = request.getJsUri();
-    JsHandler.Response handlerResponse =
+    JsResponse handlerResponse =
         jsHandler.getJsContent(jsUri, request.getHost());
-    builder.addJsCode(handlerResponse.getJsData());
     builder.setProxyCacheable(handlerResponse.isProxyCacheable());    
     setResponseCacheTtl(builder, jsUri.getStatus());
+    builder.appendJs(handlerResponse.allJs());
     return true;
   }
 

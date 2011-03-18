@@ -15,32 +15,37 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-
 package org.apache.shindig.gadgets.js;
 
-import com.google.common.annotations.VisibleForTesting;
-
-import org.apache.shindig.gadgets.uri.JsUriManager.JsUri;
-
-public class AddJsLoadCallbackProcessor implements JsProcessor {
-  private static final String CODE_ID = "[jsload-callback]";
+/**
+ * Wrapper around JavaScript providing a way to track its provenance.
+ * Other metadata may be added as well, such as annotations regarding compilation,
+ * obfuscation, and so on.
+ */
+public class JsContent {
+  private final String content;
+  private final String source;
+  private final String feature;
   
-  @VisibleForTesting
-  static final String JSL_CALLBACK_JS = "(function(){" +
-      "var j=window['___jsl'];" +
-      "if(j['c']&&--j['o']<=0){"+
-      "j['c']();" +
-      "delete j['c'];" +
-      "delete j['o'];" +      
-      "}" +
-      "})();";
-
-  public boolean process(JsRequest jsRequest, JsResponseBuilder builder) {
-    JsUri jsUri = jsRequest.getJsUri();
-    if (!jsUri.isNohint()) {
-      builder.appendJs(JSL_CALLBACK_JS, CODE_ID);
-    }
-    return true;
+  public JsContent(String content, String source) {
+    this(content, source, "[builtin]");
   }
-
+  
+  public JsContent(String content, String source, String feature) {
+    this.content = content;
+    this.source = source;
+    this.feature = feature;
+  }
+  
+  public String get() {
+    return content;
+  }
+  
+  public String getSource() {
+    return source;
+  }
+  
+  public String getFeature() {
+    return feature;
+  }
 }

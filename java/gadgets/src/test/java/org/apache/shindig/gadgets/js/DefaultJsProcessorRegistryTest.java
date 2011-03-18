@@ -56,14 +56,14 @@ public class DefaultJsProcessorRegistryTest {
   public void testProcessorModifiesResponse() throws Exception {
     JsProcessor processor = new JsProcessor() {
       public boolean process(JsRequest request, JsResponseBuilder builder) {
-        builder.setJsCode(JS_CODE);
+        builder.setJs(JS_CODE, "js");
         return true;
       }
     };
     registry = new DefaultJsProcessorRegistry(ImmutableList.of(processor));
     control.replay();
     registry.process(request, response);
-    assertEquals(JS_CODE, response.getJsCode().toString());
+    assertEquals(JS_CODE, response.build().getJsCode());
     control.verify();
   }
 

@@ -20,6 +20,8 @@ package org.apache.shindig.gadgets.rewrite.js;
 import com.google.inject.ImplementedBy;
 
 import org.apache.shindig.gadgets.features.FeatureRegistry.FeatureBundle;
+import org.apache.shindig.gadgets.js.JsContent;
+import org.apache.shindig.gadgets.js.JsResponse;
 import org.apache.shindig.gadgets.uri.JsUriManager.JsUri;
 
 import java.util.List;
@@ -37,7 +39,7 @@ public interface JsCompiler {
    * @param bundle The feature bundle.
    * @return Processed feature JS.
    */
-  String getJsContent(JsUri jsUri, FeatureBundle bundle);
+  Iterable<JsContent> getJsContent(JsUri jsUri, FeatureBundle bundle);
 
   /**
    * Compiles the provided code with the provided list of external symbols.
@@ -46,28 +48,5 @@ public interface JsCompiler {
    * @param externs The externs.
    * @return A compilation result object.
    */
-  Result compile(JsUri jsUri, String content, List<String> externs);
-
-  static class Result {
-    private final String compiled;
-    private final List<String> errors;
-
-    public Result(String compiled) {
-      this.compiled = compiled;
-      this.errors = null;
-    }
-
-    public Result(List<String> errors) {
-      this.compiled = null;
-      this.errors = errors;
-    }
-
-    public String getCode() {
-      return compiled;
-    }
-
-    public List<String> getErrors() {
-      return errors;
-    }
-  }
+  JsResponse compile(JsUri jsUri, String content, List<String> externs);
 }

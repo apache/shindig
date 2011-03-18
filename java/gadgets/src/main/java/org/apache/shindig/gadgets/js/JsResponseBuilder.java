@@ -20,58 +20,83 @@ package org.apache.shindig.gadgets.js;
 
 import javax.servlet.http.HttpServletResponse;
 
+import com.google.common.collect.Lists;
+
+import java.util.LinkedList;
+
+import java.util.List;
+
 /**
  * A class with methods to create {@link JsResponse} objects.
  */
 public class JsResponseBuilder {
-
-  private StringBuilder jsCode;
+  private LinkedList<JsContent> jsCode;
+  private List<String> errors;
   private int statusCode;
   private int cacheTtlSecs;
   private boolean proxyCacheable;
   
   public JsResponseBuilder() {
-    jsCode = new StringBuilder();
+    jsCode = Lists.newLinkedList();
     statusCode = HttpServletResponse.SC_OK;
     cacheTtlSecs = 0;
     proxyCacheable = false;
+    errors = Lists.newLinkedList();
   }
 
   public JsResponseBuilder(JsResponse response) {
-    jsCode = new StringBuilder(response.jsCode);
-    statusCode = response.statusCode;
-    cacheTtlSecs = response.cacheTtlSecs;
-    proxyCacheable = response.proxyCacheable;
+    jsCode = Lists.newLinkedList(response.allJs());
+    errors = Lists.newLinkedList(response.getErrors());
+    statusCode = response.getStatusCode();
+    cacheTtlSecs = response.getCacheTtlSecs();
+    proxyCacheable = response.isProxyCacheable();
   }
   
   /**
-   * Returns a StringBuilder to modify the current JavaScript code.
+   * Appends more JS to the response.
    */
-  public StringBuilder getJsCode() {
-    return jsCode;
+  public JsResponseBuilder appendJs(JsContent jsContent) {
+    jsCode.add(jsContent);
+    return this;
+  }
+  
+  /**
+   * Helper to append JS to the response w/ a name.
+   */
+  public JsResponseBuilder appendJs(String content, String name) {
+    return appendJs(new JsContent(content, name));
+  }
+  
+  /**
+   * Helper to append a bunch of JS.
+   */
+  public JsResponseBuilder appendJs(Iterable<JsContent> jsBundle) {
+    for (JsContent content : jsBundle) {
+      appendJs(content);
+    }
+    return this;
+  }
+  
+  /**
+   * Prepends JS to the output.
+   */
+  public JsResponseBuilder prependJs(String content, String name) {
+    jsCode.addFirst(new JsContent(content, name));
+    return this;
   }
   
   /**
    * Replaces the current JavaScript code with some new code.
    */
-  public JsResponseBuilder setJsCode(CharSequence code) {
-    this.jsCode = new StringBuilder(code);
-    return this;
+  public JsResponseBuilder setJs(String newContent, String name) {
+    return clearJs().appendJs(newContent, name);
   }
 
   /**
    * Deletes all JavaScript code in the builder.
    */
-  public JsResponseBuilder clearJsCode() {
-    jsCode = new StringBuilder();
-    return this;
-  }
-
-  /**
-   * Appends some JavaScript code to the end of the current code.  
-   */
-  public JsResponseBuilder addJsCode(CharSequence data) {
-    jsCode.append(data);
+  public JsResponseBuilder clearJs() {
+    this.jsCode = Lists.newLinkedList();
     return this;
   }
 
@@ -126,6 +151,6 @@ public class JsResponseBuilder {
    * Builds a {@link JsResponse} object with the provided data.
    */
   public JsResponse build() {
-    return new JsResponse(jsCode.toString(), statusCode, cacheTtlSecs, proxyCacheable);
+    return new JsResponse(jsCode, statusCode, cacheTtlSecs, proxyCacheable, errors);
   }
 }

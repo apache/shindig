@@ -108,6 +108,10 @@ public class FlashTagHandlerTest extends EasyMockTestCase {
     public String getDebugContent() {
       return "swfobject";
     }
+    
+    public String getName() {
+      return "swfname";
+    }
   }
 
   private void expectSecurityToken() {

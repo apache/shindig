@@ -36,6 +36,8 @@ import org.apache.shindig.gadgets.js.JsLoadProcessor;
 import org.apache.shindig.gadgets.js.JsProcessor;
 import org.apache.shindig.gadgets.js.JsProcessorRegistry;
 import org.apache.shindig.gadgets.js.JsRequestBuilder;
+import org.apache.shindig.gadgets.js.JsResponse;
+import org.apache.shindig.gadgets.js.JsResponseBuilder;
 import org.apache.shindig.gadgets.uri.JsUriManager;
 import org.apache.shindig.gadgets.uri.JsUriManager.JsUri;
 import org.apache.shindig.gadgets.uri.UriStatus;
@@ -132,7 +134,7 @@ public class JsServletTest extends ServletTestFixture {
         null, REFRESH_INTERVAL_SEC, UriStatus.VALID_UNVERSIONED);
     expect(jsUriManagerMock.processExternJsUri(isA(Uri.class))).andReturn(jsUri);
     expect(request.getHeader("If-Modified-Since")).andReturn("12345");
-    JsHandler.Response response = new JsHandler.Response(new StringBuilder(EXAMPLE_JS_CODE), true);
+    JsResponse response = new JsResponseBuilder().appendJs(EXAMPLE_JS_CODE, "js").build();
     expect(request.getHeader("Host")).andReturn("localhost");
     expect(jsHandlerMock.getJsContent(jsUri, "localhost")).andReturn(response);
     replay();
@@ -144,7 +146,6 @@ public class JsServletTest extends ServletTestFixture {
   }
   
   @Test
-  @SuppressWarnings("unchecked")
   public void testDoJsloadNormal() throws Exception {
     String url = "http://localhost/gadgets/js/feature.js?v=abc&nocache=0&onload=" + ONLOAD_PARAM;
     JsUri jsUri = mockJsUri(CONTAINER_PARAM, RenderingContext.CONTAINER, true, true, false,

@@ -982,11 +982,11 @@ public class RenderingGadgetRewriterTest {
   }
 
   private FeatureResource inline(String content, String debugContent) {
-    return new FeatureResource.Simple(content, debugContent);
+    return new FeatureResource.Simple(content, debugContent, "js");
   }
 
   private FeatureResource extern(String content, String debugContent) {
-    return new FeatureResource.Simple(content, debugContent) {
+    return new FeatureResource.Simple(content, debugContent, "js") {
       @Override
       public boolean isExternal() {
         return true;

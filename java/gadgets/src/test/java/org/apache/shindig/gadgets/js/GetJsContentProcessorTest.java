@@ -21,13 +21,14 @@ package org.apache.shindig.gadgets.js;
 import static org.junit.Assert.*;
 
 import org.apache.shindig.gadgets.servlet.JsHandler;
-import org.apache.shindig.gadgets.servlet.JsHandler.Response;
 import org.apache.shindig.gadgets.uri.JsUriManager.JsUri;
 import org.apache.shindig.gadgets.uri.UriStatus;
 import org.easymock.EasyMock;
 import org.easymock.IMocksControl;
 import org.junit.Before;
 import org.junit.Test;
+
+import com.google.common.collect.ImmutableList;
 
 
 /**
@@ -42,7 +43,7 @@ public class GetJsContentProcessorTest {
   private JsHandler handler;
   private JsUri jsUri;
   private JsRequest request;
-  private Response handlerResponse;
+  private JsResponse handlerResponse;
   private JsResponseBuilder response;
   private GetJsContentProcessor processor;
 
@@ -52,7 +53,7 @@ public class GetJsContentProcessorTest {
     handler = control.createMock(JsHandler.class);
     jsUri = control.createMock(JsUri.class);
     request = control.createMock(JsRequest.class);
-    handlerResponse = control.createMock(JsHandler.Response.class);
+    handlerResponse = control.createMock(JsResponse.class);
     response = new JsResponseBuilder();
     processor = new GetJsContentProcessor(handler);
   }
@@ -93,11 +94,12 @@ public class GetJsContentProcessorTest {
     control.verify();
   }
 
-  private void setExpectations(boolean proxyCacheable, UriStatus uriStatus) {
+  private void setExpectations(boolean proxyCacheable, UriStatus uriStatus) throws JsException {
     EasyMock.expect(handler.getJsContent(jsUri, HOST)).andReturn(handlerResponse);
     EasyMock.expect(request.getHost()).andReturn(HOST);
     EasyMock.expect(request.getJsUri()).andReturn(jsUri);
-    EasyMock.expect(handlerResponse.getJsData()).andReturn(new StringBuilder(JS_CODE));
+    EasyMock.expect(handlerResponse.allJs()).andReturn(
+        ImmutableList.of(new JsContent(JS_CODE, "source", "feature")));
     EasyMock.expect(handlerResponse.isProxyCacheable()).andReturn(proxyCacheable);
     EasyMock.expect(jsUri.getStatus()).andReturn(uriStatus);
   }
@@ -105,6 +107,6 @@ public class GetJsContentProcessorTest {
   private void checkResponse(boolean proxyCacheable, int expectedTtl) {
     assertEquals(proxyCacheable, response.isProxyCacheable());
     assertEquals(expectedTtl, response.getCacheTtlSecs());
-    assertEquals(JS_CODE, response.getJsCode().toString());
+    assertEquals(JS_CODE, response.build().getJsCode());
   }
 }

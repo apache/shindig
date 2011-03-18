@@ -19,7 +19,12 @@ package org.apache.shindig.gadgets.rewrite.js;
 
 import org.apache.shindig.gadgets.features.FeatureRegistry.FeatureBundle;
 import org.apache.shindig.gadgets.features.FeatureResource;
+import org.apache.shindig.gadgets.js.JsContent;
+import org.apache.shindig.gadgets.js.JsResponse;
+import org.apache.shindig.gadgets.js.JsResponseBuilder;
 import org.apache.shindig.gadgets.uri.JsUriManager.JsUri;
+
+import com.google.common.collect.Lists;
 
 import java.util.List;
 
@@ -28,24 +33,25 @@ import java.util.List;
  */
 public class DefaultJsCompiler implements JsCompiler {
 
-  public String getJsContent(JsUri jsUri, FeatureBundle bundle) {
-    StringBuilder builder = new StringBuilder();
+  public Iterable<JsContent> getJsContent(JsUri jsUri, FeatureBundle bundle) {
+    List<JsContent> jsContent = Lists.newLinkedList();
     for (FeatureResource resource : bundle.getResources()) {
       String content = getFeatureContent(jsUri, resource);
       content = (content != null) ? content : "";
       if (resource.isExternal()) {
         // Support external/type=url feature serving through document.write()
-        builder.append("document.write('<script src=\"").append(content).append("\"></script>')");
+        jsContent.add(new JsContent("document.write('<script src=\"" + content + "\"></script>')",
+            "[external:" + content + "]", bundle.getName()));
       } else {
-        builder.append(content);
+        jsContent.add(new JsContent(content, resource.getName(), bundle.getName()));
       }
-      builder.append(";\n");
+      jsContent.add(new JsContent(";\n", "[separator]", bundle.getName()));
     }
-    return builder.toString();
+    return jsContent;
   }
 
-  public Result compile(JsUri jsUri, String content, List<String> externs) {
-    return new Result(content);
+  public JsResponse compile(JsUri jsUri, String content, List<String> externs) {
+    return new JsResponseBuilder().appendJs(content, "[passthrough]").build();
   }
 
   protected String getFeatureContent(JsUri jsUri, FeatureResource resource) {

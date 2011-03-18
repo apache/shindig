@@ -21,13 +21,13 @@ import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.replay;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 
 import com.google.common.collect.Lists;
 
 import org.apache.shindig.gadgets.features.FeatureRegistry.FeatureBundle;
 import org.apache.shindig.gadgets.features.FeatureResource;
-import org.apache.shindig.gadgets.rewrite.js.JsCompiler.Result;
+import org.apache.shindig.gadgets.js.JsContent;
+import org.apache.shindig.gadgets.js.JsResponse;
 import org.apache.shindig.gadgets.uri.JsUriManager.JsUri;
 import org.junit.Before;
 import org.junit.Test;
@@ -55,11 +55,11 @@ public class DefaultJsCompilerTest {
     FeatureResource extRes = mockResource(true, RESOURCE_URL_DEB, RESOURCE_URL_OPT);
     FeatureResource intRes = mockResource(false, RESOURCE_CONTENT_DEB, RESOURCE_CONTENT_OPT);
     FeatureBundle bundle = mockBundle(Lists.newArrayList(extRes, intRes));
-    String actual = compiler.getJsContent(jsUri, bundle);
+    Iterable<JsContent> actual = compiler.getJsContent(jsUri, bundle);
     assertEquals(
         "document.write('<script src=\"" + RESOURCE_URL_DEB + "\"></script>');\n" +
         RESOURCE_CONTENT_DEB + ";\n",
-        actual);
+        getContent(actual));
   }
 
   @Test
@@ -68,18 +68,18 @@ public class DefaultJsCompilerTest {
     FeatureResource extRes = mockResource(true, RESOURCE_URL_DEB, RESOURCE_URL_OPT);
     FeatureResource intRes = mockResource(false, RESOURCE_CONTENT_DEB, RESOURCE_CONTENT_OPT);
     FeatureBundle bundle = mockBundle(Lists.newArrayList(extRes, intRes));
-    String actual = compiler.getJsContent(jsUri, bundle);
+    Iterable<JsContent> actual = compiler.getJsContent(jsUri, bundle);
     assertEquals(
         "document.write('<script src=\"" + RESOURCE_URL_OPT + "\"></script>');\n" +
         RESOURCE_CONTENT_OPT + ";\n",
-        actual);
+        getContent(actual));
   }
 
   @Test
   public void testCompile() throws Exception {
-    Result actual = compiler.compile(null, COMPILE_CONTENT, null);
-    assertEquals(COMPILE_CONTENT, actual.getCode());
-    assertNull(actual.getErrors());
+    JsResponse actual = compiler.compile(null, COMPILE_CONTENT, null);
+    assertEquals(COMPILE_CONTENT, actual.getJsCode());
+    assertEquals(0, actual.getErrors().size());
   }
 
   private JsUri mockJsUri(boolean debug) {
@@ -92,6 +92,7 @@ public class DefaultJsCompilerTest {
   private FeatureBundle mockBundle(List<FeatureResource> resources) {
     FeatureBundle result = createMock(FeatureBundle.class);
     expect(result.getResources()).andReturn(resources).anyTimes();
+    expect(result.getName()).andReturn("feature").anyTimes();
     replay(result);
     return result;
   }
@@ -101,7 +102,16 @@ public class DefaultJsCompilerTest {
     expect(result.getDebugContent()).andReturn(debContent).anyTimes();
     expect(result.getContent()).andReturn(optContent).anyTimes();
     expect(result.isExternal()).andReturn(external).anyTimes();
+    expect(result.getName()).andReturn("source").anyTimes();
     replay(result);
     return result;
+  }
+  
+  private String getContent(Iterable<JsContent> jsContent) {
+    StringBuilder sb = new StringBuilder();
+    for (JsContent js : jsContent) {
+      sb.append(js.get());
+    }
+    return sb.toString();
   }
 }

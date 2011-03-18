@@ -143,7 +143,7 @@ public class DefaultJsVersionerTest {
   }
 
   private void expectReq(String feature, String content) {
-    FeatureResource resource = new FeatureResource.Simple(content, "");
+    FeatureResource resource = new FeatureResource.Simple(content, "", "js");
     Collection<String> libs = Lists.newArrayList(feature);
     List<FeatureResource> resources = Lists.newArrayList(resource);
     final FeatureRegistry.LookupResult lr = createMock(FeatureRegistry.LookupResult.class);

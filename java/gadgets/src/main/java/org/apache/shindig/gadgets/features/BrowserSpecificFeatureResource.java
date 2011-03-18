@@ -96,6 +96,10 @@ public class BrowserSpecificFeatureResource implements FeatureResource {
     return browserMatch.isEmpty() ? delegate.isProxyCacheable() : false;
   }
   
+  public String getName() {
+    return delegate.getName();
+  }
+  
   private boolean browserMatches() {
     if (browserMatch.isEmpty()) {
       // Not browser-sensitive.

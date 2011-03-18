@@ -51,7 +51,7 @@ public class AllJsIframeVersionerTest {
     String debugContent = "FEATURE_DEBUG_CONTENT";
     featureChecksum = HashUtil.checksum((featureContent + debugContent).getBytes());
     FeatureRegistry registry = createMock(FeatureRegistry.class);
-    FeatureResource resource = new FeatureResource.Simple(featureContent, debugContent);
+    FeatureResource resource = new FeatureResource.Simple(featureContent, debugContent, "js");
     List<FeatureResource> allResources = Lists.newArrayList(resource);
     final FeatureRegistry.LookupResult lr = createMock(FeatureRegistry.LookupResult.class);
     expect(lr.getResources()).andReturn(allResources);

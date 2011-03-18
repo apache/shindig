@@ -42,6 +42,11 @@ public interface FeatureResource {
   boolean isProxyCacheable();
   
   /**
+   * @return A descriptive name used to reference the JS in various debug and stats contexts.
+   */
+  String getName();
+  
+  /**
    * Helper base class to avoid having to implement rarely-overridden isExternal/isProxyCacheable
    * functionality in FeatureResource.
    */
@@ -55,13 +60,15 @@ public interface FeatureResource {
     }
   }
   
-  public class Simple extends Default {
+  public class Simple extends Default {    
     private final String content;
     private final String debugContent;
+    private final String name;
     
-    public Simple(String content, String debugContent) {
+    public Simple(String content, String debugContent, String name) {
       this.content = content;
       this.debugContent = debugContent;
+      this.name = name;
     }
     
     public String getContent() {
@@ -70,6 +77,10 @@ public interface FeatureResource {
 
     public String getDebugContent() {
       return debugContent;
+    }
+    
+    public String getName() {
+      return name;
     }
   }
 }

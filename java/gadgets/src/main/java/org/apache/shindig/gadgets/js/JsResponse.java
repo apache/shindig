@@ -15,24 +15,29 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-
 package org.apache.shindig.gadgets.js;
 
+import java.util.Collections;
+import java.util.List;
 
 /**
  * An immutable object that contains the response for a JavaScript request.
+ * This object is used by JsHandler, JsProcessors, and JsCompiler alike.
  */
 public class JsResponse {
- 
-  String jsCode;
-  int cacheTtlSecs;
-  int statusCode;
-  boolean proxyCacheable;
+  private final List<JsContent> jsCode;
+  private final List<String> errors;
+  private String codeString;
+  private final int cacheTtlSecs;
+  private final int statusCode;
+  private final boolean proxyCacheable;
   
-  public JsResponse(String jsCode, int statusCode, int cachingPolicy, boolean proxyCacheable) {
-    this.jsCode = jsCode;
+  JsResponse(List<JsContent> jsCode, int statusCode, int cacheTtlSecs,
+      boolean proxyCacheable, List<String> errors) {
+    this.jsCode = Collections.unmodifiableList(jsCode);
+    this.errors = Collections.unmodifiableList(errors);
     this.statusCode = statusCode;
-    this.cacheTtlSecs = cachingPolicy;
+    this.cacheTtlSecs = cacheTtlSecs;
     this.proxyCacheable = proxyCacheable;
   }
   
@@ -40,6 +45,20 @@ public class JsResponse {
    * Returns the JavaScript code to serve.
    */
   public String getJsCode() {
+    if (codeString == null) {
+      StringBuilder sb = new StringBuilder();
+      for (JsContent js : allJs()) {
+        sb.append(js.get());
+      }
+      codeString = sb.toString();
+    }
+    return codeString;
+  }
+  
+  /**
+   * Returns an iterator starting at the beginning of all JS code in the response.
+   */
+  public Iterable<JsContent> allJs() {
     return jsCode;
   }
   
@@ -71,5 +90,12 @@ public class JsResponse {
    */
   public boolean isProxyCacheable() {
     return proxyCacheable;
+  }
+  
+  /**
+   * Returns a list of any error messages associated with this response.
+   */
+  public List<String> getErrors() {
+    return errors;
   }
 }

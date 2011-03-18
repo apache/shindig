@@ -41,7 +41,7 @@ import java.util.logging.Logger;
  */
 public class FeatureResourceLoader {
 	  
-  //class name for logging purpose
+  // Class name for logging purpose
   private static final String classname = FeatureResourceLoader.class.getName();
   private static final Logger LOG = Logger.getLogger(classname, MessageKeys.MESSAGES);
   
@@ -147,10 +147,12 @@ public class FeatureResourceLoader {
   private class DualModeFileResource extends FeatureResource.Default {
     private final FileContent optContent;
     private final FileContent dbgContent;
+    private final String fileName;
     
     protected DualModeFileResource(String optFilePath, String dbgFilePath) {
       this.optContent = new FileContent(optFilePath);
       this.dbgContent = new FileContent(dbgFilePath);
+      this.fileName = dbgFilePath;
       Preconditions.checkArgument(optContent.get() != null || dbgContent.get() != null,
         "Problems reading resource: %s", dbgFilePath);
     }
@@ -163,6 +165,10 @@ public class FeatureResourceLoader {
     public String getDebugContent() {
       String dbg = dbgContent.get();
       return dbg != null ? dbg : optContent.get();
+    }
+    
+    public String getName() {
+      return fileName;
     }
     
     private final class FileContent {
@@ -210,10 +216,12 @@ public class FeatureResourceLoader {
   private static final class DualModeStaticResource extends FeatureResource.Default {
     private final String content;
     private final String debugContent;
+    private final String path;
     
     private DualModeStaticResource(String path, String content, String debugContent) {
       this.content = content != null ? content : debugContent;
       this.debugContent = debugContent != null ? debugContent : content;
+      this.path = path;
       Preconditions.checkArgument(this.content != null, "Problems reading resource: %s", path);
     }
 
@@ -223,6 +231,10 @@ public class FeatureResourceLoader {
 
     public String getDebugContent() {
       return debugContent;
+    }
+    
+    public String getName() {
+      return path;
     }
   }
   
@@ -289,5 +301,8 @@ public class FeatureResourceLoader {
       return content != null;
     }
 
+    public String getName() {
+      return uri.toString();
+    }
   }
 }

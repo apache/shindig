@@ -36,6 +36,8 @@ import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.util.FakeTimeSource;
 import org.apache.shindig.gadgets.RenderingContext;
 import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.js.JsException;
+import org.apache.shindig.gadgets.js.JsResponseBuilder;
 import org.apache.shindig.gadgets.process.ProcessingException;
 import org.apache.shindig.gadgets.servlet.CajaContentRewriter.CajoledResult;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
@@ -153,7 +155,7 @@ public class GadgetsHandlerTest extends EasyMockTestCase {
     JSONObject request = makeMetadataNoContainerRequest(GADGET1_URL);
     RpcHandler operation = registry.getRpcHandler(request);
     try {
-      Object empty = operation.execute(emptyFormItems, authContext, converter).get();
+      operation.execute(emptyFormItems, authContext, converter).get();
       fail("Missing container");
     } catch (Exception e) {
       assertTrue(e.getMessage().contains("Missing container"));
@@ -190,7 +192,7 @@ public class GadgetsHandlerTest extends EasyMockTestCase {
     InputSource is = new InputSource(uri.toJavaUri());
     MessageQueue mq = new SimpleMessageQueue();
     CharProducer cp = CharProducer.Factory.create(new StringReader(content), is);
-    return rw.rewrite(uri, CONTAINER, rw.parse(is, cp, mime, mq), false, false);
+    return rw.rewrite(uri, CONTAINER, CajaContentRewriter.parse(is, cp, mime, mq), false, false);
   }
 
   @Test
@@ -599,7 +601,7 @@ public class GadgetsHandlerTest extends EasyMockTestCase {
     String jsContent = "var b=\"123\";";
     EasyMock.expect(jsHandler.getJsContent(
         EasyMock.isA(JsUri.class), EasyMock.eq(jsUri.getAuthority())))
-        .andReturn(new JsHandler.Response(new StringBuilder(jsContent), true));
+        .andReturn(new JsResponseBuilder().appendJs(jsContent, "js").build());
     replay();
 
     RpcHandler operation = registry.getRpcHandler(request);
@@ -629,7 +631,7 @@ public class GadgetsHandlerTest extends EasyMockTestCase {
         .andReturn(jsUri);
     EasyMock.expect(jsHandler.getJsContent(
         EasyMock.isA(JsUri.class), EasyMock.eq(jsUri.getAuthority())))
-        .andReturn(new JsHandler.Response(new StringBuilder(""), true));
+        .andThrow(new JsException(404, "not found"));
     replay();
 
     RpcHandler operation = registry.getRpcHandler(request);

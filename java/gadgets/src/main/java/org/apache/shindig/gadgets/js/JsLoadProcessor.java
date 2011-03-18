@@ -32,6 +32,7 @@ import javax.servlet.http.HttpServletResponse;
  * Emit JS loader code if the jsload query parameter is present in the request.
  */
 public class JsLoadProcessor implements JsProcessor {
+  private static final String CODE_ID = "[jsloader-bootstrap]";
 
   @VisibleForTesting
   public static final String JSLOAD_ONLOAD_ERROR = "jsload requires onload";
@@ -88,7 +89,7 @@ public class JsLoadProcessor implements JsProcessor {
     int refresh = getCacheTtlSecs(jsUri);
     resp.setCacheTtlSecs(refresh);
     resp.setProxyCacheable(true);
-    resp.addJsCode(createJsloadScript(incUri));
+    resp.appendJs(createJsloadScript(incUri), CODE_ID);
   }
 
   private int getCacheTtlSecs(JsUri jsUri) {

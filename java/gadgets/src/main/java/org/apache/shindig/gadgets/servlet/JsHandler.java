@@ -32,6 +32,10 @@ import org.apache.shindig.gadgets.config.ConfigContributor;
 import org.apache.shindig.gadgets.features.ApiDirective;
 import org.apache.shindig.gadgets.features.FeatureRegistry;
 import org.apache.shindig.gadgets.features.FeatureResource;
+import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.js.JsException;
+import org.apache.shindig.gadgets.js.JsResponse;
+import org.apache.shindig.gadgets.js.JsResponseBuilder;
 import org.apache.shindig.gadgets.rewrite.js.JsCompiler;
 import org.apache.shindig.gadgets.uri.JsUriManager.JsUri;
 
@@ -47,8 +51,10 @@ import java.util.logging.Logger;
  */
 @Singleton
 public class JsHandler {
+  private static final String CONFIG_INIT_ID = "[config-injection]";
   private static final Collection<String> EMPTY_SET = Sets.newHashSet();
   private static final Logger LOG = Logger.getLogger(JsHandler.class.getName());
+  private static final Joiner UNKNOWN_FEATURE_ERR = Joiner.on(", ");
 
   protected final FeatureRegistry registry;
   protected final ContainerConfig containerConfig;
@@ -77,12 +83,17 @@ public class JsHandler {
    * @param host The name of the host the request was directed to.
    * @return JsHandlerResponse object that contains JavaScript data and cacheable flag.
    */
-  public Response getJsContent(final JsUri jsUri, String host) {
+  public JsResponse getJsContent(final JsUri jsUri, String host) throws JsException {
     GadgetContext ctx = new JsGadgetContext(jsUri);
     Collection<String> needed = jsUri.getLibs();
-    boolean isProxyCacheable = true;
 
-    FeatureRegistry.LookupResult lookup = registry.getFeatureResources(ctx, needed, null);
+    List<String> unsupported = Lists.newLinkedList();
+    FeatureRegistry.LookupResult lookup = registry.getFeatureResources(ctx, needed, unsupported);
+    if (!unsupported.isEmpty()) {
+      throw new JsException(HttpResponse.SC_BAD_REQUEST,
+          "Unknown feature" + (unsupported.size() > 1 ? "s" : "") +
+          ": " + UNKNOWN_FEATURE_ERR.join(unsupported));
+    }
 
     // Quick-and-dirty implementation of incremental JS loading.
     Collection<String> alreadyLoaded = EMPTY_SET;
@@ -92,25 +103,27 @@ public class JsHandler {
     }
 
     // Collate all JS desired for the current request.
-    StringBuilder jsData = new StringBuilder();
+    boolean isProxyCacheable = true;
+    JsResponseBuilder responseBuilder = new JsResponseBuilder();
     List<String> allExterns = Lists.newArrayList();
 
     // Pre-process each feature.
     for (FeatureRegistry.FeatureBundle bundle : lookup.getBundles()) {
       if (alreadyLoaded.contains(bundle.getName())) continue;
-      jsData.append(compiler.getJsContent(jsUri, bundle));
+      responseBuilder.appendJs(compiler.getJsContent(jsUri, bundle));
       allExterns.addAll(bundle.getApis(ApiDirective.Type.JS, false));
       for (FeatureResource featureResource : bundle.getResources()) {
         isProxyCacheable = isProxyCacheable && featureResource.isProxyCacheable();
       }
     }
+    responseBuilder.setProxyCacheable(isProxyCacheable);
 
     // Compile all pre-processed features.
-    JsCompiler.Result result = compiler.compile(jsUri, jsData.toString(), allExterns);
+    JsResponse result = compiler.compile(jsUri, responseBuilder.build().getJsCode(), allExterns);
 
-    String code = result.getCode();
+    String code = result.getJsCode();
     if (code != null) {
-      jsData = new StringBuilder(code);
+      responseBuilder.setJs(code, "[compiled]");
     } else {
       warn(result);
     }
@@ -137,38 +150,19 @@ public class JsHandler {
             contributor.contribute(config, container, host);
           }
         }
-        jsData.append("gadgets.config.init(").append(JsonSerializer.serialize(config)).append(");\n");
+        // TODO: Convert this to a JsProcessor.
+        responseBuilder.appendJs(
+            "gadgets.config.init(" + JsonSerializer.serialize(config) + ");\n", CONFIG_INIT_ID);
       }
     }
 
     // Wrap up the response.
-    return new Response(jsData, isProxyCacheable);
+    return responseBuilder.build();
   }
 
-  protected void warn(JsCompiler.Result result) {
+  protected void warn(JsResponse result) {
     LOG.log(Level.WARNING, "Continuing with un-compiled content. " +
         "JS Compilation error: " + Joiner.on(", ").join(result.getErrors()));
-  }
-
-  /**
-   * Define the response data from JsHandler.
-   */
-  public static class Response {
-    private final boolean isProxyCacheable;
-    private final StringBuilder jsData;
-
-    public Response(StringBuilder jsData, boolean isProxyCacheable) {
-      this.jsData = jsData;
-      this.isProxyCacheable = isProxyCacheable;
-    }
-
-    public boolean isProxyCacheable() {
-      return isProxyCacheable;
-    }
-
-    public StringBuilder getJsData() {
-      return jsData;
-    }
   }
 
   /**

@@ -37,6 +37,7 @@ import java.util.List;
  * Used when loading embedded JS configuration in core.config/config.js.
  */
 public class InjectJsInfoVariableProcessor implements JsProcessor {
+  private static final String CODE_ID = "[jsload-code-info]";
 
   @VisibleForTesting
   static final String HINT_TEMPLATE = "(function(){" + 
@@ -57,7 +58,7 @@ public class InjectJsInfoVariableProcessor implements JsProcessor {
     if (!jsUri.isNohint()) {
       String uri = StringEscapeUtils.escapeJavaScript(getUri(jsUri));
       String features = getFeatures(jsUri);
-      builder.getJsCode().insert(0, String.format(HINT_TEMPLATE, uri, features));
+      builder.prependJs(String.format(HINT_TEMPLATE, uri, features), CODE_ID);
     }
     return true;
   }
