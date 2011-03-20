@@ -26,8 +26,6 @@ import org.xml.sax.InputSource;
 
 /**
  * Collection of utilities to assist in testing.
- * 
- * @author Eric Woods
  */
 public class TestUtils {
   
