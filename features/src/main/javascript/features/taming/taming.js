@@ -38,7 +38,7 @@ var bridge___;
  * @namespace The global caja___ namespace
  * @type {Object}
  */
-var caja = window['caja___'];
+var caja___ = window['caja___'];
 
 /**
  * @namespace The global ___ namespace
