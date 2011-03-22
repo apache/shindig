@@ -43,7 +43,7 @@ public class GetJsContentProcessor implements JsProcessor {
         jsHandler.getJsContent(jsUri, request.getHost());
     builder.setProxyCacheable(handlerResponse.isProxyCacheable());    
     setResponseCacheTtl(builder, jsUri.getStatus());
-    builder.appendJs(handlerResponse.allJs());
+    builder.appendJs(handlerResponse.getAllJsContent());
     return true;
   }
 

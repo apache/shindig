@@ -119,7 +119,7 @@ public class JsHandler {
     responseBuilder.setProxyCacheable(isProxyCacheable);
 
     // Compile all pre-processed features.
-    JsResponse result = compiler.compile(jsUri, responseBuilder.build().getJsCode(), allExterns);
+    JsResponse result = compiler.compile(jsUri, responseBuilder.build().getAllJsContent(), allExterns);
 
     String code = result.getJsCode();
     if (code != null) {

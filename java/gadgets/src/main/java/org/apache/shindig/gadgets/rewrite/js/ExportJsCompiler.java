@@ -73,13 +73,13 @@ public class ExportJsCompiler extends DefaultJsCompiler {
   }
 
   @Override
-  public JsResponse compile(JsUri jsUri, String content, List<String> externs) {
+  public JsResponse compile(JsUri jsUri, Iterable<JsContent> content, List<String> externs) {
     GadgetContext ctx = new JsGadgetContext(jsUri);
-    StringBuilder builder = new StringBuilder();
-    builder.append(getExportJsFeature(ctx));
-    builder.append(content);
+    JsResponseBuilder builder = new JsResponseBuilder();
+    appendExportJs(builder, ctx);
+    builder.appendJs(content);
     // TODO: attach this to a real JS compiler jscomp.Compiler.
-    return new JsResponseBuilder().appendJs(builder.toString(), "[export-compiled]").build();
+    return builder.build();
   }
 
   @Override
@@ -109,16 +109,15 @@ public class ExportJsCompiler extends DefaultJsCompiler {
     return new JsContent(sb.toString(), "[generated-symbol-exports]", bundle.getName());
   }
 
-  private String getExportJsFeature(GadgetContext context) {
-    StringBuilder builder = new StringBuilder();
+  private void appendExportJs(JsResponseBuilder builder, GadgetContext context) {
     LookupResult lookup = featureRegistry.getFeatureResources(context,
         ImmutableList.of(FEATURE_NAME), null);
     for (FeatureBundle bundle : lookup.getBundles()) {
       for (FeatureResource resource : bundle.getResources()) {
-        builder.append(resource.getDebugContent());
+        builder.appendJs(new JsContent(
+            resource.getDebugContent(), resource.getName(), bundle.getName()));
       }
     }
-    return builder.toString();
   }
 
   private static class Input {

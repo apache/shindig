@@ -72,8 +72,11 @@ public class ExportJsCompilerTest {
   @Before
   public void setUp() throws Exception {
     FeatureResource featureResourceMock = mockResource(true, EXPORT_JS_DEB, EXPORT_JS_OPT);
-    FeatureRegistry.FeatureBundle featureBundle = new FeatureRegistry.FeatureBundle(
-        null, ImmutableList.of(featureResourceMock));
+    FeatureRegistry.FeatureBundle featureBundle = createMock(FeatureRegistry.FeatureBundle.class);
+    expect(featureBundle.getResources()).andReturn(
+        ImmutableList.of(featureResourceMock)).anyTimes();
+    expect(featureBundle.getName()).andReturn("feature").anyTimes();
+    replay(featureBundle);
     LookupResult lookupMock = mockLookupResult(featureBundle);
     FeatureRegistry featureRegistryMock = mockRegistry(lookupMock);
     compiler = new ExportJsCompiler(featureRegistryMock);
@@ -170,14 +173,16 @@ public class ExportJsCompilerTest {
   @Test
   public void testCompileNotEmpty() throws Exception {
     JsUri jsUri = mockJsUri(JsCompileMode.ALL_RUN_TIME);
-    JsResponse actual = compiler.compile(jsUri, COMPILE_CONTENT, EXTERNS);
+    JsResponse actual = compiler.compile(jsUri,
+        ImmutableList.of(new JsContent(COMPILE_CONTENT, "js")), EXTERNS);
     assertEquals(EXPORT_JS_DEB + COMPILE_CONTENT, actual.getJsCode());
   }
 
   @Test
   public void testCompileEmpty() throws Exception {
     JsUri jsUri = mockJsUri(JsCompileMode.ALL_RUN_TIME);
-    JsResponse actual = compiler.compile(jsUri, "", EXTERNS);
+    JsResponse actual = compiler.compile(jsUri,
+        ImmutableList.of(new JsContent("", "js")), EXTERNS);
     assertEquals(EXPORT_JS_DEB, actual.getJsCode());
   }
   

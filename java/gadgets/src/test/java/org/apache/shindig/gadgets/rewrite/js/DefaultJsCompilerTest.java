@@ -22,6 +22,7 @@ import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.replay;
 import static org.junit.Assert.assertEquals;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 
 import org.apache.shindig.gadgets.features.FeatureRegistry.FeatureBundle;
@@ -77,7 +78,8 @@ public class DefaultJsCompilerTest {
 
   @Test
   public void testCompile() throws Exception {
-    JsResponse actual = compiler.compile(null, COMPILE_CONTENT, null);
+    JsResponse actual = compiler.compile(null, 
+        ImmutableList.of(new JsContent(COMPILE_CONTENT, "js")), null);
     assertEquals(COMPILE_CONTENT, actual.getJsCode());
     assertEquals(0, actual.getErrors().size());
   }

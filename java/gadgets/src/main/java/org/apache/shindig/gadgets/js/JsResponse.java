@@ -47,7 +47,7 @@ public class JsResponse {
   public String getJsCode() {
     if (codeString == null) {
       StringBuilder sb = new StringBuilder();
-      for (JsContent js : allJs()) {
+      for (JsContent js : getAllJsContent()) {
         sb.append(js.get());
       }
       codeString = sb.toString();
@@ -58,7 +58,7 @@ public class JsResponse {
   /**
    * Returns an iterator starting at the beginning of all JS code in the response.
    */
-  public Iterable<JsContent> allJs() {
+  public Iterable<JsContent> getAllJsContent() {
     return jsCode;
   }
   

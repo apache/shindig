@@ -98,7 +98,7 @@ public class GetJsContentProcessorTest {
     EasyMock.expect(handler.getJsContent(jsUri, HOST)).andReturn(handlerResponse);
     EasyMock.expect(request.getHost()).andReturn(HOST);
     EasyMock.expect(request.getJsUri()).andReturn(jsUri);
-    EasyMock.expect(handlerResponse.allJs()).andReturn(
+    EasyMock.expect(handlerResponse.getAllJsContent()).andReturn(
         ImmutableList.of(new JsContent(JS_CODE, "source", "feature")));
     EasyMock.expect(handlerResponse.isProxyCacheable()).andReturn(proxyCacheable);
     EasyMock.expect(jsUri.getStatus()).andReturn(uriStatus);

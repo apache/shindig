@@ -45,7 +45,7 @@ public class JsResponseBuilder {
   }
 
   public JsResponseBuilder(JsResponse response) {
-    jsCode = Lists.newLinkedList(response.allJs());
+    jsCode = Lists.newLinkedList(response.getAllJsContent());
     errors = Lists.newLinkedList(response.getErrors());
     statusCode = response.getStatusCode();
     cacheTtlSecs = response.getCacheTtlSecs();
@@ -113,6 +113,22 @@ public class JsResponseBuilder {
    */
   public int getStatusCode() {
     return statusCode;
+  }
+  
+  /**
+   * Adds an error to the response
+   */
+  public JsResponseBuilder addError(String error) {
+    this.errors.add(error);
+    return this;
+  }
+  
+  /**
+   * Adds multiple errors to the response
+   */
+  public JsResponseBuilder addErrors(List<String> errs) {
+    this.errors.addAll(errs);
+    return this;
   }
   
   /**

@@ -22,7 +22,7 @@ package org.apache.shindig.gadgets.features;
  */
 public interface FeatureResource {
   /**
-   * @return "Normal"-mode content for the feature, eg. obfuscated JS.
+   * @return "Normal"-mode content for the feature, eg. optimized/obfuscated JS.
    */
   String getContent();
   
