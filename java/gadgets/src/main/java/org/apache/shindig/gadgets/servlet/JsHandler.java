@@ -121,7 +121,7 @@ public class JsHandler {
     // Compile all pre-processed features.
     JsResponse result = compiler.compile(jsUri, responseBuilder.build().getAllJsContent(), allExterns);
 
-    String code = result.getJsCode();
+    String code = result.toJsString();
     if (code != null) {
       responseBuilder.setJs(code, "[compiled]");
     } else {

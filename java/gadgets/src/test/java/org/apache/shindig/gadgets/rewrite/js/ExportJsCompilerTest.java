@@ -175,7 +175,7 @@ public class ExportJsCompilerTest {
     JsUri jsUri = mockJsUri(JsCompileMode.ALL_RUN_TIME);
     JsResponse actual = compiler.compile(jsUri,
         ImmutableList.of(new JsContent(COMPILE_CONTENT, "js")), EXTERNS);
-    assertEquals(EXPORT_JS_DEB + COMPILE_CONTENT, actual.getJsCode());
+    assertEquals(EXPORT_JS_DEB + COMPILE_CONTENT, actual.toJsString());
   }
 
   @Test
@@ -183,7 +183,7 @@ public class ExportJsCompilerTest {
     JsUri jsUri = mockJsUri(JsCompileMode.ALL_RUN_TIME);
     JsResponse actual = compiler.compile(jsUri,
         ImmutableList.of(new JsContent("", "js")), EXTERNS);
-    assertEquals(EXPORT_JS_DEB, actual.getJsCode());
+    assertEquals(EXPORT_JS_DEB, actual.toJsString());
   }
   
   private String getContent(Iterable<JsContent> jsContent) {

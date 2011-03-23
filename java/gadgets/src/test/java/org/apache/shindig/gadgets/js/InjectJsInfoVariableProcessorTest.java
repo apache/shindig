@@ -78,7 +78,7 @@ public class InjectJsInfoVariableProcessorTest {
     control.replay();
     processor.process(request, response);
     String expected = String.format(InjectJsInfoVariableProcessor.HINT_TEMPLATE, URI_JS, LIBS_JS);
-    assertEquals(expected, response.build().getJsCode());
+    assertEquals(expected, response.build().toJsString());
     control.verify();    
   }
 
@@ -90,7 +90,7 @@ public class InjectJsInfoVariableProcessorTest {
     control.replay();
     processor.process(request, response);
     String expected = String.format(InjectJsInfoVariableProcessor.HINT_TEMPLATE, GENERATED_URI_JS, LIBS_JS);
-    assertEquals(expected, response.build().getJsCode());
+    assertEquals(expected, response.build().toJsString());
     assertFalse(captureJsUri.getValue().isJsload());
     assertTrue(captureJsUri.getValue().isNohint());
     control.verify();    

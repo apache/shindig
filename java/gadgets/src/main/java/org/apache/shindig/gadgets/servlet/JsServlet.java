@@ -96,7 +96,7 @@ public class JsServlet extends InjectedServlet {
       return;
     }
     
-    if (jsResponse.getStatusCode() == 200 && jsResponse.getJsCode().length() == 0) {
+    if (jsResponse.getStatusCode() == 200 && jsResponse.toJsString().length() == 0) {
       resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
       return;
     }
@@ -106,7 +106,7 @@ public class JsServlet extends InjectedServlet {
 
     resp.setStatus(jsResponse.getStatusCode());
     resp.setContentType("text/javascript; charset=utf-8");
-    byte[] response = CharsetUtil.getUtf8Bytes(jsResponse.getJsCode());
+    byte[] response = CharsetUtil.getUtf8Bytes(jsResponse.toJsString());
     resp.setContentLength(response.length);
     resp.getOutputStream().write(response);
   }

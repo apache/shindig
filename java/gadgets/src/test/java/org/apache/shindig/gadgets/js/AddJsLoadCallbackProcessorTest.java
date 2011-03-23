@@ -50,7 +50,7 @@ public class AddJsLoadCallbackProcessorTest {
     control.replay();
     assertTrue(processor.process(request, response));
     assertEquals(AddJsLoadCallbackProcessor.JSL_CALLBACK_JS,
-        response.build().getJsCode());
+        response.build().toJsString());
     control.verify();
   }
 
@@ -59,7 +59,7 @@ public class AddJsLoadCallbackProcessorTest {
     EasyMock.expect(jsUri.isNohint()).andReturn(true);
     control.replay();
     assertTrue(processor.process(request, response));
-    assertEquals("", response.build().getJsCode());
+    assertEquals("", response.build().toJsString());
     control.verify();
   }
 }

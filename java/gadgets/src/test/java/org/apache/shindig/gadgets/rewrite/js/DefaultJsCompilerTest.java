@@ -80,7 +80,7 @@ public class DefaultJsCompilerTest {
   public void testCompile() throws Exception {
     JsResponse actual = compiler.compile(null, 
         ImmutableList.of(new JsContent(COMPILE_CONTENT, "js")), null);
-    assertEquals(COMPILE_CONTENT, actual.getJsCode());
+    assertEquals(COMPILE_CONTENT, actual.toJsString());
     assertEquals(0, actual.getErrors().size());
   }
 

@@ -63,7 +63,7 @@ public class DefaultJsProcessorRegistryTest {
     registry = new DefaultJsProcessorRegistry(ImmutableList.of(processor));
     control.replay();
     registry.process(request, response);
-    assertEquals(JS_CODE, response.build().getJsCode());
+    assertEquals(JS_CODE, response.build().toJsString());
     control.verify();
   }
 

@@ -215,7 +215,7 @@ public class GadgetsHandlerService {
       } catch (JsException e) {
         throw new ProcessingException(e.getMessage(), e.getStatusCode());
       }
-      content = response.getJsCode();
+      content = response.toJsString();
       if (response.isProxyCacheable()) {
         expireMs = timeSource.currentTimeMillis() + (HttpUtil.getDefaultTtl() * 1000);
       }

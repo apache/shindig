@@ -46,7 +46,7 @@ public class JsResponse {
   /**
    * Returns the JavaScript code to serve.
    */
-  public String getJsCode() {
+  public String toJsString() {
     if (codeString == null) {
       StringBuilder sb = new StringBuilder();
       for (JsContent js : getAllJsContent()) {

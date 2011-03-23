@@ -107,6 +107,6 @@ public class GetJsContentProcessorTest {
   private void checkResponse(boolean proxyCacheable, int expectedTtl) {
     assertEquals(proxyCacheable, response.isProxyCacheable());
     assertEquals(expectedTtl, response.getCacheTtlSecs());
-    assertEquals(JS_CODE, response.build().getJsCode());
+    assertEquals(JS_CODE, response.build().toJsString());
   }
 }

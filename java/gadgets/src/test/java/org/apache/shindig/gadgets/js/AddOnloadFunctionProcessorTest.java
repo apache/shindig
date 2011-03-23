@@ -83,7 +83,7 @@ public class AddOnloadFunctionProcessorTest {
     assertTrue(processor.process(request, response));
     assertEquals(HttpServletResponse.SC_OK, response.getStatusCode());
     String expectedBody = String.format(AddOnloadFunctionProcessor.ONLOAD_JS_TPL, ONLOAD_FUNCTION);
-    assertEquals(expectedBody, response.build().getJsCode());
+    assertEquals(expectedBody, response.build().toJsString());
     control.verify();
   }
 }
