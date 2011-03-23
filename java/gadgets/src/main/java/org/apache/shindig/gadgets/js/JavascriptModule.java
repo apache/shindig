@@ -18,9 +18,6 @@
   
 package org.apache.shindig.gadgets.js;
 
-import org.apache.shindig.gadgets.rewrite.js.ClosureJsCompiler;
-import org.apache.shindig.gadgets.rewrite.js.JsCompiler;
-
 import com.google.common.collect.ImmutableList;
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
@@ -38,12 +35,6 @@ public class JavascriptModule extends AbstractModule {
     // nothing to configure here
   }
 
-  @Provides
-  @Inject
-  public JsCompiler provideJsCompiler(ClosureJsCompiler jsCompiler) {
-    return jsCompiler;
-  }
-  
   @Provides
   @Inject
   public List<JsProcessor> provideProcessors(
