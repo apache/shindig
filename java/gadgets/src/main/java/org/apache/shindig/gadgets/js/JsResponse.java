@@ -27,20 +27,22 @@ import java.util.List;
 public class JsResponse {
   private final List<JsContent> jsCode;
   private final List<String> errors;
-  private String codeString;
+  private final String externs;
   private final int cacheTtlSecs;
   private final int statusCode;
   private final boolean proxyCacheable;
-  
+  private String codeString;
+
   JsResponse(List<JsContent> jsCode, int statusCode, int cacheTtlSecs,
-      boolean proxyCacheable, List<String> errors) {
+      boolean proxyCacheable, List<String> errors, String externs) {
     this.jsCode = Collections.unmodifiableList(jsCode);
     this.errors = Collections.unmodifiableList(errors);
     this.statusCode = statusCode;
     this.cacheTtlSecs = cacheTtlSecs;
     this.proxyCacheable = proxyCacheable;
+    this.externs = externs;
   }
-  
+
   /**
    * Returns the JavaScript code to serve.
    */
@@ -54,48 +56,55 @@ public class JsResponse {
     }
     return codeString;
   }
-  
+
   /**
    * Returns an iterator starting at the beginning of all JS code in the response.
    */
   public Iterable<JsContent> getAllJsContent() {
     return jsCode;
   }
-  
+
   /**
    * Returns the HTTP status code.
    */
   public int getStatusCode() {
     return statusCode;
   }
-  
+
   /**
    * Returns whether the current response code is an error code.
    */
   public boolean isError() {
     return statusCode >= 400;
   }
-  
+
   /**
    * Returns the cache TTL in seconds for this response.
-   * 
+   *
    * 0 seconds means "no cache"; a value below 0 means "cache forever".
    */
   public int getCacheTtlSecs() {
     return cacheTtlSecs;
   }
-  
+
   /**
    * Returns whether the response can be cached by intermediary proxies.
    */
   public boolean isProxyCacheable() {
     return proxyCacheable;
   }
-  
+
   /**
    * Returns a list of any error messages associated with this response.
    */
   public List<String> getErrors() {
     return errors;
+  }
+
+  /**
+   * Returns a string of generated externs.
+   */
+  public String getExterns() {
+    return externs;
   }
 }

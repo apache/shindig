@@ -31,17 +31,19 @@ import java.util.List;
  */
 public class JsResponseBuilder {
   private LinkedList<JsContent> jsCode;
-  private List<String> errors;
+  private final List<String> errors;
   private int statusCode;
   private int cacheTtlSecs;
   private boolean proxyCacheable;
-  
+  private String externs;
+
   public JsResponseBuilder() {
     jsCode = Lists.newLinkedList();
     statusCode = HttpServletResponse.SC_OK;
     cacheTtlSecs = 0;
     proxyCacheable = false;
     errors = Lists.newLinkedList();
+    externs = null;
   }
 
   public JsResponseBuilder(JsResponse response) {
@@ -50,8 +52,9 @@ public class JsResponseBuilder {
     statusCode = response.getStatusCode();
     cacheTtlSecs = response.getCacheTtlSecs();
     proxyCacheable = response.isProxyCacheable();
+    externs = response.getExterns();
   }
-  
+
   /**
    * Appends more JS to the response.
    */
@@ -59,14 +62,14 @@ public class JsResponseBuilder {
     jsCode.add(jsContent);
     return this;
   }
-  
+
   /**
    * Helper to append JS to the response w/ a name.
    */
   public JsResponseBuilder appendJs(String content, String name) {
     return appendJs(new JsContent(content, name));
   }
-  
+
   /**
    * Helper to append a bunch of JS.
    */
@@ -76,7 +79,7 @@ public class JsResponseBuilder {
     }
     return this;
   }
-  
+
   /**
    * Prepends JS to the output.
    */
@@ -84,7 +87,7 @@ public class JsResponseBuilder {
     jsCode.addFirst(new JsContent(content, name));
     return this;
   }
-  
+
   /**
    * Replaces the current JavaScript code with some new code.
    */
@@ -107,14 +110,14 @@ public class JsResponseBuilder {
     this.statusCode = responseCode;
     return this;
   }
-  
+
   /**
    * Returns the HTTP status code.
    */
   public int getStatusCode() {
     return statusCode;
   }
-  
+
   /**
    * Adds an error to the response
    */
@@ -122,7 +125,7 @@ public class JsResponseBuilder {
     this.errors.add(error);
     return this;
   }
-  
+
   /**
    * Adds multiple errors to the response
    */
@@ -130,17 +133,17 @@ public class JsResponseBuilder {
     this.errors.addAll(errs);
     return this;
   }
-  
+
   /**
    * Sets the cache TTL in seconds for the response being built.
-   * 
+   *
    * 0 seconds means "no cache"; a value below 0 means "cache forever".
    */
   public JsResponseBuilder setCacheTtlSecs(int cacheTtlSecs) {
     this.cacheTtlSecs = cacheTtlSecs;
     return this;
   }
-  
+
   /**
    * Returns the cache TTL in seconds for the response.
    */
@@ -155,7 +158,7 @@ public class JsResponseBuilder {
     this.proxyCacheable = proxyCacheable;
     return this;
   }
-  
+
   /**
    * Returns whether the response can be cached by intermediary proxies.
    */
@@ -164,9 +167,18 @@ public class JsResponseBuilder {
   }
 
   /**
+   * Sets whether the compiled externs.
+   */
+  public JsResponseBuilder setExterns(String externs) {
+    this.externs = externs;
+    return this;
+  }
+
+  /**
    * Builds a {@link JsResponse} object with the provided data.
    */
   public JsResponse build() {
-    return new JsResponse(jsCode, statusCode, cacheTtlSecs, proxyCacheable, errors);
+    return new JsResponse(jsCode, statusCode, cacheTtlSecs, proxyCacheable,
+        errors, externs);
   }
 }
