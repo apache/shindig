@@ -26,13 +26,13 @@ import com.google.inject.Inject;
 
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.JsCompileMode;
-import org.apache.shindig.gadgets.RenderingContext;
 import org.apache.shindig.gadgets.features.ApiDirective;
 import org.apache.shindig.gadgets.features.FeatureRegistry;
 import org.apache.shindig.gadgets.features.FeatureRegistry.FeatureBundle;
 import org.apache.shindig.gadgets.features.FeatureRegistry.LookupResult;
 import org.apache.shindig.gadgets.features.FeatureResource;
 import org.apache.shindig.gadgets.js.JsContent;
+import org.apache.shindig.gadgets.js.JsGadgetContext;
 import org.apache.shindig.gadgets.js.JsResponse;
 import org.apache.shindig.gadgets.js.JsResponseBuilder;
 import org.apache.shindig.gadgets.uri.JsUriManager.JsUri;
@@ -214,25 +214,5 @@ public class ExportJsCompiler extends DefaultJsCompiler {
   private String getProperty(String symbol) {
     int idx = symbol.lastIndexOf('.');
     return (idx >= 0) ? symbol.substring(idx + 1) : symbol;
-  }
-
-  protected static class JsGadgetContext extends GadgetContext {
-    private final RenderingContext renderingContext;
-    private final String container;
-
-    public JsGadgetContext(JsUri ctx) {
-      this.renderingContext = ctx.getContext();
-      this.container = ctx.getContainer();
-    }
-
-    @Override
-    public RenderingContext getRenderingContext() {
-      return renderingContext;
-    }
-
-    @Override
-    public String getContainer() {
-      return container;
-    }
   }
 }
