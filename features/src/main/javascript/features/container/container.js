@@ -319,6 +319,12 @@ shindig.container.Container.addMixin = function(namespace, func) {
  */
 shindig.container.ContainerConfig = {};
 /**
+ * Allow gadgets to render in unspecified view.
+ * @type {string}
+ * @const
+ */
+shindig.container.ContainerConfig.ALLOW_DEFAULT_VIEW = 'allowDefaultView';
+/**
  * Whether cajole mode is turned on.
  * @type {string}
  * @const
@@ -375,58 +381,6 @@ shindig.container.ContainerConfig.PRELOAD_METADATAS = 'preloadMetadatas';
  * @const
  */
 shindig.container.ContainerConfig.PRELOAD_TOKENS = 'preloadTokens';
-
-
-/**
- * Enum keys for gadget rendering params. Gadget rendering params affect which
- * view of a gadget of displayed and how the gadget site is rendered, and are
- * not passed on to the actual gadget. These enum values are for documentation
- * purposes only, it is expected that clients use the string values.
- * @enum {string}
- */
-shindig.container.ContainerRender = {};
-/**
- * Allow gadgets to render in unspecified view.
- * @type {string}
- * @const
- */
-shindig.container.ContainerRender.ALLOW_DEFAULT_VIEW = 'allowDefaultView';
-/**
- * Style class to associate to iframe.
- * @type {string}
- * @const
- */
-shindig.container.ContainerRender.CLASS = 'class';
-/**
- * Whether to turn off debugging.
- * @type {string}
- * @const
- */
-shindig.container.ContainerRender.DEBUG = 'debug';
-/**
- * The starting/default gadget iframe height (in pixels).
- * @type {string}
- * @const
- */
-shindig.container.ContainerRender.HEIGHT = 'height';
-/**
- * Whether to turn off debugging.
- * @type {string}
- * @const
- */
-shindig.container.ContainerRender.TEST = 'test';
-/**
- * The gadget view name.
- * @type {string}
- * @const
- */
-shindig.container.ContainerRender.VIEW = 'view';
-/**
- * The starting/default gadget iframe width (in pixels).
- * @type {string}
- * @const
- */
-shindig.container.ContainerRender.WIDTH = 'width';
 
 
 // -----------------------------------------------------------------------------

@@ -93,15 +93,75 @@ shindig.container.NavigateTiming.PRT = 'prt';
  * @enum {string}
  */
 shindig.container.RenderParam = {};
+
+/**
+ * Allow gadgets to render in unspecified view.
+ * @type {string}
+ * @const
+ */
 shindig.container.RenderParam.ALLOW_DEFAULT_VIEW = 'allowDefaultView';
+
+/**
+ * Whether to enable cajole mode.
+ * @type {string}
+ * @const
+ */
 shindig.container.RenderParam.CAJOLE = 'cajole';
+
+/**
+ * Style class to associate to iframe.
+ * @type {string}
+ * @const
+ */
 shindig.container.RenderParam.CLASS = 'class';
+
+/**
+ * Whether to enable debugging mode.
+ * @type {string}
+ * @const
+ */
 shindig.container.RenderParam.DEBUG = 'debug';
+
+/**
+ * The starting gadget iframe height (in pixels).
+ * @type {string}
+ * @const
+ */
 shindig.container.RenderParam.HEIGHT = 'height';
+
+/**
+ * Whether to disable cache.
+ * @type {string}
+ * @const
+ */
 shindig.container.RenderParam.NO_CACHE = 'nocache';
+
+/**
+ * Whether to enable test mode.
+ * @type {string}
+ * @const
+ */
 shindig.container.RenderParam.TEST_MODE = 'testmode';
+
+/**
+ * The gadget user prefs to render with.
+ * @type {string}
+ * @const
+ */
 shindig.container.RenderParam.USER_PREFS = 'userPrefs';
+
+/**
+ * The view of gadget to render.
+ * @type {string}
+ * @const
+ */
 shindig.container.RenderParam.VIEW = 'view';
+
+/**
+ * The starting gadget iframe width (in pixels).
+ * @type {string}
+ * @const
+ */
 shindig.container.RenderParam.WIDTH = 'width';
 
 
