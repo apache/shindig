@@ -17,7 +17,9 @@
  */
 package org.apache.shindig.protocol;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.auth.SecurityToken;
+import org.apache.shindig.common.Nullable;
 import org.apache.shindig.common.servlet.HttpUtil;
 import org.apache.shindig.protocol.conversion.BeanConverter;
 
@@ -110,9 +112,7 @@ public class DataServiceServlet extends ApiServlet {
     HttpUtil.setCORSheader(servletResponse, containerConfig.<String>getList(token.getContainer(), 
         "gadgets.parentOrigins"));
 
-    BeanConverter converter = getConverterForRequest(servletRequest);
-
-    handleSingleRequest(servletRequest, servletResponse, token, converter);
+    handleSingleRequest(servletRequest, servletResponse, token);
   }
 
   @Override
@@ -149,11 +149,38 @@ public class DataServiceServlet extends ApiServlet {
    * Handler for non-batch requests.
    */
   private void handleSingleRequest(HttpServletRequest servletRequest,
-      HttpServletResponse servletResponse, SecurityToken token,
-      BeanConverter converter) throws IOException {
+      HttpServletResponse servletResponse, SecurityToken token) throws IOException {
 
     // Always returns a non-null handler.
     RestHandler handler = getRestHandler(servletRequest);
+
+    // Get Content-Type and format
+    String format = null;
+    String contentType = null;
+
+    try {
+      format = servletRequest.getParameter(FORMAT_PARAM);
+    } catch (Throwable t) {
+      // this happens while testing
+      if (LOG.isLoggable(Level.FINE)) {
+        LOG.fine("Unexpected error : format param is null " + t.toString());
+      }
+    }
+    try {
+      // TODO: First implementation causes bug when Content-Type is application/atom+xml. Fix is applied.
+      contentType = ContentTypes.extractMimePart(servletRequest.getContentType());
+    } catch (Throwable t) {
+      //this happens while testing
+      if (LOG.isLoggable(Level.FINE)) {
+        LOG.fine("Unexpected error : content type is null " + t.toString());
+      }
+    }
+
+    // Get BeanConverter for Request payload.
+    BeanConverter requestConverter = getConverterForRequest(contentType, format);
+
+    // Get BeanConverter for Response body.
+    BeanConverter responseConverter = getConverterForFormat(format);
 
     Reader bodyReader = null;
     if (!servletRequest.getMethod().equals("GET") && !servletRequest.getMethod().equals("HEAD")) {
@@ -163,11 +190,10 @@ public class DataServiceServlet extends ApiServlet {
     // Execute the request
     @SuppressWarnings("unchecked")
     Map<String, String[]> parameterMap = servletRequest.getParameterMap();
-    Future<?> future = handler.execute(parameterMap, bodyReader, token, converter);
-
+    Future<?> future = handler.execute(parameterMap, bodyReader, token, requestConverter);
     ResponseItem responseItem = getResponseItem(future);
 
-    servletResponse.setContentType(converter.getContentType());
+    servletResponse.setContentType(responseConverter.getContentType());
     if (responseItem.getErrorCode() >= 200 && responseItem.getErrorCode() < 400) {
       PrintWriter writer = servletResponse.getWriter();
       Object response = responseItem.getResponse();
@@ -178,11 +204,11 @@ public class DataServiceServlet extends ApiServlet {
 
       // JSONP style callbacks
       String callback = (HttpUtil.isJSONP(servletRequest) &&
-          ContentTypes.OUTPUT_JSON_CONTENT_TYPE.equals(converter.getContentType())) ?
+          ContentTypes.OUTPUT_JSON_CONTENT_TYPE.equals(responseConverter.getContentType())) ?
           servletRequest.getParameter("callback") : null;
 
       if (callback != null) writer.write(callback + '(');
-      writer.write(converter.convertToString(response));
+      writer.write(responseConverter.convertToString(response));
       if (callback != null) writer.write(");\n");
     } else {
       sendError(servletResponse, responseItem);
@@ -203,47 +229,34 @@ public class DataServiceServlet extends ApiServlet {
     return dispatcher.getRestHandler(path, method.toUpperCase());
   }
 
-  public BeanConverter getConverterForRequest(HttpServletRequest servletRequest) {
-    String formatString = null;
-    BeanConverter converter = jsonConverter; // default is jsonConverter
-    String contentType = null;
+  /*
+   * Return the right BeanConverter to convert the request payload.
+   */
+  BeanConverter getConverterForRequest(@Nullable String contentType, String format) {
+    if (StringUtils.isNotBlank(contentType)) {
+      return getConverterForContentType(contentType);
+    } else {
+      return getConverterForFormat(format);
+    }
+  }
 
-    try {
-      formatString = servletRequest.getParameter(FORMAT_PARAM);
-    } catch (Throwable t) {
-      // this happens while testing
-      if (LOG.isLoggable(Level.FINE)) {
-        LOG.fine("Unexpected error : format param is null " + t.toString());
-      }
-    }
-    try {
-      // TODO: First implementation causes bug when Content-Type is application/atom+xml.  Fix is applied.
-      //contentType = servletRequest.getContentType();
-      contentType = ContentTypes.extractMimePart(servletRequest.getContentType());
-    } catch (Throwable t) {
-      //this happens while testing
-      if (LOG.isLoggable(Level.FINE)) {
-        LOG.fine("Unexpected error : content type is null " + t.toString());
-      }
-    }
+  /**
+   * Return BeanConverter based on content type.
+   * @param contentType the content type for the converter.
+   * @return BeanConverter based on the contentType input param. Will default to JSON
+   */
+  protected BeanConverter getConverterForContentType(String contentType) {
+    return ContentTypes.ALLOWED_ATOM_CONTENT_TYPES.contains(contentType) ? atomConverter :
+        ContentTypes.ALLOWED_XML_CONTENT_TYPES.contains(contentType) ? xmlConverter : jsonConverter;
+  }
 
-    if (contentType != null) {
-      if (ContentTypes.ALLOWED_JSON_CONTENT_TYPES.contains(contentType)) {
-        converter = jsonConverter;
-      } else if (ContentTypes.ALLOWED_ATOM_CONTENT_TYPES.contains(contentType)) {
-        converter = atomConverter;
-      } else if (ContentTypes.ALLOWED_XML_CONTENT_TYPES.contains(contentType)) {
-        converter = xmlConverter;
-      }
-    } else if (formatString != null) {
-      if (formatString.equals(ATOM_FORMAT)) {
-        converter = atomConverter;
-      } else if (formatString.equals(XML_FORMAT)) {
-        converter = xmlConverter;
-      } else {
-        converter = jsonConverter;
-      }
-    }
-    return converter;
+  /**
+   * Return BeanConverter based on format request parameter.
+   * @param format the format for the converter.
+   * @return BeanConverter based on the format input param. Will default to JSON
+   */
+  protected BeanConverter getConverterForFormat(String format) {
+    return ATOM_FORMAT.equals(format) ? atomConverter : XML_FORMAT.equals(format) ? xmlConverter :
+        jsonConverter;
   }
 }

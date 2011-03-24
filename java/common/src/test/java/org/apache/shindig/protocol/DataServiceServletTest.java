@@ -162,16 +162,16 @@ public class DataServiceServletTest extends Assert {
   }
 
   @Test
-  public void testGetConverterForRequest() throws Exception {
-    assertConverter(atomConverter, "atom");
-    assertConverter(xmlConverter, "xml");
-    assertConverter(jsonConverter, "");
-    assertConverter(jsonConverter, null);
-    assertConverter(jsonConverter, "ahhhh!");
+  public void testGetConverterForFormat() throws Exception {
+    assertConverterForFormat(atomConverter, "atom");
+    assertConverterForFormat(xmlConverter, "xml");
+    assertConverterForFormat(jsonConverter, "");
+    assertConverterForFormat(jsonConverter, null);
+    assertConverterForFormat(jsonConverter, "ahhhh!");
   }
 
   @Test
-  public void testGetConverterForRequestContentType() throws Exception {
+  public void testGetConverterForContentType() throws Exception {
     assertConverterForContentType(atomConverter, ContentTypes.OUTPUT_ATOM_CONTENT_TYPE);
     assertConverterForContentType(xmlConverter, ContentTypes.OUTPUT_XML_CONTENT_TYPE);
     assertConverterForContentType(xmlConverter, "text/xml");
@@ -182,21 +182,11 @@ public class DataServiceServletTest extends Assert {
     assertConverterForContentType(jsonConverter, "abcd!");
   }
 
-  private void assertConverter(BeanConverter converter, String format) {
-    EasyMock.expect(req.getParameter(ApiServlet.FORMAT_PARAM))
-        .andReturn(format);
-    EasyMock.replay(req);
-    assertEquals(converter, servlet.getConverterForRequest(req));
-    EasyMock.verify(req);
-    EasyMock.reset(req);
+  private void assertConverterForFormat(BeanConverter converter, String format) {
+    assertEquals(converter, servlet.getConverterForFormat(format));
   }
 
-  private void assertConverterForContentType(BeanConverter converter,
-      String contentType) {
-    EasyMock.expect(req.getContentType()).andReturn(contentType);
-    EasyMock.replay(req);
-    assertEquals(converter, servlet.getConverterForRequest(req));
-    EasyMock.verify(req);
-    EasyMock.reset(req);
+  private void assertConverterForContentType(BeanConverter converter, String contentType) {
+    assertEquals(converter, servlet.getConverterForContentType(contentType));
   }
 }
