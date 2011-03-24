@@ -73,8 +73,8 @@ if (!this.JsUtil) {
   eval(JsUtil.prototype.include(srcDir + '/opensocial-base/jsonmediaitem.js'));
   eval(JsUtil.prototype.include(srcDir + '/opensocial-base/jsonperson.js'));
   eval(JsUtil.prototype.include(srcDir + '/opensocial-jsonrpc/jsonrpccontainer.js'));
-  eval(JsUtil.prototype.include(srcDir + '/osapi/osapi.js'));
-  eval(JsUtil.prototype.include(srcDir + '/osapi/batch.js'));
+  eval(JsUtil.prototype.include(srcDir + '/osapi.base/osapi.js'));
+  eval(JsUtil.prototype.include(srcDir + '/osapi.base/batch.js'));
   eval(JsUtil.prototype.include(srcDir + '/osapi/jsonrpctransport.js'));
   eval(JsUtil.prototype.include(srcDir + '/osapi/gadgetsrpctransport.js'));
   eval(JsUtil.prototype.include(srcDir + '/osapi/peoplehelpers.js'));

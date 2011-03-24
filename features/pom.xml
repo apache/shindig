@@ -166,8 +166,8 @@
                 <source>opensocial-base/jsonmediaitem.js</source> 
                 <source>opensocial-base/jsonperson.js</source>
                 <source>opensocial-jsonrpc/jsonrpccontainer.js</source>
-                <source>osapi/osapi.js</source>
-                <source>osapi/batch.js</source>
+                <source>osapi.base/osapi.js</source>
+                <source>osapi.base/batch.js</source>
                 <source>osapi/jsonrpctransport.js</source>
                 <source>osapi/peoplehelpers.js</source>
                 <source>../../../../src/test/javascript/lib/testutils.js</source>

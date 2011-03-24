@@ -19,20 +19,9 @@
 
 /**
  * @class
- * Tame and expose core osapi.* API to cajoled gadgets
+ * Tame and expose people osapi.* API to cajoled gadgets
  */
 tamings___.push(function(imports) {
-
-  ___.tamesTo(osapi.newBatch, ___.markFuncFreeze(function() {
-    var result = osapi.newBatch();
-    ___.markInnocent(result['add'], 'add');
-    ___.markInnocent(result['execute'], 'execute');
-    return ___.tame(result);
-  }));
-
-  // OSAPI functions are marked as simple funcs as they are registered
-  imports.outers.osapi = ___.tame(osapi);
-  ___.grantRead(imports.outers, 'osapi');
 
   // Forced to tame in an onload handler because peoplehelpers does
   // not define some functions till runOnLoadHandlers runs

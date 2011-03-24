@@ -21,9 +21,10 @@
   /**
    * It is common to batch requests together to make them more efficient.
    *
-   * Note: the container config specified endpoints at which services are to be found.
-   * When creating a batch, the calls are split out into separate requests based on the
-   * transport, as it may get sent to a different server on the backend.
+   * Note: the container config specified endpoints at which services are to be
+   * found. When creating a batch, the calls are split out into separate
+   * requests based on the transport, as it may get sent to a different server
+   * on the backend.
    */
   var newBatch = function() {
     var that = {};
@@ -36,7 +37,7 @@
     //     transport : <rpc dispatcher>
     //  }
     // }
-
+    
     /** @type {Array.<Object>} */
     var keyedRequests = [];
 

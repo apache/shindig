@@ -18,21 +18,18 @@
   under the License.
 -->
 <feature>
-  <name>osapi</name>
+  <name>osapi.base</name>
   <dependency>globals</dependency>
+  <dependency>core.log</dependency>
   <dependency>taming</dependency>
-  <dependency>shindig.auth</dependency>
-  <dependency>core.config</dependency>
-  <dependency>core.io</dependency>
-  <dependency>core.json</dependency>
-  <dependency>core.util</dependency>
-  <dependency>osapi.base</dependency>
-  <dependency>rpc</dependency>
-  <dependency>security-token</dependency>
   <all>
-    <script src="jsonrpctransport.js"></script>
-    <script src="gadgetsrpctransport.js"></script>
-    <script src="peoplehelpers.js"></script>    
+    <script src="batch.js"></script>
+    <script src="osapi.js"></script>
     <script src="taming.js"></script>    
+    <api>
+      <exports type="js">osapi.newBatch.add</exports>
+      <exports type="js">osapi.newBatch.execute</exports>
+      <exports type="js">osapi._registerMethod</exports>
+    </api>
   </all>
 </feature>
