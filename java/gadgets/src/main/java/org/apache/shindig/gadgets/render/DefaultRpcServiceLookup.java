@@ -54,7 +54,7 @@ public class DefaultRpcServiceLookup implements RpcServiceLookup {
   @Inject
   public DefaultRpcServiceLookup(DefaultServiceFetcher fetcher,
       @Named("org.apache.shindig.serviceExpirationDurationMinutes")Long duration) {
-    containerServices = new MapMaker().expiration(duration * 60, TimeUnit.SECONDS).makeMap();
+    containerServices = new MapMaker().expireAfterWrite(duration * 60, TimeUnit.SECONDS).makeMap();
     this.fetcher = fetcher;
   }
 
