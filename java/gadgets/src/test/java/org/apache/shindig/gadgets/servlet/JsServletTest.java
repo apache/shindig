@@ -19,6 +19,7 @@
 package org.apache.shindig.gadgets.servlet;
 
 import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.getCurrentArguments;
 import static org.easymock.EasyMock.isA;
 
 import com.google.caja.util.Lists;
@@ -35,12 +36,14 @@ import org.apache.shindig.gadgets.js.IfModifiedSinceProcessor;
 import org.apache.shindig.gadgets.js.JsLoadProcessor;
 import org.apache.shindig.gadgets.js.JsProcessor;
 import org.apache.shindig.gadgets.js.JsProcessorRegistry;
+import org.apache.shindig.gadgets.js.JsRequest;
 import org.apache.shindig.gadgets.js.JsRequestBuilder;
 import org.apache.shindig.gadgets.js.JsResponse;
 import org.apache.shindig.gadgets.js.JsResponseBuilder;
 import org.apache.shindig.gadgets.uri.JsUriManager;
 import org.apache.shindig.gadgets.uri.JsUriManager.JsUri;
 import org.apache.shindig.gadgets.uri.UriStatus;
+import org.easymock.IAnswer;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -55,7 +58,7 @@ public class JsServletTest extends ServletTestFixture {
 
   private final JsServlet servlet = new JsServlet();
   private JsServlet.CachingSetter httpUtilMock;
-  private JsHandler jsHandlerMock;
+  private GetJsContentProcessor getJsProcessorMock;
   private JsUriManager jsUriManagerMock;
   private JsLoadProcessor jsLoadProcessor;
   private DefaultJsServingPipeline jsServingPipeline;
@@ -68,13 +71,13 @@ public class JsServletTest extends ServletTestFixture {
     jsUriManagerMock = mock(JsUriManager.class);
     servlet.setJsRequestBuilder(new JsRequestBuilder(jsUriManagerMock));
 
-    jsHandlerMock = mock(JsHandler.class);
+    getJsProcessorMock = mock(GetJsContentProcessor.class);
     
     jsLoadProcessor = new JsLoadProcessor(jsUriManagerMock, 0);
     JsProcessorRegistry jsProcessorRegistry =
         new DefaultJsProcessorRegistry(
             ImmutableList.<JsProcessor>of(jsLoadProcessor, new IfModifiedSinceProcessor(),
-                new GetJsContentProcessor(jsHandlerMock), new AddOnloadFunctionProcessor()));
+               getJsProcessorMock, new AddOnloadFunctionProcessor()));
 
     jsServingPipeline = new DefaultJsServingPipeline(jsProcessorRegistry);
     servlet.setJsServingPipeline(jsServingPipeline);
@@ -134,9 +137,16 @@ public class JsServletTest extends ServletTestFixture {
         null, REFRESH_INTERVAL_SEC, UriStatus.VALID_UNVERSIONED);
     expect(jsUriManagerMock.processExternJsUri(isA(Uri.class))).andReturn(jsUri);
     expect(request.getHeader("If-Modified-Since")).andReturn("12345");
-    JsResponse response = new JsResponseBuilder().appendJs(EXAMPLE_JS_CODE, "js").build();
+    final JsResponse response = new JsResponseBuilder().appendJs(EXAMPLE_JS_CODE, "js").build();
     expect(request.getHeader("Host")).andReturn("localhost");
-    expect(jsHandlerMock.getJsContent(jsUri, "localhost")).andReturn(response);
+    expect(getJsProcessorMock.process(isA(JsRequest.class), isA(JsResponseBuilder.class))).andAnswer(
+        new IAnswer<Boolean>() {
+          public Boolean answer() throws Throwable {
+            JsResponseBuilder builder = (JsResponseBuilder)getCurrentArguments()[1];
+            builder.appendAllJs(response.getAllJsContent());
+            return true;
+          }
+        });
     replay();
 
     servlet.doGet(request, recorder);

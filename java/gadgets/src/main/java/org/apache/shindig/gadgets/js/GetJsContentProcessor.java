@@ -18,9 +18,19 @@
 
 package org.apache.shindig.gadgets.js;
 
+import java.util.Collection;
+import java.util.List;
+
+import com.google.common.base.Joiner;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 
-import org.apache.shindig.gadgets.servlet.JsHandler;
+import org.apache.shindig.gadgets.GadgetContext;
+import org.apache.shindig.gadgets.features.FeatureRegistry;
+import org.apache.shindig.gadgets.features.FeatureResource;
+import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.rewrite.js.JsCompiler;
 import org.apache.shindig.gadgets.uri.JsUriManager.JsUri;
 import org.apache.shindig.gadgets.uri.UriStatus;
 
@@ -28,22 +38,60 @@ import org.apache.shindig.gadgets.uri.UriStatus;
  * Retrieves the requested Javascript code using a {@link JsHandler}.
  */
 public class GetJsContentProcessor implements JsProcessor {
+  private static final Collection<String> EMPTY_SET = Sets.newHashSet();
+  private static final Joiner UNKNOWN_FEATURE_ERR = Joiner.on(", ");
 
-  private final JsHandler jsHandler;
+  private final FeatureRegistry registry;
+  private final JsCompiler compiler;
 
   @Inject
-  public GetJsContentProcessor(JsHandler jsHandler) {
-    this.jsHandler = jsHandler;
+  public GetJsContentProcessor(
+      FeatureRegistry registry,
+      JsCompiler compiler) {
+    this.registry = registry;
+    this.compiler = compiler;
   }
-  
+
+  /**
+   * Get the content of the feature resources and push it to jsData.
+   *
+   * @param jsUri A JsUri object that describes the resources to get.
+   * @param host The name of the host the request was directed to.
+   * @return JsHandlerResponse object that contains JavaScript data and cacheable flag.
+   */
   public boolean process(JsRequest request, JsResponseBuilder builder) throws JsException {
     // Get JavaScript content from features aliases request.
     JsUri jsUri = request.getJsUri();
-    JsResponse handlerResponse =
-        jsHandler.getJsContent(jsUri, request.getHost());
-    builder.setProxyCacheable(handlerResponse.isProxyCacheable());    
+    GadgetContext ctx = new JsGadgetContext(jsUri);
+    Collection<String> needed = jsUri.getLibs();
+
+    List<String> unsupported = Lists.newLinkedList();
+    FeatureRegistry.LookupResult lookup = registry.getFeatureResources(ctx, needed, unsupported);
+    if (!unsupported.isEmpty()) {
+      throw new JsException(HttpResponse.SC_BAD_REQUEST,
+          "Unknown feature(s): " + UNKNOWN_FEATURE_ERR.join(unsupported));
+    }
+
+    // Quick-and-dirty implementation of incremental JS loading.
+    Collection<String> alreadyLoaded = EMPTY_SET;
+    Collection<String> alreadyHaveLibs = jsUri.getLoadedLibs();
+    if (!alreadyHaveLibs.isEmpty()) {
+      alreadyLoaded = registry.getFeatures(alreadyHaveLibs);
+    }
+
+    // Collate all JS desired for the current request.
+    boolean isProxyCacheable = true;
+
+    // Pre-process each feature.
+    for (FeatureRegistry.FeatureBundle bundle : lookup.getBundles()) {
+      if (alreadyLoaded.contains(bundle.getName())) continue;
+      builder.appendAllJs(compiler.getJsContent(jsUri, bundle));
+      for (FeatureResource featureResource : bundle.getResources()) {
+        isProxyCacheable = isProxyCacheable && featureResource.isProxyCacheable();
+      }
+    }
+    builder.setProxyCacheable(isProxyCacheable);
     setResponseCacheTtl(builder, jsUri.getStatus());
-    builder.appendJs(handlerResponse.getAllJsContent());
     return true;
   }
 
@@ -70,5 +118,4 @@ public class GetJsContentProcessor implements JsProcessor {
         break;
     }
   }
-
 }

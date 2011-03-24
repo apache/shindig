@@ -21,6 +21,7 @@ import com.google.inject.ImplementedBy;
 
 import org.apache.shindig.gadgets.features.FeatureRegistry.FeatureBundle;
 import org.apache.shindig.gadgets.js.JsContent;
+import org.apache.shindig.gadgets.js.JsException;
 import org.apache.shindig.gadgets.js.JsResponse;
 import org.apache.shindig.gadgets.uri.JsUriManager.JsUri;
 
@@ -48,5 +49,6 @@ public interface JsCompiler {
    * @param externs The externs.
    * @return A compilation result object.
    */
-  JsResponse compile(JsUri jsUri, Iterable<JsContent> content, List<String> externs);
+  JsResponse compile(JsUri jsUri, Iterable<JsContent> content, List<String> externs)
+      throws JsException;
 }

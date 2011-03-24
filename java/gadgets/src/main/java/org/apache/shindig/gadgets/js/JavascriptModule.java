@@ -34,18 +34,23 @@ public class JavascriptModule extends AbstractModule {
   protected void configure() {
     // nothing to configure here
   }
-
+  
   @Provides
   @Inject
   public List<JsProcessor> provideProcessors(
       InjectJsInfoVariableProcessor injectJsInfoVariableProcessor,
-      JsLoadProcessor jsLoaderGeneratorProcessor, IfModifiedSinceProcessor ifModifiedSinceProcessor,
+      JsLoadProcessor jsLoaderGeneratorProcessor,
+      IfModifiedSinceProcessor ifModifiedSinceProcessor,
       GetJsContentProcessor getJsContentProcessor,
+      ConfigInjectionProcessor configInjectionProcessor,
       AddOnloadFunctionProcessor addOnloadFunctionProcessor,
-      AddJsLoadCallbackProcessor addJsLoadCallbackProcessor) {
+      AddJsLoadCallbackProcessor addJsLoadCallbackProcessor,
+      //AnonFuncWrappingProcessor jsWrapperProcessor,
+      CompilationProcessor compilationProcessor) {
     return ImmutableList.of(injectJsInfoVariableProcessor, jsLoaderGeneratorProcessor,
-        ifModifiedSinceProcessor, getJsContentProcessor, addOnloadFunctionProcessor,
-        addJsLoadCallbackProcessor);
+        ifModifiedSinceProcessor, getJsContentProcessor, configInjectionProcessor,
+        addOnloadFunctionProcessor, addJsLoadCallbackProcessor, /*jsWrapperProcessor,*/
+        compilationProcessor);
   }
   
 }

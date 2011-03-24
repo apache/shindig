@@ -47,7 +47,9 @@ import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.RenderingContext;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.js.JsException;
+import org.apache.shindig.gadgets.js.JsRequestBuilder;
 import org.apache.shindig.gadgets.js.JsResponse;
+import org.apache.shindig.gadgets.js.JsServingPipeline;
 import org.apache.shindig.gadgets.process.ProcessingException;
 import org.apache.shindig.gadgets.process.Processor;
 import org.apache.shindig.gadgets.servlet.CajaContentRewriter.CajoledResult;
@@ -122,7 +124,8 @@ public class GadgetsHandlerService {
   protected final SecurityTokenCodec securityTokenCodec;
   protected final ProxyUriManager proxyUriManager;
   protected final JsUriManager jsUriManager;
-  protected final JsHandler jsHandler;
+  protected final JsServingPipeline jsPipeline;
+  protected final JsRequestBuilder jsRequestBuilder;
   protected final ProxyHandler proxyHandler;
   protected final BeanDelegator beanDelegator;
   protected final long specRefreshInterval;
@@ -133,7 +136,7 @@ public class GadgetsHandlerService {
   public GadgetsHandlerService(TimeSource timeSource, Processor processor,
       IframeUriManager iframeUriManager, SecurityTokenCodec securityTokenCodec,
       ProxyUriManager proxyUriManager, JsUriManager jsUriManager, ProxyHandler proxyHandler,
-      JsHandler jsHandler,
+      JsServingPipeline jsPipeline, JsRequestBuilder jsRequestBuilder,
       @Named("shindig.cache.xml.refreshInterval") long specRefreshInterval,
       BeanFilter beanFilter, CajaContentRewriter cajaContentRewriter) {
     this.timeSource = timeSource;
@@ -143,7 +146,8 @@ public class GadgetsHandlerService {
     this.proxyUriManager = proxyUriManager;
     this.jsUriManager = jsUriManager;
     this.proxyHandler = proxyHandler;
-    this.jsHandler = jsHandler;
+    this.jsPipeline = jsPipeline;
+    this.jsRequestBuilder = jsRequestBuilder;
     this.specRefreshInterval = specRefreshInterval;
     this.beanFilter = beanFilter;
     this.cajaContentRewriter = cajaContentRewriter;
@@ -211,7 +215,7 @@ public class GadgetsHandlerService {
     if (isFieldIncluded(fields, "jsContent")) {
       JsResponse response = null;
       try {
-        response = jsHandler.getJsContent(jsUri, servedUri.getAuthority());
+        response = jsPipeline.execute(jsRequestBuilder.build(jsUri, servedUri.getAuthority()));
       } catch (JsException e) {
         throw new ProcessingException(e.getMessage(), e.getStatusCode());
       }

@@ -73,7 +73,7 @@ public class JsResponseBuilder {
   /**
    * Helper to append a bunch of JS.
    */
-  public JsResponseBuilder appendJs(Iterable<JsContent> jsBundle) {
+  public JsResponseBuilder appendAllJs(Iterable<JsContent> jsBundle) {
     for (JsContent content : jsBundle) {
       appendJs(content);
     }
@@ -86,13 +86,6 @@ public class JsResponseBuilder {
   public JsResponseBuilder prependJs(String content, String name) {
     jsCode.addFirst(new JsContent(content, name));
     return this;
-  }
-
-  /**
-   * Replaces the current JavaScript code with some new code.
-   */
-  public JsResponseBuilder setJs(String newContent, String name) {
-    return clearJs().appendJs(newContent, name);
   }
 
   /**

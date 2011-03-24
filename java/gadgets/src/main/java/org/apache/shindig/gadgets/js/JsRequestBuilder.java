@@ -53,4 +53,13 @@ public class JsRequestBuilder {
     return new JsRequest(jsUri, host, inCache);
   }
 
+  /**
+   * Builds a {@link JsRequest} instance for a given JsUri/host pair.
+   * @param jsUri JsUri encapsulating the request.
+   * @param host Host context for the request.
+   * @return The corresponding JsRequest.
+   */
+  public JsRequest build(JsUri jsUri, String host) {
+    return new JsRequest(jsUri, host, false);
+  }
 }

@@ -61,6 +61,7 @@ public class ExportJsCompiler extends DefaultJsCompiler {
   @Override
   public Iterable<JsContent> getJsContent(JsUri jsUri, FeatureBundle bundle) {
     List<JsContent> jsContent = Lists.newLinkedList();
+    // TODO: Convert start/end to processor too.
     jsContent.add(new JsContent("\n/* [start] feature=" + bundle.getName() +
         " */\n", "[comment-marker-start]", bundle.getName()));
     for (JsContent jsc : super.getJsContent(jsUri, bundle)) {
@@ -77,7 +78,7 @@ public class ExportJsCompiler extends DefaultJsCompiler {
     GadgetContext ctx = new JsGadgetContext(jsUri);
     JsResponseBuilder builder = new JsResponseBuilder();
     appendExportJs(builder, ctx);
-    builder.appendJs(content);
+    builder.appendAllJs(content);
     // TODO: attach this to a real JS compiler jscomp.Compiler.
     return builder.build();
   }

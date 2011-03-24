@@ -51,7 +51,7 @@ public class DefaultJsCompiler implements JsCompiler {
   }
 
   public JsResponse compile(JsUri jsUri, Iterable<JsContent> content, List<String> externs) {
-    return new JsResponseBuilder().appendJs(content).build();
+    return new JsResponseBuilder().appendAllJs(content).build();
   }
 
   protected String getFeatureContent(JsUri jsUri, FeatureResource resource) {

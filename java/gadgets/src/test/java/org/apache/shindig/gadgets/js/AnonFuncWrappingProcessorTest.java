@@ -15,34 +15,26 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.apache.shindig.gadgets.servlet;
+package org.apache.shindig.gadgets.js;
 
-import org.apache.shindig.config.ContainerConfig;
-import org.apache.shindig.gadgets.config.ConfigContributor;
-import org.apache.shindig.gadgets.features.FeatureRegistry;
-import org.apache.shindig.gadgets.rewrite.js.JsCompiler;
+import static org.easymock.EasyMock.createControl;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
-import org.easymock.EasyMock;
+import org.easymock.IMocksControl;
 
-import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Map;
-
-public class JsHandlerTest {
-  private JsHandler handler;
-  private FeatureRegistry registry;
-  private ContainerConfig config;
-  private JsCompiler compiler;
-  private Map<String, ConfigContributor> configContributors;
-  
-  @Before
-  public void setUp() {
-    
-  }
-  
+public class AnonFuncWrappingProcessorTest {
   @Test
-  public void doNothing() {
-    
+  public void wrapCode() throws Exception {
+    IMocksControl control = createControl();
+    JsRequest request = control.createMock(JsRequest.class);
+    JsResponseBuilder builder = new JsResponseBuilder().appendJs("JS_CODE", "source");
+    AnonFuncWrappingProcessor processor = new AnonFuncWrappingProcessor();
+    control.replay();
+    assertTrue(processor.process(request, builder));
+    control.verify();
+    assertEquals("(function() {\nJS_CODE\n})();", builder.build().toJsString());
   }
 }

@@ -18,44 +18,54 @@
 
 package org.apache.shindig.gadgets.js;
 
+import static org.easymock.EasyMock.createControl;
+import static org.easymock.EasyMock.eq;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.isA;
 import static org.junit.Assert.*;
 
-import org.apache.shindig.gadgets.servlet.JsHandler;
+import java.util.List;
+
+import org.apache.shindig.gadgets.RenderingContext;
+import org.apache.shindig.gadgets.features.FeatureRegistry;
+import org.apache.shindig.gadgets.features.FeatureResource;
+import org.apache.shindig.gadgets.features.FeatureRegistry.FeatureBundle;
+import org.apache.shindig.gadgets.features.FeatureRegistry.LookupResult;
+import org.apache.shindig.gadgets.rewrite.js.JsCompiler;
 import org.apache.shindig.gadgets.uri.JsUriManager.JsUri;
 import org.apache.shindig.gadgets.uri.UriStatus;
-import org.easymock.EasyMock;
 import org.easymock.IMocksControl;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 
 
 /**
  * Tests for {@link GetJsContentProcessor}.
  */
 public class GetJsContentProcessorTest {
-
-  private static final String HOST = "localhost";
-  private static final String JS_CODE = "some JS data";
+  private static final String JS_CODE1 = "some JS data";
+  private static final String JS_CODE2 = "some JS data";
   
   private IMocksControl control;
-  private JsHandler handler;
+  private FeatureRegistry registry;
+  private JsCompiler compiler;
   private JsUri jsUri;
   private JsRequest request;
-  private JsResponse handlerResponse;
   private JsResponseBuilder response;
   private GetJsContentProcessor processor;
 
   @Before
   public void setUp() {
-    control = EasyMock.createControl();
-    handler = control.createMock(JsHandler.class);
+    control = createControl();
+    registry = control.createMock(FeatureRegistry.class);
+    compiler = control.createMock(JsCompiler.class);
     jsUri = control.createMock(JsUri.class);
     request = control.createMock(JsRequest.class);
-    handlerResponse = control.createMock(JsResponse.class);
     response = new JsResponseBuilder();
-    processor = new GetJsContentProcessor(handler);
+    processor = new GetJsContentProcessor(registry, compiler);
   }
   
   @Test
@@ -95,18 +105,52 @@ public class GetJsContentProcessorTest {
   }
 
   private void setExpectations(boolean proxyCacheable, UriStatus uriStatus) throws JsException {
-    EasyMock.expect(handler.getJsContent(jsUri, HOST)).andReturn(handlerResponse);
-    EasyMock.expect(request.getHost()).andReturn(HOST);
-    EasyMock.expect(request.getJsUri()).andReturn(jsUri);
-    EasyMock.expect(handlerResponse.getAllJsContent()).andReturn(
-        ImmutableList.of(new JsContent(JS_CODE, "source", "feature")));
-    EasyMock.expect(handlerResponse.isProxyCacheable()).andReturn(proxyCacheable);
-    EasyMock.expect(jsUri.getStatus()).andReturn(uriStatus);
+    expect(jsUri.getStatus()).andReturn(uriStatus);
+    List<String> libs = ImmutableList.of("feature1", "feature2");
+    expect(jsUri.getLibs()).andReturn(libs);
+    expect(jsUri.getContainer()).andReturn("container");
+    expect(jsUri.getContext()).andReturn(RenderingContext.CONFIGURED_GADGET);
+    expect(jsUri.isDebug()).andReturn(false);
+    expect(jsUri.getLoadedLibs()).andReturn(ImmutableList.<String>of());
+    expect(request.getJsUri()).andReturn(jsUri);
+    
+    List<FeatureBundle> bundles = mockBundles(proxyCacheable);
+    LookupResult lr = control.createMock(LookupResult.class);
+    expect(lr.getBundles()).andReturn(bundles);
+
+    expect(registry.getFeatureResources(isA(JsGadgetContext.class), eq(libs),
+        eq(ImmutableList.<String>of()))).andReturn(lr);
+    expect(compiler.getJsContent(jsUri, bundles.get(0)))
+        .andReturn(ImmutableList.<JsContent>of(new JsContent(JS_CODE1, "source1", "feature1")));
+    expect(compiler.getJsContent(jsUri, bundles.get(1)))
+        .andReturn(ImmutableList.<JsContent>of(new JsContent(JS_CODE2, "source2", "feature2")));
+  }
+  
+  private List<FeatureBundle> mockBundles(boolean proxyCacheable) {
+    FeatureBundle bundle1 = control.createMock(FeatureBundle.class);
+    expect(bundle1.getName()).andReturn("feature1");
+    FeatureResource resource1 = control.createMock(FeatureResource.class);
+    expect(resource1.isProxyCacheable()).andReturn(proxyCacheable);
+    List<FeatureResource> resources1 = Lists.newArrayList(resource1);
+    expect(bundle1.getResources()).andReturn(resources1);
+    
+    FeatureBundle bundle2 = control.createMock(FeatureBundle.class);
+    expect(bundle2.getName()).andReturn("feature2");
+    FeatureResource resource2 = control.createMock(FeatureResource.class);
+    if (proxyCacheable) {
+      // Only consulted if the first bundle/resource is proxyCacheable.
+      expect(resource2.isProxyCacheable()).andReturn(proxyCacheable);
+    }
+    List<FeatureResource> resources2 = Lists.newArrayList(resource2);
+    expect(bundle2.getResources()).andReturn(resources2);
+    
+    List<FeatureBundle> bundles = Lists.newArrayList(bundle1, bundle2);
+    return bundles;
   }
 
   private void checkResponse(boolean proxyCacheable, int expectedTtl) {
     assertEquals(proxyCacheable, response.isProxyCacheable());
     assertEquals(expectedTtl, response.getCacheTtlSecs());
-    assertEquals(JS_CODE, response.build().toJsString());
+    assertEquals(JS_CODE1 + JS_CODE2, response.build().toJsString());
   }
 }

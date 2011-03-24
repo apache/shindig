@@ -56,7 +56,7 @@ public class DefaultJsProcessorRegistryTest {
   public void testProcessorModifiesResponse() throws Exception {
     JsProcessor processor = new JsProcessor() {
       public boolean process(JsRequest request, JsResponseBuilder builder) {
-        builder.setJs(JS_CODE, "js");
+        builder.clearJs().appendJs(JS_CODE, "js");
         return true;
       }
     };

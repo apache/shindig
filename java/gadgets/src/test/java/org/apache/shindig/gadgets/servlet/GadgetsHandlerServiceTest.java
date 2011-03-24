@@ -40,7 +40,10 @@ import org.apache.shindig.gadgets.features.FeatureRegistry;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.js.JsException;
+import org.apache.shindig.gadgets.js.JsRequest;
+import org.apache.shindig.gadgets.js.JsRequestBuilder;
 import org.apache.shindig.gadgets.js.JsResponseBuilder;
+import org.apache.shindig.gadgets.js.JsServingPipeline;
 import org.apache.shindig.gadgets.process.ProcessingException;
 import org.apache.shindig.gadgets.uri.JsUriManager;
 import org.apache.shindig.gadgets.uri.ProxyUriManager;
@@ -81,7 +84,8 @@ public class GadgetsHandlerServiceTest extends EasyMockTestCase {
   private final JsUriManager jsUriManager = mock(JsUriManager.class);
   private final ProxyHandler proxyHandler = mock(ProxyHandler.class);
   private final CajaContentRewriter cajaContentRewriter = mock(CajaContentRewriter.class);
-  private final JsHandler jsHandler = mock(JsHandler.class);
+  private final JsServingPipeline jsPipeline = mock(JsServingPipeline.class);
+  private final JsRequestBuilder jsRequestBuilder = new JsRequestBuilder(jsUriManager);
 
   private FakeSecurityTokenCodec tokenCodec;
   private GadgetsHandlerService gadgetHandler;
@@ -90,8 +94,8 @@ public class GadgetsHandlerServiceTest extends EasyMockTestCase {
   public void setUp() {
     tokenCodec = new FakeSecurityTokenCodec();
     gadgetHandler = new GadgetsHandlerService(timeSource, processor, urlGenerator,
-        tokenCodec, proxyUriManager, jsUriManager, proxyHandler, jsHandler,
-        SPEC_REFRESH_INTERVAL_MS, new BeanFilter(), cajaContentRewriter);
+        tokenCodec, proxyUriManager, jsUriManager, proxyHandler, jsPipeline,
+        jsRequestBuilder, SPEC_REFRESH_INTERVAL_MS, new BeanFilter(), cajaContentRewriter);
   }
 
   // Next test verify that the API data classes are configured correctly.
@@ -319,7 +323,7 @@ public class GadgetsHandlerServiceTest extends EasyMockTestCase {
     String jsContent = "var a;";
     String onload = "do this";
     expect(jsUriManager.makeExternJsUri(capture(uriCapture))).andReturn(resUri);
-    expect(jsHandler.getJsContent(EasyMock.isA(JsUri.class), EasyMock.eq("server.com")))
+    expect(jsPipeline.execute(EasyMock.isA(JsRequest.class)))
         .andReturn(new JsResponseBuilder().appendJs(jsContent, "js").setProxyCacheable(true).build());
     GadgetsHandlerApi.JsRequest request =
         createJsRequest(FakeProcessor.SPEC_URL.toString(), CONTAINER, fields, features);
@@ -345,7 +349,7 @@ public class GadgetsHandlerServiceTest extends EasyMockTestCase {
     Uri resUri = Uri.parse("http://server.com/gadgets/js/foo");
     Capture<JsUri> uriCapture = new Capture<JsUri>();
     expect(jsUriManager.makeExternJsUri(capture(uriCapture))).andReturn(resUri);
-    expect(jsHandler.getJsContent(EasyMock.isA(JsUri.class), EasyMock.eq("server.com")))
+    expect(jsPipeline.execute(EasyMock.isA(JsRequest.class)))
         .andThrow(new JsException(404, "error"));
     GadgetsHandlerApi.JsRequest request =
         createJsRequest(FakeProcessor.SPEC_URL.toString(), CONTAINER, fields, features);
