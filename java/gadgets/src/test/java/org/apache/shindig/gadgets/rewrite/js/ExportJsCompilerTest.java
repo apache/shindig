@@ -97,6 +97,7 @@ public class ExportJsCompilerTest {
     expect(result.getContext()).andReturn(RenderingContext.GADGET).anyTimes();
     expect(result.getContainer()).andReturn(CONTAINER).anyTimes();
     expect(result.getCompileMode()).andReturn(mode).anyTimes();
+    expect(result.isDebug()).andReturn(false).anyTimes();
     replay(result);
     return result;
   }
@@ -173,6 +174,7 @@ public class ExportJsCompilerTest {
   @Test
   public void testCompileNotEmpty() throws Exception {
     JsUri jsUri = mockJsUri(JsCompileMode.ALL_RUN_TIME);
+
     JsResponse actual = compiler.compile(jsUri,
         ImmutableList.of(new JsContent(COMPILE_CONTENT, "js")), EXTERNS);
     assertEquals(EXPORT_JS_DEB + COMPILE_CONTENT, actual.toJsString());
@@ -185,7 +187,7 @@ public class ExportJsCompilerTest {
         ImmutableList.of(new JsContent("", "js")), EXTERNS);
     assertEquals(EXPORT_JS_DEB, actual.toJsString());
   }
-  
+
   private String getContent(Iterable<JsContent> jsContent) {
     StringBuilder sb = new StringBuilder();
     for (JsContent js : jsContent) {
