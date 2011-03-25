@@ -109,6 +109,7 @@ if (!gadgets.rpc) { // make lib resilient to double-inclusion
      * @private
      */
     var RPC_KEY_ORIGIN = 'origin';
+    var RPC_KEY_REFERRER = 'referer';
 
     var services = {};
     var relayUrl = {};
@@ -259,10 +260,10 @@ if (!gadgets.rpc) { // make lib resilient to double-inclusion
      * and guard code in the method ensures the same before dispatching
      * any service handler.
      * @param {Object} rpc RPC request object.
-     * @param {String} opt_origin Verified origin of the rpc sender, if available.
+     * @param {String} opt_sender RPC sender, if available and with a verified origin piece.
      * @private
      */
-    function process(rpc, opt_origin) {
+    function process(rpc, opt_sender) {
       //
       // RPC object contents:
       //   s: Service Name
@@ -315,7 +316,19 @@ if (!gadgets.rpc) { // make lib resilient to double-inclusion
 
         // Set the requestor origin.
         // If not passed by the transport, then this simply sets to undefined.
-        rpc[RPC_KEY_ORIGIN] = opt_origin;
+        if (opt_sender) {
+          var origin = getOrigin(opt_sender);
+          rpc[RPC_KEY_ORIGIN] = opt_origin;
+          var referrer = document.referrer;
+          if (!referrer || getOrigin(referrer) != origin) {
+            // Transports send along as much info as they can about the sender
+            // of the message; 'origin' is the origin component alone, while
+            // 'referrer' is a best-effort field set from available information.
+            // The second clause simply verifies that referrer is valid.
+            referrer = opt_sender;
+          }
+          rpc[RPC_KEY_REFERRER] = referrer; 
+        }
 
         // Call the requested RPC service.
         var result = (services[rpc['s']] ||
