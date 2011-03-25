@@ -144,7 +144,7 @@ public class GadgetSpec {
     checksum = spec.checksum;
     attributes.putAll(spec.attributes);
   }
-  
+
   /**
    * Returns this Gadget's specification version.  Defaults to 1.0 if attribute not set.
    * @return Version value as String
@@ -182,7 +182,7 @@ public class GadgetSpec {
   public ModulePrefs getModulePrefs() {
     return modulePrefs;
   }
-  
+
 
   /**
    * UserPref

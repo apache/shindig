@@ -130,15 +130,15 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
     this.jsUriManager = jsUriManager;
     this.configContributors = configContributors;
   }
-  
+
   public void setDefaultDoctypeQName(String qname) {
       this.defaultDoctypeQName = qname;
   }
-  
+
   public void setDefaultDoctypePubId( String pubid) {
       this.defaultDoctypePubId = pubid;
   }
-  
+
   public void setDefaultDoctypeSysId( String sysid) {
     this.defaultDoctypeSysId = sysid;
   }
@@ -177,7 +177,7 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
         defaultStyle.appendChild(defaultStyle.getOwnerDocument().
             createTextNode(DEFAULT_CSS));
       }
-      // Override & insert DocType if Gadget is written for OpenSocial 2.0 or greater, 
+      // Override & insert DocType if Gadget is written for OpenSocial 2.0 or greater,
       // if quirksmode is not set
       if(gadget.getSpecificationVersion().isEqualOrGreaterThan("2.0.0")
           && !gadget.useQuirksMode()){

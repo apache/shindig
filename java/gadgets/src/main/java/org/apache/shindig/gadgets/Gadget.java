@@ -34,8 +34,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-
-
 /**
  * Intermediary representation of all state associated with processing
  * of a single gadget request.
@@ -81,9 +79,9 @@ public class Gadget {
   public GadgetSpec getSpec() {
     return spec;
   }
-  
+
   /**
-   * Returns open social specification version for this Gadget 
+   * Returns open social specification version for this Gadget
    * @return Version for this Gadget
    */
   public OpenSocialVersion getSpecificationVersion(){
@@ -92,12 +90,12 @@ public class Gadget {
     }
     return null;
   }
-  
+
   /**
-   * Returns if the doctype attribute is set to quirksmode.  
+   * Returns if the doctype attribute is set to quirksmode.
    * Needed to override default OpenSocial 2.0 behavior which is to render in standards mode,
    * may not be possible to honor this attribute when inlining (caja)
-   * 
+   *
    * @return TRUE if this Gadget should be rendered in browser quirks mode
    */
   public boolean useQuirksMode(){
@@ -154,15 +152,15 @@ public class Gadget {
   public LocaleSpec getLocale() {
     return spec.getModulePrefs().getLocale(context.getLocale());
   }
-  
+
   public void addFeature(String name) {
     directFeatureDeps.add(name);
   }
-  
+
   public void removeFeature(String name) {
     directFeatureDeps.remove(name);
   }
-  
+
   public Set<String> getDirectFeatureDeps() {
     return Collections.unmodifiableSet(directFeatureDeps);
   }
