@@ -48,8 +48,10 @@ import org.apache.http.client.params.ClientPNames;
 import org.apache.http.client.params.HttpClientParams;
 import org.apache.http.client.protocol.RequestAddCookies;
 import org.apache.http.client.protocol.ResponseProcessCookies;
+import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.conn.ConnectionPoolTimeoutException;
 import org.apache.http.conn.HttpHostConnectException;
+import org.apache.http.conn.params.ConnManagerParams;
 import org.apache.http.conn.params.ConnPerRouteBean;
 import org.apache.http.conn.params.ConnRouteParams;
 import org.apache.http.conn.scheme.PlainSocketFactory;
@@ -150,7 +152,11 @@ public class BasicHttpFetcher implements HttpFetcher {
 
     HttpParams params = new BasicHttpParams();
 
-    HttpConnectionParams.setConnectionTimeout(params, connectionTimeoutMs);
+    ConnManagerParams.setTimeout(params, connectionTimeoutMs);
+
+    // These are probably overkill for most sites.
+    ConnManagerParams.setMaxTotalConnections(params, 1152);
+    ConnManagerParams.setMaxConnectionsPerRoute(params, new ConnPerRouteBean(256));
 
     HttpProtocolParams.setVersion(params, HttpVersion.HTTP_1_1);
     HttpProtocolParams.setUserAgent(params, "Apache Shindig");
@@ -165,14 +171,10 @@ public class BasicHttpFetcher implements HttpFetcher {
 
     // Create and initialize scheme registry
     SchemeRegistry schemeRegistry = new SchemeRegistry();
-    schemeRegistry.register(new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));
-    schemeRegistry.register(new Scheme("https", 443, SSLSocketFactory.getSocketFactory()));
+    schemeRegistry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
+    schemeRegistry.register(new Scheme("https", SSLSocketFactory.getSocketFactory(), 443));
 
-    ThreadSafeClientConnManager cm = new ThreadSafeClientConnManager(schemeRegistry);
-    // These are probably overkill for most sites.
-    cm.setMaxTotal(1152);
-    cm.setDefaultMaxPerRoute(256);
-
+    ClientConnectionManager cm = new ThreadSafeClientConnManager(params, schemeRegistry);
     DefaultHttpClient client = new DefaultHttpClient(cm, params);
 
     // Set proxy if set via guice.
