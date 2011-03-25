@@ -505,23 +505,6 @@
     <profile>
       <id>run</id>
       <dependencies>
-        <dependency>
-          <groupId>org.apache.shindig</groupId>
-          <artifactId>shindig-gadgets</artifactId>
-          <version>${project.version}</version>
-        </dependency>
-
-        <dependency>
-          <groupId>org.apache.shindig</groupId>
-          <artifactId>shindig-social-api</artifactId>
-          <version>${project.version}</version>
-        </dependency>
-
-        <dependency>
-          <groupId>org.apache.shindig</groupId>
-          <artifactId>shindig-extras</artifactId>
-          <version>${project.version}</version>
-        </dependency>
       </dependencies>
 
       <build>
