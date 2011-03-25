@@ -60,6 +60,7 @@
               </includes>
             </resource>
           </webResources>
+          <classifier>${shindig.jdk.classifier}</classifier>
         </configuration>
       </plugin>
       <plugin>
@@ -102,6 +103,8 @@
     <dependency>
       <groupId>org.apache.shindig</groupId>
       <artifactId>shindig-common</artifactId>
+      <classifier>${shindig.jdk.classifier}</classifier>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.shindig</groupId>
@@ -112,18 +115,26 @@
     <dependency>
       <groupId>org.apache.shindig</groupId>
       <artifactId>shindig-gadgets</artifactId>
+      <classifier>${shindig.jdk.classifier}</classifier>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.shindig</groupId>
       <artifactId>shindig-social-api</artifactId>
+      <classifier>${shindig.jdk.classifier}</classifier>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.shindig</groupId>
       <artifactId>shindig-features</artifactId>
+      <classifier>${shindig.jdk.classifier}</classifier>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.shindig</groupId>
       <artifactId>shindig-extras</artifactId>
+      <classifier>${shindig.jdk.classifier}</classifier>
+      <version>${project.version}</version>
     </dependency>
 
     <!-- external dependencies -->

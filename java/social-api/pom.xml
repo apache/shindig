@@ -75,6 +75,7 @@
     <dependency>
       <groupId>org.apache.shindig</groupId>
       <artifactId>shindig-common</artifactId>
+      <classifier>${shindig.jdk.classifier}</classifier>
     </dependency>
 
     <dependency>

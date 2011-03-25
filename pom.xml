@@ -446,6 +446,16 @@
     </developer>
   </developers>
 
+      <modules>
+        <module>features</module>
+        <module>java/common</module>
+        <module>java/gadgets</module>
+        <module>java/social-api</module>
+        <module>java/server</module>
+        <module>extras</module>
+      </modules>
+
+
   <!-- ====================================================================== -->
   <!-- P R O F I L E S                                                        -->
   <!-- ====================================================================== -->
@@ -453,6 +463,10 @@
     <profile>
       <!-- force java5 usage -->
       <id>java5</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+        <jdk>1.5</jdk>
+      </activation>
       <properties>
         <shindig.jdk.version>1.5</shindig.jdk.version>
         <shindig.jdk.javadoc>1.5.0</shindig.jdk.javadoc>
@@ -463,56 +477,20 @@
     <profile>
       <!-- force java6 usage -->
       <id>java6</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+        <jdk>1.6</jdk>
+      </activation>
+
       <properties>
         <shindig.jdk.version>1.6</shindig.jdk.version>
         <shindig.jdk.javadoc>1.6.0</shindig.jdk.javadoc>
       </properties>
     </profile>
 
-    <!-- default profile that builds everything -->
+    <!-- stub for all -->
     <profile>
       <id>all</id>
-      <activation>
-        <activeByDefault>true</activeByDefault>
-      </activation>
-      <modules>
-        <module>features</module>
-        <module>java/common</module>
-        <module>java/gadgets</module>
-        <module>java/social-api</module>
-        <module>java/server</module>
-        <module>extras</module>
-      </modules>
-    </profile>
-
-    <!-- profile to build features jar -->
-    <profile>
-      <id>features</id>
-      <modules>
-        <module>features</module>
-      </modules>
-    </profile>
-
-    <!-- profile to build java/gadgets -->
-    <profile>
-      <id>gadgets</id>
-      <modules>
-        <module>java/gadgets</module>
-      </modules>
-    </profile>
-
-    <!-- profile to build java/rest-api -->
-    <profile>
-      <id>social-api</id>
-      <modules>
-        <module>java/social-api</module>
-      </modules>
-    </profile>
-    <profile>
-      <id>common</id>
-      <modules>
-        <module>java/common</module>
-      </modules>
     </profile>
 
     <!-- profile to build java/samples -->
@@ -1162,6 +1140,7 @@
           <configuration>
             <excludeResources>false</excludeResources>
             <attach>true</attach>
+            <classifier>${shindig.jdk.classifier}</classifier>
           </configuration>
         </plugin>
         <plugin>
@@ -1457,32 +1436,38 @@
         <groupId>org.apache.shindig</groupId>
         <artifactId>shindig-common</artifactId>
         <version>${project.version}</version>
+        <classifier>${shindig.jdk.classifier}</classifier>
       </dependency>
       <dependency>
         <groupId>org.apache.shindig</groupId>
         <artifactId>shindig-gadgets</artifactId>
         <version>${project.version}</version>
+        <classifier>${shindig.jdk.classifier}</classifier>
       </dependency>
       <dependency>
         <groupId>org.apache.shindig</groupId>
         <artifactId>shindig-server</artifactId>
         <version>${project.version}</version>
+        <classifier>${shindig.jdk.classifier}</classifier>
       </dependency>
       <dependency>
         <groupId>org.apache.shindig</groupId>
         <artifactId>shindig-social-api</artifactId>
         <version>${project.version}</version>
+        <classifier>${shindig.jdk.classifier}</classifier>
       </dependency>
       <dependency>
         <groupId>org.apache.shindig</groupId>
         <artifactId>shindig-extras</artifactId>
         <version>${project.version}</version>
+        <classifier>${shindig.jdk.classifier}</classifier>
       </dependency>
       <dependency>
         <groupId>org.apache.shindig</groupId>
         <artifactId>shindig-common</artifactId>
         <version>${project.version}</version>
         <type>test-jar</type>
+        <scope>test</scope>
       </dependency>
 
       <dependency> 
