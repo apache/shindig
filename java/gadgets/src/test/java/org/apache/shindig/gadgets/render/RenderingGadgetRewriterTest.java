@@ -90,6 +90,10 @@ public class RenderingGadgetRewriterTest {
   static final Pattern DOCUMENT_SPLIT_PATTERN = Pattern.compile(
       "(.*)<head>(.*?)<\\/head>(?:.*)<body(.*?)>(.*?)<\\/body>(?:.*)", Pattern.DOTALL |
       Pattern.CASE_INSENSITIVE);
+  private static final String CUSTOM_DOCTYPE = "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">";
+  private static final String CUSTOM_DOCTYPE_QNAME = "html";
+  private static final String CUSTOM_DOCTYPE_PUBID = "-//W3C//DTD HTML 4.01 Transitional//EN";
+  private static final String CUSTOM_DOCTYPE_SYSID = "http://www.w3.org/TR/html4/loose.dtd";
 
   static final int BEFORE_HEAD_GROUP = 1;
   static final int HEAD_GROUP = 2;
@@ -138,6 +142,11 @@ public class RenderingGadgetRewriterTest {
     String defaultXml = "<Module><ModulePrefs title=''/><Content type='html'/></Module>";
     return makeGadgetWithSpec(defaultXml);
   }
+  
+  private Gadget makeDefaultOpenSocial2Gadget(boolean useQuirks) throws GadgetException {
+    String defaultXml = "<Module specificationVersion='2' ><ModulePrefs " + (useQuirks ? "doctype='quirksmode'" : "") +" title=''/><Content type='html'/></Module>";
+    return makeGadgetWithSpec(defaultXml);
+  }
 
   private String rewrite(Gadget gadget, String content) throws Exception {
     MutableContent mc = new MutableContent(parser, content);
@@ -163,6 +172,63 @@ public class RenderingGadgetRewriterTest {
         matcher.group(BODY_GROUP).contains(BODY_CONTENT));
     assertTrue("gadgets.util.runOnLoadHandlers not invoked.",
         matcher.group(BODY_GROUP).contains("gadgets.util.runOnLoadHandlers();"));
+  }
+  
+  @Test
+  public void overrideDefaultDoctype() throws Exception{
+    Gadget gadget = makeDefaultOpenSocial2Gadget(false);
+    String body = "hello, world.";
+    String doc = new StringBuilder()
+        .append("<html><head>")
+        .append("</head><body>")
+        .append(body)
+        .append("</body></html>")
+        .toString();
+
+    rewriter.setDefaultDoctypeQName(CUSTOM_DOCTYPE_QNAME);
+    rewriter.setDefaultDoctypePubId(CUSTOM_DOCTYPE_PUBID);
+    rewriter.setDefaultDoctypeSysId(CUSTOM_DOCTYPE_SYSID);
+    String rewritten = rewrite(gadget, doc);
+    
+    Matcher matcher = DOCUMENT_SPLIT_PATTERN.matcher(rewritten);
+    assertTrue("Output is not valid HTML.", matcher.matches());
+    assertTrue("DOCTYPE not preserved", matcher.group(BEFORE_HEAD_GROUP).contains(CUSTOM_DOCTYPE));
+    
+  }
+  
+  @Test
+  public void quirksmodeInOS2() throws Exception{
+    Gadget gadget = makeDefaultOpenSocial2Gadget(true);
+    String body = "hello, world.";
+    String doc = new StringBuilder()
+        .append("<html><head>")
+        .append("</head><body>")
+        .append(body)
+        .append("</body></html>")
+        .toString();
+
+    String rewritten = rewrite(gadget, doc);
+    
+    Matcher matcher = DOCUMENT_SPLIT_PATTERN.matcher(rewritten);
+    assertTrue("Output is not valid HTML.", matcher.matches());
+    assertTrue("Should not include doctype, this will default to quirksmode (old Shindig behavior)", !matcher.group(BEFORE_HEAD_GROUP).contains("<!DOCTYPE"));
+ 
+    gadget = makeDefaultOpenSocial2Gadget(true);
+    String docType = "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">";
+    doc = new StringBuilder()
+        .append(docType)
+        .append("<html><head>")
+        .append("</head><body>")
+        .append(body)
+        .append("</body></html>")
+        .toString();   
+    rewritten = rewrite(gadget, doc);
+    
+    matcher = DOCUMENT_SPLIT_PATTERN.matcher(rewritten);
+    assertTrue("Output is not valid HTML.", matcher.matches());
+    assertTrue("Should include doctype, when in quirksmode we should use pre OS2.0 Shindig behavior.", matcher.group(BEFORE_HEAD_GROUP).contains(docType));
+ 
+
   }
 
   @Test
@@ -218,6 +284,45 @@ public class RenderingGadgetRewriterTest {
         matcher.group(BODY_GROUP).contains(body));
     assertTrue("gadgets.util.runOnLoadHandlers not invoked.",
         matcher.group(BODY_GROUP).contains("gadgets.util.runOnLoadHandlers();"));
+
+    // Skipping other tests; code path should be the same for the rest.
+  }
+  
+  @Test
+  public void completeDocumentOpenSocial2() throws Exception {
+    String head = "<script src=\"foo.js\"></script><style type=\"text/css\">body{color:red;}</style>";
+    String bodyAttr = " onload=\"foo();\"";
+    String body = "hello, world.";
+    String doc = new StringBuilder()
+        .append("<html><head>")
+        .append(head)
+        .append("</head><body").append(bodyAttr).append('>')
+        .append(body)
+        .append("</body></html>")
+        .toString();
+
+    GadgetContext context = new GadgetContext() {
+      @Override
+      public String getParameter(String name) {
+        if (name.equals("libs")) {
+          return "foo";
+        }
+        return null;
+      }
+    };
+
+    Gadget gadget = makeDefaultOpenSocial2Gadget(false)
+        .setContext(context);
+    expectFeatureCalls(gadget,
+        ImmutableList.<FeatureResource>of(),
+        ImmutableSet.of("foo"),
+        ImmutableList.of(inline("blah", "n/a")));
+
+    String rewritten = rewrite(gadget, doc);
+
+    Matcher matcher = DOCUMENT_SPLIT_PATTERN.matcher(rewritten);
+    assertTrue("Output is not valid HTML.", matcher.matches());
+    assertTrue("Doctype should have been rewritten to HTML5", matcher.group(BEFORE_HEAD_GROUP).contains("<!DOCTYPE html>"));
 
     // Skipping other tests; code path should be the same for the rest.
   }

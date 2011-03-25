@@ -18,7 +18,7 @@
  */
 package org.apache.shindig.gadgets.render;
 
-import com.google.common.base.Splitter;
+import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.JsonSerializer;
 import org.apache.shindig.common.logging.i18n.MessageKeys;
 import org.apache.shindig.common.uri.Uri;
@@ -43,8 +43,8 @@ import org.apache.shindig.gadgets.spec.UserPref;
 import org.apache.shindig.gadgets.spec.View;
 import org.apache.shindig.gadgets.uri.JsUriManager;
 import org.apache.shindig.gadgets.uri.JsUriManager.JsUri;
-import org.apache.commons.lang.StringUtils;
 import org.w3c.dom.Document;
+import org.w3c.dom.DocumentType;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.Text;
@@ -56,6 +56,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Lists;
@@ -93,6 +94,9 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
       "body{margin: 0px;padding: 0px;background-color:white;}";
   static final String IS_GADGET_BEACON = "window['__isgadget']=true;";
   static final String INSERT_BASE_ELEMENT_KEY = "gadgets.insertBaseElement";
+  static final String REWRITE_DOCTYPE_QNAME = "gadgets.doctype_qname";
+  static final String REWRITE_DOCTYPE_PUBID = "gadgets.doctype_pubid";
+  static final String REWRITE_DOCTYPE_SYSID = "gadgets.doctype_sysid";
   static final String FEATURES_KEY = "gadgets.features";
 
   protected final MessageBundleFactory messageBundleFactory;
@@ -105,6 +109,11 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
   protected Set<String> defaultExternLibs = ImmutableSet.of();
 
   protected Boolean externalizeFeatures = false;
+
+  //DOCTYPE for HTML5, OpenSocial 2.0 default
+  private String defaultDoctypeQName = "html";
+  private String defaultDoctypePubId = null;
+  private String defaultDoctypeSysId = null;
 
   /**
    * @param messageBundleFactory Used for injecting message bundles into gadget output.
@@ -120,6 +129,18 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
     this.featureRegistry = featureRegistry;
     this.jsUriManager = jsUriManager;
     this.configContributors = configContributors;
+  }
+  
+  public void setDefaultDoctypeQName(String qname) {
+      this.defaultDoctypeQName = qname;
+  }
+  
+  public void setDefaultDoctypePubId( String pubid) {
+      this.defaultDoctypePubId = pubid;
+  }
+  
+  public void setDefaultDoctypeSysId( String sysid) {
+    this.defaultDoctypeSysId = sysid;
   }
 
   @Inject
@@ -143,7 +164,7 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
     try {
       Document document = mutableContent.getDocument();
 
-      Element head = (Element)DomUtil.getFirstNamedChildNode(document.getDocumentElement(), "head");
+      Element head = (Element) DomUtil.getFirstNamedChildNode(document.getDocumentElement(), "head");
 
       // Insert new content before any of the existing children of the head element
       Node firstHeadChild = head.getFirstChild();
@@ -155,6 +176,36 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
         head.insertBefore(defaultStyle, firstHeadChild);
         defaultStyle.appendChild(defaultStyle.getOwnerDocument().
             createTextNode(DEFAULT_CSS));
+      }
+      // Override & insert DocType if Gadget is written for OpenSocial 2.0 or greater, 
+      // if quirksmode is not set
+      if(gadget.getSpecificationVersion().isEqualOrGreaterThan("2.0.0")
+          && !gadget.useQuirksMode()){
+        String container = gadget.getContext().getContainer();
+        String doctype_qname = defaultDoctypeQName;
+        String doctype_sysid = defaultDoctypeSysId;
+        String doctype_pubid = defaultDoctypePubId;
+        String value = containerConfig.getString(container, REWRITE_DOCTYPE_QNAME);
+        if(value != null){
+          doctype_qname = value;
+        }
+        value = containerConfig.getString(container, REWRITE_DOCTYPE_SYSID);
+        if(value != null){
+          doctype_sysid = value;
+        }
+        value = containerConfig.getString(container, REWRITE_DOCTYPE_PUBID);
+        if(value != null){
+          doctype_pubid = value;
+        }
+        //Don't inject DOCTYPE if QName is null
+        if(doctype_qname != null){
+          DocumentType docTypeNode = document.getImplementation()
+              .createDocumentType(doctype_qname, doctype_pubid, doctype_sysid);
+          if(document.getDoctype() != null){
+            document.removeChild(document.getDoctype());
+          }
+          document.insertBefore(docTypeNode, document.getFirstChild());
+        }
       }
 
       injectBaseTag(gadget, head);

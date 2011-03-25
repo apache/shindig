@@ -77,6 +77,7 @@ public class ModulePrefs {
   private static final String ATTR_SINGLETON = "singleton";
   private static final String ATTR_SCALING = "scaling";
   private static final String ATTR_SCROLLING = "scrolling";
+  private static final String ATTR_DOCTYPE = "doctype";
   private static final String ATTR_WIDTH = "width";
   private static final String ATTR_HEIGHT = "height";
   private static final String ATTR_CATEGORY = "category";
@@ -341,6 +342,15 @@ public class ModulePrefs {
    */
   public int getHeight() {
     return getIntAttribute(ATTR_HEIGHT);
+  }
+  
+  /**
+   * Returns this Gadget's doctype mode.  If null, we will use default mode.
+   * 
+   * @return Value of doctype attribute
+   */
+  public String getDoctype(){
+    return getAttribute(ATTR_DOCTYPE);
   }
 
   /**

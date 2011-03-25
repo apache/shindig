@@ -21,9 +21,11 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Splitter;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.util.HashUtil;
+import org.apache.shindig.common.util.OpenSocialVersion;
 import org.apache.shindig.common.xml.XmlUtil;
 import org.apache.shindig.gadgets.spec.View.ContentType;
 import org.apache.shindig.gadgets.variables.Substitutions;
+
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
@@ -47,6 +49,9 @@ public class GadgetSpec {
   public static final String DEFAULT_VIEW = "default";
   public static final Locale DEFAULT_LOCALE = new Locale("all", "ALL");
 
+  private static final String ATTR_SPECIFICATION_VERSION = "specificationVersion";
+  public static final String DOCTYPE_QUIRKSMODE = "quirksmode";
+
   /**
    * Creates a new Module from the given xml input.
    *
@@ -63,6 +68,8 @@ public class GadgetSpec {
     this.checksum = HashUtil.checksum(original.getBytes());
 
     NodeList children = doc.getChildNodes();
+    //Save specification version of this Gadget
+    setAttribute(ATTR_SPECIFICATION_VERSION,doc.getAttribute(ATTR_SPECIFICATION_VERSION));
 
     ModulePrefs modulePrefs = null;
     Map<String,UserPref> prefsBuilder = Maps.newHashMap();
@@ -137,6 +144,20 @@ public class GadgetSpec {
     checksum = spec.checksum;
     attributes.putAll(spec.attributes);
   }
+  
+  /**
+   * Returns this Gadget's specification version.  Defaults to 1.0 if attribute not set.
+   * @return Version value as String
+   */
+  public OpenSocialVersion getSpecificationVersion(){
+    // 1.0 is default if unspecified as defined in Section 7 of OS 1.1 Core Gadget specification
+    String value = (String)attributes.get(ATTR_SPECIFICATION_VERSION);
+    if (value == null) {
+      return new OpenSocialVersion("1.0");
+    } else {
+      return new OpenSocialVersion(value);
+    }
+  }
 
   /**
    * The url for this gadget spec.
@@ -161,6 +182,7 @@ public class GadgetSpec {
   public ModulePrefs getModulePrefs() {
     return modulePrefs;
   }
+  
 
   /**
    * UserPref

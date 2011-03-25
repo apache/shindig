@@ -17,7 +17,7 @@
  */
 package org.apache.shindig.gadgets;
 
-import com.google.common.base.Preconditions;
+import org.apache.shindig.common.util.OpenSocialVersion;
 import org.apache.shindig.gadgets.features.FeatureRegistry;
 import org.apache.shindig.gadgets.preload.PreloadedData;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
@@ -25,6 +25,7 @@ import org.apache.shindig.gadgets.spec.LocaleSpec;
 import org.apache.shindig.gadgets.spec.View;
 import org.apache.shindig.gadgets.uri.UriCommon;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
@@ -32,6 +33,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+
+
 
 /**
  * Intermediary representation of all state associated with processing
@@ -77,6 +80,31 @@ public class Gadget {
 
   public GadgetSpec getSpec() {
     return spec;
+  }
+  
+  /**
+   * Returns open social specification version for this Gadget 
+   * @return Version for this Gadget
+   */
+  public OpenSocialVersion getSpecificationVersion(){
+    if(spec != null){
+      return spec.getSpecificationVersion();
+    }
+    return null;
+  }
+  
+  /**
+   * Returns if the doctype attribute is set to quirksmode.  
+   * Needed to override default OpenSocial 2.0 behavior which is to render in standards mode,
+   * may not be possible to honor this attribute when inlining (caja)
+   * 
+   * @return TRUE if this Gadget should be rendered in browser quirks mode
+   */
+  public boolean useQuirksMode(){
+    if(spec != null){
+      return GadgetSpec.DOCTYPE_QUIRKSMODE.equals(spec.getModulePrefs().getDoctype());
+    }
+    return false;
   }
 
   /**

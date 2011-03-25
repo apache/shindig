@@ -108,6 +108,12 @@
 // Authority (host:port without scheme) for the proxy and concat servlets.
 "defaultShindigProxyConcatAuthority": "${SERVER_HOST}:${SERVER_PORT}",
 
+// OS 2.0 Gadget DOCTYPE: used in Gadgets with @specificationVersion 2.0 or greater and
+// quirksmode on Gadget has not been set.
+"gadgets.doctype_qname" : "HTML",  //HTML5 doctype
+"gadgets.doctype_pubid" : "",
+"gadgets.doctype_sysid" : "",
+
 // Default Uri config: these must be overridden - specified here for testing purposes
 "gadgets.uri.iframe.unlockedDomain": "${Cur['defaultShindigTestHost']}",
 "gadgets.uri.iframe.lockedDomainSuffix": "${Cur['defaultShindigTestHost']}",
