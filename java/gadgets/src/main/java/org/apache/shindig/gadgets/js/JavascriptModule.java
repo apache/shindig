@@ -25,6 +25,9 @@ import com.google.inject.Provides;
 
 import java.util.List;
 
+import org.apache.shindig.gadgets.rewrite.js.ExportJsCompiler;
+import org.apache.shindig.gadgets.rewrite.js.JsCompiler;
+
 /**
  * Guice configuration for the Javascript serving pipeline.
  */
@@ -37,6 +40,12 @@ public class JavascriptModule extends AbstractModule {
   
   @Provides
   @Inject
+  public JsCompiler provideJsCompiler(ExportJsCompiler compiler) {
+    return compiler;
+  }
+  
+  @Provides
+  @Inject
   public List<JsProcessor> provideProcessors(
       InjectJsInfoVariableProcessor injectJsInfoVariableProcessor,
       JsLoadProcessor jsLoaderGeneratorProcessor,
@@ -45,11 +54,11 @@ public class JavascriptModule extends AbstractModule {
       ConfigInjectionProcessor configInjectionProcessor,
       AddOnloadFunctionProcessor addOnloadFunctionProcessor,
       AddJsLoadCallbackProcessor addJsLoadCallbackProcessor,
-      //AnonFuncWrappingProcessor jsWrapperProcessor,
+      AnonFuncWrappingProcessor anonFuncProcessor,
       CompilationProcessor compilationProcessor) {
     return ImmutableList.of(injectJsInfoVariableProcessor, jsLoaderGeneratorProcessor,
         ifModifiedSinceProcessor, getJsContentProcessor, configInjectionProcessor,
-        addOnloadFunctionProcessor, addJsLoadCallbackProcessor, /*jsWrapperProcessor,*/
+        addOnloadFunctionProcessor, addJsLoadCallbackProcessor, anonFuncProcessor,
         compilationProcessor);
   }
   

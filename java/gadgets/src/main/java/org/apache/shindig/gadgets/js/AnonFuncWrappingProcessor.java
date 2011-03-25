@@ -17,13 +17,15 @@
  */
 package org.apache.shindig.gadgets.js;
 
-public class AnonFuncWrappingProcessor implements JsProcessor {
+import org.apache.shindig.gadgets.JsCompileMode;
 
+public class AnonFuncWrappingProcessor implements JsProcessor {
   public boolean process(JsRequest jsRequest, JsResponseBuilder builder)
       throws JsException {
-    builder.prependJs("(function() {\n", "[js-anon-wrapper]");
-    builder.appendJs("\n})();", "[js-anon-wrapper]");
+    if (jsRequest.getJsUri().getCompileMode() != JsCompileMode.BUILD_TIME) {
+      builder.prependJs("(function() {\n", "[js-anon-wrapper]");
+      builder.appendJs("\n})();", "[js-anon-wrapper]");
+    }
     return true;
   }
-
 }

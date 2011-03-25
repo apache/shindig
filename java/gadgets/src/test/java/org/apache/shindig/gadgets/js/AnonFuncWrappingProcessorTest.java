@@ -18,23 +18,47 @@
 package org.apache.shindig.gadgets.js;
 
 import static org.easymock.EasyMock.createControl;
+import static org.easymock.EasyMock.expect;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import org.apache.shindig.gadgets.JsCompileMode;
+import org.apache.shindig.gadgets.uri.JsUriManager.JsUri;
 import org.easymock.IMocksControl;
 
 import org.junit.Test;
 
 public class AnonFuncWrappingProcessorTest {
   @Test
-  public void wrapCode() throws Exception {
+  public void wrapCodeAllRunTime() throws Exception {
+    checkWrapCode(JsCompileMode.ALL_RUN_TIME, true);
+  }
+  
+  @Test
+  public void wrapCodeExplicitRunTime() throws Exception {
+    checkWrapCode(JsCompileMode.EXPLICIT_RUN_TIME, true);
+  }
+  
+  @Test
+  public void wrapCodeBuildTimeDoesNothing() throws Exception {
+    checkWrapCode(JsCompileMode.BUILD_TIME, false);
+  }
+  
+  private void checkWrapCode(JsCompileMode mode, boolean wraps) throws Exception {
     IMocksControl control = createControl();
     JsRequest request = control.createMock(JsRequest.class);
+    JsUri jsUri = control.createMock(JsUri.class);
+    expect(jsUri.getCompileMode()).andReturn(mode);
+    expect(request.getJsUri()).andReturn(jsUri);
     JsResponseBuilder builder = new JsResponseBuilder().appendJs("JS_CODE", "source");
     AnonFuncWrappingProcessor processor = new AnonFuncWrappingProcessor();
     control.replay();
     assertTrue(processor.process(request, builder));
     control.verify();
-    assertEquals("(function() {\nJS_CODE\n})();", builder.build().toJsString());
+    if (wraps) {
+      assertEquals("(function() {\nJS_CODE\n})();", builder.build().toJsString());
+    } else {
+      assertEquals("JS_CODE", builder.build().toJsString());
+    }
   }
 }
