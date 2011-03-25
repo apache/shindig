@@ -26,8 +26,8 @@ specific language governing permissions and limitations under the License.
   <gadget>
     <script src="dynamic-height.js"/>
     <script src="taming.js"/>
-    <apis>
+    <api>
       <exports type="js">gadgets.window.adjustHeight</exports>
-    </apis>
+    </api>
   </gadget>
 </feature>

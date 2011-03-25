@@ -32,8 +32,8 @@ specific language governing permissions and limitations under the License.
   <container>
     <script src="dynamic-height-util.js"/>
     <script src="taming.js"/>
-    <apis>
+    <api>
       <exports type="js">gadgets.window.getViewportDimensions</exports>
-    </apis>
+    </api>
   </container>
 </feature>

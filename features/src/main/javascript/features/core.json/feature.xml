@@ -25,20 +25,20 @@
     <script src="json-jsimpl.js"/>
     <script src="json-flatten.js"/>
     <script src="taming.js"/>
-    <apis>
+    <api>
       <exports type="js">gadgets.json.flatten</exports>
       <exports type="js">gadgets.json.parse</exports>
       <exports type="js">gadgets.json.stringify</exports>
-    </apis>
+    </api>
   </gadget>
   <container>
     <script src="json-native.js"/>
     <script src="json-jsimpl.js"/>
     <script src="json-flatten.js"/>
-    <apis>
+    <api>
       <exports type="js">gadgets.json.flatten</exports>
       <exports type="js">gadgets.json.parse</exports>
       <exports type="js">gadgets.json.stringify</exports>
-    </apis>
+    </api>
   </container>
 </feature>
