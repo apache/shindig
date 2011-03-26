@@ -1364,6 +1364,10 @@
       <id>oauth</id>
       <url>http://oauth.googlecode.com/svn/code/maven</url>
     </repository>
+    <repository>
+      <id>com.google.javascript</id>
+      <url>http://oss.sonatype.org/content/groups/staging</url>
+    </repository>
     <!-- for jstl-1.2 for now.. -->
     <repository>
       <id>java.net</id>

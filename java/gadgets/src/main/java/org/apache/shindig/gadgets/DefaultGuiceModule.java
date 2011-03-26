@@ -34,7 +34,8 @@ import org.apache.shindig.gadgets.config.DefaultConfigContributorModule;
 import org.apache.shindig.gadgets.http.AbstractHttpCache;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.InvalidationHandler;
-import org.apache.shindig.gadgets.js.JavascriptModule;
+import org.apache.shindig.gadgets.js.JsCompilerModule;
+import org.apache.shindig.gadgets.js.JsServingPipelineModule;
 import org.apache.shindig.gadgets.parse.ParseModule;
 import org.apache.shindig.gadgets.preload.PreloadModule;
 import org.apache.shindig.gadgets.render.RenderModule;
@@ -76,7 +77,8 @@ public class DefaultGuiceModule extends AbstractModule {
     install(new SubstituterModule());
     install(new TemplateModule());
     install(new UriModule());
-    install(new JavascriptModule());
+    install(new JsCompilerModule());
+    install(new JsServingPipelineModule());
 
     // bind(Long.class).annotatedWith(Names.named("org.apache.shindig.serviceExpirationDurationMinutes")).toInstance(60l);
 

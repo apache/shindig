@@ -83,11 +83,6 @@ public class ExportJsCompiler extends DefaultJsCompiler {
     return builder.build();
   }
 
-  @Override
-  protected String getFeatureContent(JsUri jsUri, FeatureResource resource) {
-    return resource.getDebugContent();
-  }
-
   private JsContent getExportsForFeature(JsUri jsUri, FeatureBundle bundle) {
     List<String> exports = Lists.newArrayList();
 

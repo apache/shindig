@@ -97,7 +97,7 @@ public class ExportJsCompilerTest {
     expect(result.getContext()).andReturn(RenderingContext.GADGET).anyTimes();
     expect(result.getContainer()).andReturn(CONTAINER).anyTimes();
     expect(result.getCompileMode()).andReturn(mode).anyTimes();
-    expect(result.isDebug()).andReturn(false).anyTimes();
+    expect(result.isDebug()).andReturn(true).anyTimes();
     replay(result);
     return result;
   }
@@ -108,7 +108,7 @@ public class ExportJsCompilerTest {
     replay(result);
     return result;
   }
-
+  
   private FeatureResource mockResource(boolean external, String debContent, String optContent) {
     FeatureResource result = createMock(FeatureResource.class);
     expect(result.getDebugContent()).andReturn(debContent).anyTimes();

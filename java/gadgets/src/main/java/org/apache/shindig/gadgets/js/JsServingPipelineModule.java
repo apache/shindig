@@ -25,23 +25,14 @@ import com.google.inject.Provides;
 
 import java.util.List;
 
-import org.apache.shindig.gadgets.rewrite.js.ExportJsCompiler;
-import org.apache.shindig.gadgets.rewrite.js.JsCompiler;
-
 /**
  * Guice configuration for the Javascript serving pipeline.
  */
-public class JavascriptModule extends AbstractModule {
+public class JsServingPipelineModule extends AbstractModule {
 
   @Override
   protected void configure() {
     // nothing to configure here
-  }
-  
-  @Provides
-  @Inject
-  public JsCompiler provideJsCompiler(ExportJsCompiler compiler) {
-    return compiler;
   }
   
   @Provides
