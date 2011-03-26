@@ -22,6 +22,7 @@ The javascript referenced here should be found in the caja jar.
   <name>caja-debug</name>
   <dependency>caja</dependency>
   <gadget>
-    <script src="res://com/google/caja/cajita-debugmode.js"/>
+    <!-- debugging unsupported in this version -->
+    <!-- <script src="res://com/google/caja/cajita-debugmode.js"/> -->
   </gadget>
 </feature>

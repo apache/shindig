@@ -126,11 +126,11 @@ public class CajaContentRewriterTest extends RewriterTestBase {
         + "<div classes=\"g___\" id=\"cajoled-output\" style=\"position: relative;\">"
         + "<script type=\"text/javascript\">caja___.enable()</script>"
         + "<script type=\"text/javascript\">{___.loadModule({'instantiate':function(___,IMPORTS___){"
-        + "return ___.prepareModule({'instantiate':function(___,IMPORTS___){var\n$v=___.readImport("
-        + "IMPORTS___,'$v',{'getOuters':{'()':{}},'initOuter':{'()':{}},'so':{'()':{}},'ro':{'()':{"
-        + "}}});var\nmoduleResult___,$dis;moduleResult___=___.NO_RESULT;$dis=$v.getOuters();"
-        + "$v.initOuter('onerror');try{{moduleResult___=$v.so('a',0)}}catch(ex___){"
-        + "___.getNewModuleHandler().handleUncaughtException(ex___,$v.ro('onerror'),'unknown','1')}"
+        + "return ___.prepareModule({'instantiate':function(___,IMPORTS___){var\n"
+        + "dis___=IMPORTS___;var moduleResult___;moduleResult___=___.NO_RESULT;"
+        + "try{{moduleResult___=IMPORTS___.w___('a',0)}}"
+        + "catch(ex___){___.getNewModuleHandler().handleUncaughtException(ex___,"
+        + "IMPORTS___.onerror_v___?IMPORTS___.onerror:___.ri(IMPORTS___,'onerror'),'unknown','1')}"
         + "return moduleResult___}";
 
     List<String> messages = ImmutableList.of(

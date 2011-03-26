@@ -39,7 +39,7 @@ caja___ = (function() {
   var fire = function(globalScope) {
     for (var tamer in tamings___) {
       if (tamings___.hasOwnProperty(tamer)) {
-        tamings___[tamer].call(___.USELESS, globalScope);
+        tamings___[tamer].call(___['USELESS'], globalScope);
       }
     }
   }
@@ -59,7 +59,7 @@ caja___ = (function() {
     for (var i = 0; i < length; i++) {
       var schema = schemas[i];
       if (typeof schema[0][schema[1]] === 'function') {
-        ___.markInnocent(schema[0][schema[1]], schema[1]);
+        ___.markFunc(schema[0][schema[1]], schema[1]);
       } else {
         gadgets.warn('Error taming function: ' + schema[0] + '.' + schema[1]);
       }
@@ -70,7 +70,7 @@ caja___ = (function() {
     for (var i = 0; i < length; i++) {
       var schema = schemas[i];
       if (typeof schema[0].prototype[schema[1]] == 'function') {
-        ___.grantInnocentMethod(schema[0].prototype, schema[1]);
+        ___.markTameAsXo4a(schema[0].prototype[schema[1]]);
       } else {
         gadgets.warn('Error taming method: ' + schema[0] + '.' + schema[1]);
       }
@@ -78,26 +78,34 @@ caja___ = (function() {
   }
 
   function enable() {
-    var imports = ___.copy(___.sharedImports);
-    imports.outers = imports;
+    var imports = {};
+    imports['outers'] = imports;
 
     var gadgetRoot = document.getElementById('cajoled-output');
-    gadgetRoot.className = 'g___';
+    gadgetRoot['className'] = 'g___';
     document.body.appendChild(gadgetRoot);
 
-    imports.htmlEmitter___ = new HtmlEmitter(gadgetRoot);
+    imports['htmlEmitter___'] = new HtmlEmitter(gadgetRoot);
+    imports['onerror'] = ___.markFunc(function(x){
+        gadgets.warn(x);
+        return true; 
+    });
+    ___.setLogFunc(imports['onerror']);
+
     attachDocumentStub('-g___', uriCallback, imports, gadgetRoot);
 
-    imports.$v = valijaMaker.CALL___(imports.outers);
+    imports['window'] = {};
+    // Use these imports
+    for (i in imports) {
+      imports['window'][i] = imports[i];
+    }
+    imports = imports['window'];
+    imports['domitaTrace___'] = 1;
+    imports['handleSet___'] = void 0;
 
-    ___.getNewModuleHandler().setImports(imports);
-
-    fire(imports);
-
-    imports.outers.gadgets = ___.tame(window.gadgets);
-    imports.outers.opensocial = ___.tame(window.opensocial);
-    ___.grantRead(imports.outers, 'gadgets');
-    ___.grantRead(imports.outers, 'opensocial');
+    // fire(imports);
+    ___.grantRead(imports, 'gadgets');
+    ___.getNewModuleHandler().setImports(___.whitelistAll(imports));
   }
   return {
     enable: enable,
@@ -107,8 +115,3 @@ caja___ = (function() {
   };
 })();
 
-// Expose alert and console.log to cajoled programs
-tamings___.push(function(imports) {
-  imports.outers.alert = function(msg) { alert(msg); };
-  ___.grantFunc(imports.outers, 'alert');
-});
