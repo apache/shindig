@@ -302,7 +302,8 @@ public class GadgetsHandlerServiceTest extends EasyMockTestCase {
     assertEquals(expectedUri, uriCapture.getValue());
     assertEquals(resUri, response.getJsUrl());
     assertNull(response.getJsContent());
-    assertNull(response.getExpireTimeMs());
+    assertEquals(timeSource.currentTimeMillis() + HttpUtil.getDefaultTtl() * 1000,
+        response.getExpireTimeMs().longValue());
     verify();
   }
 
@@ -341,7 +342,7 @@ public class GadgetsHandlerServiceTest extends EasyMockTestCase {
         response.getExpireTimeMs().longValue());
     verify();
   }
-  
+
   @Test(expected = ProcessingException.class)
   public void testGetJsDataWithException() throws Exception {
     List<String> fields = ImmutableList.of("jscontent");
@@ -418,6 +419,7 @@ public class GadgetsHandlerServiceTest extends EasyMockTestCase {
     assertEquals("Date", response.getProxyContent().getHeaders().get(0).getName());
     assertEquals("header", response.getProxyContent().getHeaders().get(1).getName());
     assertEquals("hval", response.getProxyContent().getHeaders().get(1).getValue());
+    assertEquals(1000001L, response.getExpireTimeMs().longValue());
   }
 
   @Test
@@ -444,6 +446,8 @@ public class GadgetsHandlerServiceTest extends EasyMockTestCase {
     assertEquals(CONTAINER, pUri.getContainer());
     assertEquals(resUri, response.getProxyUrl());
     assertNull(response.getProxyContent());
+    assertEquals(timeSource.currentTimeMillis() + HttpUtil.getDefaultTtl() * 1000,
+        response.getExpireTimeMs().longValue());
     verify();
   }
 
@@ -475,7 +479,9 @@ public class GadgetsHandlerServiceTest extends EasyMockTestCase {
     Capture<List<ProxyUri>> uriCapture = new Capture<List<ProxyUri>>();
     expect(proxyUriManager.make(capture(uriCapture), EasyMock.anyInt()))
         .andReturn(ImmutableList.of(resUri));
-    HttpResponse httpResponse = new HttpResponse("response");
+    HttpResponseBuilder builder = new HttpResponseBuilder();
+    builder.setExpirationTime(20000).setContent("response");
+    HttpResponse httpResponse = builder.create();
     expect(proxyHandler.fetch(EasyMock.isA(ProxyUri.class))).andReturn(httpResponse);
     replay();
     GadgetsHandlerApi.ProxyResponse response = gadgetHandler.getProxy(request);
@@ -485,6 +491,7 @@ public class GadgetsHandlerServiceTest extends EasyMockTestCase {
     assertNull(response.getProxyUrl());
     assertEquals("response",
         new String(Base64.decodeBase64(response.getProxyContent().getContentBase64())));
+    assertEquals(20000L, response.getExpireTimeMs().longValue());
     verify();
   }
 

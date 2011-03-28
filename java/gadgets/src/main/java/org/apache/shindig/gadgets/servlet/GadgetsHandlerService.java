@@ -221,8 +221,10 @@ public class GadgetsHandlerService {
       }
       content = response.toJsString();
       if (response.isProxyCacheable()) {
-        expireMs = timeSource.currentTimeMillis() + (HttpUtil.getDefaultTtl() * 1000);
+        expireMs = getDefaultExpiration();
       }
+    } else {
+      expireMs = getDefaultExpiration();
     }
     return createJsResponse(request.getUrl(), servedUri, content, fields, expireMs);
   }
@@ -343,8 +345,15 @@ public class GadgetsHandlerService {
       expireMs = httpResponse.getCacheExpiration();
     } else if (proxyUri.getRefresh() != null) {
       expireMs = timeSource.currentTimeMillis() + proxyUri.getRefresh() * 1000;
+    } else {
+      // Use default ttl:
+      return getDefaultExpiration();
     }
     return expireMs;
+  }
+
+  protected long getDefaultExpiration() {
+    return timeSource.currentTimeMillis() + (HttpUtil.getDefaultTtl() * 1000);
   }
 
   /**
