@@ -22,6 +22,7 @@ import static org.easymock.EasyMock.expect;
 
 import java.util.List;
 
+import org.apache.shindig.common.servlet.HttpServletResponseRecorder;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.gadgets.GadgetException;
@@ -58,7 +59,7 @@ public class ConcatProxyServletTest extends ServletTestFixture {
 
   private final ConcatProxyServlet servlet = new ConcatProxyServlet();
   private TestConcatUriManager uriManager;
-  
+
   private final ExecutorService sequentialExecutor = Executors.newSingleThreadExecutor();
   private final ExecutorService threadedExecutor = Executors.newCachedThreadPool();
 
@@ -280,7 +281,62 @@ public class ConcatProxyServletTest extends ServletTestFixture {
     assertEquals(results, recorder.getResponseAsString());
     assertEquals(400, recorder.getHttpStatusCode());
   }
-    
+
+  @Test
+  public void testMinimumCacheTtl() throws Exception {
+    final Uri URL4 = Uri.parse("http://example.org/4.js");
+    final Uri URL5 = Uri.parse("http://example.org/5.js");
+    final Uri URL6 = Uri.parse("http://example.org/6.js");
+
+    final Integer cacheTtl4 = Integer.MAX_VALUE;
+    final Integer cacheTtl5 = 100000;
+    final Integer cacheTtl6 = Integer.MAX_VALUE;
+
+    expectGetAndSetCacheTtl(URL4, cacheTtl4);
+    expectGetAndSetCacheTtl(URL5, cacheTtl5);
+    expectGetAndSetCacheTtl(URL6, cacheTtl6);
+
+    expectRequestWithUris(Lists.newArrayList(URL4, URL5, URL6));
+
+    // Run the servlet
+    servlet.doGet(request, recorder);
+    verify();
+    int cacheValue = getCacheControlMaxAge(recorder);
+    assertEquals(cacheTtl5, cacheValue, 10);
+  }
+
+  @Test
+  public void testDefaultCacheTtlCacheHeaderMissing() throws Exception {
+    final Uri URL4 = Uri.parse("http://example.org/4.js");
+    final Uri URL5 = Uri.parse("http://example.org/5.js");
+
+    expectGetAndReturnData(URL4, "");
+    expectGetAndReturnData(URL5, "");
+    expectRequestWithUris(Lists.newArrayList(URL4, URL5));
+
+    servlet.doGet(request, recorder);
+    verify();
+    int cacheValue = getCacheControlMaxAge(recorder);
+    // HttpResponse.defaultTtl is in msec, division by 1000 is required to convert into sec.
+    assertEquals((int) (HttpResponse.defaultTtl / 1000), cacheValue, 10);
+  }
+
+  private void expectGetAndSetCacheTtl(Uri url, Integer cacheTtl) throws Exception {
+    HttpRequest req = new HttpRequest(url);
+    HttpResponse resp = new HttpResponseBuilder().setCacheTtl(cacheTtl).create();
+    expect(pipeline.execute(req)).andReturn(resp);
+  }
+
+  /**
+   * Returns cache control max age from HttpServletResponseRecorder  
+   */
+  private int getCacheControlMaxAge(HttpServletResponseRecorder recorder) {
+    String cacheControl = recorder.getHeader("Cache-Control");
+    assertTrue(cacheControl != null);
+    String cacheValue = cacheControl.substring(cacheControl.indexOf('=') + 1);
+    return Integer.decode(cacheValue);
+  }
+  
   private void expectRequestWithUris(List<Uri> uris) {
     expectRequestWithUris(uris, null);
   }
@@ -292,7 +348,7 @@ public class ConcatProxyServletTest extends ServletTestFixture {
     expect(request.getRequestURI()).andReturn("/path").anyTimes();
     expect(request.getQueryString()).andReturn("").anyTimes();
     replay();
-    
+
     Uri uri = new UriBuilder(request).toUri();
     uriManager.expect(uri, uris, tok);
   }
@@ -304,8 +360,7 @@ public class ConcatProxyServletTest extends ServletTestFixture {
       this.uriMap = Maps.newHashMap();
     }
     
-    public List<ConcatData> make(
-        List<ConcatUri> resourceUris, boolean isAdjacent) {
+    public List<ConcatData> make(List<ConcatUri> resourceUris, boolean isAdjacent) {
       // Not used by ConcatProxyServlet
       throw new UnsupportedOperationException();
     }

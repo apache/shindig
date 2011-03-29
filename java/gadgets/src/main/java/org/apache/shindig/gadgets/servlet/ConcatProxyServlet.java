@@ -128,9 +128,7 @@ public class ConcatProxyServlet extends InjectedServlet {
         throw new GadgetException(GadgetException.Code.MISSING_PARAMETER, "Missing type",
             HttpResponse.SC_BAD_REQUEST);
       }
-      HttpUtil.setCachingHeaders(response,
-          concatUri.translateStatusRefresh(LONG_LIVED_REFRESH, DEFAULT_REFRESH), false);
-    } catch (GadgetException gex) {
+      } catch (GadgetException gex) {
       response.sendError(HttpResponse.SC_BAD_REQUEST, formatError("doGet", gex, uri));
       return;
     }
@@ -140,7 +138,7 @@ public class ConcatProxyServlet extends InjectedServlet {
     response.setHeader("Content-Type", concatType.getMimeType() + "; charset=UTF8");
     response.setHeader("Content-Disposition", "attachment;filename=p.txt");
 
-    if (doFetchConcatResources(response, concatUri)) {
+    if (doFetchConcatResources(response, concatUri, uri)) {
       response.setStatus(HttpResponse.SC_OK);
     } else {
       response.setStatus(HttpResponse.SC_BAD_REQUEST);
@@ -154,9 +152,11 @@ public class ConcatProxyServlet extends InjectedServlet {
    * @throws IOException
    */
   private boolean doFetchConcatResources(HttpServletResponse response,
-      ConcatUriManager.ConcatUri concatUri) throws IOException {
+      ConcatUriManager.ConcatUri concatUri, Uri uri) throws IOException {
     // Check for json concat and set output stream.
     ConcatOutputStream cos = null;
+    Long minCacheTtl = Long.MAX_VALUE;
+    boolean isMinCacheTtlSet = false;
 
     String jsonVar = concatUri.getSplitParam();
     if (jsonVar != null) {
@@ -216,6 +216,8 @@ public class ConcatProxyServlet extends InjectedServlet {
                         e.getHttpStatusCode());
               }
             }
+            minCacheTtl = Math.min(minCacheTtl, httpResp.getCacheTtl());
+            isMinCacheTtlSet = true;
             cos.output(futureTask.one, httpResp);
           } else {
             return false;
@@ -226,6 +228,12 @@ public class ConcatProxyServlet extends InjectedServlet {
           }
         }
       }
+      // TODO: Investigate Chunked Encoding
+      minCacheTtl = isMinCacheTtlSet ? (minCacheTtl / 1000) : DEFAULT_REFRESH;
+      HttpUtil.setCachingHeaders(response,
+          concatUri.translateStatusRefresh(LONG_LIVED_REFRESH, minCacheTtl.intValue()), false);
+    } catch (GadgetException gex) {
+      cos.outputError(uri, gex);
     } finally {
       if (cos != null) {
         try {
@@ -276,9 +284,11 @@ public class ConcatProxyServlet extends InjectedServlet {
 
   private static abstract class ConcatOutputStream extends ServletOutputStream {
     private final ServletOutputStream wrapped;
+    private final StringBuilder stringBuilder;
 
     protected ConcatOutputStream(ServletOutputStream wrapped) {
       this.wrapped = wrapped;
+      stringBuilder = new StringBuilder();
     }
 
     protected abstract void outputJs(Uri uri, String data) throws IOException;
@@ -314,20 +324,20 @@ public class ConcatProxyServlet extends InjectedServlet {
 
     @Override
     public void close() throws IOException {
+      wrapped.write(CharsetUtil.getUtf8Bytes(stringBuilder.toString()));
       wrapped.close();
     }
 
     @Override
     public void print(String data) throws IOException {
-      write(CharsetUtil.getUtf8Bytes(data));
+      stringBuilder.append(data);
     }
 
-    private byte[] CRLF_BYTES = CharsetUtil.getUtf8Bytes("\r\n");
+    private String CRLF = "\r\n";
 
     @Override
     public void println(String data) throws IOException {
-      print(data);
-      write(CRLF_BYTES);
+      print(data + CRLF);
     }
   }
 

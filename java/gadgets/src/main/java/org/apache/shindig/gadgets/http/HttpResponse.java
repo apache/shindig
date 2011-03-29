@@ -136,7 +136,7 @@ public final class HttpResponse implements Externalizable {
   // Default TTL for resources that are public and has no explicit Cache-Control max-age
   // and expires headers. Resources without cache-control are considered public by default.
   @Inject(optional = true) @Named("shindig.cache.http.defaultTtl")
-  private static long defaultTtl = DEFAULT_TTL;
+  public static long defaultTtl = DEFAULT_TTL;
 
   @Inject(optional = true) @Named("shindig.http.fast-encoding-detection")
   private static boolean fastEncodingDetection = true;
