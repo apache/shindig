@@ -62,7 +62,7 @@ import java.util.Map;
 public class ClosureJsCompiler implements JsCompiler {
   // Based on Closure Library's goog.exportSymbol implementation.
   private static final JsContent EXPORTSYMBOL_CODE =
-      new JsContent("var goog=goog||{};goog.exportSymbol=function(name,obj){"
+      JsContent.fromText("var goog=goog||{};goog.exportSymbol=function(name,obj){"
               + "var parts=name.split('.'),cur=window,part;"
               + "for(;parts.length&&(part=parts.shift());){if(!parts.length){"
               + "cur[part]=obj;}else{cur=cur[part]||(cur[part]={})}}};", "[goog.exportSymbol]");
@@ -251,7 +251,8 @@ public class ClosureJsCompiler implements JsCompiler {
       String prevExport = null;
       for (String export : exports) {
         if (!export.equals(prevExport)) {
-          builder.add(new JsContent("goog.exportSymbol('" + StringEscapeUtils.escapeJavaScript(export) +
+          builder.add(JsContent.fromText(
+              "goog.exportSymbol('" + StringEscapeUtils.escapeJavaScript(export) +
               "', " + export + ");\n", "[export-symbol]"));
           prevExport = export;
         }
@@ -336,16 +337,16 @@ public class ClosureJsCompiler implements JsCompiler {
           codePos++;
           if (nextMapping != curMapping && curMapping != -1) {
             JsContent sourceJs = orig.get(getRootSrc(mappings[curMapping]));
-            compiledOut.add(new JsContent(compiled.substring(codeStart, codePos),
-                sourceJs.getSource(), sourceJs.getFeature()));
+            compiledOut.add(JsContent.fromFeature(compiled.substring(codeStart, codePos),
+                sourceJs.getSource(), sourceJs.getFeature(), null));
             codeStart = codePos;
           }
           curMapping = nextMapping;
         }
       }
       JsContent lastSource = orig.get(getRootSrc(mappings[curMapping]));
-      compiledOut.add(new JsContent(compiled.substring(codeStart, codePos + 1),
-          lastSource.getSource(), lastSource.getFeature()));
+      compiledOut.add(JsContent.fromFeature(compiled.substring(codeStart, codePos + 1),
+          lastSource.getSource(), lastSource.getFeature(), null));
       return compiledOut;
     }
     

@@ -466,7 +466,9 @@ public class FeatureRegistry {
       List<FeatureResource> resources = Lists.newArrayList();
       for (FeatureParser.ParsedFeature.Resource parsedResource : parsedBundle.getResources()) {
         if (parsedResource.getSource() == null) {
-          resources.add(new InlineFeatureResource(parsed.getName() + ":inline.js", parsedResource.getContent()));
+          
+          resources.add(new InlineFeatureResource(parsed.getName() + ":inline.js",
+              parsedResource.getContent(), parsedResource.getAttribs()));
         } else {
           // Load using resourceLoader
           resources.add(resourceLoader.load(parsedResource.getSource(),
@@ -500,11 +502,12 @@ public class FeatureRegistry {
         .putAll(resourceAttribs).build();
   }
 
-  private static final class InlineFeatureResource extends FeatureResource.Default {
+  private static final class InlineFeatureResource extends FeatureResource.Attribute {
     private final String name;
     private final String content;
 
-    private InlineFeatureResource(String name, String content) {
+    private InlineFeatureResource(String name, String content, Map<String, String> attribs) {
+      super(attribs);
       this.content = content;
       this.name = name;
     }

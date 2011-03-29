@@ -67,7 +67,7 @@ public class JsResponseBuilder {
    * Helper to append JS to the response w/ a name.
    */
   public JsResponseBuilder appendJs(String content, String name) {
-    return appendJs(new JsContent(content, name));
+    return appendJs(JsContent.fromText(content, name));
   }
 
   /**
@@ -84,7 +84,7 @@ public class JsResponseBuilder {
    * Prepends JS to the output.
    */
   public JsResponseBuilder prependJs(String content, String name) {
-    jsCode.addFirst(new JsContent(content, name));
+    jsCode.addFirst(JsContent.fromText(content, name));
     return this;
   }
 

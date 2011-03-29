@@ -24,6 +24,7 @@ import org.apache.shindig.gadgets.js.JsResponse;
 import org.apache.shindig.gadgets.js.JsResponseBuilder;
 import org.apache.shindig.gadgets.uri.JsUriManager.JsUri;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 
 import java.util.List;
@@ -40,12 +41,14 @@ public class DefaultJsCompiler implements JsCompiler {
       content = (content != null) ? content : "";
       if (resource.isExternal()) {
         // Support external/type=url feature serving through document.write()
-        jsContent.add(new JsContent("document.write('<script src=\"" + content + "\"></script>')",
-            "[external:" + content + "]", bundle.getName()));
+        jsContent.add(JsContent.fromFeature("document.write('<script src=\"" + content + "\"></script>')",
+            "[external:" + content + "]", bundle.getName(), resource));
       } else {
-        jsContent.add(new JsContent(content, resource.getName(), bundle.getName()));
+        jsContent.add(JsContent.fromFeature(content, resource.getName(), bundle.getName(),
+            resource));
       }
-      jsContent.add(new JsContent(";\n", "[separator]", bundle.getName()));
+      jsContent.add(JsContent.fromFeature(";\n", "[separator]", bundle.getName(),
+          resource));
     }
     return jsContent;
   }

@@ -17,6 +17,10 @@
  */
 package org.apache.shindig.gadgets.features;
 
+import com.google.common.collect.ImmutableMap;
+
+import java.util.Map;
+
 /**
  * Interface yielding content/code for JS features.
  */
@@ -47,6 +51,11 @@ public interface FeatureResource {
   String getName();
   
   /**
+   * @return XML-defined attributes associated with this for resource selection/inclusion.
+   */
+  Map<String, String> getAttribs();
+  
+  /**
    * Helper base class to avoid having to implement rarely-overridden isExternal/isProxyCacheable
    * functionality in FeatureResource.
    */
@@ -57,6 +66,23 @@ public interface FeatureResource {
 
     public boolean isProxyCacheable() {
       return true;
+    }
+    
+    public Map<String, String> getAttribs() {
+      return ImmutableMap.<String, String>of();
+    }
+  }
+  
+  public abstract class Attribute extends Default {
+    private final Map<String, String> attribs;
+
+    public Attribute(Map<String, String> attribs) {
+      this.attribs = attribs;
+    }
+
+    @Override
+    public Map<String, String> getAttribs() {
+      return attribs;
     }
   }
   
@@ -70,7 +96,7 @@ public interface FeatureResource {
       this.debugContent = debugContent;
       this.name = name;
     }
-    
+
     public String getContent() {
       return content;
     }

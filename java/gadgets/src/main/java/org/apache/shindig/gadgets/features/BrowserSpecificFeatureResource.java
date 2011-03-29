@@ -100,6 +100,10 @@ public class BrowserSpecificFeatureResource implements FeatureResource {
     return delegate.getName();
   }
   
+  public Map<String, String> getAttribs() {
+    return delegate.getAttribs();
+  }
+
   private boolean browserMatches() {
     if (browserMatch.isEmpty()) {
       // Not browser-sensitive.

@@ -48,7 +48,7 @@ import com.google.common.collect.Lists;
 public class GetJsContentProcessorTest {
   private static final String JS_CODE1 = "some JS data";
   private static final String JS_CODE2 = "some JS data";
-  
+
   private IMocksControl control;
   private FeatureRegistry registry;
   private JsCompiler compiler;
@@ -67,7 +67,7 @@ public class GetJsContentProcessorTest {
     response = new JsResponseBuilder();
     processor = new GetJsContentProcessor(registry, compiler);
   }
-  
+
   @Test
   public void testPopulatesResponseForUnversionedRequest() throws Exception {
     setExpectations(true, UriStatus.VALID_UNVERSIONED);
@@ -113,7 +113,7 @@ public class GetJsContentProcessorTest {
     expect(jsUri.isDebug()).andReturn(false);
     expect(jsUri.getLoadedLibs()).andReturn(ImmutableList.<String>of());
     expect(request.getJsUri()).andReturn(jsUri);
-    
+
     List<FeatureBundle> bundles = mockBundles(proxyCacheable);
     LookupResult lr = control.createMock(LookupResult.class);
     expect(lr.getBundles()).andReturn(bundles);
@@ -121,11 +121,13 @@ public class GetJsContentProcessorTest {
     expect(registry.getFeatureResources(isA(JsGadgetContext.class), eq(libs),
         eq(ImmutableList.<String>of()))).andReturn(lr);
     expect(compiler.getJsContent(jsUri, bundles.get(0)))
-        .andReturn(ImmutableList.<JsContent>of(new JsContent(JS_CODE1, "source1", "feature1")));
+        .andReturn(ImmutableList.<JsContent>of(
+            JsContent.fromFeature(JS_CODE1, "source1", "feature1", null)));
     expect(compiler.getJsContent(jsUri, bundles.get(1)))
-        .andReturn(ImmutableList.<JsContent>of(new JsContent(JS_CODE2, "source2", "feature2")));
+        .andReturn(ImmutableList.<JsContent>of(
+            JsContent.fromFeature(JS_CODE2, "source2", "feature2", null)));
   }
-  
+
   private List<FeatureBundle> mockBundles(boolean proxyCacheable) {
     FeatureBundle bundle1 = control.createMock(FeatureBundle.class);
     expect(bundle1.getName()).andReturn("feature1");
@@ -133,7 +135,7 @@ public class GetJsContentProcessorTest {
     expect(resource1.isProxyCacheable()).andReturn(proxyCacheable);
     List<FeatureResource> resources1 = Lists.newArrayList(resource1);
     expect(bundle1.getResources()).andReturn(resources1);
-    
+
     FeatureBundle bundle2 = control.createMock(FeatureBundle.class);
     expect(bundle2.getName()).andReturn("feature2");
     FeatureResource resource2 = control.createMock(FeatureResource.class);
@@ -143,9 +145,8 @@ public class GetJsContentProcessorTest {
     }
     List<FeatureResource> resources2 = Lists.newArrayList(resource2);
     expect(bundle2.getResources()).andReturn(resources2);
-    
-    List<FeatureBundle> bundles = Lists.newArrayList(bundle1, bundle2);
-    return bundles;
+
+    return Lists.newArrayList(bundle1, bundle2);
   }
 
   private void checkResponse(boolean proxyCacheable, int expectedTtl) {

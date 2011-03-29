@@ -62,14 +62,14 @@ public class ExportJsCompiler extends DefaultJsCompiler {
   public Iterable<JsContent> getJsContent(JsUri jsUri, FeatureBundle bundle) {
     List<JsContent> jsContent = Lists.newLinkedList();
     // TODO: Convert start/end to processor too.
-    jsContent.add(new JsContent("\n/* [start] feature=" + bundle.getName() +
-        " */\n", "[comment-marker-start]", bundle.getName()));
+    jsContent.add(JsContent.fromFeature("\n/* [start] feature=" + bundle.getName() +
+        " */\n", "[comment-marker-start]", bundle.getName(), null));
     for (JsContent jsc : super.getJsContent(jsUri, bundle)) {
       jsContent.add(jsc);
     }
     jsContent.add(getExportsForFeature(jsUri, bundle));
-    jsContent.add(new JsContent("\n/* [end] feature=" + bundle.getName() +
-        " */\n", "[comment-marker-end]", bundle.getName()));
+    jsContent.add(JsContent.fromFeature("\n/* [end] feature=" + bundle.getName() +
+        " */\n", "[comment-marker-end]", bundle.getName(), null));
     return jsContent;
   }
 
@@ -101,8 +101,9 @@ public class ExportJsCompiler extends DefaultJsCompiler {
     for (Input input : generateInputs(exports)) {
       sb.append(input.toExportStatement());
     }
-    
-    return new JsContent(sb.toString(), "[generated-symbol-exports]", bundle.getName());
+
+    return JsContent.fromFeature(sb.toString(), "[generated-symbol-exports]",
+        bundle.getName(), null);
   }
 
   private void appendExportJs(JsResponseBuilder builder, GadgetContext context) {
@@ -110,8 +111,9 @@ public class ExportJsCompiler extends DefaultJsCompiler {
         ImmutableList.of(FEATURE_NAME), null);
     for (FeatureBundle bundle : lookup.getBundles()) {
       for (FeatureResource resource : bundle.getResources()) {
-        builder.appendJs(new JsContent(
-            resource.getDebugContent(), resource.getName(), bundle.getName()));
+        builder.appendJs(JsContent.fromFeature(
+            resource.getDebugContent(), resource.getName(),
+            bundle.getName(), null));
       }
     }
   }

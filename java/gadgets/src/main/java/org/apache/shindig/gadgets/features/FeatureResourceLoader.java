@@ -94,7 +94,7 @@ public class FeatureResourceLoader {
   }
   
   protected FeatureResource loadFile(String path, Map<String, String> attribs) throws IOException {
-    return new DualModeFileResource(getOptPath(path), path);
+    return new DualModeFileResource(getOptPath(path), path, attribs);
   }
   
   protected String getFileContent(File file) {
@@ -119,7 +119,7 @@ public class FeatureResourceLoader {
     } catch (IOException e) {
       // See above; OK for debugContent to be null.
     }
-    return new DualModeStaticResource(path, optContent, debugContent);
+    return new DualModeStaticResource(path, optContent, debugContent, attribs);
   }
   
   public String getResourceContent(String resource) throws IOException {
@@ -129,7 +129,9 @@ public class FeatureResourceLoader {
   protected FeatureResource loadUri(Uri uri, Map<String, String> attribs) {
     String inline = attribs.get("inline");
     inline = inline != null ? inline : "";
-    return new UriResource(fetcher, uri, "1".equals(inline) || "true".equalsIgnoreCase(inline));
+    return new UriResource(fetcher, uri,
+        "1".equals(inline) || "true".equalsIgnoreCase(inline),
+        attribs);
   }
   
   protected String getOptPath(String orig) {
@@ -144,12 +146,14 @@ public class FeatureResourceLoader {
     return file.lastModified() > lastModified;
   }
   
-  private class DualModeFileResource extends FeatureResource.Default {
+  private class DualModeFileResource extends FeatureResource.Attribute {
     private final FileContent optContent;
     private final FileContent dbgContent;
     private final String fileName;
     
-    protected DualModeFileResource(String optFilePath, String dbgFilePath) {
+    protected DualModeFileResource(String optFilePath, String dbgFilePath,
+        Map<String, String> attribs) {
+      super(attribs);
       this.optContent = new FileContent(optFilePath);
       this.dbgContent = new FileContent(dbgFilePath);
       this.fileName = dbgFilePath;
@@ -213,12 +217,13 @@ public class FeatureResourceLoader {
     }
   }
   
-  private static final class DualModeStaticResource extends FeatureResource.Default {
+  private static final class DualModeStaticResource extends FeatureResource.Attribute {
     private final String content;
     private final String debugContent;
     private final String path;
     
-    private DualModeStaticResource(String path, String content, String debugContent) {
+    private DualModeStaticResource(String path, String content, String debugContent, Map<String, String> attribs) {
+      super(attribs);
       this.content = content != null ? content : debugContent;
       this.debugContent = debugContent != null ? debugContent : content;
       this.path = path;
@@ -238,14 +243,16 @@ public class FeatureResourceLoader {
     }
   }
   
-  private static final class UriResource implements FeatureResource {
+  private static final class UriResource extends FeatureResource.Attribute {
     private final HttpFetcher fetcher;
     private final Uri uri;
     private final boolean isInline;
     private String content;
     private long lastLoadTryMs;
     
-    private UriResource(HttpFetcher fetcher, Uri uri, boolean isInline) {
+    private UriResource(HttpFetcher fetcher, Uri uri, boolean isInline,
+        Map<String, String> attribs) {
+      super(attribs);
       this.fetcher = fetcher;
       this.uri = uri;
       this.isInline = isInline;
@@ -293,10 +300,12 @@ public class FeatureResourceLoader {
       return getContent();
     }
 
+    @Override
     public boolean isExternal() {
       return !isInline;
     }
-    
+
+    @Override
     public boolean isProxyCacheable() {
       return content != null;
     }
@@ -304,5 +313,6 @@ public class FeatureResourceLoader {
     public String getName() {
       return uri.toString();
     }
+
   }
 }

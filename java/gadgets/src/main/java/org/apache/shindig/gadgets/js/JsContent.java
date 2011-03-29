@@ -17,6 +17,8 @@
  */
 package org.apache.shindig.gadgets.js;
 
+import org.apache.shindig.gadgets.features.FeatureResource;
+
 /**
  * Wrapper around JavaScript providing a way to track its provenance.
  * Other metadata may be added as well, such as annotations regarding compilation,
@@ -26,26 +28,39 @@ public class JsContent {
   private final String content;
   private final String source;
   private final String feature;
-  
-  public JsContent(String content, String source) {
-    this(content, source, "[builtin]");
+  private final FeatureResource resource;
+
+  public static JsContent fromText(String content, String source) {
+    return new JsContent(content, source, "[built-in]", null);
+  }
+
+  // TODO: Consider replacing String feature with FeatureBundle.
+  public static JsContent fromFeature(String content, String source, String feature,
+      FeatureResource resource) {
+    return new JsContent(content, source, feature, resource);
   }
   
-  public JsContent(String content, String source, String feature) {
+  private JsContent(String content, String source, String feature,
+      FeatureResource resource) {
     this.content = content;
     this.source = source;
     this.feature = feature;
+    this.resource = resource;
   }
-  
+
   public String get() {
     return content;
   }
-  
+
   public String getSource() {
     return source;
   }
-  
+
   public String getFeature() {
     return feature;
+  }
+  
+  public FeatureResource getFeatureResource() {
+    return resource;
   }
 }
