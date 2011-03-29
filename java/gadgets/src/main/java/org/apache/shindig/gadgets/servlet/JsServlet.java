@@ -96,11 +96,11 @@ public class JsServlet extends InjectedServlet {
       return;
     }
     
-    emitJsResponse(jsResponse, resp);
+    emitJsResponse(jsResponse, req, resp);
   }
   
-  protected void emitJsResponse(JsResponse jsResponse, HttpServletResponse resp)
-      throws IOException {
+  protected void emitJsResponse(JsResponse jsResponse, HttpServletRequest req,
+      HttpServletResponse resp) throws IOException {
     if (jsResponse.getStatusCode() == 200 && jsResponse.toJsString().length() == 0) {
       resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
       return;
