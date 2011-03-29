@@ -34,7 +34,7 @@ public class JsServingPipelineModule extends AbstractModule {
   protected void configure() {
     // nothing to configure here
   }
-  
+
   @Provides
   @Inject
   public List<JsProcessor> provideProcessors(
@@ -42,14 +42,22 @@ public class JsServingPipelineModule extends AbstractModule {
       JsLoadProcessor jsLoaderGeneratorProcessor,
       IfModifiedSinceProcessor ifModifiedSinceProcessor,
       GetJsContentProcessor getJsContentProcessor,
+      CajaJsSubtractingProcessor cajaJsSubtractingProcessor,
       ConfigInjectionProcessor configInjectionProcessor,
       AddOnloadFunctionProcessor addOnloadFunctionProcessor,
       AddJsLoadCallbackProcessor addJsLoadCallbackProcessor,
       CompilationProcessor compilationProcessor,
       AnonFuncWrappingProcessor anonFuncProcessor) {
-    return ImmutableList.of(injectJsInfoVariableProcessor, jsLoaderGeneratorProcessor,
-        ifModifiedSinceProcessor, getJsContentProcessor, configInjectionProcessor,
-        addOnloadFunctionProcessor, addJsLoadCallbackProcessor, compilationProcessor,
+    return ImmutableList.of(
+        injectJsInfoVariableProcessor,
+        jsLoaderGeneratorProcessor,
+        ifModifiedSinceProcessor,
+        getJsContentProcessor,
+        cajaJsSubtractingProcessor,
+        configInjectionProcessor,
+        addOnloadFunctionProcessor,
+        addJsLoadCallbackProcessor,
+        compilationProcessor,
         anonFuncProcessor);
   }
   

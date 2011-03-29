@@ -27,13 +27,13 @@ import java.util.Map;
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-public class CajoleJsSubtractingProcessor implements JsProcessor {
+public class CajaJsSubtractingProcessor implements JsProcessor {
 
   @VisibleForTesting
-  static final String CAJOLE_ATTRIB_KEY = "cajole";
+  static final String ATTRIB_KEY = "caja";
 
   @VisibleForTesting
-  static final String CAJOLE_ATTRIB_VALUE = "1";
+  static final String ATTRIB_VALUE = "1";
 
   public boolean process(JsRequest jsRequest, JsResponseBuilder builder) {
     if (!jsRequest.getJsUri().cajoleContent()) {
@@ -53,8 +53,8 @@ public class CajoleJsSubtractingProcessor implements JsProcessor {
     if (resource != null) {
       Map<String, String> attribs = resource.getAttribs();
       if (attribs != null) {
-        String attrib = attribs.get(CAJOLE_ATTRIB_KEY);
-        return CAJOLE_ATTRIB_VALUE.equals(attrib);
+        String attrib = attribs.get(ATTRIB_KEY);
+        return ATTRIB_VALUE.equals(attrib);
       }
     }
     return false;
