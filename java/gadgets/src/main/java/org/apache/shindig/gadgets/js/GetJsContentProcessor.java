@@ -52,13 +52,6 @@ public class GetJsContentProcessor implements JsProcessor {
     this.compiler = compiler;
   }
 
-  /**
-   * Get the content of the feature resources and push it to jsData.
-   *
-   * @param jsUri A JsUri object that describes the resources to get.
-   * @param host The name of the host the request was directed to.
-   * @return JsHandlerResponse object that contains JavaScript data and cacheable flag.
-   */
   public boolean process(JsRequest request, JsResponseBuilder builder) throws JsException {
     // Get JavaScript content from features aliases request.
     JsUri jsUri = request.getJsUri();
