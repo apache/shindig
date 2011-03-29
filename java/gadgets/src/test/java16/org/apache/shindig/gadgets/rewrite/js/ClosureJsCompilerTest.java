@@ -133,10 +133,15 @@ public class ClosureJsCompilerTest extends TestCase {
 
   private ClosureJsCompiler newClosureJsCompiler(final Compiler realComp,
       CompilerOptions realOptions, ExportJsCompiler exportComp, CacheProvider cache) {
-    return new ClosureJsCompiler(realOptionsMock, exportComp, cache) {
+    return new ClosureJsCompiler(exportComp, cache) {
       @Override
       Compiler newCompiler() {
         return realComp;
+      }
+      
+      @Override
+      protected CompilerOptions getCompilerOptions() {
+        return realOptionsMock;
       }
     };
   }
@@ -232,7 +237,7 @@ public class ClosureJsCompilerTest extends TestCase {
 
   private static List<JsContent> newJsContents(String jsCode) {
     List<JsContent> result = Lists.newArrayList();
-    result.add(new JsContent(jsCode, null));
+    result.add(JsContent.fromText(jsCode, null));
     return result;
   }
 }

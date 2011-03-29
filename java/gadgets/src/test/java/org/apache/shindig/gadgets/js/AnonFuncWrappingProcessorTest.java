@@ -56,7 +56,7 @@ public class AnonFuncWrappingProcessorTest {
     assertTrue(processor.process(request, builder));
     control.verify();
     if (wraps) {
-      assertEquals("(function() {\nJS_CODE\n})();", builder.build().toJsString());
+      assertEquals("(function(){JS_CODE})();", builder.build().toJsString());
     } else {
       assertEquals("JS_CODE", builder.build().toJsString());
     }

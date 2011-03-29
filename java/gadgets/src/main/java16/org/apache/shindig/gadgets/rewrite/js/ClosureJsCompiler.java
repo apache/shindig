@@ -66,49 +66,46 @@ public class ClosureJsCompiler implements JsCompiler {
               + "var parts=name.split('.'),cur=window,part;"
               + "for(;parts.length&&(part=parts.shift());){if(!parts.length){"
               + "cur[part]=obj;}else{cur=cur[part]||(cur[part]={})}}};", "[goog.exportSymbol]");
-
-  private static final JSSourceFile[] JSSOURCE_TYPE = new JSSourceFile[0];
-
+  
   @VisibleForTesting
   static final String CACHE_NAME = "CompiledJs";
 
   private final ExportJsCompiler exportCompiler;
-  private final CompilerOptions options;
-  private final Cache<String, ClosureResult> cache;
-  private ClosureResult lastResult;
+  private final Cache<String, JsResponse> cache;
+  private JsResponse lastResult;
 
   @Inject
   public ClosureJsCompiler(CacheProvider cacheProvider, FeatureRegistry registry) {
-    this(newCompilerOptions(), cacheProvider, registry);
-  }
-
-  public ClosureJsCompiler(CompilerOptions options, CacheProvider cacheProvider,
-      FeatureRegistry registry) {
-    this(options, new ExportJsCompiler(registry), cacheProvider);
+    this(new ExportJsCompiler(registry), cacheProvider);
   }
 
   @VisibleForTesting
-  ClosureJsCompiler(CompilerOptions options, ExportJsCompiler exportCompiler,
-      CacheProvider cacheProvider) {
-    // TODO: Consider using Provider<Compiler> here.
-    this.options = options;
+  ClosureJsCompiler(ExportJsCompiler exportCompiler, CacheProvider cacheProvider) {
     this.cache = cacheProvider.createCache(CACHE_NAME);
     this.exportCompiler = exportCompiler;
   }
 
-  public static CompilerOptions newCompilerOptions() {
-    // Same as google3/javascript/closure/builddefs:CLOSURE_COMPILER_FLAGS_FULL.
-    // Flags are used/preferred by Gmail.
+  public static CompilerOptions defaultCompilerOptions() {
     CompilerOptions result = new CompilerOptions();
     CompilationLevel.ADVANCED_OPTIMIZATIONS.setOptionsForCompilationLevel(result);
     result.removeUnusedPrototypePropertiesInExterns = false;
     // Avoid multiple declarations of tamings___ variables.
     // TODO: Get rid of this deviation from standard flags.
     result.checkSymbols = false;
-    result.sourceMapOutputPath = "create.out";
-    result.sourceMapDetailLevel = SourceMap.DetailLevel.ALL;
 
     return result;
+  }
+  
+  protected CompilerOptions getCompilerOptions() {
+    CompilerOptions options = defaultCompilerOptions();
+
+    if (outputCorrelatedJs()) {
+      options.sourceMapOutputPath = "create.out";
+      options.sourceMapFormat = SourceMap.Format.LEGACY;
+      options.sourceMapDetailLevel = SourceMap.DetailLevel.ALL;
+    }
+    
+    return options;
   }
 
   @VisibleForTesting
@@ -138,16 +135,16 @@ public class ClosureJsCompiler implements JsCompiler {
 
     String externStr = toExternString(externs);
     String cacheKey = makeCacheKey(exportResponse.toJsString(), externStr, jsUri);
-    ClosureResult cachedResult = cache.getElement(cacheKey);
+    JsResponse cachedResult = cache.getElement(cacheKey);
     if (cachedResult != null) {
       lastResult = cachedResult;
-      return cachedResult.response;
+      return cachedResult;
     }
 
     JsResponseBuilder builder = new JsResponseBuilder();
-    String theExterns = null;
     
     // Only run actual compiler if necessary.
+    CompilerOptions options = getCompilerOptions();
     if (!jsUri.isDebug() || options.isExternExportsEnabled()) {
       List<JSSourceFile> allExterns = Lists.newArrayList();
       allExterns.add(JSSourceFile.fromCode("externs", externStr));
@@ -159,8 +156,8 @@ public class ClosureJsCompiler implements JsCompiler {
 
       Compiler actualCompiler = newCompiler();
       Result result = actualCompiler.compile(
-          allExterns.toArray(JSSOURCE_TYPE),
-          convertToJsSource(allContent).toArray(JSSOURCE_TYPE),
+          allExterns,
+          convertToJsSource(allContent),
           options);
 
       if (actualCompiler.hasErrors()) {
@@ -170,9 +167,9 @@ public class ClosureJsCompiler implements JsCompiler {
         }
         builder.setStatusCode(HttpResponse.SC_NOT_FOUND)
             .addErrors(errors.build()).build();
-        ClosureResult errorResult = new ClosureResult(builder.build(), null);
+        JsResponse errorResult = builder.build();
         cache.addElement(cacheKey, errorResult);
-        return errorResult.response;
+        return errorResult;
       }
       
       String compiled = actualCompiler.toSource();
@@ -186,15 +183,15 @@ public class ClosureJsCompiler implements JsCompiler {
         builder.appendJs(compiled, "[compiled]");
       }
       
-      theExterns = result.externExport;
+      builder.setExterns(result.externExport);
     } else {
       // Otherwise, return original content and null exports.
       builder.appendAllJs(content);
     }
 
-    lastResult = new ClosureResult(builder.build(), theExterns);
+    lastResult = builder.build();
     cache.addElement(cacheKey, lastResult);
-    return lastResult.response;
+    return lastResult;
   }
   
   // Override this method to return "true" for cases where individual chunks of
@@ -245,6 +242,7 @@ public class ClosureJsCompiler implements JsCompiler {
     };
     List<JsContent> builder = Lists.newLinkedList(exportCompiler.getJsContent(jsUri, bundle));
 
+    CompilerOptions options = getCompilerOptions();
     if (options.isExternExportsEnabled()) {
       List<String> exports = Lists.newArrayList(bundle.getApis(ApiDirective.Type.JS, true));
       Collections.sort(exports);
@@ -261,7 +259,7 @@ public class ClosureJsCompiler implements JsCompiler {
     return builder;
   }
 
-  public ClosureResult getLastResult() {
+  public JsResponse getLastResult() {
     return this.lastResult;
   }
 
@@ -271,25 +269,8 @@ public class ClosureJsCompiler implements JsCompiler {
         HashUtil.checksum(code.getBytes()),
         HashUtil.checksum(externs.getBytes()),
         uri.getCompileMode(),
-        uri.isDebug());
-  }
-
-  public static class ClosureResult {
-    private final JsResponse response;
-    private final String externs;
-
-    public ClosureResult(JsResponse response, String externs) {
-      this.response = response;
-      this.externs = externs;
-    }
-
-    public String getExterns() {
-      return externs;
-    }
-
-    public JsResponse getResponse() {
-      return response;
-    }
+        uri.isDebug(),
+        outputCorrelatedJs());
   }
   
   /**
@@ -344,10 +325,15 @@ public class ClosureJsCompiler implements JsCompiler {
           curMapping = nextMapping;
         }
       }
-      JsContent lastSource = orig.get(getRootSrc(mappings[curMapping]));
-      compiledOut.add(JsContent.fromFeature(compiled.substring(codeStart, codePos + 1),
-          lastSource.getSource(), lastSource.getFeature(), null));
+      appendJsContent(compiledOut, codeStart, codePos + 1, compiled, curMapping);
       return compiledOut;
+    }
+    
+    private void appendJsContent(List<JsContent> out, int startPos, int codePos, 
+        String compiled, int mapping) {
+      JsContent sourceJs = orig.get(getRootSrc(mappings[mapping]));
+      out.add(JsContent.fromFeature(compiled.substring(startPos, codePos),
+          sourceJs.getSource(), sourceJs.getFeature(), null));
     }
     
     private static final String BEGIN_COMMENT = "/*";

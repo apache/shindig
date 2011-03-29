@@ -45,12 +45,12 @@ public class JsServingPipelineModule extends AbstractModule {
       ConfigInjectionProcessor configInjectionProcessor,
       AddOnloadFunctionProcessor addOnloadFunctionProcessor,
       AddJsLoadCallbackProcessor addJsLoadCallbackProcessor,
-      AnonFuncWrappingProcessor anonFuncProcessor,
-      CompilationProcessor compilationProcessor) {
+      CompilationProcessor compilationProcessor,
+      AnonFuncWrappingProcessor anonFuncProcessor) {
     return ImmutableList.of(injectJsInfoVariableProcessor, jsLoaderGeneratorProcessor,
         ifModifiedSinceProcessor, getJsContentProcessor, configInjectionProcessor,
-        addOnloadFunctionProcessor, addJsLoadCallbackProcessor, anonFuncProcessor,
-        compilationProcessor);
+        addOnloadFunctionProcessor, addJsLoadCallbackProcessor, compilationProcessor,
+        anonFuncProcessor);
   }
   
 }

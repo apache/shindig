@@ -23,8 +23,8 @@ public class AnonFuncWrappingProcessor implements JsProcessor {
   public boolean process(JsRequest jsRequest, JsResponseBuilder builder)
       throws JsException {
     if (jsRequest.getJsUri().getCompileMode() != JsCompileMode.BUILD_TIME) {
-      builder.prependJs("(function() {\n", "[js-anon-wrapper]");
-      builder.appendJs("\n})();", "[js-anon-wrapper]");
+      builder.prependJs("(function(){", "[js-anon-wrapper]");
+      builder.appendJs("})();", "[js-anon-wrapper]");
     }
     return true;
   }
