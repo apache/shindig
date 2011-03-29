@@ -25,7 +25,7 @@
   <all>
     <script src="batch.js"></script>
     <script src="osapi.js"></script>
-    <script src="taming.js"></script>    
+    <script src="taming.js" caja="1"></script>    
     <api>
       <exports type="js">osapi.newBatch.add</exports>
       <exports type="js">osapi.newBatch.execute</exports>

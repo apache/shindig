@@ -23,7 +23,7 @@ specific language governing permissions and limitations under the License.
   <gadget>
     <script inline="true" src="http://www.google.com/ig/lib/libga.js"/>
     <script src="analytics.js"/>
-    <script src="taming.js"/>
+    <script src="taming.js" caja="1"/>
     <exports type="js">_IG_GA</exports>
     <exports type="js">gadgets.analytics</exports>
     <exports type="js">gadgets.analytics.prototype.reportPageview</exports>

@@ -27,7 +27,7 @@ specific language governing permissions and limitations under the License.
     <script src="dynamic-width.js"/>
     <script src="participant.js"/>
     <script src="state.js"/>
-    <script src="taming.js"/>
+    <script src="taming.js" caja="1"/>
     <script src="util.js"/>
     <script src="wave.js"/>
     <script src="wave.ui.js"/>

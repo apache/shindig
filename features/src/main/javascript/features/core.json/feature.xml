@@ -24,7 +24,7 @@
     <script src="json-native.js"/>
     <script src="json-jsimpl.js"/>
     <script src="json-flatten.js"/>
-    <script src="taming.js"/>
+    <script src="taming.js" caja="1"/>
     <api>
       <exports type="js">gadgets.json.flatten</exports>
       <exports type="js">gadgets.json.parse</exports>

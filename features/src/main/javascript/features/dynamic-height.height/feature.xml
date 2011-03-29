@@ -23,7 +23,7 @@ specific language governing permissions and limitations under the License.
   <dependency>dynamic-height.util</dependency>
   <all>
     <script src="dynamic-height-height.js"/>
-    <script src="taming.js"/>
+    <script src="taming.js" caja="1"/>
     <api>
       <exports type="js">gadgets.window.getHeight</exports>
     </api>

@@ -24,7 +24,7 @@ specific language governing permissions and limitations under the License.
   <dependency>core.config</dependency>
   <gadget>
     <script src="tabs.js"/>
-    <script src="taming.js"/>
+    <script src="taming.js" caja="1"/>
     <api>
       <exports type="js">gadgets.Tab</exports>
       <exports type="js">gadgets.Tab.prototype.getName</exports>

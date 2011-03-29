@@ -23,7 +23,7 @@ specific language governing permissions and limitations under the License.
   <dependency>org.openajax.hub-2.0.5</dependency>
   <gadget>
     <script src="pubsub-2.js"/>
-    <script src="taming.js"/>
+    <script src="taming.js" caja="1"/>
   </gadget>
   <container>
     <script src="pubsub-2-router.js"/>

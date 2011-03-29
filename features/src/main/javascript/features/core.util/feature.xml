@@ -24,7 +24,7 @@
   <dependency>core.util.urlparams</dependency>
   <all>
     <script src="util.js"/>
-    <script src="taming.js"/>
+    <script src="taming.js" caja="1"/>
     <api>
       <exports type="js">gadgets.util.getUrlParameters</exports>
       <exports type="js">gadgets.util.makeClosure</exports>

@@ -22,6 +22,6 @@
   <dependency>taming</dependency>
   <gadget>    
     <script src="datacontext.js"></script>
-    <script src="taming.js"></script>
+    <script src="taming.js" caja="1"></script>
   </gadget>
 </feature>
