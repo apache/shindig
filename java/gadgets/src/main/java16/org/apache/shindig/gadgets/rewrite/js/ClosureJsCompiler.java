@@ -213,6 +213,10 @@ public class ClosureJsCompiler implements JsCompiler {
     return sources;
   }
   
+  // Return a unique string to represent the inbound "source" parameter.
+  // Closure Compiler errors out when two JSSourceFiles with the same name are
+  // provided, so this method tracks the currently-used source names (in the
+  // provided sourceMap) and ensures that a unique name is returned.
   private static String getUniqueSrc(String source, Map<String, Integer> sourceMap) {
     Integer ix = sourceMap.get(source);
     if (ix == null) {
@@ -280,6 +284,10 @@ public class ClosureJsCompiler implements JsCompiler {
 
     public String getExterns() {
       return externs;
+    }
+
+    public JsResponse getResponse() {
+      return response;
     }
   }
   

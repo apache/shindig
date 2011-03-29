@@ -77,7 +77,7 @@ public class JsServletTest extends ServletTestFixture {
     JsProcessorRegistry jsProcessorRegistry =
         new DefaultJsProcessorRegistry(
             ImmutableList.<JsProcessor>of(jsLoadProcessor, new IfModifiedSinceProcessor(),
-               getJsProcessorMock, new AddOnloadFunctionProcessor()));
+                 getJsProcessorMock, new AddOnloadFunctionProcessor()));
 
     jsServingPipeline = new DefaultJsServingPipeline(jsProcessorRegistry);
     servlet.setJsServingPipeline(jsServingPipeline);
