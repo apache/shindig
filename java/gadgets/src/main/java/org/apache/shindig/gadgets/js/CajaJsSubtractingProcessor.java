@@ -7,6 +7,7 @@ import com.google.common.collect.ImmutableList;
 
 import org.apache.shindig.gadgets.features.FeatureRegistry.FeatureBundle;
 import org.apache.shindig.gadgets.features.FeatureResource;
+import org.apache.shindig.gadgets.uri.UriCommon;
 
 import java.util.Map;
 
@@ -30,9 +31,6 @@ import java.util.Map;
 public class CajaJsSubtractingProcessor implements JsProcessor {
 
   @VisibleForTesting
-  static final String ATTRIB_KEY = "caja";
-
-  @VisibleForTesting
   static final String ATTRIB_VALUE = "1";
 
   public boolean process(JsRequest jsRequest, JsResponseBuilder builder) {
@@ -53,7 +51,7 @@ public class CajaJsSubtractingProcessor implements JsProcessor {
     if (resource != null) {
       Map<String, String> attribs = resource.getAttribs();
       if (attribs != null) {
-        String attrib = attribs.get(ATTRIB_KEY);
+        String attrib = attribs.get(UriCommon.Param.CAJOLE.getKey());
         return ATTRIB_VALUE.equals(attrib);
       }
     }

@@ -17,7 +17,6 @@
  */
 package org.apache.shindig.gadgets.js;
 
-import static org.apache.shindig.gadgets.js.CajaJsSubtractingProcessor.ATTRIB_KEY;
 import static org.apache.shindig.gadgets.js.CajaJsSubtractingProcessor.ATTRIB_VALUE;
 import static org.easymock.EasyMock.createControl;
 import static org.easymock.EasyMock.expect;
@@ -31,6 +30,7 @@ import com.google.common.collect.Lists;
 
 import org.apache.shindig.gadgets.features.FeatureResource;
 import org.apache.shindig.gadgets.uri.JsUriManager.JsUri;
+import org.apache.shindig.gadgets.uri.UriCommon;
 import org.easymock.IMocksControl;
 import org.junit.Before;
 import org.junit.Test;
@@ -43,7 +43,7 @@ public class CajaJsSubtractingProcessorTest {
   private static final List<String> ERRORS = ImmutableList.<String>of();
 
   private static final String NORMAL_CONTENT_JS = "normal";
-  private static final String CAJA_CONTENT_JS = "cajole";
+  private static final String CAJA_CONTENT_JS = "cajoled";
 
   private IMocksControl control;
   private List<JsContent> contents = Lists.newArrayList();
@@ -61,9 +61,9 @@ public class CajaJsSubtractingProcessorTest {
     contents.add(JsContent.fromFeature(NORMAL_CONTENT_JS, null, null,
         mockFeatureResource(null)));
     contents.add(JsContent.fromFeature(NORMAL_CONTENT_JS, null, null,
-        mockFeatureResource(ImmutableMap.of(ATTRIB_KEY, "blah"))));
+        mockFeatureResource(ImmutableMap.of(UriCommon.Param.CAJOLE.getKey(), "blah"))));
     contents.add(JsContent.fromFeature(CAJA_CONTENT_JS, null, "feature",
-        mockFeatureResource(ImmutableMap.of(ATTRIB_KEY, ATTRIB_VALUE))));
+        mockFeatureResource(ImmutableMap.of(UriCommon.Param.CAJOLE.getKey(), ATTRIB_VALUE))));
     
     response = new JsResponse(contents, -1, -1, false, ERRORS, null);
     builder = new JsResponseBuilder(response);
