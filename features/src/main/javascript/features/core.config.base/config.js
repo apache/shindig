@@ -59,7 +59,7 @@ if (!gadgets.config) {
 gadgets.config = function() {
   var ___jsl;
   var components = {};
-  var configuration;
+  var configuration = {};
 
   function foldConfig(origConfig, updConfig) {
     for (var key in updConfig) {
@@ -221,12 +221,7 @@ gadgets.config = function() {
      */
     init: function(config, opt_noValidation) {
       ___jsl = window["___jsl"] || {};
-      if (configuration) {
-        // init(...) has already been called. Merge rather than override config.
-        foldConfig(configuration, config);
-      } else {
-        configuration = config;
-      }
+      foldConfig(configuration, config);
       augmentConfig(configuration);
       var inlineOverride = window["___config"] || {};
       foldConfig(configuration, inlineOverride);
