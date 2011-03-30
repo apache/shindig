@@ -318,7 +318,7 @@ if (!gadgets.rpc) { // make lib resilient to double-inclusion
         // If not passed by the transport, then this simply sets to undefined.
         if (opt_sender) {
           var origin = getOrigin(opt_sender);
-          rpc[RPC_KEY_ORIGIN] = opt_origin;
+          rpc[RPC_KEY_ORIGIN] = opt_sender;
           var referrer = document.referrer;
           if (!referrer || getOrigin(referrer) != origin) {
             // Transports send along as much info as they can about the sender
