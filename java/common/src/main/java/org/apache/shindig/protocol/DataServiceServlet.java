@@ -232,7 +232,7 @@ public class DataServiceServlet extends ApiServlet {
   /*
    * Return the right BeanConverter to convert the request payload.
    */
-  BeanConverter getConverterForRequest(@Nullable String contentType, String format) {
+  public BeanConverter getConverterForRequest(@Nullable String contentType, String format) {
     if (StringUtils.isNotBlank(contentType)) {
       return getConverterForContentType(contentType);
     } else {
