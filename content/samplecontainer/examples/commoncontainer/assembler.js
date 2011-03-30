@@ -18,59 +18,34 @@
 */
 
 var testConfig =  testConfig || {};
-testConfig[shindig.container.ServiceConfig.API_PATH] = '/rpc';	
-testConfig[shindig.container.ContainerConfig.RENDER_DEBUG] = "1";
+testConfig[osapi.container.ServiceConfig.API_PATH] = '/rpc';	
+testConfig[osapi.container.ContainerConfig.RENDER_DEBUG] = "1";
 
 //  Create the new CommonContainer 
-var CommonContainer = new shindig.container.Container(testConfig);
+var CommonContainer = new osapi.container.Container(testConfig);
 
 // Need to pull these from values supplied in the dialog
 CommonContainer.init = function() {
-	//Create my new managed hub
-	CommonContainer.managedHub = new OpenAjax.hub.ManagedHub(
-	   {
-	   onSubscribe: function(topic, container) {
-        log(container.getClientID() + " subscribes to this topic '" + topic + "'");
-        return true;
-        // return false to reject the request.
-      },
-      onUnsubscribe: function(topic, container) {
-        log(container.getClientID() + " unsubscribes from tthis topic '" + topic + "'");
-        return true;
-      },
-      onPublish: function(topic, data, pcont, scont) {
-        log(pcont.getClientID() + " publishes '" + data + "' to topic '" + topic + "' subscribed by " + scont.getClientID());
-        return true;
-        // return false to reject the request.
-      }
-});
-	//  initialize managed hub for the Container
-	gadgets.pubsub2router.init(
-		    {
-		      hub: CommonContainer.managedHub
-		    });
-
-	 try {
-
-    // Connect to the ManagedHub
-    CommonContainer.inlineClient = new OpenAjax.hub.InlineContainer(CommonContainer.managedHub, "container",  
-        		 {
-                  Container: {
-                             onSecurityAlert:  function(source, alertType) { /* Handle client-side security alerts */  },
-                             onConnect:  function(container){        /* Called when client connects */   },
-                             onDisconnect:  function(container){        /* Called when client connects */   }
-                             }
-                   }
-                );
-    //connect to the inline client
-    CommonContainer.inlineClient.connect();
-   
-       
-     } catch(e) {
-         // TODO: error handling should be consistent with other OS gadget initialization error handling
-         alert("ERROR creating or connecting InlineClient in CommonContainer.managedHub [" + e.message + "]");
-     }
-	
+  //Create my new managed hub
+  CommonContainer.managedHub = new OpenAjax.hub.ManagedHub({
+    onSubscribe: function(topic, container) {
+      log(container.getClientID() + " subscribes to this topic '" + topic + "'");
+      return true;// return false to reject the request.
+    },
+    onUnsubscribe: function(topic, container) {
+      log(container.getClientID() + " unsubscribes from tthis topic '" + topic + "'");
+      return true;
+    },
+    onPublish: function(topic, data, pcont, scont) {
+      log(pcont.getClientID() + " publishes '" + data + "' to topic '" + topic + "' subscribed by " + scont.getClientID());
+      return true;
+      // return false to reject the request.
+    }
+  });
+  //  initialize managed hub for the Container
+  gadgets.pubsub2router.init({
+    hub: CommonContainer.managedHub
+  });
 };
 
 //Wrapper function to set the gadget site/id and default width.  Currently have some inconsistency with width actually being set. This 
@@ -79,7 +54,7 @@ CommonContainer.renderGadget = function(gadgetURL, gadgetId) {
 	//going to hardcode these values for width.  
     var el = document.getElementById("gadget-site-" + gadgetId);
     var parms ={};
-    parms[shindig.container.RenderParam.WIDTH]="100%";
+    parms[osapi.container.RenderParam.WIDTH]="100%";
 	var gadgetSite = CommonContainer.newGadgetSite(el);
 	CommonContainer.navigateGadget(gadgetSite, gadgetURL, {}, parms);
 	return gadgetSite;
@@ -92,7 +67,7 @@ CommonContainer.navigateView = function(gadgetSite, gadgetURL, view) {
 		view="default";
 	}
 	//TODO Evaluate Parms based on configuration
-    renderParms[shindig.container.RenderParam.WIDTH]="100%";
+    renderParms[osapi.container.RenderParam.WIDTH]="100%";
     renderParms['view']=view;
 
     CommonContainer.navigateGadget(gadgetSite, gadgetURL, {}, renderParms);	
