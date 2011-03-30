@@ -36,14 +36,14 @@ GadgetSiteTest.prototype.setUp = function() {
   var self = this;
   
   this.util_getCurrentTimeMs_value = 100;
-  this.util_getCurrentTimeMs_func = shindig.container.util.getCurrentTimeMs;
-  shindig.container.util.getCurrentTimeMs = function() {
+  this.util_getCurrentTimeMs_func = osapi.container.util.getCurrentTimeMs;
+  osapi.container.util.getCurrentTimeMs = function() {
     return self.util_getCurrentTimeMs_value++;
   };
   
   this.util_warn_value = null;
-  this.util_warn_func = shindig.container.util.warn;
-  shindig.container.util.warn = function(value) {
+  this.util_warn_func = osapi.container.util.warn;
+  osapi.container.util.warn = function(value) {
     self.util_warn_value = value;
   };
   
@@ -53,16 +53,16 @@ GadgetSiteTest.prototype.setUp = function() {
 };
 
 GadgetSiteTest.prototype.tearDown = function() {
-  shindig.container.util.getCurrentTimeMs = this.util_getCurrentTimeMs_func;
-  shindig.container.util.warn = this.util_warn_func;
+  osapi.container.util.getCurrentTimeMs = this.util_getCurrentTimeMs_func;
+  osapi.container.util.warn = this.util_warn_func;
   delete window[this.NAVIGATE_CALLBACK];
 };
 
 GadgetSiteTest.prototype.testGetId = function() {
   var site;
-  site = new shindig.container.GadgetSite({});
+  site = new osapi.container.GadgetSite({});
   this.assertEquals(0, site.getId());
-  site = new shindig.container.GadgetSite({});
+  site = new osapi.container.GadgetSite({});
   this.assertEquals(1, site.getId());
 };
 
@@ -130,7 +130,7 @@ GadgetSiteTest.prototype.newMetadataError = function(url, message) {
 };
 
 GadgetSiteTest.prototype.newGadgetSite = function(service, navigateCallback) {
-  return new shindig.container.GadgetSite({
+  return new osapi.container.GadgetSite({
     'service' : service,
     'navigateCallback' : navigateCallback
   });

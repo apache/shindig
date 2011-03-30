@@ -27,7 +27,7 @@
  * @param {Object=} opt_config Configuration JSON.
  * @constructor
  */
-shindig.container.Container = function(opt_config) {
+osapi.container.Container = function(opt_config) {
   var config = opt_config || {};
 
   /**
@@ -48,24 +48,24 @@ shindig.container.Container = function(opt_config) {
    * @private
    */
   this.allowDefaultView_ = Boolean(
-      shindig.container.util.getSafeJsonValue(config,
-      shindig.container.ContainerConfig.ALLOW_DEFAULT_VIEW, true));
+      osapi.container.util.getSafeJsonValue(config,
+      osapi.container.ContainerConfig.ALLOW_DEFAULT_VIEW, true));
 
   /**
    * @type {boolean}
    * @private
    */
   this.renderCajole_ = Boolean(
-      shindig.container.util.getSafeJsonValue(config,
-      shindig.container.ContainerConfig.RENDER_CAJOLE, false));
+      osapi.container.util.getSafeJsonValue(config,
+      osapi.container.ContainerConfig.RENDER_CAJOLE, false));
   
   /**
    * @type {string}
    * @private
    */
-  this.renderDebugParam_ = String(shindig.container.util.getSafeJsonValue(
-      config, shindig.container.ContainerConfig.RENDER_DEBUG_PARAM,
-      shindig.container.ContainerConfig.RENDER_DEBUG));
+  this.renderDebugParam_ = String(osapi.container.util.getSafeJsonValue(
+      config, osapi.container.ContainerConfig.RENDER_DEBUG_PARAM,
+      osapi.container.ContainerConfig.RENDER_DEBUG));
 
   /**
    * @type {boolean}
@@ -73,39 +73,39 @@ shindig.container.Container = function(opt_config) {
    */
   var param = window.__CONTAINER_URI.getQP(this.renderDebugParam_);
   this.renderDebug_ = (typeof param === 'undefined')
-      ? Boolean(shindig.container.util.getSafeJsonValue(config,
-          shindig.container.ContainerConfig.RENDER_DEBUG, false))
+      ? Boolean(osapi.container.util.getSafeJsonValue(config,
+          osapi.container.ContainerConfig.RENDER_DEBUG, false))
       : (param === '1');
 
   /**
    * @type {boolean}
    * @private
    */
-  this.renderTest_ = Boolean(shindig.container.util.getSafeJsonValue(config,
-      shindig.container.ContainerConfig.RENDER_TEST, false));
+  this.renderTest_ = Boolean(osapi.container.util.getSafeJsonValue(config,
+      osapi.container.ContainerConfig.RENDER_TEST, false));
 
   /**
    * Security token refresh interval (in ms) for debugging.
    * @type {number}
    * @private
    */
-  this.tokenRefreshInterval_ = Number(shindig.container.util.getSafeJsonValue(
-      config, shindig.container.ContainerConfig.TOKEN_REFRESH_INTERVAL,
+  this.tokenRefreshInterval_ = Number(osapi.container.util.getSafeJsonValue(
+      config, osapi.container.ContainerConfig.TOKEN_REFRESH_INTERVAL,
       30 * 60 * 1000));
 
   /**
    * @type {number}
    * @private
    */
-  this.navigateCallback_ = String(shindig.container.util.getSafeJsonValue(
-      config, shindig.container.ContainerConfig.NAVIGATE_CALLBACK,
+  this.navigateCallback_ = String(osapi.container.util.getSafeJsonValue(
+      config, osapi.container.ContainerConfig.NAVIGATE_CALLBACK,
       null));
 
   /**
-   * @type {shindig.container.Service}
+   * @type {osapi.container.Service}
    * @private
    */
-  this.service_ = new shindig.container.Service(config);
+  this.service_ = new osapi.container.Service(config);
 
   /**
    * result from calling window.setInterval()
@@ -128,12 +128,12 @@ shindig.container.Container = function(opt_config) {
  * Create a new gadget site.
  * @param {Element} gadgetEl HTML element into which to render.
  * @param {Element=} opt_bufferEl Optional HTML element for double buffering.
- * @return {shindig.container.GadgetSite} site created for client to hold to.
+ * @return {osapi.container.GadgetSite} site created for client to hold to.
  */
-shindig.container.Container.prototype.newGadgetSite = function(
+osapi.container.Container.prototype.newGadgetSite = function(
     gadgetEl, opt_bufferEl) {
   var bufferEl = opt_bufferEl || null;
-  var site = new shindig.container.GadgetSite({
+  var site = new osapi.container.GadgetSite({
       'service' : this.service_,
       'navigateCallback' : this.navigateCallback_,
       'gadgetEl' : gadgetEl,
@@ -147,27 +147,27 @@ shindig.container.Container.prototype.newGadgetSite = function(
 /**
  * Called when gadget is navigated.
  *
- * @param {shindig.container.GadgetSite} site destination gadget to navigate to.
+ * @param {osapi.container.GadgetSite} site destination gadget to navigate to.
  * @param {string} gadgetUrl The URI of the gadget.
  * @param {Object} viewParams view params for the gadget.
  * @param {Object} renderParams render parameters, including the view.
  * @param {function(Object)=} opt_callback Callback after gadget is loaded.
  */
-shindig.container.Container.prototype.navigateGadget = function(
+osapi.container.Container.prototype.navigateGadget = function(
     site, gadgetUrl, viewParams, renderParams, opt_callback) {
   var callback = opt_callback || function() {};
   if (this.allowDefaultView_) {
-    renderParams[shindig.container.RenderParam.ALLOW_DEFAULT_VIEW] = true;
+    renderParams[osapi.container.RenderParam.ALLOW_DEFAULT_VIEW] = true;
   }
   if (this.renderCajole_) {
-    renderParams[shindig.container.RenderParam.CAJOLE] = true;
+    renderParams[osapi.container.RenderParam.CAJOLE] = true;
   }
   if (this.renderDebug_) {
-    renderParams[shindig.container.RenderParam.NO_CACHE] = true;
-    renderParams[shindig.container.RenderParam.DEBUG] = true;
+    renderParams[osapi.container.RenderParam.NO_CACHE] = true;
+    renderParams[osapi.container.RenderParam.DEBUG] = true;
   }
   if (this.renderTest_) {
-    renderParams[shindig.container.RenderParam.TEST_MODE] = true;
+    renderParams[osapi.container.RenderParam.TEST_MODE] = true;
   }
 
   this.refreshService_();
@@ -181,7 +181,7 @@ shindig.container.Container.prototype.navigateGadget = function(
     if (gadgetInfo.error) {
       gadgets.warn(['Failed to possibly schedule token refresh for gadget ',
           gadgetUrl, '.'].join(''));
-    } else if (gadgetInfo[shindig.container.MetadataResponse.NEEDS_TOKEN_REFRESH]) {
+    } else if (gadgetInfo[osapi.container.MetadataResponse.NEEDS_TOKEN_REFRESH]) {
       self.scheduleRefreshTokens_();
     }
     callback(gadgetInfo);
@@ -191,9 +191,9 @@ shindig.container.Container.prototype.navigateGadget = function(
 
 /**
  * Called when gadget is closed. This may stop refreshing of tokens.
- * @param {shindig.container.GadgetSite} site navigate gadget to close.
+ * @param {osapi.container.GadgetSite} site navigate gadget to close.
  */
-shindig.container.Container.prototype.closeGadget = function(site) {
+osapi.container.Container.prototype.closeGadget = function(site) {
   var id = site.getId();
   site.close();
   delete this.sites_[id];
@@ -206,7 +206,7 @@ shindig.container.Container.prototype.closeGadget = function(site) {
  * @param {string} gadgetUrl gadget URI to preload.
  * @param {function(Object)=} opt_callback function to call upon data receive.
  */
-shindig.container.Container.prototype.preloadGadget = function(gadgetUrl, opt_callback) {
+osapi.container.Container.prototype.preloadGadget = function(gadgetUrl, opt_callback) {
   this.preloadGadgets([gadgetUrl], opt_callback);
 };
 
@@ -218,9 +218,9 @@ shindig.container.Container.prototype.preloadGadget = function(gadgetUrl, opt_ca
  * @param {Array} gadgetUrls gadgets URIs to preload.
  * @param {function(Object)=} opt_callback function to call upon data receive.
  */
-shindig.container.Container.prototype.preloadGadgets = function(gadgetUrls, opt_callback) {
+osapi.container.Container.prototype.preloadGadgets = function(gadgetUrls, opt_callback) {
   var callback = opt_callback || function() {};
-  var request = shindig.container.util.newMetadataRequest(gadgetUrls);
+  var request = osapi.container.util.newMetadataRequest(gadgetUrls);
   var self = this;
   
   this.refreshService_();
@@ -235,7 +235,7 @@ shindig.container.Container.prototype.preloadGadgets = function(gadgetUrls, opt_
  * Unload preloaded gadget. Makes future preload request possibly uncached.
  * @param {string} gadgetUrl gadget URI to unload.
  */
-shindig.container.Container.prototype.unloadGadget = function(gadgetUrl) {
+osapi.container.Container.prototype.unloadGadget = function(gadgetUrl) {
   this.unloadGadgets([gadgetUrl]);
 };
 
@@ -244,7 +244,7 @@ shindig.container.Container.prototype.unloadGadget = function(gadgetUrl) {
  * Unload preloaded gadgets. Makes future preload request possibly uncached.
  * @param {Array} gadgetUrls gadgets URIs to unload.
  */
-shindig.container.Container.prototype.unloadGadgets = function(gadgetUrls) {
+osapi.container.Container.prototype.unloadGadgets = function(gadgetUrls) {
   for (var i = 0; i < gadgetUrls.length; i++) {
     var url = gadgetUrls[i];
     delete this.preloadedGadgetUrls_[url];
@@ -257,9 +257,9 @@ shindig.container.Container.prototype.unloadGadgets = function(gadgetUrls) {
  * @param {string} gadgetUrl gadgets URI to fetch metadata for. to preload.
  * @param {function(Object)} callback Function called with gadget metadata.
  */
-shindig.container.Container.prototype.getGadgetMetadata = function(
+osapi.container.Container.prototype.getGadgetMetadata = function(
     gadgetUrl, callback) {
-  var request = shindig.container.util.newMetadataRequest([gadgetUrl]);
+  var request = osapi.container.util.newMetadataRequest([gadgetUrl]);
   
   this.refreshService_();
   this.service_.getGadgetMetadata(request, callback);
@@ -272,11 +272,11 @@ shindig.container.Container.prototype.getGadgetMetadata = function(
  *                   arguments (with the calling GadgetSite augmented) and the
  *                   callback response itself.
  */
-shindig.container.Container.prototype.rpcRegister = function(service, callback) {
+osapi.container.Container.prototype.rpcRegister = function(service, callback) {
   var self = this;
   gadgets.rpc.register(service, function() {
     // this['f'] is set by calling iframe via gadgets.rpc.
-    this[shindig.container.GadgetSite.RPC_ARG_KEY] =
+    this[osapi.container.GadgetSite.RPC_ARG_KEY] =
         self.getGadgetSiteByIframeId_(this['f']);
     var argsCopy = [this];
     for (var i = 0; i < arguments.length; ++i) {
@@ -292,7 +292,7 @@ shindig.container.Container.prototype.rpcRegister = function(service, callback) 
  * provide your specific functionalities.
  * @param {Object=} opt_config Configuration JSON.
  */
-shindig.container.Container.prototype.onConstructed = function(opt_config) {};
+osapi.container.Container.prototype.onConstructed = function(opt_config) {};
 
 
 /**
@@ -301,8 +301,8 @@ shindig.container.Container.prototype.onConstructed = function(opt_config) {};
  * @param {string} namespace
  * @param {function} func to call when creating the namespace
  */
-shindig.container.Container.addMixin = function(namespace, func) {
-   shindig.container.Container.prototype.mixins_[namespace] = func;
+osapi.container.Container.addMixin = function(namespace, func) {
+   osapi.container.Container.prototype.mixins_[namespace] = func;
 };
 
 
@@ -317,50 +317,50 @@ shindig.container.Container.addMixin = function(namespace, func) {
  * values.
  * @enum {string}
  */
-shindig.container.ContainerConfig = {};
+osapi.container.ContainerConfig = {};
 /**
  * Allow gadgets to render in unspecified view.
  * @type {string}
  * @const
  */
-shindig.container.ContainerConfig.ALLOW_DEFAULT_VIEW = 'allowDefaultView';
+osapi.container.ContainerConfig.ALLOW_DEFAULT_VIEW = 'allowDefaultView';
 /**
  * Whether cajole mode is turned on.
  * @type {string}
  * @const
  */
-shindig.container.ContainerConfig.RENDER_CAJOLE = 'renderCajole';
+osapi.container.ContainerConfig.RENDER_CAJOLE = 'renderCajole';
 /**
  * Whether debug mode is turned on.
  * @type {string}
  * @const
  */
-shindig.container.ContainerConfig.RENDER_DEBUG = 'renderDebug';
+osapi.container.ContainerConfig.RENDER_DEBUG = 'renderDebug';
 /**
  * The debug param name to look for in container URL for per-request debugging.
  * @type {string}
  * @const
  */
-shindig.container.ContainerConfig.RENDER_DEBUG_PARAM = 'renderDebugParam';
+osapi.container.ContainerConfig.RENDER_DEBUG_PARAM = 'renderDebugParam';
 /**
  * Whether test mode is turned on.
  * @type {string}
  * @const
  */
-shindig.container.ContainerConfig.RENDER_TEST = 'renderTest';
+osapi.container.ContainerConfig.RENDER_TEST = 'renderTest';
 /**
  * Security token refresh interval (in ms) for debugging.
  * @type {string}
  * @const
  */
-shindig.container.ContainerConfig.TOKEN_REFRESH_INTERVAL = 'tokenRefreshInterval';
+osapi.container.ContainerConfig.TOKEN_REFRESH_INTERVAL = 'tokenRefreshInterval';
 /**
  * Globally-defined callback function upon gadget navigation. Useful to
  * broadcast timing and stat information back to container.
  * @type {string}
  * @const
  */
-shindig.container.ContainerConfig.NAVIGATE_CALLBACK = 'navigateCallback';
+osapi.container.ContainerConfig.NAVIGATE_CALLBACK = 'navigateCallback';
 
 /**
  * Provide server reference time for preloaded data. 
@@ -368,19 +368,19 @@ shindig.container.ContainerConfig.NAVIGATE_CALLBACK = 'navigateCallback';
  * @type {number}
  * @const
  */
-shindig.container.ContainerConfig.PRELOAD_REF_TIME = 'preloadRefTime';
+osapi.container.ContainerConfig.PRELOAD_REF_TIME = 'preloadRefTime';
 /**
  * Preloaded hash of gadgets metadata
  * @type {Object}
  * @const
  */
-shindig.container.ContainerConfig.PRELOAD_METADATAS = 'preloadMetadatas';
+osapi.container.ContainerConfig.PRELOAD_METADATAS = 'preloadMetadatas';
 /**
  * Preloaded hash of gadgets tokens
  * @type {Object}
  * @const
  */
-shindig.container.ContainerConfig.PRELOAD_TOKENS = 'preloadTokens';
+osapi.container.ContainerConfig.PRELOAD_TOKENS = 'preloadTokens';
 
 
 // -----------------------------------------------------------------------------
@@ -394,14 +394,14 @@ shindig.container.ContainerConfig.PRELOAD_TOKENS = 'preloadTokens';
  * @type {Object}
  * @private
  */
-shindig.container.Container.prototype.mixins_ = {};
+osapi.container.Container.prototype.mixins_ = {};
 
 
 /**
  * Called from the constructor to add any namespace extensions.
  * @private
  */
-shindig.container.Container.prototype.initializeMixins_ = function() {
+osapi.container.Container.prototype.initializeMixins_ = function() {
   for (var i in this.mixins_) { 
     this[i] = new this.mixins_[i](this);  
   }
@@ -413,13 +413,13 @@ shindig.container.Container.prototype.initializeMixins_ = function() {
  * @param {Object} response hash of gadgets data
  * @private
  */
-shindig.container.Container.prototype.addPreloadGadgets_ = function(response) {
+osapi.container.Container.prototype.addPreloadGadgets_ = function(response) {
   for (var id in response) {
     if (response[id].error) {
       gadgets.warn(['Failed to preload gadget ', id, '.'].join(''));
     } else {
       this.addPreloadedGadgetUrl_(id);
-      if (response[id][shindig.container.MetadataResponse.NEEDS_TOKEN_REFRESH]) {
+      if (response[id][osapi.container.MetadataResponse.NEEDS_TOKEN_REFRESH]) {
         // Safe to re-schedule many times.
         this.scheduleRefreshTokens_();
       }
@@ -434,13 +434,13 @@ shindig.container.Container.prototype.addPreloadGadgets_ = function(response) {
  * @param {Object} config container configuration
  * @private
  */
-shindig.container.Container.prototype.preloadFromConfig_ = function(config) {
-  var gadgets = shindig.container.util.getSafeJsonValue(
-      config, shindig.container.ContainerConfig.PRELOAD_METADATAS, {});
-  var tokens = shindig.container.util.getSafeJsonValue(
-      config, shindig.container.ContainerConfig.PRELOAD_TOKENS, {});
-  var refTime = shindig.container.util.getSafeJsonValue(
-      config, shindig.container.ContainerConfig.PRELOAD_REF_TIME, null);
+osapi.container.Container.prototype.preloadFromConfig_ = function(config) {
+  var gadgets = osapi.container.util.getSafeJsonValue(
+      config, osapi.container.ContainerConfig.PRELOAD_METADATAS, {});
+  var tokens = osapi.container.util.getSafeJsonValue(
+      config, osapi.container.ContainerConfig.PRELOAD_TOKENS, {});
+  var refTime = osapi.container.util.getSafeJsonValue(
+      config, osapi.container.ContainerConfig.PRELOAD_REF_TIME, null);
 
   this.service_.addGadgetMetadatas(gadgets, refTime);
   this.service_.addGadgetTokens(tokens, refTime);
@@ -453,7 +453,7 @@ shindig.container.Container.prototype.preloadFromConfig_ = function(config) {
  * to be marked for deletion.
  * @private
  */
-shindig.container.Container.prototype.refreshService_ = function() {
+osapi.container.Container.prototype.refreshService_ = function() {
   var urls = this.getActiveGadgetUrls_();
   this.service_.uncacheStaleGadgetMetadataExcept(urls);
   // TODO: also uncache stale gadget tokens.
@@ -462,10 +462,10 @@ shindig.container.Container.prototype.refreshService_ = function() {
 
 /**
  * @param {string} id Iframe ID of gadget holder contained in the gadget site to get.
- * @return {shindig.container.GadgetSite} The gadget site.
+ * @return {osapi.container.GadgetSite} The gadget site.
  * @private
  */
-shindig.container.Container.prototype.getGadgetSiteByIframeId_ = function(iframeId) {
+osapi.container.Container.prototype.getGadgetSiteByIframeId_ = function(iframeId) {
   // TODO: Support getting only the loading/active gadget in 2x buffers.
   for (var siteId in this.sites_) {
     var site = this.sites_[siteId];
@@ -482,7 +482,7 @@ shindig.container.Container.prototype.getGadgetSiteByIframeId_ = function(iframe
  * Start to schedule refreshing of tokens.
  * @private
  */
-shindig.container.Container.prototype.scheduleRefreshTokens_ = function() {
+osapi.container.Container.prototype.scheduleRefreshTokens_ = function() {
   // TODO: Obtain the interval time by taking the minimum of expiry time of
   // token in all preloaded- and navigated-to- gadgets. This should be obtained
   // from the server. For now, constant on 50% of long-lived tokens (1 hour),
@@ -500,7 +500,7 @@ shindig.container.Container.prototype.scheduleRefreshTokens_ = function() {
  * Stop already-scheduled refreshing of tokens.
  * @private
  */
-shindig.container.Container.prototype.unscheduleRefreshTokens_ = function() {
+osapi.container.Container.prototype.unscheduleRefreshTokens_ = function() {
   if (this.tokenRefreshTimer_) {
     var urls = this.getTokenRefreshableGadgetUrls_();
     if (urls.length <= 0) {
@@ -519,7 +519,7 @@ shindig.container.Container.prototype.unscheduleRefreshTokens_ = function() {
  * @return {Boolean} if token refresh interval is of valid value.
  * @private
  */
-shindig.container.Container.prototype.isRefreshTokensEnabled_ = function() {
+osapi.container.Container.prototype.isRefreshTokensEnabled_ = function() {
   return this.tokenRefreshInterval_ > 0;
 };
 
@@ -528,9 +528,9 @@ shindig.container.Container.prototype.isRefreshTokensEnabled_ = function() {
  * Register standard RPC services
  * @private
  */
-shindig.container.Container.prototype.registerRpcServices_ = function() {
+osapi.container.Container.prototype.registerRpcServices_ = function() {
   this.rpcRegister('resize_iframe', function(rpcArgs, data) {
-    var site = rpcArgs[shindig.container.GadgetSite.RPC_ARG_KEY];
+    var site = rpcArgs[osapi.container.GadgetSite.RPC_ARG_KEY];
     if (site) { // Check if site is not already closed.
       site.setHeight(data);
     }
@@ -544,7 +544,7 @@ shindig.container.Container.prototype.registerRpcServices_ = function() {
  * @param {string} gadgetUrl URL of preloaded gadget.
  * @private
  */
-shindig.container.Container.prototype.addPreloadedGadgetUrl_ = function(gadgetUrl) {
+osapi.container.Container.prototype.addPreloadedGadgetUrl_ = function(gadgetUrl) {
   this.preloadedGadgetUrls_[gadgetUrl] = null;
 };
 
@@ -555,15 +555,15 @@ shindig.container.Container.prototype.addPreloadedGadgetUrl_ = function(gadgetUr
  * @return {Array} An array of URLs of gadgets.
  * @private
  */
-shindig.container.Container.prototype.getTokenRefreshableGadgetUrls_ = function() {
+osapi.container.Container.prototype.getTokenRefreshableGadgetUrls_ = function() {
   var result = {};
   for (var url in this.getActiveGadgetUrls_()) {
     var metadata = this.service_.getCachedGadgetMetadata(url);
-    if (metadata[shindig.container.MetadataResponse.NEEDS_TOKEN_REFRESH]) {
+    if (metadata[osapi.container.MetadataResponse.NEEDS_TOKEN_REFRESH]) {
       result[url] = null;
     }
   }
-  return shindig.container.util.toArrayOfJsonKeys(result);
+  return osapi.container.util.toArrayOfJsonKeys(result);
 };
 
 
@@ -572,8 +572,8 @@ shindig.container.Container.prototype.getTokenRefreshableGadgetUrls_ = function(
  * @return {Object} JSON of gadget URLs.
  * @private
  */
-shindig.container.Container.prototype.getActiveGadgetUrls_ = function() { 
-  return shindig.container.util.mergeJsons(
+osapi.container.Container.prototype.getActiveGadgetUrls_ = function() { 
+  return osapi.container.util.mergeJsons(
       this.getNavigatedGadgetUrls_(),
       this.preloadedGadgetUrls_);
 };
@@ -584,7 +584,7 @@ shindig.container.Container.prototype.getActiveGadgetUrls_ = function() {
  * @return {Object} JSON of gadget URLs.
  * @private
  */
-shindig.container.Container.prototype.getNavigatedGadgetUrls_ = function() {
+osapi.container.Container.prototype.getNavigatedGadgetUrls_ = function() {
   var result = {};
   for (var siteId in this.sites_) {
     var holder = this.sites_[siteId].getActiveGadgetHolder();
@@ -600,9 +600,9 @@ shindig.container.Container.prototype.getNavigatedGadgetUrls_ = function() {
  * Refresh security tokens immediately. This will fetch gadget metadata, along
  * with its token and have the token cache updated.
  */
-shindig.container.Container.prototype.refreshTokens_ = function() {
+osapi.container.Container.prototype.refreshTokens_ = function() {
   var ids = this.getTokenRefreshableGadgetUrls_();
-  var request = shindig.container.util.newTokenRequest(ids);
+  var request = osapi.container.util.newTokenRequest(ids);
 
   var self = this;
   this.service_.getGadgetToken(request, function(response) {
@@ -612,13 +612,13 @@ shindig.container.Container.prototype.refreshTokens_ = function() {
     for (var siteId in self.sites_) {
       var holder = self.sites_[siteId].getActiveGadgetHolder();
       var gadgetInfo = self.service_.getCachedGadgetMetadata(holder.getUrl());
-      if (gadgetInfo[shindig.container.MetadataResponse.NEEDS_TOKEN_REFRESH]) {
+      if (gadgetInfo[osapi.container.MetadataResponse.NEEDS_TOKEN_REFRESH]) {
         var tokenInfo = response[holder.getUrl()];
         if (tokenInfo.error) {
           gadgets.warn(['Failed to get token for gadget ', holder.getUrl(), '.'].join(''));
         } else {
           gadgets.rpc.call(holder.getIframeId(), 'update_security_token', null,
-              tokenInfo[shindig.container.TokenResponse.TOKEN]);
+              tokenInfo[osapi.container.TokenResponse.TOKEN]);
         }
       }
     }

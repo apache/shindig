@@ -27,22 +27,22 @@
  * @param {Object=} opt_config Configuration JSON.
  * @constructor
  */
-shindig.container.Service = function(opt_config) {
+osapi.container.Service = function(opt_config) {
   var config = opt_config || {};
 
   /**
    * @type {string}
    * @private
    */
-  this.apiHost_ = String(shindig.container.util.getSafeJsonValue(config,
-      shindig.container.ServiceConfig.API_HOST, window.__API_URI.getOrigin()));
+  this.apiHost_ = String(osapi.container.util.getSafeJsonValue(config,
+      osapi.container.ServiceConfig.API_HOST, window.__API_URI.getOrigin()));
 
   /**
    * @type {string}
    * @private
    */
-  this.apiPath_ = String(shindig.container.util.getSafeJsonValue(config,
-      shindig.container.ServiceConfig.API_PATH, '/api/rpc/cs'));
+  this.apiPath_ = String(osapi.container.util.getSafeJsonValue(config,
+      osapi.container.ServiceConfig.API_PATH, '/api/rpc/cs'));
 
   /**
    * Map of gadget URLs to cached gadgetInfo response.
@@ -69,7 +69,7 @@ shindig.container.Service = function(opt_config) {
  * provide your specific functionalities.
  * @param {Object=} opt_config Configuration JSON.
  */
-shindig.container.Service.prototype.onConstructed = function(opt_config) {};
+osapi.container.Service.prototype.onConstructed = function(opt_config) {};
 
 
 /**
@@ -80,7 +80,7 @@ shindig.container.Service.prototype.onConstructed = function(opt_config) {};
  * @param {Object} request JSON object representing the request.
  * @param {function(Object)=} opt_callback function to call upon data receive.
  */
-shindig.container.Service.prototype.getGadgetMetadata = function(
+osapi.container.Service.prototype.getGadgetMetadata = function(
     request, opt_callback) {
   // TODO: come up with an expiration mechanism to evict cached gadgets.
   // Can be based on renderParam['nocache']. Be careful with preloaded and
@@ -88,7 +88,7 @@ shindig.container.Service.prototype.getGadgetMetadata = function(
   // unloaded. The later can done without user knowing.
   var callback = opt_callback || function() {};
 
-  var uncachedUrls = shindig.container.util.toArrayOfJsonKeys(
+  var uncachedUrls = osapi.container.util.toArrayOfJsonKeys(
       this.getUncachedDataByRequest_(this.cachedMetadatas_, request));
   var finalResponse = this.getCachedDataByRequest_(this.cachedMetadatas_, request);
 
@@ -99,7 +99,7 @@ shindig.container.Service.prototype.getGadgetMetadata = function(
   // Otherwise, request for uncached metadatas.
   } else {
     var self = this;
-    request = shindig.container.util.newMetadataRequest(uncachedUrls);
+    request = osapi.container.util.newMetadataRequest(uncachedUrls);
     osapi['gadgets']['metadata'](request).execute(function(response) {
 
       // If response entirely fails, augment individual errors.
@@ -110,7 +110,7 @@ shindig.container.Service.prototype.getGadgetMetadata = function(
 
       // Otherwise, cache response. Augment final response with server response.
       } else {
-        var currentTimeMs = shindig.container.util.getCurrentTimeMs();
+        var currentTimeMs = osapi.container.util.getCurrentTimeMs();
         for (var id in response) {
           var resp = response[id];
           self.updateResponse_(resp, id, currentTimeMs);
@@ -130,7 +130,7 @@ shindig.container.Service.prototype.getGadgetMetadata = function(
  * @param {Object} response hash of gadgets metadata
  * @param {Object} data time to override responseTime (in order to support external caching)
  */
-shindig.container.Service.prototype.addGadgetMetadatas = function(response, refTime) {
+osapi.container.Service.prototype.addGadgetMetadatas = function(response, refTime) {
   this.addToCache_(response, refTime, this.cachedMetadatas_);
 };
 
@@ -140,7 +140,7 @@ shindig.container.Service.prototype.addGadgetMetadatas = function(response, refT
  * @param {Object} response hash of gadgets metadata
  * @param {Object} refTime data time to override responseTime (in order to support external caching)
  */
-shindig.container.Service.prototype.addGadgetTokens = function(response, refTime) {
+osapi.container.Service.prototype.addGadgetTokens = function(response, refTime) {
   this.addToCache_(response, refTime, this.cachedTokens_);
 };
 
@@ -152,8 +152,8 @@ shindig.container.Service.prototype.addGadgetTokens = function(response, refTime
  * @param {Object} cache the cache to update
  * @private
  */
-shindig.container.Service.prototype.addToCache_ = function(response, refTime, cache) {
-  var currentTimeMs = shindig.container.util.getCurrentTimeMs();
+osapi.container.Service.prototype.addToCache_ = function(response, refTime, cache) {
+  var currentTimeMs = osapi.container.util.getCurrentTimeMs();
   for (var id in response) {
     var resp = response[id];
     this.updateResponse_(resp, id, currentTimeMs, refTime);
@@ -170,14 +170,14 @@ shindig.container.Service.prototype.addToCache_ = function(response, refTime, ca
  * @param {Object} currentTimeMs current time
  * @private
  */
-shindig.container.Service.prototype.updateResponse_ = function(
+osapi.container.Service.prototype.updateResponse_ = function(
     resp, id, currentTimeMs, opt_refTime) { 
-  resp[shindig.container.MetadataParam.URL] = id;
+  resp[osapi.container.MetadataParam.URL] = id;
   // This ignores time to fetch metadata. Okay, expect to be < 2s.
-  resp[shindig.container.MetadataParam.LOCAL_EXPIRE_TIME]
-      = resp[shindig.container.MetadataResponse.EXPIRE_TIME_MS]
+  resp[osapi.container.MetadataParam.LOCAL_EXPIRE_TIME]
+      = resp[osapi.container.MetadataResponse.EXPIRE_TIME_MS]
       - (opt_refTime == null ? 
-          resp[shindig.container.MetadataResponse.RESPONSE_TIME_MS] : opt_refTime)
+          resp[osapi.container.MetadataResponse.RESPONSE_TIME_MS] : opt_refTime)
       + currentTimeMs;
 };
 
@@ -186,7 +186,7 @@ shindig.container.Service.prototype.updateResponse_ = function(
  * @param {Object} request JSON object representing the request.
  * @param {function(Object)=} opt_callback function to call upon data receive.
  */
-shindig.container.Service.prototype.getGadgetToken = function(
+osapi.container.Service.prototype.getGadgetToken = function(
     request, opt_callback) {
   var callback = opt_callback || function() {};
 
@@ -219,7 +219,7 @@ shindig.container.Service.prototype.getGadgetToken = function(
  * @param {string} url gadget URL to use as key to get cached metadata.
  * @return {string} the gadgetInfo referenced by this URL.
  */
-shindig.container.Service.prototype.getCachedGadgetMetadata = function(url) {
+osapi.container.Service.prototype.getCachedGadgetMetadata = function(url) {
   return this.cachedMetadatas_[url];
 };
 
@@ -228,7 +228,7 @@ shindig.container.Service.prototype.getCachedGadgetMetadata = function(url) {
  * @param {string} url gadget URL to use as key to get cached token.
  * @return {string} the tokenInfo referenced by this URL.
  */
-shindig.container.Service.prototype.getCachedGadgetToken = function(url) {
+osapi.container.Service.prototype.getCachedGadgetToken = function(url) {
   return this.cachedTokens_[url];
 };
 
@@ -236,12 +236,12 @@ shindig.container.Service.prototype.getCachedGadgetToken = function(url) {
 /**
  * @param {Object} urls JSON containing gadget URLs to avoid removing.
  */
-shindig.container.Service.prototype.uncacheStaleGadgetMetadataExcept = function(urls) {
+osapi.container.Service.prototype.uncacheStaleGadgetMetadataExcept = function(urls) {
   for (var url in this.cachedMetadatas_) {
     if (typeof urls[url] === 'undefined') {
       var gadgetInfo = this.cachedMetadatas_[url];
-      if (gadgetInfo[shindig.container.MetadataParam.LOCAL_EXPIRE_TIME]
-          < shindig.container.util.getCurrentTimeMs()) {
+      if (gadgetInfo[osapi.container.MetadataParam.LOCAL_EXPIRE_TIME]
+          < osapi.container.util.getCurrentTimeMs()) {
         delete this.cachedMetadatas_[url];
       }
     }
@@ -252,7 +252,7 @@ shindig.container.Service.prototype.uncacheStaleGadgetMetadataExcept = function(
 /**
  * Initialize OSAPI endpoint methods/interfaces.
  */
-shindig.container.Service.prototype.registerOsapiServices = function() {
+osapi.container.Service.prototype.registerOsapiServices = function() {
   var endPoint = this.apiHost_ + this.apiPath_;
 
   var osapiServicesConfig = {};
@@ -276,7 +276,7 @@ shindig.container.Service.prototype.registerOsapiServices = function() {
  * @return {Object} JSON containing requested and cached entries.
  * @private
  */
-shindig.container.Service.prototype.getCachedDataByRequest_ = function(
+osapi.container.Service.prototype.getCachedDataByRequest_ = function(
     cache, request) {
   return this.filterCachedDataByRequest_(cache, request,
       function(data) { return (typeof data !== 'undefined') });
@@ -290,7 +290,7 @@ shindig.container.Service.prototype.getCachedDataByRequest_ = function(
  * @return {Object} JSON containing requested and uncached entries.
  * @private
  */
-shindig.container.Service.prototype.getUncachedDataByRequest_ = function(
+osapi.container.Service.prototype.getUncachedDataByRequest_ = function(
     cache, request) {
   return this.filterCachedDataByRequest_(cache, request,
       function(data) { return (typeof data === 'undefined') });
@@ -305,7 +305,7 @@ shindig.container.Service.prototype.getUncachedDataByRequest_ = function(
  * @return {Object} JSON containing requested and filtered entries.
  * @private
  */
-shindig.container.Service.prototype.filterCachedDataByRequest_ = function(
+osapi.container.Service.prototype.filterCachedDataByRequest_ = function(
     data, request, filterFunc) {
   var result = {};
   for (var i = 0; i < request['ids'].length; i++) {
@@ -329,18 +329,18 @@ shindig.container.Service.prototype.filterCachedDataByRequest_ = function(
  * JSON to provide extensible configuration.
  * @enum {string}
  */
-shindig.container.ServiceConfig = {};
+osapi.container.ServiceConfig = {};
 
 /**
  * Host to fetch gadget information, via XHR.
  * @type {string}
  * @const
  */
-shindig.container.ServiceConfig.API_HOST = 'apiHost';
+osapi.container.ServiceConfig.API_HOST = 'apiHost';
 
 /**
  * Path to fetch gadget information, via XHR.
  * @type {string}
  * @const
  */
-shindig.container.ServiceConfig.API_PATH = 'apiPath';
+osapi.container.ServiceConfig.API_PATH = 'apiPath';

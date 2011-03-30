@@ -59,13 +59,13 @@ ServiceTest.prototype.setupOsapiGadgetsMetadata = function(response) {
 };
 
 ServiceTest.prototype.setupUtilCurrentTimeMs = function(time) {
-  shindig.container.util.getCurrentTimeMs = function() {
+  osapi.container.util.getCurrentTimeMs = function() {
     return time;
   };
 };
 
 ServiceTest.prototype.testGetGadgetMetadata = function() {
-  var service = new shindig.container.Service();
+  var service = new osapi.container.Service();
   service.cachedMetadatas_ = {
     'cached1.xml' : {
       'url' : 'cached1.xml',
@@ -75,7 +75,7 @@ ServiceTest.prototype.testGetGadgetMetadata = function() {
     }
   };
 
-  var request = shindig.container.util.newMetadataRequest([
+  var request = osapi.container.util.newMetadataRequest([
       'cached1.xml', 'resp1.xml', 'resp2.xml', 'resp3.xml'
   ]);
 
@@ -131,7 +131,7 @@ ServiceTest.prototype.testGetGadgetMetadata = function() {
 };
 
 ServiceTest.prototype.testUncacheStaleGadgetMetadataExcept = function() {
-  var service = new shindig.container.Service();
+  var service = new osapi.container.Service();
   service.cachedMetadatas_ = {
       'cached1.xml' : { 'localExpireTimeMs' : 100 },
       'cached2.xml' : { 'localExpireTimeMs' : 200 },
@@ -150,7 +150,7 @@ ServiceTest.prototype.testUncacheStaleGadgetMetadataExcept = function() {
 };
 
 ServiceTest.prototype.testUpdateResponse = function() {
-  var service = new shindig.container.Service();
+  var service = new osapi.container.Service();
   this.setupUtilCurrentTimeMs(120);
 
   var data = {responseTimeMs : 100, expireTimeMs : 105};
@@ -165,7 +165,7 @@ ServiceTest.prototype.testUpdateResponse = function() {
 };
 
 ServiceTest.prototype.testAddToCache = function() {
-  var service = new shindig.container.Service();
+  var service = new osapi.container.Service();
   this.setupUtilCurrentTimeMs(120);
 
   var cache = {};

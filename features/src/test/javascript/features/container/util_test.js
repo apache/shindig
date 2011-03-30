@@ -40,12 +40,12 @@ UtilTest.prototype.tearDown = function() {
 };
 
 UtilTest.prototype.testIsEmptyJson = function() {
-  this.assertEquals(true, shindig.container.util.isEmptyJson({}));
-  this.assertFalse(shindig.container.util.isEmptyJson({ 'a' : 'b' }));
+  this.assertEquals(true, osapi.container.util.isEmptyJson({}));
+  this.assertFalse(osapi.container.util.isEmptyJson({ 'a' : 'b' }));
 };
 
 UtilTest.prototype.testNewMetadataRequest = function() {
-  var req = shindig.container.util.newMetadataRequest(['a.xml', 'b.xml']);
+  var req = osapi.container.util.newMetadataRequest(['a.xml', 'b.xml']);
   this.assertEquals('abc', req.container);
   this.assertEquals(2, req.ids.length);
   this.assertEquals('a.xml', req.ids[0]);

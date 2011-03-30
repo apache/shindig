@@ -42,7 +42,7 @@ GadgetHolderTest.prototype.tearDown = function() {
 
 GadgetHolderTest.prototype.testNew = function() {
   var element = {};
-  var holder = new shindig.container.GadgetHolder(123, element);
+  var holder = new osapi.container.GadgetHolder(123, element);
   this.assertEquals(element, holder.getElement());
   this.assertNull(holder.getIframeId());
   this.assertNull(holder.getGadgetInfo());
@@ -55,7 +55,7 @@ GadgetHolderTest.prototype.testRenderWithoutRenderParams = function() {
       'iframeUrl' : 'http://shindig/gadgets/ifr?url=gadget.xml'
   };
   this.setupGadgetsRpcSetupReceiver();
-  var holder = new shindig.container.GadgetHolder(123, element);
+  var holder = new osapi.container.GadgetHolder(123, element);
   holder.render(gadgetInfo, {}, {});
   this.assertEquals('<iframe' +
       ' marginwidth="0"' +
@@ -87,7 +87,7 @@ GadgetHolderTest.prototype.testRenderWithRenderRequests = function() {
       'width' : 222
   };
   this.setupGadgetsRpcSetupReceiver();
-  var holder = new shindig.container.GadgetHolder(123, element);
+  var holder = new osapi.container.GadgetHolder(123, element);
   holder.render(gadgetInfo, {}, renderParams);
   this.assertEquals('<iframe' +
       ' marginwidth="0"' +

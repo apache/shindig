@@ -25,7 +25,7 @@
 /**
  * @type {Object}
  */
-shindig.container.util = {};
+osapi.container.util = {};
 
 
 /**
@@ -35,7 +35,7 @@ shindig.container.util = {};
  * @param {*=} defaultValue The default value to return.
  * @return {*}
  */
-shindig.container.util.getSafeJsonValue = function(json, key, defaultValue) {
+osapi.container.util.getSafeJsonValue = function(json, key, defaultValue) {
   return (json[key] != undefined && json[key] != null)
       ? json[key] : defaultValue;
 };
@@ -47,7 +47,7 @@ shindig.container.util.getSafeJsonValue = function(json, key, defaultValue) {
  * @param {Object} json2 JSON to append/replace json1.
  * @return {Object} the resulting JSON.
  */
-shindig.container.util.mergeJsons = function(json1, json2) {
+osapi.container.util.mergeJsons = function(json1, json2) {
   var result = {};
   for (var key in json1) {
     result[key] = json1[key];
@@ -66,7 +66,7 @@ shindig.container.util.mergeJsons = function(json1, json2) {
  * @param {Array} gadgetUrls A list of gadget URLs.
  * @return {Object} the resulting JSON.
  */
-shindig.container.util.newMetadataRequest = function(gadgetUrls) {
+osapi.container.util.newMetadataRequest = function(gadgetUrls) {
   return {
       'container': window.__CONTAINER,
       'ids': gadgetUrls,
@@ -89,7 +89,7 @@ shindig.container.util.newMetadataRequest = function(gadgetUrls) {
  * @param {Array} A list of gadget URLs.
  * @return {Object} the resulting JSON.
  */
-shindig.container.util.newTokenRequest = function(gadgetUrls) {
+osapi.container.util.newTokenRequest = function(gadgetUrls) {
   return {
       'container': window.__CONTAINER,
       'ids': gadgetUrls,
@@ -105,7 +105,7 @@ shindig.container.util.newTokenRequest = function(gadgetUrls) {
  * @param {Object} json to extract keys from.
  * @return {Array.<string>} keys in the json.
  */
-shindig.container.util.toArrayOfJsonKeys = function(json) {
+osapi.container.util.toArrayOfJsonKeys = function(json) {
   var result = [];
   for (var key in json) {
     result.push(key);
@@ -119,7 +119,7 @@ shindig.container.util.toArrayOfJsonKeys = function(json) {
  * @param {Object} json to check.
  * @return {Boolean}
  */
-shindig.container.util.isEmptyJson = function(json) {
+osapi.container.util.isEmptyJson = function(json) {
   for (var key in json) {
     return false;
   }
@@ -131,7 +131,7 @@ shindig.container.util.isEmptyJson = function(json) {
  * Put up a warning message to console.
  * @param {String} message to warn with.
  */
-shindig.container.util.warn = function(message) {
+osapi.container.util.warn = function(message) {
   if (console && console.warn) {
     console.warn(message);
   }
@@ -141,6 +141,6 @@ shindig.container.util.warn = function(message) {
 /**
  * @return {number} current time in ms.
  */
-shindig.container.util.getCurrentTimeMs = function() {
+osapi.container.util.getCurrentTimeMs = function() {
   return new Date().getTime();
 };

@@ -27,7 +27,7 @@
  * @param {Element} el The element to render gadgets in.
  * @constructor
  */
-shindig.container.GadgetHolder = function(siteId, el) {
+osapi.container.GadgetHolder = function(siteId, el) {
   /**
    * Unique numeric gadget ID.
    * @type {number}
@@ -87,13 +87,13 @@ shindig.container.GadgetHolder = function(siteId, el) {
  * Callback that occurs after instantiation/construction of this. Override to
  * provide your specific functionalities.
  */
-shindig.container.GadgetHolder.prototype.onConstructed = function() {};
+osapi.container.GadgetHolder.prototype.onConstructed = function() {};
 
 
 /**
  * @return {Element} The HTML element containing the rendered gadget.
  */
-shindig.container.GadgetHolder.prototype.getElement = function() {
+osapi.container.GadgetHolder.prototype.getElement = function() {
   return this.el_;
 };
 
@@ -101,7 +101,7 @@ shindig.container.GadgetHolder.prototype.getElement = function() {
 /**
  * @return {string} The unique string ID for gadget iframe.
  */
-shindig.container.GadgetHolder.prototype.getIframeId = function() {
+osapi.container.GadgetHolder.prototype.getIframeId = function() {
   return this.iframeId_;
 };
 
@@ -109,7 +109,7 @@ shindig.container.GadgetHolder.prototype.getIframeId = function() {
 /**
  * @return {Object} The metadata of gadget.
  */
-shindig.container.GadgetHolder.prototype.getGadgetInfo = function() {
+osapi.container.GadgetHolder.prototype.getGadgetInfo = function() {
   return this.gadgetInfo_;
 };
 
@@ -117,7 +117,7 @@ shindig.container.GadgetHolder.prototype.getGadgetInfo = function() {
 /**
  * Remove the gadget from this.
  */
-shindig.container.GadgetHolder.prototype.dispose = function() {
+osapi.container.GadgetHolder.prototype.dispose = function() {
   this.gadgetInfo_ = null;
 };
 
@@ -125,7 +125,7 @@ shindig.container.GadgetHolder.prototype.dispose = function() {
 /**
  * @return {string} The URL of current gadget.
  */
-shindig.container.GadgetHolder.prototype.getUrl = function() {
+osapi.container.GadgetHolder.prototype.getUrl = function() {
   return (this.gadgetInfo_) ? this.gadgetInfo_['url'] : null;
 };
 
@@ -133,24 +133,24 @@ shindig.container.GadgetHolder.prototype.getUrl = function() {
 /**
  * @return {string} The view of current gadget.
  */
-shindig.container.GadgetHolder.prototype.getView = function() {
-  return this.renderParams_[shindig.container.RenderParam.VIEW];
+osapi.container.GadgetHolder.prototype.getView = function() {
+  return this.renderParams_[osapi.container.RenderParam.VIEW];
 };
 
 
 /**
  * @return {Node} The iframe element containing gadget.
  */
-shindig.container.GadgetHolder.prototype.getIframeElement = function() {
+osapi.container.GadgetHolder.prototype.getIframeElement = function() {
   return this.el_.firstChild;
 };
 
 
 /**
  * @param {string} value The value to set this social/security token to.
- * @return {shindig.container.GadgetHolder}
+ * @return {osapi.container.GadgetHolder}
  */
-shindig.container.GadgetHolder.prototype.setSecurityToken = function(value) {
+osapi.container.GadgetHolder.prototype.setSecurityToken = function(value) {
   this.securityToken_ = value;
   return this;
 };
@@ -159,12 +159,12 @@ shindig.container.GadgetHolder.prototype.setSecurityToken = function(value) {
 /**
  * Render a gadget into the element.
  * @param {Object} gadgetInfo the JSON gadget description.
- * @param {Object} viewParams Look at shindig.container.ViewParam.
- * @param {Object} renderParams Look at shindig.container.RenderParam.
+ * @param {Object} viewParams Look at osapi.container.ViewParam.
+ * @param {Object} renderParams Look at osapi.container.RenderParam.
  */
-shindig.container.GadgetHolder.prototype.render = function(
+osapi.container.GadgetHolder.prototype.render = function(
     gadgetInfo, viewParams, renderParams) {
-  this.iframeId_ = shindig.container.GadgetHolder.IFRAME_ID_PREFIX_
+  this.iframeId_ = osapi.container.GadgetHolder.IFRAME_ID_PREFIX_
       + this.siteId_;
   this.gadgetInfo_ = gadgetInfo;
   this.viewParams_ = viewParams;
@@ -188,19 +188,19 @@ shindig.container.GadgetHolder.prototype.render = function(
  * @type {string}
  * @private
  */
-shindig.container.GadgetHolder.IFRAME_ID_PREFIX_ = '__gadget_';
+osapi.container.GadgetHolder.IFRAME_ID_PREFIX_ = '__gadget_';
 
 
 /**
  * @private
  */
-shindig.container.GadgetHolder.prototype.doNormalIframeHtml_ = function() {
+osapi.container.GadgetHolder.prototype.doNormalIframeHtml_ = function() {
   this.el_.innerHTML = this.getIframeHtml_();
 
   // Set up RPC channel. RPC relay url is on gmodules, relative to base of the
   // container. Assumes container has set up forwarding to gmodules at /gadgets.
   var iframeUri = shindig.uri(
-      this.gadgetInfo_[shindig.container.MetadataResponse.IFRAME_URL]);
+      this.gadgetInfo_[osapi.container.MetadataResponse.IFRAME_URL]);
   var relayUri = shindig.uri()
       .setSchema(iframeUri.getSchema())
       .setAuthority(iframeUri.getAuthority())
@@ -213,7 +213,7 @@ shindig.container.GadgetHolder.prototype.doNormalIframeHtml_ = function() {
 /**
  * @private
  */
-shindig.container.GadgetHolder.prototype.doOaaIframeHtml_ = function() {
+osapi.container.GadgetHolder.prototype.doOaaIframeHtml_ = function() {
   var iframeParams = {
       'id': this.iframeId_,
       'name': this.iframeId_,
@@ -224,9 +224,9 @@ shindig.container.GadgetHolder.prototype.doOaaIframeHtml_ = function() {
       'frameborder': '0',
       'vspace': '0',
       'hspace': '0',
-      'class': this.renderParams_[shindig.container.RenderParam.CLASS],
-      'height': this.renderParams_[shindig.container.RenderParam.HEIGHT],
-      'width': this.renderParams_[shindig.container.RenderParam.WIDTH]
+      'class': this.renderParams_[osapi.container.RenderParam.CLASS],
+      'height': this.renderParams_[osapi.container.RenderParam.HEIGHT],
+      'width': this.renderParams_[osapi.container.RenderParam.WIDTH]
   };
   new OpenAjax.hub.IframeContainer(
       gadgets.pubsub2router.hub,
@@ -257,10 +257,10 @@ shindig.container.GadgetHolder.prototype.doOaaIframeHtml_ = function() {
  * @param {string} feature the feature to look for.
  * @private
  */
-shindig.container.GadgetHolder.prototype.hasFeature_ = function(gadgetInfo, feature) {
-  var modulePrefs = gadgetInfo[shindig.container.MetadataResponse.MODULE_PREFS];
+osapi.container.GadgetHolder.prototype.hasFeature_ = function(gadgetInfo, feature) {
+  var modulePrefs = gadgetInfo[osapi.container.MetadataResponse.MODULE_PREFS];
   if (modulePrefs) {
-    var features = modulePrefs[shindig.container.MetadataResponse.FEATURES];
+    var features = modulePrefs[osapi.container.MetadataResponse.FEATURES];
     if (features && features[feature]) {
       return true;
     }
@@ -274,7 +274,7 @@ shindig.container.GadgetHolder.prototype.hasFeature_ = function(gadgetInfo, feat
  * @return {string} The HTML content of this gadget that can be rendered.
  * @private
  */
-shindig.container.GadgetHolder.prototype.getIframeHtml_ = function() {
+osapi.container.GadgetHolder.prototype.getIframeHtml_ = function() {
   var iframeParams = {
     'id': this.iframeId_,
     'name': this.iframeId_,
@@ -285,9 +285,9 @@ shindig.container.GadgetHolder.prototype.getIframeHtml_ = function() {
     'frameborder': '0',
     'vspace': '0',
     'hspace': '0',
-    'class': this.renderParams_[shindig.container.RenderParam.CLASS],
-    'height': this.renderParams_[shindig.container.RenderParam.HEIGHT],
-    'width': this.renderParams_[shindig.container.RenderParam.WIDTH]
+    'class': this.renderParams_[osapi.container.RenderParam.CLASS],
+    'height': this.renderParams_[osapi.container.RenderParam.HEIGHT],
+    'width': this.renderParams_[osapi.container.RenderParam.WIDTH]
   };
 
   // Do not use DOM API (createElement(), setAttribute()), since it is slower,
@@ -316,13 +316,13 @@ shindig.container.GadgetHolder.prototype.getIframeHtml_ = function() {
  * @private
  * @return {string} the rendering iframe URL.
  */
-shindig.container.GadgetHolder.prototype.getIframeUrl_ = function() {
-  var uri = shindig.uri(this.gadgetInfo_[shindig.container.MetadataResponse.IFRAME_URL]);
-  uri.setQP('debug', this.renderParams_[shindig.container.RenderParam.DEBUG] ? '1' : '0');
-  uri.setQP('nocache', this.renderParams_[shindig.container.RenderParam.NO_CACHE] ? '1' : '0');
-  uri.setQP('testmode', this.renderParams_[shindig.container.RenderParam.TEST_MODE] ? '1' : '0');
+osapi.container.GadgetHolder.prototype.getIframeUrl_ = function() {
+  var uri = shindig.uri(this.gadgetInfo_[osapi.container.MetadataResponse.IFRAME_URL]);
+  uri.setQP('debug', this.renderParams_[osapi.container.RenderParam.DEBUG] ? '1' : '0');
+  uri.setQP('nocache', this.renderParams_[osapi.container.RenderParam.NO_CACHE] ? '1' : '0');
+  uri.setQP('testmode', this.renderParams_[osapi.container.RenderParam.TEST_MODE] ? '1' : '0');
   uri.setQP('view', this.getView());
-  if (this.renderParams_[shindig.container.RenderParam.CAJOLE]) {
+  if (this.renderParams_[osapi.container.RenderParam.CAJOLE]) {
     var libs = uri.getQP('libs');
     if (libs == null || libs == '') uri.setQP('libs', 'caja');
     else uri.setQP('libs', [ libs, ':caja' ].join(''));
@@ -343,7 +343,7 @@ shindig.container.GadgetHolder.prototype.getIframeUrl_ = function() {
   // Uniquely identify possibly-same gadgets on a page.
   uri.setQP('mid', String(this.siteId_));
 
-  if (!shindig.container.util.isEmptyJson(this.viewParams_)) {
+  if (!osapi.container.util.isEmptyJson(this.viewParams_)) {
     var gadgetParamText = gadgets.json.stringify(this.viewParams_);
     uri.setFP('view-params', gadgetParamText);
   }
@@ -361,8 +361,8 @@ shindig.container.GadgetHolder.prototype.getIframeUrl_ = function() {
  * @return {string} The URL with up_ replaced by those specified in userPrefs.
  * @private
  */
-shindig.container.GadgetHolder.prototype.updateUserPrefParams_ = function(uri) {
-  var userPrefs = this.renderParams_[shindig.container.RenderParam.USER_PREFS];
+osapi.container.GadgetHolder.prototype.updateUserPrefParams_ = function(uri) {
+  var userPrefs = this.renderParams_[osapi.container.RenderParam.USER_PREFS];
   if (userPrefs) {
     for (var up in userPrefs) {
       var upKey = 'up_' + up;

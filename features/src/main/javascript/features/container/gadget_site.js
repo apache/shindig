@@ -32,9 +32,9 @@
  *        {Element} bufferEl Optional element for double buffering.
  * @constructor
  */
-shindig.container.GadgetSite = function(args) {
+osapi.container.GadgetSite = function(args) {
   /**
-   * @type {shindig.container.Service}
+   * @type {osapi.container.Service}
    * @private
    */
   this.service_ = args['service'];
@@ -62,7 +62,7 @@ shindig.container.GadgetSite = function(args) {
    * @type {number}
    * @private
    */
-  this.id_ = shindig.container.GadgetSite.nextUniqueId_++;
+  this.id_ = osapi.container.GadgetSite.nextUniqueId_++;
 
   /**
    * ID of parent gadget.
@@ -73,14 +73,14 @@ shindig.container.GadgetSite = function(args) {
 
   /**
    * Information about the currently visible gadget.
-   * @type {shindig.container.GadgetHolder?}
+   * @type {osapi.container.GadgetHolder?}
    * @private
    */
   this.currentGadgetHolder_ = null;
 
   /**
    * Information about the currently loading gadget.
-   * @type {shindig.container.GadgetHolder?}
+   * @type {osapi.container.GadgetHolder?}
    * @private
    */
   this.loadingGadgetHolder_ = null;
@@ -93,15 +93,15 @@ shindig.container.GadgetSite = function(args) {
  * Callback that occurs after instantiation/construction of this. Override to
  * provide your specific functionalities.
  */
-shindig.container.GadgetSite.prototype.onConstructed = function() {};
+osapi.container.GadgetSite.prototype.onConstructed = function() {};
 
 
 /**
  * Set the height of the gadget iframe.
  * @param {number} value The new height.
- * @return {shindig.container.GadgetSite} This instance.
+ * @return {osapi.container.GadgetSite} This instance.
  */
-shindig.container.GadgetSite.prototype.setHeight = function(value) {
+osapi.container.GadgetSite.prototype.setHeight = function(value) {
   var holder = this.getActiveGadgetHolder();
   if (holder) {
     var iframeEl = holder.getIframeElement();
@@ -116,9 +116,9 @@ shindig.container.GadgetSite.prototype.setHeight = function(value) {
 /**
  * Set the width of the gadget iframe.
  * @param {number} value The new width.
- * @return {shindig.container.GadgetSite} This instance.
+ * @return {osapi.container.GadgetSite} This instance.
  */
-shindig.container.GadgetSite.prototype.setWidth = function(value) {
+osapi.container.GadgetSite.prototype.setWidth = function(value) {
   var holder = this.getActiveGadgetHolder();
   if (holder) {
     var iframeEl = holder.getIframeElement();
@@ -132,9 +132,9 @@ shindig.container.GadgetSite.prototype.setWidth = function(value) {
 
 /**
  * @param {string} value ID of parent element containing this site.
- * @return {shindig.container.GadgetSite} This instance.
+ * @return {osapi.container.GadgetSite} This instance.
  */
-shindig.container.GadgetSite.prototype.setParentId = function(value) {
+osapi.container.GadgetSite.prototype.setParentId = function(value) {
   this.parentId_ = value;
   return this;
 };
@@ -143,7 +143,7 @@ shindig.container.GadgetSite.prototype.setParentId = function(value) {
 /**
  * @return {number} The ID of this gadget site.
  */
-shindig.container.GadgetSite.prototype.getId = function() {
+osapi.container.GadgetSite.prototype.getId = function() {
   return this.id_;
 };
 
@@ -151,9 +151,9 @@ shindig.container.GadgetSite.prototype.getId = function() {
 /**
  * Returns the currently-active gadget, the loading gadget if a gadget is
  * loading, or the currently visible gadget.
- * @return {shindig.container.GadgetHolder} The gadget holder.
+ * @return {osapi.container.GadgetHolder} The gadget holder.
  */
-shindig.container.GadgetSite.prototype.getActiveGadgetHolder = function() {
+osapi.container.GadgetSite.prototype.getActiveGadgetHolder = function() {
   return this.loadingGadgetHolder_ || this.currentGadgetHolder_;
 };
 
@@ -165,17 +165,17 @@ shindig.container.GadgetSite.prototype.getActiveGadgetHolder = function() {
  * @param {Object=} opt_gadgetInfo Optional gadget info.
  * @return {Object} JSON representing the feature.
  */
-shindig.container.GadgetSite.prototype.getFeature = function(name, opt_gadgetInfo) {
+osapi.container.GadgetSite.prototype.getFeature = function(name, opt_gadgetInfo) {
   var gadgetInfo = opt_gadgetInfo || this.getActiveGadgetHolder().getGadgetInfo();
-  return gadgetInfo[shindig.container.MetadataResponse.FEATURES] &&
-      gadgetInfo[shindig.container.MetadataResponse.FEATURES][name];
+  return gadgetInfo[osapi.container.MetadataResponse.FEATURES] &&
+      gadgetInfo[osapi.container.MetadataResponse.FEATURES][name];
 };
 
 
 /**
  * @return {string?} ID parent element containing this site.
  */
-shindig.container.GadgetSite.prototype.getParentId = function() {
+osapi.container.GadgetSite.prototype.getParentId = function() {
   return this.parentId_;
 };
 
@@ -183,34 +183,34 @@ shindig.container.GadgetSite.prototype.getParentId = function() {
 /**
  * Render a gadget in the site, by URI of the gadget XML.
  * @param {string} gadgetUrl The absolute URL to gadget.
- * @param {Object} viewParams Look at shindig.container.ViewParam.
- * @param {Object} renderParams Look at shindig.container.RenderParam.
+ * @param {Object} viewParams Look at osapi.container.ViewParam.
+ * @param {Object} renderParams Look at osapi.container.RenderParam.
  * @param {function(Object)=} opt_callback Function called with gadget info
  *     after navigation has occurred.
  */
-shindig.container.GadgetSite.prototype.navigateTo = function(
+osapi.container.GadgetSite.prototype.navigateTo = function(
     gadgetUrl, viewParams, renderParams, opt_callback) {
-  var start = shindig.container.util.getCurrentTimeMs();
+  var start = osapi.container.util.getCurrentTimeMs();
   var cached = this.service_.getCachedGadgetMetadata(gadgetUrl);
   var callback = opt_callback || function() {};
-  var request = shindig.container.util.newMetadataRequest([gadgetUrl]);
+  var request = osapi.container.util.newMetadataRequest([gadgetUrl]);
   var self = this;
   this.service_.getGadgetMetadata(request, function(response) {
-    var xrt = (!cached) ? (shindig.container.util.getCurrentTimeMs() - start) : 0;
+    var xrt = (!cached) ? (osapi.container.util.getCurrentTimeMs() - start) : 0;
     var gadgetInfo = response[gadgetUrl];
     if (gadgetInfo.error) {
       var message = ['Failed to navigate for gadget ', gadgetUrl, '.'].join('');
-      shindig.container.util.warn(message);
+      osapi.container.util.warn(message);
     } else {
       self.render(gadgetInfo, viewParams, renderParams);
     }
 
     // Return metadata server response time.
     var timingInfo = {};
-    timingInfo[shindig.container.NavigateTiming.URL] = gadgetUrl;
-    timingInfo[shindig.container.NavigateTiming.ID] = self.id_;
-    timingInfo[shindig.container.NavigateTiming.START] = start;
-    timingInfo[shindig.container.NavigateTiming.XRT] = xrt;
+    timingInfo[osapi.container.NavigateTiming.URL] = gadgetUrl;
+    timingInfo[osapi.container.NavigateTiming.ID] = self.id_;
+    timingInfo[osapi.container.NavigateTiming.START] = start;
+    timingInfo[osapi.container.NavigateTiming.XRT] = xrt;
     self.onNavigateTo(timingInfo);
 
     // Possibly with an error. Leave to user to deal with raw response.
@@ -223,7 +223,7 @@ shindig.container.GadgetSite.prototype.navigateTo = function(
  * Provide overridable callback invoked when navigateTo is completed.
  * @param {Object} data the statistic/timing information to return.
  */
-shindig.container.GadgetSite.prototype.onNavigateTo = function(data) {
+osapi.container.GadgetSite.prototype.onNavigateTo = function(data) {
   if (this.navigateCallback_) {
     var func = window[this.navigateCallback_];
     if (typeof func === 'function') {
@@ -236,10 +236,10 @@ shindig.container.GadgetSite.prototype.onNavigateTo = function(data) {
 /**
  * Render a gadget in this site, using a JSON gadget description.
  * @param {Object} gadgetInfo the JSON gadget description.
- * @param {Object} viewParams Look at shindig.container.ViewParam.
- * @param {Object} renderParams Look at shindig.container.RenderParam.
+ * @param {Object} viewParams Look at osapi.container.ViewParam.
+ * @param {Object} renderParams Look at osapi.container.RenderParam.
  */
-shindig.container.GadgetSite.prototype.render = function(
+osapi.container.GadgetSite.prototype.render = function(
     gadgetInfo, viewParams, renderParams) {
   var curUrl = this.currentGadgetHolder_ ? this.currentGadgetHolder_.getUrl() : null;
 
@@ -249,15 +249,15 @@ shindig.container.GadgetSite.prototype.render = function(
   }
   
   // Find requested view.
-  var view = renderParams[shindig.container.RenderParam.VIEW]
-      || viewParams[shindig.container.ViewParam.VIEW]
+  var view = renderParams[osapi.container.RenderParam.VIEW]
+      || viewParams[osapi.container.ViewParam.VIEW]
       || previousView;
-  var viewInfo = gadgetInfo[shindig.container.MetadataResponse.VIEWS][view];
+  var viewInfo = gadgetInfo[osapi.container.MetadataResponse.VIEWS][view];
 
   // Allow default view if requested view is not found.
-  if (!viewInfo && renderParams[shindig.container.RenderParam.ALLOW_DEFAULT_VIEW]) {
-    view = shindig.container.GadgetSite.DEFAULT_VIEW_;
-    viewInfo = gadgetInfo[shindig.container.MetadataResponse.VIEWS][view];
+  if (!viewInfo && renderParams[osapi.container.RenderParam.ALLOW_DEFAULT_VIEW]) {
+    view = osapi.container.GadgetSite.DEFAULT_VIEW_;
+    viewInfo = gadgetInfo[osapi.container.MetadataResponse.VIEWS][view];
   }
 
   // Check if view exists.
@@ -268,24 +268,24 @@ shindig.container.GadgetSite.prototype.render = function(
 
   // Load into the double-buffer if there is one.
   var el = this.loadingGadgetEl_ || this.currentGadgetEl_;
-  this.loadingGadgetHolder_ = new shindig.container.GadgetHolder(this.id_, el);
+  this.loadingGadgetHolder_ = new osapi.container.GadgetHolder(this.id_, el);
 
   var localRenderParams = {};
   for (var key in renderParams) {
     localRenderParams[key] = renderParams[key];
   }
 
-  localRenderParams[shindig.container.RenderParam.VIEW] = view;
-  localRenderParams[shindig.container.RenderParam.HEIGHT]
-      = renderParams[shindig.container.RenderParam.HEIGHT]
-      || viewInfo[shindig.container.MetadataResponse.PREFERRED_HEIGHT]
-      || gadgetInfo[shindig.container.MetadataResponse.MODULE_PREFS][shindig.container.MetadataResponse.HEIGHT]
-      || String(shindig.container.GadgetSite.DEFAULT_HEIGHT_);
-  localRenderParams[shindig.container.RenderParam.WIDTH]
-      = renderParams[shindig.container.RenderParam.WIDTH]
-      || viewInfo[shindig.container.MetadataResponse.PREFERRED_WIDTH]
-      || gadgetInfo[shindig.container.MetadataResponse.MODULE_PREFS][shindig.container.MetadataResponse.WIDTH]
-      || String(shindig.container.GadgetSite.DEFAULT_WIDTH_);
+  localRenderParams[osapi.container.RenderParam.VIEW] = view;
+  localRenderParams[osapi.container.RenderParam.HEIGHT]
+      = renderParams[osapi.container.RenderParam.HEIGHT]
+      || viewInfo[osapi.container.MetadataResponse.PREFERRED_HEIGHT]
+      || gadgetInfo[osapi.container.MetadataResponse.MODULE_PREFS][osapi.container.MetadataResponse.HEIGHT]
+      || String(osapi.container.GadgetSite.DEFAULT_HEIGHT_);
+  localRenderParams[osapi.container.RenderParam.WIDTH]
+      = renderParams[osapi.container.RenderParam.WIDTH]
+      || viewInfo[osapi.container.MetadataResponse.PREFERRED_WIDTH]
+      || gadgetInfo[osapi.container.MetadataResponse.MODULE_PREFS][osapi.container.MetadataResponse.WIDTH]
+      || String(osapi.container.GadgetSite.DEFAULT_WIDTH_);
 
   this.updateSecurityToken_(gadgetInfo, localRenderParams);
 
@@ -298,10 +298,10 @@ shindig.container.GadgetSite.prototype.render = function(
 /**
  * Called when a gadget loads in the site. Uses double buffer, if present.
  * @param {Object} gadgetInfo the JSON gadget description.
- * @param {Object} viewParams Look at shindig.container.ViewParam.
- * @param {Object} renderParams Look at shindig.container.RenderParam.
+ * @param {Object} viewParams Look at osapi.container.ViewParam.
+ * @param {Object} renderParams Look at osapi.container.RenderParam.
  */
-shindig.container.GadgetSite.prototype.onRender = function(
+osapi.container.GadgetSite.prototype.onRender = function(
     gadgetInfo, viewParams, renderParams) {
   this.swapBuffers_();
 
@@ -320,7 +320,7 @@ shindig.container.GadgetSite.prototype.onRender = function(
  * @param {function(Object)} callback Function to call upon RPC completion.
  * @param {...number} var_args payload to pass to the recipient.
  */
-shindig.container.GadgetSite.prototype.rpcCall = function(
+osapi.container.GadgetSite.prototype.rpcCall = function(
     serviceName, callback, var_args) {
   if (this.currentGadgetHolder_) {
     gadgets.rpc.call(this.currentGadgetHolder_.getIframeId(),
@@ -333,13 +333,13 @@ shindig.container.GadgetSite.prototype.rpcCall = function(
  * If token has been fetched at least once, set the token to the most recent
  * one. Otherwise, leave it.
  * @param {Object} gadgetInfo The gadgetInfo used to update security token.
- * @param {Object} renderParams Look at shindig.container.RenderParam.
+ * @param {Object} renderParams Look at osapi.container.RenderParam.
  */
-shindig.container.GadgetSite.prototype.updateSecurityToken_
+osapi.container.GadgetSite.prototype.updateSecurityToken_
     = function(gadgetInfo, renderParams) {
   var tokenInfo = this.service_.getCachedGadgetToken(gadgetInfo['url']);
   if (tokenInfo) {
-    var token = tokenInfo[shindig.container.TokenResponse.TOKEN];
+    var token = tokenInfo[osapi.container.TokenResponse.TOKEN];
     this.loadingGadgetHolder_.setSecurityToken(token);
   }
 };
@@ -350,7 +350,7 @@ shindig.container.GadgetSite.prototype.updateSecurityToken_
  * containing document. Clients should only call this if they know it is OK
  * for removal.
  */
-shindig.container.GadgetSite.prototype.close = function() {
+osapi.container.GadgetSite.prototype.close = function() {
   if (this.loadingGadgetEl_ && this.loadingGadgetEl_.firstChild) {
     this.loadingGadgetEl_.removeChild(this.loadingGadgetEl_.firstChild);
   }
@@ -371,14 +371,14 @@ shindig.container.GadgetSite.prototype.close = function() {
  * @type {number}
  * @private
  */
-shindig.container.GadgetSite.nextUniqueId_ = 0;
+osapi.container.GadgetSite.nextUniqueId_ = 0;
 
 
 /**
  * Swap the double buffer elements, if there is a double buffer.
  * @private
  */
-shindig.container.GadgetSite.prototype.swapBuffers_ = function() {
+osapi.container.GadgetSite.prototype.swapBuffers_ = function() {
   // Only process double buffering if loading gadget exists
   if (this.loadingGadgetEl_) {
     this.loadingGadgetEl_.style.left = '';
@@ -398,7 +398,7 @@ shindig.container.GadgetSite.prototype.swapBuffers_ = function() {
  * Key to identify the calling gadget site.
  * @type {string}
  */
-shindig.container.GadgetSite.RPC_ARG_KEY = 'gs';
+osapi.container.GadgetSite.RPC_ARG_KEY = 'gs';
 
 
 /**
@@ -407,7 +407,7 @@ shindig.container.GadgetSite.RPC_ARG_KEY = 'gs';
  * @type {number}
  * @private
  */
-shindig.container.GadgetSite.DEFAULT_HEIGHT_ = 200;
+osapi.container.GadgetSite.DEFAULT_HEIGHT_ = 200;
 
 
 /**
@@ -416,7 +416,7 @@ shindig.container.GadgetSite.DEFAULT_HEIGHT_ = 200;
  * @type {number}
  * @private
  */
-shindig.container.GadgetSite.DEFAULT_WIDTH_ = 320;
+osapi.container.GadgetSite.DEFAULT_WIDTH_ = 320;
 
 
 /**
@@ -424,4 +424,4 @@ shindig.container.GadgetSite.DEFAULT_WIDTH_ = 320;
  * @type {string}
  * @private
  */
-shindig.container.GadgetSite.DEFAULT_VIEW_ = 'default';
+osapi.container.GadgetSite.DEFAULT_VIEW_ = 'default';

@@ -34,20 +34,20 @@ ContainerTest.prototype.setUp = function() {
   window.__API_URI = shindig.uri('http://shindig.com');
   this.containerUri = window.__CONTAINER_URI;
   window.__CONTAINER_URI = shindig.uri('http://container.com');
-  this.shindigContainerGadgetSite = shindig.container.GadgetSite;
+  this.shindigContainerGadgetSite = osapi.container.GadgetSite;
   this.gadgetsRpc = gadgets.rpc;
 };
 
 ContainerTest.prototype.tearDown = function() {
   window.__API_URI = this.apiUri;
   window.__CONTAINER_URI = this.containerUri;
-  shindig.container.GadgetSite = this.shindigContainerGadgetSite;
+  osapi.container.GadgetSite = this.shindigContainerGadgetSite;
   gadgets.rpc = this.gadgetsRpc;
 };
 
 ContainerTest.prototype.testUnloadGadget = function() {
   this.setupGadgetsRpcRegister();
-  var container = new shindig.container.Container();
+  var container = new osapi.container.Container();
   container.preloadedGadgetUrls_ = {
     'preloaded1.xml' : {},
     'preloaded2.xml' : {}
@@ -59,7 +59,7 @@ ContainerTest.prototype.testUnloadGadget = function() {
 
 ContainerTest.prototype.testUnloadGadgets = function() {
   this.setupGadgetsRpcRegister();
-  var container = new shindig.container.Container();
+  var container = new osapi.container.Container();
   container.preloadedGadgetUrls_ = {
     'preloaded1.xml' : {},
     'preloaded2.xml' : {},
@@ -73,7 +73,7 @@ ContainerTest.prototype.testUnloadGadgets = function() {
 
 ContainerTest.prototype.testPreloadConfigGadgets = function() {
   this.setupGadgetsRpcRegister();
-  var container = new shindig.container.Container( 
+  var container = new osapi.container.Container( 
     { 'preloadMetadatas' : { 'preloaded1.xml' : {}}});
   var test = null;
   this.assertTrue('1', 'preloaded1.xml' in container.preloadedGadgetUrls_);
@@ -83,7 +83,7 @@ ContainerTest.prototype.testPreloadConfigGadgets = function() {
 
 ContainerTest.prototype.testNavigateGadget = function() {
   this.setupGadgetsRpcRegister();
-  var container = new shindig.container.Container({
+  var container = new osapi.container.Container({
     'allowDefaultView' : true,
     'renderCajole' : true,
     'renderDebug' : true,
@@ -103,7 +103,7 @@ ContainerTest.prototype.testNavigateGadget = function() {
 
 ContainerTest.prototype.testNewGadgetSite = function() {
   this.setupGadgetsRpcRegister();
-  var container = new shindig.container.Container();
+  var container = new osapi.container.Container();
   this.setupGadgetSite(1, {}, null);
   var site1 = container.newGadgetSite(null);
   this.setupGadgetSite(2, {}, null);
@@ -114,14 +114,14 @@ ContainerTest.prototype.testNewGadgetSite = function() {
 
 ContainerTest.prototype.testMixinViaPrototype = function() {
   this.setupGadgetsRpcRegister();
-  shindig.container.Container.prototype.mixins_['test'] = function(context) {
+  osapi.container.Container.prototype.mixins_['test'] = function(context) {
     return {
       'getSitesLength' : function() {
         return context.sites_.length;
       }
     };
   };
-  var container = new shindig.container.Container();
+  var container = new osapi.container.Container();
   this.setupGadgetSite(1, {}, null);
   container.newGadgetSite(null);
   this.assertTrue(container.sites_[1] != null);
@@ -130,14 +130,14 @@ ContainerTest.prototype.testMixinViaPrototype = function() {
 
 ContainerTest.prototype.testMixinViaAdd = function() {
   this.setupGadgetsRpcRegister();
-  shindig.container.Container.addMixin('test2', function(context) {
+  osapi.container.Container.addMixin('test2', function(context) {
     return {
       'getSitesLength' : function() {
         return context.sites_.length;
       }
     };
   });
-  var container = new shindig.container.Container();
+  var container = new osapi.container.Container();
   this.setupGadgetSite(1, {}, null);
   container.newGadgetSite(null);
   this.assertTrue(container.sites_[1] != null);
@@ -146,7 +146,7 @@ ContainerTest.prototype.testMixinViaAdd = function() {
 
 ContainerTest.prototype.setupGadgetSite = function(id, gadgetInfo, gadgetHolder) {
   var self = this;
-  shindig.container.GadgetSite = function() {
+  osapi.container.GadgetSite = function() {
     return {
       'getId' : function() {
         return id;
