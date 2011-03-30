@@ -22,6 +22,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
@@ -53,10 +55,8 @@ public class HttpResponseBuilder extends MutableContent {
   private HttpResponse responseObj;
   private int responseObjNumChanges;
 
-  /**
-   * @see {AbstractHttpCache.refetchStrictNoCacheAfterMs}
-   */
-  private long refetchStrictNoCacheAfterMs = -1;
+  private long refetchStrictNoCacheAfterMs =
+      AbstractHttpCache.REFETCH_STRICT_NO_CACHE_AFTER_MS_DEFAULT;
 
   public HttpResponseBuilder(GadgetHtmlParser parser, HttpResponse response) {
     super(parser, response);
@@ -71,7 +71,7 @@ public class HttpResponseBuilder extends MutableContent {
     responseObj = response;
     responseObjNumChanges = getNumChanges();
   }
-  
+
   public HttpResponseBuilder() {
     this(unsupportedParser(), null);
   }
@@ -167,7 +167,7 @@ public class HttpResponseBuilder extends MutableContent {
     }
     return this;
   }
-  
+
   public HttpResponseBuilder clearAllHeaders() {
     incrementNumChanges();
     headers.clear();
@@ -283,7 +283,7 @@ public class HttpResponseBuilder extends MutableContent {
     incrementNumChanges();
     return this;
   }
-  
+
   public int getContentLength() {
     return getResponse().length;
   }
@@ -295,7 +295,7 @@ public class HttpResponseBuilder extends MutableContent {
   Map<String, String> getMetadata() {
     return metadata;
   }
-  
+
   byte[] getResponse() {
     // Supported to avoid copying data unnecessarily.
     return getRawContentBytes();
@@ -319,12 +319,12 @@ public class HttpResponseBuilder extends MutableContent {
   @Override
   protected void setContentBytesState(byte[] newBytes, Charset newEncoding) {
     super.setContentBytesState(newBytes, newEncoding);
-    
+
     // Set the new encoding of the raw bytes, in order to ensure that
     // Content-Type headers are in sync w/ the content's encoding.
     if (newEncoding != null) setEncoding(newEncoding);
   }
-  
+
   private static GadgetHtmlParser unsupportedParser() {
     return new GadgetHtmlParser(null) {
       @Override
