@@ -41,12 +41,14 @@ class GadgetFactory {
    * @return Gadget
    */
   public function createGadget() {
-    $gadgetUrl = $this->context->getUrl();
-    if ($this->context->getBlacklist() != null && $this->context->getBlacklist()->isBlacklisted($gadgetUrl)) {
-      throw new GadgetException("The Gadget ($gadgetUrl) is blacklisted and can not be rendered");
+    if (! $gadgetContent = $this->context->getRawXml()) {
+      $gadgetUrl = $this->context->getUrl();
+      if ($this->context->getBlacklist() != null && $this->context->getBlacklist()->isBlacklisted($gadgetUrl)) {
+        throw new GadgetException("The Gadget ($gadgetUrl) is blacklisted and can not be rendered");
+      }
+      // Fetch the gadget's content and create a GadgetSpec
+      $gadgetContent = $this->fetchGadget($gadgetUrl);
     }
-    // Fetch the gadget's content and create a GadgetSpec
-    $gadgetContent = $this->fetchGadget($gadgetUrl);
     $gadgetSpecParserClass = Config::get('gadget_spec_parser');
     $gadgetSpecParser = new $gadgetSpecParserClass();
     $gadgetSpec = $gadgetSpecParser->parse($gadgetContent, $this->context);

@@ -90,6 +90,13 @@ class GadgetContext {
    * @var string
    */
   protected $container = null;
+
+  /**
+   *
+   * @var string
+   */
+  protected $rawXml = null;
+
   /**
    *
    * @var int
@@ -108,6 +115,7 @@ class GadgetContext {
     $this->setIgnoreCache($this->getIgnoreCacheParam());
     $this->setForcedJsLibs($this->getForcedJsLibsParam());
     $this->setUrl($this->getUrlParam());
+    $this->setRawXml($this->getRawXmlParam());
     $this->setModuleId($this->getModuleIdParam());
     $this->setView($this->getViewParam());
     $this->setContainer($this->getContainerParam());
@@ -168,6 +176,19 @@ class GadgetContext {
       return $_GET['url'];
     } elseif (! empty($_POST['url'])) {
       return $_POST['url'];
+    }
+    return null;
+  }
+
+  /**
+   *
+   * @return string
+   */
+  protected function getRawXmlParam() {
+    if (! empty($_GET['rawxml'])) {
+      return $_GET['rawxml'];
+    } elseif (! empty($_POST['rawxml'])) {
+      return $_POST['rawxml'];
     }
     return null;
   }
@@ -295,6 +316,14 @@ class GadgetContext {
    *
    * @return string
    */
+  public function getRawXml() {
+    return $this->rawXml;
+  }
+
+  /**
+   *
+   * @return string
+   */
   public function getView() {
     return $this->view;
   }
@@ -385,6 +414,13 @@ class GadgetContext {
    */
   public function setUrl($url) {
     $this->url = $url;
+  }
+
+  /**
+   * @param string $rawXml
+   */
+  public function setRawXml($rawXml) {
+    $this->rawXml = $rawXml;
   }
 
   /**

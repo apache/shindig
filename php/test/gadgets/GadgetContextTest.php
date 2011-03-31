@@ -32,7 +32,7 @@ class GadgetContextTest extends PHPUnit_Framework_TestCase {
    * @var testData
    */
   private $testData = array('url' => 'http://www.google.com/gadget', 'libs' => '', 'synd' => 'default', 
-      'nocache' => '', 'container' => 'default', 'view' => 'default', 'mid' => '123', 
+      'nocache' => '', 'rawxml' => '<foo></foo>', 'container' => 'default', 'view' => 'default', 'mid' => '123',
       'bcp' => '');
   
   /**
@@ -144,6 +144,10 @@ class GadgetContextTest extends PHPUnit_Framework_TestCase {
   
   }
 
+  public function testGetRawXml() {
+    $this->assertEquals($this->testData['rawxml'], $this->GadgetContext->getRawXml());
+  }
+
   /**
    * Tests GadgetContext->getView()
    */
@@ -169,7 +173,12 @@ class GadgetContextTest extends PHPUnit_Framework_TestCase {
     $url = 'Dummie_url';
     $this->GadgetContext->setUrl($url);
     $this->assertEquals($url, $this->GadgetContext->getUrl());
-  
+  }
+
+  public function testSetRawXml() {
+    $xml = 'Dummie_xml';
+    $this->GadgetContext->setRawXml($xml);
+    $this->assertEquals($xml, $this->GadgetContext->getRawXml());
   }
 
   /**
