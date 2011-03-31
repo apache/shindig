@@ -45,7 +45,9 @@ my.LayoutManager.prototype.getGadgetChrome = function(gadget) {
 
 my.init = function() {
   gadgets.pubsubrouter.init(function(id) {
-    return my.gadgetSpecUrls[parseInt(id[id.length - 1])];
+    var gadgetId = shindig.container.gadgetService.getGadgetIdFromModuleId(id);
+    var gadget = shindig.container.getGadget(gadgetId);
+    return gadget.specUrl;
   }, {
     onSubscribe: function(sender, channel) {
       log(sender + " subscribes to channel '" + channel + "'");
