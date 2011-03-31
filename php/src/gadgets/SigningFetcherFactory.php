@@ -38,6 +38,24 @@ class SigningFetcherFactory {
   }
 
   /**
+   *
+   * @return string
+   */
+  public function getKeyName()
+  {
+    return $this->keyName;
+  }
+
+  /**
+   *
+   * @return string
+   */
+  public function getPrivateKey()
+  {
+    return $this->privateKey;
+  }
+
+  /**
    * @param keyFile The file containing your private key for signing requests.
    */
   public function __construct($keyFile = null) {
