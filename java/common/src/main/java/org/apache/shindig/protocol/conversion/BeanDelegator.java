@@ -21,8 +21,10 @@ package org.apache.shindig.protocol.conversion;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.uri.Uri;
@@ -161,6 +163,21 @@ public class BeanDelegator {
       }
     }
 
+    // Proxy each item in a map (map key is not proxied)
+    if (source instanceof Multimap<?, ?>) {
+      Multimap<?, ?> mapSource = (Multimap<?, ?>) source;
+      if (!mapSource.isEmpty() && delegatedClasses.containsKey(
+          mapSource.values().iterator().next().getClass())) {
+        // Convert Map:
+        ImmutableMultimap.Builder<Object, Object> mapBuilder = ImmutableMultimap.builder();
+        for (Map.Entry<?, ?> entry : mapSource.entries()) {
+          mapBuilder.put(entry.getKey(), createDelegator(entry.getValue(), apiInterface));
+        }
+        return (T) mapBuilder.build();
+      } else {
+        return (T) source;
+      }
+    }
     // Proxy each item in a list
     if (source instanceof List<?>) {
       List<?> listSource = (List<?>) source;
@@ -250,6 +267,8 @@ public class BeanDelegator {
         type = paramType.getActualTypeArguments()[0];
       } else if (Map.class.isAssignableFrom((Class<?>) paramType.getRawType())) {
         type = paramType.getActualTypeArguments()[1];
+      } else if (Multimap.class.isAssignableFrom((Class<?>) paramType.getRawType())) {
+        type = paramType.getActualTypeArguments()[1];
       }
     }
     return (Class<?>) type;
@@ -313,7 +332,19 @@ public class BeanDelegator {
         interfaceType = interfaceParamType.getActualTypeArguments()[1];
         return validateTypes(dataType, interfaceType);
       }
-      // Only support Map and List generics
+      
+      if (Multimap.class.isAssignableFrom((Class<?>) dataParamType.getRawType()) &&
+          Multimap.class.isAssignableFrom((Class<?>) interfaceParamType.getRawType())) {
+        Type dataKeyType = dataParamType.getActualTypeArguments()[0];
+        Type interfaceKeyType = interfaceParamType.getActualTypeArguments()[0];
+        if (dataKeyType != interfaceKeyType || !PRIMITIVE_TYPE_CLASSES.contains(dataKeyType)) {
+          return false;
+        }
+        dataType = dataParamType.getActualTypeArguments()[1];
+        interfaceType = interfaceParamType.getActualTypeArguments()[1];
+        return validateTypes(dataType, interfaceType);
+      }
+      // Only support Multimap, Map and List generics
       return false;
     }
 

@@ -18,8 +18,11 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
+import com.google.common.collect.Multimap;
+
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.protocol.conversion.BeanFilter.Unfiltered;
+
 // Keep imports clean, so it is clear what is used by API
 
 import java.util.List;
@@ -162,6 +165,7 @@ public class GadgetsHandlerApi {
   public interface Feature {
     public String getName();
     public boolean getRequired();
+    public Multimap<String, String> getParams();
   }
 
   public interface LinkSpec {
