@@ -45,9 +45,6 @@ if (!gadgets.rpctx.wpm) {  // make lib resilient to double-inclusion
 
   gadgets.rpctx.wpm = function() {
     var process, ready;
-    var postMessage;
-    var pmSync = false;
-    var pmEventDomain = false;
     var isForceSecure = false;
 
     function attachBrowserEvent(eventName, callback, useCapture) {
@@ -66,39 +63,6 @@ if (!gadgets.rpctx.wpm) {  // make lib resilient to double-inclusion
       }
     }
 
-    // Some browsers (IE, Opera) have an implementation of postMessage that is
-    // synchronous, although HTML5 specifies that it should be asynchronous.  In
-    // order to make all browsers behave consistently, we run a small test to detect
-    // if postMessage is asynchronous or not.  If not, we wrap calls to postMessage
-    // in a setTimeout with a timeout of 0.
-    // Also, Opera's "message" event does not have an "origin" property (at least,
-    // it doesn't in version 9.64;  presumably, it will in version 10).  If
-    // event.origin does not exist, use event.domain.  The other difference is that
-    // while event.origin looks like <scheme>://<hostname>:<port>, event.domain
-    // consists only of <hostname>.
-    function testPostMessage() {
-      var hit = false;
-
-      function receiveMsg(event) {
-        if (event.data == 'postmessage.test') {
-          hit = true;
-          if (typeof event.origin === 'undefined') {
-            pmEventDomain = true;
-          }
-        }
-      }
-
-      attachBrowserEvent('message', receiveMsg, false);
-      window.postMessage('postmessage.test', '*');
-
-      // if 'hit' is true here, then postMessage is synchronous
-      if (hit) {
-        pmSync = true;
-      }
-
-      removeBrowserEvent('message', receiveMsg, false);
-    }
-
     function onmessage(packet) {
       var rpc = gadgets.json.parse(packet.data);
       if (isForceSecure) {
@@ -110,7 +74,13 @@ if (!gadgets.rpctx.wpm) {  // make lib resilient to double-inclusion
         var origRelay = gadgets.rpc.getRelayUrl(rpc['f']) ||
             gadgets.util.getUrlParameters()['parent'];
         var origin = gadgets.rpc.getOrigin(origRelay);
-        if (!pmEventDomain ? packet.origin !== origin :
+
+        // Opera's "message" event does not have an "origin" property (at least,
+        // it doesn't in version 9.64;  presumably, it will in version 10).  If
+        // event.origin does not exist, use event.domain.  The other difference is that
+        // while event.origin looks like <scheme>://<hostname>:<port>, event.domain
+        // consists only of <hostname>.
+        if (typeof packet.origin !== "undefined" ? packet.origin !== origin :
             packet.domain !== /^.+:\/\/([^:]+).*/.exec(origin)[1]) {
           return;
         }
@@ -130,19 +100,6 @@ if (!gadgets.rpctx.wpm) {  // make lib resilient to double-inclusion
       init: function(processFn, readyFn) {
         process = processFn;
         ready = readyFn;
-
-        testPostMessage();
-        if (!pmSync) {
-          postMessage = function(win, msg, origin) {
-            win.postMessage(msg, origin);
-          };
-        } else {
-          postMessage = function(win, msg, origin) {
-            window.setTimeout(function() {
-              win.postMessage(msg, origin);
-            }, 0);
-          };
-        }
 
         // Set up native postMessage handler.
         attachBrowserEvent('message', onmessage, false);
@@ -170,7 +127,12 @@ if (!gadgets.rpctx.wpm) {  // make lib resilient to double-inclusion
         var origin = gadgets.rpc.getTargetOrigin(targetId);
         var targetWin = gadgets.rpc._getTargetWin(targetId);
         if (origin) {
-          postMessage(targetWin, gadgets.json.stringify(rpc), origin);
+          // Some browsers (IE, Opera) have an implementation of postMessage that is
+          // synchronous, although HTML5 specifies that it should be asynchronous.  In
+          // order to make all browsers behave consistently, we wrap all postMessage
+          // calls in a setTimeout with a timeout of 0.
+          window.setTimeout(function() {
+              targetWin.postMessage(gadgets.json.stringify(rpc), origin); }, 0);
         } else {
           gadgets.error('No relay set (used as window.postMessage targetOrigin)' +
               ', cannot send cross-domain message');
