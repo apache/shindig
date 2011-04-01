@@ -25,6 +25,7 @@ import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.javascript.jscomp.BasicErrorManager;
 import com.google.javascript.jscomp.CheckLevel;
+import com.google.javascript.jscomp.CommandLineRunner;
 import com.google.javascript.jscomp.CompilationLevel;
 import com.google.javascript.jscomp.Compiler;
 import com.google.javascript.jscomp.CompilerOptions;
@@ -66,6 +67,16 @@ public class ClosureJsCompiler implements JsCompiler {
               + "var parts=name.split('.'),cur=window,part;"
               + "for(;parts.length&&(part=parts.shift());){if(!parts.length){"
               + "cur[part]=obj;}else{cur=cur[part]||(cur[part]={})}}};", "[goog.exportSymbol]");
+  
+  private static final List<JSSourceFile> DEFAULT_EXTERNS;
+  
+  static {
+    try {
+      DEFAULT_EXTERNS = CommandLineRunner.getDefaultExterns();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
   
   @VisibleForTesting
   static final String CACHE_NAME = "CompiledJs";
@@ -148,6 +159,7 @@ public class ClosureJsCompiler implements JsCompiler {
     if (!jsUri.isDebug() || options.isExternExportsEnabled()) {
       List<JSSourceFile> allExterns = Lists.newArrayList();
       allExterns.add(JSSourceFile.fromCode("externs", externStr));
+      allExterns.addAll(DEFAULT_EXTERNS);
 
       List<JsContent> allContent = Lists.newLinkedList(content);
       if (options.isExternExportsEnabled()) {
