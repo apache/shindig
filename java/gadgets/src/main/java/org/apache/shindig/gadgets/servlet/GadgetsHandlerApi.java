@@ -162,8 +162,6 @@ public class GadgetsHandlerApi {
   public interface Feature {
     public String getName();
     public boolean getRequired();
-    // TODO: Handle multi map if params are needed
-    // public Multimap<String, String> getParams();
   }
 
   public interface LinkSpec {
