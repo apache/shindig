@@ -708,6 +708,7 @@
               <excludes>
                 <exclude>**/*.iml</exclude>
                 <exclude>.gitignore</exclude>
+                <exclude>.reviewboardrc</exclude>
                 <exclude>release.properties</exclude>
                 <exclude>**/.git/**/*</exclude>
                 <exclude>**/README*</exclude>
@@ -729,10 +730,10 @@
                 <exclude>COMMITTERS</exclude>
                 <exclude>UPGRADING</exclude>
                 <exclude>**/MANIFEST.MF</exclude>
-                <exclude>**/src/test/resources/**/*.html</exclude>
-                <exclude>**/src/test/resources/**/*.css</exclude>
-                <exclude>**/src/test/resources/**/*.json</exclude>
-                <exclude>**/src/test/resources/**/*.xml</exclude>
+                <exclude>**/src/test/**/*.html</exclude>
+                <exclude>**/src/test/**/*.css</exclude>
+                <exclude>**/src/test/**/*.json</exclude>
+                <exclude>**/src/test/**/*.xml</exclude>
                 <exclude>**/create.sql</exclude>
                 <exclude>**/drop.sql</exclude>
                 <exclude>**/derby.log</exclude>
@@ -1210,6 +1211,7 @@
             <excludes>
               <exclude>**/*.iml</exclude>
               <exclude>.gitignore</exclude>
+              <exclude>.reviewboardrc</exclude>
               <exclude>release.properties</exclude>
               <exclude>**/.git/**/*</exclude>
               <exclude>**/README*</exclude>
@@ -1231,10 +1233,10 @@
               <exclude>COMMITTERS</exclude>
               <exclude>UPGRADING</exclude>
               <exclude>**/MANIFEST.MF</exclude>
-              <exclude>**/src/test/resources/**/*.html</exclude>
-              <exclude>**/src/test/resources/**/*.css</exclude>
-              <exclude>**/src/test/resources/**/*.json</exclude>
-              <exclude>**/src/test/resources/**/*.xml</exclude>
+              <exclude>**/src/test/**/*.html</exclude>
+              <exclude>**/src/test/**/*.css</exclude>
+              <exclude>**/src/test/**/*.json</exclude>
+              <exclude>**/src/test/**/*.xml</exclude>
               <exclude>**/create.sql</exclude>
               <exclude>**/drop.sql</exclude>
               <exclude>**/derby.log</exclude>
