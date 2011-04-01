@@ -720,6 +720,7 @@
                 <exclude>etc/svn-props</exclude>
                 <exclude>etc/eclipse/shindig.importorder</exclude>
                 <exclude>JsMin.php</exclude>
+                <exclude>**/content/**/*.json</exclude>
                 <exclude>**/test/misc/rewriter*.css</exclude>
                 <exclude>**/test/misc/rewriter*.js</exclude>
                 <exclude>**/test/misc/*.html</exclude>
@@ -1223,6 +1224,7 @@
               <exclude>etc/svn-props</exclude>
               <exclude>etc/eclipse/shindig.importorder</exclude>
               <exclude>JsMin.php</exclude>
+              <exclude>**/content/**/*.json</exclude>
               <exclude>**/test/misc/rewriter*.css</exclude>
               <exclude>**/test/misc/rewriter*.js</exclude>
               <exclude>**/test/misc/*.html</exclude>
