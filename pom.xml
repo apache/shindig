@@ -28,7 +28,7 @@
 
   <groupId>org.apache.shindig</groupId>
   <artifactId>shindig-project</artifactId>
-  <version>3.0.0-SNAPSHOT</version>
+  <version>3.0.0-beta1</version>
   <packaging>pom</packaging>
 
   <name>Apache Shindig Project</name>
@@ -49,7 +49,7 @@
     <!-- properties that help us sort through the java 1.5/1.6 mess -->
     <shindig.jdk.version>1.5</shindig.jdk.version>
     <shindig.jdk.javadoc>1.5.0</shindig.jdk.javadoc>
-    <shindig.jdk.classifier></shindig.jdk.classifier>
+    <shindig.jdk.classifier />
   </properties>
 
   <prerequisites>
@@ -60,9 +60,9 @@
   <!-- S C M                                                                  -->
   <!-- ====================================================================== -->
   <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/shindig/trunk</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/shindig/trunk</developerConnection>
-    <url>http://svn.apache.org/viewvc/shindig/trunk</url>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/shindig/tags/shindig-project-3.0.0-beta1</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/shindig/tags/shindig-project-3.0.0-beta1</developerConnection>
+    <url>http://svn.apache.org/viewvc/shindig/tags/shindig-project-3.0.0-beta1</url>
   </scm>
 
   <!-- ====================================================================== -->
