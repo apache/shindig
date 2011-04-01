@@ -165,6 +165,7 @@ public class BasicHttpFetcher implements HttpFetcher {
     HttpConnectionParams.setConnectionTimeout(params, connectionTimeoutMs);
     HttpConnectionParams.setSoTimeout(params, readTimeoutMs);
     HttpConnectionParams.setStaleCheckingEnabled(params, true);
+    HttpConnectionParams.setSoReuseaddr(params, true);
 
     HttpClientParams.setRedirecting(params, true);
     HttpClientParams.setAuthenticating(params, false);
