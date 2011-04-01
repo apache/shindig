@@ -79,7 +79,20 @@ public class Processor {
    * @throws ProcessingException If there is a problem processing the gadget.
    */
   public Gadget process(GadgetContext context) throws ProcessingException {
-    Uri url = context.getUrl();
+    GadgetSpec spec;
+
+    try {
+      spec = gadgetSpecFactory.getGadgetSpec(context);
+      spec = substituter.substitute(context, spec);
+
+      if (context.getSanitize()) {
+        spec = spec.removeUrlViews();
+      }
+    } catch (GadgetException e) {
+      throw new ProcessingException(e.getMessage(), e, e.getHttpStatusCode());
+    }
+
+    Uri url = spec.getUrl();
 
     if (url == null) {
       throw new ProcessingException("Missing or malformed url parameter",
@@ -88,30 +101,19 @@ public class Processor {
 
     validateGadgetUrl(url);
 
-    if (blacklist.isBlacklisted(context.getUrl())) {
+    if (blacklist.isBlacklisted(url)) {
       if (LOG.isLoggable(Level.INFO)) {
-        LOG.logp(Level.INFO, classname, "process", MessageKeys.RENDER_BLACKLISTED_GADGET, new Object[] {context.getUrl()});
+        LOG.logp(Level.INFO, classname, "process", MessageKeys.RENDER_BLACKLISTED_GADGET, new Object[] {url});
       }
       throw new ProcessingException("The requested gadget is unavailable",
           HttpServletResponse.SC_FORBIDDEN);
     }
 
-    try {
-      GadgetSpec spec = gadgetSpecFactory.getGadgetSpec(context);
-      spec = substituter.substitute(context, spec);
-
-      if (context.getSanitize()) {
-        spec = spec.removeUrlViews();
-      }
-
-      return new Gadget()
-          .setContext(context)
-          .setGadgetFeatureRegistry(featureRegistry)
-          .setSpec(spec)
-          .setCurrentView(getView(context, spec));
-    } catch (GadgetException e) {
-      throw new ProcessingException(e.getMessage(), e, e.getHttpStatusCode());
-    }
+    return new Gadget()
+        .setContext(context)
+        .setGadgetFeatureRegistry(featureRegistry)
+        .setSpec(spec)
+        .setCurrentView(getView(context, spec));
   }
 
   /**
