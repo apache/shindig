@@ -17,14 +17,18 @@
  */
 package org.apache.shindig.gadgets.spec;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.xml.XmlUtil;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 
+import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 
 /**
@@ -40,6 +44,7 @@ public class Feature {
     this.params = ImmutableMultimap.of();
     this.required = true;
     this.name = name;
+    this.views = ImmutableSet.of();
   }
   
   /**
@@ -90,6 +95,17 @@ public class Feature {
   public boolean getRequired() {
     return required;
   }
+  
+  /**
+   * Require@views
+   * Optional@views
+   * 
+   * Views associated with this feature
+   */
+  private final Set<String> views;
+  public Set<String> getViews() {
+    return views;
+  }
 
   /**
    * Produces an xml representation of the feature.
@@ -99,8 +115,11 @@ public class Feature {
     StringBuilder buf = new StringBuilder();
     buf.append(required ? "<Require" : "<Optional")
        .append(" feature=\"")
-       .append(name)
-       .append("\">");
+       .append(name);
+    if (views.size() > 0) {
+      buf.append("\" views=\"").append(StringUtils.join(views, ','));
+    }
+    buf.append("\">");
     for (Map.Entry<String, Collection<String>> entry : params.asMap().entrySet()) {
       buf.append("\n<Param name=\"")
          .append(entry.getKey())
@@ -142,5 +161,8 @@ public class Feature {
     } else {
       this.params = ImmutableMultimap.of();
     }
+    // Record all the associated views
+    String viewNames = XmlUtil.getAttribute(feature, "views", "").trim();
+    this.views = ImmutableSet.copyOf(Splitter.on(',').omitEmptyStrings().trimResults().split(viewNames));
   }
 }

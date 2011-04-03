@@ -20,6 +20,7 @@ package org.apache.shindig.gadgets;
 import org.apache.shindig.common.util.OpenSocialVersion;
 import org.apache.shindig.gadgets.features.FeatureRegistry;
 import org.apache.shindig.gadgets.preload.PreloadedData;
+import org.apache.shindig.gadgets.spec.Feature;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.LocaleSpec;
 import org.apache.shindig.gadgets.spec.View;
@@ -32,8 +33,8 @@ import com.google.common.collect.Sets;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
-
 /**
  * Intermediary representation of all state associated with processing
  * of a single gadget request.
@@ -51,6 +52,8 @@ public class Gadget {
    */
   public Gadget setContext(GadgetContext context) {
     this.context = context;
+    directFeatureDeps = null;  //New context means View may have changed
+    allGadgetFeatures = null;
     return this;
   }
 
@@ -72,7 +75,6 @@ public class Gadget {
    */
   public Gadget setSpec(GadgetSpec spec) {
     this.spec = spec;
-    this.directFeatureDeps = Sets.newHashSet(spec.getModulePrefs().getFeatures().keySet());
     return this;
   }
 
@@ -125,7 +127,7 @@ public class Gadget {
   public synchronized List<String> getAllFeatures() {
     if (allGadgetFeatures == null) {
       Preconditions.checkState(featureRegistry != null, "setGadgetFeatureRegistry must be called before Gadget.getAllFeatures()");
-      allGadgetFeatures = featureRegistry.getFeatures(Lists.newArrayList(directFeatureDeps));
+      allGadgetFeatures = featureRegistry.getFeatures(Lists.newArrayList(getDirectFeatureDeps()));
     }
     return allGadgetFeatures;
   }
@@ -150,19 +152,58 @@ public class Gadget {
    * gadget.getSpec().getModulePrefs().getLocale(locale);
    */
   public LocaleSpec getLocale() {
-    return spec.getModulePrefs().getLocale(context.getLocale());
+    String viewName = null;
+    View view = getCurrentView();
+    if (view == null) { // Use default view if current view is not set
+      viewName = GadgetSpec.DEFAULT_VIEW;
+    } else {
+      viewName = view.getName();
+    }
+    return spec.getModulePrefs().getLocale(context.getLocale(), viewName);
   }
 
+  private void initializeFeatureDeps() {
+    if (directFeatureDeps == null) {
+      directFeatureDeps = Sets.newHashSet();
+      // If we have context, lets generate the correct set of views.
+      if (context != null) {
+        directFeatureDeps.addAll(spec.getModulePrefs()
+            .getViewFeatures(context.getView()).keySet());
+      } else {
+        directFeatureDeps.addAll(spec.getModulePrefs().getFeatures().keySet());
+      }
+    }
+  }
+  
   public void addFeature(String name) {
+    initializeFeatureDeps();
     directFeatureDeps.add(name);
   }
-
+  
   public void removeFeature(String name) {
+    initializeFeatureDeps();
     directFeatureDeps.remove(name);
   }
-
+  
   public Set<String> getDirectFeatureDeps() {
+    initializeFeatureDeps();
     return Collections.unmodifiableSet(directFeatureDeps);
+  }
+  
+  /**
+   * Convenience method that returns Map of features to load for gadget's current view
+   * 
+   * @return a map of ModuleSpec/Require and ModuleSpec/Optional elements to Feature
+   */
+  public Map<String, Feature> getViewFeatures() {    
+    String name = null;
+    View view = getCurrentView();   
+    if (view == null) { // Use default view name if current view is not set
+      name = GadgetSpec.DEFAULT_VIEW;
+    } else {
+      name = view.getName();
+    }
+    return spec.getModulePrefs().getViewFeatures(name);
   }
 
   /**

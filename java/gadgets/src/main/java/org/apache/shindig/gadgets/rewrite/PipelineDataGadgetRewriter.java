@@ -58,7 +58,7 @@ public class PipelineDataGadgetRewriter implements GadgetRewriter {
   
   public void rewrite(Gadget gadget, MutableContent content) {
     // Only bother for gadgets using the opensocial-data feature
-    if (!gadget.getSpec().getModulePrefs().getFeatures().containsKey("opensocial-data")) {
+    if (!gadget.getViewFeatures().containsKey("opensocial-data")) {
       return;
     }
     

@@ -291,7 +291,7 @@ public class DefaultIframeUriManager implements IframeUriManager, ContainerConfi
   }
 
   protected void addExtrasForTypeUrl(UriBuilder uri, Gadget gadget) {
-    Set<String> features = gadget.getSpec().getModulePrefs().getFeatures().keySet();
+    Set<String> features = gadget.getViewFeatures().keySet();
     addParam(uri, Param.LIBS.getKey(), DefaultJsUriManager.addJsLibs(features), false, false);
   }
 

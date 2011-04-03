@@ -59,9 +59,9 @@ public class DefaultMessageBundleFactory extends AbstractSpecFactory<MessageBund
     return new MessageBundle(((LocaleQuery) query).locale, content);
   }
 
-  public MessageBundle getBundle(GadgetSpec spec, Locale locale, boolean ignoreCache, String container)
+  public MessageBundle getBundle(GadgetSpec spec, Locale locale, boolean ignoreCache, String container, String view)
       throws GadgetException {
-    MessageBundle exact = getBundleFor(spec, locale, ignoreCache, container);
+    MessageBundle exact = getBundleFor(spec, locale, ignoreCache, container, view);
 
     // We don't want to fetch the same bundle multiple times, so we verify that the exact match
     // has not already been fetched.
@@ -73,28 +73,28 @@ public class DefaultMessageBundleFactory extends AbstractSpecFactory<MessageBund
     if (isAllCountry) {
       lang = MessageBundle.EMPTY;
     } else {
-      lang = getBundleFor(spec, new Locale(locale.getLanguage(), "ALL"), ignoreCache, container);
+      lang = getBundleFor(spec, new Locale(locale.getLanguage(), "ALL"), ignoreCache, container, view);
     }
 
     if (isAllLanguage) {
       country = MessageBundle.EMPTY;
     } else {
-      country = getBundleFor(spec, new Locale("all", locale.getCountry()), ignoreCache, container);
+      country = getBundleFor(spec, new Locale("all", locale.getCountry()), ignoreCache, container, view);
     }
 
     if (isAllCountry || isAllLanguage) {
       // If either of these is true, we already picked up both anyway.
       all = MessageBundle.EMPTY;
     } else {
-      all = getBundleFor(spec, ALL_ALL, ignoreCache, container);
+      all = getBundleFor(spec, ALL_ALL, ignoreCache, container, view);
     }
 
     return new MessageBundle(all, country, lang, exact);
   }
 
-  private MessageBundle getBundleFor(GadgetSpec spec, Locale locale, boolean ignoreCache, String container)
+  private MessageBundle getBundleFor(GadgetSpec spec, Locale locale, boolean ignoreCache, String container, String view)
       throws GadgetException {
-    LocaleSpec localeSpec = spec.getModulePrefs().getLocale(locale);
+    LocaleSpec localeSpec = spec.getModulePrefs().getLocale(locale, view);
     if (localeSpec == null) {
       return MessageBundle.EMPTY;
     }

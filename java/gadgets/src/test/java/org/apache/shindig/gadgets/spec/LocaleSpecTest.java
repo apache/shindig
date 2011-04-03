@@ -23,7 +23,6 @@ import static org.junit.Assert.assertEquals;
 
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.xml.XmlUtil;
-
 import org.junit.Test;
 
 public class LocaleSpecTest {
@@ -42,6 +41,26 @@ public class LocaleSpecTest {
     assertEquals("US", locale.getCountry());
     assertEquals("rtl", locale.getLanguageDirection());
     assertEquals("http://example.org/msgs.xml", locale.getMessages().toString());
+    assertEquals(0, locale.getViews().size());
+  }
+  
+  @Test
+  public void viewLocale() throws Exception {
+    String xml = "<Locale" +
+                 " lang=\"en\"" +
+                 " country=\"US\"" +
+                 " language_direction=\"rtl\"" +
+                 " messages=\"http://example.org/msgs.xml\"" +
+                 " views=\"view1\"/>";
+
+    LocaleSpec locale = new LocaleSpec(XmlUtil.parse(xml), SPEC_URL);
+    assertEquals("en", locale.getLanguage());
+    assertEquals("US", locale.getCountry());
+    assertEquals("rtl", locale.getLanguageDirection());
+    assertEquals("http://example.org/msgs.xml", locale.getMessages().toString());
+    assertEquals(1, locale.getViews().size());
+    Object[] views = locale.getViews().toArray();
+    assertEquals("view1",views[0].toString());
   }
 
   @Test
@@ -85,7 +104,7 @@ public class LocaleSpecTest {
   @Test
   public void toStringIsSane() throws Exception {
     String xml = "<Locale lang='en' country='US' language_direction='rtl'" +
-                 " messages='foo'>" +
+                 " messages='foo' views='view1, view2'>" +
                  "  <msg name='hello'>World</msg>" +
                  "  <msg name='foo'>Bar</msg>" +
                  "</Locale>";
@@ -97,5 +116,6 @@ public class LocaleSpecTest {
     assertEquals(loc.getMessages(), loc2.getMessages());
     assertEquals(loc.getMessageBundle().getMessages(),
                  loc2.getMessageBundle().getMessages());
+    assertEquals(loc.getViews().toString(),loc2.getViews().toString());
   }
 }

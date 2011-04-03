@@ -41,7 +41,7 @@ public class MessageSubstituter implements Substituter {
   public void addSubstitutions(Substitutions substituter, GadgetContext context, GadgetSpec spec)
           throws GadgetException {
     MessageBundle bundle = messageBundleFactory.getBundle(spec, context.getLocale(),
-        context.getIgnoreCache(), context.getContainer());
+        context.getIgnoreCache(), context.getContainer(), context.getView());
         
     substituter.addSubstitutions(Substitutions.Type.MESSAGE, bundle.getMessages());
   }

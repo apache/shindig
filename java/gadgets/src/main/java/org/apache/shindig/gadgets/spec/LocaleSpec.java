@@ -16,13 +16,17 @@
  * specific language governing permissions and limitations under the License.
  */
 package org.apache.shindig.gadgets.spec;
+import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.xml.XmlUtil;
-
 import org.w3c.dom.Element;
+
+import com.google.common.base.Splitter;
+import com.google.common.collect.ImmutableSet;
 
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Represents a Locale tag.
@@ -53,6 +57,11 @@ public class LocaleSpec {
     if (!("ltr".equals(languageDirection) || "rtl".equals(languageDirection))) {
       throw new SpecParserException("Locale/@language_direction must be ltr or rtl");
     }
+    // Record all the associated views
+    String viewNames = XmlUtil.getAttribute(element, "views", "").trim();
+
+    this.views = ImmutableSet.copyOf(Splitter.on(',').omitEmptyStrings().trimResults().split(viewNames));
+    
     String messagesString = XmlUtil.getAttribute(element, "messages");
     if (messagesString == null) {
       this.messages = Uri.parse("");
@@ -104,19 +113,29 @@ public class LocaleSpec {
   public MessageBundle getMessageBundle() {
     return messageBundle;
   }
+  
+  /**
+   * Locale@views
+   * 
+   * Views associated with this Locale
+   */
+  private final Set<String> views;
+  public Set<String> getViews() {
+    return views;
+  }
 
   @Override
   public String toString() {
     StringBuilder buf = new StringBuilder();
-    buf.append("<Locale")
-       .append(" lang='").append(getLanguage()).append('\'')
-       .append(" country='").append(getCountry()).append('\'')
-       .append(" language_direction='").append(languageDirection).append('\'')
-       .append(" messages='").append(messages).append("'>\n");
+    buf.append("<Locale").append(" lang='").append(getLanguage()).append('\'')
+        .append(" country='").append(getCountry()).append('\'')
+        .append(" language_direction='").append(languageDirection).append('\'');
+    if (views.size() > 0) {
+      buf.append(" views=\'").append(StringUtils.join(views, ',')).append('\'');
+    }
+    buf.append(" messages='").append(messages).append("'>\n");
     for (Map.Entry<String, String> entry : messageBundle.getMessages().entrySet()) {
-      buf.append("<msg name='").append(entry.getKey()).append("'>")
-         .append(entry.getValue())
-         .append("</msg>\n");
+      buf.append("<msg name='").append(entry.getKey()).append("'>").append(entry.getValue()).append("</msg>\n");
     }
     buf.append("</Locale>");
     return buf.toString();

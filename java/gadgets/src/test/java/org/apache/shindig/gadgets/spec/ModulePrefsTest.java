@@ -25,14 +25,14 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Locale;
+import java.util.Map;
+
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.xml.XmlUtil;
 import org.apache.shindig.gadgets.variables.Substitutions;
-
 import org.junit.Test;
 import org.w3c.dom.Node;
-
-import java.util.Locale;
 
 import com.google.common.collect.Multimap;
 
@@ -65,6 +65,11 @@ public class ModulePrefsTest {
         "  <Require feature='require'/>" +
         "  <Optional feature='optional'/>" +
         "  <Preload href='http://example.org' authz='signed'/>" +
+        "	 <Require feature='requiredview1' views='default, view1'/>" +
+        "	 <Require feature='requiredview2' views='view2'/>" +
+        "	 <Require feature='require' views='view2'>" +
+        "	 		<Param name='param_name'>param_value</Param>" +
+        "  </Require>" +
         "  <Icon/>" +
         "  <Locale/>" +
         "  <Link rel='link' href='http://example.org/link'/>" +
@@ -129,6 +134,21 @@ public class ModulePrefsTest {
     assertTrue(extra.containsKey("NavigationItem"));
     assertEquals(1, extra.get("NavigationItem").iterator().next().getChildNodes().getLength());
   }
+  
+  @Test
+  public void substitutionsCopyConstructor() throws Exception{
+    ModulePrefs basePrefs = new ModulePrefs(XmlUtil.parse(FULL_XML), SPEC_URL);
+    Substitutions substituter = new Substitutions();
+    String gadgetXml = "<Module>" +
+    FULL_XML +
+    "<Content type=\"html\"></Content>" +
+    "</Module>";
+    GadgetSpec baseSpec = new GadgetSpec(SPEC_URL, gadgetXml);
+    GadgetSpec spec = baseSpec.substitute(substituter);
+    ModulePrefs subsPrefs = spec.getModulePrefs();
+    assertEquals(basePrefs.toString(), subsPrefs.toString());
+    doAsserts(subsPrefs);
+  }
 
   @Test
   public void basicElementsParseOk() throws Exception {
@@ -147,20 +167,40 @@ public class ModulePrefsTest {
   }
 
   @Test
-  public void getLocale() throws Exception {
+  public void getGlobalLocale() throws Exception {
     String xml = "<ModulePrefs title='locales'>" +
                  "  <Locale lang='en' country='UK' messages='en.xml'/>" +
                  "  <Locale lang='foo' language_direction='rtl'/>" +
                  "</ModulePrefs>";
     ModulePrefs prefs = new ModulePrefs(XmlUtil.parse(xml), SPEC_URL);
-    LocaleSpec spec = prefs.getLocale(new Locale("en", "UK"));
+    LocaleSpec spec = prefs.getGlobalLocale(new Locale("en", "UK"));
     assertEquals("http://example.org/en.xml", spec.getMessages().toString());
 
-    spec = prefs.getLocale(new Locale("foo", "ALL"));
+    spec = prefs.getGlobalLocale(new Locale("foo", "ALL"));
     assertEquals("rtl", spec.getLanguageDirection());
 
-    spec = prefs.getLocale(new Locale("en", "notexist"));
+    spec = prefs.getGlobalLocale(new Locale("en", "notexist"));
     assertNull(spec);
+  }
+  
+  @Test
+  public void getViewLocale() throws Exception {
+    String xml = "<ModulePrefs title='locales'>" +
+                 "  <Locale lang='en' country='UK' messages='en.xml' views=\"view1\"/>" +
+                 "  <Locale lang='en' country='US' messages='en_US.xml' views=\"view2\"/>" +
+                 "  <Locale lang='foo' language_direction='rtl'/>" +
+                 "</ModulePrefs>";
+    ModulePrefs prefs = new ModulePrefs(XmlUtil.parse(xml), SPEC_URL);
+    LocaleSpec spec = prefs.getGlobalLocale(new Locale("en", "UK"));
+    assertNull(spec);
+    spec = prefs.getLocale(new Locale("en", "UK"),"view1");
+    assertEquals("http://example.org/en.xml", spec.getMessages().toString());
+    spec = prefs.getLocale(new Locale("en", "UK"),"view2");
+    assertNull(spec);
+    spec = prefs.getLocale(new Locale("en", "US"),"view2");
+    assertEquals("http://example.org/en_US.xml", spec.getMessages().toString());
+    spec = prefs.getLocale(new Locale("foo", "ALL"),"view2");
+    assertEquals("rtl", spec.getLanguageDirection());
   }
 
   @Test
@@ -179,6 +219,35 @@ public class ModulePrefsTest {
 
     assertEquals(link1Href, prefs.getLinks().get(link1Rel).getHref());
     assertEquals(SPEC_URL.resolve(link2Href), prefs.getLinks().get(link2Rel).getHref());
+  }
+  
+  @Test
+  public void getViewFeatures() throws Exception {
+    ModulePrefs prefs = new ModulePrefs(XmlUtil.parse(FULL_XML), SPEC_URL);
+    Map<String, Feature> features = prefs.getViewFeatures("default");
+    assertEquals(4, features.size());
+    assertTrue(features.containsKey("requiredview1"));
+    assertTrue(features.containsKey("require"));
+    assertTrue(features.containsKey("optional"));
+    assertTrue(features.containsKey("core"));
+    assertTrue(!features.containsKey("requiredview2"));
+
+    features = prefs.getViewFeatures("view2");
+    assertEquals(4, features.size());
+    assertTrue(features.containsKey("requiredview2"));
+    assertTrue(features.containsKey("require"));
+    assertTrue(features.containsKey("optional"));
+    assertTrue(features.containsKey("core"));
+    assertTrue(!features.containsKey("requiredview1"));
+  }
+  
+  @Test
+  public void getViewFeatureParams() throws Exception {
+    ModulePrefs prefs = new ModulePrefs(XmlUtil.parse(FULL_XML), SPEC_URL);
+    Map<String, Feature> features = prefs.getViewFeatures("view2");
+    String paramValue = features.get("require").getParam("param_name");
+    assertNotNull(paramValue);
+    assertEquals("param_value", paramValue);
   }
 
   @Test

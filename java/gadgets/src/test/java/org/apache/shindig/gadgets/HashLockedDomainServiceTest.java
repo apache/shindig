@@ -77,7 +77,8 @@ public class HashLockedDomainServiceTest extends EasyMockTestCase {
 
     FeatureRegistry registry = mock(FeatureRegistry.class);
     expect(registry.getFeatures(isA(Collection.class))).andReturn(gadgetFeatures).anyTimes();
-    return new Gadget().setSpec(spec).setGadgetFeatureRegistry(registry);
+
+    return new Gadget().setSpec(spec).setContext(new GadgetContext()).setGadgetFeatureRegistry(registry);
   }
 
   @Before

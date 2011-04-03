@@ -128,7 +128,9 @@ public class RenderingGadgetRewriterTest {
         .setContext(context)
         .setPreloads(ImmutableList.<PreloadedData>of())
         .setSpec(spec)
+        .setCurrentView(spec.getView(GadgetSpec.DEFAULT_VIEW))
         .setGadgetFeatureRegistry(featureRegistry);
+    
     // Convenience: by default expect no features requested, by gadget or extern.
     // expectFeatureCalls(...) resets featureRegistry if called again.
     expectFeatureCalls(gadget,
@@ -842,13 +844,56 @@ public class RenderingGadgetRewriterTest {
     expect(lr.getResources()).andReturn(ImmutableList.<FeatureResource>of());
     replay(lr);
     expect(featureRegistry.getFeatureResources(same(gadget.getContext()),
-        eq(ImmutableSet.<String>of()), eq(Lists.<String>newArrayList())))
+        eq(ImmutableSet.<String>of()), eq(Lists.<String>newLinkedList())))
         .andReturn(lr);
     final FeatureRegistry.LookupResult lr2 = createMock(FeatureRegistry.LookupResult.class);
     expect(lr2.getResources()).andReturn(ImmutableList.<FeatureResource>of());
     replay(lr2);
+    assertTrue(gadget.getDirectFeatureDeps().contains("core"));
+    assertTrue(gadget.getDirectFeatureDeps().contains("foo"));
+    assertEquals(gadget.getDirectFeatureDeps().size(),2);
     expect(featureRegistry.getFeatureResources(same(gadget.getContext()),
-        eq(ImmutableList.<String>of("foo", "core")), eq(Lists.<String>newArrayList())))
+        eq(Lists.newLinkedList(gadget.getDirectFeatureDeps())), eq(Lists.<String>newLinkedList())))
+        .andAnswer(new IAnswer<FeatureRegistry.LookupResult>() {
+          @SuppressWarnings("unchecked")
+          public FeatureRegistry.LookupResult answer() throws Throwable {
+            List<String> unsupported = (List<String>)getCurrentArguments()[2];
+            unsupported.add("foo");
+            return lr2;
+          }
+        });
+    replay(featureRegistry);
+
+    rewrite(gadget, "");
+  }
+  
+  @Test(expected = RewritingException.class)
+  public void unsupportedViewFeatureThrows() throws Exception {
+    String gadgetXml =
+      "<Module><ModulePrefs title=''>" +
+      "  <Require feature='foo' views='default'/>" +
+      "</ModulePrefs>" +
+      "<Content view='default' type='html'/>" +
+      "</Module>";
+
+    Gadget gadget = makeGadgetWithSpec(gadgetXml);
+
+    reset(featureRegistry);
+    FeatureRegistry.LookupResult lr = createMock(FeatureRegistry.LookupResult.class);
+    expect(lr.getResources()).andReturn(ImmutableList.<FeatureResource>of());
+    replay(lr);
+    expect(featureRegistry.getFeatureResources(same(gadget.getContext()),
+        eq(ImmutableSet.<String>of()), eq(Lists.<String>newLinkedList())))
+        .andReturn(lr);
+    final FeatureRegistry.LookupResult lr2 = createMock(FeatureRegistry.LookupResult.class);
+    expect(lr2.getResources()).andReturn(ImmutableList.<FeatureResource>of());
+    replay(lr2);
+    assertTrue(gadget.getDirectFeatureDeps().contains("core"));
+    assertTrue(gadget.getDirectFeatureDeps().contains("foo"));
+    assertEquals(gadget.getDirectFeatureDeps().size(),2);
+    Lists.newLinkedList();
+    expect(featureRegistry.getFeatureResources(same(gadget.getContext()),
+        eq(Lists.newLinkedList(gadget.getDirectFeatureDeps())), eq(Lists.<String>newLinkedList())))
         .andAnswer(new IAnswer<FeatureRegistry.LookupResult>() {
           @SuppressWarnings("unchecked")
           public FeatureRegistry.LookupResult answer() throws Throwable {
@@ -929,6 +974,24 @@ public class RenderingGadgetRewriterTest {
       "<Module><ModulePrefs title=''>" +
       "  <Optional feature='foo'/>" +
       "  <Optional feature='bar'/>" +
+      "</ModulePrefs>" +
+      "<Content type='html'/>" +
+      "</Module>";
+
+    Gadget gadget = makeGadgetWithSpec(gadgetXml);
+
+    rewrite(gadget, "");
+    // rewrite will throw if the optional unsupported feature doesn't work.
+  }
+  
+  @Test
+  public void unsupportedViewFeaturesDoNotThrow() throws Exception {
+    String gadgetXml =
+      "<Module><ModulePrefs title=''>" +
+      "  <Optional feature='foo'/>" +
+      "  <Optional feature='bar'/>" +
+      "  <Require feature='bar2' views='view1'/>" +
+      "  <Optional feature='bar3' views='view1'/>" +
       "</ModulePrefs>" +
       "<Content type='html'/>" +
       "</Module>";
@@ -1061,11 +1124,11 @@ public class RenderingGadgetRewriterTest {
                                   List<FeatureResource> externResources) {
     reset(featureRegistry);
     GadgetContext gadgetContext = gadget.getContext();
-    List<String> gadgetFeatures = Lists.newArrayList(gadget.getDirectFeatureDeps());
-    List<String> allFeatures = Lists.newArrayList(gadgetFeatures);
-    List<String> allFeaturesAndLibs = Lists.newArrayList(gadgetFeatures);
+    List<String> gadgetFeatures = Lists.newLinkedList(gadget.getDirectFeatureDeps());
+    List<String> allFeatures = Lists.newLinkedList(gadgetFeatures);
+    List<String> allFeaturesAndLibs = Lists.newLinkedList(gadgetFeatures);
     allFeaturesAndLibs.addAll(externLibs);
-    List<String> emptyList = Lists.newArrayList();
+    List<String> emptyList = Lists.newLinkedList();
     final FeatureRegistry.LookupResult externLr = createMock(FeatureRegistry.LookupResult.class);
     expect(externLr.getResources()).andReturn(externResources);
     replay(externLr);

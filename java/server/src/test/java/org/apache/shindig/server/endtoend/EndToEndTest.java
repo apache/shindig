@@ -68,6 +68,7 @@ public class EndToEndTest {
     "fetchPeopleTest.xml",
     "errorTest.xml",
     "jsonTest.xml",
+    "viewLevelElementsTest.xml",
     "cajaTest.xml",
     "failCajaTest.xml",      
     "failCajaUrlTest.xml",      
@@ -115,6 +116,11 @@ public class EndToEndTest {
     executeAllPageTests("jsonTest");
   }
 
+  @Test
+  public void viewLevelElements() throws Exception {
+    executeAllPageTests("viewLevelElementsTest");
+  }
+  
   @Test
   @Ignore("Issues with passing the neko dom to caja") // FIXME
   public void cajaJsonParse() throws Exception {
@@ -422,7 +428,7 @@ public class EndToEndTest {
     if (!(page instanceof HtmlPage)) {
       fail("Got wrong page type. Was: " + page.getWebResponse().getContentType());
     }
-    webClient.waitForBackgroundJavaScript(3000);
+    webClient.waitForBackgroundJavaScript(5000);
     return (HtmlPage) page;
   }
 

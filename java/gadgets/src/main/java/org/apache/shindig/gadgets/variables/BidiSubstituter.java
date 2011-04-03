@@ -51,7 +51,7 @@ public class BidiSubstituter implements Substituter {
       throws GadgetException {
     MessageBundle bundle =
         messageBundleFactory.getBundle(spec, context.getLocale(), context.getIgnoreCache(),
-                    context.getContainer());
+                    context.getContainer(), context.getView());
     String dir = bundle.getLanguageDirection();
 
     boolean rtl = RTL.equals(dir);

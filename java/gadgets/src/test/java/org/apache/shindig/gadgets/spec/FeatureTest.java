@@ -19,8 +19,9 @@
 
 package org.apache.shindig.gadgets.spec;
 
-import org.apache.shindig.common.xml.XmlUtil;
+import java.util.Set;
 
+import org.apache.shindig.common.xml.XmlUtil;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -79,6 +80,32 @@ public class FeatureTest extends Assert {
     assertEquals(value2, feature.getParam(key2));
     assertTrue(params.get("foobar").isEmpty());
     assertNull(feature.getParam("foobar"));
+  }
+  
+  
+  @Test
+  public void testViews() throws Exception {
+    String xml = "<Require feature=\"foo\" views=\"view1\">" +
+                 "</Require>";
+    Feature feature = new Feature(XmlUtil.parse(xml));
+    Set<String> views = feature.getViews();
+    assertTrue(views.size() == 1);
+    assertTrue(views.contains("view1"));
+    
+    xml = "<Require feature=\"foo\" views=\"view1, view2\">" +
+    "</Require>";
+		feature = new Feature(XmlUtil.parse(xml));
+		views = feature.getViews();
+		assertTrue(views.size() == 2);
+		assertTrue(views.contains("view1"));
+		assertTrue(views.contains("view2"));
+		
+    xml = "<Require feature=\"foo\">" +
+    "</Require>";
+		feature = new Feature(XmlUtil.parse(xml));
+		views = feature.getViews();
+		assertTrue(views != null);
+		assertTrue(views.size() == 0);
   }
 
   @Test(expected=SpecParserException.class)

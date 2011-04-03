@@ -49,8 +49,7 @@ public class CoreUtilConfigContributor implements ConfigContributor {
   /** {@inheritDoc} */
   public void contribute(Map<String, Object> config, Gadget gadget) {
     // Add gadgets.util support. This is calculated dynamically based on request inputs.
-    ModulePrefs prefs = gadget.getSpec().getModulePrefs();
-    Collection<Feature> features = prefs.getFeatures().values();
+    Collection<Feature> features = gadget.getViewFeatures().values();
     Map<String, Map<String, Object>> featureMap = Maps.newHashMapWithExpectedSize(features.size());
     Set<String> allFeatureNames = registry.getAllFeatureNames();
 

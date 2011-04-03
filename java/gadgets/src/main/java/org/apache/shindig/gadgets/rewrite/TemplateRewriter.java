@@ -117,8 +117,7 @@ public class TemplateRewriter implements GadgetRewriter {
   }
 
   public void rewrite(Gadget gadget, MutableContent content) throws RewritingException {
-    Map<String, Feature> directFeatures = gadget.getSpec().getModulePrefs()
-        .getFeatures();
+    Map<String, Feature> directFeatures = gadget.getViewFeatures();
 
     Feature feature = directFeatures.get(TEMPLATES_FEATURE_NAME);
     if (feature == null && directFeatures.containsKey(OSML_FEATURE_NAME)) {
@@ -349,7 +348,8 @@ public class TemplateRewriter implements GadgetRewriter {
       Gadget gadget = templateContext.getGadget();
       
       MessageBundle bundle = messageBundleFactory.getBundle(gadget.getSpec(),
-          gadget.getContext().getLocale(), gadget.getContext().getIgnoreCache(), gadget.getContext().getContainer());
+          gadget.getContext().getLocale(), gadget.getContext().getIgnoreCache(), 
+          gadget.getContext().getContainer(), gadget.getContext().getView());
       MessageELResolver messageELResolver = new MessageELResolver(expressions, bundle);
   
       int autoUpdateID = 0;

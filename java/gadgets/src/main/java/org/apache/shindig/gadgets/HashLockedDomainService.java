@@ -158,7 +158,7 @@ public class HashLockedDomainService implements LockedDomainService, ContainerCo
     if (lockSecurityTokens) {
       return gadget.getAllFeatures().contains("locked-domain");
     }
-    return gadget.getSpec().getModulePrefs().getFeatures().keySet().contains("locked-domain");
+    return gadget.getViewFeatures().keySet().contains("locked-domain");
   }
 
   private boolean hostRequiresLockedDomain(String host) {

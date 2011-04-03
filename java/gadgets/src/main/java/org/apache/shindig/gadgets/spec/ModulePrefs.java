@@ -50,6 +50,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+
+
+
 /**
  * Represents the ModulePrefs element of a gadget spec.
  *
@@ -57,6 +60,7 @@ import java.util.Set;
  * Content and UserPref nodes.
  */
 public class ModulePrefs {
+	
 
   private static final String ATTR_TITLE = "title";
   private static final String ATTR_TITLE_URL = "title_url";
@@ -84,6 +88,9 @@ public class ModulePrefs {
   private static final String ATTR_CATEGORY2 = "category2";
   private static final Uri EMPTY_URI = Uri.parse("");
   private static final String UP_SUBST_PREFIX = "__UP_";
+  
+  // Used to identify Locales that are globally scoped
+  private static final String GLOBAL_LOCALE = "";
 
   private final Map<String, String> attributes;
   private final Uri base;
@@ -131,7 +138,10 @@ public class ModulePrefs {
     base = prefs.base;
     categories = prefs.getCategories();
     features = prefs.getFeatures();
-    locales = prefs.getLocales();
+    globalFeatures = prefs.globalFeatures;
+    allFeatures = prefs.getAllFeatures();
+    allLocales = prefs.allLocales;
+    locales = prefs.locales;
     oauth = prefs.oauth;
 
     List<Preload> preloads = Lists.newArrayList();
@@ -425,10 +435,13 @@ public class ModulePrefs {
 
 
   private final List<String> categories;
+  private List<Feature> allFeatures;
   private Map<String, Feature> features;
+  private Map<String, Feature> globalFeatures;
   private List<Preload> preloads;
   private List<Icon> icons;
-  private Map<Locale, LocaleSpec> locales;
+  private Map<String, Map<Locale, LocaleSpec>>  locales;
+  private Map<Locale, LocaleSpec> allLocales;
   private Map<String, LinkSpec> links;
   private OAuthSpec oauth;
   private Multimap<String,Node> extraElements;
@@ -441,12 +454,40 @@ public class ModulePrefs {
   public List<String> getCategories() {
     return categories;
   }
-
+  
   /**
-   * @return a map of ModuleSpec/Require and ModuleSpec/Optional elements to Feature
+   * All features are included in ModulePrefs.  
+   * View level features have view qualifiers appended.
+   * @return a map of ModulePrefs/Require and ModulePrefs/Optional elements to Feature
    */
   public Map<String, Feature> getFeatures() {
     return features;
+  }
+  
+  
+  /**
+   * All features elements defined in ModulePrefs
+   * @return a list of all Features included in ModulePrefs
+   */
+  public List<Feature> getAllFeatures() {
+    return allFeatures;
+  }
+  
+  /**
+   * Returns Map of features to load for the given View
+   * @return a map of ModuleSpec/Require and ModuleSpec/Optional elements to Feature
+   */
+  public Map<String, Feature> getViewFeatures(String view) {
+    Map<String, Feature> map = Maps.newHashMap();
+    // Global features are in all views..
+    map.putAll(globalFeatures);
+    // By adding view level features last so they can override global feature configurations
+    for (Feature feature : features.values()) {
+      if (feature.getViews().contains(view)) {
+        map.put(feature.getName(), feature);
+      }
+    }
+    return map;
   }
 
   /**
@@ -464,10 +505,10 @@ public class ModulePrefs {
   }
 
   /**
-   * @return a map of Locales to LocalSpec from the ModuleSpec/Locale element
+   * @return a Map of Locales to LocalSpec from the ModuleSpec/Locale element
    */
   public Map<Locale, LocaleSpec> getLocales() {
-    return locales;
+    return allLocales;
   }
 
   /**
@@ -501,12 +542,32 @@ public class ModulePrefs {
   }
 
   /**
-   * Gets the locale spec for the given locale, if any exists.
+   * Gets the global locale spec for the given locale, if any exists.
    *
    * @return The locale spec, if there is a matching one, or null.
    */
-  public LocaleSpec getLocale(Locale locale) {
-    return locales.get(locale);
+  public LocaleSpec getGlobalLocale(Locale locale) {
+    return getLocale(locale, GLOBAL_LOCALE);
+  }
+  
+  /**
+   * Gets the locale spec for the given locale and view, if any exists.
+   *
+   * @return The locale spec, if there is a matching one, or null.
+   */
+  public LocaleSpec getLocale(Locale locale, String view) {
+    if (view == null) {
+      view = GLOBAL_LOCALE;
+    }
+    Map<Locale, LocaleSpec> viewLocales = locales.get(view);
+    LocaleSpec locSpec = null;
+    if (viewLocales != null) {
+      locSpec = viewLocales.get(locale); // Check view specific locale...
+    }
+    if (locSpec == null && !view.equals(GLOBAL_LOCALE)) { // If not there, check Global map
+      locSpec = getGlobalLocale(locale);
+    }
+    return locSpec;
   }
 
   /**
@@ -679,6 +740,7 @@ public class ModulePrefs {
    */
   private static final class FeatureVisitor implements ElementVisitor {
     private final Map<String, Feature> features = Maps.newHashMap();
+    private final Map<String, Feature> globalFeatures = Maps.newHashMap();
     private final MutableBoolean oauthMarker;
     private boolean coreIncluded = false;
 
@@ -688,24 +750,45 @@ public class ModulePrefs {
       this.oauthMarker = oauthMarker;
     }
 
-    public boolean visit (String tag, Element element) throws SpecParserException {
-      if (!TAGS.contains(tag)) return false;
+    public boolean visit(String tag, Element element)
+        throws SpecParserException {
+      if (!TAGS.contains(tag))
+        return false;
 
       Feature feature = new Feature(element);
-      coreIncluded = coreIncluded || feature.getName().startsWith("core");
-      features.put(feature.getName(), feature);
+      if (feature.getViews().size() == 0) {
+        coreIncluded = coreIncluded || feature.getName().startsWith("core");
+        features.put(feature.getName(), feature);
+        globalFeatures.put(feature.getName(), feature);
+      } else {
+        // We are going to include Core feature globally, so skip it if it was
+        // included for any Views
+        if (!feature.getName().startsWith("core")) {
+          // Key view level features by qualifying with the view ID
+          for (String view : feature.getViews()) {
+            StringBuffer buff = new StringBuffer(feature.getName());
+            buff.append('.');
+            buff.append(view);
+            features.put(buff.toString(), feature);
+          }
+        }
+      }
       return true;
     }
+    
     public void apply(ModulePrefs moduleprefs) {
       if (!coreIncluded) {
         // No library was explicitly included from core - add it as an implicit dependency.
         features.put(Feature.CORE_FEATURE.getName(), Feature.CORE_FEATURE);
+        globalFeatures.put(Feature.CORE_FEATURE.getName(), Feature.CORE_FEATURE);
       }
       if (oauthMarker.booleanValue()) {
         // <OAuth> tag found: security token needed.
         features.put(Feature.SECURITY_TOKEN_FEATURE.getName(), Feature.SECURITY_TOKEN_FEATURE);
       }
       moduleprefs.features = ImmutableMap.copyOf(features);
+      moduleprefs.globalFeatures = ImmutableMap.copyOf(globalFeatures);
+      moduleprefs.allFeatures = ImmutableList.copyOf(features.values());
     }
   }
 
@@ -730,17 +813,46 @@ public class ModulePrefs {
    * Process ModulePrefs/Locale
    */
   private class LocaleVisitor implements ElementVisitor {
-    private final Map<Locale, LocaleSpec> localeMap = Maps.newHashMap();
 
-    public boolean visit(String tag, Element element) throws SpecParserException {
-      if (!"Locale".equals(tag)) return false;
+    private Map<String, Map<Locale, LocaleSpec>> locales = Maps.newHashMap();
+
+    public boolean visit(String tag, Element element)
+        throws SpecParserException {
+      if (!"Locale".equals(tag))
+        return false;
       LocaleSpec locale = new LocaleSpec(element, base);
-      localeMap.put(new Locale(locale.getLanguage(), locale.getCountry()), locale);
+      if (locale.getViews().isEmpty()) {
+        storeLocaleSpec(GLOBAL_LOCALE, locale);
+      } else {
+        // We've got a view level Locale, need to store the mapping of Views to
+        // the appropriate LocaleSpecs
+        for (String view : locale.getViews()) {
+          storeLocaleSpec(view,locale);
+        }
+      }
       return true;
     }
+    
     public void apply(ModulePrefs moduleprefs) {
-      moduleprefs.locales = ImmutableMap.copyOf(localeMap);
+      Map<Locale, LocaleSpec> allLocales = Maps.newHashMap();
+      moduleprefs.locales = locales;
+      for(Map<Locale, LocaleSpec> map : locales.values()){
+        allLocales.putAll(map);
+      }
+      moduleprefs.allLocales = ImmutableMap.copyOf(allLocales);
     }
+    
+    private void storeLocaleSpec(String view, LocaleSpec locale){
+      Map<Locale, LocaleSpec> viewLocaleSpecs;
+      if (locales.get(view) == null) {
+        viewLocaleSpecs = Maps.newHashMap();
+        locales.put(view, viewLocaleSpecs);
+      } else {
+        viewLocaleSpecs = locales.get(view);
+      }
+      viewLocaleSpecs.put(new Locale(locale.getLanguage(), locale.getCountry()), locale);      
+    }
+    
   }
 
   /**

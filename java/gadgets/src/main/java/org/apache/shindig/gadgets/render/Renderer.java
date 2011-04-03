@@ -124,7 +124,7 @@ public class Renderer {
    * Returns true iff the gadget opts into the caja or the container forces caja by flag
    */
   private boolean requiresCaja(Gadget gadget) {
-    return gadget.getSpec().getModulePrefs().getFeatures().containsKey("caja")
+    return gadget.getViewFeatures().containsKey("caja")
         || "1".equals(gadget.getContext().getParameter(UriCommon.Param.CAJOLE.getKey()));
   }
 

@@ -216,7 +216,7 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
       Element mainScriptTag = document.createElement("script");
       GadgetContext context = gadget.getContext();
       MessageBundle bundle = messageBundleFactory.getBundle(
-          gadget.getSpec(), context.getLocale(), context.getIgnoreCache(), context.getContainer());
+          gadget.getSpec(), context.getLocale(), context.getIgnoreCache(), context.getContainer(), context.getView());
       injectMessageBundles(bundle, mainScriptTag);
       injectDefaultPrefs(gadget, mainScriptTag);
       injectPreloads(gadget, mainScriptTag);
@@ -302,8 +302,8 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
     }
 
     // Get all resources requested by the gadget's requires/optional features.
-    Map<String, Feature> featureMap = gadget.getSpec().getModulePrefs().getFeatures();
-    List<String> gadgetFeatureKeys = Lists.newArrayList(gadget.getDirectFeatureDeps());
+    Map<String, Feature> featureMap = gadget.getViewFeatures();
+    List<String> gadgetFeatureKeys = Lists.newLinkedList(gadget.getDirectFeatureDeps());
     List<FeatureResource> gadgetResources =
         featureRegistry.getFeatureResources(context, gadgetFeatureKeys, unsupported).getResources();
     if (!unsupported.isEmpty()) {
