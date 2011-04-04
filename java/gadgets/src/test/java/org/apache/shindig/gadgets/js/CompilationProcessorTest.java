@@ -20,7 +20,6 @@ package org.apache.shindig.gadgets.js;
 import static org.easymock.EasyMock.createControl;
 import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.isA;
 import static org.easymock.EasyMock.same;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -29,12 +28,6 @@ import static org.junit.Assert.assertTrue;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.shindig.gadgets.GadgetContext;
-import org.apache.shindig.gadgets.RenderingContext;
-import org.apache.shindig.gadgets.features.ApiDirective;
-import org.apache.shindig.gadgets.features.FeatureRegistry;
-import org.apache.shindig.gadgets.features.FeatureRegistry.FeatureBundle;
-import org.apache.shindig.gadgets.features.FeatureRegistry.LookupResult;
 import org.apache.shindig.gadgets.rewrite.js.JsCompiler;
 import org.apache.shindig.gadgets.uri.JsUriManager.JsUri;
 import org.easymock.IMocksControl;
@@ -46,35 +39,26 @@ import com.google.common.collect.ImmutableList;
 public class CompilationProcessorTest {
   private IMocksControl control;
   private JsCompiler compiler;
-  private FeatureRegistry registry;
   private CompilationProcessor processor;
   
   @Before
   public void setUp() throws Exception {
     control = createControl();
     compiler = control.createMock(JsCompiler.class);
-    registry = control.createMock(FeatureRegistry.class);
-    processor = new CompilationProcessor(compiler, registry);
+    processor = new CompilationProcessor(compiler);
   }
   
   @Test
   public void compilerIsRun() throws Exception {
     JsUri jsUri = control.createMock(JsUri.class);
-    LookupResult lookupResult = control.createMock(LookupResult.class);
-    FeatureBundle bundle = control.createMock(FeatureBundle.class);
-    ImmutableList<String> externs = ImmutableList.of("e1", "e2");
-    expect(bundle.getApis(ApiDirective.Type.JS, false)).andReturn(externs);
-    expect(lookupResult.getBundles()).andReturn(ImmutableList.<FeatureBundle>of(bundle));
-    expect(registry.getFeatureResources(isA(GadgetContext.class), eq(ImmutableList.of("f1", "f2")),
-        eq(ImmutableList.<String>of()))).andReturn(lookupResult);
     JsResponseBuilder builder =
         new JsResponseBuilder().setCacheTtlSecs(1234).setStatusCode(200)
-          .appendJs(JsContent.fromFeature("content1:", "source1", "f1", null))
-          .appendJs(JsContent.fromFeature("content2", "source2", "f2", null));
+          .appendJs("content1:", "source1").appendJs("content2", "source2");
     JsResponse outputResponse = new JsResponseBuilder().appendJs("content3", "s3").build();
     JsRequest request = control.createMock(JsRequest.class);
     expect(request.getJsUri()).andReturn(jsUri);
-    expect(compiler.compile(same(jsUri), eq(builder.build().getAllJsContent()), eq(externs)))
+    List<String> emptyList = ImmutableList.of();
+    expect(compiler.compile(same(jsUri), eq(builder.build().getAllJsContent()), eq(emptyList)))
         .andReturn(outputResponse);
     
     control.replay();
@@ -96,19 +80,13 @@ public class CompilationProcessorTest {
   @Test(expected = JsException.class)
   public void compilerExceptionThrows() throws Exception {
     JsUri jsUri = control.createMock(JsUri.class);
-    LookupResult lookupResult = control.createMock(LookupResult.class);
-    FeatureBundle bundle = control.createMock(FeatureBundle.class);
-    ImmutableList<String> externs = ImmutableList.of();
-    expect(bundle.getApis(ApiDirective.Type.JS, false)).andReturn(externs);
-    expect(lookupResult.getBundles()).andReturn(ImmutableList.<FeatureBundle>of(bundle));
-    expect(registry.getFeatureResources(isA(GadgetContext.class), eq(ImmutableList.of("f1")),
-        eq(ImmutableList.<String>of()))).andReturn(lookupResult);
     JsResponseBuilder builder =
         new JsResponseBuilder().setCacheTtlSecs(1234).setStatusCode(200)
-          .appendJs(JsContent.fromFeature("content1:", "source1", "f1", null));
+          .appendJs("content1:", "source1").appendJs("content2", "source2");
     JsRequest request = control.createMock(JsRequest.class);
     expect(request.getJsUri()).andReturn(jsUri);
-    expect(compiler.compile(same(jsUri), eq(builder.build().getAllJsContent()), eq(externs)))
+    List<String> emptyList = ImmutableList.of();
+    expect(compiler.compile(same(jsUri), eq(builder.build().getAllJsContent()), eq(emptyList)))
         .andThrow(new JsException(400, "foo"));
     control.replay();
     processor.process(request, builder);
