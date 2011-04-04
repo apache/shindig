@@ -122,10 +122,10 @@ public class GetJsContentProcessorTest {
         eq(ImmutableList.<String>of()))).andReturn(lr);
     expect(compiler.getJsContent(jsUri, bundles.get(0)))
         .andReturn(ImmutableList.<JsContent>of(
-            JsContent.fromFeature(JS_CODE1, "source1", "feature1", null)));
+            JsContent.fromFeature(JS_CODE1, "source1", bundles.get(0), null)));
     expect(compiler.getJsContent(jsUri, bundles.get(1)))
         .andReturn(ImmutableList.<JsContent>of(
-            JsContent.fromFeature(JS_CODE2, "source2", "feature2", null)));
+            JsContent.fromFeature(JS_CODE2, "source2", bundles.get(1), null)));
   }
 
   private List<FeatureBundle> mockBundles(boolean proxyCacheable) {

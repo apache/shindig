@@ -5,7 +5,6 @@ package org.apache.shindig.gadgets.js;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 
-import org.apache.shindig.gadgets.features.FeatureRegistry.FeatureBundle;
 import org.apache.shindig.gadgets.features.FeatureResource;
 import org.apache.shindig.gadgets.uri.UriCommon;
 

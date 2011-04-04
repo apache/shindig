@@ -146,10 +146,7 @@ public class ExportJsCompilerTest {
     JsUri jsUri = mockJsUri(JsCompileMode.ALL_RUN_TIME);
     FeatureBundle bundle = mockBundle(Lists.<FeatureResource>newArrayList(), EMPTY, EMPTY); // empty
     Iterable<JsContent> actual = compiler.getJsContent(jsUri, bundle);
-    assertEquals(
-        "\n/* [start] feature=" + RESOURCE_NAME + " */\n" +
-        "\n/* [end] feature=" + RESOURCE_NAME + " */\n",
-        getContent(actual));
+    assertEquals("", getContent(actual));
   }
 
   @Test
@@ -160,14 +157,12 @@ public class ExportJsCompilerTest {
     FeatureBundle bundle = mockBundle(Lists.newArrayList(extRes, intRes), EXPORTS, EXTERNS);
     Iterable<JsContent> actual = compiler.getJsContent(jsUri, bundle);
     assertEquals(
-        "\n/* [start] feature=" + RESOURCE_NAME + " */\n" +
         "document.write('<script src=\"" + RESOURCE_URL_DEB + "\"></script>');\n" +
         RESOURCE_CONTENT_DEB + ";\n" +
         "exportJs('gadgets',[gadgets]);" +
         "exportJs('cc',[cc]);" +
         "exportJs('gadgets.rpc',[gadgets,gadgets.rpc],{call:'call'});" +
-        "exportJs('cc.prototype',[cc,cc.prototype],{site:'site'});" +
-        "\n/* [end] feature=" + RESOURCE_NAME + " */\n",
+        "exportJs('cc.prototype',[cc,cc.prototype],{site:'site'});",
         getContent(actual));
   }
 

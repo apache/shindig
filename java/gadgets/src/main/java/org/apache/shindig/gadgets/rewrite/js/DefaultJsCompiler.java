@@ -17,15 +17,14 @@
  */
 package org.apache.shindig.gadgets.rewrite.js;
 
+import com.google.common.collect.Lists;
+
 import org.apache.shindig.gadgets.features.FeatureRegistry.FeatureBundle;
 import org.apache.shindig.gadgets.features.FeatureResource;
 import org.apache.shindig.gadgets.js.JsContent;
 import org.apache.shindig.gadgets.js.JsResponse;
 import org.apache.shindig.gadgets.js.JsResponseBuilder;
 import org.apache.shindig.gadgets.uri.JsUriManager.JsUri;
-
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
 
 import java.util.List;
 
@@ -42,13 +41,11 @@ public class DefaultJsCompiler implements JsCompiler {
       if (resource.isExternal()) {
         // Support external/type=url feature serving through document.write()
         jsContent.add(JsContent.fromFeature("document.write('<script src=\"" + content + "\"></script>')",
-            "[external:" + content + "]", bundle.getName(), resource));
+            "[external:" + content + "]", bundle, resource));
       } else {
-        jsContent.add(JsContent.fromFeature(content, resource.getName(), bundle.getName(),
-            resource));
+        jsContent.add(JsContent.fromFeature(content, resource.getName(), bundle, resource));
       }
-      jsContent.add(JsContent.fromFeature(";\n", "[separator]", bundle.getName(),
-          resource));
+      jsContent.add(JsContent.fromFeature(";\n", "[separator]", bundle, resource));
     }
     return jsContent;
   }

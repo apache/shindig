@@ -62,7 +62,7 @@ public class CajaJsSubtractingProcessorTest {
         mockFeatureResource(null)));
     contents.add(JsContent.fromFeature(NORMAL_CONTENT_JS, null, null,
         mockFeatureResource(ImmutableMap.of(UriCommon.Param.CAJOLE.getKey(), "blah"))));
-    contents.add(JsContent.fromFeature(CAJA_CONTENT_JS, null, "feature",
+    contents.add(JsContent.fromFeature(CAJA_CONTENT_JS, null, null,
         mockFeatureResource(ImmutableMap.of(UriCommon.Param.CAJOLE.getKey(), ATTRIB_VALUE))));
     
     response = new JsResponse(contents, -1, -1, false, ERRORS, null);

@@ -17,6 +17,7 @@
  */
 package org.apache.shindig.gadgets.js;
 
+import org.apache.shindig.gadgets.features.FeatureRegistry.FeatureBundle;
 import org.apache.shindig.gadgets.features.FeatureResource;
 
 /**
@@ -27,24 +28,23 @@ import org.apache.shindig.gadgets.features.FeatureResource;
 public class JsContent {
   private final String content;
   private final String source;
-  private final String feature;
+  private final FeatureBundle bundle;
   private final FeatureResource resource;
-
+  
   public static JsContent fromText(String content, String source) {
-    return new JsContent(content, source, "[built-in]", null);
+    return new JsContent(content, source, null, null);
   }
 
-  // TODO: Consider replacing String feature with FeatureBundle.
-  public static JsContent fromFeature(String content, String source, String feature,
-      FeatureResource resource) {
-    return new JsContent(content, source, feature, resource);
+  public static JsContent fromFeature(String content, String source,
+      FeatureBundle bundle, FeatureResource resource) {
+    return new JsContent(content, source, bundle, resource);
   }
   
-  private JsContent(String content, String source, String feature,
-      FeatureResource resource) {
+  private JsContent(String content, String source,
+      FeatureBundle bundle, FeatureResource resource) {
     this.content = content;
     this.source = source;
-    this.feature = feature;
+    this.bundle = bundle;
     this.resource = resource;
   }
 
@@ -56,8 +56,8 @@ public class JsContent {
     return source;
   }
 
-  public String getFeature() {
-    return feature;
+  public FeatureBundle getFeatureBundle() {
+    return bundle;
   }
   
   public FeatureResource getFeatureResource() {

@@ -331,13 +331,11 @@ public class ClosureJsCompiler implements JsCompiler {
         String compiled, int mapping) {
       JsContent sourceJs = orig.get(getRootSrc(mappings[mapping]));
       String sourceName = "[closure-compiler-synthesized]";
-      String featureName = "[closure-compiler]";
       if (sourceJs != null) {
         sourceName = sourceJs.getSource() != null ? sourceJs.getSource() : "";
-        featureName = sourceJs.getFeature() != null ? sourceJs.getFeature() : "";
       }
       out.add(JsContent.fromFeature(compiled.substring(startPos, codePos),
-          sourceName, featureName, null));
+          sourceName, sourceJs.getFeatureBundle(), null));
     }
     
     private static final String BEGIN_COMMENT = "/*";

@@ -35,7 +35,7 @@ import org.apache.shindig.gadgets.uri.JsUriManager.JsUri;
 import org.apache.shindig.gadgets.uri.UriStatus;
 
 /**
- * Retrieves the requested Javascript code using a {@link JsHandler}.
+ * Retrieves the requested Javascript code using a {@link JsProcessor}.
  */
 public class GetJsContentProcessor implements JsProcessor {
   private static final Collection<String> EMPTY_SET = Sets.newHashSet();

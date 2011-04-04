@@ -61,15 +61,10 @@ public class ExportJsCompiler extends DefaultJsCompiler {
   @Override
   public Iterable<JsContent> getJsContent(JsUri jsUri, FeatureBundle bundle) {
     List<JsContent> jsContent = Lists.newLinkedList();
-    // TODO: Convert start/end to processor too.
-    jsContent.add(JsContent.fromFeature("\n/* [start] feature=" + bundle.getName() +
-        " */\n", "[comment-marker-start]", bundle.getName(), null));
     for (JsContent jsc : super.getJsContent(jsUri, bundle)) {
       jsContent.add(jsc);
     }
     jsContent.add(getExportsForFeature(jsUri, bundle));
-    jsContent.add(JsContent.fromFeature("\n/* [end] feature=" + bundle.getName() +
-        " */\n", "[comment-marker-end]", bundle.getName(), null));
     return jsContent;
   }
 
@@ -103,7 +98,7 @@ public class ExportJsCompiler extends DefaultJsCompiler {
     }
 
     return JsContent.fromFeature(sb.toString(), "[generated-symbol-exports]",
-        bundle.getName(), null);
+        bundle, null);
   }
 
   private void appendExportJs(JsResponseBuilder builder, GadgetContext context) {
@@ -113,7 +108,7 @@ public class ExportJsCompiler extends DefaultJsCompiler {
       for (FeatureResource resource : bundle.getResources()) {
         builder.appendJs(JsContent.fromFeature(
             resource.getDebugContent(), resource.getName(),
-            bundle.getName(), null));
+            bundle, null));
       }
     }
   }
