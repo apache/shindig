@@ -76,7 +76,7 @@ class GadgetSpecParser {
       if ($viewNode->getAttribute('type' == 'url') && $viewNode->getAttribute('href') == null) {
         throw new GadgetSpecException("Malformed <Content> href value");
       }
-      foreach (explode(',', $viewNode->getAttribute('view')) as $view) {
+      foreach ($this->parseViewAttribute($viewNode->getAttribute('view')) as $view) {
         $view = trim($view);
         $href = trim($viewNode->getAttribute('href'));
         $type = trim(strtoupper($viewNode->getAttribute('type')));
@@ -110,6 +110,19 @@ class GadgetSpecParser {
         }
       }
     }
+  }
+
+  /**
+   *
+   * @param string $attribute
+   * @return array
+   */
+  private function parseViewAttribute($attribute)
+  {
+    if (! $attribute) {
+      return array();
+    }
+    return explode(',', str_replace(' ', '', $attribute));
   }
 
   /**
@@ -237,30 +250,32 @@ class GadgetSpecParser {
    * @param GadgetSpec $gadget
    */
   private function parseFeatures(DOMElement &$modulePrefs, GadgetSpec &$gadget) {
-    $gadget->requiredFeatures = $gadget->optionalFeatures = array();
     $requiredNodes = $modulePrefs->getElementsByTagName('Require');
-    if ($requiredNodes->length != 0) {
-      foreach ($requiredNodes as $requiredFeature) {
-        $gadget->requiredFeatures[] = $requiredFeature->getAttribute('feature');
-        if ($requiredFeature->getAttribute('feature') == 'content-rewrite') {
-          $this->parseContentRewrite($requiredFeature, $gadget);
-        } elseif ($requiredFeature->getAttribute('feature') == 'opensocial-templates') {
-          $this->parseOpenSocialTemplates($requiredFeature, $gadget);
-        }
-      }
-    }
+    $gadget->requiredFeatures = $this->parseFeatureNodes($requiredNodes, $gadget);
     $optionalNodes = $modulePrefs->getElementsByTagName('Optional');
-    if ($optionalNodes->length != 0) {
-      foreach ($optionalNodes as $optionalFeature) {
-        $gadget->optionalFeatures[] = $optionalFeature->getAttribute('feature');
-        // Content-rewrite is a special case since it has Params as child nodes
-        if ($optionalFeature->getAttribute('feature') == 'content-rewrite') {
-          $this->parseContentRewrite($optionalFeature, $gadget);
-        } elseif ($optionalFeature->getAttribute('feature') == 'opensocial-templates') {
-          $this->parseOpenSocialTemplates($optionalFeature, $gadget);
-        }
+    $gadget->optionalFeatures = $this->parseFeatureNodes($optionalNodes, $gadget);
+  }
+
+  /**
+   *
+   * @param DOMNodeList $nodes
+   * @param GadgetSpec $gadget
+   * @return array
+   */
+  private function parseFeatureNodes(DOMNodeList &$nodes, GadgetSpec &$gadget) {
+    $features = array();
+    foreach ($nodes as $feature) {
+      $features[$feature->getAttribute('feature')] = array(
+          'views' => $this->parseViewAttribute($feature->getAttribute('views')),
+      );
+      // Content-rewrite is a special case since it has Params as child nodes
+      if ($feature->getAttribute('feature') == 'content-rewrite') {
+        $this->parseContentRewrite($feature, $gadget);
+      } elseif ($feature->getAttribute('feature') == 'opensocial-templates') {
+        $this->parseOpenSocialTemplates($feature, $gadget);
       }
     }
+    return $features;
   }
 
   /**
@@ -397,6 +412,7 @@ class GadgetSpecParser {
       foreach ($preloadNodes as $node) {
         $gadget->preloads[] = array('href' => $node->getAttribute('href'),
             'authz' => strtoupper($node->getAttribute('authz')),
+            'views' => $this->parseViewAttribute($node->getAttribute('views')),
             'signViewer' => $node->getAttribute('sign_viewer'),
             'signOwner' => $node->getAttribute('sign_owner'));
       }
@@ -425,6 +441,7 @@ class GadgetSpecParser {
         $gadget->locales[] = array('lang' => $lang, 'country' => $country,
             'messages' => $node->getAttribute('messages'),
             'languageDirection' => $node->getAttribute('language_direction'),
+            'views' => $this->parseViewAttribute($node->getAttribute('views')),
             'messageBundle' => $messageBundle);
       }
     }

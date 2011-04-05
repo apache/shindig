@@ -74,11 +74,11 @@ class GadgetFactory {
   protected function parseFeatures(Gadget &$gadget) {
     $found = $missing = array();
     if (! $this->context->getRegistry()->resolveFeatures(
-        array_merge($gadget->gadgetSpec->requiredFeatures, $gadget->gadgetSpec->optionalFeatures),
+        $this->getNeededFeaturesForView($gadget),
         $found, $missing)) {
       $requiredMissing = false;
       foreach ($missing as $featureName) {
-        if (in_array($featureName, $gadget->gadgetSpec->requiredFeatures)) {
+        if (isset($gadget->gadgetSpec->requiredFeatures[$featureName])) {
           $requiredMissing = true;
           break;
         }
@@ -87,9 +87,26 @@ class GadgetFactory {
         throw new GadgetException("Unknown features: " . implode(',', $missing));
       }
     }
-    unset($gadget->gadgetSpec->optionalFeatures);
-    unset($gadget->gadgetSpec->requiredFeatures);
     $gadget->features = $found;
+  }
+
+  /**
+   * @param Gadget $gadget
+   * @return array
+   */
+  protected function getNeededFeaturesForView(Gadget &$gadget)
+  {
+    $neededFeatures = array();
+
+    $allFeatures = array_merge($gadget->gadgetSpec->requiredFeatures, $gadget->gadgetSpec->optionalFeatures);
+
+    foreach ($allFeatures as $featureName => $feature) {
+      if (! $feature['views'] || in_array($this->context->getView(), $feature['views'])) {
+        $neededFeatures[] = $featureName;
+      }
+    }
+
+    return $neededFeatures;
   }
 
   /**
@@ -169,15 +186,15 @@ class GadgetFactory {
       $contextLocale = $this->context->getLocale();
       $locales = $gadget->gadgetSpec->locales;
       $gadget->rightToLeft = false;
-      $full = $partial = $all = null;
+      $full = $partial = $all = array();
       foreach ($locales as $locale) {
         if ($locale['lang'] == $contextLocale['lang'] && $locale['country'] == $contextLocale['country']) {
-          $full = $locale['messageBundle'];
+          $full = array_merge($full, $locale['messageBundle']);
           $gadget->rightToLeft = $locale['languageDirection'] == 'rtl';
         } elseif ($locale['lang'] == $contextLocale['lang'] && $locale['country'] == 'all') {
-          $partial = $locale['messageBundle'];
+          $partial = array_merge($partial, $locale['messageBundle']);
         } elseif ($locale['country'] == 'all' && $locale['lang'] == 'all') {
-          $all = $locale['messageBundle'];
+          $all = array_merge($all, $locale['messageBundle']);
         }
       }
       $gadget->gadgetSpec->locales = array();
@@ -202,7 +219,13 @@ class GadgetFactory {
     $unsignedRequests = $signedRequests = array();
     foreach ($gadget->gadgetSpec->locales as $key => $locale) {
       // Only fetch the locales that match the current context's language and country
-      if (($locale['country'] == 'all' && $locale['lang'] == 'all') || ($locale['lang'] == $contextLocale['lang'] && $locale['country'] == 'all') || ($locale['lang'] == $contextLocale['lang'] && $locale['country'] == $contextLocale['country'])) {
+      if ($locale['views'] && ! in_array($this->context->getView(), $locale['views'])) {
+        unset($gadget->gadgetSpec->locales[$key]);
+        continue;
+      }
+      if (($locale['country'] == 'all' && $locale['lang'] == 'all') || 
+          ($locale['lang'] == $contextLocale['lang'] && $locale['country'] == 'all') ||
+          ($locale['lang'] == $contextLocale['lang'] && $locale['country'] == $contextLocale['country'])) {
         if (! empty($locale['messages'])) {
           $transformedUrl = RemoteContentRequest::transformRelativeUrl($locale['messages'], $this->context->getUrl());
           if (! $transformedUrl) {
@@ -226,7 +249,11 @@ class GadgetFactory {
     }
     if (! $gadget->gadgetContext instanceof MetadataGadgetContext) {
       // Add preloads to the request queue
-      foreach ($gadget->getPreloads() as $preload) {
+      foreach ($gadget->getPreloads() as $id => $preload) {
+        if ($preload['views'] && ! in_array($this->context->getView(), $preload['views'])) {
+          unset($gadget->gadgetSpec->preloads[$id]);
+          continue;
+        }
         if (! empty($preload['href'])) {
           $preload['href'] = $gadget->substitutions->substitute($preload['href']);
           $request = new RemoteContentRequest($preload['href']);
@@ -270,6 +297,43 @@ class GadgetFactory {
         }
       }
     }
+
+    $responses = $this->performRequests($unsignedRequests, $signedRequests);
+    
+    // assign the results to the gadget locales and preloads (using the url as the key)
+    foreach ($gadget->gadgetSpec->locales as $key => $locale) {
+      if (! empty($locale['messages']) && isset($responses[$locale['messages']]) && $responses[$locale['messages']]['rc'] == 200) {
+        $gadget->gadgetSpec->locales[$key]['messageBundle'] = $this->parseMessageBundle($responses[$locale['messages']]['body']);
+      }
+    }
+    if (! $gadget->gadgetContext instanceof MetadataGadgetContext) {
+	    $preloads = array();
+	    foreach ($gadget->gadgetSpec->preloads as $key => $preload) {
+	      if (! empty($preload['href']) && isset($responses[$preload['href']]) && $responses[$preload['href']]['rc'] == 200) {
+	        $preloads[] = array_merge(array('id' => $preload['href']), $responses[$preload['href']]);
+	      }
+	    }
+	    $gadget->gadgetSpec->preloads = $preloads;
+	    if ($gadget->gadgetSpec->templatesRequireLibraries) {
+	    	 $requiredLibraries = array();
+		    foreach ($gadget->gadgetSpec->templatesRequireLibraries as $key => $libraryUrl) {
+		    	if (isset($responses[$libraryUrl]) && $responses[$libraryUrl]['rc'] == 200) {
+		    		$requiredLibraries[$libraryUrl] = $responses[$libraryUrl]['body'];
+		    	}
+		    }
+		    $gadget->gadgetSpec->templatesRequireLibraries = $requiredLibraries;
+	    }
+    }
+  }
+
+  /**
+   * perform all requests
+   * 
+   * @param array $unsignedRequests
+   * @param array $signedRequests
+   * @return array
+   */
+  protected function performRequests($unsignedRequests, $signedRequests) {
     // Perform the non-signed requests
     $responses = array();
     if (count($unsignedRequests)) {
@@ -295,30 +359,8 @@ class GadgetFactory {
             'rc' => $response->getHttpCode());
       }
     }
-    // assign the results to the gadget locales and preloads (using the url as the key)
-    foreach ($gadget->gadgetSpec->locales as $key => $locale) {
-      if (! empty($locale['messages']) && isset($responses[$locale['messages']]) && $responses[$locale['messages']]['rc'] == 200) {
-        $gadget->gadgetSpec->locales[$key]['messageBundle'] = $this->parseMessageBundle($responses[$locale['messages']]['body']);
-      }
-    }
-    if (! $gadget->gadgetContext instanceof MetadataGadgetContext) {
-	    $preloads = array();
-	    foreach ($gadget->gadgetSpec->preloads as $key => $preload) {
-	      if (! empty($preload['href']) && isset($responses[$preload['href']]) && $responses[$preload['href']]['rc'] == 200) {
-	        $preloads[] = array_merge(array('id' => $preload['href']), $responses[$preload['href']]);
-	      }
-	    }
-	    $gadget->gadgetSpec->preloads = $preloads;
-	    if ($gadget->gadgetSpec->templatesRequireLibraries) {
-	    	 $requiredLibraries = array();
-		    foreach ($gadget->gadgetSpec->templatesRequireLibraries as $key => $libraryUrl) {
-		    	if (isset($responses[$libraryUrl]) && $responses[$libraryUrl]['rc'] == 200) {
-		    		$requiredLibraries[$libraryUrl] = $responses[$libraryUrl]['body'];
-		    	}
-		    }
-		    $gadget->gadgetSpec->templatesRequireLibraries = $requiredLibraries;
-	    }
-    }
+
+    return $responses;
   }
 
   /**

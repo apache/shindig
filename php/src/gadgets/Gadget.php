@@ -216,7 +216,7 @@ class Gadget {
    * @return unknown
    */
   public function getRequiredFeatures() {
-    return $this->substitutions->substitute($this->gadgetSpec->requiredFeatures);
+    return $this->gadgetSpec->requiredFeatures;
   }
 
   /**

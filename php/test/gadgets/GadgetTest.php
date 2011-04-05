@@ -35,7 +35,13 @@ class MockGadgetFactory extends GadgetFactory {
    width="100" screenshot="screenshot" singleton="true" thumbnail="thumbnail"
    string="string" title_url="titleUrl" render_inline="never" scaling="true"
    scrolling="true" show_in_directory="true" show_stats="false"
-  />
+  >
+      <Require feature="opensocial" />
+      <Require feature="pubsub" views="default, canvas"/>
+      <Require feature="flash" views="mobile"/>
+      <Optional feature="views" />
+      <Optional feature="opensocial-data" views="profile,canvas" />
+  </ModulePrefs>
   <UserPref name="name1" default_value="0" datatype="hidden"/>
   <UserPref name="name2" default_value="value" datatype="hidden"/>
   <Content type="html" view="home">
@@ -246,6 +252,19 @@ class GadgetTest extends PHPUnit_Framework_TestCase {
    */
   public function testGetTitleUrl() {
     $this->assertEquals('titleUrl', $this->gadget->getTitleUrl());
+  }
+
+  public function testGetRequiredFeatures() {
+    $this->assertEquals(array(
+        'opensocial' => array('views' => array()),
+        'pubsub' => array('views' => array('default', 'canvas')),
+        'flash' => array('views' => array('mobile'))), $this->gadget->getRequiredFeatures());
+  }
+
+  public function testGetOptionalFeatures() {
+    $this->assertEquals(array(
+        'views' => array('views' => array()),
+        'opensocial-data' => array('views' => array('profile', 'canvas'))), $this->gadget->getOptionalFeatures());
   }
 
   /**
