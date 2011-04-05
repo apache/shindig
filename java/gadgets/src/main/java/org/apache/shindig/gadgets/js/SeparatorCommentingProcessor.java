@@ -35,7 +35,7 @@ public class SeparatorCommentingProcessor implements JsProcessor {
         jsBuilder.add(newComment(feature, true));
 
       // Entering a new feature, from another feature.
-      } else if (lastFeature != null && feature != null) {
+      } else if (lastFeature != null && feature != null && lastFeature != feature) {
         jsBuilder.add(newComment(lastFeature, false));
         jsBuilder.add(newComment(feature, true));
 

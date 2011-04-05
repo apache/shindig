@@ -34,7 +34,7 @@ import java.util.List;
 
 public class SeparatorCommentingProcessorTest {
   private static final List<String> ERRORS = ImmutableList.<String>of();
-  
+
   private IMocksControl control;
   private SeparatorCommentingProcessor processor;
   private JsResponse response;
@@ -44,11 +44,11 @@ public class SeparatorCommentingProcessorTest {
     control = createControl();
     processor = new SeparatorCommentingProcessor();
   }
-  
+
   @Test
   public void testNoFeature() throws Exception {
     JsResponseBuilder builder = newBuilder();
-    
+
     control.replay();
     boolean actualReturn = processor.process(null, builder);
     JsResponse actualResponse = builder.build();
@@ -57,12 +57,12 @@ public class SeparatorCommentingProcessorTest {
     assertTrue(actualReturn);
     assertEquals("", actualResponse.toJsString());
   }
-  
+
   @Test
   public void testOneFeature() throws Exception {
     JsContent js = JsContent.fromFeature("content", null, mockBundle("bundle"), null);
     JsResponseBuilder builder = newBuilder(js);
-    
+
     control.replay();
     boolean actualReturn = processor.process(null, builder);
     JsResponse actualResponse = builder.build();
@@ -75,12 +75,12 @@ public class SeparatorCommentingProcessorTest {
         "\n/* [end] feature=bundle */\n",
         actualResponse.toJsString());
   }
-  
+
   @Test
   public void testOneText() throws Exception {
     JsContent text1 = JsContent.fromText("text1", null);
     JsResponseBuilder builder = newBuilder(text1);
-    
+
     control.replay();
     boolean actualReturn = processor.process(null, builder);
     JsResponse actualResponse = builder.build();
@@ -95,7 +95,7 @@ public class SeparatorCommentingProcessorTest {
     JsContent js1 = JsContent.fromFeature("content1", null, mockBundle("bundle1"), null);
     JsContent js2 = JsContent.fromFeature("content2", null, mockBundle("bundle2"), null);
     JsResponseBuilder builder = newBuilder(js1, js2);
-    
+
     control.replay();
     boolean actualReturn = processor.process(null, builder);
     JsResponse actualResponse = builder.build();
@@ -111,7 +111,28 @@ public class SeparatorCommentingProcessorTest {
         "\n/* [end] feature=bundle2 */\n",
         actualResponse.toJsString());
   }
-  
+
+  @Test
+  public void testNeighboringSameFeatures() throws Exception {
+    FeatureBundle bundle = mockBundle("bundle");
+    JsContent js1 = JsContent.fromFeature("content1", null, bundle, null);
+    JsContent js2 = JsContent.fromFeature("content2", null, bundle, null);
+    JsResponseBuilder builder = newBuilder(js1, js2);
+
+    control.replay();
+    boolean actualReturn = processor.process(null, builder);
+    JsResponse actualResponse = builder.build();
+
+    control.verify();
+    assertTrue(actualReturn);
+    assertEquals(
+        "\n/* [start] feature=bundle */\n" +
+        "content1" +
+        "content2" +
+        "\n/* [end] feature=bundle */\n",
+        actualResponse.toJsString());
+  }
+
   @Test
   public void testMultipleFeaturesWithInBetweenTexts() throws Exception {
     JsContent text1 = JsContent.fromText("text1", null);
@@ -120,7 +141,7 @@ public class SeparatorCommentingProcessorTest {
     JsContent js1 = JsContent.fromFeature("content1", null, mockBundle("bundle1"), null);
     JsContent js2 = JsContent.fromFeature("content2", null, mockBundle("bundle2"), null);
     JsResponseBuilder builder = newBuilder(text1, js1, text2, js2, text3);
-    
+
     control.replay();
     boolean actualReturn = processor.process(null, builder);
     JsResponse actualResponse = builder.build();
@@ -139,13 +160,13 @@ public class SeparatorCommentingProcessorTest {
         "text3",
         actualResponse.toJsString());
   }
-  
+
   private JsResponseBuilder newBuilder(JsContent... contents) {
     response = new JsResponse(Lists.newArrayList(contents),
         -1, -1, false, ERRORS, null);
     return new JsResponseBuilder(response);
   }
-  
+
   private FeatureBundle mockBundle(String name) {
     FeatureBundle result = control.createMock(FeatureBundle.class);
     expect(result.getName()).andReturn(name).anyTimes();
