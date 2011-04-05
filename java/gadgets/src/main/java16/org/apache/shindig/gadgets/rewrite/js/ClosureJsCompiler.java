@@ -45,7 +45,6 @@ import org.apache.shindig.gadgets.js.JsContent;
 import org.apache.shindig.gadgets.js.JsException;
 import org.apache.shindig.gadgets.js.JsResponse;
 import org.apache.shindig.gadgets.js.JsResponseBuilder;
-import org.apache.shindig.gadgets.rewrite.js.ExportJsCompiler;
 import org.apache.shindig.gadgets.rewrite.js.JsCompiler;
 import org.apache.shindig.gadgets.uri.JsUriManager.JsUri;
 import org.json.JSONArray;
@@ -70,19 +69,14 @@ public class ClosureJsCompiler implements JsCompiler {
   @VisibleForTesting
   static final String CACHE_NAME = "CompiledJs";
 
-  private final ExportJsCompiler exportCompiler;
+  private final DefaultJsCompiler defaultCompiler;
   private final Cache<String, JsResponse> cache;
   private JsResponse lastResult;
 
   @Inject
-  public ClosureJsCompiler(CacheProvider cacheProvider, FeatureRegistry registry) {
-    this(new ExportJsCompiler(registry), cacheProvider);
-  }
-
-  @VisibleForTesting
-  ClosureJsCompiler(ExportJsCompiler exportCompiler, CacheProvider cacheProvider) {
+  public ClosureJsCompiler(DefaultJsCompiler defaultCompiler, CacheProvider cacheProvider) {
     this.cache = cacheProvider.createCache(CACHE_NAME);
-    this.exportCompiler = exportCompiler;
+    this.defaultCompiler = defaultCompiler;
   }
 
   public static CompilerOptions defaultCompilerOptions() {
@@ -130,7 +124,7 @@ public class ClosureJsCompiler implements JsCompiler {
 
   public JsResponse compile(JsUri jsUri, Iterable<JsContent> content, List<String> externs) 
       throws JsException {
-    JsResponse exportResponse = exportCompiler.compile(jsUri, content, externs);
+    JsResponse exportResponse = defaultCompiler.compile(jsUri, content, externs);
     content = exportResponse.getAllJsContent();
 
     String externStr = toExternString(externs);
@@ -182,7 +176,7 @@ public class ClosureJsCompiler implements JsCompiler {
       } else {
         builder.appendJs(compiled, "[compiled]");
       }
-      
+
       builder.setExterns(result.externExport);
     } else {
       // Otherwise, return original content and null exports.
@@ -240,7 +234,7 @@ public class ClosureJsCompiler implements JsCompiler {
         return true;
       }
     };
-    List<JsContent> builder = Lists.newLinkedList(exportCompiler.getJsContent(jsUri, bundle));
+    List<JsContent> builder = Lists.newLinkedList(defaultCompiler.getJsContent(jsUri, bundle));
 
     CompilerOptions options = getCompilerOptions();
     if (options.isExternExportsEnabled()) {

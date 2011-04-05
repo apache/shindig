@@ -42,7 +42,7 @@ import org.apache.shindig.gadgets.features.ApiDirective;
 import org.apache.shindig.gadgets.features.FeatureRegistry.FeatureBundle;
 import org.apache.shindig.gadgets.js.JsContent;
 import org.apache.shindig.gadgets.js.JsResponse;
-import org.apache.shindig.gadgets.rewrite.js.ExportJsCompiler;
+import org.apache.shindig.gadgets.rewrite.js.DefaultJsCompiler;
 import org.apache.shindig.gadgets.uri.UriStatus;
 import org.apache.shindig.gadgets.uri.JsUriManager.JsUri;
 
@@ -53,7 +53,7 @@ public class ClosureJsCompilerTest extends TestCase {
   private Compiler realCompMock;
   private CompilerOptions realOptionsMock;
   private Result realResultMock;
-  private ExportJsCompiler exportCompilerMock;
+  private DefaultJsCompiler compilerMock;
   private JsResponse exportResponseMock;
   private JsUri jsUriMock;
   private CacheProvider cacheMock;
@@ -79,12 +79,12 @@ public class ClosureJsCompilerTest extends TestCase {
     super.setUp();
     cacheMock = new MockProvider();
     exportResponseMock = mockJsResponse();
-    exportCompilerMock = mockExportJsCompiler(exportResponseMock);
+    compilerMock = mockDefaultJsCompiler(exportResponseMock);
   }
 
   public void testGetJsContentWithGoogSymbolExports() throws Exception {
     realOptionsMock = mockRealJsCompilerOptions(true); // with
-    compiler = newClosureJsCompiler(null, realOptionsMock, exportCompilerMock, cacheMock);
+    compiler = newClosureJsCompiler(null, realOptionsMock, compilerMock, cacheMock);
     FeatureBundle bundle = mockBundle(EXPORTS);
     Iterable<JsContent> actual = compiler.getJsContent(mockJsUri(false), bundle);
     assertEquals(EXPORT_COMPILER_STRING +
@@ -95,7 +95,7 @@ public class ClosureJsCompilerTest extends TestCase {
 
   public void testGetJsContentWithoutGoogSymbolExports() throws Exception {
     realOptionsMock = mockRealJsCompilerOptions(false); // without
-    compiler = newClosureJsCompiler(null, realOptionsMock, exportCompilerMock, cacheMock);
+    compiler = newClosureJsCompiler(null, realOptionsMock, compilerMock, cacheMock);
     FeatureBundle bundle = mockBundle(EXPORTS);
     Iterable<JsContent> actual = compiler.getJsContent(mockJsUri(false), bundle);
     assertEquals(EXPORT_COMPILER_STRING, getContent(actual));
@@ -106,7 +106,7 @@ public class ClosureJsCompilerTest extends TestCase {
     realResultMock = mockRealJsResult();
     realCompMock = mockRealJsCompiler(null, realResultMock, ACTUAL_COMPILER_OUTPUT);
     realOptionsMock = mockRealJsCompilerOptions(false);
-    compiler = newClosureJsCompiler(realCompMock, realOptionsMock, exportCompilerMock, cacheMock);
+    compiler = newClosureJsCompiler(realCompMock, realOptionsMock, compilerMock, cacheMock);
     JsResponse actual = compiler.compile(jsUriMock, EXPORT_COMPILER_CONTENTS,
         ImmutableList.of(EXTERN));
     assertEquals(CLOSURE_ACTUAL_COMPILER_OUTPUT, actual.toJsString());
@@ -118,7 +118,7 @@ public class ClosureJsCompilerTest extends TestCase {
     realResultMock = mockRealJsResult();
     realCompMock = mockRealJsCompiler(null, realResultMock, ACTUAL_COMPILER_OUTPUT);
     realOptionsMock = mockRealJsCompilerOptions(false);
-    compiler = newClosureJsCompiler(realCompMock, realOptionsMock, exportCompilerMock, cacheMock);
+    compiler = newClosureJsCompiler(realCompMock, realOptionsMock, compilerMock, cacheMock);
     JsResponse actual = compiler.compile(jsUriMock, EXPORT_COMPILER_CONTENTS,
         ImmutableList.of(EXTERN));
     assertEquals(CLOSURE_EXPORT_COMPILER_OUTPUT, actual.toJsString());
@@ -129,7 +129,7 @@ public class ClosureJsCompilerTest extends TestCase {
     jsUriMock = mockJsUri(false); // opt
     realCompMock = mockRealJsCompiler(JS_ERROR, realResultMock, ACTUAL_COMPILER_OUTPUT);
     realOptionsMock = mockRealJsCompilerOptions(true); // force compiler to run
-    compiler = newClosureJsCompiler(realCompMock, realOptionsMock, exportCompilerMock, cacheMock);
+    compiler = newClosureJsCompiler(realCompMock, realOptionsMock, compilerMock, cacheMock);
     JsResponse actual = compiler.compile(jsUriMock, EXPORT_COMPILER_CONTENTS,
         ImmutableList.of(EXTERN));
     assertTrue(actual.getErrors().get(0).contains(ERROR_NAME));
@@ -140,7 +140,7 @@ public class ClosureJsCompilerTest extends TestCase {
     jsUriMock = mockJsUri(true); // debug
     realCompMock = mockRealJsCompiler(JS_ERROR, realResultMock, ACTUAL_COMPILER_OUTPUT);
     realOptionsMock = mockRealJsCompilerOptions(true); // force compiler to run
-    compiler = newClosureJsCompiler(realCompMock, realOptionsMock, exportCompilerMock, cacheMock);
+    compiler = newClosureJsCompiler(realCompMock, realOptionsMock, compilerMock, cacheMock);
     JsResponse actual = compiler.compile(jsUriMock, EXPORT_COMPILER_CONTENTS,
         ImmutableList.of(EXTERN));
     assertTrue(actual.getErrors().get(0).contains(ERROR_NAME));
@@ -148,8 +148,8 @@ public class ClosureJsCompilerTest extends TestCase {
   }
 
   private ClosureJsCompiler newClosureJsCompiler(final Compiler realComp,
-      CompilerOptions realOptions, ExportJsCompiler exportComp, CacheProvider cache) {
-    return new ClosureJsCompiler(exportComp, cache) {
+      CompilerOptions realOptions, DefaultJsCompiler defaultComp, CacheProvider cache) {
+    return new ClosureJsCompiler(defaultComp, cache) {
       @Override
       Compiler newCompiler() {
         return realComp;
@@ -171,8 +171,8 @@ public class ClosureJsCompilerTest extends TestCase {
   }
 
   @SuppressWarnings("unchecked")
-  private ExportJsCompiler mockExportJsCompiler(JsResponse res) {
-    ExportJsCompiler result = createMock(ExportJsCompiler.class);
+  private DefaultJsCompiler mockDefaultJsCompiler(JsResponse res) {
+    DefaultJsCompiler result = createMock(DefaultJsCompiler.class);
     expect(result.getJsContent(isA(JsUri.class), isA(FeatureBundle.class)))
         .andReturn(EXPORT_COMPILER_CONTENTS).anyTimes();
     expect(result.compile(isA(JsUri.class), isA(Iterable.class), isA(List.class)))

@@ -15,7 +15,7 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-  
+
 package org.apache.shindig.gadgets.js;
 
 import com.google.common.collect.ImmutableList;
@@ -43,6 +43,7 @@ public class JsServingPipelineModule extends AbstractModule {
       IfModifiedSinceProcessor ifModifiedSinceProcessor,
       GetJsContentProcessor getJsContentProcessor,
       CajaJsSubtractingProcessor cajaJsSubtractingProcessor,
+      ExportJsProcessor exportJsProcessor,
       SeparatorCommentingProcessor separatorCommentingProcessor,
       ConfigInjectionProcessor configInjectionProcessor,
       AddOnloadFunctionProcessor addOnloadFunctionProcessor,
@@ -55,6 +56,7 @@ public class JsServingPipelineModule extends AbstractModule {
         ifModifiedSinceProcessor,
         getJsContentProcessor,
         cajaJsSubtractingProcessor,
+        exportJsProcessor,
         separatorCommentingProcessor,
         configInjectionProcessor,
         addOnloadFunctionProcessor,
@@ -62,5 +64,5 @@ public class JsServingPipelineModule extends AbstractModule {
         compilationProcessor,
         anonFuncProcessor);
   }
-  
+
 }

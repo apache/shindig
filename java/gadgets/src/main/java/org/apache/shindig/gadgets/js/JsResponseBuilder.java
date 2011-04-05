@@ -56,6 +56,22 @@ public class JsResponseBuilder {
   }
 
   /**
+   * Prepend a JS to the response.
+   */
+  public JsResponseBuilder prependJs(JsContent jsContent) {
+    jsCode.addFirst(jsContent);
+    return this;
+  }
+
+  /**
+   * Insert a JS at a specific index.
+   */
+  public JsResponseBuilder insertJsAt(int index, JsContent jsContent) {
+    jsCode.add(index, jsContent);
+    return this;
+  }
+
+  /**
    * Appends more JS to the response.
    */
   public JsResponseBuilder appendJs(JsContent jsContent) {

@@ -21,7 +21,6 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 import com.google.inject.Provides;
 
-import org.apache.shindig.gadgets.rewrite.js.ExportJsCompiler;
 import org.apache.shindig.gadgets.rewrite.js.JsCompiler;
 
 import java.util.List;
@@ -35,11 +34,4 @@ public class JsCompilerModule extends AbstractModule {
   protected void configure() {
     // nothing to configure here
   }
-
-  @Provides
-  @Inject
-  public JsCompiler provideJsCompiler(ExportJsCompiler compiler) {
-    return compiler;
-  }
-  
 }

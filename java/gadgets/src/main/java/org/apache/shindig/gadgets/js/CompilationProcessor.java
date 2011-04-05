@@ -17,21 +17,21 @@
  */
 package org.apache.shindig.gadgets.js;
 
-import java.util.List;
-
-import org.apache.shindig.gadgets.rewrite.js.JsCompiler;
-
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 
+import org.apache.shindig.gadgets.features.ApiDirective;
+import org.apache.shindig.gadgets.features.FeatureRegistry.FeatureBundle;
+import org.apache.shindig.gadgets.rewrite.js.JsCompiler;
+
 public class CompilationProcessor implements JsProcessor {
   private final JsCompiler compiler;
-  
+
   @Inject
   public CompilationProcessor(JsCompiler compiler) {
     this.compiler = compiler;
   }
-      
+
   /**
    * Compile content in the inbound JsResponseBuilder.
    * TODO: Re-add support for externs here if they're ever used.
@@ -39,9 +39,16 @@ public class CompilationProcessor implements JsProcessor {
    */
   public boolean process(JsRequest request, JsResponseBuilder builder)
       throws JsException {
-    List<String> externs = ImmutableList.of();
+    ImmutableList.Builder<String> externsBuilder = ImmutableList.builder();
+    for (JsContent jsc : builder.build().getAllJsContent()) {
+      FeatureBundle bundle = jsc.getFeatureBundle();
+      if (bundle != null) {
+        externsBuilder.addAll(bundle.getApis(ApiDirective.Type.JS, false));
+      }
+    }
+
     JsResponse result = compiler.compile(request.getJsUri(),
-        builder.build().getAllJsContent(), externs);
+        builder.build().getAllJsContent(), externsBuilder.build());
     builder.clearJs().appendAllJs(result.getAllJsContent());
     return true;
   }

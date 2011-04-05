@@ -15,7 +15,7 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.apache.shindig.gadgets.rewrite.js;
+package org.apache.shindig.gadgets.js;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
@@ -23,6 +23,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.JsCompileMode;
@@ -31,20 +32,13 @@ import org.apache.shindig.gadgets.features.FeatureRegistry;
 import org.apache.shindig.gadgets.features.FeatureRegistry.FeatureBundle;
 import org.apache.shindig.gadgets.features.FeatureRegistry.LookupResult;
 import org.apache.shindig.gadgets.features.FeatureResource;
-import org.apache.shindig.gadgets.js.JsContent;
-import org.apache.shindig.gadgets.js.JsGadgetContext;
-import org.apache.shindig.gadgets.js.JsResponse;
-import org.apache.shindig.gadgets.js.JsResponseBuilder;
 import org.apache.shindig.gadgets.uri.JsUriManager.JsUri;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-/**
- * JsCompiler implementation for dynamic (or run-time) feature JS compilation.
- */
-public class ExportJsCompiler extends DefaultJsCompiler {
+public class ExportJsProcessor implements JsProcessor {
 
   @VisibleForTesting
   static final String FEATURE_NAME = "exportjs";
@@ -52,33 +46,42 @@ public class ExportJsCompiler extends DefaultJsCompiler {
   private static final String FUNCTION_NAME = "exportJs";
 
   private final FeatureRegistry featureRegistry;
+  private final Provider<GadgetContext> context;
 
   @Inject
-  public ExportJsCompiler(FeatureRegistry featureRegistry) {
+  public ExportJsProcessor(FeatureRegistry featureRegistry, Provider<GadgetContext> context) {
     this.featureRegistry = featureRegistry;
+    this.context = context;
   }
 
-  @Override
-  public Iterable<JsContent> getJsContent(JsUri jsUri, FeatureBundle bundle) {
-    List<JsContent> jsContent = Lists.newLinkedList();
-    for (JsContent jsc : super.getJsContent(jsUri, bundle)) {
-      jsContent.add(jsc);
+  public boolean process(JsRequest jsRequest, JsResponseBuilder builder) {
+    JsUri jsUri = jsRequest.getJsUri();
+    ImmutableList.Builder<JsContent> resp = ImmutableList.builder();
+
+    boolean neededExportJs = false;
+    FeatureBundle last = null;
+    for (JsContent jsc : builder.build().getAllJsContent()) {
+      FeatureBundle current = jsc.getFeatureBundle();
+      if (last != null && current != last) {
+        neededExportJs |= appendExportJsStatementsForFeature(resp, jsUri, last);
+      }
+      resp.add(jsc);
+      last = current;
     }
-    jsContent.add(getExportsForFeature(jsUri, bundle));
-    return jsContent;
+    if (last != null) {
+      neededExportJs |= appendExportJsStatementsForFeature(resp, jsUri, last);
+    }
+
+    builder.clearJs();
+    if (neededExportJs) {
+      builder.appendAllJs(getExportJsContents());
+    }
+    builder.appendAllJs(resp.build());
+    return true;
   }
 
-  @Override
-  public JsResponse compile(JsUri jsUri, Iterable<JsContent> content, List<String> externs) {
-    GadgetContext ctx = new JsGadgetContext(jsUri);
-    JsResponseBuilder builder = new JsResponseBuilder();
-    appendExportJs(builder, ctx);
-    builder.appendAllJs(content);
-    // TODO: attach this to a real JS compiler jscomp.Compiler.
-    return builder.build();
-  }
-
-  private JsContent getExportsForFeature(JsUri jsUri, FeatureBundle bundle) {
+  private boolean appendExportJsStatementsForFeature(ImmutableList.Builder<JsContent> builder,
+      JsUri jsUri, FeatureBundle bundle) {
     List<String> exports = Lists.newArrayList();
 
     // Add exports of bundle, regardless.
@@ -92,25 +95,30 @@ public class ExportJsCompiler extends DefaultJsCompiler {
       }
     }
 
-    StringBuilder sb = new StringBuilder();
-    for (Input input : generateInputs(exports)) {
-      sb.append(input.toExportStatement());
+    if (!exports.isEmpty()) {
+      StringBuilder sb = new StringBuilder();
+      for (Input input : generateInputs(exports)) {
+        sb.append(input.toExportStatement());
+      }
+      builder.add(JsContent.fromFeature(sb.toString(),
+          "[generated-symbol-exports]", bundle, null));
+      return true;
     }
-
-    return JsContent.fromFeature(sb.toString(), "[generated-symbol-exports]",
-        bundle, null);
+    return false;
   }
 
-  private void appendExportJs(JsResponseBuilder builder, GadgetContext context) {
-    LookupResult lookup = featureRegistry.getFeatureResources(context,
+  private List<JsContent> getExportJsContents() {
+    ImmutableList.Builder<JsContent> result = ImmutableList.builder();
+    LookupResult lookup = featureRegistry.getFeatureResources(context.get(),
         ImmutableList.of(FEATURE_NAME), null);
     for (FeatureBundle bundle : lookup.getBundles()) {
       for (FeatureResource resource : bundle.getResources()) {
-        builder.appendJs(JsContent.fromFeature(
+        result.add(JsContent.fromFeature(
             resource.getDebugContent(), resource.getName(),
-            bundle, null));
+            bundle, resource));
       }
     }
+    return result.build();
   }
 
   private static class Input {
@@ -207,4 +215,5 @@ public class ExportJsCompiler extends DefaultJsCompiler {
     int idx = symbol.lastIndexOf('.');
     return (idx >= 0) ? symbol.substring(idx + 1) : symbol;
   }
+
 }
