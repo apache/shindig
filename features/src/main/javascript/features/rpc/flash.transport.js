@@ -48,6 +48,14 @@ if (!gadgets.rpctx.flash) {  // make lib resilient to double-inclusion
 
     var myLoc = window.location.protocol + "//" + window.location.host;
 
+    function getChannelId(receiverId) {
+      return receiverId === ".." ? gadgets.rpc.RPC_ID : receiverId;
+    }
+
+    function getRoleId(targetId) {
+      return targetId === ".." ? "INNER" : "OUTER";
+    }
+
     function init(config) {
       if (usingFlash) {
         swfUrl = config['rpc']['commSwf'] || "/xpc.swf";
@@ -66,13 +74,9 @@ if (!gadgets.rpctx.flash) {  // make lib resilient to double-inclusion
             '" type="application/x-shockwave-flash">' +
             '<param name="allowScriptAccess" value="always"></param>' +
             '<param name="movie" value="' + theSwf + '"></param>' +
+            '<embed type="application/x-shockwave-flash" allowScriptAccess="always" ' +
+            'src="' + theSwf + '" height="1" width="1"></embed>' +
             '</object>';
-
-        var embedElem = document.createElement('embed');
-        embedElem.setAttribute("allowScriptAccess", "always");
-        embedElem.setAttribute("src", theSwf);
-        embedElem.setAttribute("height", "1");
-        embedElem.setAttribute("width", "1");
 
         document.body.appendChild(containerDiv);
         containerDiv.innerHTML = html;
@@ -90,7 +94,8 @@ if (!gadgets.rpctx.flash) {  // make lib resilient to double-inclusion
       if (relayHandle !== null) {
         while (pendingHandshakes.length > 0) {
           var shake = pendingHandshakes.shift();
-          relayHandle['setup'](shake.myId, shake.targetId);
+          var targetId = shake.targetId;
+          relayHandle['setup'](shake.token, getChannelId(targetId), getRoleId(targetId));
           ready(shake.targetId, true);
         }
       }
@@ -122,7 +127,7 @@ if (!gadgets.rpctx.flash) {  // make lib resilient to double-inclusion
         // otherwise polling will occur until the SWF has completed loading, at
         // which point all connections will complete their handshake.
         secureReceivers[receiverId] = !!forceSecure;
-        pendingHandshakes.push({ myId: gadgets.rpc.RPC_ID, targetId: receiverId });
+        pendingHandshakes.push({ token: token, targetId: receiverId });
         if (relayHandle === null && setupHandle === null) {
           setupHandle = window.setTimeout(relayLoader, LOADER_TIMEOUT_MS);
         }
@@ -131,16 +136,17 @@ if (!gadgets.rpctx.flash) {  // make lib resilient to double-inclusion
       },
 
       call: function(targetId, from, rpc) {
-        var targetOrigin = gadgets.rpc.getTargetOrigin(targetId);;
-        var messageHandler = relayHandle["sendMessage_" + targetId];
+        var targetOrigin = gadgets.rpc.getTargetOrigin(targetId);
+        var rpcKey = gadgets.rpc.getAuthToken(targetId);
+        var handleKey = "sendMessage_" + getChannelId(targetId) + "_" + rpcKey + "_" + getRoleId(targetId);
+        var messageHandler = relayHandle[handleKey];
         messageHandler.call(relayHandle, gadgets.json.stringify(rpc), targetOrigin);
         return true;
       },
 
       // Methods called by relay SWF. Should be considered private.
-      _receiveMessage: function(fromId, message, fromOrigin, toOrigin) {
-        if (fromId !== this['f']) { /* TODO: anything? */ }
-        window.setTimeout(function() { process(gadgets.json.parse(message, fromOrigin)); }, 0);
+      _receiveMessage: function(message, fromOrigin, toOrigin) {
+        window.setTimeout(function() { process(gadgets.json.parse(message), fromOrigin); }, 0);
       },
 
       _ready: function() {

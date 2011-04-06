@@ -68,38 +68,33 @@ class Main {
       security.allowDomain(domain);
     }
 
-    ExternalInterface.addCallback("setup", { }, function(my_id:String, target_id:String) {
-      if (target_id.indexOf(":") > -1) {
-        return;
-      }
-
-      var role:String;
+    ExternalInterface.addCallback("setup", { },
+        function(rpc_key:String, channel_id:String, role:String) {
       var other_role:String;
-      var channel_recv_id:String;
 
-      if (target_id == "..") {
-        role = "INNER";
+      if (role == "INNER") {
         other_role = "OUTER";
-        channel_recv_id = my_id;
       } else {
-        role = "OUTER";
         other_role = "INNER";
-        channel_recv_id = target_id;
       }
 
       var receiving_lc:LocalConnection = new LocalConnection();
       var sending_lc:LocalConnection = new LocalConnection();
-      receiving_lc.receiveMessage = function(to_origin:String, from_origin:String, from_id:String, message:String) {
-        if ((to_origin === "*" || to_origin === my_origin) && ((from_id === target_id) || (from_id === "_top" && target_id === ".."))) {
-          ExternalInterface.call("gadgets.rpctx.flash._receiveMessage", escFn(from_id), escFn(message), escFn(from_origin), escFn(to_origin));
+      receiving_lc.receiveMessage =
+          function(to_origin:String, from_origin:String, in_rpc_key:String, message:String) {
+        if ((to_origin === "*" || to_origin === my_origin) && (in_rpc_key == rpc_key)) {
+          ExternalInterface.call("gadgets.rpctx.flash._receiveMessage",
+              escFn(message), escFn(from_origin), escFn(to_origin));
         }
       };
 
-      ExternalInterface.addCallback("sendMessage_" + target_id, { }, function(message:String, to_origin:String) {
+      ExternalInterface.addCallback("sendMessage_" + channel_id + "_" + rpc_key + "_" + role,
+            { }, function(message:String, to_origin:String) {
         if (!to_origin) to_origin = "*";
-        sending_lc.send("channel_" + channel_recv_id + "_" + other_role, "receiveMessage", to_origin, my_origin, my_id, message);
+        sending_lc.send("channel_" + channel_id + "_" + rpc_key + "_" + other_role,
+            "receiveMessage", to_origin, my_origin, rpc_key, message);
       });
-      receiving_lc.connect("channel_" + channel_recv_id + "_" + role);
+      receiving_lc.connect("channel_" + channel_id + "_" + rpc_key + "_" + role);
     });
     ExternalInterface.call("gadgets.rpctx.flash._ready");
   }
