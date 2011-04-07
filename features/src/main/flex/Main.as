@@ -46,6 +46,14 @@ class Main {
     return replace(str, "\\", "\\\\");
   }
 
+  public static function stripPortIfPresent(str:String):String {
+    var col_ix:Number = str.indexOf(":");
+    if (col_ix == -1) {
+      return str;
+    }
+    return str.substring(0, col_ix);
+  }
+
   public static function main(swfRoot:MovieClip):Void {
     var escFn:Function = esc;
     
@@ -60,7 +68,8 @@ class Main {
       my_origin = _level0.origin;
     }
 
-    var domain:String = my_origin.substr(my_origin.indexOf("//") + 2, my_origin.length);
+    var domain:String = stripPortIfPresent(
+        my_origin.substr(my_origin.indexOf("//") + 2, my_origin.length));
     
     if (my_origin.substr(0,5)==="http:") {
       security.allowInsecureDomain(domain);
