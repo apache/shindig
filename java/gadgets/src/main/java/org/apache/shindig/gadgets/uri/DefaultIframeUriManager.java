@@ -126,23 +126,32 @@ public class DefaultIframeUriManager implements IframeUriManager, ContainerConfi
       // 2. Set host/authority.
       String host;
       if (usingLockedDomain(gadget, container)) {
-        host = ldGen.getLockedDomainPrefix(gadget.getSpec().getUrl()) +
+        host = "//" + ldGen.getLockedDomainPrefix(gadget.getSpec().getUrl()) +
             getReqVal(container, LOCKED_DOMAIN_SUFFIX_KEY);
       } else {
         host = getReqVal(container, UNLOCKED_DOMAIN_KEY);
       }
 
-      // 3. Set host/authority and protocol/schema.
       Uri gadgetUri = Uri.parse(host);
+      if (gadgetUri.getAuthority() == null
+              && gadgetUri.getScheme() == null
+              && gadgetUri.getPath().equals(host)) {
+        // This is for backwards compatibility with unlocked domains like
+        // "unlockeddomain.com"
+        gadgetUri = Uri.parse("//" + host);
+      }
+
+      // 3. Set the scheme.
       if (StringUtils.isBlank(gadgetUri.getScheme())) {
-        uri.setAuthority(host);
         uri.setScheme(getScheme(gadget, container));
       } else {
-        uri.setAuthority(gadgetUri.getAuthority());
         uri.setScheme(gadgetUri.getScheme());
       }
 
-      // 4. Add the URL.
+      // 4. Set the authority.
+      uri.setAuthority(gadgetUri.getAuthority());
+
+      // 5. Add the URL.
       uri.addQueryParameter(Param.URL.getKey(), context.getUrl().toString());
     }
 

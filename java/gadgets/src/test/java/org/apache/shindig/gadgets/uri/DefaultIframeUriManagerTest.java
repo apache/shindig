@@ -62,6 +62,7 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
   private static final String LD_SUFFIX = ".lockeddomain.com";
   private static final String LD_SUFFIX_ALT = ".altld.com";
   private static final String UNLOCKED_DOMAIN = "unlockeddomain.com";
+  private static final String UNLOCKED_DOMAIN_CONFIG_VALUE = "//" + UNLOCKED_DOMAIN;
   private static final int TYPE_URL_NUM_BASE_PARAMS = 8;
   private static final int TYPE_HTML_NUM_BASE_PARAMS = 8;
 
@@ -654,6 +655,38 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
     assertEquals(UriStatus.VALID_UNVERSIONED, manager.validateRenderingUri(testUri));
   }
 
+  @Test
+  public void schemeLessUnlockedDomain() throws Exception {
+    Gadget gadget = mockGadget();
+    ContainerConfig config = new BasicContainerConfig();
+    config
+        .newTransaction()
+        .addContainer(ImmutableMap.<String, Object>builder()
+            .put(ContainerConfig.CONTAINER_KEY, ContainerConfig.DEFAULT_CONTAINER)
+            .put(LOCKED_DOMAIN_SUFFIX_KEY, LD_SUFFIX)
+            .build())
+                .addContainer(ImmutableMap.<String, Object> builder()
+                    .put(ContainerConfig.CONTAINER_KEY, CONTAINER)
+                    .put(IFRAME_BASE_PATH_KEY, IFRAME_PATH)
+                    .put(UNLOCKED_DOMAIN_KEY, UNLOCKED_DOMAIN)
+                    .build())
+                .commit();
+
+    TestDefaultIframeUriManager manager = new TestDefaultIframeUriManager(config);
+
+    Uri renderingUri = manager.makeRenderingUri(gadget);
+    assertNotNull(renderingUri);
+
+    UriBuilder uri = new UriBuilder(renderingUri);
+    assertEquals("", uri.getScheme());
+    assertEquals(UNLOCKED_DOMAIN, uri.getAuthority());
+    assertEquals(IFRAME_PATH, uri.getPath());
+
+    // Basic sanity checks on params
+    assertEquals(TYPE_HTML_NUM_BASE_PARAMS, uri.getQueryParameters().size());
+    assertEquals(0, uri.getFragmentParameters().size());
+  }
+
   private Uri makeValidationTestUri(String domain, String version) {
     UriBuilder uri = new UriBuilder();
     uri.setAuthority(domain);
@@ -682,7 +715,7 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
             .put(ContainerConfig.CONTAINER_KEY, CONTAINER)
             .put(IFRAME_BASE_PATH_KEY, IFRAME_PATH)
             .put(LOCKED_DOMAIN_SUFFIX_KEY, LD_SUFFIX)
-            .put(UNLOCKED_DOMAIN_KEY, UNLOCKED_DOMAIN)
+            .put(UNLOCKED_DOMAIN_KEY, UNLOCKED_DOMAIN_CONFIG_VALUE)
             .put(SECURITY_TOKEN_ALWAYS_KEY, alwaysToken)
             .put(LOCKED_DOMAIN_REQUIRED_KEY, ldRequired)
             .build())
