@@ -41,7 +41,7 @@ specific language governing permissions and limitations under the License.
       <exports type="js">gadgets.rpc.receive</exports>
       <exports type="js">gadgets.rpc.receiveSameDomain</exports>
       <exports type="js">gadgets.rpc.getOrigin</exports>
-      <exports type="js">gadgets.rpc.getReceiverOrigin</exports>
+      <exports type="js">gadgets.rpc.getTargetOrigin</exports>
     </api>
     <script src="wpm.transport.js"/>
     <script src="flash.transport.js"/>
