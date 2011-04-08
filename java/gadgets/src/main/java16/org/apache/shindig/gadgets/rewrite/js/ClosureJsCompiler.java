@@ -82,11 +82,6 @@ public class ClosureJsCompiler implements JsCompiler {
   public static CompilerOptions defaultCompilerOptions() {
     CompilerOptions result = new CompilerOptions();
     CompilationLevel.ADVANCED_OPTIMIZATIONS.setOptionsForCompilationLevel(result);
-    result.removeUnusedPrototypePropertiesInExterns = false;
-    // Avoid multiple declarations of tamings___ variables.
-    // TODO: Get rid of this deviation from standard flags.
-    result.checkSymbols = false;
-
     return result;
   }
   
