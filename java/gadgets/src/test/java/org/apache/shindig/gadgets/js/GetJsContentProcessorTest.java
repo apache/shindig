@@ -40,14 +40,17 @@ import org.junit.Test;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-
+import org.apache.shindig.gadgets.features.ApiDirective;
 
 /**
  * Tests for {@link GetJsContentProcessor}.
  */
 public class GetJsContentProcessorTest {
-  private static final String JS_CODE1 = "some JS data";
-  private static final String JS_CODE2 = "some JS data";
+  private static final String JS_CODE1 = "js1";
+  private static final String JS_CODE2 = "js2";
+
+  private static final List<String> EMPTY_STRING_LIST = ImmutableList.<String>of();
+  private static final List<FeatureBundle> EMPTY_BUNDLE_LIST = ImmutableList.<FeatureBundle>of();
 
   private IMocksControl control;
   private FeatureRegistry registry;
@@ -70,88 +73,136 @@ public class GetJsContentProcessorTest {
 
   @Test
   public void testPopulatesResponseForUnversionedRequest() throws Exception {
-    setExpectations(true, UriStatus.VALID_UNVERSIONED);
+    setupForVersionAndProxy(true, UriStatus.VALID_UNVERSIONED);
     control.replay();
     processor.process(request, response);
-    checkResponse(true, 3600);
+    checkResponse(true, 3600, JS_CODE1 + JS_CODE2, "");
     control.verify();
   }
 
   @Test
   public void testPopulatesResponseForVersionedRequest() throws Exception {
-    setExpectations(true, UriStatus.VALID_VERSIONED);
+    setupForVersionAndProxy(true, UriStatus.VALID_VERSIONED);
     control.replay();
     processor.process(request, response);
-    checkResponse(true, -1);
+    checkResponse(true, -1, JS_CODE1 + JS_CODE2, "");
     control.verify();
   }
 
   @Test
   public void testPopulatesResponseForInvalidVersion() throws Exception {
-    setExpectations(true, UriStatus.INVALID_VERSION);
+    setupForVersionAndProxy(true, UriStatus.INVALID_VERSION);
     control.replay();
     processor.process(request, response);
-    checkResponse(true, 0);
+    checkResponse(true, 0, JS_CODE1 + JS_CODE2, "");
     control.verify();
   }
 
   @Test
   public void testPopulatesResponseForNoProxyCacheable() throws Exception {
-    setExpectations(false, UriStatus.VALID_UNVERSIONED);
+    setupForVersionAndProxy(false, UriStatus.VALID_UNVERSIONED);
     control.replay();
     processor.process(request, response);
-    checkResponse(false, 3600);
+    checkResponse(false, 3600, JS_CODE1 + JS_CODE2, "");
     control.verify();
   }
 
-  private void setExpectations(boolean proxyCacheable, UriStatus uriStatus) throws JsException {
+  @Test
+  public void testPopulateWithLoadedFeatures() throws Exception {
+    List<String> reqLibs = ImmutableList.of("feature1", "feature2");
+    List<String> loadLibs = ImmutableList.of("feature2");
+
+    FeatureResource resource1 = mockResource(true);
+    FeatureBundle bundle1 = mockBundle("feature1", null, null, Lists.newArrayList(resource1));
+    FeatureBundle bundle2 = mockBundle("feature2", "export2", "extern2", null);
+
+    setupJsUriAndRegistry(UriStatus.VALID_UNVERSIONED,
+        reqLibs, ImmutableList.of(bundle1, bundle2),
+        loadLibs, ImmutableList.of(bundle2));
+
+    expect(compiler.getJsContent(jsUri, bundle1))
+      .andReturn(ImmutableList.<JsContent>of(
+          JsContent.fromFeature(JS_CODE1, null, null, null)));
+
+    control.replay();
+    processor.process(request, response);
+    checkResponse(true, 3600, JS_CODE1, "export2;\nextern2;\n");
+    control.verify();
+  }
+
+  private void setupForVersionAndProxy(boolean proxyCacheable, UriStatus uriStatus) {
+    List<String> reqLibs = ImmutableList.of("feature");
+    List<String> loadLibs = EMPTY_STRING_LIST;
+
+    FeatureResource resource1 = mockResource(proxyCacheable);
+    FeatureResource resource2 = mockResource(proxyCacheable);
+    FeatureBundle bundle = mockBundle("feature", null, null,
+        Lists.newArrayList(resource1, resource2));
+
+    setupJsUriAndRegistry(uriStatus,
+        reqLibs, Lists.newArrayList(bundle),
+        loadLibs, EMPTY_BUNDLE_LIST);
+
+    expect(compiler.getJsContent(jsUri, bundle))
+        .andReturn(ImmutableList.<JsContent>of(
+            JsContent.fromFeature(JS_CODE1, null, bundle, resource1),
+            JsContent.fromFeature(JS_CODE2, null, bundle, resource2)));
+  }
+
+  private void setupJsUriAndRegistry(UriStatus uriStatus,
+      List<String> reqLibs, List<FeatureBundle> reqLookupBundles,
+      List<String> loadLibs, List<FeatureBundle> loadLookupBundles) {
+
     expect(jsUri.getStatus()).andReturn(uriStatus);
-    List<String> libs = ImmutableList.of("feature1", "feature2");
-    expect(jsUri.getLibs()).andReturn(libs);
     expect(jsUri.getContainer()).andReturn("container");
     expect(jsUri.getContext()).andReturn(RenderingContext.CONFIGURED_GADGET);
     expect(jsUri.isDebug()).andReturn(false);
-    expect(jsUri.getLoadedLibs()).andReturn(ImmutableList.<String>of());
+    expect(jsUri.getLibs()).andReturn(reqLibs);
+    expect(jsUri.getLoadedLibs()).andReturn(loadLibs);
+
     expect(request.getJsUri()).andReturn(jsUri);
 
-    List<FeatureBundle> bundles = mockBundles(proxyCacheable);
-    LookupResult lr = control.createMock(LookupResult.class);
-    expect(lr.getBundles()).andReturn(bundles);
+    LookupResult reqLookup = mockLookupResult(reqLookupBundles);
+    LookupResult loadLookup = mockLookupResult(loadLookupBundles);
 
-    expect(registry.getFeatureResources(isA(JsGadgetContext.class), eq(libs),
-        eq(ImmutableList.<String>of()))).andReturn(lr);
-    expect(compiler.getJsContent(jsUri, bundles.get(0)))
-        .andReturn(ImmutableList.<JsContent>of(
-            JsContent.fromFeature(JS_CODE1, "source1", bundles.get(0), null)));
-    expect(compiler.getJsContent(jsUri, bundles.get(1)))
-        .andReturn(ImmutableList.<JsContent>of(
-            JsContent.fromFeature(JS_CODE2, "source2", bundles.get(1), null)));
+    expect(registry.getFeatureResources(isA(JsGadgetContext.class), eq(reqLibs),
+        eq(EMPTY_STRING_LIST))).andReturn(reqLookup);
+    expect(registry.getFeatureResources(isA(JsGadgetContext.class), eq(loadLibs),
+        eq(EMPTY_STRING_LIST))).andReturn(loadLookup);
   }
 
-  private List<FeatureBundle> mockBundles(boolean proxyCacheable) {
-    FeatureBundle bundle1 = control.createMock(FeatureBundle.class);
-    expect(bundle1.getName()).andReturn("feature1");
-    FeatureResource resource1 = control.createMock(FeatureResource.class);
-    expect(resource1.isProxyCacheable()).andReturn(proxyCacheable);
-    List<FeatureResource> resources1 = Lists.newArrayList(resource1);
-    expect(bundle1.getResources()).andReturn(resources1);
+  private LookupResult mockLookupResult(List<FeatureBundle> bundles) {
+    LookupResult result = control.createMock(LookupResult.class);
+    expect(result.getBundles()).andReturn(bundles);
+    return result;
+  }
 
-    FeatureBundle bundle2 = control.createMock(FeatureBundle.class);
-    expect(bundle2.getName()).andReturn("feature2");
-    FeatureResource resource2 = control.createMock(FeatureResource.class);
-    if (proxyCacheable) {
-      // Only consulted if the first bundle/resource is proxyCacheable.
-      expect(resource2.isProxyCacheable()).andReturn(proxyCacheable);
+  private FeatureResource mockResource(boolean proxyCacheable) {
+    FeatureResource result = control.createMock(FeatureResource.class);
+    expect(result.isProxyCacheable()).andReturn(proxyCacheable).anyTimes();
+    return result;
+  }
+
+  private FeatureBundle mockBundle(String name, String export, String extern, List<FeatureResource> resources) {
+    FeatureBundle result = control.createMock(FeatureBundle.class);
+    expect(result.getName()).andReturn(name).anyTimes();
+    if (export != null) {
+      expect(result.getApis(ApiDirective.Type.JS, true)).andReturn(ImmutableList.of(export));
     }
-    List<FeatureResource> resources2 = Lists.newArrayList(resource2);
-    expect(bundle2.getResources()).andReturn(resources2);
-
-    return Lists.newArrayList(bundle1, bundle2);
+    if (extern != null) {
+      expect(result.getApis(ApiDirective.Type.JS, false)).andReturn(ImmutableList.of(extern));
+    }
+    if (resources != null) {
+      expect(result.getResources()).andReturn(resources);
+    }
+    return result;
   }
 
-  private void checkResponse(boolean proxyCacheable, int expectedTtl) {
+  private void checkResponse(boolean proxyCacheable, int expectedTtl,
+      String jsString, String externsString) {
     assertEquals(proxyCacheable, response.isProxyCacheable());
     assertEquals(expectedTtl, response.getCacheTtlSecs());
-    assertEquals(JS_CODE1 + JS_CODE2, response.build().toJsString());
+    assertEquals(jsString, response.build().toJsString());
+    assertEquals(externsString, response.build().getExterns());
   }
 }

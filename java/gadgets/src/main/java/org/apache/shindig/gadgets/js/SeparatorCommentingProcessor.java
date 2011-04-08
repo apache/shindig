@@ -25,7 +25,7 @@ public class SeparatorCommentingProcessor implements JsProcessor {
 
   public boolean process(JsRequest jsRequest, JsResponseBuilder builder) {
     ImmutableList.Builder<JsContent> jsBuilder = ImmutableList.builder();
-    
+
     FeatureBundle lastFeature = null;
     for (JsContent js : builder.build().getAllJsContent()) {
       FeatureBundle feature = js.getFeatureBundle();
@@ -53,7 +53,7 @@ public class SeparatorCommentingProcessor implements JsProcessor {
     builder.clearJs().appendAllJs(jsBuilder.build());
     return true;
   }
-  
+
   private JsContent newComment(FeatureBundle bundle, boolean start) {
     String tag = start ? "start" : "end";
     return JsContent.fromFeature(

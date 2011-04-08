@@ -67,7 +67,7 @@ public class CompilationProcessorTest {
     JsRequest request = control.createMock(JsRequest.class);
     expect(request.getJsUri()).andReturn(jsUri);
     expect(compiler.compile(same(jsUri), eq(builder.build().getAllJsContent()),
-        eq(Lists.newArrayList("extern3", "extern4")))).andReturn(outputResponse);
+        eq("extern3;\n" + "extern4;\n"))).andReturn(outputResponse);
 
     control.replay();
     boolean status = processor.process(request, builder);
@@ -94,7 +94,7 @@ public class CompilationProcessorTest {
     JsRequest request = control.createMock(JsRequest.class);
     expect(request.getJsUri()).andReturn(jsUri);
     List<String> emptyList = ImmutableList.of();
-    expect(compiler.compile(same(jsUri), eq(builder.build().getAllJsContent()), eq(emptyList)))
+    expect(compiler.compile(same(jsUri), eq(builder.build().getAllJsContent()), eq("")))
         .andThrow(new JsException(400, "foo"));
     control.replay();
     processor.process(request, builder);

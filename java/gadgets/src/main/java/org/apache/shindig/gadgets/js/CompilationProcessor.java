@@ -17,7 +17,6 @@
  */
 package org.apache.shindig.gadgets.js;
 
-import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 
 import org.apache.shindig.gadgets.features.ApiDirective;
@@ -39,16 +38,16 @@ public class CompilationProcessor implements JsProcessor {
    */
   public boolean process(JsRequest request, JsResponseBuilder builder)
       throws JsException {
-    ImmutableList.Builder<String> externsBuilder = ImmutableList.builder();
-    for (JsContent jsc : builder.build().getAllJsContent()) {
+    Iterable<JsContent> jsContents = builder.build().getAllJsContent();
+    for (JsContent jsc : jsContents) {
       FeatureBundle bundle = jsc.getFeatureBundle();
       if (bundle != null) {
-        externsBuilder.addAll(bundle.getApis(ApiDirective.Type.JS, false));
+        builder.appendExterns(bundle.getApis(ApiDirective.Type.JS, false));
       }
     }
 
-    JsResponse result = compiler.compile(request.getJsUri(),
-        builder.build().getAllJsContent(), externsBuilder.build());
+    JsResponse result = compiler.compile(request.getJsUri(), jsContents,
+        builder.build().getExterns());
     builder.clearJs().appendAllJs(result.getAllJsContent());
     return true;
   }

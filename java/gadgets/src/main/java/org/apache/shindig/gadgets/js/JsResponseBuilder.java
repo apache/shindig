@@ -18,24 +18,26 @@
 
 package org.apache.shindig.gadgets.js;
 
-import javax.servlet.http.HttpServletResponse;
-
+import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 
-import java.util.LinkedList;
-
 import java.util.List;
+
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * A class with methods to create {@link JsResponse} objects.
  */
 public class JsResponseBuilder {
-  private LinkedList<JsContent> jsCode;
+  private static final String EXTERN_DELIM = ";\n";
+  private static final Joiner EXTERN_JOINER = Joiner.on(EXTERN_DELIM);
+
+  private List<JsContent> jsCode;
   private final List<String> errors;
   private int statusCode;
   private int cacheTtlSecs;
   private boolean proxyCacheable;
-  private String externs;
+  private final StringBuilder externs;
 
   public JsResponseBuilder() {
     jsCode = Lists.newLinkedList();
@@ -43,23 +45,30 @@ public class JsResponseBuilder {
     cacheTtlSecs = 0;
     proxyCacheable = false;
     errors = Lists.newLinkedList();
-    externs = null;
+    externs = new StringBuilder();
   }
 
   public JsResponseBuilder(JsResponse response) {
-    jsCode = Lists.newLinkedList(response.getAllJsContent());
-    errors = Lists.newLinkedList(response.getErrors());
+    this();
+    if (response.getAllJsContent() != null) {
+      jsCode.addAll(Lists.newArrayList(response.getAllJsContent()));
+    }
+    if (response.getErrors() != null) {
+      errors.addAll(Lists.newArrayList(response.getErrors()));
+    }
+    if (response.getExterns() != null) {
+      externs.append(response.getExterns());
+    }
     statusCode = response.getStatusCode();
     cacheTtlSecs = response.getCacheTtlSecs();
     proxyCacheable = response.isProxyCacheable();
-    externs = response.getExterns();
   }
 
   /**
    * Prepend a JS to the response.
    */
   public JsResponseBuilder prependJs(JsContent jsContent) {
-    jsCode.addFirst(jsContent);
+    jsCode.add(0, jsContent);
     return this;
   }
 
@@ -100,7 +109,7 @@ public class JsResponseBuilder {
    * Prepends JS to the output.
    */
   public JsResponseBuilder prependJs(String content, String name) {
-    jsCode.addFirst(JsContent.fromText(content, name));
+    jsCode.add(0, JsContent.fromText(content, name));
     return this;
   }
 
@@ -176,10 +185,26 @@ public class JsResponseBuilder {
   }
 
   /**
-   * Sets whether the compiled externs.
+   * Appends externs as string.
    */
-  public JsResponseBuilder setExterns(String externs) {
-    this.externs = externs;
+  public JsResponseBuilder appendExterns(String externs) {
+    this.externs.append(externs).append(EXTERN_DELIM);
+    return this;
+  }
+
+  /**
+   * Appends externs as from list of strings.
+   */
+  public JsResponseBuilder appendExterns(List<String> externs) {
+    return appendExterns(EXTERN_JOINER.join(externs));
+  }
+
+  /**
+   * Deletes all externs in the builder.
+   */
+  public JsResponseBuilder clearExterns() {
+    int last = externs.length();
+    this.externs.delete(0, last);
     return this;
   }
 
@@ -188,6 +213,6 @@ public class JsResponseBuilder {
    */
   public JsResponse build() {
     return new JsResponse(jsCode, statusCode, cacheTtlSecs, proxyCacheable,
-        errors, externs);
+        errors, externs.toString());
   }
 }

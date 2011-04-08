@@ -49,7 +49,7 @@ public class CajaJsSubtractingProcessorTest {
   private List<JsContent> contents = Lists.newArrayList();
   private JsResponse response;
   private JsResponseBuilder builder;
-  
+
   private CajaJsSubtractingProcessor processor;
 
   @Before
@@ -64,10 +64,10 @@ public class CajaJsSubtractingProcessorTest {
         mockFeatureResource(ImmutableMap.of(UriCommon.Param.CAJOLE.getKey(), "blah"))));
     contents.add(JsContent.fromFeature(CAJA_CONTENT_JS, null, null,
         mockFeatureResource(ImmutableMap.of(UriCommon.Param.CAJOLE.getKey(), ATTRIB_VALUE))));
-    
+
     response = new JsResponse(contents, -1, -1, false, ERRORS, null);
     builder = new JsResponseBuilder(response);
-    
+
     processor = new CajaJsSubtractingProcessor();
   }
 

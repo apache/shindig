@@ -50,7 +50,7 @@ public class DefaultJsCompiler implements JsCompiler {
     return jsContent;
   }
 
-  public JsResponse compile(JsUri jsUri, Iterable<JsContent> content, List<String> externs) {
+  public JsResponse compile(JsUri jsUri, Iterable<JsContent> content, String externs) {
     return new JsResponseBuilder().appendAllJs(content).build();
   }
 

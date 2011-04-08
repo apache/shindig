@@ -49,6 +49,6 @@ public interface JsCompiler {
    * @param externs The externs.
    * @return A compilation result object.
    */
-  JsResponse compile(JsUri jsUri, Iterable<JsContent> content, List<String> externs)
+  JsResponse compile(JsUri jsUri, Iterable<JsContent> content, String externs)
       throws JsException;
 }

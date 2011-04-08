@@ -114,21 +114,12 @@ public class ClosureJsCompiler implements JsCompiler {
     return new Compiler(errorManager);
   }
 
-  private String toExternString(List<String> externs) {
-    StringBuilder builder = new StringBuilder();
-    for (String extern : externs) {
-      builder.append(extern).append(";\n");
-    }
-    return builder.toString();
-  }
-
-  public JsResponse compile(JsUri jsUri, Iterable<JsContent> content, List<String> externs) 
+  public JsResponse compile(JsUri jsUri, Iterable<JsContent> content, String externs) 
       throws JsException {
     JsResponse exportResponse = defaultCompiler.compile(jsUri, content, externs);
     content = exportResponse.getAllJsContent();
 
-    String externStr = toExternString(externs);
-    String cacheKey = makeCacheKey(exportResponse.toJsString(), externStr, jsUri);
+    String cacheKey = makeCacheKey(exportResponse.toJsString(), externs, jsUri);
     JsResponse cachedResult = cache.getElement(cacheKey);
     if (cachedResult != null) {
       lastResult = cachedResult;
@@ -141,7 +132,7 @@ public class ClosureJsCompiler implements JsCompiler {
     CompilerOptions options = getCompilerOptions();
     if (!jsUri.isDebug() || options.isExternExportsEnabled()) {
       List<JSSourceFile> allExterns = Lists.newArrayList();
-      allExterns.add(JSSourceFile.fromCode("externs", externStr));
+      allExterns.add(JSSourceFile.fromCode("externs", externs));
 
       List<JsContent> allContent = Lists.newLinkedList(content);
       if (options.isExternExportsEnabled()) {
@@ -165,7 +156,7 @@ public class ClosureJsCompiler implements JsCompiler {
         cache.addElement(cacheKey, errorResult);
         return errorResult;
       }
-      
+
       String compiled = actualCompiler.toSource();
       if (outputCorrelatedJs()) {
         // Emit code correlated w/ original source.
@@ -177,7 +168,7 @@ public class ClosureJsCompiler implements JsCompiler {
         builder.appendJs(compiled, "[compiled]");
       }
 
-      builder.setExterns(result.externExport);
+      builder.clearExterns().appendExterns(result.externExport);
     } else {
       // Otherwise, return original content and null exports.
       builder.appendAllJs(content);
