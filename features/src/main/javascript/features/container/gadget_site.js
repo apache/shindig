@@ -26,7 +26,7 @@
 
 /**
  * @param {Object} args containing:
- *        {shindig.container.Service} service to fetch gadgets metadata, token.
+ *        {osapi.container.Service} service to fetch gadgets metadata, token.
  *        {string} navigateCallback name of callback function on navigateTo().
  *        {Element} gadgetEl Element into which to render the gadget.
  *        {Element} bufferEl Optional element for double buffering.
@@ -82,8 +82,8 @@ osapi.container.GadgetSite = function(args) {
    * Information about the currently loading gadget.
    * @type {osapi.container.GadgetHolder?}
    * @private
-   */
-  this.loadingGadgetHolder_ = null;
+   *
+  this.loadingGadgWetHolder_ = null;
 
   this.onConstructed();
 };
