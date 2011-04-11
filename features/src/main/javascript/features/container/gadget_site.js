@@ -82,8 +82,8 @@ osapi.container.GadgetSite = function(args) {
    * Information about the currently loading gadget.
    * @type {osapi.container.GadgetHolder?}
    * @private
-   *
-  this.loadingGadgWetHolder_ = null;
+   */
+  this.loadingGadgetHolder_ = null;
 
   this.onConstructed();
 };
