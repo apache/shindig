@@ -886,7 +886,7 @@ if (!gadgets.rpc) { // make lib resilient to double-inclusion
         // target is misconfigured, it won't affect the others.
         // In the case of a sibling relay, channel is not found
         // in the receiverTx map but in the transport itself.
-        var channel = receiverTx[targetId]; // || transport;
+        var channel = receiverTx[targetId] || transport;
 
         if (!channel) {
           // Not set up yet. Enqueue the rpc for such time as it is.
