@@ -56,6 +56,7 @@ class Main {
 
   public static function main(swfRoot:MovieClip):Void {
     var escFn:Function = esc;
+    var replaceFn:Function = replace;
     
     if (SINGLETON) return;
     SINGLETON = true;
@@ -85,6 +86,7 @@ class Main {
         other_role = "OUTER";
       } else {
         other_role = "INNER";
+        role = "OUTER";
       }
 
       var receiving_lc:LocalConnection = new LocalConnection();
@@ -100,10 +102,13 @@ class Main {
       ExternalInterface.addCallback("sendMessage_" + channel_id + "_" + rpc_key + "_" + role,
             { }, function(message:String, to_origin:String) {
         if (!to_origin) to_origin = "*";
-        sending_lc.send("channel_" + channel_id + "_" + rpc_key + "_" + other_role,
+        var sendId:String =
+            replaceFn("channel_" + channel_id + "_" + rpc_key + "_" + other_role, ":", "");
+        sending_lc.send(sendId,
             "receiveMessage", to_origin, my_origin, rpc_key, message);
       });
-      receiving_lc.connect("channel_" + channel_id + "_" + rpc_key + "_" + role);
+      var recvId:String = replaceFn("channel_" + channel_id + "_" + rpc_key + "_" + role, ":", "");
+      receiving_lc.connect(recvId);
     });
     ExternalInterface.call("gadgets.rpctx.flash._ready");
   }
