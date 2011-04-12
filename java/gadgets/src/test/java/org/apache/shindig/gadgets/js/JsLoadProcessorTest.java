@@ -54,11 +54,11 @@ public class JsLoadProcessorTest {
     jsUri = control.createMock(JsUri.class);
     uri = Uri.parse("http://example.org/foo.xml");
     response = new JsResponseBuilder();
-    processor = new JsLoadProcessor(jsUriManager, 1234);
-    
+    processor = new JsLoadProcessor(jsUriManager, 1234, true);
+
     EasyMock.expect(request.getJsUri()).andReturn(jsUri);
   }
-  
+
   @Test
   public void testSkipsWhenNoJsLoad() throws Exception {
     EasyMock.expect(jsUri.isJsload()).andReturn(false);
@@ -67,7 +67,7 @@ public class JsLoadProcessorTest {
     assertTrue(processor.process(request, response));
     control.verify();
   }
-  
+
   @Test
   public void testFailsWhenNoOnloadIsSpecified() throws Exception {
     EasyMock.expect(jsUri.isJsload()).andReturn(true);
@@ -82,7 +82,7 @@ public class JsLoadProcessorTest {
     }
     control.verify();
   }
-  
+
   @Test
   public void testGeneratesLoaderCodeWithNoCache() throws Exception {
     setExpectations(true, null);

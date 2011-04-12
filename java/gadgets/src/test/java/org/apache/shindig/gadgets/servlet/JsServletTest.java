@@ -72,8 +72,10 @@ public class JsServletTest extends ServletTestFixture {
     servlet.setJsRequestBuilder(new JsRequestBuilder(jsUriManagerMock));
 
     getJsProcessorMock = mock(GetJsContentProcessor.class);
-    
-    jsLoadProcessor = new JsLoadProcessor(jsUriManagerMock, 0);
+  }
+
+  private void setUp(int jsloadTtlSecs) {
+    jsLoadProcessor = new JsLoadProcessor(jsUriManagerMock, jsloadTtlSecs, true);
     JsProcessorRegistry jsProcessorRegistry =
         new DefaultJsProcessorRegistry(
             ImmutableList.<JsProcessor>of(jsLoadProcessor, new IfModifiedSinceProcessor(),
@@ -110,16 +112,18 @@ public class JsServletTest extends ServletTestFixture {
 
   @Test
   public void testJsServletGivesErrorWhenUriManagerThrowsException() throws Exception {
+    setUp(0);
     expect(jsUriManagerMock.processExternJsUri(isA(Uri.class))).andThrow(new GadgetException(null));
     replay();
-    
+
     servlet.doGet(request, recorder);
     assertEquals(HttpServletResponse.SC_BAD_REQUEST, recorder.getHttpStatusCode());
     verify();
   }
-  
+
   @Test
   public void testWithIfModifiedSinceHeaderPresentAndVersionReturnsNotModified() throws Exception {
+    setUp(0);
     JsUri jsUri = mockJsUri(CONTAINER_PARAM, RenderingContext.CONTAINER, false, false, false,
         null, REFRESH_INTERVAL_SEC, UriStatus.VALID_VERSIONED);
     expect(jsUriManagerMock.processExternJsUri(isA(Uri.class))).andReturn(jsUri);
@@ -130,9 +134,10 @@ public class JsServletTest extends ServletTestFixture {
     assertEquals(HttpServletResponse.SC_NOT_MODIFIED, recorder.getHttpStatusCode());
     verify();
   }
-  
+
   @Test
   public void testWithIfModifiedSinceHeaderPresentButNoVersionActsNormal() throws Exception {
+    setUp(0);
     JsUri jsUri = mockJsUri(CONTAINER_PARAM, RenderingContext.CONTAINER, false, false, false,
         null, REFRESH_INTERVAL_SEC, UriStatus.VALID_UNVERSIONED);
     expect(jsUriManagerMock.processExternJsUri(isA(Uri.class))).andReturn(jsUri);
@@ -154,9 +159,10 @@ public class JsServletTest extends ServletTestFixture {
     assertEquals(EXAMPLE_JS_CODE, recorder.getResponseAsString());
     verify();
   }
-  
+
   @Test
   public void testDoJsloadNormal() throws Exception {
+    setUp(0);
     String url = "http://localhost/gadgets/js/feature.js?v=abc&nocache=0&onload=" + ONLOAD_PARAM;
     JsUri jsUri = mockJsUri(CONTAINER_PARAM, RenderingContext.CONTAINER, true, true, false,
         ONLOAD_PARAM, REFRESH_INTERVAL_SEC, UriStatus.VALID_VERSIONED);
@@ -176,6 +182,8 @@ public class JsServletTest extends ServletTestFixture {
 
   @Test
   public void testDoJsloadWithJsLoadTimeout() throws Exception {
+    setUp(TIMEOUT_SEC); // Enable JS load timeout.
+
     String url = "http://localhost/gadgets/js/feature.js?v=abc&nocache=0&onload=" + ONLOAD_PARAM;
     JsUri jsUri = mockJsUri(CONTAINER_PARAM, RenderingContext.CONTAINER, true, true,
         false, ONLOAD_PARAM, -1, UriStatus.VALID_VERSIONED); // Disable refresh interval.
@@ -183,7 +191,6 @@ public class JsServletTest extends ServletTestFixture {
     expect(jsUriManagerMock.processExternJsUri(isA(Uri.class))).andReturn(jsUri);
     expect(jsUriManagerMock.makeExternJsUri(isA(JsUri.class)))
         .andReturn(Uri.parse(url));
-    jsLoadProcessor.setJsloadTtlSecs(TIMEOUT_SEC); // Enable JS load timeout.
     httpUtilMock.setCachingHeaders(recorder, TIMEOUT_SEC, false);
     replay();
 
@@ -196,6 +203,7 @@ public class JsServletTest extends ServletTestFixture {
 
   @Test
   public void testDoJsloadNoOnload() throws Exception {
+    setUp(0);
     JsUri jsUri = mockJsUri(CONTAINER_PARAM, RenderingContext.CONTAINER, true, true, false,
         null, // lacks &onload=
         REFRESH_INTERVAL_SEC, UriStatus.VALID_VERSIONED);
@@ -210,6 +218,7 @@ public class JsServletTest extends ServletTestFixture {
 
   @Test
   public void testDoJsloadNoCache() throws Exception {
+    setUp(0);
     String url = "http://localhost/gadgets/js/feature.js?v=abc&nocache=1&onload=" + ONLOAD_PARAM;
     JsUri jsUri = mockJsUri(CONTAINER_PARAM, RenderingContext.CONTAINER, true, true,
         true, // Set to no cache.

@@ -43,18 +43,17 @@ public class JsLoadProcessor implements JsProcessor {
       "})();"; // Concatenated to avoid some browsers do dynamic script injection.
 
   private final JsUriManager jsUriManager;
-  private int jsloadTtlSecs;
+  private final int jsloadTtlSecs;
+  private final boolean requireOnload;
 
   @Inject
   public JsLoadProcessor(
-      JsUriManager jsUriManager, @Named("shindig.jsload.ttl-secs") int jsloadTtlSecs) {
+      JsUriManager jsUriManager,
+      @Named("shindig.jsload.ttl-secs") int jsloadTtlSecs,
+      @Named("shindig.jsload.require-onload-with-jsload") boolean requireOnload) {
     this.jsUriManager = jsUriManager;
     this.jsloadTtlSecs = jsloadTtlSecs;
-  }
-
-  @VisibleForTesting
-  public void setJsloadTtlSecs(int jsloadTtlSecs) {
-    this.jsloadTtlSecs = jsloadTtlSecs;
+    this.requireOnload = requireOnload;
   }
 
   public boolean process(JsRequest request, JsResponseBuilder builder)
@@ -65,31 +64,34 @@ public class JsLoadProcessor implements JsProcessor {
     // versioned JS. The loader script is much smaller and cacheable for a
     // configurable amount of time.
     if (jsUri.isJsload()) {
+      // Require users to specify &onload=. This ensures a reliable continuation
+      // of JS execution. IE asynchronously loads script, before it loads
+      // source-scripted and inlined JS.
+      if (requireOnload && jsUri.getOnload() == null) {
+        throw new JsException(HttpServletResponse.SC_BAD_REQUEST, JSLOAD_ONLOAD_ERROR);
+      }
+
+      int refresh = getCacheTtlSecs(jsUri);
+      builder.setCacheTtlSecs(refresh);
+      builder.setProxyCacheable(true);
+      
       doJsload(jsUri, builder);
       return false;
     }
     return true;
   }
   
-  private void doJsload(JsUri jsUri, JsResponseBuilder resp)
+  protected void doJsload(JsUri jsUri, JsResponseBuilder resp)
       throws JsException {
-    String onloadStr = jsUri.getOnload();
-
-    // Require users to specify &onload=. This ensures a reliable continuation
-    // of JS execution. IE asynchronously loads script, before it loads
-    // source-scripted and inlined JS.
-    if (onloadStr == null) {
-      throw new JsException(HttpServletResponse.SC_BAD_REQUEST, JSLOAD_ONLOAD_ERROR);
-    }
-
     jsUri.setJsload(false);
     jsUri.setNohint(true);
     Uri incUri = jsUriManager.makeExternJsUri(jsUri);
-
-    int refresh = getCacheTtlSecs(jsUri);
-    resp.setCacheTtlSecs(refresh);
-    resp.setProxyCacheable(true);
     resp.appendJs(createJsloadScript(incUri), CODE_ID);
+  }
+
+  protected String createJsloadScript(Uri uri) {
+    String uriString = uri.toString();
+    return String.format(JSLOAD_JS_TPL, uriString);
   }
 
   private int getCacheTtlSecs(JsUri jsUri) {
@@ -100,12 +102,6 @@ public class JsLoadProcessor implements JsProcessor {
       return (jsUriRefresh != null && jsUriRefresh >= 0)
           ? jsUriRefresh : jsloadTtlSecs;
     }
-  }
-
-  @VisibleForTesting
-  String createJsloadScript(Uri uri) {
-    String uriString = uri.toString();
-    return String.format(JSLOAD_JS_TPL, uriString);
   }
 
 }

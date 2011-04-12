@@ -68,6 +68,7 @@ public class DefaultGuiceModule extends AbstractModule {
     bind(Executor.class).annotatedWith(Names.named("shindig.concat.executor")).to(ShindigExecutorService.class);
 
     bindConstant().annotatedWith(Names.named("shindig.jsload.ttl-secs")).to(60 * 60); // 1 hour
+    bindConstant().annotatedWith(Names.named("shindig.jsload.require-onload-with-jsload")).to(true);
 
     install(new DefaultConfigContributorModule());
     install(new ParseModule());
@@ -99,7 +100,7 @@ public class DefaultGuiceModule extends AbstractModule {
     handlerBinder.addBinding().to(HttpRequestHandler.class);
     handlerBinder.addBinding().to(GadgetsHandler.class);
   }
-  
+
   /**
    * Sets up the multibinding for extended feature resources
    */
