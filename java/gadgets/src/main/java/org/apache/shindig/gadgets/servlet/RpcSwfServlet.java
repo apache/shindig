@@ -82,9 +82,9 @@ public class RpcSwfServlet extends HttpServlet {
     // Similar versioning method to other APIs, implemented more compactly.
     String v = req.getParameter(UriCommon.Param.VERSION.getKey());
     if (v != null && v.equals(hash)) {
-      HttpUtil.setCachingHeaders(resp, ONE_YEAR_IN_SEC);
+      HttpUtil.setCachingHeaders(resp, ONE_YEAR_IN_SEC, true);
     } else {
-      HttpUtil.setCachingHeaders(resp, defaultSwfTtl);
+      HttpUtil.setCachingHeaders(resp, defaultSwfTtl, true);
     }
 
     resp.setHeader("Content-Type", "application/x-shockwave-flash");
