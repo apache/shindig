@@ -39,6 +39,7 @@
       org.apache.shindig.sample.shiro.ShiroGuiceModule:
       org.apache.shindig.sample.container.SampleContainerGuiceModule:
       org.apache.shindig.extras.ShindigExtrasGuiceModule:
+      org.apache.shindig.sample.commoncontainer.auth.CommonContainerAuthGuiceModule
     </param-value>
   </context-param>
 
