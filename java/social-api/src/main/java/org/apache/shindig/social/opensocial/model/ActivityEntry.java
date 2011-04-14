@@ -44,7 +44,8 @@ public interface ActivityEntry {
     TARGET("target"),
     TITLE("title"),
     UPDATED_TIME("updatedTime"),
-    VERB("verb");
+    VERB("verb"),
+    OPENSOCIAL("openSocial");
     
     /**
      * The name of the JSON element.
@@ -223,4 +224,18 @@ public interface ActivityEntry {
    * @param verb a {@link java.lang.String} object.
    */
   void setVerb(String verb);
+  
+  /**
+   * <p>getOpenSocial</p>
+   * 
+   * @return a {@link org.apache.shindig.social.opensocial.model.OpenSocial} object
+   */
+  OpenSocial getOpenSocial();
+  
+  /**
+   * <p>setOpenSocial</p>
+   * 
+   * @return a {@link org.apache.shindig.social.opensocial.model.OpenSocial} object
+   */
+  void setOpenSocial(OpenSocial extensions);
 }

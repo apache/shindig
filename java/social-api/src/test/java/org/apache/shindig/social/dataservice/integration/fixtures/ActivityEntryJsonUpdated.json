@@ -58,7 +58,8 @@
                   "url":"http://example.org/attached2"
                }
             ]
-         }
+         },
+         "openSocial":{}
       },
       {
 	    "title":"Super Updated Activity",

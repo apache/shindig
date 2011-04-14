@@ -21,6 +21,7 @@ package org.apache.shindig.social.core.model;
 import org.apache.shindig.social.opensocial.model.ActivityEntry;
 import org.apache.shindig.social.opensocial.model.ActivityObject;
 import org.apache.shindig.social.opensocial.model.MediaLink;
+import org.apache.shindig.social.opensocial.model.OpenSocial;
 
 /**
  * A simple bean implementation of an ActivityStream Entry.
@@ -38,6 +39,7 @@ public class ActivityEntryImpl implements ActivityEntry {
   private String title;
   private String updatedTime;
   private String verb;
+  private OpenSocial extensions;
 
   /**
    * Create a new empty ActivityEntry
@@ -153,5 +155,16 @@ public class ActivityEntryImpl implements ActivityEntry {
   /** {@inheritDoc} */
   public void setVerb(String verb) {
     this.verb = verb;
+  }
+
+  /** {@inheritDoc} */
+  public OpenSocial getOpenSocial() {
+	  return extensions;
+  }
+
+  /** {@inheritDoc} */
+  public void setOpenSocial(OpenSocial extensions) {
+	  this.extensions = extensions;
+
   }
 }
