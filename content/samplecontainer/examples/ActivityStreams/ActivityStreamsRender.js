@@ -75,13 +75,13 @@ function ActivityStreamsRender() {
 		social.loadActivityEntries(function(response) {
 			var html = '';
 			viewerEntries = response.viewerEntries.list;
-			ownerEntries = response.ownerEntries.list;
-			friendEntries = response.friendEntries.list;
+			//ownerEntries = response.ownerEntries.list;
+			//friendEntries = response.friendEntries.list;
 			html = "<h2>ActivityEntries</h2>";
 			html += processActivityEntries(viewerEntries);
-			html += processActivityEntries(ownerEntries);
-			html += processActivityEntries(friendEntries);
-			if (viewerEntries.length + ownerEntries.length + friendEntries.length == 0) {
+			//html += processActivityEntries(ownerEntries);
+			//html += processActivityEntries(friendEntries);
+			if (viewerEntries.length == 0) {
 				html += "<tr><td>No entries to show!</td></tr>";
 			}
 			html += "</table><br><br>";

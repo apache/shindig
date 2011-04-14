@@ -73,8 +73,8 @@ function OpenSocialWrapper() {
 	this.loadActivityEntries = function(callback) {
 		var batch = osapi.newBatch();
 		batch.add('viewerEntries', osapi.activitystreams.get({userId: '@viewer', groupId: '@self'}));
-		batch.add('ownerEntries', osapi.activitystreams.get({userId: '@owner', groupId: '@self'}));
-		batch.add('friendEntries', osapi.activitystreams.get({userId: '@viewer', groupId: '@friend'}));
+		//batch.add('ownerEntries', osapi.activitystreams.get({userId: '@owner', groupId: '@self'}));
+		//batch.add('friendEntries', osapi.activitystreams.get({userId: '@viewer', groupId: '@friend'}));
 		batch.execute(callback);
 	}
 	
@@ -98,7 +98,7 @@ function OpenSocialWrapper() {
 		var params = {
 			userId: '@viewer',
 			groupId: '@self',
-			activityEntry: {
+			activity: {
 				postedTime: '2010-04-27T06:02:36+0000',
 				title: title,
 				body: body,
@@ -108,7 +108,7 @@ function OpenSocialWrapper() {
 				},
 				verb: verb,
 				object: {
-					id: 'entryId123',
+					id: new	Date().getTime(),
 					displayName: objectName,
 					link: objectPermalink,
 					objectType: objectType,
