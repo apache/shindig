@@ -84,7 +84,8 @@ public class GetJsContentProcessor implements JsProcessor {
     }
 
     builder.setProxyCacheable(isProxyCacheable);
-    setResponseCacheTtl(builder, jsUri.getStatus());
+    UriStatus uriStatus = jsUri.getStatus();
+    setResponseCacheTtl(builder, uriStatus != null ? uriStatus : UriStatus.VALID_UNVERSIONED);
     return true;
   }
 
