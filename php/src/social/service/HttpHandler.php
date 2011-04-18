@@ -54,8 +54,13 @@ class HttpHandler extends DataRequestHandler {
       $context = new $contextClass('GADGET');
       $response = $makeRequest->fetch($context, $options);
 
+      // try to decode json object here since in order
+      // to not break gadgets.io.makeRequest functionality
+      // $response->getResponseContent() has to return a string
+      $content = json_decode($response->getResponseContent(), true);
+
       $result = array(
-        'content' => $response->getResponseContent(),
+        'content' => $content ? $content : $response->getResponseContent(),
         'status' => $response->getHttpCode(),
         'headers' => $response->getResponseHeaders()
       );
