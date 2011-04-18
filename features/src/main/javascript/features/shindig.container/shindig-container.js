@@ -729,9 +729,9 @@ shindig.IfrGadget = {
         this.getUserPrefsParams() +
         (this.secureToken ? '&st=' + this.secureToken : '') +
         '&url=' + encodeURIComponent(this.specUrl) +
-        '#rpctoken=' + this.rpcToken +
         (this.viewParams ?
             '&view-params=' + encodeURIComponent(gadgets.json.stringify(this.viewParams)) : '') +
+        '#rpctoken=' + this.rpcToken +
         (this.hashData ? '&' + this.hashData : '');
   }
 };
