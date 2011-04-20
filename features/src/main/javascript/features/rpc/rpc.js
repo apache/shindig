@@ -139,7 +139,7 @@ if (!gadgets.rpc) { // make lib resilient to double-inclusion
     // and logs info on calls it receives, to avoid undesired side-effects
     // from falling back to IFPC or some other transport.
     var console = window['console'];
-    var clog = console && console.log ? console.log : function(){};
+    var clog = console && console.log && function(msg) { console.log(msg); } || function(){};
     var fallbackTransport = (function() {
       function logFn(name) {
         return function() {
