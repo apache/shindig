@@ -28,5 +28,6 @@
     <script src="jsonperson.js"></script>    
     <script src="jsonmessagecollection.js"></script>
     <script src="jsonmessage.js"></script>
+    <script src="taming.js" caja="1"></script>
   </gadget>
 </feature>

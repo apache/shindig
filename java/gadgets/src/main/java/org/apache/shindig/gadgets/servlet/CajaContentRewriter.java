@@ -32,7 +32,6 @@ import com.google.caja.lexer.escaping.Escaping;
 import com.google.caja.parser.ParseTreeNode;
 import com.google.caja.parser.html.Dom;
 import com.google.caja.parser.html.DomParser;
-import com.google.caja.parser.html.Namespaces;
 import com.google.caja.parser.js.CajoledModule;
 import com.google.caja.parser.js.Parser;
 import com.google.caja.plugin.Job;
@@ -67,7 +66,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.shindig.common.cache.Cache;
 import org.apache.shindig.common.cache.CacheProvider;
 import org.apache.shindig.common.logging.i18n.MessageKeys;
-import org.apache.shindig.common.util.HashUtil;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
@@ -80,7 +78,6 @@ import org.apache.shindig.gadgets.parse.HtmlSerializer;
 import org.apache.shindig.gadgets.rewrite.GadgetRewriter;
 import org.apache.shindig.gadgets.rewrite.MutableContent;
 import org.apache.shindig.gadgets.uri.ProxyUriManager;
-import org.apache.shindig.gadgets.uri.UriCommon;
 import org.apache.shindig.gadgets.uri.UriStatus;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -224,7 +221,7 @@ public class CajaContentRewriter implements GadgetRewriter {
   }
 
   public void rewrite(Gadget gadget, MutableContent mc) {
-    if (!cajaEnabled(gadget)) return;
+    if (!gadget.requiresCaja()) return;
 
     GadgetContext gadgetContext = gadget.getContext();
     boolean debug = gadgetContext.getDebug();
@@ -235,73 +232,52 @@ public class CajaContentRewriter implements GadgetRewriter {
     Node root = doc.createDocumentFragment();
     root.appendChild(doc.getDocumentElement());
 
-    Node cajoledData = null;
-
-    if (cajoledData == null) {
-      if (debug) {
-        // This will load cajita-debugmode.js
-        gadget.addFeature("caja-debug");
-      }
-
-      InputSource is = new InputSource(gadgetContext.getUrl().toJavaUri());
-      // TODO(jasvir): Turn on es53 once gadgets apis support it
-      CajoledResult result =
-        rewrite(gadgetContext.getUrl(), gadgetContext.getContainer(),
-            new Dom(root), /* es53 */ false, debug);
-      if (!result.hasErrors) {
-        StringBuilder scriptBody = new StringBuilder();
-        CajoledModule cajoled = result.js;
-        TokenConsumer tc = debug
-            ? new JsPrettyPrinter(new Concatenator(scriptBody))
-            : new JsMinimalPrinter(new Concatenator(scriptBody));
-        cajoled.render(new RenderContext(tc)
-          .withAsciiOnly(true)
-          .withEmbeddable(true));
-
-        tc.noMoreTokens();
-
-        Node html = result.html;
-
-        Element script = doc.createElementNS(
-            Namespaces.HTML_NAMESPACE_URI, "script");
-        script.setAttributeNS(
-            Namespaces.HTML_NAMESPACE_URI, "type", "text/javascript");
-        script.appendChild(doc.createTextNode(scriptBody.toString()));
-
-
-        Element cajoledOutput = doc.createElement("div");
-        cajoledOutput.setAttribute("id", "cajoled-output");
-        cajoledOutput.setAttribute("classes", "g___");
-        cajoledOutput.setAttribute("style", "position: relative;");
-
-        cajoledOutput.appendChild(doc.adoptNode(html));
-        cajoledOutput.appendChild(tameCajaClientApi(doc));
-        cajoledOutput.appendChild(doc.adoptNode(script));
-
-        List<Message> messages = result.messages;
-        Element messagesNode = formatErrors(doc, is, docContent, messages,
-            /* invisible */ false);
-        cajoledOutput.appendChild(messagesNode);
-
-        cajoledData = cajoledOutput;
-        createContainerFor(doc, cajoledData);
-        mc.documentChanged();
-        HtmlSerialization.attach(doc, htmlSerializer, null);
-      } else {
-        // There were cajoling errors
-        // Content is only used to produce useful snippets with error messages
-        List<Message> messages = result.messages;
-        createContainerFor(doc,
-            formatErrors(doc, is, docContent, messages, true /* visible */));
-        mc.documentChanged();
-        logException("rewrite", messages);
-      }
+    if (debug) {
+      gadget.addFeature("caja-debug");
     }
-  }
 
-  protected boolean cajaEnabled(Gadget gadget) {
-    return (gadget.getAllFeatures().contains("caja") ||
-        "1".equals(gadget.getContext().getParameter(UriCommon.Param.CAJOLE.getKey())));
+    InputSource is = new InputSource(gadgetContext.getUrl().toJavaUri());
+    CajoledResult result =
+      rewrite(gadgetContext.getUrl(), gadgetContext.getContainer(),
+          new Dom(root), true, debug);
+
+    if (result.hasErrors) {
+      // Content is only used to produce useful snippets with error messages
+      List<Message> messages = result.messages;
+      createContainerFor(doc,
+          formatErrors(doc, is, docContent, messages, true /* visible */));
+      mc.documentChanged();
+      logException("rewrite", messages);
+      return;
+    }
+
+    Element cajoledOutput = doc.createElement("div");
+    cajoledOutput.setAttribute("id", "cajoled-output");
+
+    List<Message> messages = result.messages;
+    Element messagesNode = formatErrors(doc, is, docContent, messages,
+        /* invisible */ false);
+    cajoledOutput.appendChild(messagesNode);
+
+    // TODO(felix8a): style boxing
+    Element outerDiv = doc.createElement("div");
+    outerDiv.setAttribute("id", "caja_outerContainer___");
+    outerDiv.setAttribute("style", "position: relative;");
+    cajoledOutput.appendChild(outerDiv);
+
+    Element innerDiv = doc.createElement("div");
+    innerDiv.setAttribute("id", "caja_innerContainer___");
+    innerDiv.setAttribute("class", "g___");
+    outerDiv.appendChild(innerDiv);
+
+    innerDiv.appendChild(doc.adoptNode(result.html));
+
+    String cajoledJs = renderJs(result.js, debug);
+    cajoledOutput.appendChild(cajaStart(doc, cajoledJs));
+
+    createContainerFor(doc, cajoledOutput);
+    mc.documentChanged();
+    HtmlSerialization.attach(doc, htmlSerializer, null);
   }
 
   UriFetcher makeFetcher(final Uri gadgetUri, final String container) {
@@ -407,10 +383,26 @@ public class CajaContentRewriter implements GadgetRewriter {
     return sb.toString();
   }
 
-  private Element tameCajaClientApi(Document doc) {
+  private String renderJs(CajoledModule cajoled, boolean debug) {
+    StringBuilder rendered = new StringBuilder();
+    TokenConsumer tc = debug
+        ? new JsPrettyPrinter(new Concatenator(rendered))
+        : new JsMinimalPrinter(new Concatenator(rendered));
+    cajoled.render(new RenderContext(tc)
+        .withAsciiOnly(true)
+        .withEmbeddable(true));
+    tc.noMoreTokens();
+    return rendered.toString();
+  }
+
+  private Element cajaStart(Document doc, String cajoledJs) {
     Element scriptElement = doc.createElement("script");
     scriptElement.setAttribute("type", "text/javascript");
-    scriptElement.appendChild(doc.createTextNode("caja___.enable()"));
+    StringBuilder start = new StringBuilder();
+    start.append("caja___.start(\n'");
+    Escaping.escapeJsString(cajoledJs, true, true, start);
+    start.append("');\n");
+    scriptElement.appendChild(doc.createTextNode(start.toString()));
     return scriptElement;
   }
 

@@ -253,7 +253,8 @@ shindig.samplecontainer = {};
     shindig.samplecontainer.unpackFormState();
     shindig.container.nocache_ = useCache ? 0 : 1;
 
-    setEvilBit();
+    // TODO(felix8a): implement in server
+    //setEvilBit();
 
     stateFileUrl = document.getElementById("stateFileUrl").value;
     shindig.cookies.set(stateFileUrlCookie, encodeURIComponent(stateFileUrl));

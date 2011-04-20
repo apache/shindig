@@ -17,11 +17,13 @@
  * under the License.
  */
 
-/**
- * @class
- * Tame and expose core gadgets.* API to cajoled gadgets
- */
 tamings___.push(function(imports) {
-  caja___.tamesTo(gadgets.json.stringify, caja___.tameWin.safeJSON.stringify);
-  caja___.tamesTo(gadgets.json.parse, caja___.tameWin.safeJSON.parse);
+  caja___.whitelistCtors([
+    [window, 'JsonActivity', opensocial.Activity],
+    [window, 'JsonAlbum', opensocial.Album],
+    [window, 'JsonMediaItem', opensocial.MediaItem],
+    [window, 'JsonMessage', opensocial.Message],
+    [window, 'JsonMessageCollection', opensocial.MessageCollection],
+    [window, 'JsonPerson', opensocial.Person]
+  ]);
 });

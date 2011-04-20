@@ -20,9 +20,9 @@
 <Module>
  <ModulePrefs title="Social Activities World"
               icon="http://localhost:8080/samplecontainer/examples/icon.png">
-   <Require feature="opensocial-0.7"></Require>
-     <Require feature="settitle"/>
-   <Require feature="dynamic-height"></Require>
+   <Require feature="opensocial-0.7"/>
+   <Require feature="settitle"/>
+   <Require feature="dynamic-height"/>
  </ModulePrefs>
  <Content type="html">
    <![CDATA[
@@ -163,7 +163,7 @@ function handleActivities(dataResponse) {
     html += '<div class="streamdescription"><a href="' + activities[i].url + '">' + activities[i].getField('title') + '</a></div>';
 
     html += '<div class="streamcontents">';
-    html += '<img src="http://www.google.com/s2/sharing/resources/static/images/quot.png?hl=en_US"/>';
+    html += '<img src="http://www.gstatic.com/codesite/ph/images/star_on.gif"/>';
 
     var body = activities[i].getField('body') || '';
     html += '<span class="streamhtmlcontents">' + body + '</span>';

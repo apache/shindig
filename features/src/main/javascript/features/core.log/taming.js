@@ -22,14 +22,14 @@
  * Tame and expose core gadgets.* API to cajoled gadgets
  */
 tamings___.push(function(imports) {
-  ___.grantRead(gadgets.log, 'INFO');
-  ___.grantRead(gadgets.log, 'WARNING');
-  ___.grantRead(gadgets.log, 'ERROR');
-  ___.grantRead(gadgets.log, 'NONE');
   caja___.whitelistFuncs([
     [gadgets, 'log'],
     [gadgets, 'warn'],
     [gadgets, 'error'],
     [gadgets, 'setLogLevel']
   ]);
+  caja___.grantTameAsRead(gadgets.log, 'INFO');
+  caja___.grantTameAsRead(gadgets.log, 'WARNING');
+  caja___.grantTameAsRead(gadgets.log, 'ERROR');
+  caja___.grantTameAsRead(gadgets.log, 'NONE');
 });

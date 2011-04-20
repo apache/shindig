@@ -28,7 +28,6 @@ import org.apache.shindig.gadgets.LockedDomainService;
 import org.apache.shindig.gadgets.process.ProcessingException;
 import org.apache.shindig.gadgets.process.Processor;
 import org.apache.shindig.gadgets.spec.View;
-import org.apache.shindig.gadgets.uri.UriCommon;
 
 import com.google.inject.Inject;
 
@@ -85,7 +84,7 @@ public class Renderer {
       }
 
       if (gadget.getCurrentView().getType() == View.ContentType.URL) {
-        if (requiresCaja(gadget)) {
+        if (gadget.requiresCaja()) {
           return RenderingResults.error("Caja does not support url type gadgets.",
             HttpServletResponse.SC_BAD_REQUEST);
         } else if (gadget.sanitizeOutput()) {
@@ -118,14 +117,6 @@ public class Renderer {
       LOG.logp(Level.INFO, classname, methodname, MessageKeys.FAILED_TO_RENDER, new Object[] {gadgetUrl,t.getMessage()});
     }
     return RenderingResults.error(t.getMessage(), statusCode);
-  }
-
-  /**
-   * Returns true iff the gadget opts into the caja or the container forces caja by flag
-   */
-  private boolean requiresCaja(Gadget gadget) {
-    return gadget.getViewFeatures().containsKey("caja")
-        || "1".equals(gadget.getContext().getParameter(UriCommon.Param.CAJOLE.getKey()));
   }
 
   /**

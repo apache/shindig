@@ -103,13 +103,8 @@ public class CajaContentRewriterTest extends RewriterTestBase {
   @Test
   public void testCssExpression() throws Exception {
     String markup = "<div style='top:expression(alert(0), 0)'>test</div>";
-    String expected = "<html><head></head><body>"
-        + "<div classes=\"g___\" id=\"cajoled-output\" style=\"position: relative;\">"
-        + "<div style=\"\">test</div>"
-        + "<script type=\"text/javascript\">caja___.enable()</script>"
-        + "<script type=\"text/javascript\">{___.loadModule({'instantiate':function(___,IMPORTS___)"
-        + "{return},'cajolerName':'com.google.caja','cajolerVersion':'0','cajoledDate':0})}"
-        + "</script>";
+    String expected =
+        "<div style=\"\">test</div>";
 
     List<String> messages = ImmutableList.of(
             "folding element html into parent",
@@ -122,16 +117,8 @@ public class CajaContentRewriterTest extends RewriterTestBase {
   @Test
   public void testRewrite() throws Exception {
     String markup = "<script>var a=0;</script>";
-    String expected = "<html><head></head><body>"
-        + "<div classes=\"g___\" id=\"cajoled-output\" style=\"position: relative;\">"
-        + "<script type=\"text/javascript\">caja___.enable()</script>"
-        + "<script type=\"text/javascript\">{___.loadModule({'instantiate':function(___,IMPORTS___){"
-        + "return ___.prepareModule({'instantiate':function(___,IMPORTS___){var\n"
-        + "dis___=IMPORTS___;var moduleResult___;moduleResult___=___.NO_RESULT;"
-        + "try{{moduleResult___=IMPORTS___.w___('a',0)}}"
-        + "catch(ex___){___.getNewModuleHandler().handleUncaughtException(ex___,"
-        + "IMPORTS___.onerror_v___?IMPORTS___.onerror:___.ri(IMPORTS___,'onerror'),'unknown','1')}"
-        + "return moduleResult___}";
+    String expected =
+        "caja___.start";
 
     List<String> messages = ImmutableList.of(
             "folding element html into parent",
@@ -203,6 +190,7 @@ public class CajaContentRewriterTest extends RewriterTestBase {
 
     expect(gadget.getContext()).andReturn(context).anyTimes();
     expect(gadget.getAllFeatures()).andReturn(ImmutableList.of("caja")).anyTimes();
+    expect(gadget.requiresCaja()).andReturn(true).anyTimes();
 
     replay(context, gadget);
     return gadget;

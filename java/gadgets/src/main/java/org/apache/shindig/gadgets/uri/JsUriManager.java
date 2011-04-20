@@ -110,6 +110,7 @@ public interface JsUriManager {
       this.libs = nonNullLibs(libs);
       this.loadedLibs = EMPTY_COLL;
       this.origUri = null;
+      this.setCajoleContent(gadget.requiresCaja());
     }
 
     public JsUri(Integer refresh, boolean debug, boolean noCache, String container, String gadget,

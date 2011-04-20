@@ -23,6 +23,10 @@
  */
 
 tamings___.push(function(imports) {
+  caja___.whitelistCtors([
+    [gadgets, 'Tab'],
+    [gadgets, 'TabSet']
+  ]);
   caja___.whitelistMeths([
     [gadgets.Tab, 'getCallback'],
     [gadgets.Tab, 'getContentContainer'],
@@ -39,8 +43,5 @@ tamings___.push(function(imports) {
     [gadgets.TabSet, 'removeTab'],
     [gadgets.TabSet, 'setSelectedTab'],
     [gadgets.TabSet, 'swapTabs']
-  ]);
-  caja___.whitelistCtors([
-    [gadgets, 'TabSet']
   ]);
 });

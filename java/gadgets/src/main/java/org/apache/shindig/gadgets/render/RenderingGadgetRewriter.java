@@ -228,7 +228,10 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
 
       body.setAttribute("dir", bundle.getLanguageDirection());
 
-      injectOnLoadHandlers(body);
+      // With Caja enabled, onloads are triggered by features/caja/taming.js
+      if (!gadget.requiresCaja()) {
+        injectOnLoadHandlers(body);
+      }
 
       mutableContent.documentChanged();
     } catch (GadgetException e) {

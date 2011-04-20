@@ -421,6 +421,7 @@ public class DefaultJsUriManagerTest {
     expect(context.getExtensionParams()).andStubReturn(params);
     expect(context.getOrigUri()).andStubReturn(null);
     expect(context.getCompileMode()).andStubReturn(compileMode);
+    expect(context.cajoleContent()).andStubReturn(false);
     replay(context);
     return context;
   }

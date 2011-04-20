@@ -215,4 +215,19 @@ public class Gadget {
         getCurrentView().getType() == View.ContentType.HTML_SANITIZED) ||
         "1".equals(getContext().getParameter(UriCommon.Param.SANITIZE.getKey()));
   }
+  
+  /**
+   * True if the gadget opts into caja or the container forces caja
+   */
+  public boolean requiresCaja() {
+    if ("1".equals(
+        getContext().getParameter(UriCommon.Param.CAJOLE.getKey()))) {
+      return true;
+    }
+    if (featureRegistry != null) {
+      return getAllFeatures().contains("caja");
+    } else {
+      return getViewFeatures().containsKey("caja");
+    }
+  }
 }

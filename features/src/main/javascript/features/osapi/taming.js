@@ -35,10 +35,11 @@ tamings___.push(function(imports) {
         [osapi.people, 'getOwnerFriends']
       ]);
       // Careful not to clobber osapi.people which already has tamed functions on it
-      savedImports.outers.osapi.people.getViewer = ___.tame(osapi.people.getViewer);
-      savedImports.outers.osapi.people.getViewerFriends = ___.tame(osapi.people.getViewerFriends);
-      savedImports.outers.osapi.people.getOwner = ___.tame(osapi.people.getOwner);
-      savedImports.outers.osapi.people.getOwnerFriends = ___.tame(osapi.people.getOwnerFriends);
+      // TODO(felix8a): tame these
+      //savedImports.outers.osapi.people.getViewer = ___.tame(osapi.people.getViewer);
+      //savedImports.outers.osapi.people.getViewerFriends = ___.tame(osapi.people.getViewerFriends);
+      //savedImports.outers.osapi.people.getOwner = ___.tame(osapi.people.getOwner);
+      //savedImports.outers.osapi.people.getOwnerFriends = ___.tame(osapi.people.getOwnerFriends);
     }
   });
 

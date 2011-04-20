@@ -39,9 +39,3 @@ var bridge___;
  * @type {Object}
  */
 var caja___ = window['caja___'];
-
-/**
- * @namespace The global ___ namespace
- * @type {Object}
- */
-var ___ = window['___'];

@@ -196,10 +196,9 @@ public class EndToEndTest {
     assertEquals(1, bodyList.getLength());
     DomNode body = (DomNode) bodyList.item(0);
 
-    // Failed output contains only an error block plus a onload script block
-    assertEquals(2, body.getChildNodes().getLength());
+    // Failed output contains only an error block
+    assertEquals(1, body.getChildNodes().getLength());
     assertEquals("ul", body.getFirstChild().getNodeName());
-    assertEquals("script", body.getLastChild().getNodeName());
   }
 
   @Test

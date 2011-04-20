@@ -111,6 +111,10 @@ public class DefaultJsUriManager implements JsUriManager {
       uri.addQueryParameter(Param.COMPILE_MODE.getKey(), mode.getParamValue());
     }
 
+    if (ctx.cajoleContent()) {
+      uri.addQueryParameter(Param.CAJOLE.getKey(), "1");
+    }
+
     // Finally, version it, but only if !nocache.
     if (versioner != null && !ctx.isNoCache()) {
       uri.addQueryParameter(Param.VERSION.getKey(),

@@ -54,7 +54,7 @@ osapi._registerMethod = function(method, transport) {
       });
     };
     if (has___) {
-      ___.markInnocent(boundCall.execute, 'execute');
+      ___.markFunc(boundCall.execute, 'execute');
     }
     // TODO: This shouldnt really be necessary. The spec should be clear enough about
     // defaults that we dont have to populate this.
@@ -69,8 +69,8 @@ osapi._registerMethod = function(method, transport) {
 
     return boundCall;
   };
-  if (has___ && typeof ___.markInnocent !== 'undefined') {
-    ___.markInnocent(apiMethod, method);
+  if (has___ && typeof ___.markFunc !== 'undefined') {
+    ___.markFunc(apiMethod, method);
   }
 
   if (last[parts[parts.length - 1]]) {
