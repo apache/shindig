@@ -167,9 +167,16 @@ gadgets.rpc = function() {
    * @member gadgets.rpc
    */
   function getTransport() {
+    var targetEl = getTargetWin('..');
+    try {
+      // If this succeeds, then same-domain policy applied
+      var t = targetEl.gadgets.rpc.receiveSameDomain;
+      return gadgets.rpctx.blank;
+    } catch (e) { }
+ 
     return typeof window.postMessage === 'function' ? gadgets.rpctx.wpm :
            typeof window.postMessage === 'object' ? gadgets.rpctx.wpm :
-           window.ActiveXObject ? gadgets.rpctx.nix :
+           window.ActiveXObject ? gadgets.rpctx.ifpc:
            navigator.userAgent.indexOf('WebKit') > 0 ? gadgets.rpctx.rmr :
            navigator.product === 'Gecko' ? gadgets.rpctx.frameElement :
            gadgets.rpctx.ifpc;

@@ -36,7 +36,7 @@ useLegacyProtocol: Boolean
   <gadget>
     <script src="wpm.transport.js"/>
     <script src="fe.transport.js"/>
-    <script src="nix.transport.js"/>
+    <script src="blank.transport.js"/>
     <script src="rmr.transport.js"/>
     <script src="ifpc.transport.js"/>
     <script src="rpc.js"/>
@@ -44,7 +44,7 @@ useLegacyProtocol: Boolean
   <container>
     <script src="wpm.transport.js"/>
     <script src="fe.transport.js"/>
-    <script src="nix.transport.js"/>
+    <script src="blank.transport.js"/>
     <script src="rmr.transport.js"/>
     <script src="ifpc.transport.js"/>
     <script src="rpc.js"/>
