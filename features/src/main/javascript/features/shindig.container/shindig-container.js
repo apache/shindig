@@ -642,7 +642,10 @@ shindig.BaseIfrGadget.prototype.handleCancelUserPrefs = function() {
 
 shindig.BaseIfrGadget.prototype.refresh = function() {
   var iframeId = this.getIframeId();
-  document.getElementById(iframeId).src = this.getIframeUrl();
+  // we have to add a random value to the iframe url because otherwise
+  // some browsers would not refresh the since the iframe src would remain the
+  // same
+  document.getElementById(iframeId).src = this.getIframeUrl(Math.random());
 };
 
 shindig.BaseIfrGadget.prototype.queryIfrGadgetType_ = function() {
@@ -714,7 +717,7 @@ shindig.IfrGadget = {
     window.frames[this.getIframeId()].location = this.getIframeUrl();
   },
 
-  getIframeUrl: function() {
+  getIframeUrl: function(random) {
     return this.serverBase_ + 'ifr?' +
         'container=' + this.CONTAINER +
         '&mid=' + this.id +
@@ -731,6 +734,7 @@ shindig.IfrGadget = {
         '&url=' + encodeURIComponent(this.specUrl) +
         (this.viewParams ?
             '&view-params=' + encodeURIComponent(gadgets.json.stringify(this.viewParams)) : '') +
+        (random ? '&r=' + random : '') +
         '#rpctoken=' + this.rpcToken +
         (this.hashData ? '&' + this.hashData : '');
   }
@@ -783,7 +787,7 @@ shindig.OAAIfrGadget = {
     );
   },
 
-  getIframeUrl: function() {
+  getIframeUrl: function(random) {
     return this.serverBase_ + 'ifr?' +
         'container=' + this.CONTAINER +
         '&mid=' + this.id +
@@ -801,6 +805,7 @@ shindig.OAAIfrGadget = {
         //      '#rpctoken=' + this.rpcToken +
         (this.viewParams ?
             '&view-params=' + encodeURIComponent(gadgets.json.stringify(this.viewParams)) : '') +
+        (random ? '&r=' + random : '') +
         //      (this.hashData ? '&' + this.hashData : '');
         (this.hashData ? '#' + this.hashData : '');
   }
