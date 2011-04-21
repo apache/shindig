@@ -126,7 +126,7 @@ public class GetJsContentProcessorTest {
 
     control.replay();
     processor.process(request, response);
-    checkResponse(true, 3600, JS_CODE1, "export2;\nextern2;\n");
+    checkResponse(true, 3600, JS_CODE1, "export2", "extern2");
     control.verify();
   }
 
@@ -199,10 +199,12 @@ public class GetJsContentProcessorTest {
   }
 
   private void checkResponse(boolean proxyCacheable, int expectedTtl,
-      String jsString, String externsString) {
+      String jsString, String... externs) {
     assertEquals(proxyCacheable, response.isProxyCacheable());
     assertEquals(expectedTtl, response.getCacheTtlSecs());
     assertEquals(jsString, response.build().toJsString());
-    assertEquals(externsString, response.build().getExterns());
+    for (String extern : externs) {
+      assertTrue(response.build().getExterns().contains(extern));
+    }
   }
 }

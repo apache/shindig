@@ -164,7 +164,7 @@ public class DefaultJsUriManagerTest {
     TestDefaultJsUriManager manager = makeManager(config, null);
     List<String> extern = Lists.newArrayList("feature", "another");
     JsUri ctx = mockGadgetContext(false, false, extern, null, true, null,
-        JsCompileMode.ALL_RUN_TIME);
+        JsCompileMode.CONCAT_COMPILE_EXPORT_ALL);
     Uri jsUri = manager.makeExternJsUri(ctx);
     assertFalse(manager.hadError());
     assertEquals("http", jsUri.getScheme());
@@ -173,7 +173,7 @@ public class DefaultJsUriManagerTest {
     assertEquals(CONTAINER, jsUri.getQueryParameter(Param.CONTAINER.getKey()));
     assertEquals("0", jsUri.getQueryParameter(Param.NO_CACHE.getKey()));
     assertEquals("0", jsUri.getQueryParameter(Param.DEBUG.getKey()));
-    assertEquals(JsCompileMode.ALL_RUN_TIME.getParamValue(),
+    assertEquals(JsCompileMode.CONCAT_COMPILE_EXPORT_ALL.getParamValue(),
         jsUri.getQueryParameter(Param.COMPILE_MODE.getKey()));
     assertEquals(RenderingContext.CONTAINER.getParamValue(),
         jsUri.getQueryParameter(Param.CONTAINER_MODE.getKey()));

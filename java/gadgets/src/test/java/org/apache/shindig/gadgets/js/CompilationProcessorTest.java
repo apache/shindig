@@ -21,6 +21,7 @@ import static org.easymock.EasyMock.createControl;
 import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.isA;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.same;
 import static org.junit.Assert.assertEquals;
@@ -67,7 +68,7 @@ public class CompilationProcessorTest {
     JsRequest request = control.createMock(JsRequest.class);
     expect(request.getJsUri()).andReturn(jsUri);
     expect(compiler.compile(same(jsUri), eq(builder.build().getAllJsContent()),
-        eq("extern3;\n" + "extern4;\n"))).andReturn(outputResponse);
+        isA(String.class))).andReturn(outputResponse);
 
     control.replay();
     boolean status = processor.process(request, builder);

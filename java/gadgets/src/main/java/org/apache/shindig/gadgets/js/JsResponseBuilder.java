@@ -30,7 +30,6 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class JsResponseBuilder {
   private static final String EXTERN_DELIM = ";\n";
-  private static final Joiner EXTERN_JOINER = Joiner.on(EXTERN_DELIM);
 
   private List<JsContent> jsCode;
   private final List<String> errors;
@@ -185,10 +184,20 @@ public class JsResponseBuilder {
   }
 
   /**
-   * Appends externs as string.
+   * Appends a blob of raw extern.
    */
-  public JsResponseBuilder appendExterns(String externs) {
-    this.externs.append(externs).append(EXTERN_DELIM);
+  public JsResponseBuilder appendRawExtern(String rawExtern) {
+    this.externs.append(rawExtern).append(EXTERN_DELIM);
+    return this;
+  }
+
+  /**
+   * Appends a line of extern.
+   */
+  public JsResponseBuilder appendExtern(String extern) {
+    this.externs
+        .append((extern.indexOf(".") <= 0) ? ("var " + extern) : extern)
+        .append(" = {}").append(EXTERN_DELIM);
     return this;
   }
 
@@ -196,7 +205,10 @@ public class JsResponseBuilder {
    * Appends externs as from list of strings.
    */
   public JsResponseBuilder appendExterns(List<String> externs) {
-    return appendExterns(EXTERN_JOINER.join(externs));
+    for (String extern : externs) {
+      appendExtern(extern);
+    }
+    return this;
   }
 
   /**

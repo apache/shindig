@@ -46,10 +46,10 @@ public class JsUriManagerTest extends UriManagerTestBase {
   @Test
   public void newJsUriWithOriginalUri() throws Exception {
     Uri uri = newTestUriBuilder(RenderingContext.CONTAINER,
-        JsCompileMode.ALL_RUN_TIME).toUri();
+        JsCompileMode.CONCAT_COMPILE_EXPORT_ALL).toUri();
     JsUriManager.JsUri jsUri = new JsUriManager.JsUri(STATUS, uri, LIBS, HAVE);
     assertEquals(RenderingContext.CONTAINER, jsUri.getContext());
-    assertEquals(JsCompileMode.ALL_RUN_TIME, jsUri.getCompileMode());
+    assertEquals(JsCompileMode.CONCAT_COMPILE_EXPORT_ALL, jsUri.getCompileMode());
     assertEquals(CONTAINER_VALUE, jsUri.getContainer());
     assertTrue(jsUri.isJsload());
     assertTrue(jsUri.isNoCache());
@@ -63,10 +63,10 @@ public class JsUriManagerTest extends UriManagerTestBase {
   @Test
   public void newJsUriWithConfiguredGadgetContext() throws Exception {
     Uri uri = newTestUriBuilder(RenderingContext.CONFIGURED_GADGET,
-        JsCompileMode.ALL_RUN_TIME).toUri();
+        JsCompileMode.CONCAT_COMPILE_EXPORT_ALL).toUri();
     JsUriManager.JsUri jsUri = new JsUriManager.JsUri(STATUS, uri, LIBS, HAVE);
     assertEquals(RenderingContext.CONFIGURED_GADGET, jsUri.getContext());
-    assertEquals(JsCompileMode.ALL_RUN_TIME, jsUri.getCompileMode());
+    assertEquals(JsCompileMode.CONCAT_COMPILE_EXPORT_ALL, jsUri.getCompileMode());
     assertEquals(CONTAINER_VALUE, jsUri.getContainer());
     assertTrue(jsUri.isJsload());
     assertTrue(jsUri.isNoCache());
@@ -83,7 +83,7 @@ public class JsUriManagerTest extends UriManagerTestBase {
         Collections.<String>emptyList(), null); // Null URI.
     assertEquals(RenderingContext.GADGET, jsUri.getContext());
     assertEquals(ContainerConfig.DEFAULT_CONTAINER, jsUri.getContainer());
-    assertEquals(JsCompileMode.BUILD_TIME, jsUri.getCompileMode());
+    assertEquals(JsCompileMode.COMPILE_CONCAT, jsUri.getCompileMode());
     assertFalse(jsUri.isJsload());
     assertFalse(jsUri.isNoCache());
     assertFalse(jsUri.isNohint());
@@ -96,7 +96,7 @@ public class JsUriManagerTest extends UriManagerTestBase {
   @Test
   public void newJsUriCopyOfOtherJsUri() throws Exception {
     Uri uri = newTestUriBuilder(RenderingContext.CONTAINER,
-        JsCompileMode.ALL_RUN_TIME).toUri();
+        JsCompileMode.CONCAT_COMPILE_EXPORT_ALL).toUri();
     JsUriManager.JsUri jsUri = new JsUriManager.JsUri(STATUS, uri, LIBS, HAVE);
     JsUriManager.JsUri jsUriCopy = new JsUriManager.JsUri(jsUri);
     assertEquals(jsUri, jsUriCopy);

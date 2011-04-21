@@ -163,7 +163,7 @@ public class ClosureJsCompiler implements JsCompiler {
         builder.appendJs(compiled, "[compiled]");
       }
 
-      builder.clearExterns().appendExterns(result.externExport);
+      builder.clearExterns().appendRawExtern(result.externExport);
     } else {
       // Otherwise, return original content and null exports.
       builder.appendAllJs(content);

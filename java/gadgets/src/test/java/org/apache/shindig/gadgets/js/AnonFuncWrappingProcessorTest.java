@@ -31,17 +31,17 @@ import org.junit.Test;
 public class AnonFuncWrappingProcessorTest {
   @Test
   public void wrapCodeAllRunTime() throws Exception {
-    checkWrapCode(JsCompileMode.ALL_RUN_TIME, true);
+    checkWrapCode(JsCompileMode.CONCAT_COMPILE_EXPORT_ALL, true);
   }
   
   @Test
   public void wrapCodeExplicitRunTime() throws Exception {
-    checkWrapCode(JsCompileMode.EXPLICIT_RUN_TIME, true);
+    checkWrapCode(JsCompileMode.CONCAT_COMPILE_EXPORT_EXPLICIT, true);
   }
   
   @Test
   public void wrapCodeBuildTimeDoesNothing() throws Exception {
-    checkWrapCode(JsCompileMode.BUILD_TIME, false);
+    checkWrapCode(JsCompileMode.COMPILE_CONCAT, false);
   }
   
   private void checkWrapCode(JsCompileMode mode, boolean wraps) throws Exception {

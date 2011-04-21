@@ -16,18 +16,27 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.shindig.gadgets;
+package org.apache.shindig.gadgets.js;
 
 import static org.junit.Assert.assertEquals;
 
+import org.junit.Before;
 import org.junit.Test;
 
-public class JsCompileModeTest {
-  @Test
-  public void testValueOfParam() {
-    assertEquals(JsCompileMode.COMPILE_CONCAT, JsCompileMode.valueOfParam(null));
-    assertEquals(JsCompileMode.COMPILE_CONCAT, JsCompileMode.valueOfParam("0"));
-    assertEquals(JsCompileMode.CONCAT_COMPILE_EXPORT_ALL, JsCompileMode.valueOfParam("1"));
-    assertEquals(JsCompileMode.CONCAT_COMPILE_EXPORT_EXPLICIT, JsCompileMode.valueOfParam("2"));
+public class JsResponseBuilderTest {
+
+  private JsResponseBuilder builder;
+
+  @Before
+  public void setUp() {
+    builder = new JsResponseBuilder();
   }
+
+  @Test
+  public void testExterns() throws Exception {
+    builder.appendExtern("a");
+    builder.appendExtern("a.b");
+    assertEquals("var a = {};\na.b = {};\n", builder.build().getExterns());
+  }
+
 }

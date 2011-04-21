@@ -22,7 +22,7 @@ import org.apache.shindig.gadgets.JsCompileMode;
 public class AnonFuncWrappingProcessor implements JsProcessor {
   public boolean process(JsRequest jsRequest, JsResponseBuilder builder)
       throws JsException {
-    if (jsRequest.getJsUri().getCompileMode() != JsCompileMode.BUILD_TIME) {
+    if (jsRequest.getJsUri().getCompileMode() != JsCompileMode.COMPILE_CONCAT) {
       builder.prependJs("(function(){", "[js-anon-wrapper]");
       builder.appendJs("})();", "[js-anon-wrapper]");
     }

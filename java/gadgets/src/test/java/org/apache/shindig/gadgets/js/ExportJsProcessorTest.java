@@ -159,7 +159,7 @@ public class ExportJsProcessorTest {
 
   @Test
   public void testProcessEmpty() throws Exception {
-    JsUri jsUri = mockJsUri(JsCompileMode.ALL_RUN_TIME);
+    JsUri jsUri = mockJsUri(JsCompileMode.CONCAT_COMPILE_EXPORT_ALL);
     JsRequest jsRequest = new JsRequest(jsUri, null, false);
     JsResponseBuilder jsBuilder = new JsResponseBuilder();
     boolean actualReturnCode = compiler.process(jsRequest, jsBuilder);
@@ -169,7 +169,7 @@ public class ExportJsProcessorTest {
 
   @Test
   public void testProcessWithOneText() throws Exception {
-    JsUri jsUri = mockJsUri(JsCompileMode.ALL_RUN_TIME);
+    JsUri jsUri = mockJsUri(JsCompileMode.CONCAT_COMPILE_EXPORT_ALL);
     JsRequest jsRequest = new JsRequest(jsUri, null, false);
     JsResponseBuilder jsBuilder = new JsResponseBuilder();
     jsBuilder.appendJs(textJsContent1);
@@ -182,7 +182,7 @@ public class ExportJsProcessorTest {
 
   @Test
   public void testProcessWithOneNonEmptyFeature() throws Exception {
-    JsUri jsUri = mockJsUri(JsCompileMode.ALL_RUN_TIME);
+    JsUri jsUri = mockJsUri(JsCompileMode.CONCAT_COMPILE_EXPORT_ALL);
     JsRequest jsRequest = new JsRequest(jsUri, null, false);
     JsResponseBuilder jsBuilder = new JsResponseBuilder();
     jsBuilder.appendJs(featureJsContent1);
@@ -195,7 +195,7 @@ public class ExportJsProcessorTest {
 
   @Test
   public void testProcessWithOneEmptyFeature() throws Exception {
-    JsUri jsUri = mockJsUri(JsCompileMode.ALL_RUN_TIME);
+    JsUri jsUri = mockJsUri(JsCompileMode.CONCAT_COMPILE_EXPORT_ALL);
     JsRequest jsRequest = new JsRequest(jsUri, null, false);
     JsResponseBuilder jsBuilder = new JsResponseBuilder();
     jsBuilder.appendJs(featureJsContent3);
@@ -208,7 +208,7 @@ public class ExportJsProcessorTest {
 
   @Test
   public void testProcessWithFeaturesAndTexts() throws Exception {
-    JsUri jsUri = mockJsUri(JsCompileMode.ALL_RUN_TIME);
+    JsUri jsUri = mockJsUri(JsCompileMode.CONCAT_COMPILE_EXPORT_ALL);
     JsRequest jsRequest = new JsRequest(jsUri, null, false);
     JsResponseBuilder jsBuilder = new JsResponseBuilder();
     jsBuilder.appendJs(textJsContent1);

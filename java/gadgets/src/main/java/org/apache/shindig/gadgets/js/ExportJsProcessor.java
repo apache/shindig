@@ -85,11 +85,11 @@ public class ExportJsProcessor implements JsProcessor {
     List<String> exports = Lists.newArrayList();
 
     // Add exports of bundle, regardless.
-    if (jsUri.getCompileMode() == JsCompileMode.ALL_RUN_TIME) {
+    if (jsUri.getCompileMode() == JsCompileMode.CONCAT_COMPILE_EXPORT_ALL) {
       exports = bundle.getApis(ApiDirective.Type.JS, true);
 
     // Add exports of bundle if it is an explicitly-specified feature.
-    } else if (jsUri.getCompileMode() == JsCompileMode.EXPLICIT_RUN_TIME) {
+    } else if (jsUri.getCompileMode() == JsCompileMode.CONCAT_COMPILE_EXPORT_EXPLICIT) {
       if (jsUri.getLibs().contains(bundle.getName())) {
         exports = bundle.getApis(ApiDirective.Type.JS, true);
       }
