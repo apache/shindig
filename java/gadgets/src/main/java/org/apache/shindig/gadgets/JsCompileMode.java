@@ -24,10 +24,11 @@ public enum JsCompileMode {
   // All symbols exported (and as long as in transitive dependency) are
   // retained/unbofuscated.
   CONCAT_COMPILE_EXPORT_ALL("1"),
-  // Like run ALL_RUN_TIME, except the only retained/unobfuscated symbols are
-  // ones exported from the explicitly-requested features, ie: if feature=foo
-  // depends on feature=bar, /gadgets/js/foo will expose foo.* exported APIs,
-  // not bar.* exported APIs. This can potentially eliminate all un-used code.
+  // Like run CONCAT_COMPILE_EXPORT_ALL, except the only retained/unobfuscated
+  // symbols are ones exported from the explicitly-requested features, ie: if
+  // feature=foo depends on feature=bar, /gadgets/js/foo will expose foo.*
+  // exported APIs, not bar.* exported APIs. This can potentially eliminate all
+  // un-used code.
   CONCAT_COMPILE_EXPORT_EXPLICIT("2");
 
   private final String paramValue;

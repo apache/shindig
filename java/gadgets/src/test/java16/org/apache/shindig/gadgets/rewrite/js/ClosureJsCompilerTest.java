@@ -212,7 +212,7 @@ public class ClosureJsCompilerTest extends TestCase {
   private JsUri mockJsUri(boolean debug) {
     JsUri result = createMock(JsUri.class);
     expect(result.isDebug()).andReturn(debug).anyTimes();
-    expect(result.getCompileMode()).andReturn(JsCompileMode.ALL_RUN_TIME).anyTimes();
+    expect(result.getCompileMode()).andReturn(JsCompileMode.CONCAT_COMPILE_EXPORT_ALL).anyTimes();
     expect(result.getStatus()).andReturn(UriStatus.VALID_UNVERSIONED).anyTimes();
     expect(result.getContainer()).andReturn("container").anyTimes();
     expect(result.getContext()).andReturn(RenderingContext.CONFIGURED_GADGET).anyTimes();
