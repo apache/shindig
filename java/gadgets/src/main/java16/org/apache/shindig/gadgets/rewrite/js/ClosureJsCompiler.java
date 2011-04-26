@@ -89,12 +89,16 @@ public class ClosureJsCompiler implements JsCompiler {
     CompilerOptions options = defaultCompilerOptions();
 
     if (outputCorrelatedJs()) {
-      options.sourceMapOutputPath = "create.out";
-      options.sourceMapFormat = SourceMap.Format.LEGACY;
-      options.sourceMapDetailLevel = SourceMap.DetailLevel.ALL;
+      setSourceMapCompilerOptions(options);
     }
     
     return options;
+  }
+
+  protected void setSourceMapCompilerOptions(CompilerOptions options) {
+    options.sourceMapOutputPath = "create.out";
+    options.sourceMapFormat = SourceMap.Format.LEGACY;
+    options.sourceMapDetailLevel = SourceMap.DetailLevel.ALL;
   }
 
   @VisibleForTesting
