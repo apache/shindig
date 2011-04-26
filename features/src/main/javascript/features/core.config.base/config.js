@@ -122,13 +122,13 @@ gadgets.config = function() {
   function parseConfig(configText) {
     var config;
     try {
-      eval("config=(" + configText + "\n)");
+      config = (new Function("return (" + configText + "\n)"))();
     } catch (e) { }
     if (typeof config === "object") {
       return config;
     }
     try {
-      eval("config=({" + configText + "\n})");
+      config = (new Function("return ({" + configText + "\n})"))();
     } catch (e) { }
     return typeof config === "object" ? config : {};
   }
