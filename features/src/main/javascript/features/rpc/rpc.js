@@ -52,7 +52,7 @@
  *     true if successful, false otherwise.
  */
 
-if (!gadgets.rpc) { // make lib resilient to double-inclusion
+if (!window['gadgets']['rpc']) { // make lib resilient to double-inclusion
 
   /**
    * @static

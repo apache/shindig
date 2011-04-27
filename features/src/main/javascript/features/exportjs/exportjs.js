@@ -53,7 +53,7 @@ function exportJs(namespace, components, opt_props) {
   var nsParts = namespace.split('.');
 
   for (var i = 0, part; part = nsParts.shift(); i++) {
-    base[part] = components[i] || {};
+    base[part] = base[part] || components[i] || {};
     prevBase = base;
     base = base[part];
   }
@@ -62,7 +62,7 @@ function exportJs(namespace, components, opt_props) {
     var props = opt_props || {};
     for (var prop in props) {
       if (props.hasOwnProperty(prop) && root.hasOwnProperty(prop)) {
-        root[props[prop]] = root[prop];
+        if (!root[props[prop]]) root[props[prop]] = root[prop];
       }
     }
   };
