@@ -30,6 +30,7 @@ import com.google.javascript.jscomp.Compiler;
 import com.google.javascript.jscomp.CompilerOptions;
 import com.google.javascript.jscomp.JSError;
 import com.google.javascript.jscomp.JSSourceFile;
+import com.google.javascript.jscomp.PropertyRenamingPolicy;
 import com.google.javascript.jscomp.Result;
 import com.google.javascript.jscomp.SourceMap;
 
@@ -85,7 +86,7 @@ public class ClosureJsCompiler implements JsCompiler {
     return result;
   }
   
-  protected CompilerOptions getCompilerOptions() {
+  protected CompilerOptions getCompilerOptions(JsUri uri) {
     CompilerOptions options = defaultCompilerOptions();
 
     if (outputCorrelatedJs()) {
@@ -127,7 +128,8 @@ public class ClosureJsCompiler implements JsCompiler {
     JsResponseBuilder builder = new JsResponseBuilder();
     
     // Only run actual compiler if necessary.
-    CompilerOptions options = getCompilerOptions();
+    CompilerOptions options = getCompilerOptions(jsUri);
+    
     if (!jsUri.isDebug() || options.isExternExportsEnabled()) {
       List<JSSourceFile> allExterns = Lists.newArrayList();
       allExterns.add(JSSourceFile.fromCode("externs", externs));
@@ -241,7 +243,7 @@ public class ClosureJsCompiler implements JsCompiler {
     };
     List<JsContent> builder = Lists.newLinkedList(defaultCompiler.getJsContent(jsUri, bundle));
 
-    CompilerOptions options = getCompilerOptions();
+    CompilerOptions options = getCompilerOptions(jsUri);
     if (options.isExternExportsEnabled()) {
       List<String> exports = Lists.newArrayList(bundle.getApis(ApiDirective.Type.JS, true));
       Collections.sort(exports);

@@ -156,7 +156,7 @@ public class ClosureJsCompilerTest extends TestCase {
       }
       
       @Override
-      protected CompilerOptions getCompilerOptions() {
+      protected CompilerOptions getCompilerOptions(JsUri uri) {
         return realOptionsMock;
       }
     };
