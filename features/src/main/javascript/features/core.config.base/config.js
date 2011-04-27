@@ -84,11 +84,11 @@ gadgets.config = function() {
     var scripts = document.scripts || document.getElementsByTagName("script");
     if (!scripts || scripts.length == 0) return null;
     var scriptTag;
-    if (___jsl.u) {
+    if (___jsl['u']) {
       for (var i = 0; !scriptTag && i < scripts.length; ++i) {
         var candidate = scripts[i];
         if (candidate.src &&
-            candidate.src.indexOf(___jsl.u) == 0) {
+            candidate.src.indexOf(___jsl['u']) == 0) {
           // Do indexOf test to allow for fragment info
           scriptTag = candidate;
         }
@@ -140,14 +140,14 @@ gadgets.config = function() {
     }
     var scriptText = getInnerText(loadScript);
     var configAugment = parseConfig(scriptText);
-    if (___jsl.f && ___jsl.f.length == 1) {
+    if (___jsl['f'] && ___jsl['f'].length == 1) {
       // Single-feature load on current request.
       // Augmentation adds to just this feature's config if
       // "short-form" syntax is used ie. skipping top-level feature key.
-      var feature = ___jsl.f[0];
+      var feature = ___jsl['f'][0];
       if (!configAugment[feature]) {
         var newConfig = {};
-        newConfig[___jsl.f[0]] = configAugment;
+        newConfig[___jsl['f'][0]] = configAugment;
         configAugment = newConfig;
       }
     }
