@@ -36,9 +36,10 @@ public class CompilationProcessor implements JsProcessor {
    * TODO: Re-add support for externs here if they're ever used.
    * TODO: Convert JsCompiler to take JsResponseBuilder directly rather than Iterable<JsContent>
    */
-  public boolean process(JsRequest request, JsResponseBuilder builder)
-      throws JsException {
-    Iterable<JsContent> jsContents = builder.build().getAllJsContent();
+  public boolean process(JsRequest request, JsResponseBuilder builder) throws JsException {
+    JsResponse responseSoFar = builder.build();
+    
+    Iterable<JsContent> jsContents = responseSoFar.getAllJsContent();
     for (JsContent jsc : jsContents) {
       FeatureBundle bundle = jsc.getFeatureBundle();
       if (bundle != null) {
@@ -47,8 +48,11 @@ public class CompilationProcessor implements JsProcessor {
     }
 
     JsResponse result = compiler.compile(request.getJsUri(), jsContents,
-        builder.build().getExterns());
+        responseSoFar.getExterns());
+    
     builder.clearJs().appendAllJs(result.getAllJsContent());
+    builder.setStatusCode(result.getStatusCode());
+    builder.addErrors(result.getErrors());
     return true;
   }
 

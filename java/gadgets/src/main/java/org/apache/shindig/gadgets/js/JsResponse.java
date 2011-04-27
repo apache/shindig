@@ -32,6 +32,7 @@ public class JsResponse {
   private final int statusCode;
   private final boolean proxyCacheable;
   private String codeString;
+  private String errorString;
 
   JsResponse(List<JsContent> jsCode, int statusCode, int cacheTtlSecs,
       boolean proxyCacheable, List<String> errors, String externs) {
@@ -100,7 +101,21 @@ public class JsResponse {
   public List<String> getErrors() {
     return errors;
   }
-
+  
+  /**
+   * Returns a string of all error messages associated with this response.
+   */
+  public String toErrorString() {
+    if (errorString == null) {
+      StringBuilder sb = new StringBuilder();
+      for (String error : getErrors()) {
+        sb.append(error);
+      }
+      errorString = sb.toString();
+    }
+    return errorString;
+  }
+  
   /**
    * Returns a string of generated externs.
    */

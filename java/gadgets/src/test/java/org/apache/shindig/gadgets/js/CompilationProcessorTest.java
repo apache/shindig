@@ -86,21 +86,6 @@ public class CompilationProcessorTest {
     assertFalse(outIterator.hasNext());
   }
 
-  @Test(expected = JsException.class)
-  public void compilerExceptionThrows() throws Exception {
-    JsUri jsUri = control.createMock(JsUri.class);
-    JsResponseBuilder builder =
-        new JsResponseBuilder().setCacheTtlSecs(1234).setStatusCode(200)
-          .appendJs("content1:", "source1").appendJs("content2", "source2");
-    JsRequest request = control.createMock(JsRequest.class);
-    expect(request.getJsUri()).andReturn(jsUri);
-    List<String> emptyList = ImmutableList.of();
-    expect(compiler.compile(same(jsUri), eq(builder.build().getAllJsContent()), eq("")))
-        .andThrow(new JsException(400, "foo"));
-    control.replay();
-    processor.process(request, builder);
-  }
-
   private FeatureBundle mockBundle(String... externs) {
     FeatureBundle result = createMock(FeatureBundle.class);
     expect(result.getApis(ApiDirective.Type.JS, false)).andReturn(

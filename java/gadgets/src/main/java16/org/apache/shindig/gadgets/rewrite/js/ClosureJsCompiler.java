@@ -113,8 +113,7 @@ public class ClosureJsCompiler implements JsCompiler {
     return new Compiler(errorManager);
   }
 
-  public JsResponse compile(JsUri jsUri, Iterable<JsContent> content, String externs) 
-      throws JsException {
+  public JsResponse compile(JsUri jsUri, Iterable<JsContent> content, String externs) {
     JsResponse exportResponse = defaultCompiler.compile(jsUri, content, externs);
     content = exportResponse.getAllJsContent();
 
@@ -147,13 +146,12 @@ public class ClosureJsCompiler implements JsCompiler {
       if (actualCompiler.hasErrors()) {
         ImmutableList.Builder<String> errors = ImmutableList.builder();
         for (JSError error : actualCompiler.getErrors()) {
-          errors.add(error.toString());
+          errors.add(error.toString()); 
         }
-        builder.setStatusCode(HttpResponse.SC_NOT_FOUND)
-            .addErrors(errors.build()).build();
-        JsResponse errorResult = builder.build();
-        cache.addElement(cacheKey, errorResult);
-        return errorResult;
+        return cacheAndReturnErrorResult(
+            builder, cacheKey,
+            HttpResponse.SC_NOT_FOUND,
+            errors.build());
       }
 
       String compiled = actualCompiler.toSource();
@@ -161,8 +159,15 @@ public class ClosureJsCompiler implements JsCompiler {
         // Emit code correlated w/ original source.
         // This operation is equivalent in final code to bundled-output,
         // but is less efficient and should perhaps only be used in code profiling.
-        SourceMappings sm = processSourceMap(result, allContent);      
-        builder.appendAllJs(sm.mapCompiled(compiled));
+        SourceMappings sm = processSourceMap(result, allContent);
+        if (sm != null) {
+          builder.appendAllJs(sm.mapCompiled(compiled));
+        } else {
+          return cacheAndReturnErrorResult(
+              builder, cacheKey,
+              HttpResponse.SC_INTERNAL_SERVER_ERROR,
+              Lists.newArrayList("Parse error for source map"));
+        }
       } else {
         builder.appendJs(compiled, "[compiled]");
       }
@@ -176,6 +181,16 @@ public class ClosureJsCompiler implements JsCompiler {
     lastResult = builder.build();
     cache.addElement(cacheKey, lastResult);
     return lastResult;
+  }
+  
+  private JsResponse cacheAndReturnErrorResult(
+      JsResponseBuilder builder, String cacheKey,
+      int statusCode, List<String> messages) {
+    builder.setStatusCode(statusCode);
+    builder.addErrors(messages);
+    JsResponse result = builder.build(); 
+    cache.addElement(cacheKey, result);
+    return result;
   }
   
   // Override this method to return "true" for cases where individual chunks of
@@ -265,15 +280,15 @@ public class ClosureJsCompiler implements JsCompiler {
    * @param allInputs All inputs supplied to the compiler, in JsContent form.
    * @return SourceMappings object correlating compiled with originating input.
    */
-  private SourceMappings processSourceMap(Result result, List<JsContent> allInputs) 
-      throws JsException {
+  private SourceMappings processSourceMap(Result result, List<JsContent> allInputs) {
     StringBuilder sb = new StringBuilder();
     try {
       result.sourceMap.appendTo(sb, "done");
       return SourceMappings.parseV1(sb.toString(), allInputs);
-    } catch (Exception e) {
-      throw new JsException(HttpResponse.SC_INTERNAL_SERVER_ERROR,
-          "Parse error for source map: " + e);
+    } catch (IOException e) {
+      return null;
+    } catch (JSONException e) {
+      return null;
     }
   }
   
