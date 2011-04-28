@@ -28,8 +28,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import java.util.Iterator;
-import java.util.List;
+import com.google.common.collect.Lists;
 
 import org.apache.shindig.gadgets.features.ApiDirective;
 import org.apache.shindig.gadgets.features.FeatureRegistry.FeatureBundle;
@@ -39,8 +38,7 @@ import org.easymock.IMocksControl;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
+import java.util.Iterator;
 
 public class CompilationProcessorTest {
   private IMocksControl control;
