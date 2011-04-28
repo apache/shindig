@@ -38,6 +38,7 @@ import com.google.inject.Inject;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
+import org.apache.shindig.gadgets.parse.HtmlSerialization;
 import org.apache.shindig.gadgets.parse.SocialDataTags;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
@@ -60,6 +61,8 @@ public class CajaHtmlParser extends GadgetHtmlParser {
     // TODO: remove parseDomImpl() altogether; only have subclasses
     // support parseFragmentImpl() with base class cleaning up.
     Document document = fragment.getOwnerDocument();
+    CajaHtmlSerializer serializer = new CajaHtmlSerializer();
+    HtmlSerialization.attach(document, serializer, null);
     Node html = null;
     LinkedList<Node> beforeHtml = Lists.newLinkedList();
     while (fragment.hasChildNodes()) {

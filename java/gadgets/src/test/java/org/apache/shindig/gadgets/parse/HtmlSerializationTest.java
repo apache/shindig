@@ -43,9 +43,7 @@ public class HtmlSerializationTest {
     GadgetHtmlParser caja = new CajaHtmlParser(
             new ParseModule.DOMImplementationProvider().get());
 
-    // TODO: Add caja back when we upgrade to the latest version of caja
-    // http://code.google.com/p/google-caja/issues/detail?id=1115
-    parsers = ImmutableList.of(neko/*, caja*/);
+    parsers = ImmutableList.of(neko, caja);
   }
 
   @Test

@@ -18,16 +18,11 @@
  */
 package org.apache.shindig.gadgets.parse.caja;
 
-import com.google.caja.reporting.MarkupRenderMode;
-import org.apache.shindig.gadgets.parse.HtmlSerialization;
 import org.apache.shindig.gadgets.parse.HtmlSerializer;
 import org.w3c.dom.Document;
 
 import com.google.caja.parser.html.Nodes;
-import com.google.caja.render.Concatenator;
-import com.google.caja.reporting.RenderContext;
-
-import java.io.StringWriter;
+import com.google.caja.reporting.MarkupRenderMode;
 
 /**
  * HtmlSerializer using Caja's Nodes.render(...) method under the hood.
@@ -36,9 +31,10 @@ import java.io.StringWriter;
  */
 public class CajaHtmlSerializer implements HtmlSerializer {
   public String serialize(Document doc) {
-    StringWriter sw = HtmlSerialization.createWriter(doc);
-    return Nodes.render(doc,
-            new RenderContext(new Concatenator(sw, null)).asXml() ? MarkupRenderMode.XML : MarkupRenderMode.HTML
-    );
+    if (doc.getDoctype() != null) {
+      return Nodes.render(doc.getDoctype(), doc, MarkupRenderMode.HTML);
+    } else {
+      return Nodes.render(doc, MarkupRenderMode.HTML);
+    }
   }
 }
