@@ -122,6 +122,7 @@ if (!window['gadgets']['rpc']) { // make lib resilient to double-inclusion
     var params = {};
     var receiverTx = {};
     var earlyRpcQueue = {};
+    var passReferrer = false;
 
     // isGadget =~ isChild for the purposes of rpc (used only in setup).
     var isChild = (window.top !== window.self);
@@ -319,7 +320,7 @@ if (!window['gadgets']['rpc']) { // make lib resilient to double-inclusion
         if (opt_sender) {
           var origin = getOrigin(opt_sender);
           rpc[RPC_KEY_ORIGIN] = opt_sender;
-          var referrer = document.referrer;
+          var referrer = rpc['r'] || document.referrer;
           if (!referrer || getOrigin(referrer) != origin) {
             // Transports send along as much info as they can about the sender
             // of the message; 'origin' is the origin component alone, while
@@ -479,7 +480,7 @@ if (!window['gadgets']['rpc']) { // make lib resilient to double-inclusion
       var callback = callbacks[callbackId];
       if (callback) {
         delete callbacks[callbackId];
-        callback(result);
+        callback.call(this, result);
       }
     };
 
@@ -651,6 +652,7 @@ if (!window['gadgets']['rpc']) { // make lib resilient to double-inclusion
           transport.init(process, transportReady);
         }
         setAuthToken('..', rpctoken, opt_forcesecure || params['forcesecure']);
+        passReferrer = String(cfg['passReferrer']) === 'true';
       }
       gadgets.config.register('rpc', null, init);
     }
@@ -868,6 +870,10 @@ if (!window['gadgets']['rpc']) { // make lib resilient to double-inclusion
           't': authToken[targetId],
           'l': useLegacyProtocol[targetId]
         };
+
+        if (passReferrer) {
+          rpc['r'] = window.location.href;
+        }
 
         if (targetId !== '..' &&
             parseSiblingId(targetId) == null &&  // sibling never in the document
