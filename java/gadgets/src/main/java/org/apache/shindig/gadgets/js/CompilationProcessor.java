@@ -37,9 +37,7 @@ public class CompilationProcessor implements JsProcessor {
    * TODO: Convert JsCompiler to take JsResponseBuilder directly rather than Iterable<JsContent>
    */
   public boolean process(JsRequest request, JsResponseBuilder builder) throws JsException {
-    JsResponse responseSoFar = builder.build();
-    
-    Iterable<JsContent> jsContents = responseSoFar.getAllJsContent();
+    Iterable<JsContent> jsContents = builder.build().getAllJsContent();
     for (JsContent jsc : jsContents) {
       FeatureBundle bundle = jsc.getFeatureBundle();
       if (bundle != null) {
@@ -48,8 +46,8 @@ public class CompilationProcessor implements JsProcessor {
     }
 
     JsResponse result = compiler.compile(request.getJsUri(), jsContents,
-        responseSoFar.getExterns());
-    
+        builder.build().getExterns());
+
     builder.clearJs().appendAllJs(result.getAllJsContent());
     builder.setStatusCode(result.getStatusCode());
     builder.addErrors(result.getErrors());
