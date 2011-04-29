@@ -39,6 +39,7 @@ import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
 import org.apache.shindig.gadgets.parse.HtmlSerialization;
+import org.apache.shindig.gadgets.parse.HtmlSerializer;
 import org.apache.shindig.gadgets.parse.SocialDataTags;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
@@ -54,6 +55,11 @@ public class CajaHtmlParser extends GadgetHtmlParser {
     super(documentFactory);
   }
   
+  public CajaHtmlParser(DOMImplementation documentFactory,
+      HtmlSerializer serializer) {
+    super(documentFactory, serializer);
+  }
+
   @Override
   protected Document parseDomImpl(String source) throws GadgetException {
     DocumentFragment fragment = parseFragmentImpl(source);

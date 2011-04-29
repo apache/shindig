@@ -62,6 +62,17 @@ public abstract class GadgetHtmlParser {
   protected GadgetHtmlParser(DOMImplementation documentFactory) {
     this.documentFactory = documentFactory;
   }
+  
+  protected GadgetHtmlParser(DOMImplementation documentFactory,
+      final HtmlSerializer serializer) {
+    this.documentFactory = documentFactory;
+    this.serializerProvider = new Provider<HtmlSerializer>() {
+      @Override
+      public HtmlSerializer get() {
+        return serializer;
+      }
+    };
+  }
 
   @Inject
   public void setCacheProvider(CacheProvider cacheProvider) {
