@@ -30,6 +30,7 @@ import org.apache.shindig.protocol.conversion.BeanJsonConverter;
 import org.apache.shindig.protocol.conversion.BeanXStreamConverter;
 import org.apache.shindig.protocol.conversion.xstream.XStreamConfiguration;
 import org.apache.shindig.social.core.oauth.AuthenticationHandlerProvider;
+import org.apache.shindig.social.core.oauth.OAuthValidatorProvider;
 import org.apache.shindig.social.core.util.BeanXStreamAtomConverter;
 import org.apache.shindig.social.core.util.xstream.XStream081Configuration;
 import org.apache.shindig.social.opensocial.service.ActivityHandler;
@@ -40,11 +41,14 @@ import org.apache.shindig.social.opensocial.service.MediaItemHandler;
 import org.apache.shindig.social.opensocial.service.MessageHandler;
 import org.apache.shindig.social.opensocial.service.PersonHandler;
 
+import com.google.inject.Singleton;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
+
+import net.oauth.OAuthValidator;
 
 /**
  * Provides social api component injection. Implementor may want to replace this module if they need
@@ -63,6 +67,7 @@ public class SocialApiGuiceModule extends AbstractModule {
     bind(Boolean.class)
         .annotatedWith(Names.named(AnonymousAuthenticationHandler.ALLOW_UNAUTHENTICATED))
         .toInstance(Boolean.TRUE);
+
     bind(XStreamConfiguration.class).to(XStream081Configuration.class);
     bind(BeanConverter.class).annotatedWith(Names.named("shindig.bean.converter.xml")).to(
         BeanXStreamConverter.class);
@@ -79,6 +84,8 @@ public class SocialApiGuiceModule extends AbstractModule {
     for (Class handler : getHandlers()) {
       handlerBinder.addBinding().toInstance(handler);
     }
+
+    bind(OAuthValidator.class).toProvider(OAuthValidatorProvider.class).in(Singleton.class);
   }
 
   /**

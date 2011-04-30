@@ -33,6 +33,9 @@ import org.apache.shindig.common.testing.FakeHttpServletRequest;
 import org.apache.shindig.common.util.CharsetUtil;
 import org.apache.shindig.social.opensocial.oauth.OAuthDataStore;
 import org.apache.shindig.social.opensocial.oauth.OAuthEntry;
+
+import net.oauth.OAuthValidator;
+import net.oauth.SimpleOAuthValidator;
 import org.easymock.EasyMock;
 import org.junit.Before;
 import org.junit.Test;
@@ -48,6 +51,7 @@ import javax.servlet.http.HttpServletRequest;
 public class OAuthAuthenticationHanderTest extends EasyMockTestCase {
 
   OAuthDataStore mockStore = mock(OAuthDataStore.class);
+  OAuthValidator validator = new SimpleOAuthValidator();
 
   OAuthAuthenticationHandler reqHandler;
 
@@ -62,7 +66,7 @@ public class OAuthAuthenticationHanderTest extends EasyMockTestCase {
 
   @Before
   public void setUp() throws Exception {
-    reqHandler = new OAuthAuthenticationHandler(mockStore);
+    reqHandler = new OAuthAuthenticationHandler(mockStore, validator);
     formEncodedPost = new FakeOAuthRequest("POST", TEST_URL, "a=b&c=d",
                                            OAuth.FORM_ENCODED);
     nonFormEncodedPost = new FakeOAuthRequest("POST", TEST_URL, "BODY",

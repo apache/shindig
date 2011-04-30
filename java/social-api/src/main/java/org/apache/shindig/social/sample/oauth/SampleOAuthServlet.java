@@ -42,7 +42,6 @@ import net.oauth.OAuthException;
 import net.oauth.OAuthMessage;
 import net.oauth.OAuthProblemException;
 import net.oauth.OAuthValidator;
-import net.oauth.SimpleOAuthValidator;
 import net.oauth.OAuth.Parameter;
 import net.oauth.server.OAuthServlet;
 
@@ -53,9 +52,14 @@ import net.oauth.server.OAuthServlet;
  * and use a non-in memory data store.
  */
 public class SampleOAuthServlet extends InjectedServlet {
-  public static final OAuthValidator VALIDATOR = new SimpleOAuthValidator();
+  private OAuthValidator validator;
   private OAuthDataStore dataStore;
   private String oauthAuthorizeAction;
+
+  @Inject
+  public void setValidator(OAuthValidator validator) {
+    this.validator = validator;
+  }
 
   @Inject
   public void setDataStore(OAuthDataStore dataStore) {
@@ -114,7 +118,7 @@ public class SampleOAuthServlet extends InjectedServlet {
       throw new OAuthProblemException(OAuth.Problems.CONSUMER_KEY_UNKNOWN);
 
     OAuthAccessor accessor = new OAuthAccessor(consumer);
-    VALIDATOR.validateMessage(requestMessage, accessor);
+    validator.validateMessage(requestMessage, accessor);
 
     String callback = requestMessage.getParameter(OAuth.OAUTH_CALLBACK);
 
@@ -283,16 +287,14 @@ public class SampleOAuthServlet extends InjectedServlet {
       throw new OAuthProblemException(OAuth.Problems.CONSUMER_KEY_REFUSED);
 
     OAuthConsumer consumer = dataStore.getConsumer(consumerKey);
-
     if (consumer == null)
       throw new OAuthProblemException(OAuth.Problems.CONSUMER_KEY_UNKNOWN);
     
     OAuthAccessor accessor = new OAuthAccessor(consumer);
-
     accessor.requestToken = entry.getToken();
     accessor.tokenSecret = entry.getTokenSecret();
 
-    VALIDATOR.validateMessage(requestMessage, accessor);
+    validator.validateMessage(requestMessage, accessor);
 
     return entry;
   }

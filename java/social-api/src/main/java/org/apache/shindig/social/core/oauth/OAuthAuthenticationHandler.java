@@ -26,7 +26,6 @@ import net.oauth.OAuthConsumer;
 import net.oauth.OAuthException;
 import net.oauth.OAuthMessage;
 import net.oauth.OAuthValidator;
-import net.oauth.SimpleOAuthValidator;
 import net.oauth.OAuthProblemException;
 import net.oauth.server.OAuthServlet;
 
@@ -56,10 +55,12 @@ public class OAuthAuthenticationHandler implements AuthenticationHandler {
   public static final String REQUESTOR_ID_PARAM = "xoauth_requestor_id";
 
   private final OAuthDataStore store;
+  private final OAuthValidator validator;
 
   @Inject
-  public OAuthAuthenticationHandler(OAuthDataStore store) {
+  public OAuthAuthenticationHandler(OAuthDataStore store, OAuthValidator validator) {
     this.store = store;
+    this.validator = validator;
   }
 
   public String getName() {
@@ -101,7 +102,6 @@ public class OAuthAuthenticationHandler implements AuthenticationHandler {
     }
 
     try {
-      OAuthValidator validator = new SimpleOAuthValidator();
       validator.validateMessage(message, accessor);
     } catch (OAuthProblemException e) {
       throw e;
