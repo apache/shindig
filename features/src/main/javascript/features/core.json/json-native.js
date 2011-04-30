@@ -43,6 +43,12 @@ if (window.JSON && window.JSON.parse && window.JSON.stringify) {
   // JSON says to throw on parse errors and to support filtering functions. OS does not.
   gadgets.json = (function() {
     var endsWith___ = /___$/;
+
+    function getOrigValue(key, value) {
+      var origValue = this[key];
+      return origValue;
+    }
+
     return {
       /* documented below */
       parse: function(str) {
@@ -54,8 +60,14 @@ if (window.JSON && window.JSON.parse && window.JSON.stringify) {
       },
       /* documented below */
       stringify: function(obj) {
+        var orig = window.JSON.stringify;
+        function patchedStringify(val) {
+          return orig.call(this, val, getOrigValue);
+        }
+        var stringifyFn = (Array.prototype.toJSON && orig([{x:1}]) === "\"[{\\\"x\\\": 1}]\"") ?
+            patchedStringify : orig;
         try {
-          return window.JSON.stringify(obj, function(k,v) {
+          return stringifyFn(obj, function(k,v) {
             return !endsWith___.test(k) ? v : null;
           });
         } catch (e) {
