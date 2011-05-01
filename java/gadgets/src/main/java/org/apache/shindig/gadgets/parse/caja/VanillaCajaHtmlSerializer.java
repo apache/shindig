@@ -38,8 +38,15 @@ public class VanillaCajaHtmlSerializer implements HtmlSerializer {
       if (doc.getDoctype() != null) {
         HtmlSerialization.outputDocType(doc.getDoctype(), sw);
       }
-      sw.append(Nodes.render(doc,
-              new RenderContext(new Concatenator(sw, null)).asXml() ? MarkupRenderMode.XML : MarkupRenderMode.HTML));
+      RenderContext renderContext =
+          new RenderContext(new Concatenator(sw, null))
+              // More compact but needs charset set correctly.
+              .withAsciiOnly(false)
+              .withMarkupRenderMode(MarkupRenderMode.HTML);
+
+      // Use render unsafe in order to retain comments in the serialized HTML.
+      // TODO: This function is deprecated. Use a non-deprecated function.
+      Nodes.renderUnsafe(doc, renderContext);
       return sw.toString();
     } catch (IOException e) {
       return null;
