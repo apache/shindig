@@ -67,7 +67,6 @@ public abstract class GadgetHtmlParser {
       final HtmlSerializer serializer) {
     this.documentFactory = documentFactory;
     this.serializerProvider = new Provider<HtmlSerializer>() {
-      @Override
       public HtmlSerializer get() {
         return serializer;
       }
