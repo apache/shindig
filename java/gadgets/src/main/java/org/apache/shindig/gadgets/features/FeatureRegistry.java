@@ -19,6 +19,7 @@ package org.apache.shindig.gadgets.features;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
@@ -35,12 +36,10 @@ import org.apache.shindig.common.cache.CacheProvider;
 import org.apache.shindig.common.logging.i18n.MessageKeys;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
-import org.apache.shindig.common.util.ResourceLoader;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.RenderingContext;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
@@ -76,6 +75,8 @@ public class FeatureRegistry {
   private final FeatureParser parser;
   private final FeatureResourceLoader resourceLoader;
   private final ImmutableMap<String, FeatureNode> featureMap;
+  private final FeatureFileSystem fileSystem;
+  private final String repository;
 
 
 /**
@@ -90,18 +91,32 @@ public class FeatureRegistry {
   @Inject
   public FeatureRegistry(FeatureResourceLoader resourceLoader,
                          CacheProvider cacheProvider,
-                         @Named("org.apache.shindig.features") List<String> features)
-      throws GadgetException {
+                         @Named("org.apache.shindig.features") List<String> features,
+                         FeatureFileSystem fileSystem) throws GadgetException {
+    this(resourceLoader, cacheProvider, features, fileSystem, null);
+  }
+
+  public FeatureRegistry(FeatureResourceLoader resourceLoader,
+      CacheProvider cacheProvider,
+      @Named("org.apache.shindig.features") List<String> features,
+      FeatureFileSystem fileSystem, String repository) throws GadgetException {
+
     this.parser = new FeatureParser();
     this.resourceLoader = resourceLoader;
+    this.fileSystem = fileSystem;
+    this.repository = repository;
 
-    featureMap = register(features);
+    this.featureMap = register(features);
 
     // Connect the dependency graph made up of all features and validate there
     // are no circular deps.
     connectDependencyGraph();
 
     this.cache = cacheProvider.createCache(CACHE_NAME);
+  }
+
+  public String getRepository() {
+    return repository;
   }
 
   /**
@@ -166,7 +181,7 @@ public class FeatureRegistry {
             LOG.logp(Level.INFO, classname, "register",
                 MessageKeys.LOAD_FILES_FROM, new Object[] {location});
           }
-          loadFile(new File(uriLoc.getPath()), featureMapBuilder);
+          loadFile(fileSystem.getFile(uriLoc.getPath()), featureMapBuilder);
         }
       }
       return ImmutableMap.copyOf(featureMapBuilder);
@@ -191,7 +206,6 @@ public class FeatureRegistry {
    * @param needed List of all needed features.
    * @param unsupported If non-null, a List populated with unknown features from the needed list.
    * @return LookupResult object that may be used to render the needed features.
-   * @throws GadgetException
    */
   public LookupResult getFeatureResources(
       GadgetContext ctx, Collection<String> needed, List<String> unsupported, boolean transitive) {
@@ -417,21 +431,21 @@ public class FeatureRegistry {
     }
   }
 
-  private void loadFile(File file, Map<String,FeatureNode> featureMapBuilder)
+  private void loadFile(FeatureFile file, Map<String,FeatureNode> featureMapBuilder)
       throws GadgetException, IOException {
     if (!file.exists() || !file.canRead()) {
       throw new GadgetException(GadgetException.Code.INVALID_CONFIG,
           "Feature file '" + file.getPath() + "' doesn't exist or can't be read");
     }
 
-    File[] toLoad = file.isDirectory() ? file.listFiles() : new File[] { file };
+    FeatureFile[] toLoad = file.isDirectory() ? file.listFiles() : new FeatureFile[] { file };
 
-    for (File featureFile : toLoad) {
+    for (FeatureFile featureFile : toLoad) {
       if (featureFile.isDirectory()) {
         // Traverse into subdirectories.
         loadFile(featureFile, featureMapBuilder);
       } else if (featureFile.getName().toLowerCase(Locale.ENGLISH).endsWith(".xml")) {
-        String content = ResourceLoader.getContent(featureFile);
+        String content = featureFile.getContent();
         Uri parent = Uri.fromJavaUri(featureFile.toURI());
         loadFeature(parent, content, featureMapBuilder);
       } else {
@@ -466,7 +480,7 @@ public class FeatureRegistry {
       List<FeatureResource> resources = Lists.newArrayList();
       for (FeatureParser.ParsedFeature.Resource parsedResource : parsedBundle.getResources()) {
         if (parsedResource.getSource() == null) {
-          
+
           resources.add(new InlineFeatureResource(parsed.getName() + ":inline.js",
               parsedResource.getContent(), parsedResource.getAttribs()));
         } else {
@@ -490,6 +504,7 @@ public class FeatureRegistry {
         .append("|").append(ctx.getRenderingContext())
         .append("|").append(ctx.getContainer())
         .append("|").append(unsupported != null)
+        .append("|").append(Strings.nullToEmpty(repository))
         .toString();
   }
 
@@ -519,7 +534,7 @@ public class FeatureRegistry {
     public String getDebugContent() {
       return content;
     }
-    
+
     public String getName() {
       return name;
     }
@@ -611,7 +626,6 @@ public class FeatureRegistry {
      * If there's >= 1 bundle matching a non-ALL context, return it.
      * Otherwise, return any ALL bundles.
      * @param rctx
-     * @return
      */
     public Iterable<FeatureBundle> getBundles(RenderingContext rctx) {
       String tagMatch = null;

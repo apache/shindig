@@ -291,14 +291,14 @@ public class GadgetsHandlerServiceTest extends EasyMockTestCase {
     List<String> features = ImmutableList.of("rpc");
     Uri resUri = Uri.parse("server.com/gadgets/js/rpc");
     GadgetsHandlerApi.JsRequest request =
-        createJsRequest(null, CONTAINER, fields, features);
+        createJsRequest(null, CONTAINER, fields, features, null);
     Capture<JsUri> uriCapture = new Capture<JsUri>();
     expect(jsUriManager.makeExternJsUri(capture(uriCapture))).andReturn(resUri);
     replay();
 
     GadgetsHandlerApi.JsResponse response = gadgetHandler.getJs(request);
     JsUri expectedUri = new JsUri(null, false, false, CONTAINER, null,
-        features, null, null, false, false, RenderingContext.GADGET, null);
+        features, null, null, false, false, RenderingContext.GADGET, null, null);
     assertEquals(expectedUri, uriCapture.getValue());
     assertEquals(resUri, response.getJsUrl());
     assertNull(response.getJsContent());
@@ -311,7 +311,7 @@ public class GadgetsHandlerServiceTest extends EasyMockTestCase {
   public void testJsNoContainer() throws Exception {
     List<String> fields = ImmutableList.of("*");
     GadgetsHandlerApi.JsRequest request =
-        createJsRequest(null, null, fields, ImmutableList.of("rpc"));
+        createJsRequest(null, null, fields, ImmutableList.of("rpc"), null);
     gadgetHandler.getJs(request);
   }
 
@@ -323,18 +323,20 @@ public class GadgetsHandlerServiceTest extends EasyMockTestCase {
     Capture<JsUri> uriCapture = new Capture<JsUri>();
     String jsContent = "var a;";
     String onload = "do this";
+    String repository = "v01";
     expect(jsUriManager.makeExternJsUri(capture(uriCapture))).andReturn(resUri);
     expect(jsPipeline.execute(EasyMock.isA(JsRequest.class)))
-        .andReturn(new JsResponseBuilder().appendJs(jsContent, "js").setProxyCacheable(true).build());
+        .andReturn(new JsResponseBuilder().appendJs(jsContent, "js")
+            .setProxyCacheable(true).build());
     GadgetsHandlerApi.JsRequest request =
-        createJsRequest(FakeProcessor.SPEC_URL.toString(), CONTAINER, fields, features);
+        createJsRequest(FakeProcessor.SPEC_URL.toString(), CONTAINER, fields, features, repository);
     expect(request.getOnload()).andStubReturn(onload);
     expect(request.getContext()).andStubReturn(GadgetsHandlerApi.RenderingContext.CONTAINER);
     replay();
 
     GadgetsHandlerApi.JsResponse response = gadgetHandler.getJs(request);
     JsUri expectedUri = new JsUri(null, false, false, CONTAINER, FakeProcessor.SPEC_URL.toString(),
-        features, null, onload, false, false, RenderingContext.CONTAINER, null);
+        features, null, onload, false, false, RenderingContext.CONTAINER, null, repository);
     assertEquals(expectedUri, uriCapture.getValue());
     assertNull(response.getJsUrl());
     assertEquals(jsContent, response.getJsContent());
@@ -353,7 +355,7 @@ public class GadgetsHandlerServiceTest extends EasyMockTestCase {
     expect(jsPipeline.execute(EasyMock.isA(JsRequest.class)))
         .andThrow(new JsException(404, "error"));
     GadgetsHandlerApi.JsRequest request =
-        createJsRequest(FakeProcessor.SPEC_URL.toString(), CONTAINER, fields, features);
+        createJsRequest(FakeProcessor.SPEC_URL.toString(), CONTAINER, fields, features, null);
     expect(request.getOnload()).andStubReturn("do this");
     expect(request.getContext()).andStubReturn(GadgetsHandlerApi.RenderingContext.CONTAINER);
     replay();
@@ -595,12 +597,13 @@ public class GadgetsHandlerServiceTest extends EasyMockTestCase {
   }
 
   private GadgetsHandlerApi.JsRequest createJsRequest(String gadget, String container,
-      List<String> fields, List<String> features) {
+      List<String> fields, List<String> features, String repository) {
     GadgetsHandlerApi.JsRequest request = mock(GadgetsHandlerApi.JsRequest.class);
     EasyMock.expect(request.getFields()).andStubReturn(fields);
     EasyMock.expect(request.getContainer()).andStubReturn(container);
     EasyMock.expect(request.getGadget()).andStubReturn(gadget);
     EasyMock.expect(request.getFeatures()).andStubReturn(features);
+    EasyMock.expect(request.getRepository()).andStubReturn(repository);
     return request;
   }
 

@@ -496,7 +496,8 @@ public class GadgetsHandlerService {
 
     return new JsUri(request.getRefresh(), request.getDebug(), request.getIgnoreCache(),
         request.getContainer(), request.getGadget(), request.getFeatures(),
-        request.getLoadedFeatures(), request.getOnload(), false, false, context, request.getUrl());
+        request.getLoadedFeatures(), request.getOnload(), false, false, context, request.getUrl(),
+        request.getRepository());
   }
 
   @VisibleForTesting

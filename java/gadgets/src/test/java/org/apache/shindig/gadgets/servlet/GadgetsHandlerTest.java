@@ -571,7 +571,7 @@ public class GadgetsHandlerTest extends EasyMockTestCase {
     JSONObject results = new JSONObject(converter.convertToString(responseObj));
     assertEquals(jsUri.toString(), results.getString("jsUrl"));
     JsUri expectedUri = new JsUri(null, false, false, CONTAINER, GADGET1_URL,
-        features, null, null, false, false, RenderingContext.GADGET, null);
+        features, null, null, false, false, RenderingContext.GADGET, null, null);
     assertEquals(expectedUri, captureUri.getValue());
     assertFalse(results.has("error"));
     assertFalse(results.has("jsContent"));
@@ -579,11 +579,14 @@ public class GadgetsHandlerTest extends EasyMockTestCase {
   }
 
   private JSONObject makeComplexJsRequest(List<String> features, List<String> loadedFeatures,
-      String onload) throws JSONException {
+      String onload, String repository) throws JSONException {
     JSONObject params = new JSONObject().put("gadget", GADGET1_URL)
         .put("container", CONTAINER).put("features", features)
         .put("loadedFeatures", loadedFeatures).put("fields", "*").put("refresh", "123")
         .put("debug", "1").put("nocache", "1").put("onload", onload).put("c", "1");
+    if (repository != null) {
+        params.put("r", repository);
+    }
     JSONObject request =
         new JSONObject().put("method", "gadgets.js").put("id", "req1").put("params", params);
     return request;
@@ -596,8 +599,9 @@ public class GadgetsHandlerTest extends EasyMockTestCase {
     List<String> loadedFeatures = ImmutableList.of("rpc");
     Uri jsUri = Uri.parse("http://shindig.com/gadgets/js/rpc:io");
     String onload = "do \"this\";";
+    String repository = "v01";
 
-    JSONObject request = makeComplexJsRequest(features, loadedFeatures, onload);
+    JSONObject request = makeComplexJsRequest(features, loadedFeatures, onload, repository);
 
     Capture<JsUri> captureUri = new Capture<JsUri>();
     EasyMock.expect(jsUriManager.makeExternJsUri(EasyMock.capture(captureUri)))
@@ -612,7 +616,8 @@ public class GadgetsHandlerTest extends EasyMockTestCase {
     JSONObject results = new JSONObject(converter.convertToString(responseObj));
     assertEquals(jsUri.toString(), results.getString("jsUrl"));
     JsUri expectedUri = new JsUri(123, true, true, CONTAINER, GADGET1_URL,
-        features, loadedFeatures, onload, false, false, RenderingContext.CONTAINER, null);
+        features, loadedFeatures, onload, false, false, RenderingContext.CONTAINER, null,
+        repository);
     assertEquals(expectedUri, captureUri.getValue());
     assertFalse(results.has("error"));
     assertEquals(jsContent, results.getString("jsContent"));
@@ -627,7 +632,7 @@ public class GadgetsHandlerTest extends EasyMockTestCase {
     Uri jsUri = Uri.parse("http://shindig.com/gadgets/js/rpc:io");
     String onload = "do \"this\";";
 
-    JSONObject request = makeComplexJsRequest(features, loadedFeatures, onload);
+    JSONObject request = makeComplexJsRequest(features, loadedFeatures, onload, null);
 
     Capture<JsUri> captureUri = new Capture<JsUri>();
     EasyMock.expect(jsUriManager.makeExternJsUri(EasyMock.capture(captureUri)))

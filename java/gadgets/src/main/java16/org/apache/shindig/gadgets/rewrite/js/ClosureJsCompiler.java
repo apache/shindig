@@ -180,9 +180,10 @@ public class ClosureJsCompiler implements JsCompiler {
       builder.appendAllJs(content);
     }
 
-    lastResult = builder.build();
-    cache.addElement(cacheKey, lastResult);
-    return lastResult;
+    JsResponse result = builder.build();
+    cache.addElement(cacheKey, result);
+    lastResult = result;
+    return result;
   }
   
   private JsResponse cacheAndReturnErrorResult(

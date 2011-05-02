@@ -265,6 +265,7 @@ public class GadgetsHandlerApi {
     public List<String> getLoadedFeatures();
     public String getOnload();
     public RenderingContext getContext();
+    public String getRepository();
   }
 
   public enum RenderingContext {

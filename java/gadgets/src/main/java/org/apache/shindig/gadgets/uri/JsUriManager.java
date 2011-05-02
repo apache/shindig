@@ -60,6 +60,7 @@ public interface JsUriManager {
     private JsCompileMode compileMode;
     private boolean jsload;
     private boolean nohint;
+    private String repository;
 
     public JsUri(UriStatus status, Uri origUri, Collection<String> libs, Collection<String> have) {
       super(status, origUri);
@@ -71,12 +72,14 @@ public interface JsUriManager {
         this.jsload = "1".equals(origUri.getQueryParameter(Param.JSLOAD.getKey()));
         this.onload = origUri.getQueryParameter(Param.ONLOAD.getKey());
         this.nohint = "1".equals(origUri.getQueryParameter(Param.NO_HINT.getKey()));
+        this.repository = origUri.getQueryParameter(Param.REPOSITORY_ID.getKey());
       } else {
         this.context = RenderingContext.getDefault();
         this.compileMode = JsCompileMode.getDefault();
         this.jsload = false;
         this.onload = null;
         this.nohint = false;
+        this.repository = null;
       }
       this.libs = nonNullLibs(libs);
       this.loadedLibs = nonNullLibs(have);
@@ -88,7 +91,7 @@ public interface JsUriManager {
     }
 
     public JsUri(UriStatus status, Collection<String> libs, RenderingContext context,
-                 String onload, boolean jsload, boolean nohint) {
+        String onload, boolean jsload, boolean nohint, String repository) {
       super(status, null);
       this.compileMode = JsCompileMode.getDefault();
       this.onload = onload;
@@ -98,6 +101,7 @@ public interface JsUriManager {
       this.libs = nonNullLibs(libs);
       this.loadedLibs = EMPTY_COLL;
       this.origUri = null;
+      this.repository = repository;
     }
 
     public JsUri(Gadget gadget, Collection<String> libs) {
@@ -106,7 +110,7 @@ public interface JsUriManager {
       this.onload = null;
       this.jsload = false;
       this.nohint = false;
-      this.context = RenderingContext.getDefault();;
+      this.context = RenderingContext.getDefault();
       this.libs = nonNullLibs(libs);
       this.loadedLibs = EMPTY_COLL;
       this.origUri = null;
@@ -114,7 +118,8 @@ public interface JsUriManager {
     }
 
     public JsUri(Integer refresh, boolean debug, boolean noCache, String container, String gadget,
-        Collection<String> libs, Collection<String> loadedLibs, String onload, boolean jsload, boolean nohint, RenderingContext context, Uri origUri) {
+        Collection<String> libs, Collection<String> loadedLibs, String onload, boolean jsload,
+        boolean nohint, RenderingContext context, Uri origUri, String repository) {
       super(null, refresh, debug, noCache, container, gadget);
       this.compileMode = JsCompileMode.getDefault();
       this.onload = onload;
@@ -124,6 +129,7 @@ public interface JsUriManager {
       this.libs = nonNullLibs(libs);
       this.loadedLibs = nonNullLibs(loadedLibs);
       this.origUri = origUri;
+      this.repository = repository;
     }
 
     public JsUri(JsUri origJsUri) {
@@ -140,6 +146,7 @@ public interface JsUriManager {
       this.compileMode = origJsUri.getCompileMode();
       this.context = origJsUri.getContext();
       this.origUri = origJsUri.getOrigUri();
+      this.repository = origJsUri.getRepository();
     }
 
     public Collection<String> getLibs() {
@@ -190,6 +197,14 @@ public interface JsUriManager {
       return origUri;
     }
 
+    public void setRepository(String repository) {
+      this.repository = repository;
+    }
+
+    public String getRepository() {
+      return repository;
+    }
+
     @Override
     public boolean equals(Object obj) {
       if (obj == this) {
@@ -207,13 +222,15 @@ public interface JsUriManager {
           && Objects.equal(this.nohint, objUri.nohint)
           && Objects.equal(this.compileMode, objUri.compileMode)
           && Objects.equal(this.context, objUri.context)
-          && Objects.equal(this.origUri, objUri.origUri));
+          && Objects.equal(this.origUri, objUri.origUri)
+          && Objects.equal(this.repository, objUri.repository));
     }
 
     @Override
     public int hashCode() {
       return Objects.hashCode(this.libs, this.loadedLibs, this.onload, this.jsload,
-                              this.nohint, this.context, this.origUri);
+                              this.nohint, this.context, this.origUri,
+                              this.compileMode, this.repository);
     }
   }
 

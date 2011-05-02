@@ -88,7 +88,7 @@ public class DefaultJsUriManagerTest {
     TestDefaultJsUriManager manager = makeManager(config, null);
     List<String> extern = Lists.newArrayList("feature");
     JsUri ctx = mockGadgetContext(false, false, extern, null, false,
-        ImmutableMap.of("test", "1"), null);
+        ImmutableMap.of("test", "1"), null, "rep");
     Uri jsUri = manager.makeExternJsUri(ctx);
     assertFalse(manager.hadError());
     assertEquals("http", jsUri.getScheme());
@@ -96,6 +96,7 @@ public class DefaultJsUriManagerTest {
     assertEquals("/gadgets/js/" + addJsLibs(extern) + JS_SUFFIX, jsUri.getPath());
     assertEquals(CONTAINER, jsUri.getQueryParameter(Param.CONTAINER.getKey()));
     assertEquals("1", jsUri.getQueryParameter("test"));
+    assertEquals("rep", jsUri.getQueryParameter(Param.REPOSITORY_ID.getKey()));
   }
 
   @Test
@@ -113,6 +114,7 @@ public class DefaultJsUriManagerTest {
     assertEquals("0", jsUri.getQueryParameter(Param.NO_CACHE.getKey()));
     assertEquals("0", jsUri.getQueryParameter(Param.DEBUG.getKey()));
     assertEquals("0", jsUri.getQueryParameter(Param.CONTAINER_MODE.getKey()));
+    assertNull(jsUri.getQueryParameters(Param.REPOSITORY_ID.getKey()));
   }
 
   @Test
@@ -164,7 +166,7 @@ public class DefaultJsUriManagerTest {
     TestDefaultJsUriManager manager = makeManager(config, null);
     List<String> extern = Lists.newArrayList("feature", "another");
     JsUri ctx = mockGadgetContext(false, false, extern, null, true, null,
-        JsCompileMode.CONCAT_COMPILE_EXPORT_ALL);
+        JsCompileMode.CONCAT_COMPILE_EXPORT_ALL, null);
     Uri jsUri = manager.makeExternJsUri(ctx);
     assertFalse(manager.hadError());
     assertEquals("http", jsUri.getScheme());
@@ -393,18 +395,18 @@ public class DefaultJsUriManagerTest {
 
   private JsUri mockGadgetContext(boolean nocache, boolean debug, List<String> extern) {
     return mockGadgetContext(nocache, debug, extern, ImmutableList.<String>of(), false,
-    null, null);
+    null, null, null);
   }
 
   private JsUri mockGadgetContext(
       boolean nocache, boolean debug, List<String> extern, List<String> loaded) {
-    return mockGadgetContext(nocache, debug, extern, loaded, false, null, null);
+    return mockGadgetContext(nocache, debug, extern, loaded, false, null, null, null);
   }
 
   private JsUri mockGadgetContext(boolean nocache, boolean debug,
       List<String> extern, List<String> loaded,
       boolean isContainer, Map<String, String> params,
-      JsCompileMode compileMode) {
+      JsCompileMode compileMode, String repository) {
     JsUri context = createMock(JsUri.class);
     expect(context.getContainer()).andStubReturn(CONTAINER);
     expect(context.isNoCache()).andStubReturn(nocache);
@@ -422,6 +424,7 @@ public class DefaultJsUriManagerTest {
     expect(context.getOrigUri()).andStubReturn(null);
     expect(context.getCompileMode()).andStubReturn(compileMode);
     expect(context.cajoleContent()).andStubReturn(false);
+    expect(context.getRepository()).andStubReturn(repository);
     replay(context);
     return context;
   }

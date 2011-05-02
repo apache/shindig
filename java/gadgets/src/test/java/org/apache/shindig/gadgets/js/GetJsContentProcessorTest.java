@@ -27,6 +27,7 @@ import static org.junit.Assert.*;
 import java.util.List;
 
 import org.apache.shindig.gadgets.RenderingContext;
+import org.apache.shindig.gadgets.features.DefaultFeatureRegistryProvider;
 import org.apache.shindig.gadgets.features.FeatureRegistry;
 import org.apache.shindig.gadgets.features.FeatureResource;
 import org.apache.shindig.gadgets.features.FeatureRegistry.FeatureBundle;
@@ -66,9 +67,10 @@ public class GetJsContentProcessorTest {
     registry = control.createMock(FeatureRegistry.class);
     compiler = control.createMock(JsCompiler.class);
     jsUri = control.createMock(JsUri.class);
+    expect(jsUri.getRepository()).andStubReturn(null);
     request = control.createMock(JsRequest.class);
     response = new JsResponseBuilder();
-    processor = new GetJsContentProcessor(registry, compiler);
+    processor = new GetJsContentProcessor(new DefaultFeatureRegistryProvider(registry), compiler);
   }
 
   @Test

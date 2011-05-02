@@ -25,7 +25,9 @@ import com.google.inject.Provider;
 import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.servlet.UserAgent;
 import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.common.util.TimeSource;
 import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.http.HttpFetcher;
 
 import java.util.Arrays;
 import java.util.List;
@@ -63,14 +65,14 @@ public class BrowserSpecificFeatureResource implements FeatureResource {
   private final Provider<UserAgent> uaProvider;
   private final FeatureResource delegate;
   private final Map<UserAgent.Browser, List<VersionMatcher>> browserMatch;
-  
+
   public BrowserSpecificFeatureResource(
       Provider<UserAgent> uaProvider, FeatureResource delegate, String browserKey) {
     this.uaProvider = uaProvider;
     this.delegate = delegate;
     this.browserMatch = populateBrowserMatchers(browserKey);
   }
-  
+
   public String getContent() {
     if (browserMatches()) {
       return delegate.getContent();
@@ -95,11 +97,11 @@ public class BrowserSpecificFeatureResource implements FeatureResource {
     // Otherwise, delegate this call.
     return browserMatch.isEmpty() ? delegate.isProxyCacheable() : false;
   }
-  
+
   public String getName() {
     return delegate.getName();
   }
-  
+
   public Map<String, String> getAttribs() {
     return delegate.getAttribs();
   }
@@ -118,14 +120,14 @@ public class BrowserSpecificFeatureResource implements FeatureResource {
     }
     return false;
   }
-  
+
   private static Map<UserAgent.Browser, List<VersionMatcher>> populateBrowserMatchers(
       String browserKey) {
     Map<UserAgent.Browser, List<VersionMatcher>> map = Maps.newHashMap();
     if (browserKey == null || browserKey.length() == 0) {
       return map;
     }
-    
+
     // Comma-delimited list of <browser>-<versionKey> pairs.
     String[] entries = StringUtils.split(browserKey, ',');
     for (String entry : entries) {
@@ -133,7 +135,7 @@ public class BrowserSpecificFeatureResource implements FeatureResource {
       String[] browserAndVersion = StringUtils.split(entry, '-');
       String browser = browserAndVersion[0];
       String versionKey = browserAndVersion.length == 2 ? browserAndVersion[1] : null;
-      
+
       // This may throw an IllegalArgumentException, (properly) indicating a faulty feature.xml
       UserAgent.Browser browserEnum = UserAgent.Browser.valueOf(browser.toUpperCase());
       if (!map.containsKey(browserEnum)) {
@@ -141,65 +143,73 @@ public class BrowserSpecificFeatureResource implements FeatureResource {
       }
       map.get(browserEnum).add(new VersionMatcher(versionKey));
     }
-    
+
     return map;
   }
-  
+
   /**
    * Simple FeatureResourceLoader implementation that wraps all resource loads in
    * a browser-filtering delegator.
    */
   public static class Loader extends FeatureResourceLoader {
     private final Provider<UserAgent> uaProvider;
-    
+
     @Inject
-    public Loader(Provider<UserAgent> uaProvider) {
+    public Loader(HttpFetcher fetcher, TimeSource timeSource, FeatureFileSystem fileSystem,
+        Provider<UserAgent> uaProvider) {
+      super(fetcher, timeSource, fileSystem);
       this.uaProvider = uaProvider;
     }
-    
+
     @Override
     public FeatureResource load(Uri uri, Map<String, String> attribs) throws GadgetException {
       return new BrowserSpecificFeatureResource(
           uaProvider, super.load(uri, attribs), attribs.get("browser"));
     }
   }
-  
+
   private static final class VersionMatcher {
     private static final Op[] OPS = {
       new Op("^") {
+        @Override
         public boolean match(String in, String key) {
           return in.matches(key);
         }
       },
       new Op("=") {
+        @Override
         public boolean match(String in, String key) {
           return in.equals(key) || num(in).eq(num(key));
         }
       },
       new Op(">") {
+        @Override
         public boolean match(String in, String key) {
           return num(in).gt(num(key));
         }
       },
       new Op(">=") {
+        @Override
         public boolean match(String in, String key) {
           return in.equals(key) || num(in).eq(num(key)) || num(in).gt(num(key));
         }
       },
       new Op("<") {
+        @Override
         public boolean match(String in, String key) {
           return num(in).lt(num(key));
         }
       },
       new Op("<=") {
+        @Override
         public boolean match(String in, String key) {
           return in.equals(key) || num(in).eq(num(key)) || num(in).lt(num(key));
         }
       },
     };
-    
+
     private final String versionKey;
-    
+
     private VersionMatcher(String versionKey) {
       if (versionKey != null && versionKey.length() != 0) {
         this.versionKey = versionKey;
@@ -208,7 +218,7 @@ public class BrowserSpecificFeatureResource implements FeatureResource {
         this.versionKey = null;
       }
     }
-    
+
     public boolean matches(String version) {
       if (versionKey == null || versionKey.equals(version)) {
         // Match-all or exact-string-match.
@@ -221,18 +231,18 @@ public class BrowserSpecificFeatureResource implements FeatureResource {
       }
       return false;
     }
-    
+
     private static VersionNumber num(String str) {
       return new VersionNumber(str);
     }
-    
+
     private static abstract class Op {
       private final String pfx;
-      
+
       private Op(String pfx) {
         this.pfx = pfx;
       }
-      
+
       private boolean apply(String version, String key) {
         if (version.startsWith(pfx)) {
           version = version.substring(pfx.length());
@@ -240,13 +250,13 @@ public class BrowserSpecificFeatureResource implements FeatureResource {
         }
         return false;
       }
-      
+
       public abstract boolean match(String in, String key);
     }
-    
+
     private static final class VersionNumber {
       private final int[] parts;
-      
+
       private VersionNumber(String str) {
         String[] strParts = StringUtils.split(str, '.');
         int[] intParts = new int[strParts.length];
@@ -259,11 +269,11 @@ public class BrowserSpecificFeatureResource implements FeatureResource {
         }
         this.parts = intParts;
       }
-      
+
       public boolean eq(VersionNumber other) {
         return Arrays.equals(this.parts, other.parts);
       }
-      
+
       public boolean lt(VersionNumber other) {
         for (int i = 0; i < this.parts.length; ++i) {
           int otherVal = (i < other.parts.length) ? other.parts[i] : 0;  // 0's fill in the rest
@@ -273,7 +283,7 @@ public class BrowserSpecificFeatureResource implements FeatureResource {
         }
         return true;
       }
-      
+
       public boolean gt(VersionNumber other) {
         for (int i = 0; i < this.parts.length; ++i) {
           int otherVal = (i < other.parts.length) ? other.parts[i] : 0;  // 0's fill in the rest

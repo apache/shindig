@@ -24,9 +24,11 @@ import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 
 import org.apache.shindig.gadgets.GadgetContext;
+import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.features.ApiDirective;
 import org.apache.shindig.gadgets.features.FeatureRegistry;
 import org.apache.shindig.gadgets.features.FeatureRegistry.FeatureBundle;
+import org.apache.shindig.gadgets.features.FeatureRegistryProvider;
 import org.apache.shindig.gadgets.features.FeatureResource;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.rewrite.js.JsCompiler;
@@ -43,14 +45,14 @@ import java.util.Set;
 public class GetJsContentProcessor implements JsProcessor {
   private static final Joiner UNKNOWN_FEATURE_ERR = Joiner.on(", ");
 
-  private final FeatureRegistry registry;
+  private final FeatureRegistryProvider registryProvider;
   private final JsCompiler compiler;
 
   @Inject
   public GetJsContentProcessor(
-      FeatureRegistry registry,
+      FeatureRegistryProvider registryProvider,
       JsCompiler compiler) {
-    this.registry = registry;
+    this.registryProvider = registryProvider;
     this.compiler = compiler;
   }
 
@@ -59,8 +61,14 @@ public class GetJsContentProcessor implements JsProcessor {
     JsUri jsUri = request.getJsUri();
     GadgetContext ctx = new JsGadgetContext(jsUri);
 
-    List<FeatureBundle> requestedBundles = getAllBundles(ctx, jsUri.getLibs(), false);
-    List<FeatureBundle> loadedBundles = getAllBundles(ctx, jsUri.getLoadedLibs(), true);
+    FeatureRegistry registry;
+    try {
+      registry = registryProvider.get(jsUri.getRepository());
+    } catch (GadgetException e) {
+      throw new JsException(e.getHttpStatusCode(), e.getMessage());
+    }
+    List<FeatureBundle> requestedBundles = getAllBundles(registry, ctx, jsUri.getLibs(), false);
+    List<FeatureBundle> loadedBundles = getAllBundles(registry, ctx, jsUri.getLoadedLibs(), true);
 
     Set<String> loadedFeatures = Sets.newHashSet();
     for (FeatureBundle bundle : loadedBundles) {
@@ -89,8 +97,8 @@ public class GetJsContentProcessor implements JsProcessor {
     return true;
   }
 
-  private List<FeatureBundle> getAllBundles(GadgetContext ctx, Collection<String> requested,
-      boolean loaded) throws JsException {
+  private List<FeatureBundle> getAllBundles(FeatureRegistry registry, GadgetContext ctx,
+      Collection<String> requested, boolean loaded) throws JsException {
     List<String> unsupported = Lists.newLinkedList();
     FeatureRegistry.LookupResult lookup = registry.getFeatureResources(ctx, requested, unsupported);
     if (!unsupported.isEmpty()) {

@@ -24,6 +24,7 @@ import java.util.Map;
 import org.apache.shindig.common.cache.Cache;
 import org.apache.shindig.common.cache.CacheProvider;
 import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.common.util.TimeSource;
 import org.apache.shindig.gadgets.GadgetException;
 
 import com.google.common.base.Joiner;
@@ -44,51 +45,51 @@ public class TestFeatureRegistry extends FeatureRegistry {
   public static Builder newBuilder() {
     return new Builder();
   }
-  
+
   public static class Builder {
     private static String RESOURCE_BASE_PATH = "/resource/base/path";
     private static int resourceIdx = 0;
-    
+
     private final ResourceMock resourceMock;
     private final List<String> featureFiles;
-    
+
     private Builder() {
       this.resourceMock = new ResourceMock();
       this.featureFiles = Lists.newLinkedList();
     }
-    
+
     public TestFeatureRegistry build(String useFeature) throws GadgetException {
       return new TestFeatureRegistry(
           new TestFeatureResourceLoader(resourceMock),
           new TestCacheProvider(),
           useFeature);
     }
-    
+
     public TestFeatureRegistry build() throws GadgetException {
       return build(Joiner.on(",").join(featureFiles));
     }
-    
+
     public Builder addFeatureFile(String featureFile) {
       featureFiles.add(featureFile);
       return this;
     }
-    
+
     /* Expectation methods and helpers */
     public Uri expectResource(String content) {
       return expectResource(content, ".xml");
     }
-    
+
     public Uri expectResource(String content, String suffix) {
       Uri res = makeResourceUri(suffix);
       resourceMock.put(res.getPath(), content);
       return res;
     }
-    
+
     private static Uri makeResourceUri(String suffix) {
       return Uri.parse("res://" + RESOURCE_BASE_PATH + "/file" + (++resourceIdx) + suffix);
     }
   }
-  
+
   /* Actual class contents here */
   private final TestFeatureResourceLoader resourceLoader;
   private final TestCacheProvider cacheProvider;
@@ -96,15 +97,16 @@ public class TestFeatureRegistry extends FeatureRegistry {
       TestFeatureResourceLoader resourceLoader,
       TestCacheProvider cacheProvider,
       String featureFiles) throws GadgetException {
-    super(resourceLoader, cacheProvider, ImmutableList.<String>of(featureFiles));
+    super(resourceLoader, cacheProvider, ImmutableList.<String>of(featureFiles),
+        new DefaultFeatureFileSystem());
     this.resourceLoader = resourceLoader;
     this.cacheProvider = cacheProvider;
   }
-  
+
   public Map<String, String> getLastAttribs() {
     return Collections.unmodifiableMap(resourceLoader.lastAttribs);
   }
-  
+
   @SuppressWarnings("unchecked")
   public Cache<String, LookupResult> getLookupCache() {
     Cache<?, ?> cacheEntry = cacheProvider.caches.get(FeatureRegistry.CACHE_NAME);
@@ -113,51 +115,53 @@ public class TestFeatureRegistry extends FeatureRegistry {
     }
     return (Cache<String, LookupResult>)cacheEntry;
   }
-  
+
   private static class TestFeatureResourceLoader extends FeatureResourceLoader {
     private final ResourceMock resourceMock;
     private Map<String, String> lastAttribs;
-    
+
     private TestFeatureResourceLoader(ResourceMock resourceMock) {
+      super(null, new TimeSource(), new DefaultFeatureFileSystem());
       this.resourceMock = resourceMock;
     }
 
+    @Override
     public FeatureResource load(Uri uri, Map<String, String> attribs) throws GadgetException {
       lastAttribs = ImmutableMap.copyOf(attribs);
       return super.load(uri, attribs);
     }
-    
+
     @Override
     public String getResourceContent(String resource) throws IOException {
       return resourceMock.get(resource);
     }
   }
-  
+
   private static class ResourceMock {
     private final Map<String, String> resourceMap;
-    
+
     private ResourceMock() {
       this.resourceMap = Maps.newHashMap();
     }
-    
+
     private void put(String key, String value) {
       resourceMap.put(clean(key), value);
     }
-    
+
     private String get(String key) throws IOException {
       key = clean(key);
       if (!resourceMap.containsKey(key)) {
         throw new IOException("Missing resource: " + key);
       }
-      return resourceMap.get(key); 
+      return resourceMap.get(key);
     }
-    
+
     private String clean(String key) {
       // Resource loading doesn't support leading '/'
       return key.startsWith("/") ? key.substring(1) : key;
     }
   }
-  
+
   // TODO: generalize the below into common classes
   private static class TestCacheProvider implements CacheProvider {
     private final Map<String, Cache<?, ?>> caches = new MapMaker().makeMap();
@@ -172,7 +176,7 @@ public class TestFeatureRegistry extends FeatureRegistry {
       return cache;
     }
   }
-  
+
   private static class MapCache<K, V> implements Cache<K, V> {
     private final Map<K, V> cache = new MapMaker().makeMap();
 
@@ -196,6 +200,6 @@ public class TestFeatureRegistry extends FeatureRegistry {
     public V removeElement(K key) {
       return cache.get(key);
     }
-    
+
   }
 }

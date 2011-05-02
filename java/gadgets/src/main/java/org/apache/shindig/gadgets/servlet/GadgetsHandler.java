@@ -113,6 +113,7 @@ public class GadgetsHandler {
     LOADED_FEATURES("loadedFeatures"),
     CONTAINER_MODE(UriCommon.Param.CONTAINER_MODE),
     ONLOAD(UriCommon.Param.ONLOAD),
+    REPOSITORY(UriCommon.Param.REPOSITORY_ID),
     MIME_TYPE("mime_type");
 
     private final String name;
@@ -446,6 +447,7 @@ public class GadgetsHandler {
     private final RenderingContext context;
     private final String onload;
     private final String gadget;
+    private final String repository;
 
     public JsRequestData(BaseRequestItem request) throws ProcessingException {
       super(null, request, DEFAULT_JS_FIELDS);
@@ -457,6 +459,8 @@ public class GadgetsHandler {
       this.context = getRenderingContext(getParam(request, Param.CONTAINER_MODE));
       this.onload = getParam(request, Param.ONLOAD);
       this.gadget = getParam(request, Param.GADGET);
+      this.repository = getParam(request, Param.REPOSITORY);
+
     }
 
     public RenderingContext getContext() { return context; }
@@ -467,6 +471,7 @@ public class GadgetsHandler {
     public String getOnload() { return onload; }
     public Integer getRefresh() { return refresh; }
     public String getGadget() { return gadget; }
+    public String getRepository() { return repository; }
   }
 
   private RenderingContext getRenderingContext(String param) {

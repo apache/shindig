@@ -52,6 +52,7 @@ public interface UriCommon {
     ONLOAD("onload"),
     LOADED_LIBS("loaded"),
     NO_HINT("nohint"),
+    REPOSITORY_ID("r"),
 
     // Proxy resize params:
     RESIZE_HEIGHT("resize_h"),

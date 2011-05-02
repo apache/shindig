@@ -23,14 +23,12 @@ import com.google.inject.name.Named;
 
 import org.apache.shindig.common.logging.i18n.MessageKeys;
 import org.apache.shindig.common.uri.Uri;
-import org.apache.shindig.common.util.ResourceLoader;
 import org.apache.shindig.common.util.TimeSource;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 import java.util.logging.Level;
@@ -40,41 +38,39 @@ import java.util.logging.Logger;
  * Class that loads FeatureResource objects used to populate JS feature code.
  */
 public class FeatureResourceLoader {
-	  
+
   // Class name for logging purpose
   private static final String classname = FeatureResourceLoader.class.getName();
   private static final Logger LOG = Logger.getLogger(classname, MessageKeys.MESSAGES);
-  
-  private HttpFetcher fetcher;
-  private TimeSource timeSource = new TimeSource();
+
+  private final HttpFetcher fetcher;
+  private final TimeSource timeSource;
+  private final FeatureFileSystem fileSystem;
   private int updateCheckFrequency = 0;  // <= 0 -> only load data once, don't check for updates.
 
   @Inject
-  public void setHttpFetcher(HttpFetcher fetcher) {
+  public FeatureResourceLoader(HttpFetcher fetcher, TimeSource timeSource, FeatureFileSystem fileSystem) {
     this.fetcher = fetcher;
-  }
-  
-  @Inject
-  public void setTimeSource(TimeSource timeSource) {
     this.timeSource = timeSource;
+    this.fileSystem = fileSystem;
   }
-  
+
   @Inject(optional = true)
   public void setSupportFileUpdates(
       @Named("shindig.features.loader.file-update-check-frequency-ms") int updateCheckFrequency) {
     this.updateCheckFrequency = updateCheckFrequency;
   }
-  
+
   /**
    * Primary, and only public, method of FeatureResourceLoader. Loads the resource
    * keyed at the given {@code uri}, which was decorated with the provided list of attributes.
-   * 
+   *
    * The default implementation loads both file and res-schema resources using
    * ResourceLoader, attempting to load optimized content for files named [file].js as [file].opt.js.
-   * 
+   *
    * Override this method to provide custom functionality. Basic loadFile, loadResource, and loadUri
    * methods are kept protected for easy reuse.
-   * 
+   *
    * @param uri Uri of resource to be loaded.
    * @param attribs Attributes decorating the resource in the corresponding feature.xml
    * @return FeatureResource object providing content and debugContent loading capability.
@@ -92,20 +88,22 @@ public class FeatureResourceLoader {
       throw new GadgetException(GadgetException.Code.FAILED_TO_RETRIEVE_CONTENT, e);
     }
   }
-  
+
+  @SuppressWarnings("unused")
   protected FeatureResource loadFile(String path, Map<String, String> attribs) throws IOException {
     return new DualModeFileResource(getOptPath(path), path, attribs);
   }
-  
-  protected String getFileContent(File file) {
+
+  protected String getFileContent(FeatureFile file) {
     try {
-      return ResourceLoader.getContent(file);
+      return file.getContent();
     } catch (IOException e) {
       // This is fine; errors happen downstream.
       return null;
     }
   }
-  
+
+  @SuppressWarnings("unused")
   protected FeatureResource loadResource(
       String path, Map<String, String> attribs) throws IOException {
     String optContent = null, debugContent = null;
@@ -121,11 +119,11 @@ public class FeatureResourceLoader {
     }
     return new DualModeStaticResource(path, optContent, debugContent, attribs);
   }
-  
+
   public String getResourceContent(String resource) throws IOException {
-    return ResourceLoader.getContent(resource);
+    return fileSystem.getResourceContent(resource);
   }
-  
+
   protected FeatureResource loadUri(Uri uri, Map<String, String> attribs) {
     String inline = attribs.get("inline");
     inline = inline != null ? inline : "";
@@ -133,24 +131,24 @@ public class FeatureResourceLoader {
         "1".equals(inline) || "true".equalsIgnoreCase(inline),
         attribs);
   }
-  
+
   protected String getOptPath(String orig) {
     if (orig.endsWith(".js") && !orig.endsWith(".opt.js")) {
       return orig.substring(0, orig.length() - 3) + ".opt.js";
     }
     return orig;
   }
-  
+
   // Overridable for easier testing.
-  protected boolean fileHasChanged(File file, long lastModified) {
+  protected boolean fileHasChanged(FeatureFile file, long lastModified) {
     return file.lastModified() > lastModified;
   }
-  
+
   private class DualModeFileResource extends FeatureResource.Attribute {
     private final FileContent optContent;
     private final FileContent dbgContent;
     private final String fileName;
-    
+
     protected DualModeFileResource(String optFilePath, String dbgFilePath,
         Map<String, String> attribs) {
       super(attribs);
@@ -170,23 +168,23 @@ public class FeatureResourceLoader {
       String dbg = dbgContent.get();
       return dbg != null ? dbg : optContent.get();
     }
-    
+
     public String getName() {
       return fileName;
     }
-    
+
     private final class FileContent {
       private final String filePath;
       private long lastModified;
       private long lastUpdateCheckTime;
       private String content;
-      
+
       private FileContent(String filePath) {
         this.filePath = filePath;
         this.lastModified = 0;
         this.lastUpdateCheckTime = 0;
       }
-      
+
       private String get() {
         long nowTime = timeSource.currentTimeMillis();
         if (content == null ||
@@ -196,7 +194,12 @@ public class FeatureResourceLoader {
           // overwhelming the file system while maintaining a reasonable update rate w/o
           // implementing a full event-driven mechanism.
           lastUpdateCheckTime = nowTime;
-          File file = new File(filePath);
+          FeatureFile file;
+          try {
+            file = fileSystem.getFile(filePath);
+          } catch (IOException e) {
+            return null;
+          }
           if (fileHasChanged(file, lastModified)) {
             // Only reload file content if it's changed (or if it's the first
             // load, when this check will succeed).
@@ -216,12 +219,12 @@ public class FeatureResourceLoader {
       }
     }
   }
-  
+
   private static final class DualModeStaticResource extends FeatureResource.Attribute {
     private final String content;
     private final String debugContent;
     private final String path;
-    
+
     private DualModeStaticResource(String path, String content, String debugContent, Map<String, String> attribs) {
       super(attribs);
       this.content = content != null ? content : debugContent;
@@ -237,19 +240,19 @@ public class FeatureResourceLoader {
     public String getDebugContent() {
       return debugContent;
     }
-    
+
     public String getName() {
       return path;
     }
   }
-  
+
   private static final class UriResource extends FeatureResource.Attribute {
     private final HttpFetcher fetcher;
     private final Uri uri;
     private final boolean isInline;
     private String content;
     private long lastLoadTryMs;
-    
+
     private UriResource(HttpFetcher fetcher, Uri uri, boolean isInline,
         Map<String, String> attribs) {
       super(attribs);
@@ -258,7 +261,7 @@ public class FeatureResourceLoader {
       this.isInline = isInline;
       this.lastLoadTryMs = 0;
       this.content = getContent();
-    } 
+    }
 
     public String getContent() {
       if (isExternal()) {
@@ -267,7 +270,7 @@ public class FeatureResourceLoader {
         // Variable content is a one-time content cache for inline JS features.
         return content;
       }
-      
+
       // Try to load the content. Ideally, and most of the time, this
       // will happen immediately at startup. However, if the target server is
       // down it shouldn't hose the entire server, so in that case we defer
@@ -292,7 +295,7 @@ public class FeatureResourceLoader {
           }
         }
       }
-      
+
       return content;
     }
 
