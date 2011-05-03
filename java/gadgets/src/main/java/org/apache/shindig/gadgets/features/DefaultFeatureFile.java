@@ -30,15 +30,20 @@ import java.net.URI;
  */
 public class DefaultFeatureFile implements FeatureFile {
 
-  private final File wrappedFile;
+  protected final File wrappedFile;
 
   public DefaultFeatureFile(String path) {
     this.wrappedFile = new File(path);
   }
 
-  private DefaultFeatureFile(File wrappedFile) {
+  protected DefaultFeatureFile(File wrappedFile) {
     this.wrappedFile = wrappedFile;
   }
+
+  protected DefaultFeatureFile createFile(File wrappedFile) {
+    return new DefaultFeatureFile(wrappedFile);
+  }
+
   public InputStream getInputStream() throws IOException {
     return new FileInputStream(wrappedFile);
   }
@@ -69,9 +74,12 @@ public class DefaultFeatureFile implements FeatureFile {
 
   public FeatureFile[] listFiles() {
     File[] wrappedFiles = wrappedFile.listFiles();
+    if (wrappedFiles == null) {
+      return null;
+    }
     FeatureFile[] files = new FeatureFile[wrappedFiles.length];
     for (int i = 0; i < wrappedFiles.length; i++) {
-      files[i] = new DefaultFeatureFile(wrappedFiles[i]);
+      files[i] = createFile(wrappedFiles[i]);
     }
     return files;
   }
