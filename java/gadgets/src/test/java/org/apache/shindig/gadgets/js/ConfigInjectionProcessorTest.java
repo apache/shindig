@@ -96,6 +96,35 @@ public class ConfigInjectionProcessorTest {
   }
   
   @Test
+  public void containerNoMatchingFeaturesDoesNothing() throws Exception {
+    checkNoMatchingFeaturesDoesNothing(RenderingContext.CONTAINER);
+  }
+
+  @Test
+  public void configuredNoMatchingFeaturesDoesNothing() throws Exception {
+    checkNoMatchingFeaturesDoesNothing(RenderingContext.CONFIGURED_GADGET);
+  }
+
+  private void checkNoMatchingFeaturesDoesNothing(RenderingContext ctx) throws Exception {
+    JsResponseBuilder builder = prepareRequestReturnBuilder(ctx );
+    Map<String, Object> baseConfig = Maps.newHashMap();
+    baseConfig.put("feature1", "config1");
+    Map<String, String> f2MapConfig = Maps.newHashMap();
+    f2MapConfig.put("key1", "val1");
+    f2MapConfig.put("key2", "val2");
+    baseConfig.put("feature2", f2MapConfig);
+    expect(containerConfig.getMap(CONTAINER, ConfigInjectionProcessor.GADGETS_FEATURES_KEY))
+        .andReturn(baseConfig);
+    List<String> libs = ImmutableList.of("lib1", "lib2");
+    expect(jsUri.getLibs()).andReturn(libs);
+    expect(registry.getFeatures(libs)).andReturn(libs);
+    control.replay();
+    assertTrue(processor.process(request, builder));
+    control.verify();
+    assertEquals(BASE_CODE, builder.build().toJsString());
+  }
+
+  @Test
   public void containerNoContributorsGetsBase() throws Exception {
     checkNoContributorsGetsBase(RenderingContext.CONTAINER);
   }

@@ -50,8 +50,7 @@ public class ConfigInjectionProcessor implements JsProcessor {
     this.configContributors = configContributors;
   }
 
-  public boolean process(JsRequest request, JsResponseBuilder builder)
-      throws JsException {
+  public boolean process(JsRequest request, JsResponseBuilder builder) {
     JsUri jsUri = request.getJsUri();
     GadgetContext ctx = new JsGadgetContext(jsUri);
 
@@ -78,8 +77,10 @@ public class ConfigInjectionProcessor implements JsProcessor {
             contributor.contribute(config, container, request.getHost());
           }
         }
-        builder.appendJs(
-            "gadgets.config.init(" + JsonSerializer.serialize(config) + ");\n", CONFIG_INIT_ID);
+        if (!config.isEmpty()) {
+          builder.appendJs(
+              "gadgets.config.init(" + JsonSerializer.serialize(config) + ");\n", CONFIG_INIT_ID);
+        }
       }
     }
     return true;
