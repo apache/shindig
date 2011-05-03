@@ -185,7 +185,7 @@ if (!window['gadgets']['rpc']) { // make lib resilient to double-inclusion
       if (params['flash'] == "1") return gadgets.rpctx.flash;
       return typeof window.postMessage === 'function' ? gadgets.rpctx.wpm :
           typeof window.postMessage === 'object' ? gadgets.rpctx.wpm :
-          window.ActiveXObject ? gadgets.rpctx.nix :
+          window.ActiveXObject ? (gadgets.rpctx.flash ? gadgets.rpctx.flash : gadgets.rpctx.nix) :
           navigator.userAgent.indexOf('WebKit') > 0 ? gadgets.rpctx.rmr :
           navigator.product === 'Gecko' ? gadgets.rpctx.frameElement :
           gadgets.rpctx.ifpc;
@@ -196,6 +196,7 @@ if (!window['gadgets']['rpc']) { // make lib resilient to double-inclusion
      * send and receive messages.
      */
     function transportReady(receiverId, readySuccess) {
+      if (receiverTx[receiverId]) return;
       var tx = transport;
       if (!readySuccess) {
         tx = fallbackTransport;
@@ -892,7 +893,12 @@ if (!window['gadgets']['rpc']) { // make lib resilient to double-inclusion
         // target is misconfigured, it won't affect the others.
         // In the case of a sibling relay, channel is not found
         // in the receiverTx map but in the transport itself.
-        var channel = receiverTx[targetId] || transport;
+        var channel = receiverTx[targetId];
+        if (!channel && parseSiblingId(targetId) !== null) {
+          // Sibling-to-sibling communication; use default trasport
+          // (in practice, wpm) despite not being ready()-indicated.
+          channel = transport;
+        }
 
         if (!channel) {
           // Not set up yet. Enqueue the rpc for such time as it is.
@@ -1044,7 +1050,7 @@ if (!window['gadgets']['rpc']) { // make lib resilient to double-inclusion
 
       ACK: ACK,
 
-      RPC_ID: rpcId || "_top",
+      RPC_ID: rpcId || "..",
 
       SEC_ERROR_LOAD_TIMEOUT: LOAD_TIMEOUT,
       SEC_ERROR_FRAME_PHISH: FRAME_PHISH,
