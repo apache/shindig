@@ -129,7 +129,7 @@ function runCallbackTest(targetId, isSync) {
   var service = (isSync ? "" : "a") + "sync_callback_service";
   var echoValue = document.getElementById("echo_test_input").value;
   var callback = function(response) {
-    document.getElementById("echo_test_result").innerHTML = response + " at " + new Date().toUTCString();
+    document.getElementById("echo_test_result").innerHTML = response + " at " + new Date().toUTCString() + " from referer: " + this['referer'];
   };
   gadgets.rpc.call(targetId, service, callback, echoValue);
 };
