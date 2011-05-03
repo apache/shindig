@@ -18,10 +18,11 @@
 
 package org.apache.shindig.gadgets.js;
 
-import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 import java.util.List;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -36,15 +37,17 @@ public class JsResponseBuilder {
   private int statusCode;
   private int cacheTtlSecs;
   private boolean proxyCacheable;
-  private final StringBuilder externs;
-
+  private final StringBuilder rawExterns;
+  private final List<String> externs;
+  
   public JsResponseBuilder() {
     jsCode = Lists.newLinkedList();
     statusCode = HttpServletResponse.SC_OK;
     cacheTtlSecs = 0;
     proxyCacheable = false;
     errors = Lists.newLinkedList();
-    externs = new StringBuilder();
+    rawExterns = new StringBuilder();
+    externs = Lists.newLinkedList();
   }
 
   public JsResponseBuilder(JsResponse response) {
@@ -56,7 +59,7 @@ public class JsResponseBuilder {
       errors.addAll(Lists.newArrayList(response.getErrors()));
     }
     if (response.getExterns() != null) {
-      externs.append(response.getExterns());
+      rawExterns.append(response.getExterns());
     }
     statusCode = response.getStatusCode();
     cacheTtlSecs = response.getCacheTtlSecs();
@@ -187,7 +190,7 @@ public class JsResponseBuilder {
    * Appends a blob of raw extern.
    */
   public JsResponseBuilder appendRawExtern(String rawExtern) {
-    this.externs.append(rawExtern).append(EXTERN_DELIM);
+    this.rawExterns.append(rawExtern).append(EXTERN_DELIM);
     return this;
   }
 
@@ -195,9 +198,7 @@ public class JsResponseBuilder {
    * Appends a line of extern.
    */
   public JsResponseBuilder appendExtern(String extern) {
-    this.externs
-        .append((extern.indexOf(".") <= 0) ? ("var " + extern) : extern)
-        .append(" = {}").append(EXTERN_DELIM);
+    this.externs.add(extern);
     return this;
   }
 
@@ -215,8 +216,9 @@ public class JsResponseBuilder {
    * Deletes all externs in the builder.
    */
   public JsResponseBuilder clearExterns() {
-    int last = externs.length();
-    this.externs.delete(0, last);
+    int last = rawExterns.length();
+    this.rawExterns.delete(0, last);
+    this.externs.clear();
     return this;
   }
 
@@ -225,6 +227,32 @@ public class JsResponseBuilder {
    */
   public JsResponse build() {
     return new JsResponse(jsCode, statusCode, cacheTtlSecs, proxyCacheable,
-        errors, externs.toString());
+        errors, rawExterns.toString() + buildExternString());
+  }
+
+  private String buildExternString() {
+    StringBuilder builder = new StringBuilder();
+    Set<String> set = Sets.newHashSet();
+    for (String ext : externs) {
+      List<String> expandedList = expand(ext);
+      for (String exp : expandedList) {
+        if (set.contains(exp)) continue;
+        if (exp.endsWith(".prototype")) continue;
+        if (exp.indexOf(".") < 0) builder.append("var ");
+        builder.append(exp).append(" = {}").append(EXTERN_DELIM);
+        set.add(exp);
+      }
+    }
+    return builder.toString();
+  }
+
+  private List<String> expand(String value) {
+    List<String> result = Lists.newArrayList();
+    StringBuilder cur = new StringBuilder();
+    for (String part : value.split("\\.")) {
+      cur.append(cur.length() > 0 ? "." : "").append(part);
+      result.add(cur.toString());
+    }
+    return result;
   }
 }

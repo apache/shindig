@@ -34,9 +34,19 @@ public class JsResponseBuilderTest {
 
   @Test
   public void testExterns() throws Exception {
-    builder.appendExtern("a");
-    builder.appendExtern("a.b");
-    assertEquals("var a = {};\na.b = {};\n", builder.build().getExterns());
+    builder.appendExtern("b");
+    builder.appendExtern("b");
+    builder.appendExtern("c.d");
+    builder.appendExtern("c.d");
+    builder.appendExtern("e.prototype.f");
+    builder.appendExtern("e.prototype.f");
+    builder.appendRawExtern("var a");
+    String eee = builder.build().getExterns();
+    assertEquals(
+        "var a;\n" +
+        "var b = {};\n" +
+        "var c = {};\nc.d = {};\n" +
+        "var e = {};\ne.prototype.f = {};\n",
+        builder.build().getExterns());
   }
-
 }
