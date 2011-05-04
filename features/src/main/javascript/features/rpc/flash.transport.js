@@ -183,7 +183,7 @@ if (!gadgets.rpctx.flash) {  // make lib resilient to double-inclusion
       call: call,
 
       // Methods called by relay SWF. Should be considered private.
-      _receiveMessage: function(message, fromOrigin, toOrigin, sendingSwfDomain) {
+      _receiveMessage: function(message, fromOrigin, toOrigin) {
         var jsonMsg = gadgets.json.parse(message);
         var channelReady = jsonMsg[SWF_CHANNEL_READY];
         if (channelReady) {

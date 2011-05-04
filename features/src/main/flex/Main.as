@@ -145,21 +145,11 @@ class Main {
 
       var receiving_lc:LocalConnection = new LocalConnection();
       var sending_lc:LocalConnection = new LocalConnection();
-      var lastSendingDomain:String;
-      // Allow messages to be sent from any other SWF to this channel.
-      // Message verification itself is handled by both the fact that the
-      // channel ID contains the rpc_token as well as the passed message
-      // contents themselves, containing the token too. The SWF is
-      // largely a simple relay.
-      receiving_lc.allowDomain = function(sendingDomain:String) {
-        lastSendingDomain = sendingDomain;
-        return true;
-      };
       receiving_lc.receiveMessage =
           function(to_origin:String, from_origin:String, in_rpc_key:String, message:String) {
         if ((to_origin === "*" || to_origin === my_origin) && (in_rpc_key == rpc_key)) {
           ExternalInterface.call("gadgets.rpctx.flash._receiveMessage",
-              escFn(message), escFn(from_origin), escFn(to_origin), escFn(lastSendingDomain));
+              escFn(message), escFn(from_origin), escFn(to_origin));
         }
       };
 
@@ -167,11 +157,11 @@ class Main {
             { }, function(message:String, to_origin:String) {
         if (!to_origin) to_origin = "*";
         var sendId:String =
-            replaceFn("_channel_" + channel_id + "_" + rpc_key + "_" + other_role, ":", "");
+            replaceFn("channel_" + channel_id + "_" + rpc_key + "_" + other_role, ":", "");
         sending_lc.send(sendId,
             "receiveMessage", to_origin, my_origin, rpc_key, message);
       });
-      var recvId:String = replaceFn("_channel_" + channel_id + "_" + rpc_key + "_" + role, ":", "");
+      var recvId:String = replaceFn("channel_" + channel_id + "_" + rpc_key + "_" + role, ":", "");
       receiving_lc.connect(recvId);
       if (role == "INNER") {
         // In child context, trigger notice that the setup method is complete.
