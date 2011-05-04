@@ -43,6 +43,7 @@ import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.config.ConfigContributor;
 import org.apache.shindig.gadgets.config.CoreUtilConfigContributor;
+import org.apache.shindig.gadgets.config.DefaultConfigProcessor;
 import org.apache.shindig.gadgets.config.XhrwrapperConfigContributor;
 import org.apache.shindig.gadgets.features.FeatureRegistry;
 import org.apache.shindig.gadgets.features.FeatureResource;
@@ -117,7 +118,8 @@ public class RenderingGadgetRewriterTest {
         "shindig.xhrwrapper", new XhrwrapperConfigContributor()
     );
     rewriter
-        = new RenderingGadgetRewriter(messageBundleFactory, config, featureRegistry, jsUriManager, configContributors);
+        = new RenderingGadgetRewriter(messageBundleFactory, config, featureRegistry, jsUriManager,
+            new DefaultConfigProcessor(configContributors, config));
     Injector injector = Guice.createInjector(new ParseModule(), new PropertiesModule());
     parser = injector.getInstance(GadgetHtmlParser.class);
   }

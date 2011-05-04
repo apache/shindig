@@ -55,7 +55,6 @@ public class CompilationProcessorTest {
   @Test
   public void compilerIsRun() throws Exception {
     JsUri jsUri = control.createMock(JsUri.class);
-    FeatureBundle bundle = control.createMock(FeatureBundle.class);
     JsResponseBuilder builder =
         new JsResponseBuilder().setCacheTtlSecs(1234).setStatusCode(200)
           .appendJs("content1:", "source1")

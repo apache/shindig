@@ -29,6 +29,7 @@ public class DefaultConfigContributorModule extends AbstractModule {
   @Override
   protected void configure() {
     registerConfigContributors();
+    bind(ConfigProcessor.class).to(DefaultConfigProcessor.class);
   }
 
   protected void registerConfigContributors() {

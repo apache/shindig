@@ -29,7 +29,7 @@ import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.MessageBundleFactory;
 import org.apache.shindig.gadgets.UnsupportedFeatureException;
-import org.apache.shindig.gadgets.config.ConfigContributor;
+import org.apache.shindig.gadgets.config.ConfigProcessor;
 import org.apache.shindig.gadgets.features.FeatureRegistry;
 import org.apache.shindig.gadgets.features.FeatureResource;
 import org.apache.shindig.gadgets.preload.PreloadException;
@@ -103,14 +103,13 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
   protected final ContainerConfig containerConfig;
   protected final FeatureRegistry featureRegistry;
   protected final JsUriManager jsUriManager;
-  protected final Map<String, ConfigContributor> configContributors;
-
+  protected final ConfigProcessor configProcessor;
 
   protected Set<String> defaultExternLibs = ImmutableSet.of();
 
   protected Boolean externalizeFeatures = false;
 
-  //DOCTYPE for HTML5, OpenSocial 2.0 default
+  // DOCTYPE for HTML5, OpenSocial 2.0 default
   private String defaultDoctypeQName = "html";
   private String defaultDoctypePubId = null;
   private String defaultDoctypeSysId = null;
@@ -123,12 +122,12 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
                                  ContainerConfig containerConfig,
                                  FeatureRegistry featureRegistry,
                                  JsUriManager jsUriManager,
-                                 Map<String, ConfigContributor> configContributors) {
+                                 ConfigProcessor configProcessor) {
     this.messageBundleFactory = messageBundleFactory;
     this.containerConfig = containerConfig;
     this.featureRegistry = featureRegistry;
     this.jsUriManager = jsUriManager;
-    this.configContributors = configContributors;
+    this.configProcessor = configProcessor;
   }
 
   public void setDefaultDoctypeQName(String qname) {
@@ -409,30 +408,14 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
    */
   protected String getLibraryConfig(Gadget gadget, List<String> reqs)
       throws GadgetException {
-    GadgetContext context = gadget.getContext();
-
-    Map<String, Object> features = containerConfig.getMap(context.getContainer(), FEATURES_KEY);
-
-    Map<String, Object> config
-        = Maps.newHashMapWithExpectedSize(features == null ? 2 : features.size() + 2);
-
-    if (features != null) {
-      // Discard what we don't care about.
-      for (String name : reqs) {
-        Object conf = features.get(name);
-        if (conf != null) {
-          config.put(name, conf);
-        }
-
-        // See if this feature has configuration data
-        ConfigContributor contributor = configContributors.get(name);
-        if (contributor != null) {
-          contributor.contribute(config, gadget);
-        }
-      }
+    Map<String, Object> config =
+        configProcessor.getConfig(gadget.getContext().getContainer(), reqs, null, gadget);
+    
+    if (config.size() > 0) {
+      return "gadgets.config.init(" + JsonSerializer.serialize(config) + ");\n";
     }
-
-    return "gadgets.config.init(" + JsonSerializer.serialize(config) + ");\n";
+    
+    return "";
   }
 
   /**

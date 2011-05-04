@@ -20,15 +20,13 @@ package org.apache.shindig.gadgets.js;
 import java.util.Map;
 
 import org.apache.shindig.common.JsonSerializer;
-import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.RenderingContext;
-import org.apache.shindig.gadgets.config.ConfigContributor;
+import org.apache.shindig.gadgets.config.ConfigProcessor;
 import org.apache.shindig.gadgets.features.FeatureRegistry;
 import org.apache.shindig.gadgets.uri.JsUriManager.JsUri;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 
 public class ConfigInjectionProcessor implements JsProcessor {
@@ -37,17 +35,14 @@ public class ConfigInjectionProcessor implements JsProcessor {
   static final String GADGETS_FEATURES_KEY = "gadgets.features";
 
   private final FeatureRegistry registry;
-  private final ContainerConfig containerConfig;
-  private final Map<String, ConfigContributor> configContributors;
+  private final ConfigProcessor configProcessor;
   
   @Inject
   public ConfigInjectionProcessor(
       FeatureRegistry registry,
-      ContainerConfig containerConfig,
-      Map<String, ConfigContributor> configContributors) {
+      ConfigProcessor configProcessor) {
     this.registry = registry;
-    this.containerConfig = containerConfig;
-    this.configContributors = configContributors;
+    this.configProcessor = configProcessor;
   }
 
   public boolean process(JsRequest request, JsResponseBuilder builder) {
@@ -56,31 +51,11 @@ public class ConfigInjectionProcessor implements JsProcessor {
 
     // Append gadgets.config initialization if not in standard gadget mode.
     if (ctx.getRenderingContext() != RenderingContext.GADGET) {
-      String container = ctx.getContainer();
-
-      // Append some container specific things
-      Map<String, Object> features = containerConfig.getMap(container, GADGETS_FEATURES_KEY);
-
-      if (features != null) {
-        Map<String, Object> config =
-            Maps.newHashMapWithExpectedSize(features.size() + 2);
-        
-        // Discard what we don't care about.
-        for (String name : registry.getFeatures(jsUri.getLibs())) {
-          Object conf = features.get(name);
-          // Add from containerConfig.
-          if (conf != null) {
-            config.put(name, conf);
-          }
-          ConfigContributor contributor = configContributors.get(name);
-          if (contributor != null) {
-            contributor.contribute(config, container, request.getHost());
-          }
-        }
-        if (!config.isEmpty()) {
-          builder.appendJs(
-              "gadgets.config.init(" + JsonSerializer.serialize(config) + ");\n", CONFIG_INIT_ID);
-        }
+      Map<String, Object> config = configProcessor.getConfig(
+          ctx.getContainer(), registry.getFeatures(jsUri.getLibs()), request.getHost(), null);
+      if (!config.isEmpty()) {
+        builder.appendJs(
+            "gadgets.config.init(" + JsonSerializer.serialize(config) + ");\n", CONFIG_INIT_ID);
       }
     }
     return true;
