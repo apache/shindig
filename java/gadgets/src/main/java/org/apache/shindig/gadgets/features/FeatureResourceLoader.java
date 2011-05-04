@@ -49,7 +49,8 @@ public class FeatureResourceLoader {
   private int updateCheckFrequency = 0;  // <= 0 -> only load data once, don't check for updates.
 
   @Inject
-  public FeatureResourceLoader(HttpFetcher fetcher, TimeSource timeSource, FeatureFileSystem fileSystem) {
+  public FeatureResourceLoader(
+      HttpFetcher fetcher, TimeSource timeSource, FeatureFileSystem fileSystem) {
     this.fetcher = fetcher;
     this.timeSource = timeSource;
     this.fileSystem = fileSystem;
@@ -124,7 +125,10 @@ public class FeatureResourceLoader {
     return fileSystem.getResourceContent(resource);
   }
 
-  protected FeatureResource loadUri(Uri uri, Map<String, String> attribs) {
+  /**
+   * @throws IOException if failed to load uri (by derived classes)
+   */
+  protected FeatureResource loadUri(Uri uri, Map<String, String> attribs) throws IOException {
     String inline = attribs.get("inline");
     inline = inline != null ? inline : "";
     return new UriResource(fetcher, uri,
@@ -210,7 +214,8 @@ public class FeatureResourceLoader {
             } else if (content != null) {
               // Content existed before, file removed - log error.
               if (LOG.isLoggable(Level.WARNING)) {
-                LOG.logp(Level.WARNING, classname, "get", MessageKeys.MISSING_FILE, new Object[] {filePath});
+                LOG.logp(Level.WARNING, classname, "get", MessageKeys.MISSING_FILE,
+                    new Object[] {filePath});
               }
             }
           }
@@ -225,7 +230,8 @@ public class FeatureResourceLoader {
     private final String debugContent;
     private final String path;
 
-    private DualModeStaticResource(String path, String content, String debugContent, Map<String, String> attribs) {
+    private DualModeStaticResource(
+        String path, String content, String debugContent, Map<String, String> attribs) {
       super(attribs);
       this.content = content != null ? content : debugContent;
       this.debugContent = debugContent != null ? debugContent : content;
@@ -286,12 +292,14 @@ public class FeatureResourceLoader {
             content = response.getResponseAsString();
           } else {
             if (LOG.isLoggable(Level.WARNING)) {
-              LOG.logp(Level.WARNING, classname, "getContent", MessageKeys.UNABLE_RETRIVE_LIB, new Object[] {uri});
+              LOG.logp(Level.WARNING, classname, "getContent", MessageKeys.UNABLE_RETRIVE_LIB,
+                  new Object[] {uri});
             }
           }
         } catch (GadgetException e) {
           if (LOG.isLoggable(Level.WARNING)) {
-            LOG.logp(Level.WARNING, classname, "getContent", MessageKeys.UNABLE_RETRIVE_LIB, new Object[] {uri});
+            LOG.logp(Level.WARNING, classname, "getContent", MessageKeys.UNABLE_RETRIVE_LIB,
+                new Object[] {uri});
           }
         }
       }
