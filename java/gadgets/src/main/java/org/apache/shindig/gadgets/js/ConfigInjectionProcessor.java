@@ -51,6 +51,7 @@ public class ConfigInjectionProcessor implements JsProcessor {
 
     // Append gadgets.config initialization if not in standard gadget mode.
     if (ctx.getRenderingContext() != RenderingContext.GADGET) {
+      // TODO: subtract already-loaded from features passed to getConfig
       Map<String, Object> config = configProcessor.getConfig(
           ctx.getContainer(), registry.getFeatures(jsUri.getLibs()), request.getHost(), null);
       if (!config.isEmpty()) {
