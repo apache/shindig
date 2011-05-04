@@ -67,13 +67,14 @@ public class DefaultJsUriManager implements JsUriManager {
       jsPath.append('/');
     }
     jsPath.append(addJsLibs(ctx.getLibs()));
-    jsPath.append(JS_SUFFIX);
-    uri.setPath(jsPath.toString());
-
+    
     // Add the list of already-loaded libs
     if (!ctx.getLoadedLibs().isEmpty()) {
-      uri.addQueryParameter(Param.LOADED_LIBS.getKey(), addJsLibs(ctx.getLoadedLibs()));
+      jsPath.append("!").append(addJsLibs(ctx.getLoadedLibs()));
     }
+    
+    jsPath.append(JS_SUFFIX);
+    uri.setPath(jsPath.toString());
 
     // Standard container param, as JS may be container-specific.
     uri.addQueryParameter(Param.CONTAINER.getKey(), container);
@@ -173,12 +174,9 @@ public class DefaultJsUriManager implements JsUriManager {
       path = path.substring(1);
     }
 
-    Collection<String> libs = getJsLibs(path);
-    String haveParam = uri.getQueryParameter(Param.LOADED_LIBS.getKey());
-    if (haveParam == null) {
-      haveParam = "";
-    }
-    Collection<String> have = getJsLibs(haveParam);
+    String[] splits = path.split("!");
+    Collection<String> libs = getJsLibs(splits.length >= 1 ? splits[0] : "");
+    Collection<String> have = getJsLibs(splits.length >= 2 ? splits[1] : "");
     UriStatus status = UriStatus.VALID_UNVERSIONED;
     String version = uri.getQueryParameter(Param.VERSION.getKey());
     if (version != null && versioner != null) {

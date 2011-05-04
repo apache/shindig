@@ -192,8 +192,8 @@ public class DefaultJsUriManagerTest {
     assertFalse(manager.hadError());
     assertEquals("http", jsUri.getScheme());
     assertEquals("www.js.org", jsUri.getAuthority());
-    assertEquals("/gadgets/js/" + addJsLibs(extern) + JS_SUFFIX, jsUri.getPath());
-    assertEquals("another:onemore", jsUri.getQueryParameter(Param.LOADED_LIBS.getKey()));
+    assertEquals("/gadgets/js/" + addJsLibs(extern) + "!" + addJsLibs(loaded) +
+        JS_SUFFIX, jsUri.getPath());
     assertEquals(CONTAINER, jsUri.getQueryParameter(Param.CONTAINER.getKey()));
     assertEquals("0", jsUri.getQueryParameter(Param.NO_CACHE.getKey()));
     assertEquals("0", jsUri.getQueryParameter(Param.DEBUG.getKey()));
