@@ -35,8 +35,8 @@ if (!gadgets.rpctx.flash) {  // make lib resilient to double-inclusion
     var swfId = "___xpcswf";
     var swfUrl = null;
     var usingFlash = false;
-    var process = null;
-    var ready = null;
+    var processFn = null;
+    var readyFn = null;
     var secureReceivers = {};
     var relayHandle = null;
 
@@ -54,6 +54,27 @@ if (!gadgets.rpctx.flash) {  // make lib resilient to double-inclusion
     var readyMsgs = {};
 
     var myLoc = window.location.protocol + "//" + window.location.host;
+    var JSL_NS = '___jsl';
+    var METHODS_NS = '_fm';
+    var bucketNs;
+
+    function setupMethodBucket() {
+      window[JSL_NS] = window[JSL_NS] || {};
+      var container = window[JSL_NS];
+      var bucket = container[METHODS_NS] = {};
+      bucketNs = JSL_NS + "." + METHODS_NS;
+      return bucket;
+    }
+
+    var methodBucket = setupMethodBucket();
+
+    function exportMethod(method, requestedName) {
+      var exported = function() {
+        method.apply({}, arguments);
+      };
+      methodBucket[requestedName] = methodBucket[requestedName] || exported;
+      return bucketNs + "." + requestedName;
+    }
 
     function getChannelId(receiverId) {
       return receiverId === ".." ? gadgets.rpc.RPC_ID : receiverId;
@@ -72,7 +93,7 @@ if (!gadgets.rpctx.flash) {  // make lib resilient to double-inclusion
 
     function relayLoader() {
       if (relayHandle === null && document.body && swfUrl) {
-        var theSwf = swfUrl + '?cb=' + Math.random() + '&origin=' + myLoc;
+        var theSwf = swfUrl + '?cb=' + Math.random() + '&origin=' + myLoc + '&jsl=1';
 
         var containerDiv = document.createElement('div');
         containerDiv.style.height = '1px';
@@ -130,6 +151,25 @@ if (!gadgets.rpctx.flash) {  // make lib resilient to double-inclusion
       }
     }
 
+    function ready() {
+      flushHandshakes();
+      if (setupHandle !== null) {
+        window.clearTimeout(setupHandle);
+      }
+      setupHandle = null;
+    }
+    exportMethod(ready, 'ready');
+
+    function setupDone() {
+      // Called by SWF only for role_id = "INNER" ie when initializing to parent.
+      // Instantiates a polling handshake mechanism which ensures that any enqueued
+      // messages remain so until each side is ready to send.
+      if (!readyMsgs[".."] && readyHandle === null) {
+        readyHandle = window.setTimeout(childReadyPoller, READY_TIMEOUT_MS);
+      }
+    }
+    exportMethod(setupDone, 'setupDone');
+
     function call(targetId, from, rpc) {
       var targetOrigin = gadgets.rpc.getTargetOrigin(targetId);
       var rpcKey = gadgets.rpc.getAuthToken(targetId);
@@ -138,6 +178,28 @@ if (!gadgets.rpctx.flash) {  // make lib resilient to double-inclusion
       messageHandler.call(relayHandle, gadgets.json.stringify(rpc), targetOrigin);
       return true;
     }
+
+    function receiveMessage(message, fromOrigin, toOrigin) {
+      var jsonMsg = gadgets.json.parse(message);
+      var channelReady = jsonMsg[SWF_CHANNEL_READY];
+      if (channelReady) {
+        // Special message indicating that a ready message has been received, indicating
+        // the sender is now prepared to receive messages. This type of message is instigated
+        // by child context in polling fashion, and is responded-to by parent context(s).
+        // If readyHandle is non-null, then it should first be cleared.
+        // This method is OK to call twice, if it occurs in a race.
+        readyFn(channelReady, true);
+        readyMsgs[channelReady] = true;
+        if (channelReady !== "..") {
+          // Child-to-parent: immediately signal that parent is ready.
+          // Now that we know that child can receive messages, it's enough to send once.
+          sendChannelReady(channelReady);
+        }
+        return;
+      }
+      window.setTimeout(function() { processFn(jsonMsg, fromOrigin); }, 0);
+    }
+    exportMethod(receiveMessage, 'receiveMessage');
 
     function sendChannelReady(receiverId) {
       var myId = gadgets.rpc.RPC_ID;
@@ -156,9 +218,9 @@ if (!gadgets.rpctx.flash) {  // make lib resilient to double-inclusion
         return true;
       },
 
-      init: function(processFn, readyFn) {
-        process = processFn;
-        ready = readyFn;
+      init: function(processIn, readyIn) {
+        processFn = processIn;
+        readyFn = readyIn;
         usingFlash = true;
         return true;
       },
@@ -183,43 +245,9 @@ if (!gadgets.rpctx.flash) {  // make lib resilient to double-inclusion
       call: call,
 
       // Methods called by relay SWF. Should be considered private.
-      _receiveMessage: function(message, fromOrigin, toOrigin) {
-        var jsonMsg = gadgets.json.parse(message);
-        var channelReady = jsonMsg[SWF_CHANNEL_READY];
-        if (channelReady) {
-          // Special message indicating that a ready message has been received, indicating
-          // the sender is now prepared to receive messages. This type of message is instigated
-          // by child context in polling fashion, and is responded-to by parent context(s).
-          // If readyHandle is non-null, then it should first be cleared.
-          // This method is OK to call twice, if it occurs in a race.
-          ready(channelReady, true);
-          readyMsgs[channelReady] = true;
-          if (channelReady !== "..") {
-            // Child-to-parent: immediately signal that parent is ready.
-            // Now that we know that child can receive messages, it's enough to send once.
-            sendChannelReady(channelReady);
-          }
-          return;
-        }
-        window.setTimeout(function() { process(jsonMsg, fromOrigin); }, 0);
-      },
-
-      _ready: function() {
-        flushHandshakes();
-        if (setupHandle !== null) {
-          window.clearTimeout(setupHandle);
-        }
-        setupHandle = null;
-      },
-
-      _setupDone: function() {
-        // Called by SWF only for role_id = "INNER" ie when initializing to parent.
-        // Instantiates a polling handshake mechanism which ensures that any enqueued
-        // messages remain so until each side is ready to send.
-        if (!readyMsgs[".."] && readyHandle === null) {
-          readyHandle = window.setTimeout(childReadyPoller, READY_TIMEOUT_MS);
-        }
-      }
+      _receiveMessage: receiveMessage,
+      _ready: ready,
+      _setupDone: setupDone
     };
   }();
 

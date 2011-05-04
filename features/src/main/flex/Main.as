@@ -116,6 +116,17 @@ class Main {
       my_origin = _level0.origin;
     }
 
+    var ready_method:String = "gadgets.rpctx.flash._ready";
+    var recv_method:String = "gadgets.rpctx.flash._receiveMessage";
+    var setup_done_method:String = "gadgets.rpctx.flash._setupDone";
+
+    if (_level0.jsl == "1") {
+      // Use 'safe-exported' methods.
+      ready_method = "___jsl._fm.ready";
+      recv_method = "___jsl._fm.receiveMessage";
+      setup_done_method = "___jsl._fm.setupDone";
+    }
+
     // Flash doesn't accept/honor ports, so we strip one if present
     // for canonicalization.
     var domain:String = stripPortIfPresent(
@@ -132,8 +143,7 @@ class Main {
     }
 
     // Install global communication channel setup method.
-    ExternalInterface.addCallback("setup", { },
-        function(rpc_key:String, channel_id:String, role:String) {
+    ExternalInterface.addCallback("setup", { }, function(rpc_key:String, channel_id:String, role:String) {
       var other_role:String;
 
       if (role == "INNER") {
@@ -148,8 +158,7 @@ class Main {
       receiving_lc.receiveMessage =
           function(to_origin:String, from_origin:String, in_rpc_key:String, message:String) {
         if ((to_origin === "*" || to_origin === my_origin) && (in_rpc_key == rpc_key)) {
-          ExternalInterface.call("gadgets.rpctx.flash._receiveMessage",
-              escFn(message), escFn(from_origin), escFn(to_origin));
+          ExternalInterface.call(recv_method, escFn(message), escFn(from_origin), escFn(to_origin));
         }
       };
 
@@ -168,11 +177,11 @@ class Main {
         // This in turn initiates a child-to-parent polling procedure to complete a bidirectional
         // communication handshake, since otherwise meaningful messages could be passed and dropped
         // before the receiving end was ready.
-        ExternalInterface.call("gadgets.rpctx.flash._setupDone");
+        ExternalInterface.call(setup_done_method);
       }
     });
 
     // Signal completion of the setup callback to calling-context JS for proper ordering.
-    ExternalInterface.call("gadgets.rpctx.flash._ready");
+    ExternalInterface.call(ready_method);
   }
 }
