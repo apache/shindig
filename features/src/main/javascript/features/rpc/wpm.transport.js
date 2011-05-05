@@ -45,7 +45,6 @@ if (!gadgets.rpctx.wpm) {  // make lib resilient to double-inclusion
 
   gadgets.rpctx.wpm = function() {
     var process, ready;
-    var isForceSecure = false;
 
     function attachBrowserEvent(eventName, callback, useCapture) {
       if (typeof window.addEventListener != 'undefined') {
@@ -65,25 +64,23 @@ if (!gadgets.rpctx.wpm) {  // make lib resilient to double-inclusion
 
     function onmessage(packet) {
       var rpc = gadgets.json.parse(packet.data);
-      if (isForceSecure) {
-        if (!rpc || !rpc['f']) {
-          return;
-        }
+      if (!rpc || !rpc['f']) {
+        return;
+      }
 
-        // for security, check origin against expected value
-        var origRelay = gadgets.rpc.getRelayUrl(rpc['f']) ||
-            gadgets.util.getUrlParameters()['parent'];
-        var origin = gadgets.rpc.getOrigin(origRelay);
+      // for security, check origin against expected value
+      var origRelay = gadgets.rpc.getRelayUrl(rpc['f']) ||
+          gadgets.util.getUrlParameters()['parent'];
+      var origin = gadgets.rpc.getOrigin(origRelay);
 
-        // Opera's "message" event does not have an "origin" property (at least,
-        // it doesn't in version 9.64;  presumably, it will in version 10).  If
-        // event.origin does not exist, use event.domain.  The other difference is that
-        // while event.origin looks like <scheme>://<hostname>:<port>, event.domain
-        // consists only of <hostname>.
-        if (typeof packet.origin !== "undefined" ? packet.origin !== origin :
-            packet.domain !== /^.+:\/\/([^:]+).*/.exec(origin)[1]) {
-          return;
-        }
+      // Opera's "message" event does not have an "origin" property (at least,
+      // it doesn't in version 9.64;  presumably, it will in version 10).  If
+      // event.origin does not exist, use event.domain.  The other difference is that
+      // while event.origin looks like <scheme>://<hostname>:<port>, event.domain
+      // consists only of <hostname>.
+      if (typeof packet.origin !== "undefined" ? packet.origin !== origin :
+          packet.domain !== /^.+:\/\/([^:]+).*/.exec(origin)[1]) {
+        return;
       }
       process(rpc, packet.origin);
     }
@@ -108,16 +105,11 @@ if (!gadgets.rpctx.wpm) {  // make lib resilient to double-inclusion
         return true;
       },
 
-      setup: function(receiverId, token, forceSecure) {
-        isForceSecure = forceSecure;
+      setup: function(receiverId, token) {
         // If we're a gadget, send an ACK message to indicate to container
         // that we're ready to receive messages.
         if (receiverId === '..') {
-          if (isForceSecure) {
-            gadgets.rpc._createRelayIframe(token);
-          } else {
-            gadgets.rpc.call(receiverId, gadgets.rpc.ACK);
-          }
+          gadgets.rpc._createRelayIframe(token);
         }
         return true;
       },

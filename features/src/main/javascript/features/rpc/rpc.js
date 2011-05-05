@@ -233,7 +233,14 @@ if (!window['gadgets']['rpc']) { // make lib resilient to double-inclusion
       function onunload() {
         mainPageUnloading = true;
       }
-      gadgets.util.attachBrowserEvent(window, 'unload', onunload, false);
+
+      // TODO: use common helper
+      if (typeof window.addEventListener != 'undefined') {
+        window.addEventListener('unload', onunload, false);
+      } else if (typeof window.attachEvent != 'undefined') {
+        window.attachEvent('onunload', onunload);
+      }
+
       hookedUnload = true;
     }
 
@@ -492,7 +499,7 @@ if (!window['gadgets']['rpc']) { // make lib resilient to double-inclusion
      * RPC mechanism. Gadgets, in turn, will complete the setup
      * of the channel once they send their first messages.
      */
-    function setupFrame(frameId, token, forcesecure) {
+    function setupFrame(frameId, token) {
       if (setup[frameId] === true) {
         return;
       }
@@ -503,7 +510,7 @@ if (!window['gadgets']['rpc']) { // make lib resilient to double-inclusion
 
       var tgtFrame = getTargetWin(frameId);
       if (frameId === '..' || tgtFrame != null) {
-        if (transport.setup(frameId, token, forcesecure) === true) {
+        if (transport.setup(frameId, token) === true) {
           setup[frameId] = true;
           return;
         }
@@ -511,7 +518,7 @@ if (!window['gadgets']['rpc']) { // make lib resilient to double-inclusion
 
       if (setup[frameId] !== true && setup[frameId]++ < SETUP_FRAME_MAX_TRIES) {
         // Try again in a bit, assuming that frame will soon exist.
-        window.setTimeout(function() { setupFrame(frameId, token, forcesecure); },
+        window.setTimeout(function() { setupFrame(frameId, token); },
                         SETUP_FRAME_TIMEOUT);
       } else {
         // Fail: fall back for this gadget.
@@ -625,7 +632,7 @@ if (!window['gadgets']['rpc']) { // make lib resilient to double-inclusion
      * @member gadgets.rpc
      * @deprecated
      */
-    function setAuthToken(targetId, token, forcesecure) {
+    function setAuthToken(targetId, token) {
       token = token || '';
 
       // Coerce token to a String, ensuring that all authToken values
@@ -633,10 +640,10 @@ if (!window['gadgets']['rpc']) { // make lib resilient to double-inclusion
       // in the process(rpc) method.
       authToken[targetId] = String(token);
 
-      setupFrame(targetId, token, forcesecure);
+      setupFrame(targetId, token);
     }
 
-    function setupContainerGadgetContext(rpctoken, opt_forcesecure) {
+    function setupContainerGadgetContext(rpctoken) {
       function init(config) {
         var cfg = config ? config['rpc'] : {};
         var configLegacy = cfg['useLegacyProtocol'];
@@ -652,26 +659,25 @@ if (!window['gadgets']['rpc']) { // make lib resilient to double-inclusion
           transport = gadgets.rpctx.ifpc;
           transport.init(process, transportReady);
         }
-        setAuthToken('..', rpctoken, opt_forcesecure || params['forcesecure']);
+        setAuthToken('..', rpctoken);
         passReferrer = String(cfg['passReferrer']) === 'true';
       }
       gadgets.config.register('rpc', null, init);
     }
 
-    function setupContainerGenericIframe(rpctoken, opt_parent, opt_forcesecure) {
+    function setupContainerGenericIframe(rpctoken, opt_parent) {
       // Generic child IFRAME setting up connection w/ its container.
       // Use the opt_parent param if provided, or the "parent" query param
       // if found -- otherwise, do nothing since this call might be initiated
       // automatically at first, then actively later in IFRAME code.
-      var forcesecure = opt_forcesecure || params['forcesecure'] || false;
       var parent = opt_parent || params['parent'];
       if (parent) {
         setRelayUrl('..', parent);
-        setAuthToken('..', rpctoken, forcesecure);
+        setAuthToken('..', rpctoken);
       }
     }
 
-    function setupChildIframe(gadgetId, opt_frameurl, opt_authtoken, opt_forcesecure) {
+    function setupChildIframe(gadgetId, opt_frameurl, opt_authtoken) {
       if (gadgetId.charAt(0) != '/') {
         // only set up child (and not sibling) iframe
         if (!gadgets.util) {
@@ -692,8 +698,7 @@ if (!window['gadgets']['rpc']) { // make lib resilient to double-inclusion
       // The auth token is parsed from child params (rpctoken) or overridden.
       var childParams = gadgets.util.getUrlParameters(relayUrl);
       var rpctoken = opt_authtoken || childParams['rpctoken'];
-      var forcesecure = opt_forcesecure || childParams['forcesecure'];
-      setAuthToken(gadgetId, rpctoken, forcesecure);
+      setAuthToken(gadgetId, rpctoken);
     }
 
     /**
@@ -738,20 +743,19 @@ if (!window['gadgets']['rpc']) { // make lib resilient to double-inclusion
      * @param {string} targetId
      * @param {string=} opt_receiverurl
      * @param {string=} opt_authtoken
-     * @param {boolean=} opt_forcesecure
      */
-    function setupReceiver(targetId, opt_receiverurl, opt_authtoken, opt_forcesecure) {
+    function setupReceiver(targetId, opt_receiverurl, opt_authtoken) {
       if (targetId === '..') {
         // Gadget/IFRAME to container.
         var rpctoken = opt_authtoken || params['rpctoken'] || params['ifpctok'] || '';
         if (window['__isgadget'] === true) {
-          setupContainerGadgetContext(rpctoken, opt_forcesecure);
+          setupContainerGadgetContext(rpctoken);
         } else {
-          setupContainerGenericIframe(rpctoken, opt_receiverurl, opt_forcesecure);
+          setupContainerGenericIframe(rpctoken, opt_receiverurl);
         }
       } else {
         // Container to child.
-        setupChildIframe(targetId, opt_receiverurl, opt_authtoken, opt_forcesecure);
+        setupChildIframe(targetId, opt_receiverurl, opt_authtoken);
       }
     }
 

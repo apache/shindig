@@ -36,7 +36,7 @@ if (!gadgets.rpctx.noop) {  // make lib resilient to double-inclusion
         return true;
       },
 
-      setup: function(receiverId, token, forceSecure) {
+      setup: function(receiverId, token) {
         return true;
       },
 

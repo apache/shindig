@@ -37,7 +37,6 @@ if (!gadgets.rpctx.flash) {  // make lib resilient to double-inclusion
     var usingFlash = false;
     var processFn = null;
     var readyFn = null;
-    var secureReceivers = {};
     var relayHandle = null;
 
     var LOADER_TIMEOUT_MS = 100;
@@ -225,7 +224,7 @@ if (!gadgets.rpctx.flash) {  // make lib resilient to double-inclusion
         return true;
       },
 
-      setup: function(receiverId, token, forceSecure) {
+      setup: function(receiverId, token) {
         // Perform all setup, including embedding of relay SWF (a one-time
         // per Window operation), in this method. We cannot assume document.body
         // exists however, since child-to-parent setup is often done in head.
@@ -233,7 +232,6 @@ if (!gadgets.rpctx.flash) {  // make lib resilient to double-inclusion
         // If body already exists then this enqueueing will immediately flush;
         // otherwise polling will occur until the SWF has completed loading, at
         // which point all connections will complete their handshake.
-        secureReceivers[receiverId] = !!forceSecure;
         pendingHandshakes.push({ token: token, targetId: receiverId });
         if (relayHandle === null && setupHandle === null) {
           setupHandle = window.setTimeout(relayLoader, LOADER_TIMEOUT_MS);
