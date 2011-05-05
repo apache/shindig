@@ -50,6 +50,7 @@ public interface UriCommon {
     COMPILE_MODE("compile"),
     JSLOAD("jsload"),
     ONLOAD("onload"),
+    LOADED("loaded"),
     NO_HINT("nohint"),
     REPOSITORY_ID("r"),
 

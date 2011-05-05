@@ -251,6 +251,23 @@ public class DefaultJsUriManagerTest {
   }
 
   @Test
+  public void processPathWithLoadedJs() throws GadgetException {
+    ContainerConfig config = mockConfig("http://host", "/gadgets/js");
+    TestDefaultJsUriManager manager = makeManager(config, null);
+    Uri testUri = Uri.parse("http://host/gadgets/js/feature:another!load1:load2.js?" +
+        Param.LOADED.getKey() + "=load3:load4&" +
+        Param.CONTAINER.getKey() + '=' + CONTAINER);
+    JsUri jsUri = manager.processExternJsUri(testUri);
+    assertFalse(manager.hadError());
+    List<String> extern = Lists.newArrayList("feature", "another");
+    List<String> loadsInPath = Lists.newArrayList("load1", "load2");
+    List<String> loadsInQueryParam = Lists.newArrayList("load3", "load4");
+    assertCollectionEquals(jsUri.getLibs(), extern);
+    assertCollectionEquals(jsUri.getLoadedLibs(), Lists.newArrayList(
+        "load1", "load2", "load3", "load4"));
+  }
+
+  @Test
   public void processValidUnversionedNoVersioner() throws GadgetException {
     String targetHost = "target-host.org";
     ContainerConfig config = mockConfig("http://" + targetHost, "/gadgets/js");

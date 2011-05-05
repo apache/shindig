@@ -33,17 +33,22 @@ import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.uri.UriCommon.Param;
 
 import java.util.Collection;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Generates and validates URLs serviced by a gadget JavaScript service (JsServlet).
  */
 public class DefaultJsUriManager implements JsUriManager {
+  
   static final String JS_HOST_PARAM = "gadgets.uri.js.host";
   static final String JS_PATH_PARAM = "gadgets.uri.js.path";
   static final JsUri INVALID_URI = new JsUri(UriStatus.BAD_URI);
   protected static final String JS_SUFFIX = ".js";
   protected static final String JS_DELIMITER = ":";
 
+  private static final Logger LOG = Logger.getLogger(DefaultJsUriManager.class.getName());
+  
   private final ContainerConfig config;
   private final Versioner versioner;
 
@@ -176,7 +181,18 @@ public class DefaultJsUriManager implements JsUriManager {
 
     String[] splits = path.split("!");
     Collection<String> libs = getJsLibs(splits.length >= 1 ? splits[0] : "");
-    Collection<String> have = getJsLibs(splits.length >= 2 ? splits[1] : "");
+    
+    String haveString = (splits.length >= 2 ? splits[1] : "");
+    String haveQueryParam = uri.getQueryParameter(Param.LOADED.getKey());
+    if (haveQueryParam == null) {
+      haveQueryParam = "";
+    } else {
+      LOG.log(Level.WARNING, "Using deprecated query param ?loaded=c:d in URL. " +
+          "Replace by specifying it in path as /gadgets/js/a:b!c:d.js");
+    }
+    haveString = haveString + JS_DELIMITER + haveQueryParam;
+    Collection<String> have = getJsLibs(haveString);
+    
     UriStatus status = UriStatus.VALID_UNVERSIONED;
     String version = uri.getQueryParameter(Param.VERSION.getKey());
     if (version != null && versioner != null) {
