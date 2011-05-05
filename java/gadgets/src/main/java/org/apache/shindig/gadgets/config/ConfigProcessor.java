@@ -17,11 +17,14 @@
  */
 package org.apache.shindig.gadgets.config;
 
+import com.google.inject.ImplementedBy;
+
 import java.util.List;
 import java.util.Map;
 
 import org.apache.shindig.gadgets.Gadget;
 
+@ImplementedBy(DefaultConfigProcessor.class)
 public interface ConfigProcessor {
   // TODO: Clean up ConfigContributor interfaces so this lame uber-interface is not needed.
   Map<String, Object> getConfig(String container, List<String> features, String host,
