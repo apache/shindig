@@ -168,7 +168,21 @@ public class ModulePrefs {
       String substituted = substituter.substituteString(attr.getValue());
       attributes.put(attr.getKey(), substituted);
     }
-
+    
+    ImmutableMap.Builder<String, Feature> featureBuilder= ImmutableMap.builder();
+    for (Map.Entry<String, Feature> feature : features.entrySet()) {
+      ImmutableMultimap.Builder<String, String> params = ImmutableMultimap.builder();
+      for (Map.Entry<String, String> param: feature.getValue().getParams().entries()){     
+        String substituted=substituter.substituteString(param.getValue());
+        params.put(param.getKey(), substituted);
+      }
+      Feature oldFeature=feature.getValue();
+      Feature newFeature=new Feature(oldFeature.getName(), params.build(), oldFeature.getRequired(), oldFeature.getViews());
+      featureBuilder.put(feature.getKey(), newFeature);
+    }
+    this.features=featureBuilder.build();
+    
+    
     this.extraElements = ImmutableMultimap.copyOf(prefs.extraElements);
     this.attributes = attributes.build();
     this.needsUserPrefSubstitution = prefs.needsUserPrefSubstitution;

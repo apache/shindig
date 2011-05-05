@@ -165,4 +165,21 @@ public class Feature {
     String viewNames = XmlUtil.getAttribute(feature, "views", "").trim();
     this.views = ImmutableSet.copyOf(Splitter.on(',').omitEmptyStrings().trimResults().split(viewNames));
   }
+
+  
+  /**
+   * @param name feature name
+   * @param params feature parameters
+   * @param required true if feature is required, false otherwise
+   * @param views views declared in the feature.
+   */
+  public Feature(String name, Multimap<String, String> params,
+      boolean required, Set<String> views) {
+    this.name = name;
+    this.params = params;
+    this.required = required;
+    this.views = views;
+  }
+  
+ 
 }

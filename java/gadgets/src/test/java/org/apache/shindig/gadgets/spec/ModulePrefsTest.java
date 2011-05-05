@@ -256,12 +256,16 @@ public class ModulePrefsTest {
                  "  <Icon>__MSG_icon__</Icon>" +
                  "  <Link rel='__MSG_rel__' href='__MSG_link_href__'/>" +
                  "  <Preload href='__MSG_pre_href__'/>" +
+                 "    <Require feature=\"testFeature\">" +
+                 "           <Param name=\"test_param\">__MSG_test_param__</Param>" +
+                 "  </Require>" +
                  "</ModulePrefs>";
     String title = "blah";
     String icon = "http://example.org/icon.gif";
     String rel = "foo-bar";
     String linkHref = "http://example.org/link.html";
     String preHref = "http://example.org/preload.html";
+    String testParam = "bar-foo"; 
 
     ModulePrefs prefs = new ModulePrefs(XmlUtil.parse(xml), SPEC_URL);
     Substitutions subst = new Substitutions();
@@ -270,6 +274,7 @@ public class ModulePrefsTest {
     subst.addSubstitution(Substitutions.Type.MESSAGE, "rel", rel);
     subst.addSubstitution(Substitutions.Type.MESSAGE, "link_href", linkHref);
     subst.addSubstitution(Substitutions.Type.MESSAGE, "pre_href", preHref);
+    subst.addSubstitution(Substitutions.Type.MESSAGE, "test_param", testParam);
     prefs = prefs.substitute(subst);
 
     assertEquals(title, prefs.getTitle());
@@ -277,6 +282,7 @@ public class ModulePrefsTest {
     assertEquals(rel, prefs.getLinks().get(rel).getRel());
     assertEquals(linkHref, prefs.getLinks().get(rel).getHref().toString());
     assertEquals(preHref, prefs.getPreloads().get(0).getHref().toString());
+    assertEquals(testParam, prefs.getFeatures().get("testFeature").getParam("test_param"));
   }
 
   @Test
