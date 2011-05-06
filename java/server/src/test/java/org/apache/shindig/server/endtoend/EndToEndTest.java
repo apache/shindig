@@ -111,6 +111,7 @@ public class EndToEndTest {
     executeAllPageTests("messageBundle");
   }
 
+  @Ignore("Temporarily disabled: test does not complete on some platforms eg OSX")
   @Test
   public void jsonParse() throws Exception {
     executeAllPageTests("jsonTest");

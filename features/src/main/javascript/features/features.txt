@@ -43,6 +43,7 @@ features/dynamic-height.util/feature.xml
 features/dynamic-height/feature.xml
 features/exportjs/feature.xml
 features/flash/feature.xml
+features/gadgets.json.ext/feature.xml
 features/i18n/feature.xml
 features/jsondom/feature.xml
 features/locked-domain/feature.xml

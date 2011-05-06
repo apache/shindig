@@ -19,19 +19,140 @@
 -->
 <Module>
   <ModulePrefs title="EndToEndTest">
+    <Require feature="gadgets.json.ext" />
   </ModulePrefs>
   <Content type="html">
     <![CDATA[
       <script type="text/javascript" src="/testframework.js"></script>
       <script type="text/javascript">
+        function createDom(xmlString) {
+          var xmlDoc;
+          if (window.DOMParser) {
+            var parser = new DOMParser();
+            xmlDoc = parser.parseFromString(xmlString, "text/xml");
+          } else {
+            xmlDoc = new ActiveXObject("Microsoft.XMLDOM");
+            xmlDoc.async = "false";
+           xmlDoc.loadXML(xmlString);
+          }
+          return xmlDoc;
+        };
+
+        function createJsonString(xmlString) {
+          var dom = createDom(xmlString);
+          var result = gadgets.json.xml.convertXmlToJson(dom);
+          return gadgets.json.stringify(result);
+        };
 
         var tests = {
-            jsonStringifyTest: function() {
+          jsonStringifyTest: function() {
             var val = {foo: 1, bar: [0, 1, 2], baz: {key: 'value'}};
             var str = gadgets.json.stringify(val);
             assertTrue("Serialization missing scalar value", /"foo":1/.test(str));
             assertTrue("Serialization missing array value", /"bar":\[0,1,2\]/.test(str));
             assertTrue("Serialization missing literal value", /"baz":\{"key":"value"\}/.test(str));
+            finished();
+          },
+          jsonConvertXmlToJsonTest : function() {
+            var domString = createJsonString('<e />');
+            assertEquals("Json matches " + domString, '{"e":null}', domString);
+
+            domString = createJsonString('<e>text</e>');
+            assertEquals("Json matches " + domString, '{"e":"text"}', domString);
+
+            domString = createJsonString('<e><a>text</a><b>text</b></e>');
+            assertEquals("Json matches " + domString, '{"e":{"a":"text","b":"text"}}', domString);
+
+            domString = createJsonString('<e><a>text</a><a>text</a></e>');
+            assertEquals("Json matches " + domString, '{"e":{"a":["text","text"]}}', domString);
+
+            domString = createJsonString('<e>text<a>text</a></e>');
+            assertEquals("Json matches " + domString, '{"e":{"#text":"text","a":"text"}}', domString);
+            
+            domString = createJsonString('<e><a id="id1"/><a id="id2"/></e>');
+            assertEquals("Json matches " + domString, '{"e":{"a":[{"@id":"id1"},{"@id":"id2"}]}}', domString);
+
+            domString = createJsonString(
+              '<ol class="xoxo">' + 
+                '<li>' + 
+                  'Subject 1' + 
+                  '<ol>' + 
+                    '<li>subpoint a</li>' + 
+                    '<li>subpoint b</li>' + 
+                  '</ol>' + 
+                '</li>' + 
+                '<li attr="value">' + 
+                  '<span>Subject 2</span>' + 
+                  '<ol compact="compact">' + 
+                    '<li>subpoint c</li>' + 
+                    '<li>subpoint d</li>' + 
+                  '</ol>' + 
+                '</li>' + 
+                '<li>' + 
+                  '<span>Subject 2</span>' + 
+                  '<ol>' + 
+                    '<li>subpoint c</li>' + 
+                    '<li>subpoint d</li>' + 
+                  '</ol>' + 
+                '</li>' + 
+              '</ol>');
+            assertEquals("Json matches " + domString, 
+              '{' + 
+                '"ol":{' + 
+                  '"@class":"xoxo",' + 
+                  '"li":[' + 
+                    '{' + 
+                      '"#text":"Subject 1",' + 
+                      '"ol":{' + 
+                        '"li":["subpoint a","subpoint b"]' + 
+                      '}' + 
+                    '},' + 
+                    '{' + 
+                      '"@attr":"value",' + 
+                      '"span":"Subject 2",' + 
+                      '"ol":{' + 
+                        '"@compact":"compact",' + 
+                        '"li":["subpoint c","subpoint d"]' + 
+                      '}' + 
+                    '},' + 
+                    '{' + 
+                      '"span":"Subject 2",' + 
+                      '"ol":{' + 
+                        '"li":["subpoint c","subpoint d"]' + 
+                      '}' + 
+                    '}' + 
+                  ']' + 
+                '}' + 
+              '}', domString);
+
+            domString = createJsonString(
+              '<span class="vevent">' + 
+                '<a class="url" href="http://www.web2con.com/">' + 
+                  '<span class="summary">Web 2.0 Conference</span>' + 
+                  '<abbr class="dtstart" title="2005-10-05">October 5</abbr>' + 
+                  '<abbr class="dtend" title="2005-10-08">7</abbr>' + 
+                  '<span class="location">Argent Hotel, San Francisco, CA</span>' + 
+                '</a>' + 
+              '</span>');
+            assertEquals("Json matches " + domString, 
+              '{' + 
+                '"span":{' + 
+                  '"@class":"vevent",' + 
+                  '"a":{' + 
+                    '"@class":"url",' + 
+                    '"@href":"http://www.web2con.com/",' + 
+                    '"span":[' + 
+                      '{"@class":"summary","#text":"Web 2.0 Conference"},' + 
+                      '{"@class":"location","#text":"Argent Hotel, San Francisco, CA"}' + 
+                    '],' + 
+                    '"abbr":[' + 
+                      '{"@title":"2005-10-05","@class":"dtstart","#text":"October 5"},' + 
+                      '{"@title":"2005-10-08","@class":"dtend","#text":"7"}' + 
+                    ']' + 
+                  '}' + 
+                '}' + 
+              '}', domString);
+
             finished();
           }
         }
