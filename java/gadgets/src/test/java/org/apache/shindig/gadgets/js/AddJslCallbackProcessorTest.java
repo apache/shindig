@@ -26,13 +26,13 @@ import org.easymock.IMocksControl;
 import org.junit.Before;
 import org.junit.Test;
 
-public class AddJsLoadCallbackProcessorTest {
+public class AddJslCallbackProcessorTest {
   
   private IMocksControl control;
   private JsUri jsUri;
   private JsRequest request;
   private JsResponseBuilder response;
-  private AddJsLoadCallbackProcessor processor;  
+  private AddJslCallbackProcessor processor;  
   
   @Before
   public void setUp() {
@@ -40,7 +40,7 @@ public class AddJsLoadCallbackProcessorTest {
     jsUri = control.createMock(JsUri.class);
     request = control.createMock(JsRequest.class);
     response = new JsResponseBuilder();
-    processor = new AddJsLoadCallbackProcessor();
+    processor = new AddJslCallbackProcessor();
     EasyMock.expect(request.getJsUri()).andReturn(jsUri);
   }
 
@@ -49,7 +49,7 @@ public class AddJsLoadCallbackProcessorTest {
     EasyMock.expect(jsUri.isNohint()).andReturn(false);
     control.replay();
     assertTrue(processor.process(request, response));
-    assertEquals(AddJsLoadCallbackProcessor.JSL_CALLBACK_JS,
+    assertEquals(AddJslCallbackProcessor.JSL_CALLBACK_JS,
         response.build().toJsString());
     control.verify();
   }

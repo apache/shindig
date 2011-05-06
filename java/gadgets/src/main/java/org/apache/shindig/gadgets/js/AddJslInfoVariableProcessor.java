@@ -36,7 +36,7 @@ import java.util.List;
  * 
  * Used when loading embedded JS configuration in core.config/config.js.
  */
-public class InjectJsInfoVariableProcessor implements JsProcessor {
+public class AddJslInfoVariableProcessor implements JsProcessor {
   private static final String CODE_ID = "[jsload-code-info]";
 
   @VisibleForTesting
@@ -48,7 +48,7 @@ public class InjectJsInfoVariableProcessor implements JsProcessor {
   private final JsUriManager jsUriManager;
 
   @Inject
-  public InjectJsInfoVariableProcessor(JsUriManager jsUriManager) {
+  public AddJslInfoVariableProcessor(JsUriManager jsUriManager) {
     this.jsUriManager = jsUriManager;
   }
 

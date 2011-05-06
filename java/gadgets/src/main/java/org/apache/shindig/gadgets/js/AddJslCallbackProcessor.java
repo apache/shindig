@@ -22,7 +22,7 @@ import com.google.common.annotations.VisibleForTesting;
 
 import org.apache.shindig.gadgets.uri.JsUriManager.JsUri;
 
-public class AddJsLoadCallbackProcessor implements JsProcessor {
+public class AddJslCallbackProcessor implements JsProcessor {
   private static final String CODE_ID = "[jsload-callback]";
   
   @VisibleForTesting

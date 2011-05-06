@@ -36,9 +36,9 @@ import java.util.List;
 
 
 /**
- * Tests for {@link InjectJsInfoVariableProcessor}.
+ * Tests for {@link AddJslInfoVariableProcessor}.
  */
-public class InjectJsInfoVariableProcessorTest {
+public class AddJslInfoVariableProcessorTest {
 
   private static final String URI = "http://localhost";
   private static final List<String> LIBS = ImmutableList.of("fo'o", "bar", "baz");
@@ -52,7 +52,7 @@ public class InjectJsInfoVariableProcessorTest {
   private JsUriManager jsUriManager;
   private JsUri jsUri;
   private JsResponseBuilder response;
-  private InjectJsInfoVariableProcessor processor;
+  private AddJslInfoVariableProcessor processor;
 
   @Before
   public void setUp() {
@@ -60,7 +60,7 @@ public class InjectJsInfoVariableProcessorTest {
     request = control.createMock(JsRequest.class);
     jsUriManager = control.createMock(JsUriManager.class);
     response = new JsResponseBuilder();
-    processor = new InjectJsInfoVariableProcessor(jsUriManager);
+    processor = new AddJslInfoVariableProcessor(jsUriManager);
   }
 
   @Test
@@ -77,7 +77,7 @@ public class InjectJsInfoVariableProcessorTest {
     setJsUri(URI);
     control.replay();
     processor.process(request, response);
-    String expected = String.format(InjectJsInfoVariableProcessor.HINT_TEMPLATE, URI_JS, LIBS_JS);
+    String expected = String.format(AddJslInfoVariableProcessor.HINT_TEMPLATE, URI_JS, LIBS_JS);
     assertEquals(expected, response.build().toJsString());
     control.verify();    
   }
@@ -89,7 +89,7 @@ public class InjectJsInfoVariableProcessorTest {
     EasyMock.expect(jsUriManager.makeExternJsUri(EasyMock.capture(captureJsUri))).andReturn(Uri.parse(GENERATED_URI));
     control.replay();
     processor.process(request, response);
-    String expected = String.format(InjectJsInfoVariableProcessor.HINT_TEMPLATE, GENERATED_URI_JS, LIBS_JS);
+    String expected = String.format(AddJslInfoVariableProcessor.HINT_TEMPLATE, GENERATED_URI_JS, LIBS_JS);
     assertEquals(expected, response.build().toJsString());
     assertFalse(captureJsUri.getValue().isJsload());
     assertTrue(captureJsUri.getValue().isNohint());

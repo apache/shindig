@@ -38,7 +38,7 @@ public class JsServingPipelineModule extends AbstractModule {
   @Provides
   @Inject
   public List<JsProcessor> provideProcessors(
-      InjectJsInfoVariableProcessor injectJsInfoVariableProcessor,
+      AddJslInfoVariableProcessor addJslInfoVariableProcessor,
       JsLoadProcessor jsLoaderGeneratorProcessor,
       IfModifiedSinceProcessor ifModifiedSinceProcessor,
       GetJsContentProcessor getJsContentProcessor,
@@ -46,12 +46,13 @@ public class JsServingPipelineModule extends AbstractModule {
       ExportJsProcessor exportJsProcessor,
       SeparatorCommentingProcessor separatorCommentingProcessor,
       ConfigInjectionProcessor configInjectionProcessor,
+      AddJslLoadedVariableProcessor addJslLoadedVariableProcessor,
       AddOnloadFunctionProcessor addOnloadFunctionProcessor,
-      AddJsLoadCallbackProcessor addJsLoadCallbackProcessor,
+      AddJslCallbackProcessor addJslCallbackProcessor,
       CompilationProcessor compilationProcessor,
       AnonFuncWrappingProcessor anonFuncProcessor) {
     return ImmutableList.of(
-        injectJsInfoVariableProcessor,
+        addJslInfoVariableProcessor,
         jsLoaderGeneratorProcessor,
         ifModifiedSinceProcessor,
         getJsContentProcessor,
@@ -59,8 +60,9 @@ public class JsServingPipelineModule extends AbstractModule {
         exportJsProcessor,
         separatorCommentingProcessor,
         configInjectionProcessor,
+        addJslLoadedVariableProcessor,
         addOnloadFunctionProcessor,
-        addJsLoadCallbackProcessor,
+        addJslCallbackProcessor,
         compilationProcessor,
         anonFuncProcessor);
   }
