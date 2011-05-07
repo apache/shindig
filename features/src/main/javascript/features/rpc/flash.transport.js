@@ -46,6 +46,7 @@ if (!gadgets.rpctx.flash) {  // make lib resilient to double-inclusion
     var setupAttempts = 0;
 
     var SWF_CHANNEL_READY = "_scr";
+    var SWF_CONFIRMED_PARENT = "_pnt";
     var READY_TIMEOUT_MS = 100;
     var MAX_READY_RETRIES = 50;
     var readyAttempts = 0;
@@ -192,7 +193,7 @@ if (!gadgets.rpctx.flash) {  // make lib resilient to double-inclusion
         if (channelReady !== "..") {
           // Child-to-parent: immediately signal that parent is ready.
           // Now that we know that child can receive messages, it's enough to send once.
-          sendChannelReady(channelReady);
+          sendChannelReady(channelReady, true);
         }
         return;
       }
@@ -200,10 +201,11 @@ if (!gadgets.rpctx.flash) {  // make lib resilient to double-inclusion
     }
     exportMethod(receiveMessage, 'receiveMessage');
 
-    function sendChannelReady(receiverId) {
+    function sendChannelReady(receiverId, opt_isParentConfirmation) {
       var myId = gadgets.rpc.RPC_ID;
       var readyAck = {};
-      readyAck[SWF_CHANNEL_READY] = myId;
+      readyAck[SWF_CHANNEL_READY] = opt_isParentConfirmation ? ".." : myId;
+      readyAck[SWF_CONFIRMED_PARENT] = myId;
       call(receiverId, myId, readyAck);
     }
 
