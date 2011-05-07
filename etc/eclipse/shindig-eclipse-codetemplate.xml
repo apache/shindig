@@ -7,7 +7,7 @@
  */</template><template autoinsert="false" context="filecomment_context" deleted="false" description="Comment for created Java files" enabled="true" id="org.eclipse.jdt.ui.text.codetemplates.filecomment" name="filecomment">/**
  *
  */</template><template autoinsert="false" context="typecomment_context" deleted="false" description="Comment for created types" enabled="true" id="org.eclipse.jdt.ui.text.codetemplates.typecomment" name="typecomment">/**
- * @author &lt;a href="mailto:XXX@apache.org"&gt;XXX&lt;/a&gt;
+ * @author &lt;a href="mailto:dev@shindig.apache.org"&gt;Shindig Dev&lt;/a&gt;
  * @version $$Id: $$
  *
  * ${tags}
@@ -42,7 +42,7 @@ ${filecomment}
 ${package_declaration}
 
 /**
- * @author &lt;a href="mailto:XXX@apache.org"&gt;XXX&lt;/a&gt;
+ * @author &lt;a href="mailto:dev@shindig.apache.org"&gt;Shindig Dev&lt;/a&gt;
  * @version $$Id: $$
  */
 ${typecomment}
