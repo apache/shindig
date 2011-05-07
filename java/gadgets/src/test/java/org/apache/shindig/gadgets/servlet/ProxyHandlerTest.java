@@ -27,6 +27,7 @@ import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.util.FakeTimeSource;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.Gadget;
+import org.apache.shindig.gadgets.GadgetBlacklist;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
@@ -46,6 +47,7 @@ import org.easymock.EasyMock;
 import static org.easymock.EasyMock.capture;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.isA;
+
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -53,21 +55,24 @@ import java.util.List;
 import java.util.Map;
 
 public class ProxyHandlerTest extends EasyMockTestCase {
+  private final static String GADGET = "http://some/gadget.xml";
   private final static String URL_ONE = "http://www.example.org/test.html";
   private final static String DATA_ONE = "hello world";
 
   public final RequestPipeline pipeline = mock(RequestPipeline.class);
+  private GadgetBlacklist gadgetBlacklist = mock(GadgetBlacklist.class); 
   public CaptureRewriter rewriter = new CaptureRewriter();
   public ResponseRewriterRegistry rewriterRegistry
       = new DefaultResponseRewriterRegistry(Arrays.<ResponseRewriter>asList(rewriter), null);
   private ProxyUriManager.ProxyUri request;
 
   private final ProxyHandler proxyHandler
-      = new ProxyHandler(pipeline, rewriterRegistry, true);
+      = new ProxyHandler(pipeline, rewriterRegistry, true, gadgetBlacklist);
 
   private void expectGetAndReturnData(String url, byte[] data) throws Exception {
     HttpRequest req = new HttpRequest(Uri.parse(url));
     HttpResponse resp = new HttpResponseBuilder().setResponse(data).create();
+    expect(gadgetBlacklist.isBlacklisted(isA(Uri.class))).andReturn(false);
     expect(pipeline.execute(req)).andReturn(resp);
   }
 
@@ -75,20 +80,21 @@ public class ProxyHandlerTest extends EasyMockTestCase {
       throws Exception {
     HttpRequest req = new HttpRequest(Uri.parse(url));
     HttpResponse resp = new HttpResponseBuilder().addAllHeaders(headers).create();
+    expect(gadgetBlacklist.isBlacklisted(isA(Uri.class))).andReturn(false);
     expect(pipeline.execute(req)).andReturn(resp);
   }
-
+  
   private void setupProxyRequestMock(String host, String url,
       boolean noCache, int refresh, String rewriteMime, String fallbackUrl) throws Exception {
     request = new ProxyUriManager.ProxyUri(
-        refresh, false, noCache, ContainerConfig.DEFAULT_CONTAINER, null, Uri.parse(url));
+        refresh, false, noCache, ContainerConfig.DEFAULT_CONTAINER, GADGET, Uri.parse(url));
     request.setFallbackUrl(fallbackUrl);
     request.setRewriteMimeType(rewriteMime);
   }
 
   private void setupNoArgsProxyRequestMock(String host, String url) throws Exception {
     request = new ProxyUriManager.ProxyUri(
-        -1, false, false, ContainerConfig.DEFAULT_CONTAINER, null,
+        -1, false, false, ContainerConfig.DEFAULT_CONTAINER, GADGET,
         url != null ? Uri.parse(url) : null);
   }
 
@@ -111,6 +117,26 @@ public class ProxyHandlerTest extends EasyMockTestCase {
     };
   }
 
+  @Test
+  public void testBlacklistedGadget() throws Exception {
+    String url = "http://example.org/mypage.html";
+    String domain = "example.org";
+    String gadget = "http://blacklisted/gadget.xml";
+    setupProxyRequestMock(domain, url, true, -1, null, null);
+    expect(gadgetBlacklist.isBlacklisted(isA(Uri.class))).andReturn(true);
+    replay();
+    boolean exceptionCaught = false;
+    try {
+      proxyHandler.fetch(request);
+    } catch (GadgetException e) {
+      exceptionCaught = true;
+      assertEquals(GadgetException.Code.BLACKLISTED_GADGET, e.getCode());
+      assertEquals(HttpResponse.SC_FORBIDDEN, e.getHttpStatusCode());
+    }
+    assertTrue(exceptionCaught);
+    verify();
+  }
+  
   @Test
   public void testInvalidHeaderDropped() throws Exception {
     String url = "http://example.org/mypage.html";
@@ -301,6 +327,7 @@ public class ProxyHandlerTest extends EasyMockTestCase {
         .addHeader("Content-Type", contentType)
         .create();
 
+    expect(gadgetBlacklist.isBlacklisted(isA(Uri.class))).andReturn(false);
     expect(pipeline.execute((HttpRequest) EasyMock.anyObject())).andReturn(resp);
 
     replay();
@@ -311,7 +338,7 @@ public class ProxyHandlerTest extends EasyMockTestCase {
     ResponseRewriterRegistry rewriterRegistry =
         new DefaultResponseRewriterRegistry(
             Arrays.<ResponseRewriter>asList(rewriter), null);
-    ProxyHandler proxyHandler = new ProxyHandler(pipeline, rewriterRegistry, true);
+    ProxyHandler proxyHandler = new ProxyHandler(pipeline, rewriterRegistry, true, gadgetBlacklist);
 
     request.setReturnOriginalContentOnError(true);
     HttpResponse recorder = proxyHandler.fetch(request);
@@ -338,6 +365,7 @@ public class ProxyHandlerTest extends EasyMockTestCase {
         .addHeader("Content-Type", contentType)
         .create();
 
+    expect(gadgetBlacklist.isBlacklisted(isA(Uri.class))).andReturn(false);
     expect(pipeline.execute((HttpRequest) EasyMock.anyObject())).andReturn(resp);
 
     replay();
@@ -348,7 +376,7 @@ public class ProxyHandlerTest extends EasyMockTestCase {
     ResponseRewriterRegistry rewriterRegistry =
         new DefaultResponseRewriterRegistry(
             Arrays.<ResponseRewriter>asList(rewriter), null);
-    ProxyHandler proxyHandler = new ProxyHandler(pipeline, rewriterRegistry, true);
+    ProxyHandler proxyHandler = new ProxyHandler(pipeline, rewriterRegistry, true, gadgetBlacklist);
 
     boolean exceptionCaught = false;
     try {

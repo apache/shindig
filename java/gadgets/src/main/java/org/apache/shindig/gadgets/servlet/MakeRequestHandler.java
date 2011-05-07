@@ -33,6 +33,7 @@ import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.AuthType;
 import org.apache.shindig.gadgets.FeedProcessor;
 import org.apache.shindig.gadgets.FetchResponseUtils;
+import org.apache.shindig.gadgets.GadgetBlacklist;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.GadgetException.Code;
 import org.apache.shindig.gadgets.http.HttpRequest;
@@ -76,15 +77,18 @@ public class MakeRequestHandler {
   private final RequestPipeline requestPipeline;
   private final ResponseRewriterRegistry contentRewriterRegistry;
   private final Provider<FeedProcessor> feedProcessorProvider;
+  private final GadgetBlacklist gadgetBlacklist;
 
   @Inject
   public MakeRequestHandler(RequestPipeline requestPipeline,
       @RewriterRegistry(rewriteFlow = RewriteFlow.DEFAULT)
       ResponseRewriterRegistry contentRewriterRegistry,
-      Provider<FeedProcessor> feedProcessorProvider) {
+      Provider<FeedProcessor> feedProcessorProvider,
+      GadgetBlacklist gadgetBlacklist) {
     this.requestPipeline = requestPipeline;
     this.contentRewriterRegistry = contentRewriterRegistry;
     this.feedProcessorProvider = feedProcessorProvider;
+    this.gadgetBlacklist = gadgetBlacklist;
   }
 
   /**
@@ -94,6 +98,11 @@ public class MakeRequestHandler {
       throws GadgetException, IOException {
     HttpRequest rcr = buildHttpRequest(request);
 
+    if (rcr.getGadget() != null && gadgetBlacklist.isBlacklisted(rcr.getGadget())) {
+      throw new GadgetException(GadgetException.Code.BLACKLISTED_GADGET,
+          "The requested content is unavailable", HttpResponse.SC_FORBIDDEN);
+    }
+    
     // Serialize the response
     HttpResponse results = requestPipeline.execute(rcr);
 

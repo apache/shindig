@@ -21,6 +21,7 @@ package org.apache.shindig.gadgets.servlet;
 import static junitx.framework.StringAssert.assertStartsWith;
 import static org.easymock.EasyMock.capture;
 import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.isA;
 
 import com.google.common.collect.Lists;
 
@@ -31,6 +32,7 @@ import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.AuthType;
+import org.apache.shindig.gadgets.GadgetBlacklist;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
@@ -62,8 +64,9 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
   private static final String RESPONSE_BODY = "makeRequest response body";
   private static final SecurityToken DUMMY_TOKEN = new FakeGadgetToken();
 
+  private final GadgetBlacklist gadgetBlacklist = mock(GadgetBlacklist.class);
   private final MakeRequestHandler handler
-      = new MakeRequestHandler(pipeline, rewriterRegistry, feedProcessorProvider);
+      = new MakeRequestHandler(pipeline, rewriterRegistry, feedProcessorProvider, gadgetBlacklist);
 
   private void expectGetAndReturnBody(String response) throws Exception {
     expectGetAndReturnBody(AuthType.NONE, response);
@@ -171,6 +174,22 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
     assertEquals(-1, httpRequest.getCacheTtl());
   }
 
+  @Test
+  public void GetRequestWithBlacklistedGadget() throws Exception {
+    expect(request.getParameter(Param.GADGET.getKey())).andReturn("http://some/gadget.xml").anyTimes();
+    expect(gadgetBlacklist.isBlacklisted(isA(Uri.class))).andReturn(true);
+    replay();
+    boolean exceptionThrown = false;
+    try {
+      handler.fetch(request, recorder);
+    } catch (GadgetException e) {
+      exceptionThrown = true;
+      assertEquals(403, e.getHttpStatusCode());
+      assertEquals(GadgetException.Code.BLACKLISTED_GADGET, e.getCode());
+    }
+    assertTrue(exceptionThrown);
+    verify();
+  }
 
   @Test
   public void testExplicitHeaders() throws Exception {

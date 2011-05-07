@@ -26,6 +26,7 @@ import com.google.inject.name.Named;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.gadgets.GadgetBlacklist;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
@@ -53,16 +54,19 @@ public class ProxyHandler {
   private final RequestPipeline requestPipeline;
   private final ResponseRewriterRegistry contentRewriterRegistry;
   protected final boolean remapInternalServerError;
+  private final GadgetBlacklist gadgetBlacklist;
 
   @Inject
   public ProxyHandler(RequestPipeline requestPipeline,
                       @RewriterRegistry(rewriteFlow = RewriteFlow.DEFAULT)
                       ResponseRewriterRegistry contentRewriterRegistry,
                       @Named("shindig.proxy.remapInternalServerError")
-                      Boolean remapInternalServerError) {
+                      Boolean remapInternalServerError,
+                      GadgetBlacklist gadgetBlacklist) {
     this.requestPipeline = requestPipeline;
     this.contentRewriterRegistry = contentRewriterRegistry;
     this.remapInternalServerError = remapInternalServerError;
+    this.gadgetBlacklist = gadgetBlacklist;
   }
 
   /**
@@ -84,6 +88,11 @@ public class ProxyHandler {
           "No url parameter in request", HttpResponse.SC_BAD_REQUEST);
     }
 
+    if (rcr.getGadget() != null && gadgetBlacklist.isBlacklisted(rcr.getGadget())) {
+      throw new GadgetException(GadgetException.Code.BLACKLISTED_GADGET,
+          "The requested content is unavailable", HttpResponse.SC_FORBIDDEN);
+    }
+    
     HttpResponse results = requestPipeline.execute(rcr);
 
     if (results.isError()) {

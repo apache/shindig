@@ -23,6 +23,7 @@ import static junitx.framework.StringAssert.assertStartsWith;
 import static org.easymock.EasyMock.expect;
 
 import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.gadgets.GadgetBlacklist;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
@@ -50,8 +51,10 @@ public class MakeRequestServletTest extends ServletTestFixture {
   private static final Enumeration<String> EMPTY_ENUM
       = Collections.enumeration(Collections.<String>emptyList());
 
+  private final GadgetBlacklist gadgetBlacklist = mock(GadgetBlacklist.class);
   private final MakeRequestServlet servlet = new MakeRequestServlet();
-  private final MakeRequestHandler handler = new MakeRequestHandler(pipeline, null, feedProcessorProvider);
+  private final MakeRequestHandler handler =
+      new MakeRequestHandler(pipeline, null, feedProcessorProvider, gadgetBlacklist);
 
   private final HttpRequest internalRequest = new HttpRequest(REQUEST_URL);
   private final HttpResponse internalResponse = new HttpResponse(RESPONSE_BODY);
