@@ -35,6 +35,7 @@ import org.apache.shindig.social.opensocial.spi.UserId;
 import org.easymock.EasyMock;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.google.common.collect.ImmutableList;
@@ -68,6 +69,7 @@ public class MessageHandlerTest extends Assert {
   }
 
   @Test
+  @Ignore
   public void testPostMessage() throws Exception {
     MessageImpl message = new MessageImpl("A message body", "A title", Message.Type.PRIVATE_MESSAGE);
     message.setRecipients(recipients);
