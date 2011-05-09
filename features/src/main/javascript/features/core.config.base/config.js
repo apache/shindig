@@ -55,7 +55,7 @@
  * configuration.
  */
 
-if (!gadgets.config) {
+if (!window['gadgets']['config']) {
 gadgets.config = function() {
   var ___jsl;
   var components = {};
