@@ -39,6 +39,9 @@
       <exports type="js">gadgets.util.unescapeString</exports>
       <exports type="js">gadgets.util.attachBrowserEvent</exports>
       <exports type="js">gadgets.util.removeBrowserEvent</exports>
+      <exports type="js">gadgets.util.createElement</exports>
+      <exports type="js">gadgets.util.createIframeElement</exports>
+      <exports type="js">gadgets.util.getBodyElement</exports>
     </api>
   </all>
 </feature>

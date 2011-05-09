@@ -34,6 +34,31 @@ gadgets.util = function() {
   var services = {};
   var onLoadHandlers = [];
 
+  var XHTML_SPEC = 'http://www.w3.org/1999/xhtml';
+
+  function attachAttributes(elem, opt_attribs) {
+    var attribs = opt_attribs || {};
+    for (var attrib in attribs) {
+      if (attribs.hasOwnProperty(attrib)) {
+        elem[attrib] = attribs[attrib];
+      }
+    }
+  }
+
+  function stringifyElement(tagName, opt_attribs) {
+    var arr = [];
+    arr.push('<').push(tagName);
+    var attribs = opt_attribs || {};
+    for (var attrib in attribs) {
+      if (attribs.hasOwnProperty(attrib)) {
+        var value = escapeString(attribs[attrib]);
+        arr.push(' ').push(attrib).push('="').push(value).push('"');
+      }
+    }
+    arr.push('></').push(tagName).push('>');
+    return arr.join('');
+  }
+
   /**
    * @enum {boolean}
    * @const
@@ -57,12 +82,22 @@ gadgets.util = function() {
     60 : true,
     // greater than
     62 : true,
-    // Backslash
+    // backslash
     92 : true,
     // line separator
     8232 : true,
     // paragraph separator
-    8233 : true
+    8233 : true,
+    // fullwidth quotation mark
+    65282 : true,
+    // fullwidth apostrophe
+    65287 : true,
+    // fullwidth less-than sign
+    65308 : true,
+    // fullwidth greater-than sign
+    65310 : true,
+    // fullwidth reverse solidus
+    65340 : true
   };
 
   /**
@@ -73,7 +108,42 @@ gadgets.util = function() {
    * @return {string} The character corresponding to value.
    */
   function unescapeEntity(match, value) {
+    // TODO: b0rked for UTF-16 and can easily be convinced to generate
+    // truncating NULs or completely invalid non-Unicode characters. Here's a
+    // fixed version (it handles entities for valid codepoints from U+0001 ...
+    // U+10FFFD, except for the non-character codepoints U+...FFFE and
+    // U+...FFFF; isolated UTF-16 surrogate pairs are supported for
+    // compatibility with previous versions of escapeString, 0 generates the
+    // empty string rather than a possibly-truncating '\0', and all other inputs
+    // generate U+FFFD (the replacement character, standard practice for
+    // non-signalling Unicode codecs like this one)
+    //     return (
+    //         (value > 0) &&
+    //         (value <= 0x10fffd) &&
+    //         ((value & 0xffff) < 0xfffe)) ?
+    //       ((value <= 0xffff) ?
+    //         String.fromCharCode(value) :
+    //         String.fromCharCode(
+    //           ((value - 0x10000) >> 10) | 0xd800,
+    //           ((value - 0x10000) & 0x3ff) | 0xdc00)) :
+    //       ((value === 0) ? '' : '\ufffd');
     return String.fromCharCode(value);
+  }
+
+  function escapeString(str) {
+    if (!str) return str;
+    var out = [], ch, shouldEscape;
+    for (var i = 0, j = str.length; i < j; ++i) {
+      ch = str.charCodeAt(i);
+      shouldEscape = escapeCodePoints[ch];
+      if (shouldEscape === true) {
+        out.push('&#', ch, ';');
+      } else if (shouldEscape !== false) {
+        // undefined or null are OK.
+        out.push(str.charAt(i));
+      }
+    }
+    return out.join('');
   }
 
   /**
@@ -247,27 +317,10 @@ gadgets.util = function() {
      * Currently not in the spec -- future proposals may change
      * how this is handled.
      *
-     * TODO: Parsing the string would probably be more accurate and faster than
-     * a bunch of regular expressions.
-     *
      * @param {string} str The string to escape.
      * @return {string} The escaped string.
      */
-    escapeString : function(str) {
-      if (!str) return str;
-      var out = [], ch, shouldEscape;
-      for (var i = 0, j = str.length; i < j; ++i) {
-        ch = str.charCodeAt(i);
-        shouldEscape = escapeCodePoints[ch];
-        if (shouldEscape === true) {
-          out.push('&#', ch, ';');
-        } else if (shouldEscape !== false) {
-          // undefined or null are OK.
-          out.push(str.charAt(i));
-        }
-      }
-      return out.join('');
-    },
+    escapeString : escapeString,
 
     /**
      * Reverses escapeString
@@ -279,7 +332,6 @@ gadgets.util = function() {
       if (!str) return str;
       return str.replace(/&#([0-9]+);/g, unescapeEntity);
     },
-
 
     /**
      * Attach an event listener to given DOM element (Not a gadget standard)
@@ -316,6 +368,73 @@ gadgets.util = function() {
       } else {
         gadgets.warn('cannot removeBrowserEvent: ' + eventName);
       }
+    },
+
+    /**
+     * Creates an HTML or XHTML element.
+     * @param {string} tagName The type of element to construct.
+     * @return {Element} The newly constructed element.
+     */
+    createElement : function(tagName) {
+      // TODO: factor this out to core.util.dom.
+      var element;
+      if ((!document.body) || document.body.namespaceURI) {
+        try {
+          element = document.createElementNS(XHTML_SPEC, tagName);
+        } catch (nonXmlDomException) {
+        }
+      }
+      return element || document.createElement(tagName);
+    },
+
+    /**
+     * Creates an HTML or XHTML iframe element with attributes.
+     * @param {Object=} opt_attribs Optional set of attributes to attach. The
+     * only working attributes are spelled the same way in XHTML attribute
+     * naming (most strict, all-lower-case), HTML attribute naming (less strict,
+     * case-insensitive), and JavaScript property naming (some properties named
+     * incompatibly with XHTML/HTML).
+     * @return {Element} The DOM node representing body.
+     */
+    createIframeElement : function(opt_attribs) {
+      // TODO: factor this out to core.util.dom.
+      var frame = gadgets.util.createElement('iframe');
+      try {
+        // TODO: provide automatic mapping to only set the needed
+        // and JS-HTML-XHTML compatible subset through stringifyElement (just
+        // 'name' and 'id', AFAIK). The values of the attributes will be
+        // stringified should the stringifyElement code path be taken (IE)
+        var tagString = stringifyElement('iframe', opt_attribs);
+        var ieFrame = gadgets.util.createElement(tagString);
+        if (ieFrame &&
+            ((!frame) ||
+             ((ieFrame.tagName == frame.tagName) &&
+              (ieFrame.namespaceURI == frame.namespaceURI)))) {
+          frame = ieFrame;
+        }
+      } catch (nonStandardCallFailed) {
+      }
+      attachAttributes(frame, opt_attribs);
+      return frame;
+    },
+
+    /**
+     * Gets the HTML or XHTML body element.
+     * @return {Element} The DOM node representing body.
+     */
+    getBodyElement : function() {
+      // TODO: factor this out to core.util.dom.
+      if (document.body) {
+        return document.body;
+      }
+      try {
+        var xbodies = document.getElementsByTagNameNS(XHTML_SPEC, 'body');
+        if (xbodies && (xbodies.length == 1)) {
+          return xbodies[0];
+        }
+      } catch (nonXmlDomException) {
+      }
+      return document.documentElement || document;
     }
   };
 }();
