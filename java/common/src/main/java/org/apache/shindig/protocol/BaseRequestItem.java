@@ -198,7 +198,11 @@ public class BaseRequestItem implements RequestItem {
 
   public <T> T getTypedParameter(String parameterName, Class<T> dataTypeClass) {
     try {
-      return converter.convertToObject(getParameter(parameterName), dataTypeClass);
+      String json = getParameter(parameterName);
+      if (json == null) {
+        throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST, "missing data for " + parameterName);
+      }
+      return converter.convertToObject(json, dataTypeClass);
     } catch (RuntimeException e) {
       if (e.getCause() instanceof JSONException)
         throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());

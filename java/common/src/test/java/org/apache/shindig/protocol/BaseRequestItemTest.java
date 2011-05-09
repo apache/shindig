@@ -115,6 +115,11 @@ public class BaseRequestItemTest extends Assert {
     assertEquals(1234, input.id);
   }
 
+  @Test(expected = ProtocolException.class)
+  public void testGetTypedParameterEmpty() throws Exception {
+    request.getTypedParameter("empty", InputData.class);
+  }
+
   @Test
   public void testGetParameters() throws Exception {
     request.setParameter("anykey", "{name: 'Bob', id: '1234'}");
