@@ -24,6 +24,7 @@ import static org.easymock.EasyMock.capture;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.shindig.auth.SecurityToken;
@@ -45,6 +46,7 @@ import org.apache.shindig.gadgets.js.JsRequestBuilder;
 import org.apache.shindig.gadgets.js.JsResponseBuilder;
 import org.apache.shindig.gadgets.js.JsServingPipeline;
 import org.apache.shindig.gadgets.process.ProcessingException;
+import org.apache.shindig.gadgets.servlet.GadgetsHandlerApi.Feature;
 import org.apache.shindig.gadgets.uri.JsUriManager;
 import org.apache.shindig.gadgets.uri.ProxyUriManager;
 import org.apache.shindig.gadgets.uri.JsUriManager.JsUri;
@@ -208,6 +210,32 @@ public class GadgetsHandlerServiceTest extends EasyMockTestCase {
     verify();
   }
 
+  @SuppressWarnings("unchecked")
+  @Test
+  public void testGetMetadataWithParams() throws Exception {
+    GadgetsHandlerApi.MetadataRequest request = createMetadataRequest(
+        FakeProcessor.SPEC_URL4, CONTAINER, "default",
+        createAuthContext(null, null), ImmutableList.of("*"));
+    EasyMock.expect(mockRegistry.getFeatures(EasyMock.isA(List.class)))
+        .andReturn(Lists.newArrayList("auth-refresh"));
+    replay();
+    GadgetsHandlerApi.MetadataResponse response =
+        gadgetHandler.getMetadata(request);
+
+    Map<String, Feature> features=response.getModulePrefs().getFeatures();
+    //make sure that the feature set contains all the features, and no extra features
+    //Note that the core feature is automatically included.
+    assertTrue(features.containsKey(FakeProcessor.FEATURE1) &&
+        features.containsKey(FakeProcessor.FEATURE2) &&
+        features.containsKey(FakeProcessor.FEATURE3) &&
+        features.size()==3);
+    Multimap<String, String> params1=features.get(FakeProcessor.FEATURE2).getParams();
+    assertEquals(ImmutableList.of(FakeProcessor.PARAM_VALUE, FakeProcessor.PARAM_VALUE2), params1.get(FakeProcessor.PARAM_NAME));
+    Multimap<String, String> params2=features.get(FakeProcessor.FEATURE3).getParams();
+    assertEquals(ImmutableList.of(FakeProcessor.PARAM_VALUE3), params2.get(FakeProcessor.PARAM_NAME2));
+
+    verify();
+  }
   @Test
   public void testGetToken() throws Exception {
     GadgetsHandlerApi.TokenRequest request = createTokenRequest(
