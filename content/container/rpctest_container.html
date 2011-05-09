@@ -50,12 +50,13 @@
       var gadgethost = 'http://' + window.location.search.substring(1).split('&')[0];
       var gadgetdeferred = window.location.search.indexOf('&gadgetdeferred=1') !== -1;
       var uabackward = window.location.search.indexOf('&uabackward=1') !== -1;
-      var flash = window.location.search.indexOf('&flash=1') !== -1;
+      var flash = window.location.search.indexOf('&rpctx=flash') !== -1;
+      var rmr = window.location.search.indexOf('&rpctx=rmr') !== -1;
 
       // Useful per-page variables.
       var gadgeturl = gadgethost + '/container/rpctest_gadget.xml';
       var cachebust = 'cachebust=' + Math.random();
-      var gadgetrenderingurl = gadgethost + '/gadgets/ifr?url=' + gadgeturl + '&libs=rpc&parent=' + window.location.protocol + '//' + window.location.host + '&debug=1&nocache=1&' + cachebust + (flash ? '&flash=1' : '');
+      var gadgetrenderingurl = gadgethost + '/gadgets/ifr?url=' + gadgeturl + '&libs=rpc&parent=' + window.location.protocol + '//' + window.location.host + '&debug=1&nocache=1&' + cachebust + (flash ? '&rpctx=flash' : '') + (rmr ? '&rpctx=rmr' : '');
       var gadgetrelay = gadgethost + '/container/rpc_relay.uncompressed.html';
 
       // Include rpc.js. Append random cache-busting param to ensure caching doesn't occur.

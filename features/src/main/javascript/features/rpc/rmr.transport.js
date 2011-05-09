@@ -34,9 +34,15 @@ gadgets.rpctx = gadgets.rpctx || {};
  * by page A while the onresize event will be fired in the DOM of page B,
  * thus providing a single bit channel indicating "message sent to you".
  * This method has the added benefit that the relay need not be active,
- * nor even exist: a 404 suffices just as well.
+ * nor even exist: a 404 suffices just as well. Note that the technique
+ * doesn't actually strictly require WebKit; it just so happens that these
+ * browsers have no known alternatives (but are very ill-used right now).
+ * The technique's implementation accounts for timing issues through
+ * a packet-ack'ing protocol, so should work on just about any browser.
+ * This may be of value in scenarios where neither wpm nor Flash are
+ * available for some reason.
  *
- *   rmr: WebKit-specific resizing trick.
+ *   rmr: Resizing trick, works particularly well on WebKit.
  *      - Safari 2+
  *      - Chrome 1
  */
@@ -134,16 +140,16 @@ if (!gadgets.rpctx.rmr) {  // make lib resilient to double-inclusion
       // treat 404s as legitimate for the purposes of cross domain
       // communication.
       var relayUri = gadgets.rpc.getRelayUrl(frameId);
+      var relayOrigin = gadgets.rpc.getOrigin(parentParam);
       if (!relayUri) {
-        relayUri =
-            gadgets.rpc.getOrigin(parentParam);
-            '/robots.txt';
+        relayUri = relayOrigin + '/robots.txt';
       }
 
       rmr_channels[frameId] = {
         frame: channelFrame,
         receiveWindow: null,
         relayUri: relayUri,
+        relayOrigin: relayOrigin,
         searchCounter: 0,
         width: 10,
 
@@ -163,7 +169,16 @@ if (!gadgets.rpctx.rmr) {  // make lib resilient to double-inclusion
         // Number of messages received and processed from the sender.
         // This is the number that accompanies every ACK to tell the
         // sender to clear its queue.
-        recvId: 0
+        recvId: 0,
+
+        // Token sent to target to verify domain.
+        // TODO: switch to shindig.random()
+        verifySendToken: String(Math.random()),
+
+        // Token received from target during handshake. Stored in
+        // order to send back to the caller for verification.
+        verifyRecvToken: null,
+        originVerified: false
       };
 
       if (frameId !== '..') {
@@ -266,7 +281,7 @@ if (!gadgets.rpctx.rmr) {  // make lib resilient to double-inclusion
 
         if (handler.waiting ||
             (handler.queue.length === 0 &&
-            !(serviceName === gadgets.rpc.ACK && rpc && rpc.ackAlone === true))) {
+            !(serviceName === gadgets.rpc.ACK && rpc && rpc['ackAlone'] === true))) {
           // If we are awaiting a response from any previously-sent messages,
           // or if we don't have anything new to send, just return.
           // Note that we don't short-return if we're ACKing just-received
@@ -312,8 +327,15 @@ if (!gadgets.rpctx.rmr) {  // make lib resilient to double-inclusion
       var channel = rmr_channels[toFrameId];
       var rmrData = {id: channel.sendId};
       if (channel) {
-        rmrData.d = Array.prototype.slice.call(channel.queue, 0);
-        rmrData.d.push({s: gadgets.rpc.ACK, id: channel.recvId});
+        rmrData['d'] = Array.prototype.slice.call(channel.queue, 0);
+        var ackPacket = { 's': gadgets.rpc.ACK, 'id': channel.recvId };
+        if (!channel.originVerified) {
+          ackPacket['sendToken'] = channel.verifySendToken;
+        }
+        if (channel.verifyRecvToken) {
+          ackPacket['recvToken'] = channel.verifyRecvToken;
+        }
+        rmrData['d'].push(ackPacket);
       }
       return gadgets.json.stringify(rmrData);
     }
@@ -331,13 +353,13 @@ if (!gadgets.rpctx.rmr) {  // make lib resilient to double-inclusion
 
       // Decode the RPC object array.
       var rpcObj = gadgets.json.parse(decodeURIComponent(data)) || {};
-      var rpcArray = rpcObj.d || [];
+      var rpcArray = rpcObj['d'] || [];
 
       var nonAckReceived = false;
       var noLongerWaiting = false;
 
       var numBypassed = 0;
-      var numToBypass = (channel.recvId - rpcObj.id);
+      var numToBypass = (channel.recvId - rpcObj['id']);
       for (var i = 0; i < rpcArray.length; ++i) {
         var rpc = rpcArray[i];
 
@@ -350,14 +372,27 @@ if (!gadgets.rpctx.rmr) {  // make lib resilient to double-inclusion
           // send messages to the from frame.
           ready(fromFrameId, true);
 
+          // Store sendToken if challenge was passed.
+          // This will cause the token to be sent back to the sender
+          // to prove origin verification.
+          channel.verifyRecvToken = rpc['sendToken'];
+
+          // If a recvToken came back, check to see if it matches the
+          // sendToken originally sent as a challenge. If so, mark
+          // origin as having been verified.
+          if (!channel.originVerified && rpc['recvToken'] &&
+              String(rpc['recvToken']) == String(channel.verifySendToken)) {
+            channel.originVerified = true;
+          }
+
           if (channel.waiting) {
             noLongerWaiting = true;
           }
 
           channel.waiting = false;
-          var newlyAcked = Math.max(0, rpc.id - channel.sendId);
+          var newlyAcked = Math.max(0, rpc['id'] - channel.sendId);
           channel.queue.splice(0, newlyAcked);
-          channel.sendId = Math.max(channel.sendId, rpc.id || 0);
+          channel.sendId = Math.max(channel.sendId, rpc['id'] || 0);
           continue;
         }
 
@@ -372,11 +407,9 @@ if (!gadgets.rpctx.rmr) {  // make lib resilient to double-inclusion
 
         ++channel.recvId;
 
-        // Best-effort at determining origin. Use parent param if relayUri's
-        // origin matches that of the relayUri; else use relayUri.
-        var origin = gadgets.rpc.getOrigin(parentParam) == gadgets.rpc.getOrigin(channel.relayUri)
-            ? parentParam : channel.relayUri;
-        process(rpc, origin);  // actually dispatch the message
+        // Send along the origin if it's been verified during handshake.
+        // In either case, dispatch the message.
+        process(rpc, channel.originVerified ? channel.relayOrigin : undefined);
       }
 
       // Send an ACK indicating that we got/processed the message(s).
@@ -387,7 +420,7 @@ if (!gadgets.rpctx.rmr) {  // make lib resilient to double-inclusion
       if (nonAckReceived ||
           (noLongerWaiting && channel.queue.length > 0)) {
         var from = (fromFrameId === '..') ? gadgets.rpc.RPC_ID : '..';
-        callRmr(fromFrameId, gadgets.rpc.ACK, from, {ackAlone: nonAckReceived});
+        callRmr(fromFrameId, gadgets.rpc.ACK, from, {'ackAlone': nonAckReceived});
       }
     }
 

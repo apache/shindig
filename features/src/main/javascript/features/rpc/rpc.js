@@ -182,7 +182,8 @@ if (!window['gadgets']['rpc']) { // make lib resilient to double-inclusion
      * @member gadgets.rpc
      */
     function getTransport() {
-      if (params['flash'] == "1") return gadgets.rpctx.flash;
+      if (params['rpctx'] == 'flash') return gadgets.rpctx.flash;
+      if (params['rpctx'] == 'rmr') return gadgets.rpctx.rmr;
       return typeof window.postMessage === 'function' ? gadgets.rpctx.wpm :
           typeof window.postMessage === 'object' ? gadgets.rpctx.wpm :
           window.ActiveXObject ? (gadgets.rpctx.flash ? gadgets.rpctx.flash : gadgets.rpctx.nix) :
@@ -691,8 +692,8 @@ if (!window['gadgets']['rpc']) { // make lib resilient to double-inclusion
       }
 
       // The "relay URL" can either be explicitly specified or is set as
-      // the child IFRAME URL verbatim.
-      var relayUrl = opt_frameurl || childIframe.src;
+      // the child IFRAME URL's origin
+      var relayUrl = opt_frameurl || gadgets.rpc.getOrigin(childIframe.src);
       setRelayUrl(gadgetId, relayUrl);
 
       // The auth token is parsed from child params (rpctoken) or overridden.
