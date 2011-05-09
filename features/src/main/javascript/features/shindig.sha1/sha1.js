@@ -181,6 +181,16 @@ shindig.sha1 = (function() {
    * @param {number=} opt_length is # of bytes to compress.
    */
   function update(bytes, opt_length) {
+    if (typeof(bytes) === 'string') {
+      // convert Unicode to UTF-8 bytes
+      bytes = unescape(encodeURIComponent(bytes));
+      var byteArray = [];
+      for (var i = 0, maxi = bytes.length; i < maxi; ++i) {
+        byteArray.push(bytes.charCodeAt(i));
+      }
+      bytes = byteArray;
+    }
+
     if (!opt_length) {
       opt_length = bytes.length;
     }
