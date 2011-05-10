@@ -1020,7 +1020,7 @@ if (!window['gadgets']['rpc']) { // make lib resilient to double-inclusion
         var src = relay + '#..&' + rpcId + '&' + token + '&' +
             encodeURIComponent(gadgets.json.stringify(data));
 
-        var iframe = document.createElement('iframe');
+        var iframe = gadgets.util.createIframeElement();
         iframe.style.border = iframe.style.width = iframe.style.height = '0px';
         iframe.style.visibility = 'hidden';
         iframe.style.position = 'absolute';
