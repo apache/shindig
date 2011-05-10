@@ -41,6 +41,9 @@ if (!gadgets.rpctx.ifpc) {  // make lib resilient to double-inclusion
     var callId = 0;
     var ready;
 
+    var URL_LIMIT = 2000;
+    var messagesIn = {};
+
     /**
    * Encodes arguments for the legacy IFPC wire format.
    *
@@ -99,6 +102,15 @@ if (!gadgets.rpctx.ifpc) {  // make lib resilient to double-inclusion
       window.setTimeout(function() { document.body.appendChild(iframe); }, 0);
     }
 
+    function isMessageComplete(arr, total) {
+      for (var i = total - 1; i >= 0; --i) {
+        if (typeof arr[i] === 'undefined') {
+          return false;
+        }
+      }
+      return true;
+    }
+
     return {
       getCode: function() {
         return 'ifpc';
@@ -134,7 +146,8 @@ if (!gadgets.rpctx.ifpc) {  // make lib resilient to double-inclusion
         }
 
         // The RPC mechanism supports two formats for IFPC (legacy and current).
-        var src = null;
+        var src = null,
+            queueOut = [];
         if (rpc.l) {
           // Use legacy protocol.
           // Format: #iframe_id&callId&num_packets&packet_num&block_of_data
@@ -142,16 +155,57 @@ if (!gadgets.rpctx.ifpc) {  // make lib resilient to double-inclusion
           src = [relay, '#', encodeLegacyData([from, callId, 1, 0,
             encodeLegacyData([from, rpc['s'], '', '', from].concat(
                 callArgs))])].join('');
+          queueOut.push(src);
         } else {
           // Format: #targetId & sourceId@callId & packetNum & packetId & packetData
-          src = [relay, '#', targetId, '&', from, '@', callId,
-            '&1&0&', encodeURIComponent(gadgets.json.stringify(rpc))].join('');
+          src = [relay, '#', targetId, '&', from, '@', callId, '&'].join('');
+          var message = encodeURIComponent(gadgets.json.stringify(rpc)),
+              payloadLength = URL_LIMIT - src.length,
+              numPackets = Math.ceil(message.length/payloadLength),
+              packetIdx = 0,
+              part;
+          while (message.length > 0) {
+            part = message.substring(0, payloadLength);
+            message = message.substring(payloadLength);
+            queueOut.push([src, numPackets, '&', packetIdx, '&', part].join(''));
+            packetIdx += 1;
+          }
         }
 
         // Conduct the IFPC call by creating the Iframe with
         // the relay URL and appended message.
-        emitInvisibleIframe(src);
+        do {
+          emitInvisibleIframe(queueOut.shift());
+        } while(queueOut.length > 0);
         return true;
+      },
+
+      /** Process message from invisible iframe, merging message parts if necessary. */
+      _receiveMessage: function(fragment, process) {
+        var from = fragment[1],   // in the form of "<from>@<callid>"
+            numPackets = parseInt(fragment[2], 10),
+            packetIdx = parseInt(fragment[3], 10),
+            payload = fragment[fragment.length - 1],
+            completed = numPackets === 1;
+
+        // if message is multi-part, store parts in the proper order
+        if (numPackets > 1) {
+          if (!messagesIn[from]) {
+            messagesIn[from] = [];
+          }
+          messagesIn[from][packetIdx] = payload;
+          // check if all parts have been sent
+          if (isMessageComplete(messagesIn[from], numPackets)) {
+            payload = messagesIn[from].join('');
+            delete messagesIn[from];
+            completed = true;
+          }
+        }
+
+        // complete message sent
+        if (completed) {
+          process(gadgets.json.parse(decodeURIComponent(payload)));
+        }
       }
     };
   }();

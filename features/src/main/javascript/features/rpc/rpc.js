@@ -968,8 +968,7 @@ if (!window['gadgets']['rpc']) { // make lib resilient to double-inclusion
        */
       receive: function(fragment, otherWindow) {
         if (fragment.length > 4) {
-          process(gadgets.json.parse(
-              decodeURIComponent(fragment[fragment.length - 1])));
+          transport._receiveMessage(fragment, process);
         } else {
           relayOnload.apply(null, fragment.concat(otherWindow));
         }
