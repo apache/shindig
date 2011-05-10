@@ -261,7 +261,6 @@ if (!window['gadgets']['rpc']) { // make lib resilient to double-inclusion
       hookMainPageUnload();
 
       data = gadgets.json.parse(decodeURIComponent(data));
-      transport.relayOnload(sourceId, data);
     }
 
     /**
@@ -644,38 +643,37 @@ if (!window['gadgets']['rpc']) { // make lib resilient to double-inclusion
       setupFrame(targetId, token);
     }
 
-    function setupContainerGadgetContext(rpctoken) {
+    function setupContainedContext(rpctoken, opt_parent) {
       function init(config) {
         var cfg = config ? config['rpc'] : {};
-        var configLegacy = cfg['useLegacyProtocol'];
-        if (typeof configLegacy === "string") {
-          configLegacy = configLegacy === "true";
-        }
+        var useLegacy = String(cfg['useLegacyProtocol']) === 'true';
+        passReferrer = String(cfg['passReferrer']) === 'true';
+
         // Parent-relative only.
-        var parentRelayUrl = cfg['parentRelayUrl'] || "";
-        parentRelayUrl = getOrigin(params['parent']) + parentRelayUrl;
-        var useLegacy = !!configLegacy;
+        var parentRelayUrl = cfg['parentRelayUrl'] || '';
+        parentRelayUrl = getOrigin(params['parent'] || opt_parent) + parentRelayUrl;
         setRelayUrl('..', parentRelayUrl, useLegacy);
+
         if (useLegacy) {
           transport = gadgets.rpctx.ifpc;
           transport.init(process, transportReady);
         }
-        setAuthToken('..', rpctoken);
-        passReferrer = String(cfg['passReferrer']) === 'true';
-      }
-      gadgets.config.register('rpc', null, init);
-    }
 
-    function setupContainerGenericIframe(rpctoken, opt_parent) {
-      // Generic child IFRAME setting up connection w/ its container.
-      // Use the opt_parent param if provided, or the "parent" query param
-      // if found -- otherwise, do nothing since this call might be initiated
-      // automatically at first, then actively later in IFRAME code.
-      var parent = opt_parent || params['parent'];
-      if (parent) {
-        setRelayUrl('..', parent);
         setAuthToken('..', rpctoken);
       }
+
+      // Check to see if we know the parent yet.
+      // In almost all cases we will, since the parent param is provided.
+      // However, it's possible that the lib doesn't yet know, but is
+      // initialized in forced fashion later.
+      if (!params['parent'] && opt_parent) {
+        // Handles the forced initialization case.
+        init({});
+        return;
+      }
+
+      // Handles the standard gadgets.config.init() case.
+      gadgets.config.register('rpc', null, init);
     }
 
     function setupChildIframe(gadgetId, opt_frameurl, opt_authtoken) {
@@ -693,11 +691,12 @@ if (!window['gadgets']['rpc']) { // make lib resilient to double-inclusion
 
       // The "relay URL" can either be explicitly specified or is set as
       // the child IFRAME URL's origin
-      var relayUrl = opt_frameurl || gadgets.rpc.getOrigin(childIframe.src);
+      var childSrc = childIframe.src;
+      var relayUrl = opt_frameurl || gadgets.rpc.getOrigin(childSrc);
       setRelayUrl(gadgetId, relayUrl);
 
       // The auth token is parsed from child params (rpctoken) or overridden.
-      var childParams = gadgets.util.getUrlParameters(relayUrl);
+      var childParams = gadgets.util.getUrlParameters(childSrc);
       var rpctoken = opt_authtoken || childParams['rpctoken'];
       setAuthToken(gadgetId, rpctoken);
     }
@@ -749,11 +748,7 @@ if (!window['gadgets']['rpc']) { // make lib resilient to double-inclusion
       if (targetId === '..') {
         // Gadget/IFRAME to container.
         var rpctoken = opt_authtoken || params['rpctoken'] || params['ifpctok'] || '';
-        if (window['__isgadget'] === true) {
-          setupContainerGadgetContext(rpctoken);
-        } else {
-          setupContainerGenericIframe(rpctoken, opt_receiverurl);
-        }
+        setupContainedContext(rpctoken, opt_receiverurl);
       } else {
         // Container to child.
         setupChildIframe(targetId, opt_receiverurl, opt_authtoken);

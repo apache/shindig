@@ -69,9 +69,7 @@ if (!gadgets.rpctx.wpm) {  // make lib resilient to double-inclusion
       }
 
       // for security, check origin against expected value
-      var origRelay = gadgets.rpc.getRelayUrl(rpc['f']) ||
-          gadgets.util.getUrlParameters()['parent'];
-      var origin = gadgets.rpc.getOrigin(origRelay);
+      var origin = gadgets.rpc.getTargetOrigin(rpc['f']);
 
       // Opera's "message" event does not have an "origin" property (at least,
       // it doesn't in version 9.64;  presumably, it will in version 10).  If
@@ -111,6 +109,7 @@ if (!gadgets.rpctx.wpm) {  // make lib resilient to double-inclusion
         if (receiverId === '..') {
           gadgets.rpc._createRelayIframe(token);
         }
+        ready(receiverId, true);
         return true;
       },
 
@@ -130,10 +129,6 @@ if (!gadgets.rpctx.wpm) {  // make lib resilient to double-inclusion
               ', cannot send cross-domain message');
         }
         return true;
-      },
-
-      relayOnload: function(receiverId, data) {
-        ready(receiverId, true);
       }
     };
   }();
