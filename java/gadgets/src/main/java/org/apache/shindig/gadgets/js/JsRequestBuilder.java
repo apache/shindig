@@ -50,7 +50,7 @@ public class JsRequestBuilder {
     JsUri jsUri = jsUriManager.processExternJsUri(new UriBuilder(request).toUri());
     String host = request.getHeader("Host");
     boolean inCache = request.getHeader("If-Modified-Since") != null;
-    return new JsRequest(jsUri, host, inCache);
+    return build(jsUri, host, inCache);
   }
 
   /**
@@ -60,6 +60,10 @@ public class JsRequestBuilder {
    * @return The corresponding JsRequest.
    */
   public JsRequest build(JsUri jsUri, String host) {
-    return new JsRequest(jsUri, host, false);
+    return build(jsUri, host, false);
+  }
+
+  protected JsRequest build(JsUri jsUri, String host, boolean inCache) {
+    return new JsRequest(jsUri, host, inCache);
   }
 }
