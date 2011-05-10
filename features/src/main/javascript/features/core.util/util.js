@@ -21,20 +21,18 @@
  * @fileoverview General purpose utilities that gadgets can use.
  */
 
-// Short-term incremental library-building mechanism.
-var __getUrlParameters = gadgets.util.getUrlParameters;
-
 /**
  * @static
  * @class Provides general-purpose utility functions.
  * @name gadgets.util
  */
-gadgets.util = function() {
+gadgets.util = gadgets.util || {};
+
+(function() {  
+  
   var features = {};
   var services = {};
   var onLoadHandlers = [];
-
-  var XHTML_SPEC = 'http://www.w3.org/1999/xhtml';
 
   function attachAttributes(elem, opt_attribs) {
     var attribs = opt_attribs || {};
@@ -156,285 +154,236 @@ gadgets.util = function() {
     gadgets.config.register('core.util', null, init);
   }
 
-  return /** @scope gadgets.util */ {
-
-    /**
-     * Gets the URL parameters.
-     *
-     * @param {string=} opt_url Optional URL whose parameters to parse.
-     *                         Defaults to window's current URL.
-     * @return {Object} Parameters passed into the query string.
-     * @member gadgets.util
-     * @private Implementation detail.
-     */
-    getUrlParameters : __getUrlParameters,
-
-    /**
-     * Creates a closure that is suitable for passing as a callback.
-     * Any number of arguments
-     * may be passed to the callback;
-     * they will be received in the order they are passed in.
-     *
-     * @param {Object} scope The execution scope; may be null if there is no
-     *     need to associate a specific instance of an object with this
-     *     callback.
-     * @param {function(Object,Object)} callback The callback to invoke when this is run;
-     *     any arguments passed in will be passed after your initial arguments.
-     * @param {Object} var_args Initial arguments to be passed to the callback.
-     *
-     * @member gadgets.util
-     * @private Implementation detail.
-     */
-    makeClosure : function(scope, callback, var_args) {
-      // arguments isn't a real array, so we copy it into one.
-      var baseArgs = [];
-      for (var i = 2, j = arguments.length; i < j; ++i) {
-        baseArgs.push(arguments[i]);
+  /**
+   * Creates a closure that is suitable for passing as a callback.
+   * Any number of arguments
+   * may be passed to the callback;
+   * they will be received in the order they are passed in.
+   *
+   * @param {Object} scope The execution scope; may be null if there is no
+   *     need to associate a specific instance of an object with this
+   *     callback.
+   * @param {function(Object,Object)} callback The callback to invoke when this is run;
+   *     any arguments passed in will be passed after your initial arguments.
+   * @param {Object} var_args Initial arguments to be passed to the callback.
+   *
+   * @member gadgets.util
+   * @private Implementation detail.
+   */
+  gadgets.util.makeClosure = function(scope, callback, var_args) {
+    // arguments isn't a real array, so we copy it into one.
+    var baseArgs = [];
+    for (var i = 2, j = arguments.length; i < j; ++i) {
+      baseArgs.push(arguments[i]);
+    }
+    return function() {
+      // append new arguments.
+      var tmpArgs = baseArgs.slice();
+      for (var i = 0, j = arguments.length; i < j; ++i) {
+        tmpArgs.push(arguments[i]);
       }
-      return function() {
-        // append new arguments.
-        var tmpArgs = baseArgs.slice();
-        for (var i = 0, j = arguments.length; i < j; ++i) {
-          tmpArgs.push(arguments[i]);
-        }
-        return callback.apply(scope, tmpArgs);
-      };
-    },
+      return callback.apply(scope, tmpArgs);
+    };
+  };
 
-    /**
-     * Utility function for generating an "enum" from an array.
-     *
-     * @param {Array.<string>} values The values to generate.
-     * @return {Object.<string,string>} An object with member fields to handle
-     *   the enum.
-     *
-     * @private Implementation detail.
-     */
-    makeEnum : function(values) {
-      var i, v, obj = {};
-      for (i = 0; (v = values[i]); ++i) {
-        obj[v] = v;
-      }
-      return obj;
-    },
+  /**
+   * Utility function for generating an "enum" from an array.
+   *
+   * @param {Array.<string>} values The values to generate.
+   * @return {Object.<string,string>} An object with member fields to handle
+   *   the enum.
+   *
+   * @private Implementation detail.
+   */
+  gadgets.util.makeEnum = function(values) {
+    var i, v, obj = {};
+    for (i = 0; (v = values[i]); ++i) {
+      obj[v] = v;
+    }
+    return obj;
+  };
 
-    /**
-     * Gets the feature parameters.
-     *
-     * @param {string} feature The feature to get parameters for.
-     * @return {Object} The parameters for the given feature, or null.
-     *
-     * @member gadgets.util
-     */
-    getFeatureParameters : function(feature) {
-      return typeof features[feature] === 'undefined' ? null : features[feature];
-    },
+  /**
+   * Gets the feature parameters.
+   *
+   * @param {string} feature The feature to get parameters for.
+   * @return {Object} The parameters for the given feature, or null.
+   *
+   * @member gadgets.util
+   */
+  gadgets.util.getFeatureParameters = function(feature) {
+    return typeof features[feature] === 'undefined' ? null : features[feature];
+  };
 
-    /**
-     * Returns whether the current feature is supported.
-     *
-     * @param {string} feature The feature to test for.
-     * @return {boolean} True if the feature is supported.
-     *
-     * @member gadgets.util
-     */
-    hasFeature : function(feature) {
-      return typeof features[feature] !== 'undefined';
-    },
+  /**
+   * Returns whether the current feature is supported.
+   *
+   * @param {string} feature The feature to test for.
+   * @return {boolean} True if the feature is supported.
+   *
+   * @member gadgets.util
+   */
+  gadgets.util.hasFeature = function(feature) {
+    return typeof features[feature] !== 'undefined';
+  };
 
-    /**
-     * Returns the list of services supported by the server
-     * serving this gadget.
-     *
-     * @return {Object} List of Services that enumerate their methods.
-     *
-     * @member gadgets.util
-     */
-    getServices : function() {
-      return services;
-    },
+  /**
+   * Returns the list of services supported by the server
+   * serving this gadget.
+   *
+   * @return {Object} List of Services that enumerate their methods.
+   *
+   * @member gadgets.util
+   */
+  gadgets.util.getServices = function() {
+    return services;
+  };
 
-    /**
-     * Registers an onload handler.
-     * @param {function()} callback The handler to run.
-     *
-     * @member gadgets.util
-     */
-    registerOnLoadHandler : function(callback) {
-      onLoadHandlers.push(callback);
-    },
+  /**
+   * Registers an onload handler.
+   * @param {function()} callback The handler to run.
+   *
+   * @member gadgets.util
+   */
+  gadgets.util.registerOnLoadHandler = function(callback) {
+    onLoadHandlers.push(callback);
+  };
 
-    /**
-     * Runs all functions registered via registerOnLoadHandler.
-     * @private Only to be used by the container, not gadgets.
-     */
-    runOnLoadHandlers : function() {
-      for (var i = 0, j = onLoadHandlers.length; i < j; ++i) {
-        onLoadHandlers[i]();
-      }
-    },
-
-    /**
-     * Escapes the input using html entities to make it safer.
-     *
-     * If the input is a string, uses gadgets.util.escapeString.
-     * If it is an array, calls escape on each of the array elements
-     * if it is an object, will only escape all the mapped keys and values if
-     * the opt_escapeObjects flag is set. This operation involves creating an
-     * entirely new object so only set the flag when the input is a simple
-     * string to string map.
-     * Otherwise, does not attempt to modify the input.
-     *
-     * @param {Object} input The object to escape.
-     * @param {boolean=} opt_escapeObjects Whether to escape objects.
-     * @return {Object} The escaped object.
-     * @private Only to be used by the container, not gadgets.
-     */
-    escape : function(input, opt_escapeObjects) {
-      if (!input) {
-        return input;
-      } else if (typeof input === 'string') {
-        return gadgets.util.escapeString(input);
-      } else if (typeof input === 'array') {
-        for (var i = 0, j = input.length; i < j; ++i) {
-          input[i] = gadgets.util.escape(input[i]);
-        }
-      } else if (typeof input === 'object' && opt_escapeObjects) {
-        var newObject = {};
-        for (var field in input) {
-          if (input.hasOwnProperty(field)) {
-            newObject[gadgets.util.escapeString(field)] = gadgets.util.escape(input[field], true);
-          }
-        }
-        return newObject;
-      }
-      return input;
-    },
-
-    /**
-     * Escapes the input using html entities to make it safer.
-     *
-     * Currently not in the spec -- future proposals may change
-     * how this is handled.
-     *
-     * @param {string} str The string to escape.
-     * @return {string} The escaped string.
-     */
-    escapeString : escapeString,
-
-    /**
-     * Reverses escapeString
-     *
-     * @param {string} str The string to unescape.
-     * @return {string}
-     */
-    unescapeString : function(str) {
-      if (!str) return str;
-      return str.replace(/&#([0-9]+);/g, unescapeEntity);
-    },
-
-    /**
-     * Attach an event listener to given DOM element (Not a gadget standard)
-     *
-     * @param {Object} elem  DOM element on which to attach event.
-     * @param {string} eventName  Event type to listen for.
-     * @param {function()} callback  Invoked when specified event occurs.
-     * @param {boolean} useCapture  If true, initiates capture.
-     */
-    attachBrowserEvent : function(elem, eventName, callback, useCapture) {
-      if (typeof elem.addEventListener != 'undefined') {
-        elem.addEventListener(eventName, callback, useCapture);
-      } else if (typeof elem.attachEvent != 'undefined') {
-        elem.attachEvent('on' + eventName, callback);
-      } else {
-        gadgets.warn('cannot attachBrowserEvent: ' + eventName);
-      }
-    },
-
-    /**
-     * Remove event listener. (Shindig internal implementation only)
-     *
-     * @param {Object} elem  DOM element from which to remove event.
-     * @param {string} eventName  Event type to remove.
-     * @param {function()} callback  Listener to remove.
-     * @param {boolean} useCapture  Specifies whether listener being removed was added with
-     *                              capture enabled.
-     */
-    removeBrowserEvent : function(elem, eventName, callback, useCapture) {
-      if (elem.removeEventListener) {
-        elem.removeEventListener(eventName, callback, useCapture);
-      } else if (elem.detachEvent) {
-        elem.detachEvent('on' + eventName, callback);
-      } else {
-        gadgets.warn('cannot removeBrowserEvent: ' + eventName);
-      }
-    },
-
-    /**
-     * Creates an HTML or XHTML element.
-     * @param {string} tagName The type of element to construct.
-     * @return {Element} The newly constructed element.
-     */
-    createElement : function(tagName) {
-      // TODO: factor this out to core.util.dom.
-      var element;
-      if ((!document.body) || document.body.namespaceURI) {
-        try {
-          element = document.createElementNS(XHTML_SPEC, tagName);
-        } catch (nonXmlDomException) {
-        }
-      }
-      return element || document.createElement(tagName);
-    },
-
-    /**
-     * Creates an HTML or XHTML iframe element with attributes.
-     * @param {Object=} opt_attribs Optional set of attributes to attach. The
-     * only working attributes are spelled the same way in XHTML attribute
-     * naming (most strict, all-lower-case), HTML attribute naming (less strict,
-     * case-insensitive), and JavaScript property naming (some properties named
-     * incompatibly with XHTML/HTML).
-     * @return {Element} The DOM node representing body.
-     */
-    createIframeElement : function(opt_attribs) {
-      // TODO: factor this out to core.util.dom.
-      var frame = gadgets.util.createElement('iframe');
-      try {
-        // TODO: provide automatic mapping to only set the needed
-        // and JS-HTML-XHTML compatible subset through stringifyElement (just
-        // 'name' and 'id', AFAIK). The values of the attributes will be
-        // stringified should the stringifyElement code path be taken (IE)
-        var tagString = stringifyElement('iframe', opt_attribs);
-        var ieFrame = gadgets.util.createElement(tagString);
-        if (ieFrame &&
-            ((!frame) ||
-             ((ieFrame.tagName == frame.tagName) &&
-              (ieFrame.namespaceURI == frame.namespaceURI)))) {
-          frame = ieFrame;
-        }
-      } catch (nonStandardCallFailed) {
-      }
-      attachAttributes(frame, opt_attribs);
-      return frame;
-    },
-
-    /**
-     * Gets the HTML or XHTML body element.
-     * @return {Element} The DOM node representing body.
-     */
-    getBodyElement : function() {
-      // TODO: factor this out to core.util.dom.
-      if (document.body) {
-        return document.body;
-      }
-      try {
-        var xbodies = document.getElementsByTagNameNS(XHTML_SPEC, 'body');
-        if (xbodies && (xbodies.length == 1)) {
-          return xbodies[0];
-        }
-      } catch (nonXmlDomException) {
-      }
-      return document.documentElement || document;
+  /**
+   * Runs all functions registered via registerOnLoadHandler.
+   * @private Only to be used by the container, not gadgets.
+   */
+  gadgets.util.runOnLoadHandlers = function() {
+    for (var i = 0, j = onLoadHandlers.length; i < j; ++i) {
+      onLoadHandlers[i]();
     }
   };
-}();
+
+  /**
+   * Escapes the input using html entities to make it safer.
+   *
+   * If the input is a string, uses gadgets.util.escapeString.
+   * If it is an array, calls escape on each of the array elements
+   * if it is an object, will only escape all the mapped keys and values if
+   * the opt_escapeObjects flag is set. This operation involves creating an
+   * entirely new object so only set the flag when the input is a simple
+   * string to string map.
+   * Otherwise, does not attempt to modify the input.
+   *
+   * @param {Object} input The object to escape.
+   * @param {boolean=} opt_escapeObjects Whether to escape objects.
+   * @return {Object} The escaped object.
+   * @private Only to be used by the container, not gadgets.
+   */
+  gadgets.util.escape = function(input, opt_escapeObjects) {
+    if (!input) {
+      return input;
+    } else if (typeof input === 'string') {
+      return gadgets.util.escapeString(input);
+    } else if (typeof input === 'array') {
+      for (var i = 0, j = input.length; i < j; ++i) {
+        input[i] = gadgets.util.escape(input[i]);
+      }
+    } else if (typeof input === 'object' && opt_escapeObjects) {
+      var newObject = {};
+      for (var field in input) {
+        if (input.hasOwnProperty(field)) {
+          newObject[gadgets.util.escapeString(field)] = gadgets.util.escape(input[field], true);
+        }
+      }
+      return newObject;
+    }
+    return input;
+  };
+
+  /**
+   * Escapes the input using html entities to make it safer.
+   *
+   * Currently not in the spec -- future proposals may change
+   * how this is handled.
+   *
+   * @param {string} str The string to escape.
+   * @return {string} The escaped string.
+   */
+  gadgets.util.escapeString = escapeString;
+
+  /**
+   * Reverses escapeString
+   *
+   * @param {string} str The string to unescape.
+   * @return {string}
+   */
+  gadgets.util.unescapeString = function(str) {
+    if (!str) return str;
+    return str.replace(/&#([0-9]+);/g, unescapeEntity);
+  };
+
+  /**
+   * Attach an event listener to given DOM element (Not a gadget standard)
+   *
+   * @param {Object} elem  DOM element on which to attach event.
+   * @param {string} eventName  Event type to listen for.
+   * @param {function()} callback  Invoked when specified event occurs.
+   * @param {boolean} useCapture  If true, initiates capture.
+   */
+  gadgets.util.attachBrowserEvent = function(elem, eventName, callback, useCapture) {
+    if (typeof elem.addEventListener != 'undefined') {
+      elem.addEventListener(eventName, callback, useCapture);
+    } else if (typeof elem.attachEvent != 'undefined') {
+      elem.attachEvent('on' + eventName, callback);
+    } else {
+      gadgets.warn('cannot attachBrowserEvent: ' + eventName);
+    }
+  };
+
+  /**
+   * Remove event listener. (Shindig internal implementation only)
+   *
+   * @param {Object} elem  DOM element from which to remove event.
+   * @param {string} eventName  Event type to remove.
+   * @param {function()} callback  Listener to remove.
+   * @param {boolean} useCapture  Specifies whether listener being removed was added with
+   *                              capture enabled.
+   */
+  gadgets.util.removeBrowserEvent = function(elem, eventName, callback, useCapture) {
+    if (elem.removeEventListener) {
+      elem.removeEventListener(eventName, callback, useCapture);
+    } else if (elem.detachEvent) {
+      elem.detachEvent('on' + eventName, callback);
+    } else {
+      gadgets.warn('cannot removeBrowserEvent: ' + eventName);
+    }
+  };
+
+  /**
+   * Creates an HTML or XHTML iframe element with attributes.
+   * @param {Object=} opt_attribs Optional set of attributes to attach. The
+   * only working attributes are spelled the same way in XHTML attribute
+   * naming (most strict, all-lower-case), HTML attribute naming (less strict,
+   * case-insensitive), and JavaScript property naming (some properties named
+   * incompatibly with XHTML/HTML).
+   * @return {Element} The DOM node representing body.
+   */
+  gadgets.util.createIframeElement = function(opt_attribs) {
+    // TODO: factor this out to core.util.dom.
+    var frame = gadgets.util.createElement('iframe');
+    try {
+      // TODO: provide automatic mapping to only set the needed
+      // and JS-HTML-XHTML compatible subset through stringifyElement (just
+      // 'name' and 'id', AFAIK). The values of the attributes will be
+      // stringified should the stringifyElement code path be taken (IE)
+      var tagString = stringifyElement('iframe', opt_attribs);
+      var ieFrame = gadgets.util.createElement(tagString);
+      if (ieFrame &&
+          ((!frame) ||
+           ((ieFrame.tagName == frame.tagName) &&
+            (ieFrame.namespaceURI == frame.namespaceURI)))) {
+        frame = ieFrame;
+      }
+    } catch (nonStandardCallFailed) {
+    }
+    attachAttributes(frame, opt_attribs);
+    return frame;
+  };
+
+})();

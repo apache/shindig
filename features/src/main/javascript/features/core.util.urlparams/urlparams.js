@@ -26,8 +26,9 @@
  * @class Provides a thin method for parsing url parameters.
  * @name gadgets.util
  */
+gadgets.util = gadgets.util || {};
 
-gadgets.util = function() {
+(function() {  
   var parameters = null;
 
   /**
@@ -51,50 +52,49 @@ gadgets.util = function() {
     return query.split('&');
   }
 
-  return /** @scope gadgets.util */ {
-    /**
-     * Gets the URL parameters.
-     *
-     * @param {string=} opt_url Optional URL whose parameters to parse.
-     *                         Defaults to window's current URL.
-     * @return {Object} Parameters passed into the query string.
-     * @member gadgets.util
-     * @private Implementation detail.
-     */
-    getUrlParameters: function(opt_url) {
-      var no_opt_url = typeof opt_url === 'undefined';
-      if (parameters !== null && no_opt_url) {
-        // "parameters" is a cache of current window params only.
-        return parameters;
-      }
-      var parsed = {};
-      var pairs = parseUrlParams(opt_url || document.location.href);
-      var unesc = window.decodeURIComponent ? decodeURIComponent : unescape;
-      for (var i = 0, j = pairs.length; i < j; ++i) {
-        var pos = pairs[i].indexOf('=');
-        if (pos === -1) {
-          continue;
-        }
-        var argName = pairs[i].substring(0, pos);
-        var value = pairs[i].substring(pos + 1);
-        // difference to IG_Prefs, is that args doesn't replace spaces in
-        // argname. Unclear on if it should do:
-        // argname = argname.replace(/\+/g, " ");
-        value = value.replace(/\+/g, ' ');
-        try {
-          parsed[argName] = unesc(value);
-        } catch (e) {
-          // Undecodable/invalid value; ignore.
-        }
-      }
-      if (no_opt_url) {
-        // Cache current-window params in parameters var.
-        parameters = parsed;
-      }
-      return parsed;
+  /**
+   * Gets the URL parameters.
+   *
+   * @param {string=} opt_url Optional URL whose parameters to parse.
+   *                         Defaults to window's current URL.
+   * @return {Object} Parameters passed into the query string.
+   * @member gadgets.util
+   * @private Implementation detail.
+   */
+  gadgets.util.getUrlParameters = function(opt_url) {
+    var no_opt_url = typeof opt_url === 'undefined';
+    if (parameters !== null && no_opt_url) {
+      // "parameters" is a cache of current window params only.
+      return parameters;
     }
+    var parsed = {};
+    var pairs = parseUrlParams(opt_url || document.location.href);
+    var unesc = window.decodeURIComponent ? decodeURIComponent : unescape;
+    for (var i = 0, j = pairs.length; i < j; ++i) {
+      var pos = pairs[i].indexOf('=');
+      if (pos === -1) {
+        continue;
+      }
+      var argName = pairs[i].substring(0, pos);
+      var value = pairs[i].substring(pos + 1);
+      // difference to IG_Prefs, is that args doesn't replace spaces in
+      // argname. Unclear on if it should do:
+      // argname = argname.replace(/\+/g, " ");
+      value = value.replace(/\+/g, ' ');
+      try {
+        parsed[argName] = unesc(value);
+      } catch (e) {
+        // Undecodable/invalid value; ignore.
+      }
+    }
+    if (no_opt_url) {
+      // Cache current-window params in parameters var.
+      parameters = parsed;
+    }
+    return parsed;
   };
-}();
+})();
+
 // Initialize url parameters so that hash data is pulled in before it can be
 // altered by a click.
 gadgets.util.getUrlParameters();

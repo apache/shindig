@@ -40,7 +40,8 @@ if (!this.JsUtil) {
   eval(JsUtil.prototype.include(srcDir + '/core/json-jsimpl.js'));
   eval(JsUtil.prototype.include(srcDir + '/core/json-flatten.js'));
   eval(JsUtil.prototype.include(srcDir + '/core/auth.js'));
-  eval(JsUtil.prototype.include(srcDir + '/core/util.js'));
+  eval(JsUtil.prototype.include(srcDir + '/core.util.dom/dom.js'));
+  eval(JsUtil.prototype.include(srcDir + '/core.util/util.js'));
   eval(JsUtil.prototype.include(srcDir + '/core/prefs.js'));
   eval(JsUtil.prototype.include(srcDir + '/core/log.js'));
   eval(JsUtil.prototype.include(srcDir + '/core.io/io.js'));
