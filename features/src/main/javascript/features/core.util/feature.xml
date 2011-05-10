@@ -22,6 +22,7 @@
   <dependency>taming</dependency>
   <dependency>core.config</dependency>
   <dependency>core.util.dom</dependency>
+  <dependency>core.util.string</dependency>
   <dependency>core.util.urlparams</dependency>
   <all>
     <script src="util.js"/>
@@ -34,11 +35,12 @@
       <exports type="js">gadgets.util.getServices</exports>
       <exports type="js">gadgets.util.registerOnLoadHandler</exports>
       <exports type="js">gadgets.util.runOnLoadHandlers</exports>
-      <exports type="js">gadgets.util.escape</exports>
-      <exports type="js">gadgets.util.escapeString</exports>
-      <exports type="js">gadgets.util.unescapeString</exports>
       <exports type="js">gadgets.util.attachBrowserEvent</exports>
       <exports type="js">gadgets.util.removeBrowserEvent</exports>
+      <!-- TODO: move to core.util.string -->
+      <exports type="js">gadgets.util.escape</exports>
+      <exports type="js">gadgets.util.escapeString</exports>
+      <!-- TODO: move to core.util.dom -->
       <exports type="js">gadgets.util.createIframeElement</exports>
     </api>
   </all>

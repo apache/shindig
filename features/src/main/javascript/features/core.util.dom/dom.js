@@ -29,7 +29,7 @@
 gadgets.util = gadgets.util || {};
 
 (function() {  
-  
+
   var XHTML_SPEC = 'http://www.w3.org/1999/xhtml';
 
   /**
@@ -47,8 +47,7 @@ gadgets.util = gadgets.util || {};
     }
     return element || document.createElement(tagName);
   };
-  
-  
+
   /**
    * Gets the HTML or XHTML body element.
    * @return {Element} The DOM node representing body.

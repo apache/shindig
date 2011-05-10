@@ -35,15 +35,16 @@ if (!this.JsUtil) {
 
   eval(JsUtil.prototype.include(testSrcDir + '/mocks/env.js'));
   eval(JsUtil.prototype.include(testSrcDir + '/mocks/xhr.js'));
-  eval(JsUtil.prototype.include(srcDir + '/core/config.js'));
-  eval(JsUtil.prototype.include(srcDir + '/core/json-native.js'));
-  eval(JsUtil.prototype.include(srcDir + '/core/json-jsimpl.js'));
-  eval(JsUtil.prototype.include(srcDir + '/core/json-flatten.js'));
-  eval(JsUtil.prototype.include(srcDir + '/core/auth.js'));
+  eval(JsUtil.prototype.include(srcDir + '/core.config.base/config.js'));
+  eval(JsUtil.prototype.include(srcDir + '/core.json/json-native.js'));
+  eval(JsUtil.prototype.include(srcDir + '/core.json/json-jsimpl.js'));
+  eval(JsUtil.prototype.include(srcDir + '/core.json/json-flatten.js'));
+  eval(JsUtil.prototype.include(srcDir + '/core.util.string/string.js'));
   eval(JsUtil.prototype.include(srcDir + '/core.util.dom/dom.js'));
+  eval(JsUtil.prototype.include(srcDir + '/core.util.urlparams/urlparams.js'));
   eval(JsUtil.prototype.include(srcDir + '/core.util/util.js'));
-  eval(JsUtil.prototype.include(srcDir + '/core/prefs.js'));
-  eval(JsUtil.prototype.include(srcDir + '/core/log.js'));
+  eval(JsUtil.prototype.include(srcDir + '/core.prefs/prefs.js'));
+  eval(JsUtil.prototype.include(srcDir + '/core.log/log.js'));
   eval(JsUtil.prototype.include(srcDir + '/core.io/io.js'));
   eval(JsUtil.prototype.include(srcDir + '/views/views.js'));
   eval(JsUtil.prototype.include(srcDir + '/xhrwrapper/xhrwrapper.js'));
@@ -79,6 +80,7 @@ if (!this.JsUtil) {
   eval(JsUtil.prototype.include(srcDir + '/osapi/jsonrpctransport.js'));
   eval(JsUtil.prototype.include(srcDir + '/osapi/gadgetsrpctransport.js'));
   eval(JsUtil.prototype.include(srcDir + '/osapi/peoplehelpers.js'));
+  eval(JsUtil.prototype.include(srcDir + '/shindig.auth/auth.js'));
   eval(JsUtil.prototype.include(srcDir + '/shindig.uri/uri.js'));
   eval(JsUtil.prototype.include(srcDir + '/container/constant.js'));
   eval(JsUtil.prototype.include(srcDir + '/container/util.js'));
