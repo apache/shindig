@@ -17,6 +17,9 @@
  */
 package org.apache.shindig.gadgets.js;
 
+import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
+
 import org.apache.shindig.gadgets.features.FeatureRegistry.FeatureBundle;
 import org.apache.shindig.gadgets.features.FeatureResource;
 
@@ -42,6 +45,8 @@ public class JsContent {
   
   private JsContent(String content, String source,
       FeatureBundle bundle, FeatureResource resource) {
+    Preconditions.checkArgument(
+        !Strings.isNullOrEmpty(source), "All JS content must have a source");
     this.content = content;
     this.source = source;
     this.bundle = bundle;

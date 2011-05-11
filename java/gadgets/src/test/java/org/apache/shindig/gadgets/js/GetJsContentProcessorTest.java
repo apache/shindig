@@ -124,7 +124,7 @@ public class GetJsContentProcessorTest {
 
     expect(compiler.getJsContent(jsUri, bundle1))
       .andReturn(ImmutableList.<JsContent>of(
-          JsContent.fromFeature(JS_CODE1, null, null, null)));
+          JsContent.fromFeature(JS_CODE1, "source1", null, null)));
 
     control.replay();
     processor.process(request, response);
@@ -147,8 +147,8 @@ public class GetJsContentProcessorTest {
 
     expect(compiler.getJsContent(jsUri, bundle))
         .andReturn(ImmutableList.<JsContent>of(
-            JsContent.fromFeature(JS_CODE1, null, bundle, resource1),
-            JsContent.fromFeature(JS_CODE2, null, bundle, resource2)));
+            JsContent.fromFeature(JS_CODE1, "source1", bundle, resource1),
+            JsContent.fromFeature(JS_CODE2, "source2", bundle, resource2)));
   }
 
   private void setupJsUriAndRegistry(UriStatus uriStatus,

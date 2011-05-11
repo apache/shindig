@@ -91,11 +91,11 @@ public class ExportJsProcessorTest {
     LookupResult lookupMock = mockLookupResult(bundle);
     FeatureRegistry featureRegistryMock = mockRegistry(lookupMock);
 
-    textJsContent1 = JsContent.fromText(TEXT_CONTENT_1, null);
-    textJsContent2 = JsContent.fromText(TEXT_CONTENT_2, null);
-    featureJsContent1 = JsContent.fromFeature(FEATURE_CONTENT_1, null, mockBundle(EXPORTS_1), null);
-    featureJsContent2 = JsContent.fromFeature(FEATURE_CONTENT_2, null, mockBundle(EXPORTS_2), null);
-    featureJsContent3 = JsContent.fromFeature(FEATURE_CONTENT_3, null, mockBundle(EXPORTS_3), null);
+    textJsContent1 = JsContent.fromText(TEXT_CONTENT_1, "source1");
+    textJsContent2 = JsContent.fromText(TEXT_CONTENT_2, "source2");
+    featureJsContent1 = JsContent.fromFeature(FEATURE_CONTENT_1, "source3", mockBundle(EXPORTS_1), null);
+    featureJsContent2 = JsContent.fromFeature(FEATURE_CONTENT_2, "source4", mockBundle(EXPORTS_2), null);
+    featureJsContent3 = JsContent.fromFeature(FEATURE_CONTENT_3, "source5", mockBundle(EXPORTS_3), null);
     compiler = new ExportJsProcessor(featureRegistryMock, contextProviderMock);
   }
 

@@ -42,6 +42,7 @@ public class CajaJsSubtractingProcessorTest {
 
   private static final List<String> ERRORS = ImmutableList.<String>of();
 
+  private static final String SOURCE = "source";
   private static final String NORMAL_CONTENT_JS = "normal";
   private static final String CAJA_CONTENT_JS = "cajoled";
 
@@ -57,12 +58,12 @@ public class CajaJsSubtractingProcessorTest {
     control = createControl();
 
     contents = Lists.newArrayList();
-    contents.add(JsContent.fromFeature(NORMAL_CONTENT_JS, null, null, null));
-    contents.add(JsContent.fromFeature(NORMAL_CONTENT_JS, null, null,
+    contents.add(JsContent.fromFeature(NORMAL_CONTENT_JS, SOURCE, null, null));
+    contents.add(JsContent.fromFeature(NORMAL_CONTENT_JS, SOURCE, null,
         mockFeatureResource(null)));
-    contents.add(JsContent.fromFeature(NORMAL_CONTENT_JS, null, null,
+    contents.add(JsContent.fromFeature(NORMAL_CONTENT_JS, SOURCE, null,
         mockFeatureResource(ImmutableMap.of(UriCommon.Param.CAJOLE.getKey(), "blah"))));
-    contents.add(JsContent.fromFeature(CAJA_CONTENT_JS, null, null,
+    contents.add(JsContent.fromFeature(CAJA_CONTENT_JS, SOURCE, null,
         mockFeatureResource(ImmutableMap.of(UriCommon.Param.CAJOLE.getKey(), ATTRIB_VALUE))));
 
     response = new JsResponse(contents, -1, -1, false, ERRORS, null);

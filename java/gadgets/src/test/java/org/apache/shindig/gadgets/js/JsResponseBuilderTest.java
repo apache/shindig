@@ -18,10 +18,12 @@
  */
 package org.apache.shindig.gadgets.js;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.Iterator;
 
 public class JsResponseBuilderTest {
 
@@ -48,5 +50,19 @@ public class JsResponseBuilderTest {
         "var c = {};\nc.d = {};\n" +
         "var e = {};\ne.prototype.f = {};\n",
         builder.build().getExterns());
+  }
+  
+  @Test
+  public void skipsEmptyContent() throws Exception {
+    builder.appendJs("number 1", "num1");
+    builder.appendJs("", "num2");
+    builder.appendJs("number 3", "num3");
+    builder.prependJs("number 4", "num4");
+    builder.prependJs("", "num5");
+    Iterator<JsContent> allJsContent = builder.build().getAllJsContent().iterator();
+    assertEquals("num4", allJsContent.next().getSource());
+    assertEquals("num1", allJsContent.next().getSource());
+    assertEquals("num3", allJsContent.next().getSource());
+    assertFalse(allJsContent.hasNext());
   }
 }

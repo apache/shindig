@@ -59,8 +59,8 @@ public class CompilationProcessorTest {
         new JsResponseBuilder().setCacheTtlSecs(1234).setStatusCode(200)
           .appendJs("content1:", "source1")
           .appendJs("content2", "source2")
-          .appendJs(JsContent.fromFeature("content3:", null, mockBundle("extern3"), null))
-          .appendJs(JsContent.fromFeature("content4:", null, mockBundle("extern4"), null));
+          .appendJs(JsContent.fromFeature("content3:", "source3", mockBundle("extern3"), null))
+          .appendJs(JsContent.fromFeature("content4:", "source4", mockBundle("extern4"), null));
     JsResponse outputResponse = new JsResponseBuilder().appendJs("content3", "s3").build();
     JsRequest request = control.createMock(JsRequest.class);
     expect(request.getJsUri()).andReturn(jsUri);

@@ -60,7 +60,7 @@ public class SeparatorCommentingProcessorTest {
 
   @Test
   public void testOneFeature() throws Exception {
-    JsContent js = JsContent.fromFeature("content", null, mockBundle("bundle"), null);
+    JsContent js = JsContent.fromFeature("content", "source", mockBundle("bundle"), null);
     JsResponseBuilder builder = newBuilder(js);
 
     control.replay();
@@ -78,7 +78,7 @@ public class SeparatorCommentingProcessorTest {
 
   @Test
   public void testOneText() throws Exception {
-    JsContent text1 = JsContent.fromText("text1", null);
+    JsContent text1 = JsContent.fromText("text1", "source");
     JsResponseBuilder builder = newBuilder(text1);
 
     control.replay();
@@ -92,8 +92,8 @@ public class SeparatorCommentingProcessorTest {
 
   @Test
   public void testMultipleFeaturesWithoutInBetweenTexts() throws Exception {
-    JsContent js1 = JsContent.fromFeature("content1", null, mockBundle("bundle1"), null);
-    JsContent js2 = JsContent.fromFeature("content2", null, mockBundle("bundle2"), null);
+    JsContent js1 = JsContent.fromFeature("content1", "source1", mockBundle("bundle1"), null);
+    JsContent js2 = JsContent.fromFeature("content2", "source2", mockBundle("bundle2"), null);
     JsResponseBuilder builder = newBuilder(js1, js2);
 
     control.replay();
@@ -115,8 +115,8 @@ public class SeparatorCommentingProcessorTest {
   @Test
   public void testNeighboringSameFeatures() throws Exception {
     FeatureBundle bundle = mockBundle("bundle");
-    JsContent js1 = JsContent.fromFeature("content1", null, bundle, null);
-    JsContent js2 = JsContent.fromFeature("content2", null, bundle, null);
+    JsContent js1 = JsContent.fromFeature("content1", "source1", bundle, null);
+    JsContent js2 = JsContent.fromFeature("content2", "source2", bundle, null);
     JsResponseBuilder builder = newBuilder(js1, js2);
 
     control.replay();
@@ -135,11 +135,11 @@ public class SeparatorCommentingProcessorTest {
 
   @Test
   public void testMultipleFeaturesWithInBetweenTexts() throws Exception {
-    JsContent text1 = JsContent.fromText("text1", null);
-    JsContent text2 = JsContent.fromText("text2", null);
-    JsContent text3 = JsContent.fromText("text3", null);
-    JsContent js1 = JsContent.fromFeature("content1", null, mockBundle("bundle1"), null);
-    JsContent js2 = JsContent.fromFeature("content2", null, mockBundle("bundle2"), null);
+    JsContent text1 = JsContent.fromText("text1", "source1");
+    JsContent text2 = JsContent.fromText("text2", "source2");
+    JsContent text3 = JsContent.fromText("text3", "source3");
+    JsContent js1 = JsContent.fromFeature("content1", "source4", mockBundle("bundle1"), null);
+    JsContent js2 = JsContent.fromFeature("content2", "source5", mockBundle("bundle2"), null);
     JsResponseBuilder builder = newBuilder(text1, js1, text2, js2, text3);
 
     control.replay();

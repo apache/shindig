@@ -70,15 +70,26 @@ public class JsResponseBuilder {
    * Prepend a JS to the response.
    */
   public JsResponseBuilder prependJs(JsContent jsContent) {
-    jsCode.add(0, jsContent);
+    if (canAddContent(jsContent)) {
+      jsCode.add(0, jsContent);
+    }
     return this;
+  }
+
+  /**
+   * Prepends JS to the output.
+   */
+  public JsResponseBuilder prependJs(String content, String name) {
+    return prependJs(JsContent.fromText(content, name));
   }
 
   /**
    * Insert a JS at a specific index.
    */
   public JsResponseBuilder insertJsAt(int index, JsContent jsContent) {
-    jsCode.add(index, jsContent);
+    if (canAddContent(jsContent)) {
+      jsCode.add(index, jsContent);
+    }
     return this;
   }
 
@@ -86,7 +97,9 @@ public class JsResponseBuilder {
    * Appends more JS to the response.
    */
   public JsResponseBuilder appendJs(JsContent jsContent) {
-    jsCode.add(jsContent);
+    if (canAddContent(jsContent)) {
+      jsCode.add(jsContent);
+    }
     return this;
   }
 
@@ -104,14 +117,6 @@ public class JsResponseBuilder {
     for (JsContent content : jsBundle) {
       appendJs(content);
     }
-    return this;
-  }
-
-  /**
-   * Prepends JS to the output.
-   */
-  public JsResponseBuilder prependJs(String content, String name) {
-    jsCode.add(0, JsContent.fromText(content, name));
     return this;
   }
 
@@ -254,5 +259,9 @@ public class JsResponseBuilder {
       result.add(cur.toString());
     }
     return result;
+  }
+  
+  private boolean canAddContent(JsContent jsContent) {
+    return !jsContent.get().isEmpty();
   }
 }
