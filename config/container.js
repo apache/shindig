@@ -236,7 +236,8 @@
     "useLegacyProtocol" : false,
 
     // Path to the cross-domain enabling SWF for rpc's Flash transport.
-    "commSwf": "/xpc.swf"
+    "commSwf": "/xpc.swf",
+    "passReferrer": "c2p:query"
   },
   // Skin defaults
   "skins" : {

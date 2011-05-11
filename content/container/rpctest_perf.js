@@ -54,6 +54,8 @@ function completePerfStats() {
   document.getElementById("results_time_used").innerHTML = timeUsedMs + "ms";
   document.getElementById("results_msgs_per_sec").innerHTML = (perfStats.numResults / (timeUsedMs / 1000));
   document.getElementById("results_bytes_per_sec").innerHTML = (perfStats.bytesReceived / (timeUsedMs / 1000));
+  document.getElementById("results_referrer").innerHTML = (this['referer'] || "n/a") + " -- config: " +
+      (gadgets.config.get("rpc")["passReferrer"] || "<empty>");
   document.getElementById("test_running").style.display = "none";
   document.getElementById("results").style.display = "";
 };

@@ -122,7 +122,8 @@ if (!window['gadgets']['rpc']) { // make lib resilient to double-inclusion
     var params = {};
     var receiverTx = {};
     var earlyRpcQueue = {};
-    var passReferrer = false;
+    var passReferrerDirection = null;
+    var passReferrerContents = null;
 
     // isGadget =~ isChild for the purposes of rpc (used only in setup).
     var isChild = (window.top !== window.self);
@@ -328,7 +329,7 @@ if (!window['gadgets']['rpc']) { // make lib resilient to double-inclusion
         if (opt_sender) {
           var origin = getOrigin(opt_sender);
           rpc[RPC_KEY_ORIGIN] = opt_sender;
-          var referrer = rpc['r'] || document.referrer;
+          var referrer = rpc['r'];
           if (!referrer || getOrigin(referrer) != origin) {
             // Transports send along as much info as they can about the sender
             // of the message; 'origin' is the origin component alone, while
@@ -643,11 +644,18 @@ if (!window['gadgets']['rpc']) { // make lib resilient to double-inclusion
       setupFrame(targetId, token);
     }
 
+    function setReferrerConfig(cfg) {
+      var passReferrer = cfg['passReferrer'] || "";
+      var prParts = passReferrer.split(":", 2);
+      passReferrerDirection = prParts[0] || "none";
+      passReferrerContents = prParts[1] || "origin";
+    }
+
     function setupContainedContext(rpctoken, opt_parent) {
       function init(config) {
         var cfg = config ? config['rpc'] : {};
         var useLegacy = String(cfg['useLegacyProtocol']) === 'true';
-        passReferrer = String(cfg['passReferrer']) === 'true';
+        setReferrerConfig(cfg);
 
         // Parent-relative only.
         var parentRelayUrl = cfg['parentRelayUrl'] || '';
@@ -753,6 +761,24 @@ if (!window['gadgets']['rpc']) { // make lib resilient to double-inclusion
         // Container to child.
         setupChildIframe(targetId, opt_receiverurl, opt_authtoken);
       }
+    }
+
+    function getReferrer(targetId) {
+      if (passReferrerDirection === "bidir" ||
+          (passReferrerDirection === "c2p" && targetId === "..") ||
+          (passReferrerDirection === "p2c" && targetId !== "..")) {
+        var href = window.location.href;
+        var lopOff = "?";  // default = origin
+        if (passReferrerContents === "query") {
+          lopOff = "#";
+        } else if (passReferrerContents === "hash") {
+          return href;
+        }
+        var lastIx = href.lastIndexOf(lopOff);
+        lastIx = lastIx === -1 ? href.length : lastIx;
+        return href.substring(0, lastIx);
+      }
+      return null;
     }
 
     return /** @scope gadgets.rpc */ {
@@ -872,8 +898,9 @@ if (!window['gadgets']['rpc']) { // make lib resilient to double-inclusion
           'l': useLegacyProtocol[targetId]
         };
 
-        if (passReferrer) {
-          rpc['r'] = window.location.href;
+        var referrer = getReferrer(targetId);
+        if (referrer) {
+          rpc['r'] = referrer;
         }
 
         if (targetId !== '..' &&
@@ -1000,6 +1027,8 @@ if (!window['gadgets']['rpc']) { // make lib resilient to double-inclusion
         }
         if (isChild) {
           setupReceiver('..');
+        } else {
+          gadgets.config.register('rpc', null, function(config) { setReferrerConfig(config['rpc'] || {}); });
         }
       },
 

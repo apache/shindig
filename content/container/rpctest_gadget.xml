@@ -27,7 +27,7 @@
       // Pre-onload message send.
       gadgets.rpc.call(null, 'initial_gadget_message', null, 'Hello there! Pre-onload message sent successfully.');
     
-      var cachebust = 'cachebust=' + Math.random();
+      var cachebust = 'cachebust=1';// + Math.random();
       document.write('<scr' + 'ipt language="JavaScript" type="text/javascript" src="/container/rpctest_perf.js?' + cachebust + '"></scr' + 'ipt>');
     </script>
     <script>
@@ -100,7 +100,8 @@
       Messages: <span id="results_num_received"></span>, Bytes: <span id="results_bytes_received"></span> <span id="in_or_out"></span><br/>
       Time elapsed for test run: <span id="results_time_used"></span><br/>
       Messages/second: <span id="results_msgs_per_sec"></span><br/>
-      Bytes/second: <span id="results_bytes_per_sec"></span>
+      Bytes/second: <span id="results_bytes_per_sec"></span><br/>
+      Referrer: <span id="results_referrer"></span>
     </div><hr/>
     <div>Callback<br/>
       <ul>
