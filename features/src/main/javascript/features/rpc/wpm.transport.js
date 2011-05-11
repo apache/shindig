@@ -104,11 +104,7 @@ if (!gadgets.rpctx.wpm) {  // make lib resilient to double-inclusion
       },
 
       setup: function(receiverId, token) {
-        // If we're a gadget, send an ACK message to indicate to container
-        // that we're ready to receive messages.
-        if (receiverId === '..') {
-          gadgets.rpc._createRelayIframe(token);
-        }
+        // Indicate that we're ready to send to the given receiver.
         ready(receiverId, true);
         return true;
       },

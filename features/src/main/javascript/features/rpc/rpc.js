@@ -1009,44 +1009,6 @@ if (!window['gadgets']['rpc']) { // make lib resilient to double-inclusion
       /** Parses a sibling id into {id: <siblingId>, origin: <siblingOrigin>} */
       _parseSiblingId: parseSiblingId,
 
-      /** Create an iframe for loading the relay URL. Used by child only. */
-      _createRelayIframe: function(token, data) {
-        var relay = getRelayUrl('..');
-        if (!relay) {
-          return null;
-        }
-
-        // Format: #targetId & sourceId & authToken & data
-        var src = relay + '#..&' + rpcId + '&' + token + '&' +
-            encodeURIComponent(gadgets.json.stringify(data));
-
-        var iframe = gadgets.util.createIframeElement();
-        iframe.style.border = iframe.style.width = iframe.style.height = '0px';
-        iframe.style.visibility = 'hidden';
-        iframe.style.position = 'absolute';
-
-        function appendFn() {
-          // Append the iframe.
-          document.body.appendChild(iframe);
-
-          // Set the src of the iframe to 'about:blank' first and then set it
-          // to the relay URI. This prevents the iframe from maintaining a src
-          // to the 'old' relay URI if the page is returned to from another.
-          // In other words, this fixes the bfcache issue that causes the iframe's
-          // src property to not be updated despite us assigning it a new value here.
-          iframe.src = 'javascript:"<html></html>"';
-          iframe.src = src;
-        }
-
-        if (document.body) {
-          appendFn();
-        } else {
-          gadgets.util.registerOnLoadHandler(function() { appendFn(); });
-        }
-
-        return iframe;
-      },
-
       ACK: ACK,
 
       RPC_ID: rpcId || "..",
