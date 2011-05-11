@@ -39,8 +39,8 @@ if (!this.JsUtil) {
   eval(JsUtil.prototype.include(srcDir + '/core.json/json-native.js'));
   eval(JsUtil.prototype.include(srcDir + '/core.json/json-jsimpl.js'));
   eval(JsUtil.prototype.include(srcDir + '/core.json/json-flatten.js'));
-  eval(JsUtil.prototype.include(srcDir + '/core.util.string/string.js'));
   eval(JsUtil.prototype.include(srcDir + '/core.util.dom/dom.js'));
+  eval(JsUtil.prototype.include(srcDir + '/core.util.string/string.js'));
   eval(JsUtil.prototype.include(srcDir + '/core.util.urlparams/urlparams.js'));
   eval(JsUtil.prototype.include(srcDir + '/core.util/util.js'));
   eval(JsUtil.prototype.include(srcDir + '/core.prefs/prefs.js'));

@@ -37,9 +37,6 @@
       <exports type="js">gadgets.util.runOnLoadHandlers</exports>
       <exports type="js">gadgets.util.attachBrowserEvent</exports>
       <exports type="js">gadgets.util.removeBrowserEvent</exports>
-      <!-- TODO: move to core.util.string -->
-      <exports type="js">gadgets.util.escape</exports>
-      <exports type="js">gadgets.util.escapeString</exports>
       <!-- TODO: move to core.util.dom -->
       <exports type="js">gadgets.util.createIframeElement</exports>
     </api>

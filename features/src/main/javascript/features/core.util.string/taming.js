@@ -23,6 +23,8 @@
  */
 tamings___.push(function(imports) {
   caja___.whitelistFuncs([
+    [gadgets.util, 'escape'],
+    [gadgets.util, 'escapeString'],
     [gadgets.util, 'unescapeString']
   ]);
 });

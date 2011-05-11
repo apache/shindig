@@ -115,6 +115,8 @@
                 <source>core.json/json-jsimpl.js</source>
                 <source>core.json/json-flatten.js</source>
                 <source>shindig.auth/auth.js</source>
+                <source>core.util.dom/dom.js</source>
+                <source>core.util.string/string.js</source>
                 <source>core.util.urlparams/urlparams.js</source>
                 <source>core.util/util.js</source>
                 <source>core.prefs/prefs.js</source>

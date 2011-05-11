@@ -44,74 +44,21 @@ gadgets.util = gadgets.util || {};
   }
 
   function stringifyElement(tagName, opt_attribs) {
-    var arr = [];
-    arr.push('<').push(tagName);
+    var arr = ['<', tagName];
     var attribs = opt_attribs || {};
     for (var attrib in attribs) {
       if (attribs.hasOwnProperty(attrib)) {
-        var value = escapeString(attribs[attrib]);
-        arr.push(' ').push(attrib).push('="').push(value).push('"');
+        arr.push(' ');
+        arr.push(attrib);
+        arr.push('="');
+        arr.push(gadgets.util.escapeString(attribs[attrib]));
+        arr.push('"');
       }
     }
-    arr.push('></').push(tagName).push('>');
+    arr.push('></');
+    arr.push(tagName);
+    arr.push('>');
     return arr.join('');
-  }
-
-  /**
-   * @enum {boolean}
-   * @const
-   * @private
-   * Maps code points to the value to replace them with.
-   * If the value is "false", the character is removed entirely, otherwise
-   * it will be replaced with an html entity.
-   */
-  var escapeCodePoints = {
-    // nul; most browsers truncate because they use c strings under the covers.
-    0 : false,
-    // new line
-    10 : true,
-    // carriage return
-    13 : true,
-    // double quote
-    34 : true,
-    // single quote
-    39 : true,
-    // less than
-    60 : true,
-    // greater than
-    62 : true,
-    // backslash
-    92 : true,
-    // line separator
-    8232 : true,
-    // paragraph separator
-    8233 : true,
-    // fullwidth quotation mark
-    65282 : true,
-    // fullwidth apostrophe
-    65287 : true,
-    // fullwidth less-than sign
-    65308 : true,
-    // fullwidth greater-than sign
-    65310 : true,
-    // fullwidth reverse solidus
-    65340 : true
-  };
-
-  function escapeString(str) {
-    if (!str) return str;
-    var out = [], ch, shouldEscape;
-    for (var i = 0, j = str.length; i < j; ++i) {
-      ch = str.charCodeAt(i);
-      shouldEscape = escapeCodePoints[ch];
-      if (shouldEscape === true) {
-        out.push('&#', ch, ';');
-      } else if (shouldEscape !== false) {
-        // undefined or null are OK.
-        out.push(str.charAt(i));
-      }
-    }
-    return out.join('');
   }
 
   /**
@@ -228,56 +175,6 @@ gadgets.util = gadgets.util || {};
       onLoadHandlers[i]();
     }
   };
-
-  /**
-   * Escapes the input using html entities to make it safer.
-   *
-   * If the input is a string, uses gadgets.util.escapeString.
-   * If it is an array, calls escape on each of the array elements
-   * if it is an object, will only escape all the mapped keys and values if
-   * the opt_escapeObjects flag is set. This operation involves creating an
-   * entirely new object so only set the flag when the input is a simple
-   * string to string map.
-   * Otherwise, does not attempt to modify the input.
-   *
-   * @param {Object} input The object to escape.
-   * @param {boolean=} opt_escapeObjects Whether to escape objects.
-   * @return {Object} The escaped object.
-   * @private Only to be used by the container, not gadgets.
-   */
-  gadgets.util.escape = function(input, opt_escapeObjects) {
-    // TODO: move to core.util.string.
-    if (!input) {
-      return input;
-    } else if (typeof input === 'string') {
-      return gadgets.util.escapeString(input);
-    } else if (typeof input === 'array') {
-      for (var i = 0, j = input.length; i < j; ++i) {
-        input[i] = gadgets.util.escape(input[i]);
-      }
-    } else if (typeof input === 'object' && opt_escapeObjects) {
-      var newObject = {};
-      for (var field in input) {
-        if (input.hasOwnProperty(field)) {
-          newObject[gadgets.util.escapeString(field)] = gadgets.util.escape(input[field], true);
-        }
-      }
-      return newObject;
-    }
-    return input;
-  };
-
-  /**
-   * Escapes the input using html entities to make it safer.
-   *
-   * Currently not in the spec -- future proposals may change
-   * how this is handled.
-   *
-   * @param {string} str The string to escape.
-   * @return {string} The escaped string.
-   */
-  // TODO: move to core.util.string.
-  gadgets.util.escapeString = escapeString;
 
   /**
    * Attach an event listener to given DOM element (Not a gadget standard)
