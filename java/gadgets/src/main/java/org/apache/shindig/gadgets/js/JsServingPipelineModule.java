@@ -22,6 +22,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 import com.google.inject.Provides;
+import com.google.inject.name.Named;
 
 import java.util.List;
 
@@ -37,6 +38,7 @@ public class JsServingPipelineModule extends AbstractModule {
 
   @Provides
   @Inject
+  @Named("shindig.js.optional-processors")
   public List<JsProcessor> provideProcessors(
       AddJslInfoVariableProcessor addJslInfoVariableProcessor,
       JsLoadProcessor jsLoaderGeneratorProcessor,
@@ -48,9 +50,7 @@ public class JsServingPipelineModule extends AbstractModule {
       ConfigInjectionProcessor configInjectionProcessor,
       AddJslLoadedVariableProcessor addJslLoadedVariableProcessor,
       AddOnloadFunctionProcessor addOnloadFunctionProcessor,
-      AddJslCallbackProcessor addJslCallbackProcessor,
-      CompilationProcessor compilationProcessor,
-      AnonFuncWrappingProcessor anonFuncProcessor) {
+      AddJslCallbackProcessor addJslCallbackProcessor) {
     return ImmutableList.of(
         addJslInfoVariableProcessor,
         jsLoaderGeneratorProcessor,
@@ -62,9 +62,17 @@ public class JsServingPipelineModule extends AbstractModule {
         configInjectionProcessor,
         addJslLoadedVariableProcessor,
         addOnloadFunctionProcessor,
-        addJslCallbackProcessor,
+        addJslCallbackProcessor);
+  }
+
+  @Provides
+  @Inject
+  @Named("shindig.js.required-processors")
+  public List<JsProcessor> provideProcessors(
+      CompilationProcessor compilationProcessor,
+      AnonFuncWrappingProcessor anonFuncProcessor) {
+    return ImmutableList.of(
         compilationProcessor,
         anonFuncProcessor);
   }
-
 }

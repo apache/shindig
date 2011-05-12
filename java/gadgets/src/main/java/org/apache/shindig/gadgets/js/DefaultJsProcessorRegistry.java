@@ -19,6 +19,7 @@
 package org.apache.shindig.gadgets.js;
 
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 
 import java.util.List;
 
@@ -28,18 +29,29 @@ import java.util.List;
  */
 public class DefaultJsProcessorRegistry implements JsProcessorRegistry {
 
-  private final List<JsProcessor> processors;
+  private final List<JsProcessor> optionalProcessors;
+  private final List<JsProcessor> requiredProcessors;
 
   @Inject
-  public DefaultJsProcessorRegistry(List<JsProcessor> processors) {
-    this.processors = processors;
+  public DefaultJsProcessorRegistry(
+      @Named("shindig.js.optional-processors") List<JsProcessor> optionalProcessors,
+      @Named("shindig.js.required-processors") List<JsProcessor> requiredProcessors) {
+    this.optionalProcessors = optionalProcessors;
+    this.requiredProcessors = requiredProcessors;
   }
 
+  @Override
   public void process(JsRequest request, JsResponseBuilder response) throws JsException {
-    for (JsProcessor processor : processors) {
+    for (JsProcessor processor : optionalProcessors) {
       if (!processor.process(request, response)) {
         break;
       }
+    }
+    // This pipeline sequentially executes JsProcessor, and can stop on any, bypassing
+    // the actual compilation process. This is put here so generated JS will still be
+    // compiled.
+    for (JsProcessor processor : requiredProcessors) {
+      processor.process(request, response);
     }
   }
 }
