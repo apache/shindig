@@ -259,10 +259,9 @@ public class CajaContentRewriter implements GadgetRewriter {
         /* invisible */ false);
     cajoledOutput.appendChild(messagesNode);
 
-    // TODO(felix8a): style boxing
     Element outerDiv = doc.createElement("div");
     outerDiv.setAttribute("id", "caja_outerContainer___");
-    outerDiv.setAttribute("style", "position: relative;");
+    outerDiv.setAttribute("style", "position: relative; overflow: hidden;");
     cajoledOutput.appendChild(outerDiv);
 
     Element innerDiv = doc.createElement("div");
@@ -273,7 +272,7 @@ public class CajaContentRewriter implements GadgetRewriter {
     innerDiv.appendChild(doc.adoptNode(result.html));
 
     String cajoledJs = renderJs(result.js, debug);
-    cajoledOutput.appendChild(cajaStart(doc, cajoledJs));
+    cajoledOutput.appendChild(cajaStart(doc, cajoledJs, debug));
 
     createContainerFor(doc, cajoledOutput);
     mc.documentChanged();
@@ -395,13 +394,15 @@ public class CajaContentRewriter implements GadgetRewriter {
     return rendered.toString();
   }
 
-  private Element cajaStart(Document doc, String cajoledJs) {
+  private Element cajaStart(Document doc, String cajoledJs, boolean debug) {
     Element scriptElement = doc.createElement("script");
     scriptElement.setAttribute("type", "text/javascript");
     StringBuilder start = new StringBuilder();
     start.append("caja___.start(\n'");
     Escaping.escapeJsString(cajoledJs, true, true, start);
-    start.append("');\n");
+    start.append("', ");
+    start.append(debug ? "true" : "false");
+    start.append(");\n");
     scriptElement.appendChild(doc.createTextNode(start.toString()));
     return scriptElement;
   }

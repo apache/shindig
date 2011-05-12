@@ -24,6 +24,7 @@
 caja___ = (function() {
   // currently limited to one cajoled gadget per ifr
   var tamingFrame;
+  var tame___;      // tame___ === tamingFrame.contentWindow.___
   var guestFrame;
   var pendingScript;
 
@@ -42,29 +43,43 @@ caja___ = (function() {
   };
 
   function fire(globalScope) {
-    var USELESS = tamingFrame.contentWindow.___.USELESS;
     for (var tamer in tamings___) {
       if (tamings___.hasOwnProperty(tamer)) {
-        tamings___[tamer].call(USELESS, globalScope);
+        tamings___[tamer].call(tame___.USELESS, globalScope);
       }
     }
   }
 
-  function grantTameAsRead(obj, prop) {
-    tamingFrame.contentWindow.___.grantTameAsRead(obj, prop);
+  function getPendingScript() {
+    return pendingScript;
+  }
+
+  function getTameGlobal() {
+    return tamingFrame.contentWindow;
+  }
+
+  function grantTameAsRead(obj, propName) {
+    tame___.grantTameAsRead(obj, propName);
+  }
+
+  function tame(obj) {
+    return tame___.tame(obj);
   }
 
   function tamesTo(feral, tame) {
-    tamingFrame.contentWindow.___.tamesTo(feral, tame);
+    tame___.tamesTo(feral, tame);
+  }
+
+  function markTameAsFunction(f, name) {
+    return tame___.markTameAsFunction(f, name);
   }
 
   function whitelistCtors(schemas) {
-    var ___ = tamingFrame.contentWindow.___;
     var length = schemas.length;
     for (var i = 0; i < length; i++) {
       var schema = schemas[i];
       if (typeof schema[0][schema[1]] === 'function') {
-        ___.markTameAsCtor(
+        tame___.markTameAsCtor(
             schema[0][schema[1]] /* func */,
             schema[2] /* parent */,
             schema[1] /* name */);
@@ -76,12 +91,11 @@ caja___ = (function() {
   }
 
   function whitelistFuncs(schemas) {
-    var ___ = tamingFrame.contentWindow.___;
     var length = schemas.length;
     for (var i = 0; i < length; i++) {
       var schema = schemas[i];
       if (typeof schema[0][schema[1]] === 'function') {
-        ___.markTameAsFunction(schema[0][schema[1]], schema[1]);
+        tame___.markTameAsFunction(schema[0][schema[1]], schema[1]);
       } else {
         gadgets.warn('Error taming function: ' + schema[0] + '.' + schema[1]);
       }
@@ -89,15 +103,22 @@ caja___ = (function() {
   }
 
   function whitelistMeths(schemas) {
-    var ___ = tamingFrame.contentWindow.___;
     var length = schemas.length;
     for (var i = 0; i < length; i++) {
       var schema = schemas[i];
       if (typeof schema[0].prototype[schema[1]] == 'function') {
-        ___.grantTameAsMethod(schema[0], schema[1]);
+        tame___.grantTameAsMethod(schema[0], schema[1]);
       } else {
         gadgets.warn('Error taming method: ' + schema[0] + '.' + schema[1]);
       }
+    }
+  }
+
+  function whitelistProps(schemas) {
+    var length = schemas.length;
+    for (var i = 0; i < length; i++) {
+      var schema = schemas[i];
+      tame___.grantTameAsRead(schemas[0], schemas[1]);
     }
   }
 
@@ -111,20 +132,24 @@ caja___ = (function() {
     return frame;
   }
 
-  function start(script) {
+  function start(script, debug) {
+    var debugArg = debug ? '?debug=1' : '';
+
     // guestFrame must be created before loadedTamingFrame fires
     guestFrame = makeFrame('caja-guest-frame');
     var gdoc = guestFrame.contentWindow.document;
     gdoc.write('<html><head>\n');
-    gdoc.write('<script>var cajaIframeDone___ = function(){};<'+'/script>\n');
-    gdoc.write('<script src="js/caja-guest-frame"><'+'/script>\n');
+    gdoc.write('<script>var cajaIframeDone___ = function(){};<\/script>\n');
+    gdoc.write(
+        '<script src="js/caja-guest-frame' + debugArg + '"><\/script>\n');
 
     tamingFrame = makeFrame('caja-taming-frame');
     var tdoc = tamingFrame.contentWindow.document;
     tdoc.write('<html><head>\n');
-    tdoc.write('<script>var cajaIframeDone___ = function(){};<'+'/script>\n');
-    tdoc.write('<script src="js/caja-taming-frame"><'+'/script>\n');
-    tdoc.write('<script>parent.caja___.loadedTamingFrame();<'+'/script>\n');
+    tdoc.write('<script>var cajaIframeDone___ = function(){};<\/script>\n');
+    tdoc.write(
+        '<script src="js/caja-taming-frame' + debugArg + '"><\/script>\n');
+    tdoc.write('<script>parent.caja___.loadedTamingFrame();<\/script>\n');
     tdoc.write('</head></html>');
     tdoc.close();
 
@@ -136,7 +161,7 @@ caja___ = (function() {
 
   function loadedTamingFrame() {
     var gdoc = guestFrame.contentWindow.document;
-    gdoc.write('<script>parent.caja___.loadedGuestFrame();<'+'/script>\n');
+    gdoc.write('<script>parent.caja___.loadedGuestFrame();<\/script>\n');
   }
 
   function loadedGuestFrame() {
@@ -145,56 +170,56 @@ caja___ = (function() {
 
     var gadgetBody = document.getElementById('caja_innerContainer___');
 
-    var tamingWin = tamingFrame.contentWindow;
-    caja___.tameWin = tamingWin;
-    // TODO(felix8a): pass pseudo-window location
-    tamingWin.attachDocumentStub(
-        '-g___', uriCallback, imports, gadgetBody);
-    imports.htmlEmitter___ =
-        new tamingWin.HtmlEmitter(gadgetBody, imports.document);
+    var tameWin = tamingFrame.contentWindow;
+    tame___ = tameWin.___;
 
-    imports.onerror = tamingWin.___.tame(
-        tamingWin.___.markTameAsFunction(function (msg, source, line) {
+    // TODO(felix8a): pass pseudo-window location
+    tameWin.attachDocumentStub('-g___', uriCallback, imports, gadgetBody);
+    imports.htmlEmitter___ =
+        new tameWin.HtmlEmitter(gadgetBody, imports.document);
+
+    imports.onerror = tame___.tame(
+        tame___.markTameAsFunction(function (msg, source, line) {
             gadgets.log([msg, source, line]);
         }));
 
     fire(imports);
 
-    // TODO(felix8a): move these to definition
-    imports.gadgets = tamingWin.___.tame(window.gadgets);
-    imports.opensocial = tamingWin.___.tame(window.opensocial);
-    imports.osapi = tamingWin.___.tame(window.osapi);
+    // these are in globals.js
+    imports.gadgets = tame___.tame(window.gadgets);
+    imports.opensocial = tame___.tame(window.opensocial);
+    imports.osapi = tame___.tame(window.osapi);
 
-    tamingWin.___.whitelistAll(imports);
+    tame___.whitelistAll(imports);
 
-    guestWin.plugin_dispatchEvent___ =
-        tamingWin.plugin_dispatchEvent___;
-    guestWin.plugin_dispatchToHandler___ =
-        tamingWin.plugin_dispatchToHandler___;
+    guestWin.plugin_dispatchEvent___ = tameWin.plugin_dispatchEvent___;
+    guestWin.plugin_dispatchToHandler___ = tameWin.plugin_dispatchToHandler___;
     guestWin.___.getNewModuleHandler().setImports(imports);
     guestWin.___.useDebugSymbols = function(){};
 
     var gdoc = guestWin.document;
     gdoc.write('<script>\n');
-    gdoc.write(pendingScript);
-    gdoc.write('<'+'/script>\n');
-    gdoc.write('<script>\n');
+    gdoc.write('eval(parent.caja___.getPendingScript());');
     gdoc.write('parent.gadgets.util.runOnLoadHandlers();\n');
-    gdoc.write('<'+'/script>\n');
+    gdoc.write('<\/script>\n');
     gdoc.write('</head></html>');
     gdoc.close();
   }
 
   return {
+    getPendingScript: getPendingScript,
+    getTameGlobal: getTameGlobal,
     grantTameAsRead: grantTameAsRead,
     loadedGuestFrame: loadedGuestFrame,
     loadedTamingFrame: loadedTamingFrame,
+    markTameAsFunction: markTameAsFunction,
     start: start,
-    tameWin: null,
+    tame: tame,
     tamesTo: tamesTo,
     whitelistCtors: whitelistCtors,
     whitelistFuncs: whitelistFuncs,
-    whitelistMeths: whitelistMeths
+    whitelistMeths: whitelistMeths,
+    whitelistProps: whitelistProps
   };
 })();
 

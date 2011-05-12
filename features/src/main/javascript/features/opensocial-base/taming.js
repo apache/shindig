@@ -26,4 +26,8 @@ tamings___.push(function(imports) {
     [window, 'JsonMessageCollection', opensocial.MessageCollection],
     [window, 'JsonPerson', opensocial.Person]
   ]);
+  caja___.whitelistMeths([
+    [JsonPerson, 'getDisplayName'],
+    [JsonPerson, 'getAppData']
+  ]);
 });

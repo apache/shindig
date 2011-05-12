@@ -22,15 +22,13 @@
  * Tame and expose core osapi.* API to cajoled gadgets
  */
 tamings___.push(function(imports) {
-  // TODO(felix8a): tame osapi
-  // ___.tamesTo(osapi.newBatch, ___.markFuncFreeze(function() {
-  //   var result = osapi.newBatch();
-  //   ___.markFunc(result['add'], 'add');
-  //   ___.markFunc(result['execute'], 'execute');
-  //   return ___.tame(result);
-  // }));
-  // 
-  // // OSAPI functions are marked as simple funcs as they are registered
-  // imports.outers.osapi = ___.tame(osapi);
-  // ___.grantTameAsRead(imports.outers, 'osapi');
+  caja___.tamesTo(osapi.newBatch, caja___.markTameAsFunction(function() {
+    var batch = osapi.newBatch();
+    caja___.whitelistFuncs([
+      [batch, 'add'],
+      [batch, 'execute']
+    ]);
+    var t = caja___.tame(batch);
+    return t;
+  }, 'newBatch'));
 });

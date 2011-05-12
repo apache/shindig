@@ -23,13 +23,18 @@ specific language governing permissions and limitations under the License.
   <dependency>taming</dependency>
   <gadget>
     <script src="taming.js"/>
+    <exports type="js">caja___.getPendingScript</exports>
+    <exports type="js">caja___.getTameGlobal</exports>
     <exports type="js">caja___.grantTameAsRead</exports>
-    <exports type="js">caja___.guestFrameReady</exports>
+    <exports type="js">caja___.loadedGuestFrame</exports>
+    <exports type="js">caja___.loadedTamingFrame</exports>
+    <exports type="js">caja___.markTameAsFunction</exports>
     <exports type="js">caja___.start</exports>
-    <exports type="js">caja___.tamingFrameReady</exports>
+    <exports type="js">caja___.tame</exports>
     <exports type="js">caja___.tamesTo</exports>
     <exports type="js">caja___.whitelistCtors</exports>
     <exports type="js">caja___.whitelistFuncs</exports>
     <exports type="js">caja___.whitelistMeths</exports>
+    <exports type="js">caja___.whitelistProps</exports>
   </gadget>
 </feature>

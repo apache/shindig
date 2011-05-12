@@ -22,10 +22,6 @@
  * Tame and expose opensocial.* API to cajoled gadgets
  */
 tamings___.push(function(imports) {
-  // TODO(felix8a): tame these
-  // ___.grantInnocentMethod(JsonPerson.prototype, 'getDisplayName');
-  // ___.grantInnocentMethod(JsonPerson.prototype, 'getAppData');
-
   caja___.whitelistCtors([
     [window, 'JsonRpcRequestItem', Object],
     [opensocial, 'Activity', Object],
@@ -51,7 +47,10 @@ tamings___.push(function(imports) {
     [opensocial, 'ResponseItem', Object],
     [opensocial, 'Url', Object]
   ]);
+
   caja___.whitelistMeths([
+    [JsonPerson, 'getDisplayName'],
+    [JsonPerson, 'getAppData'],
     [opensocial.Activity, 'getField'],
     [opensocial.Activity, 'getId'],
     [opensocial.Activity, 'setField'],
@@ -165,49 +164,50 @@ tamings___.push(function(imports) {
     [opensocial, 'requestShareApp']
   ]);
 
-  caja___.grantTameAsRead(opensocial, 'CreateActivityPriority');
-  caja___.grantTameAsRead(opensocial, 'EscapeType');
-  caja___.grantTameAsRead(opensocial.Activity, 'Field');
-  caja___.grantTameAsRead(opensocial.Address, 'Field');
-  caja___.grantTameAsRead(opensocial.Album, 'Field');
-  caja___.grantTameAsRead(opensocial.BodyType, 'Field');
-  caja___.grantTameAsRead(opensocial.DataRequest, 'ActivityRequestFields');
-  caja___.grantTameAsRead(opensocial.DataRequest, 'DataRequestFields');
-  caja___.grantTameAsRead(opensocial.DataRequest, 'FilterType');
-  caja___.grantTameAsRead(opensocial.DataRequest, 'Group');
-  caja___.grantTameAsRead(opensocial.DataRequest, 'PeopleRequestFields');
-  caja___.grantTameAsRead(opensocial.DataRequest, 'SortOrder');
-  caja___.grantTameAsRead(opensocial.Email, 'Field');
-  caja___.grantTameAsRead(opensocial.Enum, 'Smoker');
-  caja___.grantTameAsRead(opensocial.Enum, 'Drinker');
-  caja___.grantTameAsRead(opensocial.Enum, 'Gender');
-  caja___.grantTameAsRead(opensocial.Enum, 'LookingFor');
-  caja___.grantTameAsRead(opensocial.Enum, 'Presence');
-  caja___.grantTameAsRead(opensocial.Environment, 'ObjectType');
-  caja___.grantTameAsRead(opensocial.IdSpec, 'Field');
-  caja___.grantTameAsRead(opensocial.IdSpec, 'GroupId');
-  caja___.grantTameAsRead(opensocial.IdSpec, 'PersonId');
-  caja___.grantTameAsRead(opensocial.MediaItem, 'Field');
-  caja___.grantTameAsRead(opensocial.MediaItem, 'Type');
-  caja___.grantTameAsRead(opensocial.Message, 'Field');
-  caja___.grantTameAsRead(opensocial.Message, 'Type');
-  caja___.grantTameAsRead(opensocial.MessageCollection, 'Field');
-  caja___.grantTameAsRead(opensocial.Name, 'Field');
-  caja___.grantTameAsRead(opensocial.NavigationParameters, 'DestinationType');
-  caja___.grantTameAsRead(opensocial.NavigationParameters, 'Field');
-  caja___.grantTameAsRead(opensocial.Organization, 'Field');
-  caja___.grantTameAsRead(opensocial.Person, 'Field');
-  caja___.grantTameAsRead(opensocial.Phone, 'Field');
-  caja___.grantTameAsRead(opensocial.ResponseItem, 'Error');
-  caja___.grantTameAsRead(opensocial.Url, 'Field');
+  caja___.whitelistProps([
+    [opensocial, 'CreateActivityPriority'],
+    [opensocial, 'EscapeType'],
+    [opensocial.Activity, 'Field'],
+    [opensocial.Address, 'Field'],
+    [opensocial.Album, 'Field'],
+    [opensocial.BodyType, 'Field'],
+    [opensocial.DataRequest, 'ActivityRequestFields'],
+    [opensocial.DataRequest, 'DataRequestFields'],
+    [opensocial.DataRequest, 'FilterType'],
+    [opensocial.DataRequest, 'Group'],
+    [opensocial.DataRequest, 'PeopleRequestFields'],
+    [opensocial.DataRequest, 'SortOrder'],
+    [opensocial.Email, 'Field'],
+    [opensocial.Enum, 'Smoker'],
+    [opensocial.Enum, 'Drinker'],
+    [opensocial.Enum, 'Gender'],
+    [opensocial.Enum, 'LookingFor'],
+    [opensocial.Enum, 'Presence'],
+    [opensocial.Environment, 'ObjectType'],
+    [opensocial.IdSpec, 'Field'],
+    [opensocial.IdSpec, 'GroupId'],
+    [opensocial.IdSpec, 'PersonId'],
+    [opensocial.MediaItem, 'Field'],
+    [opensocial.MediaItem, 'Type'],
+    [opensocial.Message, 'Field'],
+    [opensocial.Message, 'Type'],
+    [opensocial.MessageCollection, 'Field'],
+    [opensocial.Name, 'Field'],
+    [opensocial.NavigationParameters, 'DestinationType'],
+    [opensocial.NavigationParameters, 'Field'],
+    [opensocial.Organization, 'Field'],
+    [opensocial.Person, 'Field'],
+    [opensocial.Phone, 'Field'],
+    [opensocial.ResponseItem, 'Error'],
+    [opensocial.Url, 'Field']
+  ]);
 
   // TODO(jasvir): The following object *is* exposed to gadget
   // code because its returned by opensocial.DataRequest.*
   // but isn't documented in gadget API.
-  // TODO(felix8a): tame these
-  //caja___.grantTameAsRead(JsonRpcRequestItem, 'rpc');
-  //caja___.grantTameAsRead(JsonRpcRequestItem, 'processData');
-  //caja___.grantTameAsRead(JsonRpcRequestItem, 'processResponse');
-  //caja___.grantTameAsRead(JsonRpcRequestItem, 'errors');
+  caja___.grantTameAsRead(JsonRpcRequestItem, 'rpc');
+  caja___.grantTameAsRead(JsonRpcRequestItem, 'processData');
+  caja___.grantTameAsRead(JsonRpcRequestItem, 'processResponse');
+  caja___.grantTameAsRead(JsonRpcRequestItem, 'errors');
 
 });

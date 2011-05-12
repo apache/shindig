@@ -28,8 +28,10 @@ tamings___.push(function(imports) {
     [gadgets, 'error'],
     [gadgets, 'setLogLevel']
   ]);
-  caja___.grantTameAsRead(gadgets.log, 'INFO');
-  caja___.grantTameAsRead(gadgets.log, 'WARNING');
-  caja___.grantTameAsRead(gadgets.log, 'ERROR');
-  caja___.grantTameAsRead(gadgets.log, 'NONE');
+  caja___.whitelistProps([
+    [gadgets.log, 'INFO'],
+    [gadgets.log, 'WARNING'],
+    [gadgets.log, 'ERROR'],
+    [gadgets.log, 'NONE']
+  ]);
 });

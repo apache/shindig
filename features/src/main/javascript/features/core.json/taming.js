@@ -22,6 +22,8 @@
  * Tame and expose core gadgets.* API to cajoled gadgets
  */
 tamings___.push(function(imports) {
-  caja___.tamesTo(gadgets.json.stringify, caja___.tameWin.safeJSON.stringify);
-  caja___.tamesTo(gadgets.json.parse, caja___.tameWin.safeJSON.parse);
+  caja___.tamesTo(gadgets.json.stringify,
+                  caja___.getTameGlobal().safeJSON.stringify);
+  caja___.tamesTo(gadgets.json.parse,
+                  caja___.getTameGlobal().safeJSON.parse);
 });
