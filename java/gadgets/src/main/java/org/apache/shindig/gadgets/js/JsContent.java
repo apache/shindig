@@ -45,8 +45,6 @@ public class JsContent {
   
   private JsContent(String content, String source,
       FeatureBundle bundle, FeatureResource resource) {
-    Preconditions.checkArgument(
-        !Strings.isNullOrEmpty(source), "All JS content must have a source");
     this.content = content;
     this.source = source;
     this.bundle = bundle;
