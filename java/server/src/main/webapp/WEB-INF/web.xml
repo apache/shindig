@@ -59,14 +59,24 @@
    <context-param>
   	<param-name>system.properties</param-name>
      <param-value>
-    	shindig.host=localhost
-    	
-    	aKey=/shindig/gadgets/proxy?container=default&amp;url=
-    	shindig.port=
-    	
+    	aKey=/shindig/gadgets/proxy?container=default&amp;url=    	
      </param-value>
   </context-param>  
-
+  
+  <filter>
+    <filter-name>hostFilter</filter-name>
+    <filter-class>org.apache.shindig.common.servlet.HostFilter</filter-class>
+  </filter>
+  <filter-mapping>
+    <filter-name>hostFilter</filter-name>
+    <url-pattern>/gadgets/ifr</url-pattern>
+    <url-pattern>/gadgets/js/*</url-pattern>
+    <url-pattern>/gadgets/proxy/*</url-pattern>
+    <url-pattern>/gadgets/concat</url-pattern>
+    <url-pattern>/rpc/*</url-pattern>
+    <url-pattern>/rest/*</url-pattern>
+  </filter-mapping>
+    
     <filter>
         <filter-name>ShiroFilter</filter-name>
         <filter-class>org.apache.shiro.web.servlet.IniShiroFilter</filter-class>

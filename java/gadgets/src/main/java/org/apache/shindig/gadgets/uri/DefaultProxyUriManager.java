@@ -25,6 +25,7 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.shindig.common.servlet.ServletRequestContext;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.common.util.Utf8UrlCoder;
@@ -276,6 +277,7 @@ public class DefaultProxyUriManager implements ProxyUriManager {
       throw new RuntimeException("Missing required container config key: " + key + " for " +
           "container: " + container);
     }
+    val = val.replace("%host%", ServletRequestContext.getAuthority());
     return val;
   }
 }

@@ -4,22 +4,22 @@
             "name": "Publish Subscribe Demo",
             "Description": "This is a sample pub/sub demo showcasing the pubsub-2 feature",
             "apps" : [
-                     {"name": "publisher", "url": "http://localhost:8080/container/sample-pubsub-2-publisher.xml"},
-                     {"name": "subscriber", "url": "http://localhost:8080/container/sample-pubsub-2-subscriber.xml"}
+                     {"name": "publisher", "url": "/container/sample-pubsub-2-publisher.xml"},
+                     {"name": "subscriber", "url": "/container/sample-pubsub-2-subscriber.xml"}
                      ]
              },
              {
             "name": "Activity Streams Sample",
             "Description": "Simple gadget to test base ActivityStreams implementation in features",
             "apps" : [
-                     {"name": "ActivityStreams Sample", "url": "http://localhost:8080/samplecontainer/examples/ActivityStreams/ActivityStreamGadget.xml"}
+                     {"name": "ActivityStreams Sample", "url": "/samplecontainer/examples/ActivityStreams/ActivityStreamGadget.xml"}
                      ]
              },
                          {
             "name": "Sample Media Items Gadget",
             "Description": "This is a sample pub/sub demo showcasing the pubsub-2 feature",
             "apps" : [
-                     {"name": "publisher", "url": "http://localhost:8080/samplecontainer/examples/media/Media.xml"}
+                     {"name": "publisher", "url": "/samplecontainer/examples/media/Media.xml"}
                      ]
              },
              {

@@ -27,6 +27,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.auth.SecurityTokenCodec;
 import org.apache.shindig.auth.SecurityTokenException;
+import org.apache.shindig.common.servlet.ServletRequestContext;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.config.ContainerConfig;
@@ -342,10 +343,13 @@ public class DefaultIframeUriManager implements IframeUriManager, ContainerConfi
 
   private String getReqVal(String container, String key) {
     String val = config.getString(container, key);
+ 
     if (val == null) {
       throw new RuntimeException("Missing required container config param, key: "
           + key + ", container: " + container);
     }
+    val = val.replace("%host%", ServletRequestContext.getAuthority());
+
     return val;
   }
 

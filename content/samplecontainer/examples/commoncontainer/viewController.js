@@ -45,7 +45,11 @@ $(function() {
 			  $.each(data.collections, function(i,data){
 				 var optionVal = [];
 				 $.each(data.apps, function(i,data){
-				      optionVal.push(data.url);
+				   if (data.url.indexOf("http") < 0){
+				     optionVal.push(location.protocol+"//"+location.host+data.url);
+				   }else{
+					 optionVal.push(data.url);
+				   }
 				 });
 			     $('#gadgetCollection').append('<option value="'+ optionVal.toString() + '">' + data.name +'</option>');
 			   });

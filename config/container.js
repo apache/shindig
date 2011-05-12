@@ -103,10 +103,13 @@
 //"gadgets.securityTokenKeyFile" : "/path/to/key/file.txt",
 
 // URI for the default shindig test instance.
-"defaultShindigTestHost": "http://${SERVER_HOST}:${SERVER_PORT}",
+//"defaultShindigTestHost": "http://${SERVER_HOST}:${SERVER_PORT}",
+"defaultShindigTestHost":"http://%host%",
+
 
 // Authority (host:port without scheme) for the proxy and concat servlets.
-"defaultShindigProxyConcatAuthority": "${SERVER_HOST}:${SERVER_PORT}",
+//"defaultShindigProxyConcatAuthority": "${SERVER_HOST}:${SERVER_PORT}",
+"defaultShindigProxyConcatAuthority":"%host%",
 
 // OS 2.0 Gadget DOCTYPE: used in Gadgets with @specificationVersion 2.0 or greater and
 // quirksmode on Gadget has not been set.
