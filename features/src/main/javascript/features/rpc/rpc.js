@@ -699,7 +699,7 @@ if (!window['gadgets']['rpc']) { // make lib resilient to double-inclusion
 
       // The "relay URL" can either be explicitly specified or is set as
       // the child IFRAME URL's origin
-      var childSrc = childIframe.src;
+      var childSrc = childIframe && childIframe.src;
       var relayUrl = opt_frameurl || gadgets.rpc.getOrigin(childSrc);
       setRelayUrl(gadgetId, relayUrl);
 
