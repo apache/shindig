@@ -59,6 +59,8 @@
    <context-param>
   	<param-name>system.properties</param-name>
      <param-value>
+        shindig.host=localhost
+        shindig.port=
     	aKey=/shindig/gadgets/proxy?container=default&amp;url=    	
      </param-value>
   </context-param>  

@@ -21,10 +21,10 @@ package org.apache.shindig.gadgets.uri;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.name.Named;
 
 import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.shindig.common.servlet.ServletRequestContext;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.config.ContainerConfig;
@@ -33,7 +33,6 @@ import org.apache.shindig.gadgets.uri.UriCommon.Param;
 // Temporary replacement of javax.annotation.Nullable
 import org.apache.shindig.common.Nullable;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -55,6 +54,7 @@ public class DefaultConcatUriManager implements ConcatUriManager {
   private final ContainerConfig config;
   private final Versioner versioner;
   private boolean strictParsing;
+  private Provider<String> hostProvider;
   private static int DEFAULT_URL_MAX_LENGTH = 2048;
   private int urlMaxLength = DEFAULT_URL_MAX_LENGTH;
   private static final float URL_LENGTH_BUFFER_MARGIN = .8f;
@@ -75,6 +75,11 @@ public class DefaultConcatUriManager implements ConcatUriManager {
   public void setUrlMaxLength(
       @Named("org.apache.shindig.gadgets.uri.urlMaxLength") int urlMaxLength) {
     this.urlMaxLength = urlMaxLength;
+  }
+  
+  @Inject(optional = true)
+  public void setHostProvider(@Named("shindig.host-provider") Provider<String> hostProvider) {
+    this.hostProvider = hostProvider;
   }
 
   public int getUrlMaxLength() {
@@ -223,7 +228,9 @@ public class DefaultConcatUriManager implements ConcatUriManager {
       throw new RuntimeException(
           "Missing required config '" + key + "' for container: " + container);
     }
-    val = val.replace("%host%", ServletRequestContext.getAuthority());
+    if (hostProvider != null) {
+      val = val.replace("%host%", hostProvider.get());
+    }
 
     return val;
   }

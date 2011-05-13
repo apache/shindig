@@ -22,10 +22,10 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.name.Named;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.shindig.common.servlet.ServletRequestContext;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.common.util.Utf8UrlCoder;
@@ -73,6 +73,7 @@ public class DefaultProxyUriManager implements ProxyUriManager {
   private final ContainerConfig config;
   private final Versioner versioner;
   private boolean strictParsing = false;
+  private Provider<String> hostProvider;
 
   @Inject
   public DefaultProxyUriManager(ContainerConfig config,
@@ -84,6 +85,11 @@ public class DefaultProxyUriManager implements ProxyUriManager {
   @Inject(optional = true)
   public void setUseStrictParsing(@Named("shindig.uri.proxy.use-strict-parsing") boolean useStrict) {
     this.strictParsing = useStrict;
+  }
+  
+  @Inject(optional = true)
+  public void setHostProvider(@Named("shindig.host-provider") Provider<String> hostProvider) {
+    this.hostProvider = hostProvider;
   }
 
   public List<Uri> make(List<ProxyUri> resources, Integer forcedRefresh) {
@@ -277,7 +283,9 @@ public class DefaultProxyUriManager implements ProxyUriManager {
       throw new RuntimeException("Missing required container config key: " + key + " for " +
           "container: " + container);
     }
-    val = val.replace("%host%", ServletRequestContext.getAuthority());
+    if (hostProvider != null) {
+      val = val.replace("%host%", hostProvider.get());
+    }
     return val;
   }
 }

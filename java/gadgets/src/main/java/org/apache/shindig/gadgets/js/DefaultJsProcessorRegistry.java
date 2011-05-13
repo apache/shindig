@@ -40,7 +40,6 @@ public class DefaultJsProcessorRegistry implements JsProcessorRegistry {
     this.requiredProcessors = requiredProcessors;
   }
 
-  @Override
   public void process(JsRequest request, JsResponseBuilder response) throws JsException {
     for (JsProcessor processor : optionalProcessors) {
       if (!processor.process(request, response)) {

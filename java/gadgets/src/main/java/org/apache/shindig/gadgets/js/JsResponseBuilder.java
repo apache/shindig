@@ -262,6 +262,6 @@ public class JsResponseBuilder {
   }
   
   private boolean canAddContent(JsContent jsContent) {
-    return !jsContent.get().isEmpty();
+    return jsContent.get().length() > 0;
   }
 }

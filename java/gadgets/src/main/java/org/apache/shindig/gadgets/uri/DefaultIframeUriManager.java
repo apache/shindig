@@ -21,13 +21,13 @@ package org.apache.shindig.gadgets.uri;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.ImplementedBy;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.name.Named;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.auth.SecurityTokenCodec;
 import org.apache.shindig.auth.SecurityTokenException;
-import org.apache.shindig.common.servlet.ServletRequestContext;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.config.ContainerConfig;
@@ -58,6 +58,7 @@ public class DefaultIframeUriManager implements IframeUriManager, ContainerConfi
   private boolean ldEnabled = true;
   private TemplatingSignal tplSignal = null;
   private Versioner versioner = null;
+  private Provider<String> hostProvider;
 
   private final ContainerConfig config;
   private final LockedDomainPrefixGenerator ldGen;
@@ -102,6 +103,11 @@ public class DefaultIframeUriManager implements IframeUriManager, ContainerConfi
   @Inject(optional = true)
   public void setTemplatingSignal(TemplatingSignal tplSignal) {
     this.tplSignal = tplSignal;
+  }
+  
+  @Inject(optional = true)
+  public void setHostProvider(@Named("shindig.host-provider") Provider<String> hostProvider) {
+    this.hostProvider = hostProvider;
   }
 
   public Uri makeRenderingUri(Gadget gadget) {
@@ -348,7 +354,9 @@ public class DefaultIframeUriManager implements IframeUriManager, ContainerConfi
       throw new RuntimeException("Missing required container config param, key: "
           + key + ", container: " + container);
     }
-    val = val.replace("%host%", ServletRequestContext.getAuthority());
+    if (hostProvider != null) {
+      val = val.replace("%host%", hostProvider.get());
+    }
 
     return val;
   }
