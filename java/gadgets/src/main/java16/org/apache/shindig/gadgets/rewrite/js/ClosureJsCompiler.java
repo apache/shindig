@@ -98,7 +98,7 @@ public class ClosureJsCompiler implements JsCompiler {
 
   protected void setSourceMapCompilerOptions(CompilerOptions options) {
     options.sourceMapOutputPath = "create.out";
-    options.sourceMapFormat = SourceMap.Format.LEGACY;
+    options.sourceMapFormat = SourceMap.Format.V1;
     options.sourceMapDetailLevel = SourceMap.DetailLevel.ALL;
   }
 
