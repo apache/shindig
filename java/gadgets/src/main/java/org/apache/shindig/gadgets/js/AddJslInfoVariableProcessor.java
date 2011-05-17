@@ -62,7 +62,7 @@ public class AddJslInfoVariableProcessor implements JsProcessor {
     return true;
   }
 
-  private String getUri(JsUri jsUri) {
+  protected String getUri(JsUri jsUri) {
     Uri uri = jsUri.getOrigUri();
     if (uri == null || jsUri.isJsload()) {
       JsUri auxUri = new JsUri(jsUri);
