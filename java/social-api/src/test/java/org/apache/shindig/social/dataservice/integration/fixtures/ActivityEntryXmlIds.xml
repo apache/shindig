@@ -1,4 +1,4 @@
-<response xmlns="http://ns.opensocial.org/2008/opensocial">
+<?xml version="1.0" encoding="UTF-8"?><response xmlns="http://ns.opensocial.org/2008/opensocial">
   <itemsPerPage>2</itemsPerPage>
   <startIndex>0</startIndex>
   <totalResults>2</totalResults>
@@ -20,71 +20,90 @@
         <objectType>person</objectType>
         <url>http://example.org/john</url>
       </actor>
-      <generator>
-
-        <url>http://example.org/activities-app</url>
-      </generator>
+      <id>activity1</id>
+	  <title>John posted a new blog entry</title>
       <object>
-        <attachedObjects>
-          <object>
-            <id>attached1</id>
-            <url>http://example.org/attached1</url>
-          </object>
-          <object>
-            <id>attached2</id>
-            <url>http://example.org/attached2</url>
-          </object>
-        </attachedObjects>
         <id>object1</id>
-          <summary>&lt;body&gt;My activity summary.&lt;/body&gt;</summary>
-        <image>
-          <height>250</height>
-          <url>http://example.org/album/my_fluffy_cat_thumb.jpg</url>
-          <width>250</width>
-        </image>
-        <objectType>http://activitystrea.ms/schema/1.0/photo</objectType>
-        <upstreamDuplicates>upstreamId1</upstreamDuplicates>
-
-        <upstreamDuplicates>upstreamId2</upstreamDuplicates>
-        <url>http://example.org/album/my_fluffy_cat.jpg</url>
+        <url>http://example.org/blog/2011/02/entry</url>
       </object>
-      <postedTime>2011-02-10T15:04:55Z</postedTime>
-      <provider>
-        <url>http://example.org/activity-stream</url>
-      </provider>
-
+      <published>2011-02-10T15:04:55Z</published>
       <target>
-        <displayName>John&apos;s Photo Album</displayName>
-        <id>tag:example.org,2011:abc123</id>
-        <image>
-          <height>250</height>
-          <url>http://example.org/album/thumbnail.jpg</url>
+        <displayName>John&apos;s Blog</displayName>
 
-          <width>250</width>
-        </image>
-        <objectType>http://activitystrea.ms/schema/1.0/photo-album</objectType>
-        <url>http://example.org/album/</url>
+        <id>target1</id>
+        <objectType>blog</objectType>
+        <url>http://example.org/blog/</url>
       </target>
-      <title>John Doe posted a new video to his album.</title>
       <verb>post</verb>
-
     </activityEntry>
   </entry>
+
   <entry>
     <activityEntry>
       <actor>
         <displayName>John Doe</displayName>
         <id>john.doe</id>
+        <image>
+          <height>250</height>
+
+          <url>http://example.org/john/image</url>
+          <width>250</width>
+        </image>
+        <objectType>person</objectType>
+        <url>http://example.org/john</url>
       </actor>
+      <generator>
 
+        <url>http://example.org/activities-app</url>
+      </generator>
+      <id>activity2</id>
       <object>
-        <displayName>Super simple ActivityObject</displayName>
-        <id>object2</id>
-        <objectType>article</objectType>
-      </object>
-      <postedTime>2010-04-27T06:02:36+0000</postedTime>
-      <title>Super simple ActivityEntry</title>
+        <attachments>
+          <object>
+            <id>attachment1</id>
 
+            <objectType>attachment</objectType>
+          </object>
+          <object>
+            <id>attachment2</id>
+            <objectType>attachment</objectType>
+          </object>
+        </attachments>
+
+        <downstreamDuplicate>downstream1</downstreamDuplicate>
+        <downstreamDuplicate>downstream2</downstreamDuplicate>
+        <id>object2</id>
+        <summary>Photo posted</summary>
+        <image>
+          <height>250</height>
+          <url>http://example.org/album/my_fluffy_cat_thumb.jpg</url>
+
+          <width>250</width>
+        </image>
+        <objectType>photo</objectType>
+        <upstreamDuplicate>upstream1</upstreamDuplicate>
+        <upstreamDuplicate>upstream2</upstreamDuplicate>
+        <url>http://example.org/album/my_fluffy_cat.jpg</url>
+
+      </object>
+      <provider>
+        <url>http://example.org/activity-stream</url>
+      </provider>
+      <published>2011-02-10T15:04:55Z</published>
+      <target>
+        <displayName>John&apos;s Photo Album</displayName>
+
+        <id>target2</id>
+        <image>
+          <height>250</height>
+          <url>http://example.org/album/thumbnail.jpg</url>
+          <width>250</width>
+        </image>
+        <objectType>photo-album</objectType>
+
+        <url>http://example.org/album/</url>
+      </target>
+      <title>John posted a new video to his album.</title>
       <verb>post</verb>
     </activityEntry>
   </entry>

@@ -2,19 +2,56 @@
    "startIndex":0,
    "totalResults":1,
    "entry":[
-      {
-         "title":"Super simple ActivityEntry",
-         "verb":"post",
-         "postedTime":"2010-04-27T06:02:36+0000",
-         "actor":{
-            "id":"john.doe",
-            "displayName":"John Doe"
-         },
-         "object":{
-            "id":"object2",
-            "displayName":"Super simple ActivityObject",
-            "objectType":"article"
-         }
+{
+	  	"id": "activity2",
+        "published": "2011-02-10T15:04:55Z",
+        "generator": {
+          "url": "http://example.org/activities-app"
+        },
+        "provider": {
+          "url": "http://example.org/activity-stream"
+        },
+        "title": "John posted a new video to his album.",
+        "actor": {
+          "url": "http://example.org/john",
+          "objectType": "person",
+          "id": "john.doe",
+          "image": {
+            "url": "http://example.org/john/image",
+            "width": 250,
+            "height": 250
+          },
+          "displayName": "John Doe"
+        },
+        "verb": "post",
+        "object" : {
+          "url": "http://example.org/album/my_fluffy_cat.jpg",
+          "objectType": "photo",
+          "id": "object2",
+          "summary": "Photo posted",
+          "image": {
+            "url": "http://example.org/album/my_fluffy_cat_thumb.jpg",
+            "width": 250,
+            "height": 250
+          },
+          "upstreamDuplicates" : ["upstream1", "upstream2"],
+          "downstreamDuplicates" : ["downstream1", "downstream2"],
+          "attachments": [
+          	{"id": "attachment1", "objectType": "attachment"},
+          	{"id": "attachment2", "objectType": "attachment"}
+          ]
+        },
+        "target": {
+          "url": "http://example.org/album/",
+          "objectType": "photo-album",
+          "id": "target2",
+          "displayName": "John's Photo Album",
+          "image": {
+            "url": "http://example.org/album/thumbnail.jpg",
+            "width": 250,
+            "height": 250
+          }
+        }
       }
    ],
    "itemsPerPage":1

@@ -28,36 +28,58 @@ import org.apache.shindig.social.opensocial.model.MediaLink;
  */
 public class ActivityObjectImpl implements ActivityObject {
   
-  private List<ActivityObject> attachedObjects;
+  private List<ActivityObject> attachments;
+  private ActivityObject author;
+  private String content;
   private String displayName;
   private List<String> downstreamDuplicates;
-  private String embedCode;
   private String id;
   private MediaLink image;
   private String objectType;
+  private String published;
   private String summary;
+  private String updated;
   private List<String> upstreamDuplicates;
   private String url;
   
   /**
-   * A simple implementation of an ActivtyObject
+   * Constructs an empty ActivityObject.
    */
-  public ActivityObjectImpl() {
+  public ActivityObjectImpl() { }
+
+  /** {@inheritDoc} */
+  public List<ActivityObject> getAttachments() {
+    return attachments;
   }
 
   /** {@inheritDoc} */
-  public List<ActivityObject> getAttachedObjects() {
-    return this.attachedObjects;
+  public void setAttachments(List<ActivityObject> attachments) {
+    this.attachments = attachments;
   }
 
   /** {@inheritDoc} */
-  public void setAttachedObjects(List<ActivityObject> attachedObjects) {
-    this.attachedObjects = attachedObjects;
+  public ActivityObject getAuthor() {
+    return author;
+  }
+
+  /** {@inheritDoc} */
+  public void setAuthor(ActivityObject author) {
+    this.author = author;
+  }
+  
+  /** {@inheritDoc} */
+  public String getContent() {
+    return content;
+  }
+
+  /** {@inheritDoc} */
+  public void setContent(String content) {
+    this.content = content;
   }
 
   /** {@inheritDoc} */
   public String getDisplayName() {
-    return this.displayName;
+    return displayName;
   }
 
   /** {@inheritDoc} */
@@ -67,27 +89,17 @@ public class ActivityObjectImpl implements ActivityObject {
 
   /** {@inheritDoc} */
   public List<String> getDownstreamDuplicates() {
-    return this.downstreamDuplicates;
+    return downstreamDuplicates;
   }
 
   /** {@inheritDoc} */
   public void setDownstreamDuplicates(List<String> downstreamDuplicates) {
     this.downstreamDuplicates = downstreamDuplicates;
   }
-
-  /** {@inheritDoc} */
-  public String getEmbedCode() {
-    return this.embedCode;
-  }
-
-  /** {@inheritDoc} */
-  public void setEmbedCode(String embedCode) {
-    this.embedCode = embedCode;
-  }
-
+  
   /** {@inheritDoc} */
   public String getId() {
-    return this.id;
+    return id;
   }
 
   /** {@inheritDoc} */
@@ -97,7 +109,7 @@ public class ActivityObjectImpl implements ActivityObject {
 
   /** {@inheritDoc} */
   public MediaLink getImage() {
-    return this.image;
+    return image;
   }
 
   /** {@inheritDoc} */
@@ -107,37 +119,57 @@ public class ActivityObjectImpl implements ActivityObject {
 
   /** {@inheritDoc} */
   public String getObjectType() {
-    return this.objectType;
+    return objectType;
   }
 
   /** {@inheritDoc} */
   public void setObjectType(String objectType) {
     this.objectType = objectType;
   }
-
+  
   /** {@inheritDoc} */
-  public List<String> getUpstreamDuplicates() {
-    return this.upstreamDuplicates;
+  public String getPublished() {
+    return published;
   }
 
   /** {@inheritDoc} */
-  public void setUpstreamDuplicates(List<String> upstreamDuplicates) {
-    this.upstreamDuplicates = upstreamDuplicates;
+  public void setPublished(String published) {
+    this.published = published;
   }
 
   /** {@inheritDoc} */
   public String getSummary() {
-    return this.summary;
+    return summary;
   }
 
   /** {@inheritDoc} */
   public void setSummary(String summary) {
     this.summary = summary;
   }
+  
+  /** {@inheritDoc} */
+  public String getUpdated() {
+    return updated;
+  }
 
   /** {@inheritDoc} */
+  public void setUpdated(String updated) {
+    this.updated = updated;
+  }
+
+  /** {@inheritDoc} */
+  public List<String> getUpstreamDuplicates() {
+    return upstreamDuplicates;
+  }
+
+  /** {@inheritDoc} */
+  public void setUpstreamDuplicates(List<String> upstreamDuplicates) {
+    this.upstreamDuplicates = upstreamDuplicates;
+  }
+  
+  /** {@inheritDoc} */
   public String getUrl() {
-    return this.url;
+    return url;
   }
 
   /** {@inheritDoc} */

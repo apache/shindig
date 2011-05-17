@@ -117,16 +117,16 @@ function ActivityStreamsRender() {
 	function processActivityEntries(entries) {
 		var html = '';
 		for(idx = 0; idx < entries.length; idx++) {
-			if(entries[idx].object.link && entries[idx].object.link != "null") {
-				html += "<h3><a href='" + entries[idx].object.link + "'>" + entries[idx].title + "</a></h3>";
+			if(entries[idx].object.url && entries[idx].object.url != "null") {
+				html += "<h3><a href='" + entries[idx].object.url + "'>" + entries[idx].title + "</a></h3>";
 			} else {
 				html += "<h3>" + entries[idx].title + "</h3>";
 			}
-			html += "ID: " + entries[idx].object.id + "<br>";
+			html += "ID: " + entries[idx].id + "<br>";
 			html += "Actor: " + entries[idx].actor.displayName + "<br>";
-			html += "Posted: " + entries[idx].postedTime + "<br>";
-			if(entries[idx].body && entries[idx].body != "null") {
-				html += "Body: " + entries[idx].body + "<br>";
+			html += "Posted: " + entries[idx].published + "<br>";
+			if(entries[idx].content && entries[idx].content != "null") {
+				html += "Content: " + entries[idx].content + "<br>";
 			}
 		}
 		return html;

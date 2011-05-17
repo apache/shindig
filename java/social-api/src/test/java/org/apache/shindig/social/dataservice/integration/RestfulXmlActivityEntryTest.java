@@ -29,14 +29,14 @@ public class RestfulXmlActivityEntryTest extends AbstractLargeRestfulTests{
   
   @Test
   public void testGetActivityEntryXmlById() throws Exception {
-    String resp = getResponse("/activitystreams/john.doe/@self/1/object1", "GET", "xml", ContentTypes.OUTPUT_XML_CONTENT_TYPE);
+    String resp = getResponse("/activitystreams/john.doe/@self/1/activity2", "GET", "xml", ContentTypes.OUTPUT_XML_CONTENT_TYPE);
     String expected = TestUtils.loadTestFixture(FIXTURE_LOC + "ActivityEntryXmlId.xml");
     assertTrue(TestUtils.xmlsEqual(expected, resp));
   }
   
   @Test
   public void testGetActivityEntryXmlByIds() throws Exception {
-    String resp = getResponse("/activitystreams/john.doe/@self/1/object1,object2", "GET", "xml", ContentTypes.OUTPUT_XML_CONTENT_TYPE);
+    String resp = getResponse("/activitystreams/john.doe/@self/1/activity1,activity2", "GET", "xml", ContentTypes.OUTPUT_XML_CONTENT_TYPE);
     String expected = TestUtils.loadTestFixture(FIXTURE_LOC + "ActivityEntryXmlIds.xml");
     assertTrue(TestUtils.xmlsEqual(expected, resp));
   }

@@ -20,8 +20,7 @@ package org.apache.shindig.social.core.model;
 
 import org.apache.shindig.social.opensocial.model.ActivityEntry;
 import org.apache.shindig.social.opensocial.model.ActivityObject;
-import org.apache.shindig.social.opensocial.model.MediaLink;
-import org.apache.shindig.social.opensocial.model.OpenSocial;
+import org.apache.shindig.social.opensocial.model.Extension;
 
 /**
  * A simple bean implementation of an ActivityStream Entry.
@@ -29,27 +28,27 @@ import org.apache.shindig.social.opensocial.model.OpenSocial;
 public class ActivityEntryImpl implements ActivityEntry {
   
   private ActivityObject actor;
-  private String body;
+  private String content;
   private ActivityObject generator;
-  private MediaLink icon;
+  private String icon;
+  private String id;
   private ActivityObject object;
-  private String postedTime;
+  private String published;
   private ActivityObject provider;
   private ActivityObject target;
   private String title;
-  private String updatedTime;
+  private String updated;
+  private String url;
   private String verb;
-  private OpenSocial extensions;
+  private Extension openSocial;
 
   /**
    * Create a new empty ActivityEntry
    */
-  public ActivityEntryImpl() {
-  }
-
-  /** {@inheritDoc} */
+  public ActivityEntryImpl() { }
+  
   public ActivityObject getActor() {
-    return this.actor;
+    return actor;
   }
 
   /** {@inheritDoc} */
@@ -58,18 +57,18 @@ public class ActivityEntryImpl implements ActivityEntry {
   }
 
   /** {@inheritDoc} */
-  public String getBody() {
-    return this.body;
+  public String getContent() {
+    return content;
   }
 
   /** {@inheritDoc} */
-  public void setBody(String body) {
-    this.body = body;
+  public void setContent(String content) {
+    this.content = content;
   }
 
   /** {@inheritDoc} */
   public ActivityObject getGenerator() {
-    return this.generator;
+    return generator;
   }
 
   /** {@inheritDoc} */
@@ -78,38 +77,48 @@ public class ActivityEntryImpl implements ActivityEntry {
   }
 
   /** {@inheritDoc} */
-  public MediaLink getIcon() {
-    return this.icon;
+  public String getIcon() {
+    return icon;
   }
 
   /** {@inheritDoc} */
-  public void setIcon(MediaLink icon) {
+  public void setIcon(String icon) {
     this.icon = icon;
   }
 
   /** {@inheritDoc} */
+  public String getId() {
+    return id;
+  }
+
+  /** {@inheritDoc} */
+  public void setId(String id) {
+    this.id = id;
+  }
+
+  /** {@inheritDoc} */
   public ActivityObject getObject() {
-    return this.object;
+    return object;
   }
 
   /** {@inheritDoc} */
   public void setObject(ActivityObject object) {
-    this.object = object; 
+    this.object = object;
   }
 
   /** {@inheritDoc} */
-  public String getPostedTime() {
-    return this.postedTime;
+  public String getPublished() {
+    return published;
   }
 
   /** {@inheritDoc} */
-  public void setPostedTime(String postedTime) {
-    this.postedTime = postedTime;
+  public void setPublished(String published) {
+    this.published = published;
   }
 
   /** {@inheritDoc} */
   public ActivityObject getProvider() {
-    return this.provider;
+    return provider;
   }
 
   /** {@inheritDoc} */
@@ -119,7 +128,7 @@ public class ActivityEntryImpl implements ActivityEntry {
 
   /** {@inheritDoc} */
   public ActivityObject getTarget() {
-    return this.target;
+    return target;
   }
 
   /** {@inheritDoc} */
@@ -129,7 +138,7 @@ public class ActivityEntryImpl implements ActivityEntry {
 
   /** {@inheritDoc} */
   public String getTitle() {
-    return this.title;
+    return title;
   }
 
   /** {@inheritDoc} */
@@ -138,18 +147,28 @@ public class ActivityEntryImpl implements ActivityEntry {
   }
 
   /** {@inheritDoc} */
-  public String getUpdatedTime() {
-    return this.updatedTime;
+  public String getUpdated() {
+    return updated;
   }
 
   /** {@inheritDoc} */
-  public void setUpdatedTime(String updatedTime) {
-    this.updatedTime = updatedTime;
+  public void setUpdated(String updated) {
+    this.updated = updated;
+  }
+  
+  /** {@inheritDoc} */
+  public String getUrl() {
+    return url;
+  }
+
+  /** {@inheritDoc} */
+  public void setUrl(String url) {
+    this.url = url;
   }
 
   /** {@inheritDoc} */
   public String getVerb() {
-    return this.verb;
+    return verb;
   }
 
   /** {@inheritDoc} */
@@ -158,13 +177,12 @@ public class ActivityEntryImpl implements ActivityEntry {
   }
 
   /** {@inheritDoc} */
-  public OpenSocial getOpenSocial() {
-	  return extensions;
+  public Extension getOpenSocial() {
+    return openSocial;
   }
 
   /** {@inheritDoc} */
-  public void setOpenSocial(OpenSocial extensions) {
-	  this.extensions = extensions;
-
+  public void setOpenSocial(Extension openSocial) {
+    this.openSocial = openSocial;
   }
 }

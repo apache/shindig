@@ -295,11 +295,11 @@ public class JsonDbOpensocialServiceTest extends Assert {
   @Test
   public void testGetExpectedActivityEntry() throws Exception {
     ActivityEntry entry = db.getActivityEntry(JOHN_DOE, SELF_GROUP, APP_ID,
-        ImmutableSet.of("title"), "object1", new FakeGadgetToken()).get();
+        ImmutableSet.of("title"), "activity2", new FakeGadgetToken()).get();
     assertNotNull(entry);
     // Check that some fields are fetched and others are not
     assertNotNull(entry.getTitle());
-    assertNull(entry.getPostedTime());
+    assertNull(entry.getPublished());
   }
 
   @Test

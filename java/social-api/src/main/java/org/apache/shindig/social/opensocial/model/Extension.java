@@ -1,21 +1,20 @@
 package org.apache.shindig.social.opensocial.model;
 
 import org.apache.shindig.protocol.model.Exportablebean;
-import org.apache.shindig.social.core.model.OpenSocialImpl;
+import org.apache.shindig.social.core.model.ExtensionImpl;
 
 import com.google.inject.ImplementedBy;
 
 /**
- * Represents the OpenSocial namespace in ActivityStreams.
- *
+ * A generic class to represent extensions to data models.
  */
-@ImplementedBy(OpenSocialImpl.class)
+@ImplementedBy(ExtensionImpl.class)
 @Exportablebean
-public interface OpenSocial {
+public interface Extension {
 	
 	public static enum Field {
-		//Add OpenSocial field extensions here
-		;
+	  ; // No fields to add
+	  
 		/**
 		 * The name of the JSON element.
 		 */
@@ -39,6 +38,4 @@ public interface OpenSocial {
 			return jsonString;
 		}
 	}
-	
-
 }

@@ -29,14 +29,14 @@ public class RestfulAtomActivityEntryTest extends AbstractLargeRestfulTests{
   
   @Test
   public void testGetActivityEntryAtomById() throws Exception {
-    String resp = getResponse("/activitystreams/john.doe/@self/1/object1", "GET", "atom", ContentTypes.OUTPUT_ATOM_CONTENT_TYPE);
+    String resp = getResponse("/activitystreams/john.doe/@self/1/activity2", "GET", "atom", ContentTypes.OUTPUT_ATOM_CONTENT_TYPE);
     String expected = TestUtils.loadTestFixture(FIXTURE_LOC + "ActivityEntryAtomId.xml");
     assertTrue(TestUtils.xmlsEqual(expected, resp));
   }
   
   @Test
   public void testGetActivityEntryAtomByIds() throws Exception {
-    String resp = getResponse("/activitystreams/john.doe/@self/1/object1,object2", "GET", "atom", ContentTypes.OUTPUT_ATOM_CONTENT_TYPE);
+    String resp = getResponse("/activitystreams/john.doe/@self/1/activity1,activity2", "GET", "atom", ContentTypes.OUTPUT_ATOM_CONTENT_TYPE);
     String expected = TestUtils.loadTestFixture(FIXTURE_LOC + "ActivityEntryAtomIds.xml");
     assertTrue(TestUtils.xmlsEqual(expected, resp));
   }

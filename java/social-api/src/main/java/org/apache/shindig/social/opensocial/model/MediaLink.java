@@ -38,9 +38,7 @@ public interface MediaLink {
     URL("url"),
     WIDTH("width");
     
-    /**
-     * The name of the JSON element.
-     */
+    // The name of the JSON element
     private final String jsonString;
     
     /**

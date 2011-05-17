@@ -33,14 +33,14 @@ public class RestfulJsonActivityEntryTest extends AbstractLargeRestfulTests{
   
   @Test
   public void testGetActivityEntryJsonById() throws Exception {
-    String resp = getResponse("/activitystreams/john.doe/@self/1/object1", "GET", null, ContentTypes.OUTPUT_JSON_CONTENT_TYPE);
+    String resp = getResponse("/activitystreams/john.doe/@self/1/activity1", "GET", null, ContentTypes.OUTPUT_JSON_CONTENT_TYPE);
     String expected = TestUtils.loadTestFixture(FIXTURE_LOC + "ActivityEntryJsonId.json");
     assertTrue(TestUtils.jsonsEqual(expected, resp));
   }
   
   @Test
   public void testGetActivityEntryJsonByIds() throws Exception {
-    String resp = getResponse("/activitystreams/john.doe/@self/1/object1,object2", "GET", null, ContentTypes.OUTPUT_JSON_CONTENT_TYPE);
+    String resp = getResponse("/activitystreams/john.doe/@self/1/activity1,activity2", "GET", null, ContentTypes.OUTPUT_JSON_CONTENT_TYPE);
     String expected = TestUtils.loadTestFixture(FIXTURE_LOC + "ActivityEntryJsonIds.json");
     assertTrue(TestUtils.jsonsEqual(expected, resp));
   }
@@ -60,8 +60,8 @@ public class RestfulJsonActivityEntryTest extends AbstractLargeRestfulTests{
   
   @Test
   public void testDeleteActivityEntryJson() throws Exception {
-    // First delete object1, then retrieve & test
-    getResponse("/activitystreams/john.doe/@self/1/object1", "DELETE", null, ContentTypes.OUTPUT_JSON_CONTENT_TYPE);
+    // First delete activity1, then retrieve & test
+    getResponse("/activitystreams/john.doe/@self/1/activity1", "DELETE", null, ContentTypes.OUTPUT_JSON_CONTENT_TYPE);
     String resp = getResponse("/activitystreams/john.doe/@self/1", "GET", null, ContentTypes.OUTPUT_JSON_CONTENT_TYPE);
     String expected = TestUtils.loadTestFixture(FIXTURE_LOC + "ActivityEntryJsonDelete.json");;
     assertTrue(TestUtils.jsonsEqual(expected, resp));
@@ -69,26 +69,30 @@ public class RestfulJsonActivityEntryTest extends AbstractLargeRestfulTests{
   
   @Test
   public void testUpdateActivityEntryJson() throws Exception {
+    String expected = TestUtils.loadTestFixture(FIXTURE_LOC + "ActivityEntryJsonUpdated.json");
+    
     // Update activity
-    String postData = "{title : 'Super Updated Activity', actor: {id: 'john.doe'}, object : {id: 'object2'}}";
-    getResponse("/activitystreams/john.doe/@self/1/object2", "PUT", postData, null, ContentTypes.OUTPUT_JSON_CONTENT_TYPE);
+    String postData = "{id: 'activity2', title : 'Super Updated Activity', actor: {id: 'john.doe'}, object : {id: 'object2'}}";
+    String putResp = getResponse("/activitystreams/john.doe/@self/1/activity2", "PUT", postData, null, ContentTypes.OUTPUT_JSON_CONTENT_TYPE);
+    assertTrue(TestUtils.jsonsEqual(expected, putResp));
     
     // Retrieve updated activity & test
-    String resp = getResponse("/activitystreams/john.doe/@self/1", "GET", null, ContentTypes.OUTPUT_JSON_CONTENT_TYPE);
-    String expected = TestUtils.loadTestFixture(FIXTURE_LOC + "ActivityEntryJsonUpdated.json");;
-    assertTrue(TestUtils.jsonsEqual(expected, resp));
+    String getResp = getResponse("/activitystreams/john.doe/@self/1/activity2", "GET", null, ContentTypes.OUTPUT_JSON_CONTENT_TYPE);
+    assertTrue(TestUtils.jsonsEqual(expected, getResp));
   }
   
   @Test
   public void testCreateActivityEntryJson() throws Exception {
+    String expected = TestUtils.loadTestFixture(FIXTURE_LOC + "ActivityEntryJsonCreated.json");;
+    
     // Create activity
-    String postData = "{title : 'Super Created Activity', actor: {id: 'john.doe'}, object : {id: 'objectCreated'}}";
-    getResponse("/activitystreams/john.doe/@self/1", "POST", postData, null, ContentTypes.OUTPUT_JSON_CONTENT_TYPE);
+    String postData = "{id: 'activityCreated', title : 'Super Created Activity', actor: {id: 'john.doe'}, object : {id: 'objectCreated'}}";
+    String postResp = getResponse("/activitystreams/john.doe/@self/1", "POST", postData, null, ContentTypes.OUTPUT_JSON_CONTENT_TYPE);
+    assertTrue(TestUtils.jsonsEqual(expected, postResp));
     
     // Retrieve created activity & test
-    String resp = getResponse("/activitystreams/john.doe/@self/1/objectCreated", "GET", null, ContentTypes.OUTPUT_JSON_CONTENT_TYPE);
-    String expected = TestUtils.loadTestFixture(FIXTURE_LOC + "ActivityEntryJsonCreated.json");;
-    assertTrue(TestUtils.jsonsEqual(expected, resp));
+    String getResp = getResponse("/activitystreams/john.doe/@self/1/activityCreated", "GET", null, ContentTypes.OUTPUT_JSON_CONTENT_TYPE);
+    assertTrue(TestUtils.jsonsEqual(expected, getResp));
   }
   
   @Test

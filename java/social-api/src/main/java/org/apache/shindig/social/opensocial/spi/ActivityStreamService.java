@@ -110,7 +110,7 @@ public interface ActivityStreamService {
    * @return a response item containing any errors
    * @throws org.apache.shindig.protocol.ProtocolException if any
    */
-  Future<Void> updateActivityEntry(UserId userId, GroupId groupId, String appId,
+  Future<ActivityEntry> updateActivityEntry(UserId userId, GroupId groupId, String appId,
       Set<String> fields, ActivityEntry activity, String activityId,
       SecurityToken token) throws ProtocolException;
 
@@ -127,6 +127,6 @@ public interface ActivityStreamService {
    * @return a response item containing any errors
    * @throws org.apache.shindig.protocol.ProtocolException if any.
    */
-  Future<Void> createActivityEntry(UserId userId, GroupId groupId, String appId,
+  Future<ActivityEntry> createActivityEntry(UserId userId, GroupId groupId, String appId,
       Set<String> fields, ActivityEntry activity, SecurityToken token) throws ProtocolException;
 }

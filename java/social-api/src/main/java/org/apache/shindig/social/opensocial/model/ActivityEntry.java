@@ -24,32 +24,33 @@ import org.apache.shindig.social.core.model.ActivityEntryImpl;
 import com.google.inject.ImplementedBy;
 
 /**
- * <p>ActivityEntry interface.</p>
+ * <p>Represents an 'Activity' within the Activity Streams JSON 1.0
+ * specification.  Refer to http://activitystrea.ms/head/json-activity.html</p>
  */
 @ImplementedBy(ActivityEntryImpl.class)
 @Exportablebean
 public interface ActivityEntry {
   
   /**
-   * Fields that represent JSON elements for an activity entry.
+   * Fields that represent the JSON elements.
    */
   public static enum Field {
     ACTOR("actor"),
-    BODY("body"),
+    CONTENT("content"),
     GENERATOR("generator"),
     ICON("icon"),
+    ID("id"),
     OBJECT("object"),
-    POSTED_TIME("postedTime"),
+    PUBLISHED("published"),
     PROVIDER("provider"),
     TARGET("target"),
     TITLE("title"),
-    UPDATED_TIME("updatedTime"),
+    UPDATED("updated"),
+    URL("url"),
     VERB("verb"),
     OPENSOCIAL("openSocial");
     
-    /**
-     * The name of the JSON element.
-     */
+    // The name of the JSON element
     private final String jsonString;
     
     /**
@@ -86,18 +87,18 @@ public interface ActivityEntry {
   void setActor(ActivityObject actor);
 
   /**
-   * <p>getBody</p>
+   * <p>getContent</p>
    *
    * @return a {@link java.lang.String} object.
    */
-  String getBody();
+  String getContent();
 
   /**
-   * <p>setBody</p>
+   * <p>setContent</p>
    *
-   * @param body a {@link java.lang.String} object.
+   * @param content a {@link java.lang.String} object.
    */
-  void setBody(String body);
+  void setContent(String content);
   
   /**
    * <p>getGenerator</p>
@@ -116,16 +117,30 @@ public interface ActivityEntry {
   /**
    * <p>getIcon</p>
    *
-   * @return a {@link org.apache.shindig.social.opensocial.model.MediaLink} object.
+   * @return a {@link java.lang.String} object.
    */
-  MediaLink getIcon();
+  String getIcon();
 
   /**
    * <p>setIcon</p>
    *
-   * @param icon a {@link org.apache.shindig.social.opensocial.model.MediaLink} object.
+   * @param icon a {@link java.lang.String} object.
    */
-  void setIcon(MediaLink icon);
+  void setIcon(String icon);
+  
+  /**
+   * <p>getId</p>
+   *
+   * @return a {@link java.lang.String} object.
+   */
+  String getId();
+
+  /**
+   * <p>setId</p>
+   *
+   * @param id a {@link java.lang.String} object.
+   */
+  void setId(String id);
 
   /**
    * <p>getObject</p>
@@ -142,18 +157,18 @@ public interface ActivityEntry {
   void setObject(ActivityObject object);
 
   /**
-   * <p>getPostedTime</p>
+   * <p>getPublished</p>
    *
    * @return a {@link java.lang.String} object.
    */
-  String getPostedTime();
+  String getPublished();
 
   /**
-   * <p>setPostedTime</p>
+   * <p>setPublished</p>
    *
-   * @param postedTime a {@link java.lang.String} object.
+   * @param published a {@link java.lang.String} object.
    */
-  void setPostedTime(String postedTime);
+  void setPublished(String published);
   
   /**
    * <p>getProvider</p>
@@ -198,18 +213,32 @@ public interface ActivityEntry {
   void setTitle(String title);
   
   /**
-   * <p>getUpdatedTime</p>
+   * <p>getUpdated</p>
    *
    * @return a {@link java.lang.String} object.
    */
-  String getUpdatedTime();
+  String getUpdated();
 
   /**
-   * <p>setUpdatedTime</p>
+   * <p>setUpdated</p>
    *
-   * @param postedTime a {@link java.lang.String} object.
+   * @param updated a {@link java.lang.String} object.
    */
-  void setUpdatedTime(String updatedTime);
+  void setUpdated(String updated);
+  
+  /**
+   * <p>getUrl</p>
+   *
+   * @return a {@link java.lang.String} object.
+   */
+  String getUrl();
+
+  /**
+   * <p>setUrl</p>
+   *
+   * @param url a {@link java.lang.String} object.
+   */
+  void setUrl(String url);
 
   /**
    * <p>getVerb</p>
@@ -228,14 +257,14 @@ public interface ActivityEntry {
   /**
    * <p>getOpenSocial</p>
    * 
-   * @return a {@link org.apache.shindig.social.opensocial.model.OpenSocial} object
+   * @return a {@link org.apache.shindig.social.opensocial.model.Extension} object
    */
-  OpenSocial getOpenSocial();
+  Extension getOpenSocial();
   
   /**
    * <p>setOpenSocial</p>
    * 
-   * @return a {@link org.apache.shindig.social.opensocial.model.OpenSocial} object
+   * @return a {@link org.apache.shindig.social.opensocial.model.Extension} object
    */
-  void setOpenSocial(OpenSocial extensions);
+  void setOpenSocial(Extension opensocial);
 }

@@ -27,29 +27,35 @@ import com.google.inject.ImplementedBy;
 
 /**
  * A representation of an Activity's object.
+ * 
+ * Note that an Activity's object may contain fields from an Activity when
+ * the objectType is of type 'activity'.  As such, ActivityObject becomes
+ * a superset of Activity.  Refer to the Activity Streams spec.
  */
 @ImplementedBy(ActivityObjectImpl.class)
 @Exportablebean
 public interface ActivityObject {
   
-  /*
-   * Fields that represent JSON elements for an activity entry.
+  /**
+   * Fields that represent the JSON elements.
    */
   public static enum Field {
-    ATTACHED_OBJECTS("attachedObjects"),
+    // Activity's object fields
+    ATTACHMENTS("attachments"),
+    AUTHOR("author"),
+    CONTENT("content"),
     DISPLAY_NAME("displayName"),
     DOWNSTREAM_DUPLICATES("downstreamDuplicates"),
-    EMBED_CODE("embedCode"),
     ID("id"),
     IMAGE("image"),
     OBJECT_TYPE("objectType"),
+    PUBLISHED("published"),
     SUMMARY("summary"),
+    UPDATED("updated"),
     UPSTREAM_DUPLICATES("upstreamDuplicates"),
     URL("url");
     
-    /*
-     * The name of the JSON element.
-     */
+    // The name of the JSON element
     private final String jsonString;
     
     /**
@@ -70,141 +76,186 @@ public interface ActivityObject {
       return jsonString;
     }
   }
+
+  /**
+   * <p>getAttachments</p>
+   *
+   * @return a list of {@link org.apache.shindig.social.opensocial.model.ActivityObject} object
+   */
+  List<ActivityObject> getAttachments();
+
+  /**
+   * <p>setAttachments</p>
+   *
+   * @param attachments a list of {@link org.apache.shindig.social.opensocial.model.ActivityObject} objects
+   */
+  void setAttachments(List<ActivityObject> attachments);
+
+  /**
+   * <p>getAuthor</p>
+   *
+   * @return a {@link org.apache.shindig.social.opensocial.model.ActivityObject} object
+   */
+  ActivityObject getAuthor();
+
+  /**
+   * <p>setAuthor</p>
+   *
+   * @param author a {@link org.apache.shindig.social.opensocial.model.ActivityObject} object
+   */
+  void setAuthor(ActivityObject author);
   
   /**
-   * Gets the list of Attached Activities for this entry
+   * <p>getContent</p>
    *
-   * @return a list of ActivityObjects
+   * @return a {@link java.lang.String} object.
    */
-  List<ActivityObject> getAttachedObjects();
+  String getContent();
 
   /**
-   * Sets the list of Attached Activities for this entry
+   * <p>setContent</p>
    *
-   * @param attachedObjects a list of ActivityObjects
+   * @param content a {@link java.lang.String} object.
    */
-  void setAttachedObjects(List<ActivityObject> attachedObjects);
+  void setContent(String content);
 
   /**
-   * @return the human-readable name of the object
+   * <p>getDisplayName</p>
+   *
+   * @return a {@link java.lang.String} object.
    */
   String getDisplayName();
 
   /**
-   * Sets the name
-   * @param name a human-readable name
+   * <p>setDisplayName</p>
+   *
+   * @param displayName a {@link java.lang.String} object
    */
   void setDisplayName(String displayName);
 
   /**
-   * Get the list of downstream duplicates.
+   * <p>getDownstreamDuplicates</p>
    *
-   * @return a list of strings
+   * @return a list of {@link java.lang.String} objects
    */
   List<String> getDownstreamDuplicates();
 
   /**
-   * Set the list of downstream duplicates
+   * <p>setDownstreamDuplicates</p>
    *
-   * @param downstreamDuplicates a list of strings containing duplicate IDs
+   * @param downstreamDuplicates a list of {@link java.lang.String} objects
    */
   void setDownstreamDuplicates(List<String> downstreamDuplicates);
-
-  /**
-   * Returns the object's embedCode property.
-   * 
-   * @return String is the object's embedCode property.
-   */
-  String getEmbedCode();
   
   /**
-   * Sets the objet's embedCode property.
-   * 
-   * @param embedCode is the value to set embedCode to
-   */
-  void setEmbedCode(String embedCode);
-
-  /**
-   * Gets the absolute URI that uniquely identifies the object
+   * <p>getId</p>
    *
-   * @return a non-null string
+   * @return a {@link java.lang.String} object.
    */
   String getId();
 
   /**
-   * Set the absolute URI that uniquely identifies the object
+   * <p>setId</p>
    *
-   * @param id a non-null string
+   * @param id a {@link java.lang.String} object.
    */
   void setId(String id);
 
   /**
-   * Get the link to a representative image.
+   * <p>getImage</p>
    *
-   * @return a {@link org.apache.shindig.extras.as.opensocial.model.MediaLink} object.
+   * @return a {@link org.apache.shindig.extras.as.opensocial.model.MediaLink} object
    */
   MediaLink getImage();
 
   /**
-   * Set the link to a representative image.
+   * <p>setImage</p>
    *
-   * @param image a {@link org.apache.shindig.extras.as.opensocial.model.MediaLink} object.
+   * @param image a {@link org.apache.shindig.extras.as.opensocial.model.MediaLink} object
    */
   void setImage(MediaLink image);
 
   /**
-   * Returns the ActivityObject's object type.
+   * <p>getObjectType</p>
    *
-   * @return String representing the object type
+   * @return a {@link java.lang.String} object
    */
   String getObjectType();
 
   /**
-   * Set's the ActivityObject's object type.
+   * <p>setObjectType</p>
    *
-   * @param objectType is the object type
+   * @param objectType a {@link java.lang.String} object
    */
   void setObjectType(String objectType);
-
+  
   /**
-   * Get the list of upstream duplicates.
+   * <p>getPublished</p>
    *
-   * @return a list of strings
+   * @return a {@link java.lang.String} object.
    */
-  List<String> getUpstreamDuplicates();
+  String getPublished();
 
   /**
-   * Set the list of upstream duplicates.
+   * <p>setPublished</p>
    *
-   * @param upstreamDuplicates a list of strings containing duplicate IDs
+   * @param published a {@link java.lang.String} object.
    */
-  void setUpstreamDuplicates(List<String> upstreamDuplicates);
+  void setPublished(String published);
 
   /**
-   * Gets the human-readable summary for this object.
-   * @return the summary
+   * <p>getSummary</p>
+   *
+   * @return a {@link java.lang.String} object
    */
   String getSummary();
 
   /**
-   * Sets the human-readable summary for this object.
+   * <p>setSummary</p>
    *
-   * @param summary a summary
+   * @param summary a {@link java.lang.String} object
    */
   void setSummary(String summary);
   
+  /**
+   * <p>getUpdated</p>
+   *
+   * @return a {@link java.lang.String} object.
+   */
+  String getUpdated();
+
+  /**
+   * <p>setUpdated</p>
+   *
+   * @param updated a {@link java.lang.String} object.
+   */
+  void setUpdated(String updated);
+
+  /**
+   * <p>getUpstreamDuplicates</p>
+   *
+   * @return a list of {@link java.lang.String} objects
+   */
+  List<String> getUpstreamDuplicates();
+
+  /**
+   * <p>setUpstreamDuplicates</p>
+   *
+   * @param upstreamDuplicates a list of {@link java.lang.String} objects
+   */
+  void setUpstreamDuplicates(List<String> upstreamDuplicates);
   
   /**
-   * Returns the object's URL.
-   * 
-   * @return String is the object's URL
+   * <p>getUrl</p>
+   *
+   * @return a {@link java.lang.String} object.
    */
   String getUrl();
-  
+
   /**
-   * Sets the object's URL.
-   * 
-   * @param url is the value to set the object's URL
+   * <p>setUrl</p>
+   *
+   * @param url a {@link java.lang.String} object.
    */
   void setUrl(String url);
 }

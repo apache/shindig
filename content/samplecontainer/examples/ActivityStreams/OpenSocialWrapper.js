@@ -93,15 +93,15 @@ function OpenSocialWrapper() {
 		osapi.activitystreams.get(params).execute(callback);
 	}
 	
-	this.postActivityEntry = function(title, body, verb, actorId, actorName, objectName, objectSummary,
+	this.postActivityEntry = function(title, content, verb, actorId, actorName, objectName, objectSummary,
 									  objectPermalink, objectType, callback) { 
 		var params = {
 			userId: '@viewer',
 			groupId: '@self',
 			activity: {
-				postedTime: '2010-04-27T06:02:36+0000',
+				published: '2010-04-27T06:02:36+0000',
 				title: title,
-				body: body,
+				content: content,
 				actor: {
 					id: actorId,
 					displayName: actorName
@@ -110,7 +110,7 @@ function OpenSocialWrapper() {
 				object: {
 					id: new	Date().getTime(),
 					displayName: objectName,
-					link: objectPermalink,
+					url: objectPermalink,
 					objectType: objectType,
 					summary: objectSummary
 				}
@@ -123,13 +123,13 @@ function OpenSocialWrapper() {
 		var params = {
 			userId: '@viewer',
 			groupId: '@self',
-			activityEntryId: activityEntryId
+			activityId: activityEntryId
 		}
 		osapi.activitystreams.delete(params).execute(callback);
 	}
 	
 	this.getActivityEntryById = function(activityEntryId, callback) {
-		var params = {activityEntryId: activityEntryId};
+		var params = {activityId: activityEntryId};
 		osapi.activitystreams.get(params).execute(callback);
 	}
 }

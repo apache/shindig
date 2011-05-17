@@ -1,8 +1,44 @@
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:osearch="http://a9.com/-/spec/opensearch/1.1">
   <entry>
-    <id>object1</id>
-    <title>John Doe posted a new video to his album.</title>
-    <summary>&lt;body&gt;My activity summary.&lt;/body&gt;</summary>
+    <id>activity1</id>
+    <title>John posted a new blog entry</title>
+    <author>
+      <uri>john.doe</uri>
+      <name xmlns="http://ns.opensocial.org/2008/opensocial">John Doe</name>
+    </author>
+    <content type="application/xml">
+      <activityEntry xmlns="http://ns.opensocial.org/2008/opensocial">
+        <actor>
+          <displayName>John Doe</displayName>
+          <id>john.doe</id>
+          <image>
+            <height>250</height>
+            <url>http://example.org/john/image</url>
+            <width>250</width>
+          </image>
+          <objectType>person</objectType>
+          <url>http://example.org/john</url>
+        </actor>
+        <id>activity1</id>
+        <object>
+          <id>object1</id>
+          <url>http://example.org/blog/2011/02/entry</url>
+        </object>
+        <published>2011-02-10T15:04:55Z</published>
+        <target>
+          <displayName>John&apos;s Blog</displayName>
+          <id>target1</id>
+          <objectType>blog</objectType>
+          <url>http://example.org/blog/</url>
+        </target>
+        <verb>post</verb>
+      </activityEntry>
+    </content>
+  </entry>
+  <entry>
+    <id>activity2</id>
+    <title>John posted a new video to his album.</title>
+    <summary>Photo posted</summary>
     <author>
       <uri>john.doe</uri>
       <name xmlns="http://ns.opensocial.org/2008/opensocial">John Doe</name>
@@ -23,69 +59,48 @@
         <generator>
           <url>http://example.org/activities-app</url>
         </generator>
+        <id>activity2</id>
         <object>
-          <attachedObjects>
+          <attachments>
             <object>
-              <id>attached1</id>
-              <url>http://example.org/attached1</url>
+              <id>attachment1</id>
+              <objectType>attachment</objectType>
             </object>
             <object>
-              <id>attached2</id>
-              <url>http://example.org/attached2</url>
+              <id>attachment2</id>
+              <objectType>attachment</objectType>
             </object>
-          </attachedObjects>
-          <id>object1</id>
+          </attachments>
+          <downstreamDuplicate>downstream1</downstreamDuplicate>
+          <downstreamDuplicate>downstream2</downstreamDuplicate>
+          <id>object2</id>
           <image>
             <height>250</height>
             <url>http://example.org/album/my_fluffy_cat_thumb.jpg</url>
             <width>250</width>
           </image>
-          <objectType>http://activitystrea.ms/schema/1.0/photo</objectType>
-          <summary>&lt;body&gt;My activity summary.&lt;/body&gt;</summary>
-          <upstreamDuplicates>upstreamId1</upstreamDuplicates>
-          <upstreamDuplicates>upstreamId2</upstreamDuplicates>
+          <objectType>photo</objectType>
+          <summary>Photo posted</summary>
+          <upstreamDuplicate>upstream1</upstreamDuplicate>
+          <upstreamDuplicate>upstream2</upstreamDuplicate>
           <url>http://example.org/album/my_fluffy_cat.jpg</url>
         </object>
-        <postedTime>2011-02-10T15:04:55Z</postedTime>
         <provider>
           <url>http://example.org/activity-stream</url>
         </provider>
+        <published>2011-02-10T15:04:55Z</published>
         <target>
           <displayName>John&apos;s Photo Album</displayName>
-          <id>tag:example.org,2011:abc123</id>
+          <id>target2</id>
           <image>
             <height>250</height>
             <url>http://example.org/album/thumbnail.jpg</url>
             <width>250</width>
           </image>
-          <objectType>http://activitystrea.ms/schema/1.0/photo-album</objectType>
+          <objectType>photo-album</objectType>
           <url>http://example.org/album/</url>
         </target>
-        <title>John Doe posted a new video to his album.</title>
-        <verb>post</verb>
-      </activityEntry>
-    </content>
-  </entry>
-  <entry>
-    <id>object2</id>
-    <title>Super simple ActivityEntry</title>
-    <author>
-      <uri>john.doe</uri>
-      <name xmlns="http://ns.opensocial.org/2008/opensocial">John Doe</name>
-    </author>
-    <content type="application/xml">
-      <activityEntry xmlns="http://ns.opensocial.org/2008/opensocial">
-        <actor>
-          <displayName>John Doe</displayName>
-          <id>john.doe</id>
-        </actor>
-        <object>
-          <displayName>Super simple ActivityObject</displayName>
-          <id>object2</id>
-          <objectType>article</objectType>
-        </object>
-        <postedTime>2010-04-27T06:02:36+0000</postedTime>
-        <title>Super simple ActivityEntry</title>
+        <title>John posted a new video to his album.</title>
         <verb>post</verb>
       </activityEntry>
     </content>

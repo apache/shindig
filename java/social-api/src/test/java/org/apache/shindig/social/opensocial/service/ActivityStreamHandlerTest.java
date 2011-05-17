@@ -179,7 +179,7 @@ public class ActivityStreamHandlerTest extends EasyMockTestCase {
 
     org.easymock.EasyMock.expect(service.createActivityEntry(eq(JOHN_DOE.iterator().next()),
         eq(new GroupId(GroupId.Type.self, null)), eq("appId"), eq(ImmutableSet.<String>of()),
-        eq(entry), eq(token))).andReturn(ImmediateFuture.newInstance((Void) null));
+        eq(entry), eq(token))).andReturn(ImmediateFuture.newInstance((ActivityEntry) null));
     replay();
 
     return operation.execute(Maps.<String, String[]>newHashMap(),
@@ -199,7 +199,7 @@ public class ActivityStreamHandlerTest extends EasyMockTestCase {
 
     org.easymock.EasyMock.expect(service.createActivityEntry(eq(JOHN_DOE.iterator().next()),
         eq(new GroupId(GroupId.Type.self, null)), eq("appId"), eq(ImmutableSet.<String>of()),
-        eq(entry), eq(token))).andReturn(ImmediateFuture.newInstance((Void) null));
+        eq(entry), eq(token))).andReturn(ImmediateFuture.newInstance((ActivityEntry) null));
     replay();
 
     Future<?> future = operation.execute(Maps.<String, String[]>newHashMap(),
@@ -222,7 +222,7 @@ public class ActivityStreamHandlerTest extends EasyMockTestCase {
 
     org.easymock.EasyMock.expect(service.updateActivityEntry(eq(JOHN_DOE.iterator().next()),
         eq(new GroupId(GroupId.Type.self, null)), eq("appId"), eq(ImmutableSet.<String>of()),
-        eq(entry), eq("testObject"), eq(token))).andReturn(ImmediateFuture.newInstance((Void) null));
+        eq(entry), eq("testObject"), eq(token))).andReturn(ImmediateFuture.newInstance((ActivityEntry) null));
     replay();
 
     Future<?> future = operation.execute(Maps.<String, String[]>newHashMap(),

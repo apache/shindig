@@ -351,71 +351,82 @@
 },
 "activityEntries" : {
 	"john.doe": [{
-      "verb": "post",
-      "postedTime": "2011-02-10T15:04:55Z",	
-      "generator": {
-        "url": "http://example.org/activities-app"
-      },
-      "provider": {
-        "url": "http://example.org/activity-stream"
-      },
-      "title": "John Doe posted a new video to his album.",
-      "target": {
-        "url": "http://example.org/album/",
-        "objectType": "http://activitystrea.ms/schema/1.0/photo-album",
-        "id": "tag:example.org,2011:abc123",
-        "displayName": "John's Photo Album",
-        "image": {
-          "url": "http://example.org/album/thumbnail.jpg",
-          "width": 250,
-          "height": 250
+		"id": "activity1",
+		"title": "John posted a new blog entry",
+	    "published": "2011-02-10T15:04:55Z",
+	    "actor": {
+	      "url": "http://example.org/john",
+	      "objectType" : "person",
+	      "id": "john.doe",
+	      "image": {
+	        "url": "http://example.org/john/image",
+	        "width": 250,
+	        "height": 250
+	      },
+	      "displayName": "John Doe"
+	    },
+	    "verb": "post",
+	    "object" : {
+	      "url": "http://example.org/blog/2011/02/entry",
+	      "id": "object1"
+	    },
+	    "target" : {
+	      "url": "http://example.org/blog/",
+	      "objectType": "blog",
+	      "id": "target1",
+	      "displayName": "John's Blog"
+	    }
+	  }, {
+	  	"id": "activity2",
+        "published": "2011-02-10T15:04:55Z",
+        "generator": {
+          "url": "http://example.org/activities-app"
+        },
+        "provider": {
+          "url": "http://example.org/activity-stream"
+        },
+        "title": "John posted a new video to his album.",
+        "actor": {
+          "url": "http://example.org/john",
+          "objectType": "person",
+          "id": "john.doe",
+          "image": {
+            "url": "http://example.org/john/image",
+            "width": 250,
+            "height": 250
+          },
+          "displayName": "John Doe"
+        },
+        "verb": "post",
+        "object" : {
+          "url": "http://example.org/album/my_fluffy_cat.jpg",
+          "objectType": "photo",
+          "id": "object2",
+          "summary": "Photo posted",
+          "image": {
+            "url": "http://example.org/album/my_fluffy_cat_thumb.jpg",
+            "width": 250,
+            "height": 250
+          },
+          "upstreamDuplicates" : ["upstream1", "upstream2"],
+          "downstreamDuplicates" : ["downstream1", "downstream2"],
+          "attachments": [
+          	{"id": "attachment1", "objectType": "attachment"},
+          	{"id": "attachment2", "objectType": "attachment"}
+          ]
+        },
+        "target": {
+          "url": "http://example.org/album/",
+          "objectType": "photo-album",
+          "id": "target2",
+          "displayName": "John's Photo Album",
+          "image": {
+            "url": "http://example.org/album/thumbnail.jpg",
+            "width": 250,
+            "height": 250
+          }
         }
-      },
-      "object" : {
-        "url": "http://example.org/album/my_fluffy_cat.jpg",
-        "objectType": "http://activitystrea.ms/schema/1.0/photo",
-        "id": "object1",
-        "summary": "<body>My activity summary.</body>",
-        "image": {
-          "url": "http://example.org/album/my_fluffy_cat_thumb.jpg",
-          "width": 250,
-          "height": 250
-        },
-        "upstreamDuplicates": ["upstreamId1", "upstreamId2"],
-	    "attachedObjects": [{
-	     "url": "http://example.org/attached1",
-	      "id": "attached1"
-	    }, {
-	      "url": "http://example.org/attached2",
-	      "id": "attached2"
-	    }]
-      },
-      "actor": {
-        "url": "http://example.org/john",
-        "objectType": "person",
-        "id": "john.doe",
-        "image": {
-          "url": "http://example.org/john/image",
-          "width": 250,
-          "height": 250
-        },
-        "displayName": "John Doe"
-      },
-      "openSocial" : {}
-    }, {
-		"title": "Super simple ActivityEntry",
-		"actor": {
-			"id": "john.doe",
-			"displayName": "John Doe"
-		},
-		"postedTime": "2010-04-27T06:02:36+0000",
-		"object": {
-			"id": "object2",
-			"displayName": "Super simple ActivityObject",
-			"objectType": "article"
-		},
-		"verb": "post"
-	}]
+      }]
 },
 "albums" : {
 	"john.doe": [{

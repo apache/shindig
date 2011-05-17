@@ -87,15 +87,15 @@ public class AtomEntry {
       updated = activity.getUpdated();
     } else if (o instanceof ActivityEntry) {
       ActivityEntry activity = (ActivityEntry)o;
-      id = activity.getObject().getId();
+      id = activity.getId();
       title = activity.getTitle();
       summary = activity.getObject().getSummary();
       author = new AtomAuthor(activity);
       content = new AtomContent(activity);
       try {
-        updated = new SimpleDateFormat().parse(activity.getPostedTime());
+        updated = new SimpleDateFormat().parse(activity.getPublished());
       } catch (ParseException e) {
-        // TODO: map postedTime to updated field correctly
+        // TODO: map published to updated field correctly
       }
     } else if (oCopy instanceof Entry) {
       Entry<?, ?> e = (Entry<?, ?>) oCopy;

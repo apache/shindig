@@ -57,7 +57,7 @@ import org.apache.shindig.social.opensocial.model.MediaLink;
 import org.apache.shindig.social.opensocial.model.Message;
 import org.apache.shindig.social.opensocial.model.MessageCollection;
 import org.apache.shindig.social.opensocial.model.Name;
-import org.apache.shindig.social.opensocial.model.OpenSocial;
+import org.apache.shindig.social.opensocial.model.Extension;
 import org.apache.shindig.social.opensocial.model.Organization;
 import org.apache.shindig.social.opensocial.model.Person;
 import org.apache.shindig.social.opensocial.model.Url;
@@ -174,7 +174,7 @@ public class XStream081Configuration implements XStreamConfiguration {
         new ClassFieldMapping("organization", Organization.class),
         new ClassFieldMapping("person", Person.class),
         new ClassFieldMapping("url", Url.class),
-        new ClassFieldMapping("openSocial", OpenSocial.class),
+        new ClassFieldMapping("openSocial", Extension.class),
         // this is an example of a class field mapping with context. If
         // ListField is mapped inside an element named emails, replace the element
         // name
@@ -213,7 +213,7 @@ public class XStream081Configuration implements XStreamConfiguration {
         new ClassFieldMapping("organization", Organization.class),
         new ClassFieldMapping("person", Person.class),
         new ClassFieldMapping("url", Url.class),
-        new ClassFieldMapping("openSocial", OpenSocial.class),
+        new ClassFieldMapping("openSocial", Extension.class),
         // this is an example of a class field mapping with context. If
         // ListField is mapped inside an element named emails, replace the element
         // name that would have been defiend as fqcn ListField with email
@@ -253,7 +253,7 @@ public class XStream081Configuration implements XStreamConfiguration {
         .put("organization", Organization.class)
         .put("person", Person.class)
         .put("url", Url.class)
-        .put("openSocial", OpenSocial.class)
+        .put("openSocial", Extension.class)
         .put("listField", ListField.class).build()
     );
 
@@ -291,8 +291,9 @@ public class XStream081Configuration implements XStreamConfiguration {
         new ImplicitCollectionFieldMapping(Message.class, "collectionIds", String.class, "collectionsIds"),
         new ImplicitCollectionFieldMapping(Message.class, "replies", String.class, "replies"),
         
-        new ImplicitCollectionFieldMapping(ActivityObject.class, "downstreamDuplicates", String.class, "downstreamDuplicates"),
-        new ImplicitCollectionFieldMapping(ActivityObject.class, "upstreamDuplicates", String.class, "upstreamDuplicates"),
+        new ImplicitCollectionFieldMapping(ActivityObject.class, "downstreamDuplicates", String.class, "downstreamDuplicate"),
+        new ImplicitCollectionFieldMapping(ActivityObject.class, "upstreamDuplicates", String.class, "upstreamDuplicate"),
+        //new ImplicitCollectionFieldMapping(ActivityObject.class, "attachments", ActivityObject.class, "attachment"),
 
         new ImplicitCollectionFieldMapping(Activity.class, "mediaItems", MediaItem.class, "mediaItems"))
     );

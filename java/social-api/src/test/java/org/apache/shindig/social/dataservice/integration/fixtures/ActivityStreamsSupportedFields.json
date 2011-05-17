@@ -1,15 +1,17 @@
 {
    "entry":[
      "actor",
-     "body",
+     "content",
      "generator",
      "icon",
+     "id",
      "object",
-     "postedTime",
+     "published",
      "provider",
      "target",
      "title",
-     "updatedTime",
+     "updated",
+     "url",
      "verb"
    ]
 }
