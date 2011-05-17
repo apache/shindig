@@ -152,6 +152,11 @@ gadgets.config = function() {
       }
     }
     foldConfig(baseConfig, configAugment);
+
+    var globalConfig = window['___cfg'];
+    if (globalConfig) {
+      foldConfig(baseConfig, globalConfig);
+    }
   }
 
   return {
