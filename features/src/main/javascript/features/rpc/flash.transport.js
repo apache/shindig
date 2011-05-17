@@ -142,7 +142,7 @@ if (!gadgets.rpctx.flash) {  // make lib resilient to double-inclusion
     }
 
     function flushHandshakes() {
-      if (relayHandle !== null) {
+      if (relayHandle !== null && relayHandle['setup']) {
         while (pendingHandshakes.length > 0) {
           var shake = pendingHandshakes.shift();
           var targetId = shake.targetId;
@@ -238,7 +238,6 @@ if (!gadgets.rpctx.flash) {  // make lib resilient to double-inclusion
         if (relayHandle === null && setupHandle === null) {
           setupHandle = window.setTimeout(relayLoader, LOADER_TIMEOUT_MS);
         }
-        flushHandshakes();
         return true;
       },
 
