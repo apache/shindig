@@ -22,13 +22,20 @@
  * Tame and expose core osapi.* API to cajoled gadgets
  */
 tamings___.push(function(imports) {
-  caja___.tamesTo(osapi.newBatch, caja___.markTameAsFunction(function() {
+  function newBatch() {
     var batch = osapi.newBatch();
     caja___.whitelistFuncs([
       [batch, 'add'],
       [batch, 'execute']
     ]);
-    var t = caja___.tame(batch);
-    return t;
-  }, 'newBatch'));
+    return caja___.tame(batch);
+  }
+  caja___.markTameAsFunction(newBatch, 'newBatch');
+  caja___.tamesTo(osapi.newBatch, newBatch);
+  caja___.whitelistCtors([
+    [osapi, '_BoundCall', Object]
+  ]);
+  caja___.whitelistMeths([
+    [osapi._BoundCall, 'execute']
+  ]);
 });

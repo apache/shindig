@@ -30,6 +30,8 @@
       <exports type="js">osapi.newBatch.add</exports>
       <exports type="js">osapi.newBatch.execute</exports>
       <exports type="js">osapi._registerMethod</exports>
+      <exports type="js">osapi._BoundCall</exports>
+      <exports type="js">osapi._BoundCall.prototype.execute</exports>
     </api>
   </all>
 </feature>

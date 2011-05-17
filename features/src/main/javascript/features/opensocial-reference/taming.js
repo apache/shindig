@@ -205,9 +205,10 @@ tamings___.push(function(imports) {
   // TODO(jasvir): The following object *is* exposed to gadget
   // code because its returned by opensocial.DataRequest.*
   // but isn't documented in gadget API.
-  caja___.grantTameAsRead(JsonRpcRequestItem, 'rpc');
-  caja___.grantTameAsRead(JsonRpcRequestItem, 'processData');
-  caja___.grantTameAsRead(JsonRpcRequestItem, 'processResponse');
-  caja___.grantTameAsRead(JsonRpcRequestItem, 'errors');
-
+  caja___.whitelistProps([
+    [JsonRpcRequestItem, 'rpc'],
+    [JsonRpcRequestItem, 'processData'],
+    [JsonRpcRequestItem, 'processResponse'],
+    [JsonRpcRequestItem, 'errors']
+  ]);
 });

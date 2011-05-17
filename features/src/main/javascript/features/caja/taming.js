@@ -58,8 +58,12 @@ caja___ = (function() {
     return tamingFrame.contentWindow;
   }
 
-  function grantTameAsRead(obj, propName) {
-    tame___.grantTameAsRead(obj, propName);
+  function getUseless() {
+    return tame___ && tame___.USELESS;
+  }
+
+  function markTameAsFunction(func, name) {
+    return tame___.markTameAsFunction(func, name);
   }
 
   function tame(obj) {
@@ -70,8 +74,8 @@ caja___ = (function() {
     tame___.tamesTo(feral, tame);
   }
 
-  function markTameAsFunction(f, name) {
-    return tame___.markTameAsFunction(f, name);
+  function untame(obj) {
+    return tame___.untame(obj);
   }
 
   function whitelistCtors(schemas) {
@@ -209,13 +213,14 @@ caja___ = (function() {
   return {
     getPendingScript: getPendingScript,
     getTameGlobal: getTameGlobal,
-    grantTameAsRead: grantTameAsRead,
+    getUseless: getUseless,
     loadedGuestFrame: loadedGuestFrame,
     loadedTamingFrame: loadedTamingFrame,
     markTameAsFunction: markTameAsFunction,
     start: start,
     tame: tame,
     tamesTo: tamesTo,
+    untame: untame,
     whitelistCtors: whitelistCtors,
     whitelistFuncs: whitelistFuncs,
     whitelistMeths: whitelistMeths,

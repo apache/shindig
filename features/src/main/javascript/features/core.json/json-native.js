@@ -68,7 +68,7 @@ if (window.JSON && window.JSON.parse && window.JSON.stringify) {
             patchedStringify : orig;
         try {
           return stringifyFn(obj, function(k,v) {
-            return !endsWith___.test(k) ? v : null;
+            return !endsWith___.test(k) ? v : void 0;
           });
         } catch (e) {
           return null;

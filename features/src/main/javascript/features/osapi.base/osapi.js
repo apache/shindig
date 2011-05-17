@@ -19,13 +19,12 @@
 /**
  * Called by the transports for each service method that they expose
  * @param {string} method  The method to expose e.g. "people.get".
- * @param {Object.<string,Object>} transport The transport used to execute a call for the method.
+ * @param {Object.<string,Object>} transport The transport used to
+ *    execute a call for the method.
  */
 osapi._registerMethod = function(method, transport) {
-  var has___ = typeof ___ !== 'undefined';
-
   // Skip registration of local newBatch implementation.
-  if (method == 'newBatch') {
+  if (method === 'newBatch') {
     return;
   }
 
@@ -36,46 +35,53 @@ osapi._registerMethod = function(method, transport) {
     last[parts[i]] = last[parts[i]] || {};
     last = last[parts[i]];
   }
+  var basename = parts[parts.length - 1];
+  if (last[basename]) {
+    gadgets.warn('Skipping duplicate osapi method definition '
+                 + method + ' on transport ' + transport['name']);
+    return;
+  }
 
-  // Use the batch as the actual executor of calls.
-  var apiMethod = function(rpc) {
-    var batch = osapi.newBatch();
-    var boundCall = {};
-    boundCall.execute = function(callback) {
-      var feralCallback = has___ ? ___.untame(callback) : callback;
-      var that = has___ ? ___.USELESS : this;
-      batch.add(method, this);
-      batch.execute(function(batchResult) {
-        if (batchResult.error) {
-          feralCallback.call(that, batchResult.error);
-        } else {
-          feralCallback.call(that, batchResult[method]);
-        }
-      });
-    };
-    if (has___) {
-      ___.markFunc(boundCall.execute, 'execute');
-    }
-    // TODO: This shouldnt really be necessary. The spec should be clear enough about
-    // defaults that we dont have to populate this.
+  last[basename] = function(rpc) {
+    // TODO: This shouldn't really be necessary. The spec should be clear
+    // enough about defaults that we dont have to populate this.
     rpc = rpc || {};
     rpc['userId'] = rpc['userId'] || '@viewer';
     rpc['groupId'] = rpc['groupId'] || '@self';
-
-    // Decorate the execute method with the information necessary for batching
-    boundCall['method'] = method;
-    boundCall['transport'] = transport;
-    boundCall['rpc'] = rpc;
-
+    var boundCall = new osapi._BoundCall(method, transport, rpc);
     return boundCall;
   };
-  if (has___ && typeof ___.markFunc !== 'undefined') {
-    ___.markFunc(apiMethod, method);
-  }
 
-  if (last[parts[parts.length - 1]]) {
-    gadgets.warn('Skipping duplicate osapi method definition ' + method + ' on transport ' + transport['name']);
-  } else {
-    last[parts[parts.length - 1]] = apiMethod;
+  if (typeof tamings___ !== 'undefined') {
+    tamings___.push(function() {
+      caja___.markTameAsFunction(last[basename], method);
+    });
   }
 };
+
+// This was formerly an anonymous ad-hoc object, but that triggers a caja
+// bug: http://code.google.com/p/google-caja/issues/detail?id=1355
+// Workaround is to make it a class.
+osapi._BoundCall = function(method, transport, rpc) {
+  this.method = method;
+  this.transport = transport;
+  this.rpc = rpc;
+};
+
+osapi._BoundCall.prototype.execute = function(callback) {
+  var cajaReady = (typeof caja___ !== 'undefined'
+                   && caja___.getUseless
+                   && caja___.getUseless());
+  var that = cajaReady ? caja___.getUseless() : this;
+  var feralCallback = cajaReady ? caja___.untame(callback) : callback;
+  var batch = osapi.newBatch();
+  batch.add(this.method, this);
+  batch.execute(function(batchResult) {
+    if (batchResult.error) {
+      feralCallback.call(that, batchResult.error);
+    } else {
+      feralCallback.call(that, batchResult[that.method]);
+    }
+  });
+};
+

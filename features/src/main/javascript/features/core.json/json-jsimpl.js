@@ -90,7 +90,7 @@ if (!(window.JSON && window.JSON.parse && window.JSON.stringify)) {
           i,          // The loop counter.
           k,          // The member key.
           l,          // Length.
-          r = /["\\\x00-\x1f\x7f-\x9f]/g,
+          r = /[\"\\\x00-\x1f\x7f-\x9f]/g,
           v;          // The member value.
 
       switch (typeof value) {
@@ -135,7 +135,7 @@ if (!(window.JSON && window.JSON.parse && window.JSON.stringify)) {
           }
           // Otherwise, iterate through all of the keys in the object.
           for (k in value) {
-            if (k.match('___$'))
+            if (/___$/.test(k))
               continue;
             if (value.hasOwnProperty(k)) {
               if (typeof k === 'string') {

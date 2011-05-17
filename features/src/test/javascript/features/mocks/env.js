@@ -27,7 +27,8 @@
 var document = {
   location: {
     href: "http://localhost"
-  }
+  },
+  getElementsByTagName: function (name) { return []; }
 };
 
 // See mocks.FakeWindow if you need something more full featured.
