@@ -43,9 +43,18 @@
     window.__CONTAINER_URI = shindig.uri(window.location.href);
 
     window.__API_URI = null;
-    var scriptEls = document.getElementsByTagName('script');
-    if (scriptEls.length > 0) {
-      window.__API_URI = shindig.uri(scriptEls[scriptEls.length - 1].src);
+    var scriptEl = null;
+    if (window.__CONTAINER_SCRIPT_ID) {
+      scriptEl = document.getElementById(window.__CONTAINER_SCRIPT_ID);
+    } else {
+      var scriptEls = document.getElementsByTagName('script');
+      if (scriptEls.length > 0) {
+        scriptEl = scriptEls[scriptEls.length - 1];
+      }
+    }
+
+    if (scriptEl) {
+      window.__API_URI = shindig.uri(scriptEl.src);
       // In case script URI is relative, resolve (make absolute) with container.
       window.__API_URI.resolve(window.__CONTAINER_URI);
     }
