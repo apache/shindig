@@ -19,8 +19,6 @@
 package org.apache.shindig.gadgets.js;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Joiner;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 
@@ -28,11 +26,9 @@ import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.features.FeatureRegistry;
 import org.apache.shindig.gadgets.features.FeatureRegistry.FeatureBundle;
-import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.uri.JsUriManager.JsUri;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -42,7 +38,6 @@ import java.util.Set;
  */
 public class AddJslLoadedVariableProcessor implements JsProcessor {
   private static final String CODE_ID = "[jsload-loaded-info]";
-  private static final Joiner UNKNOWN_FEATURE_ERR = Joiner.on(", ");
 
   @VisibleForTesting
   static final String TEMPLATE =
@@ -55,7 +50,7 @@ public class AddJslLoadedVariableProcessor implements JsProcessor {
     this.registry = featureRegistry;
   }
 
-  public boolean process(JsRequest jsRequest, JsResponseBuilder builder) throws JsException {
+  public boolean process(JsRequest jsRequest, JsResponseBuilder builder) {
     JsUri jsUri = jsRequest.getJsUri();
     if (!jsUri.isNohint()) {
       Set<String> result = getBundleNames(jsUri, false);
@@ -67,16 +62,11 @@ public class AddJslLoadedVariableProcessor implements JsProcessor {
   }
 
   // TODO: factor this logic into somewhere shared. it's now used in GetJsContentProcessor.
-  private Set<String> getBundleNames(JsUri jsUri, boolean loaded) throws JsException {
+  private Set<String> getBundleNames(JsUri jsUri, boolean loaded) {
     GadgetContext ctx = new JsGadgetContext(jsUri);
-    Collection<String> libs = loaded ? jsUri.getLoadedLibs() : jsUri.getLibs(); 
-    List<String> unsupported = Lists.newLinkedList();
-    FeatureRegistry.LookupResult lookup = registry.getFeatureResources(ctx, libs, unsupported);
-    if (!unsupported.isEmpty()) {
-      String message = loaded ? "loaded" : "requested";
-      throw new JsException(HttpResponse.SC_BAD_REQUEST,
-          "Unknown " + message + " feature(s): " + UNKNOWN_FEATURE_ERR.join(unsupported));
-    }
+    Collection<String> libs = loaded ? jsUri.getLoadedLibs() : jsUri.getLibs();
+    // TODO: possibly warn on unknown/unrecognized libs.
+    FeatureRegistry.LookupResult lookup = registry.getFeatureResources(ctx, libs, null);
     Set<String> ret = Sets.newLinkedHashSet(); // ordered set for testability.
     for (FeatureBundle bundle : lookup.getBundles()) {
       ret.add(bundle.getName());

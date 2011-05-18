@@ -21,6 +21,7 @@ package org.apache.shindig.gadgets.js;
 import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.isA;
+import static org.easymock.EasyMock.isNull;
 import static org.junit.Assert.assertEquals;
 
 import com.google.common.collect.ImmutableList;
@@ -43,8 +44,6 @@ import java.util.List;
  * Tests for {@link AddJslLoadedVariableProcessor}.
  */
 public class AddJslLoadedVariableProcessorTest {
-  private static final List<String> EMPTY_STRING_LIST = ImmutableList.<String>of();
-
   private static final String REQ_1_LIB = "foo";
   private static final String REQ_1_DEP_LIB = "bar";
   private static final String REQ_2_LIB = "gig";
@@ -96,6 +95,7 @@ public class AddJslLoadedVariableProcessorTest {
     EasyMock.expect(request.getJsUri()).andReturn(jsUri);
   }
 
+  @SuppressWarnings("unchecked")
   private void setUpRegistry() {
     FeatureBundle bundle1 = mockBundle(REQ_1_LIB);
     FeatureBundle bundle2 = mockBundle(REQ_1_DEP_LIB);
@@ -103,10 +103,10 @@ public class AddJslLoadedVariableProcessorTest {
     FeatureBundle bundle4 = mockBundle(LOAD_LIB);
     LookupResult reqResult = mockLookupResult(Lists.newArrayList(bundle1, bundle2, bundle3));
     expect(registry.getFeatureResources(isA(JsGadgetContext.class), eq(REQ_LIBS),
-        eq(EMPTY_STRING_LIST))).andReturn(reqResult);
+        isNull(List.class))).andReturn(reqResult);
     LookupResult loadResult = mockLookupResult(Lists.newArrayList(bundle4));
     expect(registry.getFeatureResources(isA(JsGadgetContext.class), eq(LOAD_LIBS),
-        eq(EMPTY_STRING_LIST))).andReturn(loadResult);
+        isNull(List.class))).andReturn(loadResult);
   }
 
   private LookupResult mockLookupResult(List<FeatureBundle> bundles) {

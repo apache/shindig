@@ -18,8 +18,6 @@
 
 package org.apache.shindig.gadgets.js;
 
-import com.google.common.base.Joiner;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 
@@ -30,12 +28,10 @@ import org.apache.shindig.gadgets.features.FeatureRegistry;
 import org.apache.shindig.gadgets.features.FeatureRegistry.FeatureBundle;
 import org.apache.shindig.gadgets.features.FeatureRegistryProvider;
 import org.apache.shindig.gadgets.features.FeatureResource;
-import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.rewrite.js.JsCompiler;
 import org.apache.shindig.gadgets.uri.JsUriManager.JsUri;
 import org.apache.shindig.gadgets.uri.UriStatus;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -43,8 +39,6 @@ import java.util.Set;
  * Retrieves the requested Javascript code using a {@link JsProcessor}.
  */
 public class GetJsContentProcessor implements JsProcessor {
-  private static final Joiner UNKNOWN_FEATURE_ERR = Joiner.on(", ");
-
   private final FeatureRegistryProvider registryProvider;
   private final JsCompiler compiler;
 
@@ -67,8 +61,12 @@ public class GetJsContentProcessor implements JsProcessor {
     } catch (GadgetException e) {
       throw new JsException(e.getHttpStatusCode(), e.getMessage());
     }
-    List<FeatureBundle> requestedBundles = getAllBundles(registry, ctx, jsUri.getLibs(), false);
-    List<FeatureBundle> loadedBundles = getAllBundles(registry, ctx, jsUri.getLoadedLibs(), true);
+
+    // TODO: possibly warn on unknown/unrecognized libs.
+    List<FeatureBundle> requestedBundles = registry.getFeatureResources(
+        ctx, jsUri.getLibs(), null).getBundles();
+    List<FeatureBundle> loadedBundles = registry.getFeatureResources(
+        ctx, jsUri.getLoadedLibs(), null).getBundles();
 
     Set<String> loadedFeatures = Sets.newHashSet();
     for (FeatureBundle bundle : loadedBundles) {
@@ -95,18 +93,6 @@ public class GetJsContentProcessor implements JsProcessor {
     UriStatus uriStatus = jsUri.getStatus();
     setResponseCacheTtl(builder, uriStatus != null ? uriStatus : UriStatus.VALID_UNVERSIONED);
     return true;
-  }
-
-  private List<FeatureBundle> getAllBundles(FeatureRegistry registry, GadgetContext ctx,
-      Collection<String> requested, boolean loaded) throws JsException {
-    List<String> unsupported = Lists.newLinkedList();
-    FeatureRegistry.LookupResult lookup = registry.getFeatureResources(ctx, requested, unsupported);
-    if (!unsupported.isEmpty()) {
-      String message = loaded ? "loaded" : "requested";
-      throw new JsException(HttpResponse.SC_BAD_REQUEST,
-          "Unknown " + message + " feature(s): " + UNKNOWN_FEATURE_ERR.join(unsupported));
-    }
-    return lookup.getBundles();
   }
 
   /**

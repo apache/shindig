@@ -22,6 +22,7 @@ import static org.easymock.EasyMock.createControl;
 import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.isA;
+import static org.easymock.EasyMock.isNull;
 import static org.junit.Assert.*;
 
 import java.util.List;
@@ -151,6 +152,7 @@ public class GetJsContentProcessorTest {
             JsContent.fromFeature(JS_CODE2, "source2", bundle, resource2)));
   }
 
+  @SuppressWarnings("unchecked")
   private void setupJsUriAndRegistry(UriStatus uriStatus,
       List<String> reqLibs, List<FeatureBundle> reqLookupBundles,
       List<String> loadLibs, List<FeatureBundle> loadLookupBundles) {
@@ -168,9 +170,9 @@ public class GetJsContentProcessorTest {
     LookupResult loadLookup = mockLookupResult(loadLookupBundles);
 
     expect(registry.getFeatureResources(isA(JsGadgetContext.class), eq(reqLibs),
-        eq(EMPTY_STRING_LIST))).andReturn(reqLookup);
+        isNull(List.class))).andReturn(reqLookup);
     expect(registry.getFeatureResources(isA(JsGadgetContext.class), eq(loadLibs),
-        eq(EMPTY_STRING_LIST))).andReturn(loadLookup);
+        isNull(List.class))).andReturn(loadLookup);
   }
 
   private LookupResult mockLookupResult(List<FeatureBundle> bundles) {
