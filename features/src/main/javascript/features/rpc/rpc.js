@@ -685,12 +685,13 @@ if (!window['gadgets']['rpc']) { // make lib resilient to double-inclusion
     }
 
     function setupChildIframe(gadgetId, opt_frameurl, opt_authtoken) {
+      var childIframe = null;
       if (gadgetId.charAt(0) != '/') {
         // only set up child (and not sibling) iframe
         if (!gadgets.util) {
           return;
         }
-        var childIframe = document.getElementById(gadgetId);
+        childIframe = document.getElementById(gadgetId);
         if (!childIframe) {
           throw new Error('Cannot set up gadgets.rpc receiver with ID: ' + gadgetId +
               ', element not found.');
