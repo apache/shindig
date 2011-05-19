@@ -108,8 +108,6 @@
                 <source>globals/globals.js</source>
                 <source>cloo/cloo.js</source>
                 <source>core.config.base/config.js</source>
-                <source>core.config.base/configcontainer.js</source>
-                <source>core.config.base/configgadget.js</source>
                 <source>core.config/validators.js</source>
                 <source>core.json/json-native.js</source>
                 <source>core.json/json-jsimpl.js</source>

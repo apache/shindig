@@ -29,10 +29,15 @@
   <dependency>osapi.base</dependency>
   <dependency>rpc</dependency>
   <dependency>security-token</dependency>
-  <all>
+  <container>
+    <script src="jsonrpctransport.js"></script>
+    <script src="peoplehelpers.js"></script>    
+    <script src="taming.js" caja="1"></script>    
+  </container>
+  <gadget>
     <script src="jsonrpctransport.js"></script>
     <script src="gadgetsrpctransport.js"></script>
     <script src="peoplehelpers.js"></script>    
     <script src="taming.js" caja="1"></script>    
-  </all>
+  </gadget>
 </feature>

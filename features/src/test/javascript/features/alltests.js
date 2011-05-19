@@ -39,8 +39,6 @@ if (!this.JsUtil) {
   eval(JsUtil.prototype.include(srcDir + '/globals/globals.js'));
   eval(JsUtil.prototype.include(srcDir + '/cloo/cloo.js'));
   eval(JsUtil.prototype.include(srcDir + '/core.config.base/config.js'));
-  eval(JsUtil.prototype.include(srcDir + '/core.config.base/configcontainer.js'));
-  eval(JsUtil.prototype.include(srcDir + '/core.config.base/configgadget.js'));
   eval(JsUtil.prototype.include(srcDir + '/core.config/validators.js'));
   eval(JsUtil.prototype.include(srcDir + '/core.json/json-native.js'));
   eval(JsUtil.prototype.include(srcDir + '/core.json/json-jsimpl.js'));

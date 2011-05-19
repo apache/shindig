@@ -115,7 +115,7 @@ if (gadgets && gadgets.rpc) { //Dont bind if gadgets.rpc not defined
     }
 
     // Do not run this in container mode.
-    if (gadgets.config && window !== window.top) {
+    if (gadgets.config) {
       gadgets.config.register('osapi.services', null, init);
     }
   })();
