@@ -63,9 +63,9 @@ osapi._registerMethod = function(method, transport) {
 // bug: http://code.google.com/p/google-caja/issues/detail?id=1355
 // Workaround is to make it a class.
 osapi._BoundCall = function(method, transport, rpc) {
-  this.method = method;
-  this.transport = transport;
-  this.rpc = rpc;
+  this['method'] = method;
+  this['transport'] = transport;
+  this['rpc'] = rpc;
 };
 
 osapi._BoundCall.prototype.execute = function(callback) {
