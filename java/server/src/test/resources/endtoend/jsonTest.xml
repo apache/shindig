@@ -37,11 +37,10 @@
           }
           return xmlDoc;
         };
-
-        function createJsonString(xmlString) {
+        
+        function createJson(xmlString) {
           var dom = createDom(xmlString);
-          var result = gadgets.json.xml.convertXmlToJson(dom);
-          return gadgets.json.stringify(result);
+          return gadgets.json.xml.convertXmlToJson(dom);
         };
 
         var tests = {
@@ -54,25 +53,37 @@
             finished();
           },
           jsonConvertXmlToJsonTest : function() {
-            var domString = createJsonString('<e />');
-            assertEquals("Json matches " + domString, '{"e":null}', domString);
-
-            domString = createJsonString('<e>text</e>');
-            assertEquals("Json matches " + domString, '{"e":"text"}', domString);
-
-            domString = createJsonString('<e><a>text</a><b>text</b></e>');
-            assertEquals("Json matches " + domString, '{"e":{"a":"text","b":"text"}}', domString);
-
-            domString = createJsonString('<e><a>text</a><a>text</a></e>');
-            assertEquals("Json matches " + domString, '{"e":{"a":["text","text"]}}', domString);
-
-            domString = createJsonString('<e>text<a>text</a></e>');
-            assertEquals("Json matches " + domString, '{"e":{"#text":"text","a":"text"}}', domString);
+            var obj = createJson('<e />');
+            assertEquals('Testing e is not null', obj.e, null);
             
-            domString = createJsonString('<e><a id="id1"/><a id="id2"/></e>');
-            assertEquals("Json matches " + domString, '{"e":{"a":[{"@id":"id1"},{"@id":"id2"}]}}', domString);
-
-            domString = createJsonString(
+            obj = createJson('<e>text</e>');
+            assertEquals('Testing e equals text', obj.e, "text");
+            
+            obj = createJson('<e><a>text</a><b>text</b></e>');
+            assertTrue('Testing e is not null', obj.e != null);
+            assertEquals('Testing e.a equals text', obj.e.a, "text");
+            assertEquals('Testing e.a.b equals text', obj.e.b, "text");
+          
+            obj = createJson('<e><a>text</a><a>text</a></e>');
+            assertTrue('Testing e is not null', obj.e != null);
+            assertTrue('Testing e.a is not null', obj.e.a != null);
+            assertTrue('Testing e.a is an instance of Array', obj.e.a instanceof Array);
+            assertEquals('Testing e.a.length equals 2 ', obj.e.a.length, 2);
+          
+            obj = createJson('<e>text<a>text</a></e>');
+            assertTrue('Testing e is not null', obj.e != null);
+            assertEquals('Testing e["#text"] equals text', obj.e["#text"], "text");
+            assertEquals('Testing e.a equals text', obj.e.a, "text"); 
+            
+            obj = createJson('<e><a id="id1"/><a id="id2"/></e>');
+            assertTrue('Testing e is not null', obj.e != null);
+            assertTrue('Testing e.a does not equal null', obj.e.a != null);
+            assertTrue('Testing e.a is an instance of Array', obj.e.a instanceof Array);
+            assertEquals('Testing e.a.length is 2', obj.e.a.length, 2);
+            assertEquals('Testing e.a[0]["@id"] equals id1', obj.e.a[0]["@id"], "id1");
+            assertEquals('Testing e.a[1].["@id"] equals id2', obj.e.a[1]["@id"], "id2"); 
+            
+            obj = createJson(
               '<ol class="xoxo">' + 
                 '<li>' + 
                   'Subject 1' + 
@@ -96,37 +107,35 @@
                   '</ol>' + 
                 '</li>' + 
               '</ol>');
-            assertEquals("Json matches " + domString, 
-              '{' + 
-                '"ol":{' + 
-                  '"@class":"xoxo",' + 
-                  '"li":[' + 
-                    '{' + 
-                      '"#text":"Subject 1",' + 
-                      '"ol":{' + 
-                        '"li":["subpoint a","subpoint b"]' + 
-                      '}' + 
-                    '},' + 
-                    '{' + 
-                      '"@attr":"value",' + 
-                      '"span":"Subject 2",' + 
-                      '"ol":{' + 
-                        '"@compact":"compact",' + 
-                        '"li":["subpoint c","subpoint d"]' + 
-                      '}' + 
-                    '},' + 
-                    '{' + 
-                      '"span":"Subject 2",' + 
-                      '"ol":{' + 
-                        '"li":["subpoint c","subpoint d"]' + 
-                      '}' + 
-                    '}' + 
-                  ']' + 
-                '}' + 
-              '}', domString);
-
-            domString = createJsonString(
-              '<span class="vevent">' + 
+              assertTrue('Testing ol is not null', obj.ol != null);
+              assertEquals('Testing ol["@class"] is equal to xoxo', obj.ol["@class"], "xoxo");
+              assertTrue('Testing ol.li is not null', obj.ol.li != null);
+              assertTrue('Testing ol.li is an instance of an Array', obj.ol.li instanceof Array);
+              assertEquals('Testing ol.li.length is equal to 3', obj.ol.li.length, 3);
+              assertEquals('Testing ol.li[0]["#text"] is equal to Subject 1', obj.ol.li[0]["#text"], "Subject 1"); 
+              assertTrue('Testing ol.li.[0].ol is not null', obj.ol.li[0].ol != null);
+              assertTrue('Testing ol.li[0].ol.li is not null', obj.ol.li[0].ol.li != null);
+              assertTrue('Testing ol.li[0].ol.li is an instance of Array', obj.ol.li[0].ol.li instanceof Array);
+              assertEquals('Testing ol.li[0].ol.li.length is equal to 2', obj.ol.li[0].ol.li.length, 2);
+              assertEquals('Testing ol.li[0].ol.li.[0] is equal to subpoint a', obj.ol.li[0].ol.li[0], "subpoint a");
+              assertEquals('Testing ol.li[0].ol.li.[1] is equal to subpoint b', obj.ol.li[0].ol.li[1], "subpoint b");
+              assertEquals('Testing ol.li[1]["@attr"] is equal to value', obj.ol.li[1]["@attr"], "value");
+              assertEquals('Testing ol.li[1].span is equal to Subject 2', obj.ol.li[1].span, "Subject 2");
+              assertTrue('Testing ol.li[1].ol is not null', obj.ol.li[1].ol != null);
+              assertEquals('Testing ol.li[1].ol["@compact"]', obj.ol.li[1].ol["@compact"], "compact");
+              assertTrue('Testing ol.li[1].ol.li is not null', obj.ol.li[1].ol.li != null);
+              assertTrue('Testing ol.li[1].ol.li is an instanceof Array', obj.ol.li[1].ol.li instanceof Array);
+              assertEquals('Testing ol.li[1].ol.li[0] equals subpoint c', obj.ol.li[1].ol.li[0], "subpoint c");
+              assertEquals('Testing ol.li[1].ol.li[1] equals subpoint d', obj.ol.li[1].ol.li[1], "subpoint d");
+              assertEquals('Testing old.li[2].span equals Subject 2', obj.ol.li[2].span, "Subject 2");
+              assertTrue('Testing ol.li[2].ol is not null', obj.ol.li[2].ol != null);
+              assertTrue('Testing ol.li[2].ol.li is not null', obj.ol.li[2].ol.li != null);
+              assertTrue('Testing ol.li[2].ol.li is an instance of Array', obj.ol.li[2].ol.li instanceof Array);
+              assertEquals('Testing ol.li[2].ol.li.length is equal to 2', obj.ol.li[2].ol.li.length, 2);
+              assertEquals('Testing ol.li[2].ol.li[0] is equal to subpoint c', obj.ol.li[2].ol.li[0], "subpoint c");
+              assertEquals('Testing ol.li[2].ol.li[1] is equal to subpoint d', obj.ol.li[2].ol.li[1], "subpoint d");
+              
+              obj = createJson('<span class="vevent">' + 
                 '<a class="url" href="http://www.web2con.com/">' + 
                   '<span class="summary">Web 2.0 Conference</span>' + 
                   '<abbr class="dtstart" title="2005-10-05">October 5</abbr>' + 
@@ -134,24 +143,27 @@
                   '<span class="location">Argent Hotel, San Francisco, CA</span>' + 
                 '</a>' + 
               '</span>');
-            assertEquals("Json matches " + domString, 
-              '{' + 
-                '"span":{' + 
-                  '"@class":"vevent",' + 
-                  '"a":{' + 
-                    '"@class":"url",' + 
-                    '"@href":"http://www.web2con.com/",' + 
-                    '"span":[' + 
-                      '{"@class":"summary","#text":"Web 2.0 Conference"},' + 
-                      '{"@class":"location","#text":"Argent Hotel, San Francisco, CA"}' + 
-                    '],' + 
-                    '"abbr":[' + 
-                      '{"@title":"2005-10-05","@class":"dtstart","#text":"October 5"},' + 
-                      '{"@title":"2005-10-08","@class":"dtend","#text":"7"}' + 
-                    ']' + 
-                  '}' + 
-                '}' + 
-              '}', domString);
+              assertTrue('Testing span is not null', obj.span != null);
+              assertEquals('Testing span["@class"] equals vevent', obj.span["@class"], "vevent");
+              assertTrue('Testing span.a is not null', obj.span.a != null);
+              assertEquals('Testing span.a["@class"] equals url', obj.span.a["@class"], "url");
+              assertEquals('Testing span.a["@href"] equals http://www.web2con.com/', obj.span.a["@href"], "http://www.web2con.com/");
+              assertTrue('Testing span.a.span is not null', obj.span.a.span != null);
+              assertTrue('Testing span.a.span is an instance of Array', obj.span.a.span instanceof Array);
+              assertEquals('Testing span.a.span.length equals 2', obj.span.a.span.length, 2);
+              assertEquals('Testing span.a.span[0]["@class"] equals summary', obj.span.a.span[0]["@class"], "summary");
+              assertEquals('Testing span.a.span[0]["#text"] equals Web 2.0 Conference', obj.span.a.span[0]["#text"], "Web 2.0 Conference");
+              assertEquals('Testing span.a.span[1]["@class"] equals location', obj.span.a.span[1]["@class"], "location");
+              assertEquals('Testing span.a.span[1]["#text"] equals Argent Hotel, San Francisco, CA', obj.span.a.span[1]["#text"], "Argent Hotel, San Francisco, CA");
+              assertTrue('Testing span.a.abbr is not null', obj.span.a.abbr != null);
+              assertTrue('Testing span.a.abbr is an instance of Array', obj.span.a.abbr instanceof Array);
+              assertEquals('Testing span.a.abbr.length equals 2', obj.span.a.abbr.length, 2);
+              assertEquals('Testing span.a.abbr[0]["@title"] equals 2005-10-05', obj.span.a.abbr[0]["@title"], "2005-10-05");
+              assertEquals('Testing span.a.abbr[0]["@class"] equals dtstart', obj.span.a.abbr[0]["@class"], "dtstart");
+              assertEquals('Testing span.a.abbr[0]["#text"] equals October 5', obj.span.a.abbr[0]["#text"], "October 5");
+              assertEquals('Testing span.a.abbr[1]["@title"] equals 2005-10-08', obj.span.a.abbr[1]["@title"], "2005-10-08");
+              assertEquals('Testing span.a.abbr[1]["@class"] equals dtend', obj.span.a.abbr[1]["@class"], "dtend");
+              assertEquals('Testing span.a.abbr[1]["#text"] equals 7', obj.span.a.abbr[1]["#text"], "7");
 
             finished();
           }
