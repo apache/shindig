@@ -402,6 +402,15 @@ shindig.Gadget = function(params) {
   }
 };
 
+shindig.Gadget.prototype.setServerBase = function(url) {
+  this.serverBase_ = url;
+}
+
+shindig.Gadget.prototype.getServerBase = function() {
+  return this.serverBase_;
+};
+
+
 shindig.Gadget.prototype.getUserPrefs = function() {
   return this.userPrefs;
 };
@@ -479,8 +488,11 @@ shindig.Gadget.prototype.getAdditionalParams = function() {
 
 shindig.BaseIfrGadget = function(opt_params) {
   shindig.Gadget.call(this, opt_params);
+  
   if(!this.serverBase_){
 	  this.serverBase_ = '/gadgets/'; // default gadget server
+  } else if(this.serverBase_.indexOf('/gadgets')<0) {
+	  this.serverBase_ += '/gadgets/';
   }
   this.queryIfrGadgetType_();
 };
@@ -526,13 +538,7 @@ shindig.BaseIfrGadget.prototype.getUserPrefsDialogContent = function(continuatio
       this.cssClassGadgetUserPrefsDialog + '"></div>');
 };
 
-shindig.BaseIfrGadget.prototype.setServerBase = function(url) {
-  this.serverBase_ = url;
-};
 
-shindig.BaseIfrGadget.prototype.getServerBase = function() {
-  return this.serverBase_;
-};
 
 shindig.BaseIfrGadget.prototype.getMainContent = function(continuation) {
   // proper sub-class has not been mixed-in yet
@@ -962,6 +968,17 @@ shindig.IfrContainer.prototype.setParentUrl = function(url) {
 shindig.IfrContainer.prototype.renderGadget = function(gadget) {
   var chrome = this.layoutManager.getGadgetChrome(gadget);
   gadget.render(chrome);
+};
+
+function init(config) {
+    var sbase = config["shindig-container"];
+    shindig.Gadget.prototype.setServerBase(sbase.serverBase);
+    
+};
+
+// We do run this in the container mode in the new common container
+if (gadgets.config) {
+  gadgets.config.register("shindig-container", null, init);
 };
 
 /**

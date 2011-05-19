@@ -47,7 +47,7 @@ public class JsonContainerConfig extends ExpressionContainerConfig {
 
   // Used by tests
   public JsonContainerConfig(String containers, Expressions expressions) throws ContainerConfigException {
-    this(containers, "localhost", "8080", expressions);
+    this(containers, "localhost", "8080", "",expressions);
   }
   /**
    * Creates a new configuration from files.
@@ -57,10 +57,11 @@ public class JsonContainerConfig extends ExpressionContainerConfig {
   public JsonContainerConfig(@Named("shindig.containers.default") String containers,
                              @Nullable @Named("shindig.host") String host,
                              @Nullable @Named("shindig.port") String port,
+                             @Nullable @Named("shindig.contextroot") String contextRoot,                           
                              Expressions expressions)
       throws ContainerConfigException {
     super(expressions);
-    JsonContainerConfigLoader.getTransactionFromFile(containers, host, port, this).commit();
+    JsonContainerConfigLoader.getTransactionFromFile(containers, host, port, contextRoot, this).commit();
   }
 
   /**

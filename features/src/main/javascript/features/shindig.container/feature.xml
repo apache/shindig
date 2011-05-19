@@ -25,6 +25,7 @@ A map of view names to view attributes. Examples:
 -->
   <name>shindig-container</name>
   <dependency>globals</dependency>
+  <dependency>core.config</dependency>
   <dependency>rpc</dependency>
   <dependency>osapi</dependency>
   <dependency>shindig.uri.ext</dependency>

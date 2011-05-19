@@ -62,6 +62,7 @@ public class JsonContainerConfigLoader {
   public static final char FILE_SEPARATOR = ',';
   public static final String SERVER_PORT = "SERVER_PORT";
   public static final String SERVER_HOST = "SERVER_HOST";
+  public static final String CONTEXT_ROOT = "CONTEXT_ROOT";
 
   private JsonContainerConfigLoader() {
   }
@@ -74,15 +75,16 @@ public class JsonContainerConfigLoader {
    *        the container configurations from.
    * @param host The hostname where Shindig is running.
    * @param port The port number where Shindig is receiving requests.
+   * @param contextRoot contextRoot where Shindig module is deployed
    * @param containerConfig The container configuration to add the contents of
    *        the file to.
    * @return A transaction to add the new containers to the configuration.
    * @throws ContainerConfigException If there was a problem reading the files.
    */
   public static Transaction getTransactionFromFile(
-      String containers, String host, String port, ContainerConfig containerConfig)
+      String containers, String host, String port, String contextRoot,ContainerConfig containerConfig)
       throws ContainerConfigException {
-    return addToTransactionFromFile(containers, host, port, containerConfig.newTransaction());
+    return addToTransactionFromFile(containers, host, port, contextRoot,containerConfig.newTransaction());
   }
 
   /**
@@ -97,10 +99,10 @@ public class JsonContainerConfigLoader {
    * @throws ContainerConfigException If there was a problem reading the files.
    */
   public static Transaction addToTransactionFromFile(
-      String containers, String host, String port, Transaction transaction)
+      String containers, String host, String port, String contextRoot, Transaction transaction)
       throws ContainerConfigException {
     List<Map<String, Object>> config = loadContainers(containers);
-    addHostAndPortToDefaultContainer(config, host, port);
+    addHostAndPortToDefaultContainer(config, host, port,contextRoot);
     addContainersToTransaction(transaction, config);
     return transaction;
   }
@@ -272,7 +274,7 @@ public class JsonContainerConfigLoader {
   }
 
   private static void addHostAndPortToDefaultContainer(
-      List<Map<String, Object>> config, String host, String port) {
+      List<Map<String, Object>> config, String host, String port,String contextRoot) {
     for (int i = 0, j = config.size(); i < j; ++i) {
       Map<String, Object> container = config.get(i);
       @SuppressWarnings("unchecked")
@@ -282,10 +284,13 @@ public class JsonContainerConfigLoader {
         newContainer.putAll(container);
         newContainer.put(SERVER_PORT, port);
         newContainer.put(SERVER_HOST, host);
+        newContainer.put(CONTEXT_ROOT,contextRoot);
         config.set(i, Collections.unmodifiableMap(newContainer));
       }
     }
   }
+  
+ 
 
   private static void addContainersToTransaction(
       Transaction transaction, List<Map<String, Object>> config) {

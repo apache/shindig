@@ -37,7 +37,7 @@ $(function() {
 	// ID used to associate gadget site
 	var curId = 0;
 	
-	//  Load the defaultl collections stored and update the options with the collection name
+	//  Load the default collections stored and update the options with the collection name
 	$.ajax({
 			url: './gadgetCollections.json',
 			dataType: 'json',
@@ -45,8 +45,8 @@ $(function() {
 			  $.each(data.collections, function(i,data){
 				 var optionVal = [];
 				 $.each(data.apps, function(i,data){
-				   if (data.url.indexOf("http") < 0){
-				     optionVal.push(location.protocol+"//"+location.host+data.url);
+				   if (data.url.indexOf("http") < 0 && data.url.indexOf("/") == 0 ){
+					 optionVal.push(urlBase+data.url);
 				   }else{
 					 optionVal.push(data.url);
 				   }

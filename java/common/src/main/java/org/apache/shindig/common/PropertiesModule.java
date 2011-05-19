@@ -57,10 +57,20 @@ public class PropertiesModule extends AbstractModule {
 
   @Override
   protected void configure() {
+	this.binder().bindConstant().annotatedWith(Names.named("shindig.contextroot")).to(getContextRoot());
     Names.bindProperties(this.binder(), getProperties());
     // This could be generalized to inject any system property...
     this.binder().bindConstant().annotatedWith(Names.named("shindig.port")).to(getServerPort());
     this.binder().bindConstant().annotatedWith(Names.named("shindig.host")).to(getServerHostname());
+  }
+
+  /**
+   * Should return the context root where the current web module is deployed with.  Useful for testing and working out of the box configs.
+   * If not set uses fixed value of "".
+   * @return an context path as a string.
+   */
+  private String getContextRoot() {
+	  return System.getProperty("shindig.contextroot") != null ? System.getProperty("shindig.contextroot") : "";
   }
 
   /**
@@ -94,12 +104,23 @@ public class PropertiesModule extends AbstractModule {
       return properties;
   }
 
+  
   private Properties readPropertyFile(String propertyFile) {
     Properties properties = new Properties();
     InputStream is = null;
+    String contextRoot = getContextRoot();
     try {
       is = ResourceLoader.openResource(propertyFile);
       properties.load(is);
+      
+      String value = null;
+      for(Object key : properties.keySet()){
+        value = (String)properties.get((String)key);
+    	if (value != null && value.indexOf("%contextRoot%") >=0 ){
+          properties.put(key, value.replace(("%contextRoot%"),contextRoot));
+    	}
+      }
+
     } catch (IOException e) {
       throw new CreationException(Arrays.asList(
           new Message("Unable to load properties: " + propertyFile)));

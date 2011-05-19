@@ -21,11 +21,13 @@ package org.apache.shindig.common.servlet;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 
+import com.google.inject.Binder;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.Singleton;
 import com.google.inject.Stage;
+import com.google.inject.name.Names;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.List;
@@ -48,12 +50,15 @@ public class GuiceServletContextListener implements ServletContextListener {
   // HNN- constant name matched system.properties <contextparam> specified in the web.xml
   private static final String SYSTEM_PROPERTIES = "system.properties";
 
+  private String contextRoot = "";
   public void contextInitialized(ServletContextEvent event) {
     ServletContext context = event.getServletContext();
-    //HNN setting all system.properties specified in the web.xml
+	
+
     setSystemProperties(context);     
     String moduleNames = context.getInitParameter(MODULES_ATTRIBUTE);
     List<Module> modules = Lists.newLinkedList();
+    
     if (moduleNames != null) {
       for (String moduleName : Splitter.on(':').split(moduleNames)) {
         try {
@@ -99,6 +104,13 @@ public class GuiceServletContextListener implements ServletContextListener {
    * @param context the ServletContext
    */
   private void setSystemProperties(ServletContext context){
+	try{
+	  contextRoot = context.getContextPath();
+	}
+	catch(Exception e){
+	  contextRoot= "";
+	}
+	System.setProperty("shindig.contextroot", contextRoot);
     String systemProperties = context.getInitParameter(SYSTEM_PROPERTIES);
     String key=null;
     String value=null;

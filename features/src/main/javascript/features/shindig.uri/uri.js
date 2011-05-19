@@ -227,7 +227,7 @@ shindig.uri = (function() {
       // Setters
       setSchema: function(schema) { schema_ = schema; return bundle; },
       setAuthority: function(authority) { authority_ = authority; return bundle; },
-      setPath: function(path) { path_ = (path[0] === '/' ? '' : '/') + path; return bundle; },
+      setPath: function(path) { if (typeof path !== 'undefined' && path != null) { path_ = (path[0] === '/' ? '' : '/') + path; } return bundle; },
       setQuery: function(query) { qparms_ = null; query_ = stripPrefix(query, '?'); return bundle; },
       setFragment: function(fragment) { fparms_ = null; fragment_ = stripPrefix(fragment, '#'); return bundle; },
       setQP: setQP,

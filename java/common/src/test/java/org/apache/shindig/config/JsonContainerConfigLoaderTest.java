@@ -84,7 +84,7 @@ public class JsonContainerConfigLoaderTest {
 
   private void createConfigForTest(String containers) throws ContainerConfigException {
     JsonContainerConfigLoader
-        .getTransactionFromFile(containers, "localhost", "8080", config).commit();
+        .getTransactionFromFile(containers, "localhost", "8080", "",config).commit();
   }
   
   @Before

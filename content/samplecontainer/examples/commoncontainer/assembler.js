@@ -17,8 +17,12 @@
  * under the License.
 */
 
+// url base should be <host>:<port>//<contextRoot>
+var urlBase = location.href.substr(0,location.href.indexOf("/samplecontainer/examples/commoncontainer/"));
+var contextRoot = urlBase.substr(urlBase.indexOf(location.port)+location.port.length);
+	
 var testConfig =  testConfig || {};
-testConfig[osapi.container.ServiceConfig.API_PATH] = '/rpc';	
+testConfig[osapi.container.ServiceConfig.API_PATH] = contextRoot+'/rpc';	
 testConfig[osapi.container.ContainerConfig.RENDER_DEBUG] = "1";
 
 //  Create the new CommonContainer 

@@ -82,6 +82,10 @@ osapi.container.GadgetHolder = function(siteId, el) {
   this.onConstructed();
 };
 
+/**
+ * Url points to the rpc_relay.html which allows cross-domain communication between a gadget and container
+ */
+osapi.container.GadgetHolder.prototype.relayPath_ = null;
 
 /**
  * Callback that occurs after instantiation/construction of this. Override to
@@ -204,7 +208,8 @@ osapi.container.GadgetHolder.prototype.doNormalIframeHtml_ = function() {
   var relayUri = shindig.uri()
       .setSchema(iframeUri.getSchema())
       .setAuthority(iframeUri.getAuthority())
-      .setPath('/gadgets/files/container/rpc_relay.html');
+      //.setPath('/test1/gadgets/files/container/rpc_relay.html');
+      .setPath(this.relayPath_);
   gadgets.rpc.setupReceiver(this.iframeId_, relayUri.toString(),
       iframeUri.getFP('rpctoken'));
 };
@@ -244,7 +249,8 @@ osapi.container.GadgetHolder.prototype.doOaaIframeHtml_ = function() {
         IframeContainer: {
           parent: this.el_,
           uri: this.getIframeUrl_(),
-          tunnelURI: shindig.uri('/gadgets/' + '../container/rpc_relay.html').resolve(shindig.uri(window.location.href)),
+          //tunnelURI: shindig.uri('/test1/gadgets/' + '../container/rpc_relay.html').resolve(shindig.uri(window.location.href)),
+          tunnelURI: shindig.uri(this.relayPath_).resolve(shindig.uri(window.location.href)),
           iframeAttrs: iframeParams
         }
       }
@@ -373,4 +379,17 @@ osapi.container.GadgetHolder.prototype.updateUserPrefParams_ = function(uri) {
       uri.setExistingP(upKey, upValue);
     }
   }
+};
+
+function init(config) {
+	if (config.container){
+		var rpath = config["container"]["relayPath"];
+		osapi.container.GadgetHolder.prototype.relayPath_ = rpath;
+	}
+};
+
+// We do run this in the container mode in the new common container
+if (gadgets.config) {
+  gadgets.config.register("container", null, init);
+
 };
