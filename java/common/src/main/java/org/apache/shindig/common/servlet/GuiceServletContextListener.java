@@ -50,7 +50,6 @@ public class GuiceServletContextListener implements ServletContextListener {
   // HNN- constant name matched system.properties <contextparam> specified in the web.xml
   private static final String SYSTEM_PROPERTIES = "system.properties";
 
-  private String contextRoot = "";
   public void contextInitialized(ServletContextEvent event) {
     ServletContext context = event.getServletContext();
 	
@@ -104,13 +103,13 @@ public class GuiceServletContextListener implements ServletContextListener {
    * @param context the ServletContext
    */
   private void setSystemProperties(ServletContext context){
-	try{
-	  contextRoot = context.getContextPath();
-	}
-	catch(Exception e){
-	  contextRoot= "";
-	}
-	System.setProperty("shindig.contextroot", contextRoot);
+    String contextRoot = "";
+    try {
+      contextRoot = context.getContextPath();
+    } catch (Exception e) {
+      contextRoot = "";
+    }
+    System.setProperty("shindig.contextroot", contextRoot);
     String systemProperties = context.getInitParameter(SYSTEM_PROPERTIES);
     String key=null;
     String value=null;

@@ -97,11 +97,11 @@ public class PropertiesModule extends AbstractModule {
   }
 
   protected static String getDefaultPropertiesPath() {
-      return DEFAULT_PROPERTIES;
+    return DEFAULT_PROPERTIES;
   }
 
   protected Properties getProperties() {
-      return properties;
+    return properties;
   }
 
   
