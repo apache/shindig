@@ -19,26 +19,13 @@
 <feature>
   <name>core.config.base</name>
   <dependency>globals</dependency>
-  <gadget>
+  <all>
     <script src="config.js"/>
-    <script src="configgadget.js"/>
     <api>
       <exports type="js">gadgets.config.register</exports>
       <exports type="js">gadgets.config.get</exports>
       <exports type="js">gadgets.config.init</exports>
       <exports type="js">gadgets.config.update</exports>      
-      <exports type="js">gadgets.config.isGadget</exports>
     </api>
-  </gadget>
-  <container>
-    <script src="config.js"/>
-    <script src="configcontainer.js"/>
-    <api>
-      <exports type="js">gadgets.config.register</exports>
-      <exports type="js">gadgets.config.get</exports>
-      <exports type="js">gadgets.config.init</exports>
-      <exports type="js">gadgets.config.update</exports>
-      <exports type="js">gadgets.config.isContainer</exports>
-    </api>
-  </container>
+  </all>
 </feature>
