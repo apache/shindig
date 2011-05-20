@@ -102,6 +102,13 @@
         </target>
         <title>John posted a new video to his album.</title>
         <verb>post</verb>
+        <openSocial>
+          <embed>
+            <context>1234</context>
+            <gadget>http://example.org/albumViewer.xml</gadget>
+            <url>http://example.org/album/</url>
+          </embed>
+        </openSocial>
       </activityEntry>
     </content>
   </entry>

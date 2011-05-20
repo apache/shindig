@@ -44,6 +44,13 @@
     <upstreamDuplicate>upstream2</upstreamDuplicate>
     <url>http://example.org/album/my_fluffy_cat.jpg</url>
   </object>
+  <openSocial>
+    <embed>
+      <context>1234</context>
+      <gadget>http://example.org/albumViewer.xml</gadget>
+      <url>http://example.org/album/</url>
+    </embed>
+  </openSocial>
   <provider>
 
     <url>http://example.org/activity-stream</url>

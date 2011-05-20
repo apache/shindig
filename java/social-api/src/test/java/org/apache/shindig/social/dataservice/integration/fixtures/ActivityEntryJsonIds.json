@@ -77,6 +77,13 @@
             "width": 250,
             "height": 250
           }
+        },
+        "openSocial":{
+          "embed":{
+            "gadget":"http://example.org/albumViewer.xml",
+            "context":"1234",
+            "url":"http://example.org/album/"
+          }
         }
       }
    ],

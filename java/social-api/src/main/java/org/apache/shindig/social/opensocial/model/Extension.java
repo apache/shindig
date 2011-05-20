@@ -11,31 +11,47 @@ import com.google.inject.ImplementedBy;
 @ImplementedBy(ExtensionImpl.class)
 @Exportablebean
 public interface Extension {
-	
-	public static enum Field {
-	  ; // No fields to add
-	  
-		/**
-		 * The name of the JSON element.
-		 */
-		private final String jsonString;
 
-		/**
-		 * Constructs the field base for the JSON element.
-		 * 
-		 * @param jsonString the name of the element
-		 */
-		private Field(String jsonString) {
-			this.jsonString = jsonString;
-		}
+  public static enum Field {
+    EMBED("embed"); // Embedded Experiences
 
-		/**
-		 * Returns the name of the JSON element.
-		 * 
-		 * @return String the name of the JSON element
-		 */
-		public String toString() {
-			return jsonString;
-		}
-	}
+    /**
+     * The name of the JSON element.
+     */
+    private final String jsonString;
+
+    /**
+     * Constructs the field base for the JSON element.
+     * 
+     * @param jsonString
+     *          the name of the element
+     */
+    private Field(String jsonString) {
+      this.jsonString = jsonString;
+    }
+
+    /**
+     * Returns the name of the JSON element.
+     * 
+     * @return String the name of the JSON element
+     */
+    public String toString() {
+      return jsonString;
+    }
+  }
+
+  /**
+   * Gets the embedded experience for this activity.
+   * 
+   * @return the embedded experience for this activity
+   */
+  EmbeddedExperience getEmbed();
+
+  /**
+   * Sets the emnbedded experience for this activity.
+   * 
+   * @param embed
+   *          the embedded experience to set
+   */
+  void setEmbed(EmbeddedExperience embed);
 }
