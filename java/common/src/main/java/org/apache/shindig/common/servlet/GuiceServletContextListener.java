@@ -52,8 +52,6 @@ public class GuiceServletContextListener implements ServletContextListener {
 
   public void contextInitialized(ServletContextEvent event) {
     ServletContext context = event.getServletContext();
-	
-
     setSystemProperties(context);     
     String moduleNames = context.getInitParameter(MODULES_ATTRIBUTE);
     List<Module> modules = Lists.newLinkedList();
@@ -103,12 +101,7 @@ public class GuiceServletContextListener implements ServletContextListener {
    * @param context the ServletContext
    */
   private void setSystemProperties(ServletContext context){
-    String contextRoot = "";
-    try {
-      contextRoot = context.getContextPath();
-    } catch (Exception e) {
-      contextRoot = "";
-    }
+    String contextRoot = context.getContextPath();
     System.setProperty("shindig.contextroot", contextRoot);
     String systemProperties = context.getInitParameter(SYSTEM_PROPERTIES);
     String key=null;
