@@ -37,8 +37,12 @@ osapi._registerMethod = function(method, transport) {
   }
   var basename = parts[parts.length - 1];
   if (last[basename]) {
-    gadgets.warn('Skipping duplicate osapi method definition '
-                 + method + ' on transport ' + transport['name']);
+    if (!last['__dupwarn']) {
+      gadgets.warn('Skipping duplicate osapi method definition '
+                   + method + ' on transport ' + transport['name'] +
+                   '; others may exist, but suppressing warnings');
+    }
+    last['__dupwarn'] = true;
     return;
   }
 
