@@ -21,9 +21,11 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 
+import org.apache.shindig.common.Nullable;
 import org.apache.shindig.common.logging.i18n.MessageKeys;
 import org.apache.shindig.common.servlet.InjectedFilter;
 
+import com.google.inject.name.Named;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -53,17 +55,20 @@ import javax.servlet.http.HttpServletResponse;
  * additional handler.
  */
 public class AuthenticationServletFilter extends InjectedFilter {
-  public static final String AUTH_TYPE_OAUTH = "OAuth";
-
-  // At some point change this to a container specific realm
-  private static final String REALM = "shindig";
- 
-  private List<AuthenticationHandler> handlers;
+  public static final String WWW_AUTHENTICATE_HEADER = "WWW-Authenticate";
 
   //class name for logging purpose
   private static final String CLASSNAME = AuthenticationServletFilter.class.getName();
   private static final Logger LOG = Logger.getLogger(CLASSNAME, MessageKeys.MESSAGES);
-  
+
+  private String realm = "shindig";
+  private List<AuthenticationHandler> handlers;
+
+  @Inject(optional = true)
+  public void setAuthenticationRealm(@Named("shindig.authentication.realm") String realm) {
+    this.realm = realm;
+  }
+
   @Inject
   public void setAuthenticationHandlers(List<AuthenticationHandler> handlers) {
     this.handlers = handlers;
@@ -71,18 +76,19 @@ public class AuthenticationServletFilter extends InjectedFilter {
 
   public void destroy() { }
 
-  public void doFilter(ServletRequest request, ServletResponse response,
-      FilterChain chain) throws IOException, ServletException {
-
+  public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+      throws IOException, ServletException {
     if (!(request instanceof HttpServletRequest && response instanceof HttpServletResponse)) {
       throw new ServletException("Auth filter can only handle HTTP");
     }
 
     HttpServletRequest req = (HttpServletRequest) request;
     HttpServletResponse resp = (HttpServletResponse) response;
+    String authHeader = null;
 
     try {
       for (AuthenticationHandler handler : handlers) {
+        authHeader = handler.getWWWAuthenticateHeader(getRealm(req));
         SecurityToken token = handler.getSecurityTokenFromRequest(req);
         if (token != null) {
           AuthInfoUtil.setAuthTypeForRequest(req, handler.getName());
@@ -90,10 +96,8 @@ public class AuthenticationServletFilter extends InjectedFilter {
           callChain(chain, req, resp);
           return;
         } else {
-          String authHeader = handler.getWWWAuthenticateHeader(REALM);
-          if (authHeader != null) {
-              resp.addHeader("WWW-Authenticate", authHeader);
-          }
+          // Set auth header
+          setAuthHeader(authHeader, resp);
         }
       }
 
@@ -105,7 +109,7 @@ public class AuthenticationServletFilter extends InjectedFilter {
       if (LOG.isLoggable(Level.INFO)) {
         LOG.logp(Level.INFO, CLASSNAME, "doFilter", MessageKeys.ERROR_PARSING_SECURE_TOKEN, cause);
       }
-           
+
       if (iae.getAdditionalHeaders() != null) {
         for (Map.Entry<String,String> entry : iae.getAdditionalHeaders().entrySet()) {
           resp.addHeader(entry.getKey(), entry.getValue());
@@ -114,11 +118,28 @@ public class AuthenticationServletFilter extends InjectedFilter {
       if (iae.getRedirect() != null) {
         resp.sendRedirect(iae.getRedirect());
       } else {
+        // Set auth header
+        setAuthHeader(authHeader, resp);
+
         // For now append the cause message if set, this allows us to send any underlying oauth errors
         String message = (cause==null) ? iae.getMessage() : iae.getMessage() + cause.getMessage();
 
         resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, message);
       }
+    }
+  }
+
+  /**
+   * Override this to return container server specific realm.
+   * @return The authentication realm for this server.
+   */
+  protected String getRealm(HttpServletRequest request) {
+    return realm;
+  }
+
+  private void setAuthHeader(@Nullable String authHeader, HttpServletResponse response) {
+    if (authHeader != null) {
+      response.addHeader(WWW_AUTHENTICATE_HEADER, authHeader);
     }
   }
 
@@ -132,11 +153,9 @@ public class AuthenticationServletFilter extends InjectedFilter {
   }
 
   private static class StashedBodyRequestwrapper extends HttpServletRequestWrapper {
-
     final InputStream rawStream;
     ServletInputStream stream;
     BufferedReader reader;
-
 
     StashedBodyRequestwrapper(HttpServletRequest wrapped) {
       super(wrapped);
@@ -146,7 +165,8 @@ public class AuthenticationServletFilter extends InjectedFilter {
 
     @Override
     public ServletInputStream getInputStream() throws IOException {
-      Preconditions.checkState(reader == null, "The methods getInputStream() and getReader() are mutually exclusive.");
+      Preconditions.checkState(reader == null,
+          "The methods getInputStream() and getReader() are mutually exclusive.");
 
       if (stream == null) {
         stream = new ServletInputStream() {
@@ -160,7 +180,8 @@ public class AuthenticationServletFilter extends InjectedFilter {
 
     @Override
     public BufferedReader getReader() throws IOException {
-      Preconditions.checkState(stream == null, "The methods getInputStream() and getReader() are mutually exclusive.");
+      Preconditions.checkState(stream == null,
+          "The methods getInputStream() and getReader() are mutually exclusive.");
 
       if (reader == null) {
         Charset charset = Charset.forName(getCharacterEncoding());
