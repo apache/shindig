@@ -22,8 +22,8 @@ import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.getCurrentArguments;
 import static org.easymock.EasyMock.isA;
 
-import com.google.caja.util.Lists;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.GadgetException;

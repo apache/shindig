@@ -71,7 +71,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.google.caja.util.Join;
+import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -372,7 +372,7 @@ public class RenderingGadgetRewriterTest {
       @Override
       public String getParameter(String name) {
         if (name.equals("libs")) {
-          return Join.join(":", libs);
+          return Joiner.on(':').join(libs);
         }
         return null;
       }
@@ -473,7 +473,7 @@ public class RenderingGadgetRewriterTest {
       @Override
       public String getParameter(String name) {
         if (name.equals("libs")) {
-          return Join.join(":", libs);
+          return Joiner.on(':').join(libs);
         }
         return null;
       }
@@ -1184,7 +1184,7 @@ public class RenderingGadgetRewriterTest {
 
   private static class FakeJsUriManager implements JsUriManager {
     public Uri makeExternJsUri(JsUri ctx) {
-      return Uri.parse("/js/" + Join.join(":", ctx.getLibs()));
+      return Uri.parse("/js/" + Joiner.on(':').join(ctx.getLibs()));
     }
 
     public JsUri processExternJsUri(Uri uri) {

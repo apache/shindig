@@ -28,6 +28,7 @@ import java.util.logging.Logger;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
@@ -75,7 +76,6 @@ import com.google.caja.render.JsMinimalPrinter;
 import com.google.caja.render.JsPrettyPrinter;
 import com.google.caja.reporting.MessageContext;
 import com.google.caja.reporting.RenderContext;
-import com.google.caja.util.Lists;
 
 /**
  * Service that interfaces with the system to provide information about gadgets.
@@ -280,7 +280,7 @@ public class GadgetsHandlerService {
   private List<GadgetsHandlerApi.Message> convertMessages(
       List<com.google.caja.reporting.Message> msgs,
       final MessageContext mc) {
-    List<GadgetsHandlerApi.Message> result = Lists.newArrayList(msgs.size());
+    List<GadgetsHandlerApi.Message> result = Lists.newArrayListWithExpectedSize(msgs.size());
     for (final com.google.caja.reporting.Message m : msgs) {
       MessageImpl msg = new MessageImpl(m.getMessageType().name(),
           m.format(mc), convertMessageLevel(m.getMessageLevel().name()));
