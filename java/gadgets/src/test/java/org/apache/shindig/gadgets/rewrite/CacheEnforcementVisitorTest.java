@@ -90,6 +90,7 @@ public class CacheEnforcementVisitorTest extends DomWalkerTestBase {
         null, null, null, null, CacheEnforcementVisitor.Tags.ALL_RESOURCES);
     HttpRequest newRequest = visitor.createNewHttpRequest(gadget, IMG_URL);
     assertEquals(CONTAINER, newRequest.getContainer());
+    assertEquals("1", newRequest.getParam(CacheEnforcementVisitor.CACHE_ENFORCEMENT_FETCH_PARAM));
     assertEquals(uri, newRequest.getGadget());
   }
 

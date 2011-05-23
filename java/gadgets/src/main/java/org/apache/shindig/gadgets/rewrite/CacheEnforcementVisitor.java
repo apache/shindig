@@ -58,6 +58,7 @@ import java.util.logging.Logger;
 public class CacheEnforcementVisitor extends ResourceMutateVisitor {
 
   private static final Logger logger = Logger.getLogger(CacheEnforcementVisitor.class.getName());
+  public static final String CACHE_ENFORCEMENT_FETCH_PARAM = "X-shindig-cache-enforcement-fetch";
   private final HttpCache cache;
   private final RequestPipeline requestPipeline;
   private final Executor executor;
@@ -92,6 +93,7 @@ public class CacheEnforcementVisitor extends ResourceMutateVisitor {
       if (context != null) {
         request.setContainer(context.getContainer());
       }
+      request.setParam(CACHE_ENFORCEMENT_FETCH_PARAM, "1");
     }
     return request;
   }
