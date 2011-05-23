@@ -545,10 +545,10 @@ public class DefaultProxyUriManagerTest extends UriManagerTestBase {
   private ProxyUriManager.Versioner makeVersioner(UriStatus status, String... versions) {
     ProxyUriManager.Versioner versioner = createMock(ProxyUriManager.Versioner.class);
     if (versions.length > 0) {
-      expect(versioner.version(isA(List.class), eq(CONTAINER)))
+      expect(versioner.version(isA(List.class), eq(CONTAINER), isA(List.class)))
           .andReturn(Lists.newArrayList(versions)).anyTimes();
     } else {
-      expect(versioner.version(isA(List.class), eq(CONTAINER)))
+      expect(versioner.version(isA(List.class), eq(CONTAINER), isA(List.class)))
           .andReturn(null).anyTimes();
     }
     expect(versioner.validate(isA(Uri.class), eq(CONTAINER), isA(String.class)))

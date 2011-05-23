@@ -241,16 +241,18 @@ public interface ProxyUriManager {
    * @return Status of the Uri passed in
    */
   ProxyUri process(Uri uri) throws GadgetException;
-  
+                                                                  
   public interface Versioner {
     /**
      * Generates a version for each of the provided resources.
      * @param resources Resources to version.
      * @param container Container making the request
+     * @param resourceTags Index-correlated list of html tags, one per resouceUris. Any older
+     * implementations can just ignore.
      * @return Index-correlated list of version strings
      */
-    List<String> version(List<Uri> resources, String container);
-    
+    List<String> version(List<Uri> resources, String container, List<String> resourceTags);
+
     /**
      * Validate the version of the resource.
      * @param resource Uri of a proxied resource

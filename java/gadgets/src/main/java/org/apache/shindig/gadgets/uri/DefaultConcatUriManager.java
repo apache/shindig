@@ -100,7 +100,6 @@ public class DefaultConcatUriManager implements ConcatUriManager {
     for (ConcatUri ctx : resourceUris) {
       concatUris.add(makeConcatUri(ctx, isAdjacent, container));
     }
-
     return concatUris;
   }
 
@@ -146,7 +145,8 @@ public class DefaultConcatUriManager implements ConcatUriManager {
       if (uriBuilder.toString().length() > injectedMaxUrlLength) {
         uriBuilder.removeQueryParameter(i.toString());
 
-        addVersionAndSplitParam(uriBuilder, splitParam, doSplit, batchUris, container);
+        addVersionAndSplitParam(uriBuilder, splitParam, doSplit, batchUris, container,
+            ctx.getType());
         uris.add(uriBuilder.toUri());
 
         uriBuilder = makeUriBuilder(ctx, concatHost, concatPath);
@@ -159,7 +159,7 @@ public class DefaultConcatUriManager implements ConcatUriManager {
     }
 
     if (batchUris != null && uriBuilder != ctx.makeQueryParams(null, null)) {
-      addVersionAndSplitParam(uriBuilder, splitParam, doSplit, batchUris, container);
+      addVersionAndSplitParam(uriBuilder, splitParam, doSplit, batchUris, container, ctx.getType());
       uris.add(uriBuilder.toUri());
     }
 
@@ -170,7 +170,7 @@ public class DefaultConcatUriManager implements ConcatUriManager {
   }
 
   private void addVersionAndSplitParam(UriBuilder uriBuilder, String splitParam, boolean doSplit,
-                                       List<Uri> batchUris, String container) {
+                                       List<Uri> batchUris, String container, Type type) {
     // HashCode is used to differentiate splitParam paramter across ConcatUris
     // within single page/url. This value is appended to the splitParam value which
     // is recieved from config container.
@@ -179,12 +179,14 @@ public class DefaultConcatUriManager implements ConcatUriManager {
       uriBuilder.addQueryParameter(Param.JSON.getKey(),
           (splitParam + String.valueOf(Math.abs(hashCode))));
     }
-    
+
     if (versioner != null) {
       List<String> versions = null;
       List<List<Uri>> batches = Lists.newArrayList();
+      List<String> resourceTags = Lists.newArrayList();
       batches.add(batchUris);
-      versions = versioner.version(batches, container);
+      resourceTags.add(type.getTagName().toLowerCase());
+      versions = versioner.version(batches, container, resourceTags);
       if (versions != null && versions.size() == 1) {
         String version = versions.get(0);
         if (version != null) {

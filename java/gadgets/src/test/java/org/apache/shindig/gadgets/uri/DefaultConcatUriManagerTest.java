@@ -594,7 +594,7 @@ public class DefaultConcatUriManagerTest extends UriManagerTestBase {
   @SuppressWarnings("unchecked")
   private ConcatUriManager.Versioner makeVersioner(UriStatus status, String... versions) {
     ConcatUriManager.Versioner versioner = createMock(ConcatUriManager.Versioner.class);
-    expect(versioner.version(isA(List.class), eq(CONTAINER)))
+    expect(versioner.version(isA(List.class), eq(CONTAINER), isA(List.class)))
         .andReturn(ImmutableList.copyOf(versions)).anyTimes();
     expect(versioner.validate(isA(List.class), eq(CONTAINER), isA(String.class)))
         .andReturn(status).anyTimes();

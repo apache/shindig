@@ -197,9 +197,13 @@ public interface ConcatUriManager {
      * Generates a version for each of the provided resources.
      * @param resourceUris List of resource "batches" to version.
      * @param container Container making the request
+     * @param resourceTags Index-correlated list of html tags, one per list of resouceUris as only
+     * similar tags can be concat. Each entry in resourceTags corresponds to html tag of resources
+     * uris. Any older implementations can just ignore.
      * @return Index-correlated list of version strings, one per input.
      */
-    List<String> version(List<List<Uri>> resourceUris, String container);
+    List<String> version(List<List<Uri>> resourceUris, String container,
+                         List<String> resourceTags);
     
     /**
      * Validate the version of the resource list.

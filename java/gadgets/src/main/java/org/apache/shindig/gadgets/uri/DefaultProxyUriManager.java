@@ -98,9 +98,11 @@ public class DefaultProxyUriManager implements ProxyUriManager {
     }
 
     List<Uri> resourceUris = Lists.newArrayListWithCapacity(resources.size());
+    List<String> resourceTags = Lists.newArrayListWithCapacity(resources.size());
 
     for (ProxyUri puc : resources) {
       resourceUris.add(puc.getResource());
+      resourceTags.add(puc.getHtmlTagContext());
     }
 
     Map<Uri, String> versions;
@@ -108,7 +110,8 @@ public class DefaultProxyUriManager implements ProxyUriManager {
       versions = Collections.emptyMap();
     } else {
       versions = Maps.newHashMapWithExpectedSize(resources.size());
-      List<String> versionList = versioner.version(resourceUris, resources.get(0).getContainer());
+      List<String> versionList = versioner.version(resourceUris, resources.get(0).getContainer(),
+          resourceTags);
       if (versionList != null && versionList.size() == resources.size()) {
         // This should always be the case.
         // Should we error if not, or just WARNING?
