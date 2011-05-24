@@ -18,6 +18,7 @@
 package org.apache.shindig.gadgets.config;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 
@@ -32,6 +33,7 @@ public class DefaultConfigProcessor implements ConfigProcessor {
   static final String GADGETS_FEATURES_KEY = "gadgets.features";
 
   private final Map<String, ConfigContributor> featureContributors;
+  private final List<ConfigContributor> globalContributors;
   private final ContainerConfig containerConfig;
   
   @Inject
@@ -39,14 +41,26 @@ public class DefaultConfigProcessor implements ConfigProcessor {
       Map<String, ConfigContributor> featureContributors,
       ContainerConfig containerConfig) {
     this.featureContributors = featureContributors;
+    this.globalContributors = Lists.newLinkedList();
     this.containerConfig = containerConfig;
+  }
+  
+  @Inject(optional = true)
+  public void setGlobalContributors(List<ConfigContributor> globalContribs) {
+    globalContributors.addAll(globalContribs);
   }
   
   public Map<String, Object> getConfig(String container, List<String> features, String host,
       Gadget gadget) {
+    Map<String, Object> config = Maps.newHashMap();
+
+    // Perform global config
+    for (ConfigContributor contrib : globalContributors) {
+      contribute(contrib, config, container, host, gadget);
+    }
+    
     // Append some container specific things
     Map<String, Object> featureConfig = containerConfig.getMap(container, GADGETS_FEATURES_KEY);
-    Map<String, Object> config = Maps.newHashMap();
     
     if (featureConfig != null) {
       // Discard what we don't care about.
@@ -56,17 +70,21 @@ public class DefaultConfigProcessor implements ConfigProcessor {
         if (conf != null) {
           config.put(name, conf);
         }
-        ConfigContributor contributor = featureContributors.get(name);
-        if (contributor != null) {
-          if (host != null) {
-            contributor.contribute(config, container, host);
-          } else if (gadget != null) {
-            contributor.contribute(config, gadget);
-          }
-        }
+        contribute(featureContributors.get(name), config, container, host, gadget);
       }
     }
     return config;
+  }
+  
+  private void contribute(ConfigContributor contrib, Map<String, Object> config, String container,
+      String host, Gadget gadget) {
+    if (contrib != null) {
+      if (host != null) {
+        contrib.contribute(config, container, host);
+      } else if (gadget != null) {
+        contrib.contribute(config, gadget);
+      }
+    }
   }
 
 }
