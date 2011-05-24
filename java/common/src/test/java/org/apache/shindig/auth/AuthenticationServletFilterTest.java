@@ -65,18 +65,15 @@ public class AuthenticationServletFilterTest extends EasyMockTestCase {
   }
 
   private static class NullSecurityTokenAuthenticationHandler implements AuthenticationHandler {
-    @Override
     public String getName() {
       return "TestAuth";
     }
 
-    @Override
     public SecurityToken getSecurityTokenFromRequest(HttpServletRequest request)
         throws InvalidAuthenticationException {
       return null;
     }
 
-    @Override
     public String getWWWAuthenticateHeader(String realm) {
       return TEST_AUTH_HEADER;
     }
