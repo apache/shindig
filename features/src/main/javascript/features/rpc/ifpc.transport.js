@@ -148,7 +148,7 @@ if (!gadgets.rpctx.ifpc) {  // make lib resilient to double-inclusion
         // The RPC mechanism supports two formats for IFPC (legacy and current).
         var src = null,
             queueOut = [];
-        if (rpc.l) {
+        if (rpc['l']) {
           // Use legacy protocol.
           // Format: #iframe_id&callId&num_packets&packet_num&block_of_data
           var callArgs = rpc['a'];
