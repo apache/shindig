@@ -49,8 +49,7 @@ public class JsServingPipelineModule extends AbstractModule {
       SeparatorCommentingProcessor separatorCommentingProcessor,
       ConfigInjectionProcessor configInjectionProcessor,
       AddJslLoadedVariableProcessor addJslLoadedVariableProcessor,
-      AddOnloadFunctionProcessor addOnloadFunctionProcessor,
-      AddJslCallbackProcessor addJslCallbackProcessor) {
+      AddOnloadFunctionProcessor addOnloadFunctionProcessor) {
     return ImmutableList.of(
         addJslInfoVariableProcessor,
         jsLoaderGeneratorProcessor,
@@ -61,8 +60,7 @@ public class JsServingPipelineModule extends AbstractModule {
         separatorCommentingProcessor,
         configInjectionProcessor,
         addJslLoadedVariableProcessor,
-        addOnloadFunctionProcessor,
-        addJslCallbackProcessor);
+        addOnloadFunctionProcessor);
   }
 
   @Provides

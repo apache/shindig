@@ -54,8 +54,9 @@ public class AddOnloadFunctionProcessorTest {
   }
 
   @Test
-  public void testSkipsWhenNoOnloadIsSpecified() throws Exception {
+  public void testSkipsWhenNoOnloadAndWithHintSpecified() throws Exception {
     EasyMock.expect(jsUri.getOnload()).andReturn(null);
+    EasyMock.expect(jsUri.isNohint()).andReturn(false);
     response = control.createMock(JsResponseBuilder.class);
     control.replay();
     assertTrue(processor.process(request, response));
@@ -84,6 +85,26 @@ public class AddOnloadFunctionProcessorTest {
     assertEquals(HttpServletResponse.SC_OK, response.getStatusCode());
     String expectedBody = String.format(AddOnloadFunctionProcessor.ONLOAD_JS_TPL, ONLOAD_FUNCTION);
     assertEquals(expectedBody, response.build().toJsString());
+    control.verify();
+  }
+
+  @Test
+  public void testWithoutHint() throws Exception {
+    EasyMock.expect(jsUri.getOnload()).andReturn(null);
+    EasyMock.expect(jsUri.isNohint()).andReturn(true);
+    control.replay();
+    assertTrue(processor.process(request, response));
+    assertEquals(AddOnloadFunctionProcessor.JSL_CALLBACK_JS, response.build().toJsString());
+    control.verify();
+  }
+
+  @Test
+  public void testWithHint() throws Exception {
+    EasyMock.expect(jsUri.getOnload()).andReturn(null);
+    EasyMock.expect(jsUri.isNohint()).andReturn(false);
+    control.replay();
+    assertTrue(processor.process(request, response));
+    assertEquals("", response.build().toJsString());
     control.verify();
   }
 }
