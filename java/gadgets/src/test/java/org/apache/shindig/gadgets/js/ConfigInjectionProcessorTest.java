@@ -43,9 +43,12 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 
 public class ConfigInjectionProcessorTest {
+  private static final List<String> EMPTY_LIST = ImmutableList.of();
+  private static final String HOST = "myHost";
   private static final String BASE_CODE = "code\n";
   private static final String CONTAINER = "container";
   private IMocksControl control;
@@ -93,6 +96,7 @@ public class ConfigInjectionProcessorTest {
         .andReturn(null);
     List<String> libs = ImmutableList.of();
     expect(jsUri.getLibs()).andReturn(libs);
+    expect(jsUri.getLoadedLibs()).andReturn(EMPTY_LIST);
     expect(registry.getFeatures(libs)).andReturn(libs);
     expect(request.getHost()).andReturn("host");
     control.replay();
@@ -112,7 +116,7 @@ public class ConfigInjectionProcessorTest {
   }
 
   private void checkNoMatchingFeaturesDoesNothing(RenderingContext ctx) throws Exception {
-    JsResponseBuilder builder = prepareRequestReturnBuilder(ctx );
+    JsResponseBuilder builder = prepareRequestReturnBuilder(ctx);
     Map<String, Object> baseConfig = Maps.newHashMap();
     baseConfig.put("feature1", "config1");
     Map<String, String> f2MapConfig = Maps.newHashMap();
@@ -123,6 +127,7 @@ public class ConfigInjectionProcessorTest {
         .andReturn(baseConfig);
     List<String> libs = ImmutableList.of("lib1", "lib2");
     expect(jsUri.getLibs()).andReturn(libs);
+    expect(jsUri.getLoadedLibs()).andReturn(EMPTY_LIST);
     expect(registry.getFeatures(libs)).andReturn(libs);
     expect(request.getHost()).andReturn("host");
     control.replay();
@@ -171,15 +176,15 @@ public class ConfigInjectionProcessorTest {
     baseConfig.put("feature4", "unused");
     expect(containerConfig.getMap(CONTAINER, ConfigInjectionProcessor.GADGETS_FEATURES_KEY))
         .andReturn(baseConfig);
-    String host = "myHost";
-    expect(request.getHost()).andReturn(host).anyTimes();
+    expect(request.getHost()).andReturn(HOST).anyTimes();
     ImmutableList.Builder<String> libsBuilder =
-        ImmutableList.<String>builder().add("feature1", "feature2");
+        ImmutableList.<String>builder().add(ConfigInjectionProcessor.CONFIG_FEATURE,
+          "feature1", "feature2");
     if (extraContrib) {
       libsBuilder.add("feature3");
       ConfigContributor cc = control.createMock(ConfigContributor.class);
       Capture<Map<String, Object>> captureConfig = new Capture<Map<String, Object>>();
-      cc.contribute(capture(captureConfig), eq(CONTAINER), eq(host));
+      cc.contribute(capture(captureConfig), eq(CONTAINER), eq(HOST));
       expectLastCall().andAnswer(new IAnswer<Void>() {
         @SuppressWarnings("unchecked")
         public Void answer() throws Throwable {
@@ -193,6 +198,7 @@ public class ConfigInjectionProcessorTest {
     }
     List<String> libs = libsBuilder.build();
     expect(jsUri.getLibs()).andReturn(libs);
+    expect(jsUri.getLoadedLibs()).andReturn(EMPTY_LIST);
     expect(registry.getFeatures(libs)).andReturn(libs);
     
     control.replay();
@@ -232,5 +238,47 @@ public class ConfigInjectionProcessorTest {
     expect(jsUri.isDebug()).andReturn(false);
     expect(request.getJsUri()).andReturn(jsUri);
     return new JsResponseBuilder().appendJs(BASE_CODE, "source");
+  }
+  
+  @Test
+  public void newGlobalConfigAdded() throws Exception {
+    List<String> requested = ImmutableList.of("reqfeature1", "reqfeature2", "already1");
+    List<String> alreadyHas = ImmutableList.of("already1");
+    expect(jsUri.getLibs()).andReturn(requested);
+    expect(jsUri.getLoadedLibs()).andReturn(alreadyHas);
+    Map<String, Object> config =
+        ImmutableMap.<String, Object>of("reqfeature1", "reqval1", "already1", "alval1");
+    expect(containerConfig.getMap(CONTAINER, ConfigInjectionProcessor.GADGETS_FEATURES_KEY))
+        .andReturn(config);
+    expect(request.getHost()).andReturn(HOST).anyTimes();
+    expect(registry.getFeatures(requested)).andReturn(requested);
+    
+    JsResponseBuilder builder = prepareRequestReturnBuilder(RenderingContext.CONFIGURED_GADGET);
+
+    ConfigContributor cc = control.createMock(ConfigContributor.class);
+    Capture<Map<String, Object>> captureConfig = new Capture<Map<String, Object>>();
+    cc.contribute(capture(captureConfig), eq(CONTAINER), eq(HOST));
+    expectLastCall().andAnswer(new IAnswer<Void>() {
+      @SuppressWarnings("unchecked")
+      public Void answer() throws Throwable {
+        Map<String, Object> config = (Map<String, Object>)getCurrentArguments()[0];
+        String f3Value = (String)config.get("reqfeature1");
+        config.put("reqfeature1", f3Value + ":MODIFIED");
+        return null;
+      }
+    });
+    configContributors.put("reqfeature1", cc);
+    
+    control.replay();
+    assertTrue(processor.process(request, builder));
+    control.verify();
+    
+    String jsCode = builder.build().toJsString();
+    String startCode = BASE_CODE + "window['___cfg']=";
+    assertTrue(jsCode.startsWith(startCode));
+    String json = jsCode.substring(startCode.length(), jsCode.length() - ";\n".length());
+    JSONObject configObj = new JSONObject(json);
+    assertEquals(1, configObj.names().length());
+    assertEquals("reqval1:MODIFIED", configObj.getString("reqfeature1"));
   }
 }

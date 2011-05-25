@@ -17,8 +17,6 @@
  */
 package org.apache.shindig.gadgets.js;
 
-import java.util.Map;
-
 import org.apache.shindig.common.JsonSerializer;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.RenderingContext;
@@ -27,12 +25,25 @@ import org.apache.shindig.gadgets.features.FeatureRegistry;
 import org.apache.shindig.gadgets.uri.JsUriManager.JsUri;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.inject.Inject;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class ConfigInjectionProcessor implements JsProcessor {
   private static final String CONFIG_INIT_ID = "[config-injection]";
   @VisibleForTesting
   static final String GADGETS_FEATURES_KEY = "gadgets.features";
+  @VisibleForTesting
+  static final String CONFIG_INIT_TPL = "gadgets.config.init(%s);\n";
+  @VisibleForTesting
+  static final String GLOBAL_CONFIG_KEY_TPL = "window['___cfg']=%s;\n";
+  @VisibleForTesting
+  static final String CONFIG_FEATURE = "core.config.base";
 
   private final FeatureRegistry registry;
   private final ConfigProcessor configProcessor;
@@ -51,15 +62,33 @@ public class ConfigInjectionProcessor implements JsProcessor {
 
     // Append gadgets.config initialization if not in standard gadget mode.
     if (ctx.getRenderingContext() != RenderingContext.GADGET) {
-      // TODO: subtract already-loaded from features passed to getConfig
+      List<String> allReq = registry.getFeatures(jsUri.getLibs());
+      Collection<String> loaded = jsUri.getLoadedLibs();
+      
+      // Only inject config for features not already present and configured.
+      List<String> newReq = subtractCollection(allReq, loaded);
+      
       Map<String, Object> config = configProcessor.getConfig(
-          ctx.getContainer(), registry.getFeatures(jsUri.getLibs()), request.getHost(), null);
+          ctx.getContainer(), newReq, request.getHost(), null);
       if (!config.isEmpty()) {
-        builder.appendJs(
-            "gadgets.config.init(" + JsonSerializer.serialize(config) + ");\n", CONFIG_INIT_ID);
+        String configJson = JsonSerializer.serialize(config);
+        if (allReq.contains(CONFIG_FEATURE) || loaded.contains(CONFIG_FEATURE)) {
+          // config lib is present: pass it data
+          builder.appendJs(String.format(CONFIG_INIT_TPL, configJson), CONFIG_INIT_ID);
+        } else {
+          // config lib not available: use global variable
+          builder.appendJs(String.format(GLOBAL_CONFIG_KEY_TPL, configJson), CONFIG_INIT_ID);
+        }
       }
     }
     return true;
+  }
+  
+  private List<String> subtractCollection(Collection<String> root, Collection<String> subtracted) {
+    // Obtain set of common elements.
+    Set<String> result = Sets.newHashSet(root);
+    result.removeAll(subtracted);
+    return Lists.newArrayList(result);
   }
 
 }
