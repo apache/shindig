@@ -651,21 +651,29 @@ if (!window['gadgets']['rpc']) { // make lib resilient to double-inclusion
       passReferrerContents = prParts[1] || "origin";
     }
 
+
+    function setLegacyProtocolConfig(cfg) {
+      if (isLegacyProtocolConfig(cfg)) {
+        transport = gadgets.rpctx.ifpc;
+        transport.init(process, transportReady);
+      }
+    }
+    
+    function isLegacyProtocolConfig(cfg) {
+      return String(cfg['useLegacyProtocol']) === 'true';
+    }
+
     function setupContainedContext(rpctoken, opt_parent) {
       function init(config) {
         var cfg = config ? config['rpc'] : {};
-        var useLegacy = String(cfg['useLegacyProtocol']) === 'true';
         setReferrerConfig(cfg);
 
         // Parent-relative only.
         var parentRelayUrl = cfg['parentRelayUrl'] || '';
         parentRelayUrl = getOrigin(params['parent'] || opt_parent) + parentRelayUrl;
-        setRelayUrl('..', parentRelayUrl, useLegacy);
+        setRelayUrl('..', parentRelayUrl, isLegacyProtocolConfig(cfg));
 
-        if (useLegacy) {
-          transport = gadgets.rpctx.ifpc;
-          transport.init(process, transportReady);
-        }
+        setLegacyProtocolConfig(cfg);
 
         setAuthToken('..', rpctoken);
       }
@@ -1029,7 +1037,11 @@ if (!window['gadgets']['rpc']) { // make lib resilient to double-inclusion
         if (isChild) {
           setupReceiver('..');
         } else {
-          gadgets.config.register('rpc', null, function(config) { setReferrerConfig(config['rpc'] || {}); });
+          gadgets.config.register('rpc', null, function(config) {
+            var cfg = config['rpc'] || {};
+            setReferrerConfig(cfg);
+            setLegacyProtocolConfig(cfg);
+          });
         }
       },
 
