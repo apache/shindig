@@ -85,7 +85,6 @@ public class ConfigInjectionProcessor implements JsProcessor {
   }
   
   private List<String> subtractCollection(Collection<String> root, Collection<String> subtracted) {
-    // Obtain set of common elements.
     Set<String> result = Sets.newHashSet(root);
     result.removeAll(subtracted);
     return Lists.newArrayList(result);
