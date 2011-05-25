@@ -17,9 +17,6 @@
  */
 package org.apache.shindig.gadgets.js;
 
-import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
-
 import org.apache.shindig.gadgets.features.FeatureRegistry.FeatureBundle;
 import org.apache.shindig.gadgets.features.FeatureResource;
 
