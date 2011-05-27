@@ -79,7 +79,8 @@
      var allPeople, viewerFriendData;
      function render(data) {
        var viewer = data.viewer;
-       allPeople = data.viewerFriends.list;
+       // When Caja is enabled, data is read-only, so make a writeable copy.
+       allPeople = data.viewerFriends.list.concat();
        if (viewer) {
          allPeople.push(viewer);
        }
