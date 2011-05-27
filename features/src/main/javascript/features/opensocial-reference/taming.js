@@ -49,8 +49,6 @@ tamings___.push(function(imports) {
   ]);
 
   caja___.whitelistMeths([
-    [JsonPerson, 'getDisplayName'],
-    [JsonPerson, 'getAppData'],
     [opensocial.Activity, 'getField'],
     [opensocial.Activity, 'getId'],
     [opensocial.Activity, 'setField'],
