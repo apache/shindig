@@ -491,7 +491,9 @@ JsonRpcContainer.prototype.newMessageCollection = function(opt_params) {
 JsonRpcContainer.prototype.newFetchMessageCollectionsRequest = function(idSpec, opt_params) {
   var rpc = { method: 'messages.get' };
   rpc.params = this.translateIdSpec(idSpec);
-
+  
+  FieldTranslations.translateStandardArguments(opt_params, rpc.params);
+  
   return new JsonRpcRequestItem(rpc,
       function(rawJson) {
         rawJson = rawJson['list'];
@@ -507,6 +509,8 @@ JsonRpcContainer.prototype.newFetchMessagesRequest = function(idSpec, msgCollId,
   var rpc = { method: 'messages.get' };
   rpc.params = this.translateIdSpec(idSpec);
   rpc.params.msgCollId = msgCollId;
+  
+  FieldTranslations.translateStandardArguments(opt_params, rpc.params);
 
   return new JsonRpcRequestItem(rpc,
       function(rawJson) {
@@ -541,7 +545,9 @@ JsonRpcContainer.prototype.newFetchAlbumsRequest = function(idSpec, opt_params) 
   var rpc = { method: 'albums.get' };
   rpc.params = this.translateIdSpec(idSpec);
   rpc.params.appId = '@app';
-
+  
+  FieldTranslations.translateStandardArguments(opt_params, rpc.params);
+  
   return new JsonRpcRequestItem(rpc, function(rawJson) {
     rawJson = rawJson['list'];
     var albums = [];
@@ -568,6 +574,8 @@ JsonRpcContainer.prototype.newFetchMediaItemsRequest = function(idSpec, albumId,
   rpc.params = this.translateIdSpec(idSpec);
   rpc.params.appId = '@app';
   rpc.params.albumId = albumId;
+  
+  FieldTranslations.translateStandardArguments(opt_params, rpc.params);
 
   return new JsonRpcRequestItem(rpc, function(rawJson) {
     rawJson = rawJson['list'];
