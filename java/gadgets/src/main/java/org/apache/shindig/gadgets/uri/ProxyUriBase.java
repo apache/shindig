@@ -92,7 +92,7 @@ public class ProxyUriBase {
   public void setFromUri(Uri uri) {
     if (uri != null) {
       refresh = getIntegerValue(uri.getQueryParameter(Param.REFRESH.getKey()));
-      debug = getBooleanValue(uri.getQueryParameter(Param.DEBUG.getKey()));
+      debug = getTruthyValue(uri.getQueryParameter(Param.DEBUG.getKey()));
       noCache = getBooleanValue(uri.getQueryParameter(Param.NO_CACHE.getKey()));
       String newContainer = uri.getQueryParameter(Param.CONTAINER.getKey());
       if (newContainer == null) {
@@ -108,6 +108,10 @@ public class ProxyUriBase {
       sanitizeContent = getBooleanValue(uri.getQueryParameter(Param.SANITIZE.getKey()));
       cajoleContent = getBooleanValue(uri.getQueryParameter(Param.CAJOLE.getKey()));
     }
+  }
+
+  protected static boolean getTruthyValue(String str) {
+    return str != null && !"0".equals(str) && str.length() > 0;
   }
 
   @Override

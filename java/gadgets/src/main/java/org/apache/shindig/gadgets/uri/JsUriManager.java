@@ -147,6 +147,7 @@ public interface JsUriManager {
       this.context = origJsUri.getContext();
       this.origUri = origJsUri.getOrigUri();
       this.repository = origJsUri.getRepository();
+      this.extensionParams = origJsUri.getExtensionParams();
     }
 
     public Collection<String> getLibs() {

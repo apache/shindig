@@ -156,7 +156,7 @@ public class ClosureJsCompiler implements JsCompiler {
             errors.build());
       }
 
-      String compiled = actualCompiler.toSource();
+      String compiled = compileToSource(actualCompiler, result, jsUri);
       if (outputCorrelatedJs()) {
         // Emit code correlated w/ original source.
         // This operation is equivalent in final code to bundled-output,
@@ -184,6 +184,10 @@ public class ClosureJsCompiler implements JsCompiler {
     cache.addElement(cacheKey, result);
     lastResult = result;
     return result;
+  }
+
+  protected String compileToSource(Compiler compiler, Result result, JsUri jsUri) {
+    return compiler.toSource();
   }
   
   private JsResponse cacheAndReturnErrorResult(
