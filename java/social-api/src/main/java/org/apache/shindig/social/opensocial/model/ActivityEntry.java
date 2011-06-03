@@ -29,7 +29,7 @@ import com.google.inject.ImplementedBy;
  */
 @ImplementedBy(ActivityEntryImpl.class)
 @Exportablebean
-public interface ActivityEntry {
+public interface ActivityEntry extends Comparable<ActivityEntry> {
   
   /**
    * Fields that represent the JSON elements.

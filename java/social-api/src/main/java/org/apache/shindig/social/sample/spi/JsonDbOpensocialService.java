@@ -24,6 +24,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.Future;
 
 import javax.servlet.http.HttpServletResponse;
@@ -39,7 +40,6 @@ import org.apache.shindig.protocol.conversion.BeanConverter;
 import org.apache.shindig.protocol.model.SortOrder;
 import org.apache.shindig.social.opensocial.model.Activity;
 import org.apache.shindig.social.opensocial.model.ActivityEntry;
-import org.apache.shindig.social.opensocial.model.ActivityObject;
 import org.apache.shindig.social.opensocial.model.Album;
 import org.apache.shindig.social.opensocial.model.MediaItem;
 import org.apache.shindig.social.opensocial.model.Message;
@@ -1282,7 +1282,6 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
           }
         }
       }
-
       throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST, "Activity not found: " + activityId);
     } catch (JSONException je) {
       throw new ProtocolException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, je.getMessage(), je);
@@ -1307,6 +1306,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
           }
         }
       }
+      Collections.sort(result, Collections.reverseOrder());
       return ImmediateFuture.newInstance(new RestfulCollection<ActivityEntry>(result));
     } catch (JSONException je) {
       throw new ProtocolException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, je.getMessage(), je);
@@ -1338,6 +1338,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
           }
         }
       }
+      Collections.sort(result, Collections.reverseOrder());
       return ImmediateFuture.newInstance(new RestfulCollection<ActivityEntry>(result));
     } catch (JSONException je) {
       throw new ProtocolException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, je.getMessage(), je);

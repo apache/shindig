@@ -185,4 +185,23 @@ public class ActivityEntryImpl implements ActivityEntry {
   public void setOpenSocial(Extension openSocial) {
     this.openSocial = openSocial;
   }
+
+  /**
+   * Sorts ActivityEntries in ascending order based on publish date.
+   * 
+   * @param that is the ActivityEntry to compare to this ActivityEntry
+   * 
+   * @return int represents how the ActivityEntries compare
+   */
+  public int compareTo(ActivityEntry that) {
+    if (this.getPublished() == null && that.getPublished() == null) {
+      return 0;   // both are null, equal
+    } else if (this.getPublished() == null) {
+      return -1;  // this is null, comes before real date
+    } else if (that.getPublished() == null) {
+      return 1;   // that is null, this comes after
+    } else {      // compare publish dates in lexicographical order
+      return this.getPublished().compareTo(that.getPublished());
+    }
+  }
 }
