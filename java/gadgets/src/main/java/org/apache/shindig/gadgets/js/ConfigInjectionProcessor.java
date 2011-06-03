@@ -19,9 +19,11 @@ package org.apache.shindig.gadgets.js;
 
 import org.apache.shindig.common.JsonSerializer;
 import org.apache.shindig.gadgets.GadgetContext;
+import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.RenderingContext;
 import org.apache.shindig.gadgets.config.ConfigProcessor;
 import org.apache.shindig.gadgets.features.FeatureRegistry;
+import org.apache.shindig.gadgets.features.FeatureRegistryProvider;
 import org.apache.shindig.gadgets.uri.JsUriManager.JsUri;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -45,29 +47,35 @@ public class ConfigInjectionProcessor implements JsProcessor {
   @VisibleForTesting
   static final String CONFIG_FEATURE = "core.config.base";
 
-  private final FeatureRegistry registry;
+  private final FeatureRegistryProvider registryProvider;
   private final ConfigProcessor configProcessor;
-  
+
   @Inject
   public ConfigInjectionProcessor(
-      FeatureRegistry registry,
+      FeatureRegistryProvider registryProvider,
       ConfigProcessor configProcessor) {
-    this.registry = registry;
+    this.registryProvider = registryProvider;
     this.configProcessor = configProcessor;
   }
 
-  public boolean process(JsRequest request, JsResponseBuilder builder) {
+  public boolean process(JsRequest request, JsResponseBuilder builder) throws JsException {
     JsUri jsUri = request.getJsUri();
     GadgetContext ctx = new JsGadgetContext(jsUri);
+    FeatureRegistry registry;
+    try {
+      registry = registryProvider.get(jsUri.getRepository());
+    } catch (GadgetException e) {
+      throw new JsException(e.getHttpStatusCode(), e.getMessage());
+    }
 
     // Append gadgets.config initialization if not in standard gadget mode.
     if (ctx.getRenderingContext() != RenderingContext.GADGET) {
       List<String> allReq = registry.getFeatures(jsUri.getLibs());
       Collection<String> loaded = jsUri.getLoadedLibs();
-      
+
       // Only inject config for features not already present and configured.
       List<String> newReq = subtractCollection(allReq, loaded);
-      
+
       Map<String, Object> config = configProcessor.getConfig(
           ctx.getContainer(), newReq, request.getHost(), null);
       if (!config.isEmpty()) {
@@ -83,7 +91,7 @@ public class ConfigInjectionProcessor implements JsProcessor {
     }
     return true;
   }
-  
+
   private List<String> subtractCollection(Collection<String> root, Collection<String> subtracted) {
     Set<String> result = Sets.newHashSet(root);
     result.removeAll(subtracted);

@@ -123,7 +123,8 @@ public class JsLoadProcessorTest {
     assertFalse(processor.process(request, response));
     assertEquals(HttpServletResponse.SC_OK, response.getStatusCode());
     assertEquals(expectedTtl, response.getCacheTtlSecs());
-    String expectedBody = String.format(JsLoadProcessor.JSLOAD_JS_TPL, uri.toString());
+    String expectedBody = String.format(JsLoadProcessor.JSLOAD_JS_TPL,
+        uri.toString() + "?jsload=0");
     assertEquals(expectedBody, response.build().toJsString());
   }
 

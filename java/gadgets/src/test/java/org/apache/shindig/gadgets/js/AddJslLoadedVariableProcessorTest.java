@@ -31,6 +31,7 @@ import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.features.FeatureRegistry;
 import org.apache.shindig.gadgets.features.FeatureRegistry.FeatureBundle;
 import org.apache.shindig.gadgets.features.FeatureRegistry.LookupResult;
+import org.apache.shindig.gadgets.features.FeatureRegistryProvider;
 import org.apache.shindig.gadgets.uri.JsUriManager.JsUri;
 import org.apache.shindig.gadgets.uri.UriStatus;
 import org.easymock.EasyMock;
@@ -67,7 +68,12 @@ public class AddJslLoadedVariableProcessorTest {
     request = control.createMock(JsRequest.class);
     registry = control.createMock(FeatureRegistry.class);
     response = new JsResponseBuilder();
-    processor = new AddJslLoadedVariableProcessor(registry);
+    FeatureRegistryProvider registryProvider = new FeatureRegistryProvider() {
+      public FeatureRegistry get(String repository) {
+        return registry;
+      }
+    };
+    processor = new AddJslLoadedVariableProcessor(registryProvider);
   }
 
   @Test

@@ -153,4 +153,12 @@ public class GadgetContext {
   public boolean getCajoled() {
     return delegate == null ? false : delegate.getCajoled();
   }
+
+  /**
+   * @return return the feature js repository if available
+   */
+  public String getRepository() {
+    return delegate == null ? null : delegate.getRepository();
+  }
 }
+

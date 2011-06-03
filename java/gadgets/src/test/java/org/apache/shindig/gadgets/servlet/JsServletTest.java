@@ -176,7 +176,7 @@ public class JsServletTest extends ServletTestFixture {
 
     servlet.doGet(request, recorder);
     assertEquals(HttpServletResponse.SC_OK, recorder.getHttpStatusCode());
-    assertEquals(String.format(JsLoadProcessor.JSLOAD_JS_TPL, url),
+    assertEquals(String.format(JsLoadProcessor.JSLOAD_JS_TPL, url + "&jsload=0"),
         recorder.getResponseAsString());
     verify();
   }
@@ -197,7 +197,7 @@ public class JsServletTest extends ServletTestFixture {
 
     servlet.doGet(request, recorder);
     assertEquals(HttpServletResponse.SC_OK, recorder.getHttpStatusCode());
-    assertEquals(String.format(JsLoadProcessor.JSLOAD_JS_TPL, url),
+    assertEquals(String.format(JsLoadProcessor.JSLOAD_JS_TPL, url + "&jsload=0"),
         recorder.getResponseAsString());
     verify();
   }
@@ -233,7 +233,7 @@ public class JsServletTest extends ServletTestFixture {
 
     servlet.doGet(request, recorder);
     assertEquals(HttpServletResponse.SC_OK, recorder.getHttpStatusCode());
-    assertEquals(String.format(JsLoadProcessor.JSLOAD_JS_TPL, url),
+    assertEquals(String.format(JsLoadProcessor.JSLOAD_JS_TPL, url + "&jsload=0"),
         recorder.getResponseAsString());
     verify();
   }

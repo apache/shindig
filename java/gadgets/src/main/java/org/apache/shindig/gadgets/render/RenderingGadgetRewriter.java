@@ -22,16 +22,25 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.JsonSerializer;
 import org.apache.shindig.common.logging.i18n.MessageKeys;
 import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.common.xml.DomUtil;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.GadgetException.Code;
 import org.apache.shindig.gadgets.MessageBundleFactory;
+import org.apache.shindig.gadgets.RenderingContext;
 import org.apache.shindig.gadgets.UnsupportedFeatureException;
 import org.apache.shindig.gadgets.config.ConfigProcessor;
 import org.apache.shindig.gadgets.features.FeatureRegistry;
+import org.apache.shindig.gadgets.features.FeatureRegistryProvider;
 import org.apache.shindig.gadgets.features.FeatureResource;
+import org.apache.shindig.gadgets.js.JsException;
+import org.apache.shindig.gadgets.js.JsRequest;
+import org.apache.shindig.gadgets.js.JsRequestBuilder;
+import org.apache.shindig.gadgets.js.JsResponse;
+import org.apache.shindig.gadgets.js.JsServingPipeline;
 import org.apache.shindig.gadgets.preload.PreloadException;
 import org.apache.shindig.gadgets.preload.PreloadedData;
 import org.apache.shindig.gadgets.rewrite.GadgetRewriter;
@@ -43,6 +52,7 @@ import org.apache.shindig.gadgets.spec.UserPref;
 import org.apache.shindig.gadgets.spec.View;
 import org.apache.shindig.gadgets.uri.JsUriManager;
 import org.apache.shindig.gadgets.uri.JsUriManager.JsUri;
+import org.apache.shindig.gadgets.uri.UriCommon;
 import org.w3c.dom.Document;
 import org.w3c.dom.DocumentType;
 import org.w3c.dom.Element;
@@ -84,8 +94,6 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
   //class name for logging purpose
   private static final String classname = RenderingGadgetRewriter.class.getName();
   private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
- 
-  private static final int INLINE_JS_BUFFER = 50;
 
   protected static final String DEFAULT_CSS =
       "body,td,div,span,p{font-family:arial,sans-serif;}" +
@@ -101,7 +109,8 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
 
   protected final MessageBundleFactory messageBundleFactory;
   protected final ContainerConfig containerConfig;
-  protected final FeatureRegistry featureRegistry;
+  protected final FeatureRegistryProvider featureRegistryProvider;
+  protected final JsServingPipeline jsServingPipeline;
   protected final JsUriManager jsUriManager;
   protected final ConfigProcessor configProcessor;
 
@@ -120,12 +129,14 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
   @Inject
   public RenderingGadgetRewriter(MessageBundleFactory messageBundleFactory,
                                  ContainerConfig containerConfig,
-                                 FeatureRegistry featureRegistry,
+                                 FeatureRegistryProvider featureRegistryProvider,
+                                 JsServingPipeline jsServingPipeline,
                                  JsUriManager jsUriManager,
                                  ConfigProcessor configProcessor) {
     this.messageBundleFactory = messageBundleFactory;
     this.containerConfig = containerConfig;
-    this.featureRegistry = featureRegistry;
+    this.featureRegistryProvider = featureRegistryProvider;
+    this.jsServingPipeline = jsServingPipeline;
     this.jsUriManager = jsUriManager;
     this.configProcessor = configProcessor;
   }
@@ -259,11 +270,20 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
         "gadgets.util.runOnLoadHandlers();"));
   }
 
+
+  /**
+   * @throws GadgetException
+   */
   protected void injectGadgetBeacon(Gadget gadget, Node headTag, Node firstHeadChild)
           throws GadgetException {
     Element beaconNode = headTag.getOwnerDocument().createElement("script");
     beaconNode.setTextContent(IS_GADGET_BEACON);
     headTag.insertBefore(beaconNode, firstHeadChild);
+  }
+
+  protected String getFeatureRepositoryId(Gadget gadget) {
+    GadgetContext context = gadget.getContext();
+    return context.getRepository();
   }
 
   /**
@@ -274,40 +294,51 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
     // TODO: If there isn't any js in the document, we can skip this. Unfortunately, that means
     // both script tags (easy to detect) and event handlers (much more complex).
     GadgetContext context = gadget.getContext();
+    String repository = getFeatureRepositoryId(gadget);
+    FeatureRegistry featureRegistry = featureRegistryProvider.get(repository);
+
+    checkRequiredFeatures(gadget, featureRegistry);
 
     // Set of extern libraries requested by the container
     Set<String> externForcedLibs = defaultExternLibs;
 
-    // gather the libraries we'll need to generate the extern libs
+    // gather the libraries we'll need to generate the extern script for
     String externParam = context.getParameter("libs");
     if (StringUtils.isNotBlank(externParam)) {
       externForcedLibs = Sets.newTreeSet(Splitter.on(':').split(externParam));
     }
 
+    // Inject extern script
     if (!externForcedLibs.isEmpty()) {
-      String jsUrl = jsUriManager.makeExternJsUri(new JsUri(gadget, externForcedLibs))
-          .toString();
-      Element libsTag = headTag.getOwnerDocument().createElement("script");
-      libsTag.setAttribute("src", jsUrl);
-      headTag.insertBefore(libsTag, firstHeadChild);
+      injectScript(externForcedLibs, null, false, gadget, headTag, firstHeadChild, "");
     }
 
+    Collection<String> gadgetLibs = gadget.getDirectFeatureDeps();
+
+    // Get config for all features
+    Set<String> allLibs = ImmutableSet.<String>builder()
+        .addAll(externForcedLibs).addAll(gadgetLibs).build();
+    String libraryConfig =
+      getLibraryConfig(gadget, featureRegistry.getFeatures(allLibs));
+
+    // Inject internal script
+    injectScript(gadgetLibs, externForcedLibs, !externalizeFeatures,
+        gadget, headTag, firstHeadChild, libraryConfig);
+  }
+
+  /**
+   * Check that all gadget required features exists
+   */
+  protected void checkRequiredFeatures(Gadget gadget, FeatureRegistry featureRegistry)
+      throws GadgetException {
     List<String> unsupported = Lists.newLinkedList();
-
-    List<FeatureResource> externForcedResources =
-        featureRegistry.getFeatureResources(context, externForcedLibs, unsupported).getResources();
-    if (!unsupported.isEmpty()) {
-      if (LOG.isLoggable(Level.INFO)) {
-        LOG.logp(Level.INFO, classname, "injectFeatureLibraries", MessageKeys.UNKNOWN_FEATURES, new Object[] {unsupported.toString()});
-      }
-      unsupported.clear();
-    }
 
     // Get all resources requested by the gadget's requires/optional features.
     Map<String, Feature> featureMap = gadget.getViewFeatures();
     List<String> gadgetFeatureKeys = Lists.newLinkedList(gadget.getDirectFeatureDeps());
     List<FeatureResource> gadgetResources =
-        featureRegistry.getFeatureResources(context, gadgetFeatureKeys, unsupported).getResources();
+        featureRegistry.getFeatureResources(gadget.getContext(), gadgetFeatureKeys, unsupported)
+            .getResources();
     if (!unsupported.isEmpty()) {
       List<String> requiredUnsupported = Lists.newLinkedList();
       for (String notThere : unsupported) {
@@ -320,77 +351,54 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
         throw new UnsupportedFeatureException(requiredUnsupported.toString());
       }
     }
+  }
 
-    // Inline or externalize the gadgetFeatureKeys
-    List<FeatureResource> inlineResources = Lists.newArrayList();
-    List<String> allRequested = Lists.newArrayList(gadgetFeatureKeys);
+  /**
+   * Get the js content for a request (JsUri)
+   */
+  protected String getFeaturesContent(JsUri jsUri) throws GadgetException {
+    // Inject js content, fetched from JsPipeline
+    JsRequest jsRequest = new JsRequestBuilder(jsUriManager).build(jsUri, null);
+    JsResponse jsResponse;
+    try {
+      jsResponse = jsServingPipeline.execute(jsRequest);
+    } catch (JsException e) {
+      throw new GadgetException(Code.JS_PROCESSING_ERROR, e, e.getStatusCode());
+    }
+    return jsResponse.toJsString();
+  }
 
-    if (externalizeFeatures) {
-      Set<String> externGadgetLibs = Sets.newTreeSet(featureRegistry.getFeatures(gadgetFeatureKeys));
-      externGadgetLibs.removeAll(externForcedLibs);
+  /**
+   * Add script tag with either js content (inline=true) or script src tag
+   */
+  protected void injectScript(Collection<String> libs, Collection<String> loaded, boolean inline,
+      Gadget gadget, Node headTag, Node firstHeadChild, String extraContent)
+      throws GadgetException {
 
-      if (!externGadgetLibs.isEmpty()) {
-        String jsUrl = jsUriManager.makeExternJsUri(new JsUri(gadget, externGadgetLibs))
-            .toString();
-        Element libsTag = headTag.getOwnerDocument().createElement("script");
-        libsTag.setAttribute("src", jsUrl);
-        headTag.insertBefore(libsTag, firstHeadChild);
-      }
+    GadgetContext context = gadget.getContext();
+    // Gadget is not specified in request in order to support better caching
+    JsUri jsUri = new JsUri(null, context.getDebug(), false, context.getContainer(), null,
+        libs, loaded, null, false, false, RenderingContext.getDefault(), null,
+        getFeatureRepositoryId(gadget));
+
+    String content = "";
+    if (!inline) {
+      String jsUrl = new UriBuilder(jsUriManager.makeExternJsUri(jsUri))
+          // Avoid jsload by adding jsload=0
+          .addQueryParameter(UriCommon.Param.JSLOAD.getKey(), "0")
+          .toString();
+      Element libsTag = headTag.getOwnerDocument().createElement("script");
+      libsTag.setAttribute("src", jsUrl);
+      headTag.insertBefore(libsTag, firstHeadChild);
     } else {
-      inlineResources.addAll(gadgetResources);
+      content = getFeaturesContent(jsUri);
     }
 
-    // Calculate inlineResources as all resources that are needed by the gadget to
-    // render, minus all those included through externResources.
-    // TODO: profile and if needed, optimize this a bit.
-    if (!externForcedLibs.isEmpty()) {
-      allRequested.addAll(externForcedLibs);
-      inlineResources.removeAll(externForcedResources);
-    }
-
-    // Precalculate the maximum length in order to avoid excessive garbage generation.
-    int size = 0;
-    for (FeatureResource resource : inlineResources) {
-      if (!resource.isExternal()) {
-        if (context.getDebug()) {
-          size += resource.getDebugContent().length();
-        } else {
-          size += resource.getContent().length();
-        }
-      }
-    }
-
-    String libraryConfig =
-        getLibraryConfig(gadget, featureRegistry.getFeatures(allRequested));
-
-    // Size has a small fudge factor added to it for delimiters and such.
-    StringBuilder inlineJs = new StringBuilder(size + libraryConfig.length() + INLINE_JS_BUFFER);
-
-    // Inline any libs that weren't extern. The ugly context switch between inline and external
-    // Js is needed to allow both inline and external scripts declared in feature.xml.
-    for (FeatureResource resource : inlineResources) {
-      String theContent = context.getDebug() ? resource.getDebugContent() : resource.getContent();
-      if (resource.isExternal()) {
-        if (inlineJs.length() > 0) {
-          Element inlineTag = headTag.getOwnerDocument().createElement("script");
-          headTag.insertBefore(inlineTag, firstHeadChild);
-          inlineTag.appendChild(headTag.getOwnerDocument().createTextNode(inlineJs.toString()));
-          inlineJs.setLength(0);
-        }
-        Element referenceTag = headTag.getOwnerDocument().createElement("script");
-        referenceTag.setAttribute("src", theContent);
-        headTag.insertBefore(referenceTag, firstHeadChild);
-      } else {
-        inlineJs.append(theContent).append(";\n");
-      }
-    }
-
-    inlineJs.append(libraryConfig);
-
-    if (inlineJs.length() > 0) {
+    content = content + extraContent;
+    if (content.length() > 0) {
       Element inlineTag = headTag.getOwnerDocument().createElement("script");
       headTag.insertBefore(inlineTag, firstHeadChild);
-      inlineTag.appendChild(headTag.getOwnerDocument().createTextNode(inlineJs.toString()));
+      inlineTag.appendChild(headTag.getOwnerDocument().createTextNode(content));
     }
   }
 
@@ -410,11 +418,11 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
       throws GadgetException {
     Map<String, Object> config =
         configProcessor.getConfig(gadget.getContext().getContainer(), reqs, null, gadget);
-    
+
     if (config.size() > 0) {
       return "gadgets.config.init(" + JsonSerializer.serialize(config) + ");\n";
     }
-    
+
     return "";
   }
 

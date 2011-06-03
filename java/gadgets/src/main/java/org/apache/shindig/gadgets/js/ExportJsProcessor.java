@@ -26,11 +26,13 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 
 import org.apache.shindig.gadgets.GadgetContext;
+import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.JsCompileMode;
 import org.apache.shindig.gadgets.features.ApiDirective;
 import org.apache.shindig.gadgets.features.FeatureRegistry;
 import org.apache.shindig.gadgets.features.FeatureRegistry.FeatureBundle;
 import org.apache.shindig.gadgets.features.FeatureRegistry.LookupResult;
+import org.apache.shindig.gadgets.features.FeatureRegistryProvider;
 import org.apache.shindig.gadgets.features.FeatureResource;
 import org.apache.shindig.gadgets.uri.JsUriManager.JsUri;
 
@@ -45,16 +47,17 @@ public class ExportJsProcessor implements JsProcessor {
 
   private static final String FUNCTION_NAME = "exportJs";
 
-  private final FeatureRegistry featureRegistry;
+  private final FeatureRegistryProvider featureRegistryProvider;
   private final Provider<GadgetContext> context;
 
   @Inject
-  public ExportJsProcessor(FeatureRegistry featureRegistry, Provider<GadgetContext> context) {
-    this.featureRegistry = featureRegistry;
+  public ExportJsProcessor(FeatureRegistryProvider featureRegistryProvider,
+      Provider<GadgetContext> context) {
+    this.featureRegistryProvider = featureRegistryProvider;
     this.context = context;
   }
 
-  public boolean process(JsRequest jsRequest, JsResponseBuilder builder) {
+  public boolean process(JsRequest jsRequest, JsResponseBuilder builder) throws JsException {
     JsUri jsUri = jsRequest.getJsUri();
     ImmutableList.Builder<JsContent> resp = ImmutableList.builder();
 
@@ -74,7 +77,13 @@ public class ExportJsProcessor implements JsProcessor {
 
     builder.clearJs();
     if (neededExportJs) {
-      builder.appendAllJs(getExportJsContents());
+      FeatureRegistry featureRegistry;
+      try {
+        featureRegistry = featureRegistryProvider.get(jsUri.getRepository());
+      } catch (GadgetException e) {
+        throw new JsException(e.getHttpStatusCode(), e.getMessage());
+      }
+      builder.appendAllJs(getExportJsContents(featureRegistry));
     }
     builder.appendAllJs(resp.build());
     return true;
@@ -107,7 +116,7 @@ public class ExportJsProcessor implements JsProcessor {
     return false;
   }
 
-  private List<JsContent> getExportJsContents() {
+  private List<JsContent> getExportJsContents(FeatureRegistry featureRegistry) {
     ImmutableList.Builder<JsContent> result = ImmutableList.builder();
     LookupResult lookup = featureRegistry.getFeatureResources(context.get(),
         ImmutableList.of(FEATURE_NAME), null);

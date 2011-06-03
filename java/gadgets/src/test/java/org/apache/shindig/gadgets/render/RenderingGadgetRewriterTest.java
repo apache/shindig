@@ -46,7 +46,12 @@ import org.apache.shindig.gadgets.config.CoreUtilConfigContributor;
 import org.apache.shindig.gadgets.config.DefaultConfigProcessor;
 import org.apache.shindig.gadgets.config.XhrwrapperConfigContributor;
 import org.apache.shindig.gadgets.features.FeatureRegistry;
+import org.apache.shindig.gadgets.features.FeatureRegistryProvider;
 import org.apache.shindig.gadgets.features.FeatureResource;
+import org.apache.shindig.gadgets.js.JsException;
+import org.apache.shindig.gadgets.js.JsRequest;
+import org.apache.shindig.gadgets.js.JsResponseBuilder;
+import org.apache.shindig.gadgets.js.JsServingPipeline;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
 import org.apache.shindig.gadgets.parse.ParseModule;
 import org.apache.shindig.gadgets.preload.PreloadException;
@@ -56,6 +61,7 @@ import org.apache.shindig.gadgets.rewrite.RewritingException;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.View;
 import org.apache.shindig.gadgets.uri.JsUriManager;
+import org.easymock.EasyMock;
 import org.easymock.IAnswer;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -107,18 +113,26 @@ public class RenderingGadgetRewriterTest {
   private final MapGadgetContext context = new MapGadgetContext();
 
   private FeatureRegistry featureRegistry;
+  private JsServingPipeline jsServingPipeline;
   private RenderingGadgetRewriter rewriter;
   private GadgetHtmlParser parser;
 
   @Before
   public void setUp() throws Exception {
     featureRegistry = createMock(FeatureRegistry.class);
+    FeatureRegistryProvider featureRegistryProvider = new FeatureRegistryProvider() {
+      public FeatureRegistry get(String repository) {
+        return featureRegistry;
+      }
+    };
+    jsServingPipeline = createMock(JsServingPipeline.class);
     Map<String, ConfigContributor> configContributors = ImmutableMap.of(
         "core.util", new CoreUtilConfigContributor(featureRegistry),
         "shindig.xhrwrapper", new XhrwrapperConfigContributor()
     );
     rewriter
-        = new RenderingGadgetRewriter(messageBundleFactory, config, featureRegistry, jsUriManager,
+        = new RenderingGadgetRewriter(messageBundleFactory, config, featureRegistryProvider,
+            jsServingPipeline, jsUriManager,
             new DefaultConfigProcessor(configContributors, config));
     Injector injector = Guice.createInjector(new ParseModule(), new PropertiesModule());
     parser = injector.getInstance(GadgetHtmlParser.class);
@@ -132,7 +146,7 @@ public class RenderingGadgetRewriterTest {
         .setSpec(spec)
         .setCurrentView(spec.getView(GadgetSpec.DEFAULT_VIEW))
         .setGadgetFeatureRegistry(featureRegistry);
-    
+
     // Convenience: by default expect no features requested, by gadget or extern.
     // expectFeatureCalls(...) resets featureRegistry if called again.
     expectFeatureCalls(gadget,
@@ -146,7 +160,7 @@ public class RenderingGadgetRewriterTest {
     String defaultXml = "<Module><ModulePrefs title=''/><Content type='html'/></Module>";
     return makeGadgetWithSpec(defaultXml);
   }
-  
+
   private Gadget makeDefaultOpenSocial2Gadget(boolean useQuirks) throws GadgetException {
     String defaultXml = "<Module specificationVersion='2' ><ModulePrefs " + (useQuirks ? "doctype='quirksmode'" : "") +" title=''/><Content type='html'/></Module>";
     return makeGadgetWithSpec(defaultXml);
@@ -177,7 +191,7 @@ public class RenderingGadgetRewriterTest {
     assertTrue("gadgets.util.runOnLoadHandlers not invoked.",
         matcher.group(BODY_GROUP).contains("gadgets.util.runOnLoadHandlers();"));
   }
-  
+
   @Test
   public void overrideDefaultDoctype() throws Exception{
     Gadget gadget = makeDefaultOpenSocial2Gadget(false);
@@ -193,13 +207,13 @@ public class RenderingGadgetRewriterTest {
     rewriter.setDefaultDoctypePubId(CUSTOM_DOCTYPE_PUBID);
     rewriter.setDefaultDoctypeSysId(CUSTOM_DOCTYPE_SYSID);
     String rewritten = rewrite(gadget, doc);
-    
+
     Matcher matcher = DOCUMENT_SPLIT_PATTERN.matcher(rewritten);
     assertTrue("Output is not valid HTML.", matcher.matches());
     assertTrue("DOCTYPE not preserved", matcher.group(BEFORE_HEAD_GROUP).contains(CUSTOM_DOCTYPE));
-    
+
   }
-  
+
   @Test
   public void quirksmodeInOS2() throws Exception{
     Gadget gadget = makeDefaultOpenSocial2Gadget(true);
@@ -212,11 +226,11 @@ public class RenderingGadgetRewriterTest {
         .toString();
 
     String rewritten = rewrite(gadget, doc);
-    
+
     Matcher matcher = DOCUMENT_SPLIT_PATTERN.matcher(rewritten);
     assertTrue("Output is not valid HTML.", matcher.matches());
     assertTrue("Should not include doctype, this will default to quirksmode (old Shindig behavior)", !matcher.group(BEFORE_HEAD_GROUP).contains("<!DOCTYPE"));
- 
+
     gadget = makeDefaultOpenSocial2Gadget(true);
     String docType = "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">";
     doc = new StringBuilder()
@@ -225,13 +239,13 @@ public class RenderingGadgetRewriterTest {
         .append("</head><body>")
         .append(body)
         .append("</body></html>")
-        .toString();   
+        .toString();
     rewritten = rewrite(gadget, doc);
-    
+
     matcher = DOCUMENT_SPLIT_PATTERN.matcher(rewritten);
     assertTrue("Output is not valid HTML.", matcher.matches());
     assertTrue("Should include doctype, when in quirksmode we should use pre OS2.0 Shindig behavior.", matcher.group(BEFORE_HEAD_GROUP).contains(docType));
- 
+
 
   }
 
@@ -279,7 +293,7 @@ public class RenderingGadgetRewriterTest {
     assertTrue("IsGadget beacon not included.",
         matcher.group(HEAD_GROUP).contains("<script>" + IS_GADGET_BEACON + "</script>"));
     assertTrue("Forced javascript not included.",
-        matcher.group(HEAD_GROUP).contains("<script src=\"/js/foo\">"));
+        matcher.group(HEAD_GROUP).contains("<script src=\"/js/foo?jsload=0\">"));
     assertFalse("Default styling was injected when a doctype was specified.",
         matcher.group(HEAD_GROUP).contains(DEFAULT_CSS));
     assertTrue("Custom body attributes missing.",
@@ -291,7 +305,7 @@ public class RenderingGadgetRewriterTest {
 
     // Skipping other tests; code path should be the same for the rest.
   }
-  
+
   @Test
   public void completeDocumentOpenSocial2() throws Exception {
     String head = "<script src=\"foo.js\"></script><style type=\"text/css\">body{color:red;}</style>";
@@ -350,7 +364,7 @@ public class RenderingGadgetRewriterTest {
 
   private Set<String> getInjectedScript(String content) {
     Pattern featurePattern
-        = Pattern.compile("(?:.*)<script src=\"\\/js\\/(.*?)\"><\\/script>(?:.*)", Pattern.DOTALL);
+        = Pattern.compile("(?:.*)<script src=\"\\/js\\/(.*?)\\?jsload=0\"><\\/script>(?:.*)", Pattern.DOTALL);
     Matcher matcher = featurePattern.matcher(content);
 
     assertTrue("Forced scripts not injected.", matcher.matches());
@@ -868,7 +882,7 @@ public class RenderingGadgetRewriterTest {
 
     rewrite(gadget, "");
   }
-  
+
   @Test(expected = RewritingException.class)
   public void unsupportedViewFeatureThrows() throws Exception {
     String gadgetXml =
@@ -946,7 +960,7 @@ public class RenderingGadgetRewriterTest {
     expect(featureRegistry.getFeatureResources(same(gadget.getContext()),
         eq(ImmutableList.<String>of("core")), eq(Lists.<String>newArrayList())))
         .andReturn(lr);
-    expect(featureRegistry.getFeatures(eq(ImmutableList.of("core", "bar"))))
+    expect(featureRegistry.getFeatures(eq(ImmutableSet.of("core", "bar"))))
         .andReturn(ImmutableList.of("core"));
     expect(featureRegistry.getFeatures(eq(ImmutableList.of("core"))))
         .andReturn(ImmutableList.of("core"));
@@ -985,7 +999,7 @@ public class RenderingGadgetRewriterTest {
     rewrite(gadget, "");
     // rewrite will throw if the optional unsupported feature doesn't work.
   }
-  
+
   @Test
   public void unsupportedViewFeaturesDoNotThrow() throws Exception {
     String gadgetXml =
@@ -1020,7 +1034,7 @@ public class RenderingGadgetRewriterTest {
     // are more complicated because JSON doesn't implement interfaces like Collection or Map, or
     // implementing equals.
     PreloadedData preloadedData = new PreloadedData() {
-      public Collection<Object> toJson() throws PreloadException {
+      public Collection<Object> toJson() {
         return someData;
       }
     };
@@ -1143,12 +1157,28 @@ public class RenderingGadgetRewriterTest {
         eq(emptyList))).andReturn(gadgetLr);
     expect(featureRegistry.getFeatures(eq(allFeatures)))
         .andReturn(allFeatures);
-    expect(featureRegistry.getFeatures(eq(allFeaturesAndLibs)))
+    expect(featureRegistry.getFeatures(eq(Sets.newHashSet(allFeaturesAndLibs))))
         .andReturn(allFeaturesAndLibs);
     // Add CoreUtilConfigContributor behavior
     expect(featureRegistry.getAllFeatureNames()).
         andReturn(ImmutableSet.of("foo", "foo2", "core.util")).anyTimes();
     replay(featureRegistry);
+
+    JsResponseBuilder builder = new JsResponseBuilder();
+    for (FeatureResource r :  gadgetResources) {
+      if (r.isExternal()) {
+        builder.appendJs("<script src=\"" + r.getContent() + "\">", r.getName());
+      } else {
+        builder.appendJs(r.getContent(), r.getName());
+      }
+    }
+    reset(jsServingPipeline);
+    try {
+      expect(jsServingPipeline.execute(EasyMock.<JsRequest>anyObject())).andReturn(builder.build());
+    } catch (JsException e) {
+      throw new RuntimeException("Should not fail here");
+    }
+    replay(jsServingPipeline);
   }
 
   private FeatureResource inline(String content, String debugContent) {

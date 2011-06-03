@@ -26,6 +26,7 @@ import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.GadgetSpecFactory;
 import org.apache.shindig.gadgets.features.FeatureRegistry;
+import org.apache.shindig.gadgets.features.FeatureRegistryProvider;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.View;
 import org.apache.shindig.gadgets.variables.VariableSubstituter;
@@ -50,19 +51,19 @@ public class Processor {
   private final VariableSubstituter substituter;
   private final ContainerConfig containerConfig;
   private final GadgetBlacklist blacklist;
-  private final FeatureRegistry featureRegistry;
+  private final FeatureRegistryProvider featureRegistryProvider;
 
   @Inject
   public Processor(GadgetSpecFactory gadgetSpecFactory,
                    VariableSubstituter substituter,
                    ContainerConfig containerConfig,
                    GadgetBlacklist blacklist,
-                   FeatureRegistry featureRegistry) {
+                   FeatureRegistryProvider featureRegistryProvider) {
     this.gadgetSpecFactory = gadgetSpecFactory;
     this.substituter = substituter;
     this.blacklist = blacklist;
     this.containerConfig = containerConfig;
-    this.featureRegistry = featureRegistry;
+    this.featureRegistryProvider = featureRegistryProvider;
   }
 
   protected void validateGadgetUrl(Uri url) throws ProcessingException {
@@ -80,6 +81,7 @@ public class Processor {
    */
   public Gadget process(GadgetContext context) throws ProcessingException {
     GadgetSpec spec;
+    FeatureRegistry featureRegistry;
 
     try {
       spec = gadgetSpecFactory.getGadgetSpec(context);
@@ -88,6 +90,8 @@ public class Processor {
       if (context.getSanitize()) {
         spec = spec.removeUrlViews();
       }
+
+      featureRegistry = featureRegistryProvider.get(context.getRepository());
     } catch (GadgetException e) {
       throw new ProcessingException(e.getMessage(), e, e.getHttpStatusCode());
     }

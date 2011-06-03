@@ -35,6 +35,7 @@ import org.apache.shindig.gadgets.features.ApiDirective;
 import org.apache.shindig.gadgets.features.FeatureRegistry;
 import org.apache.shindig.gadgets.features.FeatureRegistry.FeatureBundle;
 import org.apache.shindig.gadgets.features.FeatureRegistry.LookupResult;
+import org.apache.shindig.gadgets.features.FeatureRegistryProvider;
 import org.apache.shindig.gadgets.features.FeatureResource;
 import org.apache.shindig.gadgets.uri.JsUriManager.JsUri;
 import org.easymock.EasyMock;
@@ -89,14 +90,19 @@ public class ExportJsProcessorTest {
     FeatureResource resource = mockResource(EXPORT_JS_DEB);
     FeatureRegistry.FeatureBundle bundle = mockExportJsBundle(resource);
     LookupResult lookupMock = mockLookupResult(bundle);
-    FeatureRegistry featureRegistryMock = mockRegistry(lookupMock);
+    final FeatureRegistry featureRegistryMock = mockRegistry(lookupMock);
+    FeatureRegistryProvider registryProvider = new FeatureRegistryProvider() {
+      public FeatureRegistry get(String repository) {
+        return featureRegistryMock;
+      }
+    };
 
     textJsContent1 = JsContent.fromText(TEXT_CONTENT_1, "source1");
     textJsContent2 = JsContent.fromText(TEXT_CONTENT_2, "source2");
     featureJsContent1 = JsContent.fromFeature(FEATURE_CONTENT_1, "source3", mockBundle(EXPORTS_1), null);
     featureJsContent2 = JsContent.fromFeature(FEATURE_CONTENT_2, "source4", mockBundle(EXPORTS_2), null);
     featureJsContent3 = JsContent.fromFeature(FEATURE_CONTENT_3, "source5", mockBundle(EXPORTS_3), null);
-    compiler = new ExportJsProcessor(featureRegistryMock, contextProviderMock);
+    compiler = new ExportJsProcessor(registryProvider, contextProviderMock);
   }
 
   @SuppressWarnings("unchecked")
@@ -111,7 +117,8 @@ public class ExportJsProcessorTest {
 
   private JsUri mockJsUri(JsCompileMode mode) {
     JsUri result = createMock(JsUri.class);
-    expect(result.getCompileMode()).andReturn(mode).anyTimes();
+    expect(result.getCompileMode()).andStubReturn(mode);
+    expect(result.getRepository()).andStubReturn(null);
     replay(result);
     return result;
   }

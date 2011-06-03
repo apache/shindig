@@ -34,6 +34,7 @@ import org.apache.shindig.gadgets.RenderingContext;
 import org.apache.shindig.gadgets.config.ConfigContributor;
 import org.apache.shindig.gadgets.config.DefaultConfigProcessor;
 import org.apache.shindig.gadgets.features.FeatureRegistry;
+import org.apache.shindig.gadgets.features.FeatureRegistryProvider;
 import org.apache.shindig.gadgets.uri.JsUriManager.JsUri;
 import org.easymock.Capture;
 import org.easymock.IAnswer;
@@ -58,7 +59,7 @@ public class ConfigInjectionProcessorTest {
   private ContainerConfig containerConfig;
   private Map<String, ConfigContributor> configContributors;
   private ConfigInjectionProcessor processor;
-  
+
   @Before
   public void setUp() throws Exception {
     control = createControl();
@@ -67,10 +68,16 @@ public class ConfigInjectionProcessorTest {
     registry = control.createMock(FeatureRegistry.class);
     containerConfig = control.createMock(ContainerConfig.class);
     configContributors = Maps.newHashMap();
-    processor = new ConfigInjectionProcessor(registry,
+    FeatureRegistryProvider registryProvider = new FeatureRegistryProvider() {
+      public FeatureRegistry get(String repository) {
+        return registry;
+      }
+    };
+
+    processor = new ConfigInjectionProcessor(registryProvider,
         new DefaultConfigProcessor(configContributors, containerConfig));
   }
-  
+
   @Test
   public void gadgetGetsNothing() throws Exception {
     JsResponseBuilder builder = prepareRequestReturnBuilder(RenderingContext.GADGET);
@@ -79,17 +86,17 @@ public class ConfigInjectionProcessorTest {
     control.verify();
     assertEquals(BASE_CODE, builder.build().toJsString());
   }
-  
+
   @Test
   public void containerNoFeaturesDoesNothing() throws Exception {
     checkNoFeaturesDoesNothing(RenderingContext.CONTAINER);
   }
-  
+
   @Test
   public void configuredNoFeaturesDoesNothing() throws Exception {
     checkNoFeaturesDoesNothing(RenderingContext.CONFIGURED_GADGET);
   }
-  
+
   private void checkNoFeaturesDoesNothing(RenderingContext ctx) throws Exception {
     JsResponseBuilder builder = prepareRequestReturnBuilder(ctx);
     expect(containerConfig.getMap(CONTAINER, ConfigInjectionProcessor.GADGETS_FEATURES_KEY))
@@ -104,7 +111,7 @@ public class ConfigInjectionProcessorTest {
     control.verify();
     assertEquals(BASE_CODE, builder.build().toJsString());
   }
-  
+
   @Test
   public void containerNoMatchingFeaturesDoesNothing() throws Exception {
     checkNoMatchingFeaturesDoesNothing(RenderingContext.CONTAINER);
@@ -140,30 +147,30 @@ public class ConfigInjectionProcessorTest {
   public void containerNoContributorsGetsBase() throws Exception {
     checkNoContributorsGetsBase(RenderingContext.CONTAINER);
   }
-  
+
   @Test
   public void configuredNoContributorsGetsBase() throws Exception {
     checkNoContributorsGetsBase(RenderingContext.CONFIGURED_GADGET);
   }
-  
+
   private void checkNoContributorsGetsBase(RenderingContext ctx) throws Exception {
     checkInjectConfig(ctx, false);
   }
-  
+
   @Test
   public void containerModeInjectConfig() throws Exception {
     checkInjectConfig(RenderingContext.CONTAINER);
   }
-  
+
   @Test
   public void configuredModeInjectConfig() throws Exception {
     checkInjectConfig(RenderingContext.CONFIGURED_GADGET);
   }
-  
+
   private void checkInjectConfig(RenderingContext ctx) throws Exception {
     checkInjectConfig(ctx, true);
   }
-  
+
   private void checkInjectConfig(RenderingContext ctx, boolean extraContrib) throws Exception {
     JsResponseBuilder builder = prepareRequestReturnBuilder(ctx);
     Map<String, Object> baseConfig = Maps.newHashMap();
@@ -200,7 +207,7 @@ public class ConfigInjectionProcessorTest {
     expect(jsUri.getLibs()).andReturn(libs);
     expect(jsUri.getLoadedLibs()).andReturn(EMPTY_LIST);
     expect(registry.getFeatures(libs)).andReturn(libs);
-    
+
     control.replay();
     assertTrue(processor.process(request, builder));
     control.verify();
@@ -211,7 +218,7 @@ public class ConfigInjectionProcessorTest {
     assertTrue(jsCode.endsWith(endMatch));
     String injectedConfig = jsCode.substring(baseMatch.length(),
         jsCode.length() - endMatch.length());
-    
+
     // Convert to JSON object to bypass ordering issues.
     // This is bulky but works. There's probably a better way.
     JSONObject configObj = new JSONObject(injectedConfig);
@@ -231,15 +238,16 @@ public class ConfigInjectionProcessorTest {
       assertEquals(expected.get("feature3").toString(), configObj.get("feature3").toString());
     }
   }
-  
+
   private JsResponseBuilder prepareRequestReturnBuilder(RenderingContext ctx) {
     expect(jsUri.getContext()).andReturn(ctx);
     expect(jsUri.getContainer()).andReturn(CONTAINER);
     expect(jsUri.isDebug()).andReturn(false);
+    expect(jsUri.getRepository()).andReturn(null);
     expect(request.getJsUri()).andReturn(jsUri);
     return new JsResponseBuilder().appendJs(BASE_CODE, "source");
   }
-  
+
   @Test
   public void newGlobalConfigAdded() throws Exception {
     List<String> requested = ImmutableList.of("reqfeature1", "reqfeature2", "already1");
@@ -252,7 +260,7 @@ public class ConfigInjectionProcessorTest {
         .andReturn(config);
     expect(request.getHost()).andReturn(HOST).anyTimes();
     expect(registry.getFeatures(requested)).andReturn(requested);
-    
+
     JsResponseBuilder builder = prepareRequestReturnBuilder(RenderingContext.CONFIGURED_GADGET);
 
     ConfigContributor cc = control.createMock(ConfigContributor.class);
@@ -268,11 +276,11 @@ public class ConfigInjectionProcessorTest {
       }
     });
     configContributors.put("reqfeature1", cc);
-    
+
     control.replay();
     assertTrue(processor.process(request, builder));
     control.verify();
-    
+
     String jsCode = builder.build().toJsString();
     String startCode = BASE_CODE + "window['___cfg']=";
     assertTrue(jsCode.startsWith(startCode));

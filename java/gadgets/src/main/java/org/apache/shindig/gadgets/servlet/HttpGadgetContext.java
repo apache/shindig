@@ -25,6 +25,7 @@ import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.RenderingContext;
 import org.apache.shindig.gadgets.UserPrefs;
+import org.apache.shindig.gadgets.uri.UriCommon;
 
 import com.google.common.collect.Maps;
 
@@ -150,16 +151,26 @@ public class HttpGadgetContext extends GadgetContext {
     }
     return userAgent;
   }
-  
+
+  @Override
+  public String getRepository() {
+    String repository = request.getHeader(UriCommon.Param.REPOSITORY_ID.getKey());
+    if (repository == null) {
+      return super.getRepository();
+    }
+    return repository;
+  }
+
   /**
    * @param req
    * @return The container, if set, or null.
    */
+  @SuppressWarnings("deprecation")
   private static String getContainer(HttpServletRequest req) {
-    String container = req.getParameter("container");
+    String container = req.getParameter(UriCommon.Param.CONTAINER.getKey());
     if (container == null) {
       // The parameter used to be called 'synd' FIXME: schedule removal
-      container = req.getParameter("synd");
+      container = req.getParameter(UriCommon.Param.SYND.getKey());
     }
     return container;
   }
@@ -169,7 +180,7 @@ public class HttpGadgetContext extends GadgetContext {
    * @return Debug setting, if set, or null.
    */
   private static Boolean getDebug(HttpServletRequest req) {
-    String debug = req.getParameter("debug");
+    String debug = req.getParameter(UriCommon.Param.DEBUG.getKey());
     if (debug == null) {
       return Boolean.FALSE;
     } else if ("0".equals(debug)) {
@@ -183,7 +194,7 @@ public class HttpGadgetContext extends GadgetContext {
    * @return The ignore cache setting, if appropriate params are set, or null.
    */
   private static Boolean getIgnoreCache(HttpServletRequest req) {
-    String ignoreCache = req.getParameter("nocache");
+    String ignoreCache = req.getParameter(UriCommon.Param.NO_CACHE.getKey());
     if (ignoreCache == null) {
       return Boolean.FALSE;
     } else if ("0".equals(ignoreCache)) {
@@ -197,8 +208,8 @@ public class HttpGadgetContext extends GadgetContext {
    * @return The locale, if appropriate parameters are set, or null.
    */
   private static Locale getLocale(HttpServletRequest req) {
-    String language = req.getParameter("lang");
-    String country = req.getParameter("country");
+    String language = req.getParameter(UriCommon.Param.LANG.getKey());
+    String country = req.getParameter(UriCommon.Param.COUNTRY.getKey());
     if (language == null && country == null) {
       return null;
     } else if (language == null) {
@@ -219,7 +230,7 @@ public class HttpGadgetContext extends GadgetContext {
     if (mid == null) {
       return null;
     }
-    
+
     try {
       return Integer.parseInt(mid);
     } catch (IllegalArgumentException e) {
@@ -232,11 +243,11 @@ public class HttpGadgetContext extends GadgetContext {
    * @return The rendering context, if appropriate params are set, or null.
    */
   private static RenderingContext getRenderingContext(HttpServletRequest req) {
-    String c = req.getParameter("c");
+    String c = req.getParameter(UriCommon.Param.CONTAINER_MODE.getKey());
     if (c == null) {
       return null;
     }
-    return "1".equals(c) ? RenderingContext.CONTAINER : RenderingContext.GADGET;
+    return RenderingContext.valueOfParam(c);
   }
 
   /**
@@ -244,7 +255,7 @@ public class HttpGadgetContext extends GadgetContext {
    * @return The ignore cache setting, if appropriate params are set, or null.
    */
   private static Uri getUrl(HttpServletRequest req) {
-    String url = req.getParameter("url");
+    String url = req.getParameter(UriCommon.Param.URL.getKey());
     if (url == null) {
       return null;
     }
@@ -281,6 +292,6 @@ public class HttpGadgetContext extends GadgetContext {
    * @return The view, if specified, or null.
    */
   private static String getView(HttpServletRequest req) {
-    return req.getParameter("view");
+    return req.getParameter(UriCommon.Param.VIEW.getKey());
   }
 }

@@ -23,8 +23,10 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
 import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.gadgets.uri.JsUriManager;
 import org.apache.shindig.gadgets.uri.JsUriManager.JsUri;
+import org.apache.shindig.gadgets.uri.UriCommon;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -59,7 +61,7 @@ public class JsLoadProcessor implements JsProcessor {
   public boolean process(JsRequest request, JsResponseBuilder builder)
       throws JsException {
     JsUri jsUri = request.getJsUri();
-    
+
     // Don't emit the JS itself; instead emit JS loader script that loads
     // versioned JS. The loader script is much smaller and cacheable for a
     // configurable amount of time.
@@ -74,18 +76,22 @@ public class JsLoadProcessor implements JsProcessor {
       int refresh = getCacheTtlSecs(jsUri);
       builder.setCacheTtlSecs(refresh);
       builder.setProxyCacheable(true);
-      
+
       doJsload(jsUri, builder);
       return false;
     }
     return true;
   }
-  
-  protected void doJsload(JsUri jsUri, JsResponseBuilder resp)
-      throws JsException {
+
+  /**
+   * @throws JsException
+   */
+  protected void doJsload(JsUri jsUri, JsResponseBuilder resp) throws JsException {
     jsUri.setJsload(false);
     jsUri.setNohint(true);
     Uri incUri = jsUriManager.makeExternJsUri(jsUri);
+    // Make sure next fetch will get content:
+    incUri = new UriBuilder(incUri).addQueryParameter(UriCommon.Param.JSLOAD.getKey(), "0").toUri();
     resp.appendJs(createJsloadScript(incUri), CODE_ID);
   }
 

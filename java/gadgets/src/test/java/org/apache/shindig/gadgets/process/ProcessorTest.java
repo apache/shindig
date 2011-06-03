@@ -31,6 +31,8 @@ import org.apache.shindig.gadgets.GadgetBlacklist;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.GadgetSpecFactory;
+import org.apache.shindig.gadgets.features.FeatureRegistry;
+import org.apache.shindig.gadgets.features.FeatureRegistryProvider;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.variables.VariableSubstituter;
 
@@ -72,7 +74,13 @@ public class ProcessorTest {
          "}}}");
 
     containerConfig = new JsonContainerConfig(config, Expressions.forTesting());
-    processor = new Processor(gadgetSpecFactory, substituter, containerConfig, blacklist, null);
+    FeatureRegistryProvider registryProvider = new FeatureRegistryProvider() {
+      public FeatureRegistry get(String repository) {
+        return null;
+      }
+    };
+    processor = new Processor(gadgetSpecFactory, substituter, containerConfig, blacklist,
+        registryProvider);
   }
 
   private GadgetContext makeContext(final String view, final Uri specUrl, final boolean sanitize) {
@@ -89,7 +97,7 @@ public class ProcessorTest {
       public String getView() {
         return view;
       }
-      
+
       @Override
       public boolean getSanitize() {
         return sanitize;
@@ -152,7 +160,7 @@ public class ProcessorTest {
     } catch (ProcessingException e) {
       assertEquals(HttpServletResponse.SC_FORBIDDEN, e.getHttpStatusCode());
     }
-    
+
   }
 
   @Test
@@ -174,7 +182,7 @@ public class ProcessorTest {
       assertEquals(HttpServletResponse.SC_FORBIDDEN, e.getHttpStatusCode());
     }
   }
-  
+
   @Test
   public void typeUrlViewsAreSkippedForSanitizedGadget() throws Exception {
     Gadget gadget = processor.process(makeContext("url", SPEC_URL, true));
