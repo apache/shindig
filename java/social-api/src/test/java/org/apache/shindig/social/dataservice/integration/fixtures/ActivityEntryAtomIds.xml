@@ -1,41 +1,5 @@
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:osearch="http://a9.com/-/spec/opensearch/1.1">
   <entry>
-    <id>activity1</id>
-    <title>John posted a new blog entry</title>
-    <author>
-      <uri>john.doe</uri>
-      <name xmlns="http://ns.opensocial.org/2008/opensocial">John Doe</name>
-    </author>
-    <content type="application/xml">
-      <activityEntry xmlns="http://ns.opensocial.org/2008/opensocial">
-        <actor>
-          <displayName>John Doe</displayName>
-          <id>john.doe</id>
-          <image>
-            <height>250</height>
-            <url>http://example.org/john/image</url>
-            <width>250</width>
-          </image>
-          <objectType>person</objectType>
-          <url>http://example.org/john</url>
-        </actor>
-        <id>activity1</id>
-        <object>
-          <id>object1</id>
-          <url>http://example.org/blog/2011/02/entry</url>
-        </object>
-        <published>2011-02-10T15:04:55Z</published>
-        <target>
-          <displayName>John&apos;s Blog</displayName>
-          <id>target1</id>
-          <objectType>blog</objectType>
-          <url>http://example.org/blog/</url>
-        </target>
-        <verb>post</verb>
-      </activityEntry>
-    </content>
-  </entry>
-  <entry>
     <id>activity2</id>
     <title>John posted a new video to his album.</title>
     <summary>Photo posted</summary>
@@ -85,10 +49,17 @@
           <upstreamDuplicate>upstream2</upstreamDuplicate>
           <url>http://example.org/album/my_fluffy_cat.jpg</url>
         </object>
+        <openSocial>
+          <embed>
+            <context>1234</context>
+            <gadget>http://example.org/albumViewer.xml</gadget>
+            <url>http://example.org/album/</url>
+          </embed>
+        </openSocial>
         <provider>
           <url>http://example.org/activity-stream</url>
         </provider>
-        <published>2011-02-10T15:04:55Z</published>
+        <published>2011-03-10T15:04:55Z</published>
         <target>
           <displayName>John&apos;s Photo Album</displayName>
           <id>target2</id>
@@ -102,13 +73,43 @@
         </target>
         <title>John posted a new video to his album.</title>
         <verb>post</verb>
-        <openSocial>
-          <embed>
-            <context>1234</context>
-            <gadget>http://example.org/albumViewer.xml</gadget>
-            <url>http://example.org/album/</url>
-          </embed>
-        </openSocial>
+      </activityEntry>
+    </content>
+  </entry>
+  <entry>
+    <id>activity1</id>
+    <title>John posted a new blog entry</title>
+    <author>
+      <uri>john.doe</uri>
+      <name xmlns="http://ns.opensocial.org/2008/opensocial">John Doe</name>
+    </author>
+    <content type="application/xml">
+      <activityEntry xmlns="http://ns.opensocial.org/2008/opensocial">
+        <actor>
+          <displayName>John Doe</displayName>
+          <id>john.doe</id>
+          <image>
+            <height>250</height>
+            <url>http://example.org/john/image</url>
+            <width>250</width>
+          </image>
+          <objectType>person</objectType>
+          <url>http://example.org/john</url>
+        </actor>
+        <id>activity1</id>
+        <object>
+          <id>object1</id>
+          <url>http://example.org/blog/2011/02/entry</url>
+        </object>
+        <published>2011-02-10T15:04:55Z</published>
+        <target>
+          <displayName>John&apos;s Blog</displayName>
+          <id>target1</id>
+          <objectType>blog</objectType>
+          <url>http://example.org/blog/</url>
+        </target>
+        <title>John posted a new blog entry</title>
+        <verb>post</verb>
       </activityEntry>
     </content>
   </entry>
@@ -117,5 +118,4 @@
   <osearch:itemsPerPage>2</osearch:itemsPerPage>
   <author>?</author>
   <link rel="rel">???</link>
-
 </feed>

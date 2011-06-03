@@ -52,7 +52,7 @@
         <provider>
           <url>http://example.org/activity-stream</url>
         </provider>
-        <published>2011-02-10T15:04:55Z</published>
+        <published>2011-03-10T15:04:55Z</published>
         <target>
           <displayName>John&apos;s Photo Album</displayName>
           <id>target2</id>

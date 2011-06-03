@@ -19,7 +19,6 @@ package org.apache.shindig.social.dataservice.integration;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.StringReader;
@@ -76,14 +75,13 @@ public class TestUtils {
     return obj1Converted.equals(obj2Converted);
   }
   
-  
   /**
    * Tests the DOMs represented by two XML strings for equality by performing
-   * a deep comparison.  The two DOMs are considered equal if the paths to all
-   * leaf nodes are equal and the values at such paths are equal.
+   * a deep comparison.
    * 
    * @param xml1 represents the XML DOM to compare with xml2
    * @param xml2 represents the XML DOM to compare with xml1
+   * 
    * return true if the represented DOMs are equal, false otherwise
    */
   public static boolean xmlsEqual(String xml1, String xml2) throws Exception {
@@ -93,10 +91,10 @@ public class TestUtils {
     Document doc1 = db.parse(new InputSource(new StringReader(xml1)));
     Document doc2 = db.parse(new InputSource(new StringReader(xml2)));
     
-    Map<String, String> paths1 = getLeafPaths(doc1.getDocumentElement(), "");
-    Map<String, String> paths2 = getLeafPaths(doc2.getDocumentElement(), "");
-
-    return paths1.equals(paths2);
+    Set<Object> childSet1 = getChildSet(doc1.getDocumentElement(), "");
+    Set<Object> childSet2 = getChildSet(doc2.getDocumentElement(), "");
+    
+    return childSet1.equals(childSet2); // comparing sets does all the hard work :)
   }
   
   // ---------------------------- PRIVATE HELPERS -----------------------------
@@ -134,25 +132,23 @@ public class TestUtils {
   }
   
   /*
-   * Recursive utility to map all leaf node paths to the values at each path
-   * within an XML node.
+   * Recursive utility to represent an XML Document as a Set.
    * 
-   * @param node is the root node to find all leaf paths & values for
+   * @param node is the root node to map to a Set
    * @param basePath is the path to the root node
-   * @return Map<String, String> is a Map of leaf paths & values for each path
+   * 
+   * @return Set<Object> represents the XML Document as a Set
    */
-  private static Map<String, String> getLeafPaths(Node node, String basePath) {    
-    Map<String, String> paths = new HashMap<String, String>();
-    if (!node.hasChildNodes()) {
-      if (!node.getTextContent().trim().equals("")) {
-        paths.put(basePath, node.getTextContent());
-      }
+  private static Set<Object> getChildSet(Node node, String basePath) {
+    Set<Object> childSet = new HashSet<Object>();
+    if (!node.hasChildNodes() && !node.getTextContent().trim().equals("")) {
+      childSet.add(basePath + ":" + node.getTextContent());
     } else {
       NodeList children = node.getChildNodes();
       for (int i = 0; i < children.getLength(); i++) {
-        paths.putAll(getLeafPaths(children.item(i), basePath + "/" + node.getNodeName()));
+        childSet.add(getChildSet(children.item(i), basePath + "/" + node.getNodeName()));
       }
     }
-    return paths;
+    return childSet;
   }
 }
