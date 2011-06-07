@@ -58,7 +58,7 @@ osapi.container.Container = function(opt_config) {
   this.renderCajole_ = Boolean(
       osapi.container.util.getSafeJsonValue(config,
       osapi.container.ContainerConfig.RENDER_CAJOLE, false));
-  
+
   /**
    * @type {string}
    * @private
@@ -72,10 +72,10 @@ osapi.container.Container = function(opt_config) {
    * @private
    */
   var param = window.__CONTAINER_URI.getQP(this.renderDebugParam_);
-  this.renderDebug_ = (typeof param === 'undefined')
-      ? Boolean(osapi.container.util.getSafeJsonValue(config,
-          osapi.container.ContainerConfig.RENDER_DEBUG, false))
-      : (param === '1');
+  this.renderDebug_ = (typeof param === 'undefined') ?
+      Boolean(osapi.container.util.getSafeJsonValue(config,
+          osapi.container.ContainerConfig.RENDER_DEBUG, false)) :
+      (param === '1');
 
   /**
    * @type {boolean}
@@ -171,7 +171,7 @@ osapi.container.Container.prototype.navigateGadget = function(
   }
 
   this.refreshService_();
-  
+
   var self = this;
   // TODO: Lifecycle, add ability for current gadget to cancel nav.
   site.navigateTo(gadgetUrl, viewParams, renderParams, function(gadgetInfo) {
@@ -222,7 +222,7 @@ osapi.container.Container.prototype.preloadGadgets = function(gadgetUrls, opt_ca
   var callback = opt_callback || function() {};
   var request = osapi.container.util.newMetadataRequest(gadgetUrls);
   var self = this;
-  
+
   this.refreshService_();
   this.service_.getGadgetMetadata(request, function(response) {
     self.addPreloadGadgets_(response);
@@ -260,7 +260,7 @@ osapi.container.Container.prototype.unloadGadgets = function(gadgetUrls) {
 osapi.container.Container.prototype.getGadgetMetadata = function(
     gadgetUrl, callback) {
   var request = osapi.container.util.newMetadataRequest([gadgetUrl]);
-  
+
   this.refreshService_();
   this.service_.getGadgetMetadata(request, callback);
 };
@@ -298,8 +298,9 @@ osapi.container.Container.prototype.onConstructed = function(opt_config) {};
 /**
  * Adds a new namespace to the Container object.  The namespace
  * will contain the result of calling the function passed in.
- * @param {string} namespace
- * @param {function} func to call when creating the namespace
+ *
+ * @param {string} namespace the namespace to add.
+ * @param {function} func to call when creating the namespace.
  */
 osapi.container.Container.addMixin = function(namespace, func) {
    osapi.container.Container.prototype.mixins_[namespace] = func;
@@ -363,7 +364,7 @@ osapi.container.ContainerConfig.TOKEN_REFRESH_INTERVAL = 'tokenRefreshInterval';
 osapi.container.ContainerConfig.NAVIGATE_CALLBACK = 'navigateCallback';
 
 /**
- * Provide server reference time for preloaded data. 
+ * Provide server reference time for preloaded data.
  * This time is used instead of each response time in order to support server caching of results.
  * @type {number}
  * @const
@@ -391,7 +392,7 @@ osapi.container.ContainerConfig.PRELOAD_TOKENS = 'preloadTokens';
 /**
  * Adds the ability for features to extend the container with
  * their own functionality that may be specific to that feature.
- * @type {Object}
+ * @type {Object<string,function>}
  * @private
  */
 osapi.container.Container.prototype.mixins_ = {};
@@ -402,15 +403,15 @@ osapi.container.Container.prototype.mixins_ = {};
  * @private
  */
 osapi.container.Container.prototype.initializeMixins_ = function() {
-  for (var i in this.mixins_) { 
-    this[i] = new this.mixins_[i](this);  
+  for (var i in this.mixins_) {
+    this[i] = new this.mixins_[i](this);
   }
 };
 
 
 /**
  * Add list of gadgets to preload list
- * @param {Object} response hash of gadgets data
+ * @param {Object} response hash of gadgets data.
  * @private
  */
 osapi.container.Container.prototype.addPreloadGadgets_ = function(response) {
@@ -430,8 +431,8 @@ osapi.container.Container.prototype.addPreloadGadgets_ = function(response) {
 
 /**
  * Preload gadgets and tokens from container config.
- * Support caching by providing server time to override respnse time usage
- * @param {Object} config container configuration
+ * Support caching by providing server time to override respnse time usage.
+ * @param {Object} config container configuration.
  * @private
  */
 osapi.container.Container.prototype.preloadFromConfig_ = function(config) {
@@ -461,7 +462,7 @@ osapi.container.Container.prototype.refreshService_ = function() {
 
 
 /**
- * @param {string} id Iframe ID of gadget holder contained in the gadget site to get.
+ * @param {string} iframeId Iframe ID of gadget holder contained in the gadget site to get.
  * @return {osapi.container.GadgetSite} The gadget site.
  * @private
  */
@@ -572,7 +573,7 @@ osapi.container.Container.prototype.getTokenRefreshableGadgetUrls_ = function() 
  * @return {Object} JSON of gadget URLs.
  * @private
  */
-osapi.container.Container.prototype.getActiveGadgetUrls_ = function() { 
+osapi.container.Container.prototype.getActiveGadgetUrls_ = function() {
   return osapi.container.util.mergeJsons(
       this.getNavigatedGadgetUrls_(),
       this.preloadedGadgetUrls_);
@@ -599,6 +600,7 @@ osapi.container.Container.prototype.getNavigatedGadgetUrls_ = function() {
 /**
  * Refresh security tokens immediately. This will fetch gadget metadata, along
  * with its token and have the token cache updated.
+ * @private
  */
 osapi.container.Container.prototype.refreshTokens_ = function() {
   var ids = this.getTokenRefreshableGadgetUrls_();
