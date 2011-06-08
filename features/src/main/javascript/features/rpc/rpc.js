@@ -337,7 +337,7 @@ if (!window['gadgets']['rpc']) { // make lib resilient to double-inclusion
             // The second clause simply verifies that referrer is valid.
             referrer = opt_sender;
           }
-          rpc[RPC_KEY_REFERRER] = referrer; 
+          rpc[RPC_KEY_REFERRER] = referrer;
         }
 
         // Call the requested RPC service.
@@ -645,10 +645,10 @@ if (!window['gadgets']['rpc']) { // make lib resilient to double-inclusion
     }
 
     function setReferrerConfig(cfg) {
-      var passReferrer = cfg['passReferrer'] || "";
-      var prParts = passReferrer.split(":", 2);
-      passReferrerDirection = prParts[0] || "none";
-      passReferrerContents = prParts[1] || "origin";
+      var passReferrer = cfg['passReferrer'] || '';
+      var prParts = passReferrer.split(':', 2);
+      passReferrerDirection = prParts[0] || 'none';
+      passReferrerContents = prParts[1] || 'origin';
     }
 
 
@@ -658,7 +658,7 @@ if (!window['gadgets']['rpc']) { // make lib resilient to double-inclusion
         transport.init(process, transportReady);
       }
     }
-    
+
     function isLegacyProtocolConfig(cfg) {
       return String(cfg['useLegacyProtocol']) === 'true';
     }
@@ -773,14 +773,14 @@ if (!window['gadgets']['rpc']) { // make lib resilient to double-inclusion
     }
 
     function getReferrer(targetId) {
-      if (passReferrerDirection === "bidir" ||
-          (passReferrerDirection === "c2p" && targetId === "..") ||
-          (passReferrerDirection === "p2c" && targetId !== "..")) {
+      if (passReferrerDirection === 'bidir' ||
+          (passReferrerDirection === 'c2p' && targetId === '..') ||
+          (passReferrerDirection === 'p2c' && targetId !== '..')) {
         var href = window.location.href;
-        var lopOff = "?";  // default = origin
-        if (passReferrerContents === "query") {
-          lopOff = "#";
-        } else if (passReferrerContents === "hash") {
+        var lopOff = '?';  // default = origin
+        if (passReferrerContents === 'query') {
+          lopOff = '#';
+        } else if (passReferrerContents === 'hash') {
           return href;
         }
         var lastIx = href.lastIndexOf(lopOff);
@@ -1053,7 +1053,7 @@ if (!window['gadgets']['rpc']) { // make lib resilient to double-inclusion
 
       ACK: ACK,
 
-      RPC_ID: rpcId || "..",
+      RPC_ID: rpcId || '..',
 
       SEC_ERROR_LOAD_TIMEOUT: LOAD_TIMEOUT,
       SEC_ERROR_FRAME_PHISH: FRAME_PHISH,

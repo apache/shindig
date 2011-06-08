@@ -32,7 +32,7 @@ gadgets.rpctx = gadgets.rpctx || {};
 if (!gadgets.rpctx.flash) {  // make lib resilient to double-inclusion
 
   gadgets.rpctx.flash = function() {
-    var swfId = "___xpcswf";
+    var swfId = '___xpcswf';
     var swfUrl = null;
     var usingFlash = false;
     var processFn = null;
@@ -45,15 +45,15 @@ if (!gadgets.rpctx.flash) {  // make lib resilient to double-inclusion
     var setupHandle = null;
     var setupAttempts = 0;
 
-    var SWF_CHANNEL_READY = "_scr";
-    var SWF_CONFIRMED_PARENT = "_pnt";
+    var SWF_CHANNEL_READY = '_scr';
+    var SWF_CONFIRMED_PARENT = '_pnt';
     var READY_TIMEOUT_MS = 100;
     var MAX_READY_RETRIES = 50;
     var readyAttempts = 0;
     var readyHandle = null;
     var readyMsgs = {};
 
-    var myLoc = window.location.protocol + "//" + window.location.host;
+    var myLoc = window.location.protocol + '//' + window.location.host;
     var JSL_NS = '___jsl';
     var METHODS_NS = '_fm';
     var bucketNs;
@@ -62,7 +62,7 @@ if (!gadgets.rpctx.flash) {  // make lib resilient to double-inclusion
       window[JSL_NS] = window[JSL_NS] || {};
       var container = window[JSL_NS];
       var bucket = container[METHODS_NS] = {};
-      bucketNs = JSL_NS + "." + METHODS_NS;
+      bucketNs = JSL_NS + '.' + METHODS_NS;
       return bucket;
     }
 
@@ -73,20 +73,20 @@ if (!gadgets.rpctx.flash) {  // make lib resilient to double-inclusion
         method.apply({}, arguments);
       };
       methodBucket[requestedName] = methodBucket[requestedName] || exported;
-      return bucketNs + "." + requestedName;
+      return bucketNs + '.' + requestedName;
     }
 
     function getChannelId(receiverId) {
-      return receiverId === ".." ? gadgets.rpc.RPC_ID : receiverId;
+      return receiverId === '..' ? gadgets.rpc.RPC_ID : receiverId;
     }
 
     function getRoleId(targetId) {
-      return targetId === ".." ? "INNER" : "OUTER";
+      return targetId === '..' ? 'INNER' : 'OUTER';
     }
 
     function init(config) {
       if (usingFlash) {
-        swfUrl = config['rpc']['commSwf'] || "/xpc.swf";
+        swfUrl = config['rpc']['commSwf'] || '/xpc.swf';
       }
     }
     gadgets.config.register('rpc', null, init);
@@ -128,8 +128,8 @@ if (!gadgets.rpctx.flash) {  // make lib resilient to double-inclusion
       // to receive messages. This only occurs after the SWF indicates that
       // its setup() method has been successfully called and completed, and
       // only in child context.
-      if (readyMsgs[".."]) return;
-      sendChannelReady("..");
+      if (readyMsgs['..']) return;
+      sendChannelReady('..');
       readyAttempts++;
       if (readyAttempts >= MAX_READY_RETRIES && readyHandle !== null) {
         window.clearTimeout(readyHandle);
@@ -164,7 +164,7 @@ if (!gadgets.rpctx.flash) {  // make lib resilient to double-inclusion
       // Called by SWF only for role_id = "INNER" ie when initializing to parent.
       // Instantiates a polling handshake mechanism which ensures that any enqueued
       // messages remain so until each side is ready to send.
-      if (!readyMsgs[".."] && readyHandle === null) {
+      if (!readyMsgs['..'] && readyHandle === null) {
         readyHandle = window.setTimeout(childReadyPoller, READY_TIMEOUT_MS);
       }
     }
@@ -173,7 +173,7 @@ if (!gadgets.rpctx.flash) {  // make lib resilient to double-inclusion
     function call(targetId, from, rpc) {
       var targetOrigin = gadgets.rpc.getTargetOrigin(targetId);
       var rpcKey = gadgets.rpc.getAuthToken(targetId);
-      var handleKey = "sendMessage_" + getChannelId(targetId) + "_" + rpcKey + "_" + getRoleId(targetId);
+      var handleKey = 'sendMessage_' + getChannelId(targetId) + '_' + rpcKey + '_' + getRoleId(targetId);
       var messageHandler = relayHandle[handleKey];
       messageHandler.call(relayHandle, gadgets.json.stringify(rpc), targetOrigin);
       return true;
@@ -190,7 +190,7 @@ if (!gadgets.rpctx.flash) {  // make lib resilient to double-inclusion
         // This method is OK to call twice, if it occurs in a race.
         readyFn(channelReady, true);
         readyMsgs[channelReady] = true;
-        if (channelReady !== "..") {
+        if (channelReady !== '..') {
           // Child-to-parent: immediately signal that parent is ready.
           // Now that we know that child can receive messages, it's enough to send once.
           sendChannelReady(channelReady, true);
@@ -204,7 +204,7 @@ if (!gadgets.rpctx.flash) {  // make lib resilient to double-inclusion
     function sendChannelReady(receiverId, opt_isParentConfirmation) {
       var myId = gadgets.rpc.RPC_ID;
       var readyAck = {};
-      readyAck[SWF_CHANNEL_READY] = opt_isParentConfirmation ? ".." : myId;
+      readyAck[SWF_CHANNEL_READY] = opt_isParentConfirmation ? '..' : myId;
       readyAck[SWF_CONFIRMED_PARENT] = myId;
       call(receiverId, myId, readyAck);
     }

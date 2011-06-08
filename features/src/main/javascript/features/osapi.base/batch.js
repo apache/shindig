@@ -37,7 +37,7 @@
     //     transport : <rpc dispatcher>
     //  }
     // }
-    
+
     /** @type {Array.<Object>} */
     var keyedRequests = [];
 

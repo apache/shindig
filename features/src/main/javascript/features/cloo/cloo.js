@@ -24,7 +24,7 @@
  * Method overrides are actually method overwrites, and importantly there's
  * no such thing as private state: all properties attached to "this" are public
  * and accessible.
- * 
+ *
  * With this library, object-oriented JS APIs are implemented as function
  * closures with private internal variables. Exported APIs are returned from
  * these as Objects themselves.
@@ -91,12 +91,12 @@
  */
 
 var cloo = (function() {
-  var UNKNOWN_NAME = "(n/a)";
+  var UNKNOWN_NAME = '(n/a)';
   var selfs = [];
 
   function InterfaceMethod(className, methodName) {
     return function() {
-      throw "Class " + className + " missing " + methodName + "()";
+      throw 'Class ' + className + ' missing ' + methodName + '()';
     }
   }
 
@@ -107,14 +107,14 @@ var cloo = (function() {
   }
 
   function hasOwnFunctionProperty(obj, key) {
-    return obj.hasOwnProperty(key) && typeof obj[key] === "function";
+    return obj.hasOwnProperty(key) && typeof obj[key] === 'function';
   }
 
   function objectCreator() {
     var args = arguments;
     var className = UNKNOWN_NAME;
     var ix = 0;
-    if (typeof args[0] === "string") {
+    if (typeof args[0] === 'string') {
       className = args[0];
       ix = 1;
     }
@@ -145,7 +145,7 @@ var cloo = (function() {
       }
     }
 
-    var lastIx = selfs.length-1;
+    var lastIx = selfs.length - 1;
     if (lastIx >= 0 && !selfs[lastIx]) {
       selfs[lastIx] = out;
     }
@@ -155,14 +155,14 @@ var cloo = (function() {
 
   function selfStorage() {
     var ix = selfs.length;
-    if (ix && !selfs[ix-1]) {
-      throw "me() must be followed by obj()";
+    if (ix && !selfs[ix - 1]) {
+      throw 'me() must be followed by obj()';
     }
     selfs.push(null);
     return function() {
       var obj = selfs[ix];
       if (!obj) {
-        throw "me() access before obj creation";
+        throw 'me() access before obj creation';
       }
       return obj;
     };

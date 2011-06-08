@@ -83,7 +83,10 @@ osapi.container.GadgetHolder = function(siteId, el) {
 };
 
 /**
- * Url points to the rpc_relay.html which allows cross-domain communication between a gadget and container
+ * Url points to the rpc_relay.html which allows cross-domain communication between
+ *     a gadget and container
+ * @type {string}
+ * @private
  */
 osapi.container.GadgetHolder.prototype.relayPath_ = null;
 
@@ -152,7 +155,7 @@ osapi.container.GadgetHolder.prototype.getIframeElement = function() {
 
 /**
  * @param {string} value The value to set this social/security token to.
- * @return {osapi.container.GadgetHolder}
+ * @return {osapi.container.GadgetHolder} the current GadgetHolder
  */
 osapi.container.GadgetHolder.prototype.setSecurityToken = function(value) {
   this.securityToken_ = value;
@@ -168,8 +171,8 @@ osapi.container.GadgetHolder.prototype.setSecurityToken = function(value) {
  */
 osapi.container.GadgetHolder.prototype.render = function(
     gadgetInfo, viewParams, renderParams) {
-  this.iframeId_ = osapi.container.GadgetHolder.IFRAME_ID_PREFIX_
-      + this.siteId_;
+  this.iframeId_ = osapi.container.GadgetHolder.IFRAME_ID_PREFIX_ +
+      this.siteId_;
   this.gadgetInfo_ = gadgetInfo;
   this.viewParams_ = viewParams;
   this.renderParams_ = renderParams;
@@ -239,7 +242,8 @@ osapi.container.GadgetHolder.prototype.doOaaIframeHtml_ = function() {
       {
         Container: {
           onSecurityAlert: function(source, alertType) {
-            gadgets.error(['Security error for container ', source.getClientID(), ' : ', alertType].join(''));
+            gadgets.error(['Security error for container ',
+                source.getClientID(), ' : ', alertType].join(''));
             source.getIframe().src = 'about:blank';
           },
           onConnect: function(container) {
@@ -249,7 +253,8 @@ osapi.container.GadgetHolder.prototype.doOaaIframeHtml_ = function() {
         IframeContainer: {
           parent: this.el_,
           uri: this.getIframeUrl_(),
-          //tunnelURI: shindig.uri('/test1/gadgets/' + '../container/rpc_relay.html').resolve(shindig.uri(window.location.href)),
+          //tunnelURI: shindig.uri('/test1/gadgets/' + '../container/rpc_relay.html')
+          //   .resolve(shindig.uri(window.location.href)),
           tunnelURI: shindig.uri(this.relayPath_).resolve(shindig.uri(window.location.href)),
           iframeAttrs: iframeParams
         }
@@ -262,6 +267,7 @@ osapi.container.GadgetHolder.prototype.doOaaIframeHtml_ = function() {
  * @param {Object} gadgetInfo the JSON gadget description.
  * @param {string} feature the feature to look for.
  * @private
+ * @return {boolean} true if feature is set.
  */
 osapi.container.GadgetHolder.prototype.hasFeature_ = function(gadgetInfo, feature) {
   var modulePrefs = gadgetInfo[osapi.container.MetadataResponse.MODULE_PREFS];
@@ -331,7 +337,7 @@ osapi.container.GadgetHolder.prototype.getIframeUrl_ = function() {
   if (this.renderParams_[osapi.container.RenderParam.CAJOLE]) {
     var libs = uri.getQP('libs');
     if (libs == null || libs == '') uri.setQP('libs', 'caja');
-    else uri.setQP('libs', [ libs, ':caja' ].join(''));
+    else uri.setQP('libs', [libs, ':caja'].join(''));
     uri.setQP('caja', '1');
   }
   this.updateUserPrefParams_(uri);
@@ -364,7 +370,6 @@ osapi.container.GadgetHolder.prototype.getIframeUrl_ = function() {
  * and its appearance (in query params or fragment).
  * @param {shindig.uri} uri The URL possibly containing user preferences
  *     parameters prefixed by up_.
- * @return {string} The URL with up_ replaced by those specified in userPrefs.
  * @private
  */
 osapi.container.GadgetHolder.prototype.updateUserPrefParams_ = function(uri) {
@@ -382,14 +387,13 @@ osapi.container.GadgetHolder.prototype.updateUserPrefParams_ = function(uri) {
 };
 
 function init(config) {
-	if (config.container){
-		var rpath = config["container"]["relayPath"];
-		osapi.container.GadgetHolder.prototype.relayPath_ = rpath;
-	}
-};
+  if (config.container) {
+    var rpath = config['container']['relayPath'];
+    osapi.container.GadgetHolder.prototype.relayPath_ = rpath;
+  }
+}
 
 // We do run this in the container mode in the new common container
 if (gadgets.config) {
-  gadgets.config.register("container", null, init);
-
-};
+  gadgets.config.register('container', null, init);
+}

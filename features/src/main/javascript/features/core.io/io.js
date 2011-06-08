@@ -258,7 +258,7 @@ gadgets.io = function() {
     if (paramData !== null) {
       var contentTypeHeader = 'Content-Type';
       var contentType = 'application/x-www-form-urlencoded';
-      if (typeof opt_headers === "string") {
+      if (typeof opt_headers === 'string') {
         // This turned out to come directly from a public API, so we need to
         // keep compatibility...
         contentType = opt_headers;
@@ -446,8 +446,8 @@ gadgets.io = function() {
     },
 
     /**
-     * @param {string} relativeUrl url to fetch via xhr
-     * @param callback callback to call when response is received or for error
+     * @param {string} relativeUrl url to fetch via xhr.
+     * @param callback callback to call when response is received or for error.
      * @param {Object=} opt_params
      * @param {Object=} opt_headers
      *
@@ -536,6 +536,9 @@ gadgets.io = function() {
   };
 }();
 
+/**
+ * @const
+ **/
 gadgets.io.RequestParameters = gadgets.util.makeEnum([
   'METHOD',
   'CONTENT_TYPE',

@@ -127,8 +127,8 @@ osapi.container.Service.prototype.getGadgetMetadata = function(
 
 /**
  * Add preloaded gadgets to cache
- * @param {Object} response hash of gadgets metadata
- * @param {Object} data time to override responseTime (in order to support external caching)
+ * @param {Object} response hash of gadgets metadata.
+ * @param {Object} refTime time to override responseTime (in order to support external caching).
  */
 osapi.container.Service.prototype.addGadgetMetadatas = function(response, refTime) {
   this.addToCache_(response, refTime, this.cachedMetadatas_);
@@ -137,8 +137,9 @@ osapi.container.Service.prototype.addGadgetMetadatas = function(response, refTim
 
 /**
  * Add preloaded tokens to cache
- * @param {Object} response hash of gadgets metadata
- * @param {Object} refTime data time to override responseTime (in order to support external caching)
+ * @param {Object} response hash of gadgets metadata.
+ * @param {Object} refTime data time to override responseTime
+ *     (in order to support external caching).
  */
 osapi.container.Service.prototype.addGadgetTokens = function(response, refTime) {
   this.addToCache_(response, refTime, this.cachedTokens_);
@@ -147,9 +148,9 @@ osapi.container.Service.prototype.addGadgetTokens = function(response, refTime) 
 
 /**
  * Utility function to add data to cache
- * @param {Object} response hash of gadgets metadata
- * @param {Object} refTime data time to override responseTime (in order to support external caching)
- * @param {Object} cache the cache to update
+ * @param {Object} response hash of gadgets metadata.
+ * @param {Object} refTime data time to override responseTime (in order to support external caching).
+ * @param {Object} cache the cache to update.
  * @private
  */
 osapi.container.Service.prototype.addToCache_ = function(response, refTime, cache) {
@@ -164,21 +165,21 @@ osapi.container.Service.prototype.addToCache_ = function(response, refTime, cach
 
 /**
  * Update gadget data, set gadget id and calculate expiration time
- * @param {Object} resp gadget metadata item
- * @param {string} id gadget id
- * @param {Object} opt_refTime data time to override responseTime (support external caching)
- * @param {Object} currentTimeMs current time
+ * @param {Object} resp gadget metadata item.
+ * @param {string} id gadget id.
+ * @param {Object} currentTimeMs current time.
+ * @param {Object} opt_refTime data time to override responseTime (support external caching).
  * @private
  */
 osapi.container.Service.prototype.updateResponse_ = function(
-    resp, id, currentTimeMs, opt_refTime) { 
+    resp, id, currentTimeMs, opt_refTime) {
   resp[osapi.container.MetadataParam.URL] = id;
   // This ignores time to fetch metadata. Okay, expect to be < 2s.
-  resp[osapi.container.MetadataParam.LOCAL_EXPIRE_TIME]
-      = resp[osapi.container.MetadataResponse.EXPIRE_TIME_MS]
-      - (opt_refTime == null ? 
-          resp[osapi.container.MetadataResponse.RESPONSE_TIME_MS] : opt_refTime)
-      + currentTimeMs;
+  resp[osapi.container.MetadataParam.LOCAL_EXPIRE_TIME] =
+      resp[osapi.container.MetadataResponse.EXPIRE_TIME_MS] -
+      (opt_refTime == null ?
+          resp[osapi.container.MetadataResponse.RESPONSE_TIME_MS] : opt_refTime) +
+      currentTimeMs;
 };
 
 
@@ -236,12 +237,13 @@ osapi.container.Service.prototype.getCachedGadgetToken = function(url) {
 /**
  * @param {Object} urls JSON containing gadget URLs to avoid removing.
  */
-osapi.container.Service.prototype.uncacheStaleGadgetMetadataExcept = function(urls) {
+osapi.container.Service.prototype.uncacheStaleGadgetMetadataExcept =
+    function(urls) {
   for (var url in this.cachedMetadatas_) {
     if (typeof urls[url] === 'undefined') {
       var gadgetInfo = this.cachedMetadatas_[url];
-      if (gadgetInfo[osapi.container.MetadataParam.LOCAL_EXPIRE_TIME]
-          < osapi.container.util.getCurrentTimeMs()) {
+      if (gadgetInfo[osapi.container.MetadataParam.LOCAL_EXPIRE_TIME] <
+          osapi.container.util.getCurrentTimeMs()) {
         delete this.cachedMetadatas_[url];
       }
     }
@@ -298,8 +300,8 @@ osapi.container.Service.prototype.getUncachedDataByRequest_ = function(
 
 
 /**
- * Helper to filter out cached data 
- * @param {Object} cache JSON containing cached data.
+ * Helper to filter out cached data
+ * @param {Object} data JSON containing cached data.
  * @param {Object} request containing ids.
  * @param {Function} filterFunc function to filter result.
  * @return {Object} JSON containing requested and filtered entries.

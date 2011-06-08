@@ -59,9 +59,8 @@
       window.__API_URI.resolve(window.__CONTAINER_URI);
     }
 
-    window.__CONTAINER = window.__API_URI
-        ? window.__API_URI.getQP('container')
-        : 'default';
+    window.__CONTAINER = window.__API_URI ?
+        window.__API_URI.getQP('container') : 'default';
   }
 
   initializeConfig();

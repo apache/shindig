@@ -161,7 +161,7 @@ if (!gadgets.rpctx.ifpc) {  // make lib resilient to double-inclusion
           src = [relay, '#', targetId, '&', from, '@', callId, '&'].join('');
           var message = encodeURIComponent(gadgets.json.stringify(rpc)),
               payloadLength = URL_LIMIT - src.length,
-              numPackets = Math.ceil(message.length/payloadLength),
+              numPackets = Math.ceil(message.length / payloadLength),
               packetIdx = 0,
               part;
           while (message.length > 0) {
@@ -176,7 +176,7 @@ if (!gadgets.rpctx.ifpc) {  // make lib resilient to double-inclusion
         // the relay URL and appended message.
         do {
           emitInvisibleIframe(queueOut.shift());
-        } while(queueOut.length > 0);
+        } while (queueOut.length > 0);
         return true;
       },
 

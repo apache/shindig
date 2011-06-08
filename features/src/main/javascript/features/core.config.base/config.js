@@ -66,8 +66,8 @@ gadgets.config = function() {
       if (!updConfig.hasOwnProperty(key)) {
         continue;
       }
-      if (typeof origConfig[key] === "object" &&
-          typeof updConfig[key] === "object") {
+      if (typeof origConfig[key] === 'object' &&
+          typeof updConfig[key] === 'object') {
         // Both have the same key with an object value. Recurse.
         foldConfig(origConfig[key], updConfig[key]);
       } else {
@@ -81,7 +81,7 @@ gadgets.config = function() {
 
   function getLoadingScript() {
     // Attempt to retrieve config augmentation from latest script node.
-    var scripts = document.scripts || document.getElementsByTagName("script");
+    var scripts = document.scripts || document.getElementsByTagName('script');
     if (!scripts || scripts.length == 0) return null;
     var scriptTag;
     if (___jsl['u']) {
@@ -102,7 +102,7 @@ gadgets.config = function() {
   }
 
   function getInnerText(scriptNode) {
-    var scriptText = "";
+    var scriptText = '';
     if (scriptNode.nodeType == 3 || scriptNode.nodeType == 4) {
       scriptText = scriptNode.nodeValue;
     } else if (scriptNode.innerText) {
@@ -122,15 +122,15 @@ gadgets.config = function() {
   function parseConfig(configText) {
     var config;
     try {
-      config = (new Function("return (" + configText + "\n)"))();
+      config = (new Function('return (' + configText + '\n)'))();
     } catch (e) { }
-    if (typeof config === "object") {
+    if (typeof config === 'object') {
       return config;
     }
     try {
-      config = (new Function("return ({" + configText + "\n})"))();
+      config = (new Function('return ({' + configText + '\n})'))();
     } catch (e) { }
-    return typeof config === "object" ? config : {};
+    return typeof config === 'object' ? config : {};
   }
 
   function augmentConfig(baseConfig) {
@@ -225,10 +225,10 @@ gadgets.config = function() {
      * @function
      */
     init: function(config, opt_noValidation) {
-      ___jsl = window["___jsl"] || {};
+      ___jsl = window['___jsl'] || {};
       foldConfig(configuration, config);
       augmentConfig(configuration);
-      var inlineOverride = window["___config"] || {};
+      var inlineOverride = window['___config'] || {};
       foldConfig(configuration, inlineOverride);
       for (var name in components) {
         if (components.hasOwnProperty(name)) {
@@ -260,13 +260,13 @@ gadgets.config = function() {
     /**
      * Method largely for dev and debugging purposes that
      * replaces or manually updates feature config.
-     * @param updateConfig {Object} Config object, with keys for features.
-     * @param opt_replace {Boolean} true to replace all configuration.
+     * @param {Object} updateConfig Config object, with keys for features.
+     * @param {boolean} opt_replace true to replace all configuration.
      */
     update: function(updateConfig, opt_replace) {
       configuration = opt_replace ? {} : configuration || {};
       foldConfig(configuration, updateConfig);
     }
-  }
+  };
 }();
 } // ! end double inclusion guard

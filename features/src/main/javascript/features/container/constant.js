@@ -31,143 +31,111 @@ osapi.container = {};
 
 /**
  * Constants to key into gadget metadata state.
+ * @const
  * @enum {string}
  */
-osapi.container.MetadataParam = {};
-osapi.container.MetadataParam.LOCAL_EXPIRE_TIME = 'localExpireTimeMs';
-osapi.container.MetadataParam.URL = 'url';
+osapi.container.MetadataParam = {
+    LOCAL_EXPIRE_TIME: 'localExpireTimeMs',
+    URL: 'url'
+};
 
 
 /**
  * Constants to key into gadget metadata response JSON.
  * @enum {string}
  */
-osapi.container.MetadataResponse = {};
-osapi.container.MetadataResponse.IFRAME_URL = 'iframeUrl';
-osapi.container.MetadataResponse.NEEDS_TOKEN_REFRESH = 'needsTokenRefresh';
-osapi.container.MetadataResponse.VIEWS = 'views';
-osapi.container.MetadataResponse.EXPIRE_TIME_MS = 'expireTimeMs';
-osapi.container.MetadataResponse.FEATURES = 'features';
-osapi.container.MetadataResponse.HEIGHT = 'height';
-osapi.container.MetadataResponse.MODULE_PREFS = 'modulePrefs';
-osapi.container.MetadataResponse.PREFERRED_HEIGHT = 'preferredHeight';
-osapi.container.MetadataResponse.PREFERRED_WIDTH = 'preferredWidth';
-osapi.container.MetadataResponse.RESPONSE_TIME_MS = 'responseTimeMs';
-osapi.container.MetadataResponse.WIDTH = 'width';
+
+osapi.container.MetadataResponse = {
+  IFRAME_URL: 'iframeUrl',
+  NEEDS_TOKEN_REFRESH: 'needsTokenRefresh',
+  VIEWS: 'views',
+  EXPIRE_TIME_MS: 'expireTimeMs',
+  FEATURES: 'features',
+  HEIGHT: 'height',
+  MODULE_PREFS: 'modulePrefs',
+  PREFERRED_HEIGHT: 'preferredHeight',
+  PREFERRED_WIDTH: 'preferredWidth',
+  RESPONSE_TIME_MS: 'responseTimeMs',
+  WIDTH: 'width'
+};
 
 
 /**
  * Constants to key into gadget token response JSON.
  * @enum {string}
  */
-osapi.container.TokenResponse = {};
-osapi.container.TokenResponse.TOKEN = 'token';
+osapi.container.TokenResponse = {
+  TOKEN: 'token'
+};
 
 
 /**
  * Constants to key into timing response JSON.
- * @type {string}
+ * @enum {string}
  */
-osapi.container.NavigateTiming = {};
-// The gadget URL reporting this timing information.
-osapi.container.NavigateTiming.URL = 'url';
-// The gadget site ID reporting this timing information.
-osapi.container.NavigateTiming.ID = 'id';
-// Absolute time (ms) when gadget navigation is requested.
-osapi.container.NavigateTiming.START = 'start';
-// Time (ms) to receive XHR response time. In CC, for metadata and token.
-osapi.container.NavigateTiming.XRT = 'xrt';
-// Time (ms) to receive first byte. Typically timed at start of page.
-osapi.container.NavigateTiming.SRT = 'srt';
-// Time (ms) to load the DOM. Typically timed at end of page.
-osapi.container.NavigateTiming.DL = 'dl';
-// Time (ms) when body onload is called.
-osapi.container.NavigateTiming.OL = 'ol';
-// Time (ms) when page is ready for use. Typically happen after data XHR (ex:
-// calendar, email) is received/presented to users. Overridable by user.
-osapi.container.NavigateTiming.PRT = 'prt';
+osapi.container.NavigateTiming = {
+  /** The gadget URL reporting this timing information. */
+  URL: 'url',
+  /** The gadget site ID reporting this timing information. */
+  ID: 'id',
+  /** Absolute time (ms) when gadget navigation is requested. */
+  START: 'start',
+  /** Time (ms) to receive XHR response time. In CC, for metadata and token. */
+  XRT: 'xrt',
+  /** Time (ms) to receive first byte. Typically timed at start of page. */
+  SRT: 'srt',
+  /** Time (ms) to load the DOM. Typically timed at end of page. */
+  DL: 'dl',
+  /** Time (ms) when body onload is called. */
+  OL: 'ol',
+  /** Time (ms) when page is ready for use. Typically happen after data XHR (ex:
+   * calendar, email) is received/presented to users. Overridable by user.
+   */
+  PRT: 'prt'
+};
 
 
 /**
  * Constants to key into request renderParam JSON.
  * @enum {string}
- */
-osapi.container.RenderParam = {};
-
-/**
- * Allow gadgets to render in unspecified view.
- * @type {string}
  * @const
  */
-osapi.container.RenderParam.ALLOW_DEFAULT_VIEW = 'allowDefaultView';
+osapi.container.RenderParam = {
+    /** Allow gadgets to render in unspecified view. */
+    ALLOW_DEFAULT_VIEW: 'allowDefaultView',
 
-/**
- * Whether to enable cajole mode.
- * @type {string}
- * @const
- */
-osapi.container.RenderParam.CAJOLE = 'cajole';
+    /** Whether to enable cajole mode. */
+    CAJOLE: 'cajole',
 
-/**
- * Style class to associate to iframe.
- * @type {string}
- * @const
- */
-osapi.container.RenderParam.CLASS = 'class';
+    /** Style class to associate to iframe. */
+    CLASS: 'class',
 
-/**
- * Whether to enable debugging mode.
- * @type {string}
- * @const
- */
-osapi.container.RenderParam.DEBUG = 'debug';
+    /** Whether to enable debugging mode. */
+    DEBUG: 'debug',
 
-/**
- * The starting gadget iframe height (in pixels).
- * @type {string}
- * @const
- */
-osapi.container.RenderParam.HEIGHT = 'height';
+    /** The starting gadget iframe height (in pixels). */
+    HEIGHT: 'height',
 
-/**
- * Whether to disable cache.
- * @type {string}
- * @const
- */
-osapi.container.RenderParam.NO_CACHE = 'nocache';
+    /** Whether to disable cache. */
+    NO_CACHE: 'nocache',
 
-/**
- * Whether to enable test mode.
- * @type {string}
- * @const
- */
-osapi.container.RenderParam.TEST_MODE = 'testmode';
+    /** Whether to enable test mode. */
+    TEST_MODE: 'testmode',
 
-/**
- * The gadget user prefs to render with.
- * @type {string}
- * @const
- */
-osapi.container.RenderParam.USER_PREFS = 'userPrefs';
+    /** The gadget user prefs to render with. */
+    USER_PREFS: 'userPrefs',
 
-/**
- * The view of gadget to render.
- * @type {string}
- * @const
- */
-osapi.container.RenderParam.VIEW = 'view';
+    /** The view of gadget to render. */
+    VIEW: 'view',
 
-/**
- * The starting gadget iframe width (in pixels).
- * @type {string}
- * @const
- */
-osapi.container.RenderParam.WIDTH = 'width';
-
+    /** The starting gadget iframe width (in pixels). */
+    WIDTH: 'width'
+};
 
 /**
  * Constants to key into request viewParam JSON.
  * @enum {string}
  */
-osapi.container.ViewParam = {};
-osapi.container.ViewParam.VIEW = 'view';
+osapi.container.ViewParam = {
+  VIEW: 'view'
+};

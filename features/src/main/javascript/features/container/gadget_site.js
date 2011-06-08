@@ -247,11 +247,11 @@ osapi.container.GadgetSite.prototype.render = function(
   if (curUrl == gadgetInfo['url']) {
     previousView = this.currentGadgetHolder_.getView();
   }
-  
+
   // Find requested view.
-  var view = renderParams[osapi.container.RenderParam.VIEW]
-      || viewParams[osapi.container.ViewParam.VIEW]
-      || previousView;
+  var view = renderParams[osapi.container.RenderParam.VIEW] ||
+      viewParams[osapi.container.ViewParam.VIEW] ||
+      previousView;
   var viewInfo = gadgetInfo[osapi.container.MetadataResponse.VIEWS][view];
 
   // Allow default view if requested view is not found.
@@ -276,16 +276,16 @@ osapi.container.GadgetSite.prototype.render = function(
   }
 
   localRenderParams[osapi.container.RenderParam.VIEW] = view;
-  localRenderParams[osapi.container.RenderParam.HEIGHT]
-      = renderParams[osapi.container.RenderParam.HEIGHT]
-      || viewInfo[osapi.container.MetadataResponse.PREFERRED_HEIGHT]
-      || gadgetInfo[osapi.container.MetadataResponse.MODULE_PREFS][osapi.container.MetadataResponse.HEIGHT]
-      || String(osapi.container.GadgetSite.DEFAULT_HEIGHT_);
-  localRenderParams[osapi.container.RenderParam.WIDTH]
-      = renderParams[osapi.container.RenderParam.WIDTH]
-      || viewInfo[osapi.container.MetadataResponse.PREFERRED_WIDTH]
-      || gadgetInfo[osapi.container.MetadataResponse.MODULE_PREFS][osapi.container.MetadataResponse.WIDTH]
-      || String(osapi.container.GadgetSite.DEFAULT_WIDTH_);
+  localRenderParams[osapi.container.RenderParam.HEIGHT] =
+      renderParams[osapi.container.RenderParam.HEIGHT] ||
+      viewInfo[osapi.container.MetadataResponse.PREFERRED_HEIGHT] ||
+      gadgetInfo[osapi.container.MetadataResponse.MODULE_PREFS][osapi.container.MetadataResponse.HEIGHT] ||
+      String(osapi.container.GadgetSite.DEFAULT_HEIGHT_);
+  localRenderParams[osapi.container.RenderParam.WIDTH] =
+      renderParams[osapi.container.RenderParam.WIDTH] ||
+      viewInfo[osapi.container.MetadataResponse.PREFERRED_WIDTH] ||
+      gadgetInfo[osapi.container.MetadataResponse.MODULE_PREFS][osapi.container.MetadataResponse.WIDTH] ||
+      String(osapi.container.GadgetSite.DEFAULT_WIDTH_);
 
   this.updateSecurityToken_(gadgetInfo, localRenderParams);
 
@@ -334,9 +334,10 @@ osapi.container.GadgetSite.prototype.rpcCall = function(
  * one. Otherwise, leave it.
  * @param {Object} gadgetInfo The gadgetInfo used to update security token.
  * @param {Object} renderParams Look at osapi.container.RenderParam.
+ * @private
  */
-osapi.container.GadgetSite.prototype.updateSecurityToken_
-    = function(gadgetInfo, renderParams) {
+osapi.container.GadgetSite.prototype.updateSecurityToken_ =
+      function(gadgetInfo, renderParams) {
   var tokenInfo = this.service_.getCachedGadgetToken(gadgetInfo['url']);
   if (tokenInfo) {
     var token = tokenInfo[osapi.container.TokenResponse.TOKEN];

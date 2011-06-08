@@ -29,15 +29,14 @@ osapi.container.util = {};
 
 
 /**
- * Return value of json at key, if valid. Otherwise, return defaultValue.
  * @param {Object} json The JSON to look up key param from.
  * @param {string} key Key in config.
  * @param {*=} defaultValue The default value to return.
- * @return {*}
+ * @return {*} value of json at key, if valid. Otherwise, return defaultValue.
  */
 osapi.container.util.getSafeJsonValue = function(json, key, defaultValue) {
-  return (json[key] != undefined && json[key] != null)
-      ? json[key] : defaultValue;
+  return (json[key] != undefined && json[key] != null) ?
+      json[key] : defaultValue;
 };
 
 
@@ -86,7 +85,7 @@ osapi.container.util.newMetadataRequest = function(gadgetUrls) {
 
 /**
  * Construct a JSON request to get gadget token.
- * @param {Array} A list of gadget URLs.
+ * @param {Array} gadgetUrls A list of gadget URLs.
  * @return {Object} the resulting JSON.
  */
 osapi.container.util.newTokenRequest = function(gadgetUrls) {
@@ -115,9 +114,8 @@ osapi.container.util.toArrayOfJsonKeys = function(json) {
 
 
 /**
- * Return true if json is empty.
  * @param {Object} json to check.
- * @return {Boolean}
+ * @return {Boolean} true if json is empty.
  */
 osapi.container.util.isEmptyJson = function(json) {
   for (var key in json) {

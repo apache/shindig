@@ -23,7 +23,7 @@
 (function() {
 
   var useOAuth2;
-  
+
   /**
    * Called by a batch to execute all requests
    * @param {Object} requests
