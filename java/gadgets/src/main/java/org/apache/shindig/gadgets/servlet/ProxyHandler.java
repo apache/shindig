@@ -48,13 +48,11 @@ import java.io.IOException;
  */
 @Singleton
 public class ProxyHandler {
-  // TODO: parameterize these.
-  static final Integer LONG_LIVED_REFRESH = (365 * 24 * 60 * 60);  // 1 year
-
   private final RequestPipeline requestPipeline;
   private final ResponseRewriterRegistry contentRewriterRegistry;
   protected final boolean remapInternalServerError;
   private final GadgetBlacklist gadgetBlacklist;
+  private final Integer longLivedRefreshSec;
 
   @Inject
   public ProxyHandler(RequestPipeline requestPipeline,
@@ -62,11 +60,14 @@ public class ProxyHandler {
                       ResponseRewriterRegistry contentRewriterRegistry,
                       @Named("shindig.proxy.remapInternalServerError")
                       Boolean remapInternalServerError,
-                      GadgetBlacklist gadgetBlacklist) {
+                      GadgetBlacklist gadgetBlacklist,
+                      @Named("org.apache.shindig.gadgets.servlet.longLivedRefreshSec")
+                      int longLivedRefreshSec) {
     this.requestPipeline = requestPipeline;
     this.contentRewriterRegistry = contentRewriterRegistry;
     this.remapInternalServerError = remapInternalServerError;
     this.gadgetBlacklist = gadgetBlacklist;
+    this.longLivedRefreshSec = longLivedRefreshSec;
   }
 
   /**
@@ -122,7 +123,7 @@ public class ProxyHandler {
 
     try {
       ServletUtil.setCachingHeaders(response,
-          proxyUri.translateStatusRefresh(LONG_LIVED_REFRESH, (int) (results.getCacheTtl() / 1000)),
+          proxyUri.translateStatusRefresh(longLivedRefreshSec, (int) (results.getCacheTtl() / 1000)),
           false);
     } catch (GadgetException gex) {
       return ServletUtil.errorResponse(gex);

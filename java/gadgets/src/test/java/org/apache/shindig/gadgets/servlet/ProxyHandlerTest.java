@@ -58,6 +58,8 @@ public class ProxyHandlerTest extends EasyMockTestCase {
   private final static String GADGET = "http://some/gadget.xml";
   private final static String URL_ONE = "http://www.example.org/test.html";
   private final static String DATA_ONE = "hello world";
+  private final static Integer LONG_LIVED_REFRESH = (365 * 24 * 60 * 60);  // 1 year
+
 
   public final RequestPipeline pipeline = mock(RequestPipeline.class);
   private GadgetBlacklist gadgetBlacklist = mock(GadgetBlacklist.class); 
@@ -67,7 +69,7 @@ public class ProxyHandlerTest extends EasyMockTestCase {
   private ProxyUriManager.ProxyUri request;
 
   private final ProxyHandler proxyHandler
-      = new ProxyHandler(pipeline, rewriterRegistry, true, gadgetBlacklist);
+      = new ProxyHandler(pipeline, rewriterRegistry, true, gadgetBlacklist, LONG_LIVED_REFRESH);
 
   private void expectGetAndReturnData(String url, byte[] data) throws Exception {
     HttpRequest req = new HttpRequest(Uri.parse(url));
@@ -338,7 +340,8 @@ public class ProxyHandlerTest extends EasyMockTestCase {
     ResponseRewriterRegistry rewriterRegistry =
         new DefaultResponseRewriterRegistry(
             Arrays.<ResponseRewriter>asList(rewriter), null);
-    ProxyHandler proxyHandler = new ProxyHandler(pipeline, rewriterRegistry, true, gadgetBlacklist);
+    ProxyHandler proxyHandler = new ProxyHandler(pipeline, rewriterRegistry, true, gadgetBlacklist,
+        LONG_LIVED_REFRESH);
 
     request.setReturnOriginalContentOnError(true);
     HttpResponse recorder = proxyHandler.fetch(request);
@@ -376,7 +379,8 @@ public class ProxyHandlerTest extends EasyMockTestCase {
     ResponseRewriterRegistry rewriterRegistry =
         new DefaultResponseRewriterRegistry(
             Arrays.<ResponseRewriter>asList(rewriter), null);
-    ProxyHandler proxyHandler = new ProxyHandler(pipeline, rewriterRegistry, true, gadgetBlacklist);
+    ProxyHandler proxyHandler = new ProxyHandler(pipeline, rewriterRegistry, true, gadgetBlacklist,
+        LONG_LIVED_REFRESH);
 
     boolean exceptionCaught = false;
     try {

@@ -68,7 +68,6 @@ public class ConcatProxyServlet extends InjectedServlet {
   public static final String JSON_PARAM = Param.JSON.getKey();
   private static final Pattern JSON_PARAM_PATTERN = Pattern.compile("^\\w*$");
 
-  // TODO: parameterize these.
   static final Integer LONG_LIVED_REFRESH = (365 * 24 * 60 * 60);  // 1 year
   static final Integer DEFAULT_REFRESH = (60 * 60);                // 1 hour
 
@@ -82,6 +81,14 @@ public class ConcatProxyServlet extends InjectedServlet {
 
   // Sequential version of 'execute' by default.
   private transient Executor executor = Executors.newSingleThreadExecutor();
+
+  private Integer longLivedRefreshSec = LONG_LIVED_REFRESH;
+
+  @Inject(optional = true)
+  public void setLongLivedRefresh(
+      @Named("org.apache.shindig.gadgets.servlet.longLivedRefreshSec") int longLivedRefreshSec) {
+    this.longLivedRefreshSec = longLivedRefreshSec;
+  }
 
   @Inject
   public void setRequestPipeline(RequestPipeline requestPipeline) {
@@ -231,7 +238,7 @@ public class ConcatProxyServlet extends InjectedServlet {
       // TODO: Investigate Chunked Encoding
       minCacheTtl = isMinCacheTtlSet ? (minCacheTtl / 1000) : DEFAULT_REFRESH;
       HttpUtil.setCachingHeaders(response,
-          concatUri.translateStatusRefresh(LONG_LIVED_REFRESH, minCacheTtl.intValue()), false);
+          concatUri.translateStatusRefresh(longLivedRefreshSec, minCacheTtl.intValue()), false);
     } catch (GadgetException gex) {
       cos.outputError(uri, gex);
     } finally {
