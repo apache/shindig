@@ -16,90 +16,55 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package org.apache.shindig.common.servlet;
+
+import com.google.common.base.Objects;
 
 import javax.servlet.ServletRequest;
 
 public class ServletRequestContext {
 
+  public final static String HOST = "host";
+  public final static String PORT = "port";
+  public final static String SCHEME = "scheme";
+
   public static void setRequestInfo(ServletRequest req) {
-    String auth = req.getServerName() + ":" + req.getServerPort();
-	String fullAuth = req.getScheme() + "://" + auth;
-	authority.set(auth);
-	fullAuthority.set(fullAuth);
+    host.set(req.getServerName());
+    port.set("" + req.getServerPort());
+    scheme.set(req.getScheme());
 
-	System.setProperty("authority",auth);
-	System.setProperty("fullAuthority", fullAuth);
+    // Temporary solution since variables are not available in forked thread during js processing
+    System.setProperty(HOST, req.getServerName());
+    System.setProperty(PORT, "" + req.getServerPort());
+    System.setProperty(SCHEME, req.getScheme());
   }
   
   /**
-   * A Thread Local holder for authority -- host + port
+   * A Thread Local holder for host
    */
-  private static ThreadLocal<String> authority = new ThreadLocal<String>();
+  private static ThreadLocal<String> host = new ThreadLocal<String>();
   
   /**
-   * A Thread Local holder for full authority -- scheme + host + port
+   * A Thread Local holder for port
    */
-  private static ThreadLocal<String> fullAuthority = new ThreadLocal<String>();
+  private static ThreadLocal<String> port = new ThreadLocal<String>();
   
- 
-  public static String getAuthority() {
+  /**
+   * A Thread Local holder for scheme
+   */
+  private static ThreadLocal<String> scheme = new ThreadLocal<String>();
   
-    String retVal = authority.get();
-    if (retVal == null) {
-      retVal = System.getProperty("authority");
-      if (retVal == null){
-    	retVal = getDefaultAuthority();
-      }
-    }
-    return retVal;
-  }
- 
-  private static String getDefaultAuthority() {
-    
-    String retVal = System.getProperty("defaultAuthority");
-	if (retVal == null){
-	  retVal = getServerHostname()+":"+getServerPort();
-	  System.setProperty("defaultAuthority", retVal);
-	}
-	return retVal;
-	
-  }
-
-  public static String getFullAuthority() {
- 
-  	String retVal = fullAuthority.get();
-    if (retVal == null) {
-      retVal = System.getProperty("fullAuthority");
-      if (retVal == null){
-        retVal = getDefaultFullAuthority();
-  	  }
-  	}
-    return retVal;
-    
+  
+  public static String getHost(){
+    return host.get() != null ? host.get() : System.getProperty(HOST);
   }
   
-  private static String getDefaultFullAuthority() {
-	  
-    String retVal = System.getProperty("defaultFullAuthority");
-    if ( retVal != null ){
-	  retVal = "http://"+getServerHostname()+":"+getServerPort();
-	  System.setProperty("defaultFullAuthority", retVal);
-	}
-	return retVal;
-	
+  public static String getPort(){
+    return port.get() != null ? port.get() : System.getProperty(PORT);
   }
   
-  private static String getServerPort() {
-	return System.getProperty("shindig.port") != null ? System.getProperty("shindig.port") :
-	  System.getProperty("jetty.port") != null ? System.getProperty("jetty.port") :
-	  "8080";
+  public static String getScheme(){
+    return scheme.get() != null ? scheme.get() : System.getProperty(SCHEME);
   }
-  
-  private static String getServerHostname() {
-	return System.getProperty("shindig.host") != null ? System.getProperty("shindig.host") :
-	  System.getProperty("jetty.host") != null ? System.getProperty("jetty.host") :
-	  "localhost";
-  }
-
 }

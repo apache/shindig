@@ -57,7 +57,7 @@ public class PropertiesModule extends AbstractModule {
 
   @Override
   protected void configure() {
-	this.binder().bindConstant().annotatedWith(Names.named("shindig.contextroot")).to(getContextRoot());
+    this.binder().bindConstant().annotatedWith(Names.named("shindig.contextroot")).to(getContextRoot());
     Names.bindProperties(this.binder(), getProperties());
     // This could be generalized to inject any system property...
     this.binder().bindConstant().annotatedWith(Names.named("shindig.port")).to(getServerPort());
@@ -70,30 +70,23 @@ public class PropertiesModule extends AbstractModule {
    * @return an context path as a string.
    */
   private String getContextRoot() {
-	  return System.getProperty("shindig.contextroot") != null ? System.getProperty("shindig.contextroot") : "";
+    return System.getProperty("shindig.contextroot") != null ? System.getProperty("shindig.contextroot") : "";
   }
 
   /**
-   * Should return the port that the current server is running on.  Useful for testing and working out of the box configs.
-   * Looks for a port in system properties "shindig.port" then "jetty.port", if not set uses fixed value of "8080"
+   * Should return the default port set as system property. Return empty string if it's not set.
    * @return an integer port number as a string.
    */
   protected String getServerPort() {
-    return System.getProperty("shindig.port") != null ? System.getProperty("shindig.port") :
-           System.getProperty("jetty.port") != null ? System.getProperty("jetty.port") :
-           "8080";
+    return System.getProperty("shindig.port") != null ? System.getProperty("shindig.port") : "";
   }
 
   /*
-   * Should return the hostname that the current server is running on.  Useful for testing and working out of the box configs.
-   * Looks for a hostname in system properties "shindig.host", if not set uses fixed value of "localhost"
+   * Should return the hostname set as system property. Return empty string  if its' not set. 
    * @return a hostname
    */
-
   protected String getServerHostname() {
-    return System.getProperty("shindig.host") != null ? System.getProperty("shindig.host") :
-           System.getProperty("jetty.host") != null ? System.getProperty("jetty.host") :
-           "localhost";
+    return System.getProperty("shindig.host") != null ? System.getProperty("shindig.host") : "";
   }
 
   protected static String getDefaultPropertiesPath() {
@@ -114,13 +107,12 @@ public class PropertiesModule extends AbstractModule {
       properties.load(is);
       
       String value = null;
-      for(Object key : properties.keySet()){
+      for (Object key : properties.keySet()) {
         value = (String)properties.get((String)key);
-    	if (value != null && value.indexOf("%contextRoot%") >=0 ){
+        if (value != null && value.indexOf("%contextRoot%") >=0 ){
           properties.put(key, value.replace(("%contextRoot%"),contextRoot));
-    	}
+        }
       }
-
     } catch (IOException e) {
       throw new CreationException(Arrays.asList(
           new Message("Unable to load properties: " + propertyFile)));

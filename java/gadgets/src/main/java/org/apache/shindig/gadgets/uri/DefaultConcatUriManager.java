@@ -25,10 +25,12 @@ import com.google.inject.Provider;
 import com.google.inject.name.Named;
 
 import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.shindig.common.servlet.Authority;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.uri.UriCommon.Param;
+
 
 // Temporary replacement of javax.annotation.Nullable
 import org.apache.shindig.common.Nullable;
@@ -54,7 +56,7 @@ public class DefaultConcatUriManager implements ConcatUriManager {
   private final ContainerConfig config;
   private final Versioner versioner;
   private boolean strictParsing;
-  private Provider<String> hostProvider;
+  private Provider<Authority> hostProvider;
   private static int DEFAULT_URL_MAX_LENGTH = 2048;
   private int urlMaxLength = DEFAULT_URL_MAX_LENGTH;
   private static final float URL_LENGTH_BUFFER_MARGIN = .8f;
@@ -76,9 +78,9 @@ public class DefaultConcatUriManager implements ConcatUriManager {
       @Named("org.apache.shindig.gadgets.uri.urlMaxLength") int urlMaxLength) {
     this.urlMaxLength = urlMaxLength;
   }
-  
+
   @Inject(optional = true)
-  public void setHostProvider(@Named("shindig.host-provider") Provider<String> hostProvider) {
+  public void setHostProvider(Provider<Authority> hostProvider) {
     this.hostProvider = hostProvider;
   }
 
@@ -117,7 +119,7 @@ public class DefaultConcatUriManager implements ConcatUriManager {
 
     List<Uri> resourceUris = ctx.getBatch();
     Map<Uri, String> snippets = Maps.newHashMapWithExpectedSize(resourceUris.size());
-    
+
     String splitParam = config.getString(ctx.getContainer(), CONCAT_JS_SPLIT_PARAM);
 
     boolean doSplit = false;
@@ -135,7 +137,7 @@ public class DefaultConcatUriManager implements ConcatUriManager {
     // batchUris holds uris for the current batch of uris being concatenated.
     List<Uri> batchUris = Lists.newArrayList();
 
-    // uris holds the concatenated uris formed from batches which satisfy the 
+    // uris holds the concatenated uris formed from batches which satisfy the
     // GET URL limit constraint.
     List<Uri> uris = Lists.newArrayList();
 
@@ -231,7 +233,7 @@ public class DefaultConcatUriManager implements ConcatUriManager {
           "Missing required config '" + key + "' for container: " + container);
     }
     if (hostProvider != null) {
-      val = val.replace("%host%", hostProvider.get());
+      val = val.replace("%authority%", hostProvider.get().getAuthority());
     }
 
     return val;

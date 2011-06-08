@@ -38,6 +38,8 @@ import org.apache.shindig.gadgets.spec.UserPref;
 import org.apache.shindig.gadgets.spec.View;
 import org.apache.shindig.gadgets.uri.UriCommon.Param;
 
+import org.apache.shindig.common.servlet.Authority;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -58,7 +60,7 @@ public class DefaultIframeUriManager implements IframeUriManager, ContainerConfi
   private boolean ldEnabled = true;
   private TemplatingSignal tplSignal = null;
   private Versioner versioner = null;
-  private Provider<String> hostProvider;
+  private Provider<Authority> hostProvider;
 
   private final ContainerConfig config;
   private final LockedDomainPrefixGenerator ldGen;
@@ -104,9 +106,9 @@ public class DefaultIframeUriManager implements IframeUriManager, ContainerConfi
   public void setTemplatingSignal(TemplatingSignal tplSignal) {
     this.tplSignal = tplSignal;
   }
-  
+
   @Inject(optional = true)
-  public void setHostProvider(@Named("shindig.host-provider") Provider<String> hostProvider) {
+  public void setHostProvider( Provider<Authority> hostProvider) {
     this.hostProvider = hostProvider;
   }
 
@@ -349,13 +351,13 @@ public class DefaultIframeUriManager implements IframeUriManager, ContainerConfi
 
   private String getReqVal(String container, String key) {
     String val = config.getString(container, key);
- 
+
     if (val == null) {
       throw new RuntimeException("Missing required container config param, key: "
           + key + ", container: " + container);
     }
     if (hostProvider != null) {
-      val = val.replace("%host%", hostProvider.get());
+      val = val.replace("%authority%", hostProvider.get().getAuthority());
     }
 
     return val;

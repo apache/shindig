@@ -36,7 +36,7 @@ import javax.servlet.ServletResponse;
  * A Filter that can cache ServletRequest information in ThreadLocal variable
  */
 public class HostFilter implements Filter {
-  
+
   public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {	
     ServletRequestContext.setRequestInfo(request);
     chain.doFilter(request, response);

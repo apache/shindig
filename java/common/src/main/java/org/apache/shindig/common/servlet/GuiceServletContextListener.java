@@ -46,16 +46,16 @@ public class GuiceServletContextListener implements ServletContextListener {
 
   // From guice-servlet-2.0
   public static final String INJECTOR_NAME = Injector.class.getName();
-  
+
   // HNN- constant name matched system.properties <contextparam> specified in the web.xml
   private static final String SYSTEM_PROPERTIES = "system.properties";
 
   public void contextInitialized(ServletContextEvent event) {
     ServletContext context = event.getServletContext();
-    setSystemProperties(context);     
+    setSystemProperties(context);
     String moduleNames = context.getInitParameter(MODULES_ATTRIBUTE);
     List<Module> modules = Lists.newLinkedList();
-    
+
     if (moduleNames != null) {
       for (String moduleName : Splitter.on(':').split(moduleNames)) {
         try {

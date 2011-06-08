@@ -34,6 +34,8 @@ import org.apache.shindig.gadgets.JsCompileMode;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.uri.UriCommon.Param;
 
+import org.apache.shindig.common.servlet.Authority;
+
 import java.util.Collection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -42,7 +44,7 @@ import java.util.logging.Logger;
  * Generates and validates URLs serviced by a gadget JavaScript service (JsServlet).
  */
 public class DefaultJsUriManager implements JsUriManager {
-  
+
   static final String JS_HOST_PARAM = "gadgets.uri.js.host";
   static final String JS_PATH_PARAM = "gadgets.uri.js.path";
   static final JsUri INVALID_URI = new JsUri(UriStatus.BAD_URI);
@@ -50,19 +52,19 @@ public class DefaultJsUriManager implements JsUriManager {
   protected static final String JS_DELIMITER = ":";
 
   private static final Logger LOG = Logger.getLogger(DefaultJsUriManager.class.getName());
-  
+
   private final ContainerConfig config;
   private final Versioner versioner;
-  private Provider<String> hostProvider;
+  private Provider<Authority> hostProvider;
 
   @Inject
   public DefaultJsUriManager(ContainerConfig config, Versioner versioner) {
     this.config = config;
     this.versioner = versioner;
   }
-  
+
   @Inject(optional = true)
-  public void setHostProvider(@Named("shindig.host-provider") Provider<String> hostProvider) {
+  public void setHostProvider(Provider<Authority> hostProvider) {
     this.hostProvider = hostProvider;
   }
 
@@ -80,12 +82,12 @@ public class DefaultJsUriManager implements JsUriManager {
       jsPath.append('/');
     }
     jsPath.append(addJsLibs(ctx.getLibs()));
-    
+
     // Add the list of already-loaded libs
     if (!ctx.getLoadedLibs().isEmpty()) {
       jsPath.append("!").append(addJsLibs(ctx.getLoadedLibs()));
     }
-    
+
     jsPath.append(JS_SUFFIX);
     uri.setPath(jsPath.toString());
 
@@ -189,7 +191,7 @@ public class DefaultJsUriManager implements JsUriManager {
 
     String[] splits = path.split("!");
     Collection<String> libs = getJsLibs(splits.length >= 1 ? splits[0] : "");
-    
+
     String haveString = (splits.length >= 2 ? splits[1] : "");
     String haveQueryParam = uri.getQueryParameter(Param.LOADED.getKey());
     if (haveQueryParam == null) {
@@ -200,7 +202,7 @@ public class DefaultJsUriManager implements JsUriManager {
     }
     haveString = haveString + JS_DELIMITER + haveQueryParam;
     Collection<String> have = getJsLibs(haveString);
-    
+
     UriStatus status = UriStatus.VALID_UNVERSIONED;
     String version = uri.getQueryParameter(Param.VERSION.getKey());
     if (version != null && versioner != null) {
@@ -231,7 +233,7 @@ public class DefaultJsUriManager implements JsUriManager {
       }
     }
     if (hostProvider != null) {
-      ret = ret.replace("%host%", hostProvider.get());
+      ret = ret.replace("%authority%", hostProvider.get().getAuthority());
     }
     return ret;
   }

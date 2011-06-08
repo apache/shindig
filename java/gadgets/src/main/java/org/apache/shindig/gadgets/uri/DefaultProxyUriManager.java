@@ -34,6 +34,8 @@ import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.uri.UriCommon.Param;
 
+import org.apache.shindig.common.servlet.Authority;
+
 // Temporary replacement of javax.annotation.Nullable
 import org.apache.shindig.common.Nullable;
 import java.util.Collections;
@@ -73,7 +75,7 @@ public class DefaultProxyUriManager implements ProxyUriManager {
   private final ContainerConfig config;
   private final Versioner versioner;
   private boolean strictParsing = false;
-  private Provider<String> hostProvider;
+  private Provider<Authority> hostProvider;
 
   @Inject
   public DefaultProxyUriManager(ContainerConfig config,
@@ -86,9 +88,9 @@ public class DefaultProxyUriManager implements ProxyUriManager {
   public void setUseStrictParsing(@Named("shindig.uri.proxy.use-strict-parsing") boolean useStrict) {
     this.strictParsing = useStrict;
   }
-  
+
   @Inject(optional = true)
-  public void setHostProvider(@Named("shindig.host-provider") Provider<String> hostProvider) {
+  public void setHostProvider(Provider<Authority> hostProvider) {
     this.hostProvider = hostProvider;
   }
 
@@ -287,7 +289,12 @@ public class DefaultProxyUriManager implements ProxyUriManager {
           "container: " + container);
     }
     if (hostProvider != null) {
-      val = val.replace("%host%", hostProvider.get());
+      val = val.replace("%authority%", hostProvider.get().getAuthority());
+    }else{
+      //require this for test purpose, %host% needs to be replaced with default value eg. StyleTagProxyEmbeddedUrlsVisitorTest
+      if (val.indexOf("%authority%") >= 0){
+        val = val.replace("%authority%", "localhost:8080");
+      }
     }
     return val;
   }
