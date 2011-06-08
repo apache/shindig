@@ -76,7 +76,7 @@ class GadgetSpecParser {
       if ($viewNode->getAttribute('type' == 'url') && $viewNode->getAttribute('href') == null) {
         throw new GadgetSpecException("Malformed <Content> href value");
       }
-      foreach ($this->parseViewAttribute($viewNode->getAttribute('view')) as $view) {
+      foreach (explode(',', $viewNode->getAttribute('view')) as $view) {
         $view = trim($view);
         $href = trim($viewNode->getAttribute('href'));
         $type = trim(strtoupper($viewNode->getAttribute('type')));
