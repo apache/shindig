@@ -21,13 +21,11 @@ package org.apache.shindig.common.servlet;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 
-import com.google.inject.Binder;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.Singleton;
 import com.google.inject.Stage;
-import com.google.inject.name.Names;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.List;

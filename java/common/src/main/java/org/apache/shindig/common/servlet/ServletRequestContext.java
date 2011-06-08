@@ -19,8 +19,6 @@
 
 package org.apache.shindig.common.servlet;
 
-import com.google.common.base.Objects;
-
 import javax.servlet.ServletRequest;
 
 public class ServletRequestContext {

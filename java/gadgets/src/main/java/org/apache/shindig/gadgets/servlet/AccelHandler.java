@@ -17,7 +17,6 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
-import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;

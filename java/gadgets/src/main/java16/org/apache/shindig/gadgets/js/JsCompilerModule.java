@@ -18,12 +18,6 @@
 package org.apache.shindig.gadgets.js;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.Inject;
-import com.google.inject.Provides;
-
-import org.apache.shindig.gadgets.rewrite.js.JsCompiler;
-
-import java.util.List;
 
 /**
  * Guice configuration for JS compilation.

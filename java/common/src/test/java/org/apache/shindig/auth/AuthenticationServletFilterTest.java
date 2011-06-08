@@ -24,7 +24,7 @@ import com.google.common.collect.ImmutableList;
 import javax.servlet.FilterChain;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import static org.easymock.EasyMock.expect;
+
 import org.junit.Before;
 import org.junit.Test;
 

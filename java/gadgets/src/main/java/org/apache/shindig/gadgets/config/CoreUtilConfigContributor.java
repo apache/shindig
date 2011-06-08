@@ -24,7 +24,6 @@ import com.google.inject.Singleton;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.features.FeatureRegistry;
 import org.apache.shindig.gadgets.spec.Feature;
-import org.apache.shindig.gadgets.spec.ModulePrefs;
 
 import java.util.Collection;
 import java.util.Map;
