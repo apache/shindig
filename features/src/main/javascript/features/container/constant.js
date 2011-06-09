@@ -139,3 +139,12 @@ osapi.container.RenderParam = {
 osapi.container.ViewParam = {
   VIEW: 'view'
 };
+
+/**
+ * Constants to define lifecycle callback 
+ */
+osapi.container.CallbackType = {};
+osapi.container.CallbackType.ON_PRELOADED = 'onPreloaded';
+osapi.container.CallbackType.ON_NAVIGATED = 'onNavigated';
+osapi.container.CallbackType.ON_CLOSED = 'onClosed';
+osapi.container.CallbackType.ON_UNLOADED = 'onUnloaded';
