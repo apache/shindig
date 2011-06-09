@@ -35,6 +35,7 @@ public class CompilationProcessor implements JsProcessor {
    * Compile content in the inbound JsResponseBuilder.
    * TODO: Re-add support for externs here if they're ever used.
    * TODO: Convert JsCompiler to take JsResponseBuilder directly rather than Iterable<JsContent>
+   * @throws JsException
    */
   public boolean process(JsRequest request, JsResponseBuilder builder) throws JsException {
     Iterable<JsContent> jsContents = builder.build().getAllJsContent();
@@ -51,6 +52,11 @@ public class CompilationProcessor implements JsProcessor {
     builder.clearJs().appendAllJs(result.getAllJsContent());
     builder.setStatusCode(result.getStatusCode());
     builder.addErrors(result.getErrors());
+    int refresh = result.getCacheTtlSecs();
+    if (refresh > 0) {
+      // Allow ttl overwrite by compiler
+      builder.setCacheTtlSecs(refresh);
+    }
     return true;
   }
 

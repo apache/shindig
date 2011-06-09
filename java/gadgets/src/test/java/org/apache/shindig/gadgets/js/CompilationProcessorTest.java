@@ -83,6 +83,29 @@ public class CompilationProcessorTest {
     assertFalse(outIterator.hasNext());
   }
 
+  @Test
+  public void compilerTtlIsUsed() throws Exception {
+    JsUri jsUri = control.createMock(JsUri.class);
+    JsResponseBuilder builder =
+        new JsResponseBuilder().setCacheTtlSecs(1234).setStatusCode(200)
+          .appendJs("content1:", "source1");
+    JsResponse outputResponse =
+        new JsResponseBuilder().setCacheTtlSecs(789)
+            .appendJs("content3", "s3").build();
+    JsRequest request = control.createMock(JsRequest.class);
+    expect(request.getJsUri()).andReturn(jsUri);
+    expect(compiler.compile(same(jsUri), eq(builder.build().getAllJsContent()),
+        isA(String.class))).andReturn(outputResponse);
+
+    control.replay();
+    boolean status = processor.process(request, builder);
+    control.verify();
+
+    JsResponse compResult = builder.build();
+    assertEquals(200, compResult.getStatusCode());
+    assertEquals(789, compResult.getCacheTtlSecs());
+  }
+
   private FeatureBundle mockBundle(String... externs) {
     FeatureBundle result = createMock(FeatureBundle.class);
     expect(result.getApis(ApiDirective.Type.JS, false)).andReturn(

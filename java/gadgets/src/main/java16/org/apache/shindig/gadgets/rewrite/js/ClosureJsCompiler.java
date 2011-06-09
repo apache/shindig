@@ -63,13 +63,12 @@ public class ClosureJsCompiler implements JsCompiler {
               + "var parts=name.split('.'),cur=window,part;"
               + "for(;parts.length&&(part=parts.shift());){if(!parts.length){"
               + "cur[part]=obj;}else{cur=cur[part]||(cur[part]={})}}};", "[goog.exportSymbol]");
-  
+
   @VisibleForTesting
   static final String CACHE_NAME = "CompiledJs";
 
   private final DefaultJsCompiler defaultCompiler;
   private final Cache<String, JsResponse> cache;
-  private JsResponse lastResult;
 
   @Inject
   public ClosureJsCompiler(DefaultJsCompiler defaultCompiler, CacheProvider cacheProvider) {
@@ -82,14 +81,14 @@ public class ClosureJsCompiler implements JsCompiler {
     CompilationLevel.ADVANCED_OPTIMIZATIONS.setOptionsForCompilationLevel(result);
     return result;
   }
-  
+
   protected CompilerOptions getCompilerOptions(JsUri uri) {
     CompilerOptions options = defaultCompilerOptions();
 
     if (outputCorrelatedJs()) {
       setSourceMapCompilerOptions(options);
     }
-    
+
     return options;
   }
 
@@ -118,92 +117,104 @@ public class ClosureJsCompiler implements JsCompiler {
     String cacheKey = makeCacheKey(exportResponse.toJsString(), externs, jsUri);
     JsResponse cachedResult = cache.getElement(cacheKey);
     if (cachedResult != null) {
-      lastResult = cachedResult;
       return cachedResult;
     }
 
-    JsResponseBuilder builder = new JsResponseBuilder();
-    
     // Only run actual compiler if necessary.
     CompilerOptions options = getCompilerOptions(jsUri);
-    
+
     if (!jsUri.isDebug() || options.isExternExportsEnabled()) {
-      List<JSSourceFile> allExterns = Lists.newArrayList();
-      allExterns.add(JSSourceFile.fromCode("externs", externs));
-
-      List<JsContent> allContent = Lists.newLinkedList(content);
-      if (options.isExternExportsEnabled()) {
-        allContent.add(EXPORTSYMBOL_CODE);
-      }
-
-      Compiler actualCompiler = newCompiler();
-      Result result = actualCompiler.compile(
-          allExterns,
-          convertToJsSource(allContent),
-          options);
-
-      if (actualCompiler.hasErrors()) {
-        ImmutableList.Builder<String> errors = ImmutableList.builder();
-        for (JSError error : actualCompiler.getErrors()) {
-          errors.add(error.toString()); 
-        }
-        return cacheAndReturnErrorResult(
-            builder, cacheKey,
-            HttpResponse.SC_NOT_FOUND,
-            errors.build());
-      }
-
-      String compiled = compileToSource(actualCompiler, result, jsUri);
-      if (outputCorrelatedJs()) {
-        // Emit code correlated w/ original source.
-        // This operation is equivalent in final code to bundled-output,
-        // but is less efficient and should perhaps only be used in code profiling.
-        SourceMappings sm = processSourceMap(result, allContent);
-        if (sm != null) {
-          builder.appendAllJs(sm.mapCompiled(compiled));
-        } else {
-          return cacheAndReturnErrorResult(
-              builder, cacheKey,
-              HttpResponse.SC_INTERNAL_SERVER_ERROR,
-              Lists.newArrayList("Parse error for source map"));
-        }
-      } else {
-        builder.appendJs(compiled, "[compiled]");
-      }
-
-      builder.clearExterns().appendRawExtern(result.externExport);
-    } else {
-      // Otherwise, return original content and null exports.
-      builder.appendAllJs(content);
+      return doCompile(jsUri, content, externs, cacheKey);
     }
 
+    return doDebug(content, cacheKey);
+  }
+
+  protected JsResponse doDebug(Iterable<JsContent> content, String cacheKey) {
+    JsResponseBuilder builder = new JsResponseBuilder();
+    builder.appendAllJs(content);
     JsResponse result = builder.build();
     cache.addElement(cacheKey, result);
-    lastResult = result;
     return result;
+  }
+
+  protected JsResponse doCompile(JsUri jsUri, Iterable<JsContent> content, String externs,
+      String cacheKey) {
+    JsResponseBuilder builder = new JsResponseBuilder();
+
+    CompilerOptions options = getCompilerOptions(jsUri);
+
+    List<JSSourceFile> allExterns = Lists.newArrayList();
+    allExterns.add(JSSourceFile.fromCode("externs", externs));
+
+    List<JsContent> allContent = Lists.newLinkedList(content);
+    if (options.isExternExportsEnabled()) {
+      allContent.add(EXPORTSYMBOL_CODE);
+    }
+
+    Compiler actualCompiler = newCompiler();
+    Result result = actualCompiler.compile(
+        allExterns,
+        convertToJsSource(allContent),
+        options);
+
+    if (actualCompiler.hasErrors()) {
+      ImmutableList.Builder<String> errors = ImmutableList.builder();
+      for (JSError error : actualCompiler.getErrors()) {
+        errors.add(error.toString());
+      }
+      return cacheAndReturnErrorResult(
+          builder, cacheKey,
+          HttpResponse.SC_NOT_FOUND,
+          errors.build());
+    }
+
+    String compiled = compileToSource(actualCompiler, result, jsUri);
+    if (outputCorrelatedJs()) {
+      // Emit code correlated w/ original source.
+      // This operation is equivalent in final code to bundled-output,
+      // but is less efficient and should perhaps only be used in code profiling.
+      SourceMappings sm = processSourceMap(result, allContent);
+      if (sm != null) {
+        builder.appendAllJs(sm.mapCompiled(compiled));
+      } else {
+        return cacheAndReturnErrorResult(
+            builder, cacheKey,
+            HttpResponse.SC_INTERNAL_SERVER_ERROR,
+            Lists.newArrayList("Parse error for source map"));
+      }
+    } else {
+      builder.appendJs(compiled, "[compiled]");
+    }
+
+    builder.clearExterns().appendRawExtern(result.externExport);
+
+    JsResponse response = builder.build();
+    cache.addElement(cacheKey, response);
+    return response;
   }
 
   protected String compileToSource(Compiler compiler, Result result, JsUri jsUri) {
     return compiler.toSource();
   }
-  
+
   private JsResponse cacheAndReturnErrorResult(
       JsResponseBuilder builder, String cacheKey,
       int statusCode, List<String> messages) {
     builder.setStatusCode(statusCode);
     builder.addErrors(messages);
-    JsResponse result = builder.build(); 
+    JsResponse result = builder.build();
     cache.addElement(cacheKey, result);
     return result;
   }
-  
+
   // Override this method to return "true" for cases where individual chunks of
   // compiled JS should be emitted as JsContent objects, each correlating output JS
   // with the original source file from which they came.
   protected boolean outputCorrelatedJs() {
     return false;
   }
-  
+
   private List<JSSourceFile> convertToJsSource(Iterable<JsContent> content) {
     Map<String, Integer> sourceMap = Maps.newHashMap();
     List<JSSourceFile> sources = Lists.newLinkedList();
@@ -212,7 +223,7 @@ public class ClosureJsCompiler implements JsCompiler {
     }
     return sources;
   }
-  
+
   // Return a unique string to represent the inbound "source" parameter.
   // Closure Compiler errors out when two JSSourceFiles with the same name are
   // provided, so this method tracks the currently-used source names (in the
@@ -226,7 +237,7 @@ public class ClosureJsCompiler implements JsCompiler {
     sourceMap.put(source, ix + 1);
     return ret;
   }
-  
+
   private static String getRootSrc(String source) {
     int colIx = source.lastIndexOf(":");
     if (colIx == -1) {
@@ -262,10 +273,6 @@ public class ClosureJsCompiler implements JsCompiler {
     return builder;
   }
 
-  public JsResponse getLastResult() {
-    return this.lastResult;
-  }
-
   protected String makeCacheKey(String code, String externs, JsUri uri) {
     // TODO: include compilation options in the cache key
     return Joiner.on(":").join(
@@ -275,7 +282,7 @@ public class ClosureJsCompiler implements JsCompiler {
         uri.isDebug(),
         outputCorrelatedJs());
   }
-  
+
   /**
    * Pull the source map out of the given Closure Result, and convert
    * it to a local SourceMappings object used to correlate compiled
@@ -295,12 +302,12 @@ public class ClosureJsCompiler implements JsCompiler {
       return null;
     }
   }
-  
+
   private static class SourceMappings {
     private final Map<String, JsContent> orig;
     private final int[][] lines;
     private final String[] mappings;
-    
+
     private SourceMappings(int[][] lines, String[] mappings, List<JsContent> content) {
       this.lines = lines;
       this.mappings = mappings;
@@ -309,14 +316,15 @@ public class ClosureJsCompiler implements JsCompiler {
         orig.put(js.getSource(), js);
       }
     }
-    
+
     private List<JsContent> mapCompiled(String compiled) {
       List<JsContent> compiledOut = Lists.newLinkedList();
       int codeStart = 0;
       int codePos = 0;
       int curMapping = -1;
-      for (int[] line : lines) {
-        for (int nextMapping : line) {
+      for (int line = 0; line < lines.length; ++line) {
+        for (int col = 0; col < lines[line].length; ++col) {
+          int nextMapping = lines[line][col];
           codePos++;
           if (nextMapping != curMapping && curMapping != -1) {
             appendJsContent(compiledOut, codeStart, codePos, compiled, curMapping);
@@ -328,8 +336,8 @@ public class ClosureJsCompiler implements JsCompiler {
       appendJsContent(compiledOut, codeStart, codePos + 1, compiled, curMapping);
       return compiledOut;
     }
-    
-    private void appendJsContent(List<JsContent> out, int startPos, int codePos, 
+
+    private void appendJsContent(List<JsContent> out, int startPos, int codePos,
         String compiled, int mapping) {
       JsContent sourceJs = orig.get(getRootSrc(mappings[mapping]));
       String sourceName = "[closure-compiler-synthesized]";
@@ -341,16 +349,16 @@ public class ClosureJsCompiler implements JsCompiler {
       out.add(JsContent.fromFeature(compiled.substring(startPos, codePos),
           sourceName, bundle, null));
     }
-    
+
     private static final String BEGIN_COMMENT = "/*";
     private static final String END_COMMENT = "*/";
     private static SourceMappings parseV1(String sourcemap, List<JsContent> orig)
         throws IOException, JSONException {
       BufferedReader reader = new BufferedReader(new StringReader(sourcemap));
       JSONObject summary = new JSONObject(stripComment(reader.readLine()));
-      
+
       int lineCount = summary.getInt("count");
-      
+
       // Read lines info.
       int maxMappingIndex = 0;
       int[][] lines = new int[lineCount][];
@@ -364,13 +372,13 @@ public class ClosureJsCompiler implements JsCompiler {
           maxMappingIndex = Math.max(mappingIndex, maxMappingIndex);
         }
       }
-      
+
       // Bypass comment and unused file info for each line.
       reader.readLine(); // comment
       for (int i = 0; i < lineCount; ++i) {
         reader.readLine();
       }
-      
+
       // Read mappings objects.
       reader.readLine(); // comment
       String[] mappings = new String[maxMappingIndex + 1];
@@ -379,10 +387,10 @@ public class ClosureJsCompiler implements JsCompiler {
         JSONArray mappingObj = new JSONArray(mappingLine);
         mappings[i] = mappingObj.getString(0);
       }
-      
+
       return new SourceMappings(lines, mappings, orig);
     }
-    
+
     private static String stripComment(String line) {
       int begin = line.indexOf(BEGIN_COMMENT);
       if (begin != -1) {
