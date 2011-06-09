@@ -45,6 +45,7 @@ if (!gadgets.rpctx.wpm) {  // make lib resilient to double-inclusion
 
   gadgets.rpctx.wpm = function() {
     var process, ready;
+    var forceSecure = true;
 
     function attachBrowserEvent(eventName, callback, useCapture) {
       if (typeof window.addEventListener != 'undefined') {
@@ -76,8 +77,9 @@ if (!gadgets.rpctx.wpm) {  // make lib resilient to double-inclusion
       // event.origin does not exist, use event.domain.  The other difference is that
       // while event.origin looks like <scheme>://<hostname>:<port>, event.domain
       // consists only of <hostname>.
-      if (typeof packet.origin !== 'undefined' ? packet.origin !== origin :
-          packet.domain !== /^.+:\/\/([^:]+).*/.exec(origin)[1]) {
+      if (forceSecure && (typeof packet.origin !== "undefined"
+          ? packet.origin !== origin
+          : packet.domain !== /^.+:\/\/([^:]+).*/.exec(origin)[1])) {
         return;
       }
       process(rpc, packet.origin);
@@ -93,6 +95,14 @@ if (!gadgets.rpctx.wpm) {  // make lib resilient to double-inclusion
       },
 
       init: function(processFn, readyFn) {
+        function configure(config) {
+          var cfg = config ? config['rpc'] : {};
+          if (String(cfg['disableForceSecure']) === 'true') {
+            forceSecure = false;
+          }
+        }
+        gadgets.config.register('rpc', null, configure);
+
         process = processFn;
         ready = readyFn;
 
