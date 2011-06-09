@@ -159,6 +159,21 @@ gadgets.config = function() {
     }
   }
 
+  /**
+   * Iterates through all registered components.
+   * @param {function(string,Object)} processor The processor method.
+   */
+  function forAllComponents(processor) {
+    for (var name in components) {
+      if (components.hasOwnProperty(name)) {
+        var componentList = components[name];
+        for (var i = 0, j = componentList.length; i < j; ++i) {
+          processor(name, componentList[i]);
+        }
+      }
+    }
+  }
+
   return {
     /**
      * Registers a configurable component and its configuration parameters.
@@ -179,11 +194,14 @@ gadgets.config = function() {
      *     complete. Takes the form function(config), where config will be
      *     all registered config data for all components. This allows your
      *     component to read configuration from other components.
+     * @param {boolean=} opt_callOnUpdate Whether the callback shall be call
+     *     on gadgets.config.update() as well.
      * @member gadgets.config
      * @name register
      * @function
      */
-    register: function(component, opt_validators, opt_callback) {
+    register: function(component, opt_validators, opt_callback,
+        opt_callOnUpdate) {
       var registered = components[component];
       if (!registered) {
         registered = [];
@@ -192,7 +210,8 @@ gadgets.config = function() {
 
       registered.push({
         validators: opt_validators || {},
-        callback: opt_callback
+        callback: opt_callback,
+        callOnUpdate: opt_callOnUpdate
       });
     },
 
@@ -230,31 +249,25 @@ gadgets.config = function() {
       augmentConfig(configuration);
       var inlineOverride = window['___config'] || {};
       foldConfig(configuration, inlineOverride);
-      for (var name in components) {
-        if (components.hasOwnProperty(name)) {
-          var componentList = components[name], conf = configuration[name];
-
-          for (var i = 0, j = componentList.length; i < j; ++i) {
-            var component = componentList[i];
-            if (conf && !opt_noValidation) {
-              var validators = component.validators;
-              for (var v in validators) {
-                if (validators.hasOwnProperty(v)) {
-                  if (!validators[v](conf[v])) {
-                    throw new Error('Invalid config value "' + conf[v] +
-                        '" for parameter "' + v + '" in component "' +
-                        name + '"');
-                  }
-                }
+      forAllComponents(function(name, component) {
+        var conf = configuration[name];
+        if (conf && !opt_noValidation) {
+          var validators = component.validators;
+          for (var v in validators) {
+            if (validators.hasOwnProperty(v)) {
+              if (!validators[v](conf[v])) {
+                throw new Error('Invalid config value "' + conf[v] +
+                    '" for parameter "' + v + '" in component "' +
+                    name + '"');
               }
-            }
-
-            if (component.callback) {
-              component.callback(configuration);
             }
           }
         }
-      }
+
+        if (component.callback) {
+          component.callback(configuration);
+        }
+      });
     },
 
     /**
@@ -264,8 +277,21 @@ gadgets.config = function() {
      * @param {boolean} opt_replace true to replace all configuration.
      */
     update: function(updateConfig, opt_replace) {
+      // Iterate before changing updateConfig and configuration.
+      var callbacks = [];
+      forAllComponents(function(name, component) {
+        if (updateConfig.hasOwnProperty(name) ||
+            (opt_replace && configuration && configuration[name])) {
+          if (component.callback && component.callOnUpdate) {
+            callbacks.push(component.callback);
+          }
+        }
+      });
       configuration = opt_replace ? {} : configuration || {};
       foldConfig(configuration, updateConfig);
+      for (var i = 0, j = callbacks.length; i < j; ++i) {
+        callbacks[i](configuration);
+      }
     }
   };
 }();
