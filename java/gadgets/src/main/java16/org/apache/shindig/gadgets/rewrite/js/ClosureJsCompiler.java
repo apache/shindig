@@ -315,9 +315,8 @@ public class ClosureJsCompiler implements JsCompiler {
       int codeStart = 0;
       int codePos = 0;
       int curMapping = -1;
-      for (int line = 0; line < lines.length; ++line) {
-        for (int col = 0; col < lines[line].length; ++col) {
-          int nextMapping = lines[line][col];
+      for (int[] line : lines) {
+        for (int nextMapping : line) {
           codePos++;
           if (nextMapping != curMapping && curMapping != -1) {
             appendJsContent(compiledOut, codeStart, codePos, compiled, curMapping);

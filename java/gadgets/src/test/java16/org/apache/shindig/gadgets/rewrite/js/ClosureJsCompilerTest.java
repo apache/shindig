@@ -182,8 +182,7 @@ public class ClosureJsCompilerTest extends TestCase {
   }
 
   private Result mockRealJsResult() {
-    Result result = createMock(Result.class);
-    return result;
+    return createMock(Result.class);
   }
 
   private Compiler mockRealJsCompiler(JSError error, Result res, String toSource) {

@@ -166,8 +166,7 @@ public class ExportJsProcessor implements JsProcessor {
 
       // Global/window namespace.
       } else {
-        for (int i = 0; i < properties.size(); i++) {
-          String prop = properties.get(i);
+        for (String prop : properties) {
           result.append(FUNCTION_NAME).append("(");
           result.append("'").append(prop).append("',[").append(prop);
           result.append("]);");

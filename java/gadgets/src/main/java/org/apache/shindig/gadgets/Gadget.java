@@ -152,13 +152,8 @@ public class Gadget {
    * gadget.getSpec().getModulePrefs().getLocale(locale);
    */
   public LocaleSpec getLocale() {
-    String viewName = null;
     View view = getCurrentView();
-    if (view == null) { // Use default view if current view is not set
-      viewName = GadgetSpec.DEFAULT_VIEW;
-    } else {
-      viewName = view.getName();
-    }
+    String viewName = (view == null) ? GadgetSpec.DEFAULT_VIEW : view.getName();
     return spec.getModulePrefs().getLocale(context.getLocale(), viewName);
   }
 

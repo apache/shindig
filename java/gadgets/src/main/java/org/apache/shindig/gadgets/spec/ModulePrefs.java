@@ -780,7 +780,7 @@ public class ModulePrefs {
         if (!feature.getName().startsWith("core")) {
           // Key view level features by qualifying with the view ID
           for (String view : feature.getViews()) {
-            StringBuffer buff = new StringBuffer(feature.getName());
+            StringBuilder buff = new StringBuilder(feature.getName());
             buff.append('.');
             buff.append(view);
             features.put(buff.toString(), feature);

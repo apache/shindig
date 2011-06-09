@@ -18,6 +18,8 @@
  */
 package org.apache.shindig.common.util;
 
+import com.google.common.base.Objects;
+
 import java.util.Comparator;
 import java.util.StringTokenizer;
 
@@ -71,7 +73,12 @@ public class OpenSocialVersion {
     }
     return false;
   }
-  
+
+  @Override
+  public int hashCode() {
+    return Objects.hashCode(major, minor, patch);
+  }
+
   /**
    * Tests if OpenSocialVersion is equivalent to the parameter version
    * @param version Compare with this version

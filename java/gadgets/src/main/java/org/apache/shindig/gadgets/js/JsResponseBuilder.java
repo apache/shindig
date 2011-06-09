@@ -243,7 +243,7 @@ public class JsResponseBuilder {
       for (String exp : expandedList) {
         if (set.contains(exp)) continue;
         if (exp.endsWith(".prototype")) continue;
-        if (exp.indexOf(".") < 0) builder.append("var ");
+        if (!exp.contains(".")) builder.append("var ");
         builder.append(exp).append(" = {}").append(EXTERN_DELIM);
         set.add(exp);
       }

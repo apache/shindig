@@ -292,7 +292,7 @@ public class DefaultProxyUriManager implements ProxyUriManager {
       val = val.replace("%authority%", hostProvider.get().getAuthority());
     }else{
       //require this for test purpose, %host% needs to be replaced with default value eg. StyleTagProxyEmbeddedUrlsVisitorTest
-      if (val.indexOf("%authority%") >= 0){
+      if (val.contains("%authority%")) {
         val = val.replace("%authority%", "localhost:8080");
       }
     }

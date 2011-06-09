@@ -141,7 +141,7 @@ public class DefaultConcatUriManager implements ConcatUriManager {
     // GET URL limit constraint.
     List<Uri> uris = Lists.newArrayList();
 
-    Integer i = Integer.valueOf(START_INDEX);
+    Integer i = START_INDEX;
     for (Uri resource : resourceUris) {
       uriBuilder.addQueryParameter(i.toString(), resource.toString());
       if (uriBuilder.toString().length() > injectedMaxUrlLength) {
@@ -153,7 +153,7 @@ public class DefaultConcatUriManager implements ConcatUriManager {
 
         uriBuilder = makeUriBuilder(ctx, concatHost, concatPath);
         batchUris = Lists.newArrayList();
-        i = Integer.valueOf(START_INDEX);
+        i = START_INDEX;
         uriBuilder.addQueryParameter(i.toString(), resource.toString());
       }
       i++;
@@ -201,7 +201,7 @@ public class DefaultConcatUriManager implements ConcatUriManager {
   private Map<Uri, String> createSnippets(List<Uri> uris) {
     Map<Uri, String> snippets = Maps.newHashMap();
     for (Uri uri : uris) {
-      Integer i = Integer.valueOf(START_INDEX);
+      Integer i = START_INDEX;
       String splitParam = uri.getQueryParameter(Param.JSON.getKey());
       String resourceUri = null;
       while ((resourceUri = uri.getQueryParameter(i.toString())) != null) {
@@ -267,7 +267,7 @@ public class DefaultConcatUriManager implements ConcatUriManager {
     }
     String splitParam = type == Type.JS ? uri.getQueryParameter(Param.JSON.getKey()) : null;
 
-    Integer i = Integer.valueOf(START_INDEX);
+    Integer i = START_INDEX;
     String uriStr = null;
     while ((uriStr = uri.getQueryParameter(i.toString())) != null) {
       try {

@@ -86,9 +86,6 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
         HTMLElements.getElement(HTMLElements.BODY)};
   }
 
-  private static final Map<String, HTMLElements.Element> OSML_ELEMENTS = ImmutableMap.of(
-      SocialDataTags.OSML_TEMPLATE_TAG, OSML_TEMPLATE_ELEMENT,
-      SocialDataTags.OSML_DATA_TAG, OSML_DATA_ELEMENT);
 
   @Inject
   public NekoSimplifiedHtmlParser(DOMImplementation documentFactory) {

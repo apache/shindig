@@ -421,9 +421,7 @@ public class CajaContentRewriter implements GadgetRewriter {
 
   protected PluginCompiler makePluginCompiler(
       PluginMeta meta, MessageQueue mq) {
-    PluginCompiler compiler = new PluginCompiler(
+    return new PluginCompiler(
         BuildInfo.getInstance(), meta, mq);
-    return compiler;
   }
-
 }
