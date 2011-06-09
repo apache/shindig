@@ -23,7 +23,7 @@
  */
 tamings___.push(function(imports) {
   caja___.whitelistFuncs([
-    [gadgets.util, 'getFeatureParameters'],
-    [gadgets.util, 'hasFeature']
+    [gadgets.util, 'registerOnLoadHandler']
   ]);
 });
+

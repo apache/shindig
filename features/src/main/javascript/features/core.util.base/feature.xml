@@ -17,23 +17,13 @@
   specific language governing permissions and limitations under the License.
 -->
 <feature>
-  <name>core.util</name>
+  <name>core.util.base</name>
   <dependency>globals</dependency>
-  <dependency>taming</dependency>
-  <dependency>core.config</dependency>
-  <dependency>core.util.base</dependency>
-  <dependency>core.util.dom</dependency>
-  <dependency>core.util.event</dependency>
-  <dependency>core.util.onload</dependency>
-  <dependency>core.util.string</dependency>
-  <dependency>core.util.urlparams</dependency>
   <all>
-    <script src="util.js"/>
-    <script src="taming.js" caja="1"/>
+    <script src="base.js"/>
     <api>
-      <exports type="js">gadgets.util.getFeatureParameters</exports>
-      <exports type="js">gadgets.util.hasFeature</exports>
-      <exports type="js">gadgets.util.getServices</exports>
+      <exports type="js">gadgets.util.makeClosure</exports>
+      <exports type="js">gadgets.util.makeEnum</exports>
     </api>
   </all>
 </feature>

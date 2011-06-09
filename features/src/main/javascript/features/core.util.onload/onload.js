@@ -18,12 +18,39 @@
  */
 
 /**
- * @class
- * Tame and expose core gadgets.* API to cajoled gadgets
+ * @fileoverview General purpose utilities that gadgets can use.
  */
-tamings___.push(function(imports) {
-  caja___.whitelistFuncs([
-    [gadgets.util, 'getFeatureParameters'],
-    [gadgets.util, 'hasFeature']
-  ]);
-});
+
+/**
+ * @static
+ * @class Provides general-purpose utility functions for onload.
+ * @name gadgets.util
+ */
+gadgets.util = gadgets.util || {};
+
+(function() {
+
+  var onLoadHandlers = [];
+
+  /**
+   * Registers an onload handler.
+   * @param {function()} callback The handler to run.
+   *
+   * @member gadgets.util
+   */
+  gadgets.util.registerOnLoadHandler = function(callback) {
+    onLoadHandlers.push(callback);
+  };
+
+  /**
+   * Runs all functions registered via registerOnLoadHandler.
+   * @private Only to be used by the container, not gadgets.
+   */
+  gadgets.util.runOnLoadHandlers = function() {
+    for (var i = 0, j = onLoadHandlers.length; i < j; ++i) {
+      onLoadHandlers[i]();
+    }
+  };
+
+})();
+

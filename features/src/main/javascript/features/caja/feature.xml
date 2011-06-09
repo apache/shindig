@@ -19,7 +19,7 @@ specific language governing permissions and limitations under the License.
 <feature>
   <name>caja</name>
   <dependency>core.io</dependency>
-  <dependency>core.util</dependency>
+  <dependency>core.util.onload</dependency>
   <dependency>taming</dependency>
   <gadget>
     <script src="taming.js"/>

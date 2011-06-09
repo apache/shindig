@@ -33,7 +33,8 @@
   <dependency>shindig.auth</dependency>
   <dependency>core.config.base</dependency>
   <dependency>core.json</dependency>
-  <dependency>core.util</dependency>
+  <dependency>core.util.base</dependency>
+  <dependency>core.util.urlparams</dependency>
   <all>
     <script src="io.js"/>
     <script src="taming.js" caja="1"/>
