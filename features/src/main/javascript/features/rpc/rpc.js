@@ -611,7 +611,9 @@ if (!window['gadgets']['rpc']) { // make lib resilient to double-inclusion
         }
       }
       relayUrl[targetId] = url;
-      useLegacyProtocol[targetId] = !!opt_useLegacy;
+      if (typeof opt_useLegacy !== 'undefined') {
+        useLegacyProtocol[targetId] = !!opt_useLegacy;
+      }
     }
 
     /**
@@ -904,7 +906,7 @@ if (!window['gadgets']['rpc']) { // make lib resilient to double-inclusion
           'c': callback ? callId : 0,
           'a': Array.prototype.slice.call(arguments, 3),
           't': authToken[targetId],
-          'l': useLegacyProtocol[targetId]
+          'l': !!useLegacyProtocol[targetId]
         };
 
         var referrer = getReferrer(targetId);
