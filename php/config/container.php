@@ -94,6 +94,7 @@ $shindigConfig = array(
    '/rpc' => 'JsonRpcServlet', 
    '/public.crt' => 'CertServlet', 
    '/public.cer' => 'CertServlet', 
+   '/' => 'ContentFilesServlet',  
  ), 
  
   // The X-XRDS-Location value for your implementing container, see http://code.google.com/p/partuza/source/browse/trunk/Library/XRDS.php for an example
