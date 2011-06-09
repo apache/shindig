@@ -65,7 +65,7 @@ abstract class GadgetBaseRenderer extends GadgetRenderer {
     }
     if (isset($_GET['view-params'])) {
       $viewParams = json_decode($_GET['view-params'], true);
-      if ($viewParams != $_GET['view-params'] && $viewParams) {
+      if ($viewParams != $_GET['view-params'] && $viewParams && is_array($viewParams)) {
         foreach ($viewParams as $key => $val) {
           $this->dataContext['ViewParams'][$key] = $val;
         }
