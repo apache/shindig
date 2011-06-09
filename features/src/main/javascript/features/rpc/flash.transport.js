@@ -86,7 +86,7 @@ if (!gadgets.rpctx.flash) {  // make lib resilient to double-inclusion
 
     function init(config) {
       if (usingFlash) {
-        swfUrl = config['rpc']['commSwf'] || '/xpc.swf';
+        swfUrl = config['rpc']['commSwf'] || '//xpc.googleusercontent.com/gadgets/xpc.swf';
       }
     }
     gadgets.config.register('rpc', null, init);
