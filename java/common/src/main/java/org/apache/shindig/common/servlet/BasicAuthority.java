@@ -60,8 +60,7 @@ public class BasicAuthority implements Authority {
   }
 
   public String getOrigin(){
-    return Objects.firstNonNull(ServletRequestContext.getScheme(), "http")
-        "://" + getAuthority();
+    return Objects.firstNonNull(ServletRequestContext.getScheme(), "http");
   }
 
   private String getServerPort() {
