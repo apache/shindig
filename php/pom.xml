@@ -22,7 +22,7 @@
   <parent>
     <groupId>org.apache.shindig</groupId>
     <artifactId>shindig-project</artifactId>
-    <version>3.0.0-beta2</version>
+    <version>3.0.0-SNAPHSOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
@@ -33,9 +33,9 @@
   <description>PHP tests</description>
 
   <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/shindig/tags/shindig-project-3.0.0-beta2/php</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/shindig/tags/shindig-project-3.0.0-beta2/php</developerConnection>
-    <url>http://svn.apache.org/viewvc/shindig/tags/shindig-project-3.0.0-beta2/php</url>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/shindig/trunk/php</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/shindig/trunk/php</developerConnection>
+    <url>http://svn.apache.org/viewvc/shindig/trunk/php</url>
   </scm>
 
   <!-- common params -->
