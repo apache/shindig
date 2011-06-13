@@ -28,7 +28,7 @@
 
   <groupId>org.apache.shindig</groupId>
   <artifactId>shindig-project</artifactId>
-  <version>3.0.0-SNAPHSOT</version>
+  <version>3.0.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>Apache Shindig Project</name>
