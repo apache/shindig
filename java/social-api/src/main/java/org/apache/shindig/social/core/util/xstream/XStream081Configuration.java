@@ -27,6 +27,7 @@ import org.apache.shindig.protocol.DataCollection;
 import org.apache.shindig.protocol.RestfulCollection;
 import org.apache.shindig.protocol.conversion.xstream.ClassFieldMapping;
 import org.apache.shindig.protocol.conversion.xstream.DataCollectionConverter;
+import org.apache.shindig.protocol.conversion.xstream.ExtendableBeanConverter;
 import org.apache.shindig.protocol.conversion.xstream.GuiceBeanConverter;
 import org.apache.shindig.protocol.conversion.xstream.ImplicitCollectionFieldMapping;
 import org.apache.shindig.protocol.conversion.xstream.InterfaceClassMapper;
@@ -38,6 +39,7 @@ import org.apache.shindig.protocol.conversion.xstream.RestfullCollectionConverte
 import org.apache.shindig.protocol.conversion.xstream.WriterStack;
 import org.apache.shindig.protocol.conversion.xstream.XStreamConfiguration;
 import org.apache.shindig.protocol.model.EnumImpl;
+import org.apache.shindig.protocol.model.ExtendableBean;
 import org.apache.shindig.social.core.util.atom.AtomAttribute;
 import org.apache.shindig.social.core.util.atom.AtomAttributeConverter;
 import org.apache.shindig.social.core.util.atom.AtomContent;
@@ -51,8 +53,6 @@ import org.apache.shindig.social.opensocial.model.ActivityEntry;
 import org.apache.shindig.social.opensocial.model.ActivityObject;
 import org.apache.shindig.social.opensocial.model.Address;
 import org.apache.shindig.social.opensocial.model.BodyType;
-import org.apache.shindig.social.opensocial.model.EmbeddedExperience;
-import org.apache.shindig.social.opensocial.model.Extension;
 import org.apache.shindig.social.opensocial.model.ListField;
 import org.apache.shindig.social.opensocial.model.MediaItem;
 import org.apache.shindig.social.opensocial.model.MediaLink;
@@ -175,8 +175,7 @@ public class XStream081Configuration implements XStreamConfiguration {
         new ClassFieldMapping("organization", Organization.class),
         new ClassFieldMapping("person", Person.class),
         new ClassFieldMapping("url", Url.class),
-        new ClassFieldMapping("openSocial", Extension.class),
-        new ClassFieldMapping("embed", EmbeddedExperience.class),
+        new ClassFieldMapping("openSocial", ExtendableBean.class),
         // this is an example of a class field mapping with context. If
         // ListField is mapped inside an element named emails, replace the element
         // name
@@ -215,8 +214,7 @@ public class XStream081Configuration implements XStreamConfiguration {
         new ClassFieldMapping("organization", Organization.class),
         new ClassFieldMapping("person", Person.class),
         new ClassFieldMapping("url", Url.class),
-        new ClassFieldMapping("openSocial", Extension.class),
-        new ClassFieldMapping("embed", EmbeddedExperience.class),
+        new ClassFieldMapping("openSocial", ExtendableBean.class),
         // this is an example of a class field mapping with context. If
         // ListField is mapped inside an element named emails, replace the element
         // name that would have been defiend as fqcn ListField with email
@@ -245,6 +243,7 @@ public class XStream081Configuration implements XStreamConfiguration {
         .put("activity", Activity.class)
         .put("activityEntry", ActivityEntry.class)
         .put("object", ActivityObject.class)
+        .put("openSocial", ExtendableBean.class)
         .put("mediaLink", MediaLink.class)
         .put("account", Account.class)
         .put("address", Address.class)
@@ -256,8 +255,6 @@ public class XStream081Configuration implements XStreamConfiguration {
         .put("organization", Organization.class)
         .put("person", Person.class)
         .put("url", Url.class)
-        .put("openSocial", Extension.class)
-        .put("embed", EmbeddedExperience.class)
         .put("listField", ListField.class).build()
     );
 
@@ -297,7 +294,6 @@ public class XStream081Configuration implements XStreamConfiguration {
         
         new ImplicitCollectionFieldMapping(ActivityObject.class, "downstreamDuplicates", String.class, "downstreamDuplicate"),
         new ImplicitCollectionFieldMapping(ActivityObject.class, "upstreamDuplicates", String.class, "upstreamDuplicate"),
-        //new ImplicitCollectionFieldMapping(ActivityObject.class, "attachments", ActivityObject.class, "attachment"),
 
         new ImplicitCollectionFieldMapping(Activity.class, "mediaItems", MediaItem.class, "mediaItems"))
     );
@@ -357,6 +353,7 @@ public class XStream081Configuration implements XStreamConfiguration {
     xstream.registerConverter(new ISO8601SqlTimestampConverter());
     xstream.registerConverter(new GuiceBeanConverter(fmapper, injector));
     xstream.registerConverter(new AtomAttributeConverter());
+    xstream.registerConverter(new ExtendableBeanConverter(), XStream.PRIORITY_VERY_HIGH);
     xstream.setMode(XStream.NO_REFERENCES);
 
     amapper.addAttributeFor(AtomAttribute.class);

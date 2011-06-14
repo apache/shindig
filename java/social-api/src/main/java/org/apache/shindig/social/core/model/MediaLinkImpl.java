@@ -17,18 +17,22 @@
  */
 package org.apache.shindig.social.core.model;
 
+import org.apache.shindig.protocol.model.ExtendableBean;
+import org.apache.shindig.protocol.model.ExtendableBeanImpl;
 import org.apache.shindig.social.opensocial.model.MediaLink;
 
 /**
  * <p>MediaLinkImpl class.</p>
  *
  */
-public class MediaLinkImpl implements MediaLink {
+public class MediaLinkImpl extends ExtendableBeanImpl implements MediaLink {
   
+  private static final long serialVersionUID = 1L;
   private Integer duration;
   private Integer height;
   private String url;
-  private Integer width;  
+  private Integer width;
+  private ExtendableBean openSocial;
   
   /**
    * Create a new MediaLink
@@ -74,5 +78,15 @@ public class MediaLinkImpl implements MediaLink {
   /** {@inheritDoc} */
   public void setWidth(Integer width) {
     this.width = width;
+  }
+  
+  /** {@inheritDoc} */
+  public ExtendableBean getOpenSocial() {
+    return openSocial;
+  }
+
+  /** {@inheritDoc} */
+  public void setOpenSocial(ExtendableBean openSocial) {
+    this.openSocial = openSocial;
   }
 }

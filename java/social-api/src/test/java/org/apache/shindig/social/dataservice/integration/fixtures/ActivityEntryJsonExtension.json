@@ -1,0 +1,19 @@
+{
+   "entry": {
+	  id: "activityCreated",
+	  title: "Super Created Activity",
+	  extension1: "extension1Value",
+	  object: {
+	    extension3: [
+	      {
+	        ext1: "ext1Value"
+	      }
+	    ],
+	    id: "objectCreated"
+	  },
+	  actor: {
+	    id: "john.doe",
+	    extension2: "extension2Value"
+	  }
+   }
+}

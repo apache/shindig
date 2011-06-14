@@ -17,25 +17,6 @@
  */
 package org.apache.shindig.protocol.conversion;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.MapMaker;
-import com.google.common.collect.Lists;
-import com.google.common.collect.ImmutableMap;
-
-import com.google.inject.Inject;
-import com.google.inject.Injector;
-
-import org.apache.shindig.common.JsonProperty;
-import org.apache.shindig.common.JsonSerializer;
-import org.apache.shindig.common.uri.Uri;
-import org.apache.shindig.protocol.ContentTypes;
-import org.apache.shindig.protocol.model.Enum;
-import org.apache.shindig.protocol.model.EnumImpl;
-import org.joda.time.DateTime;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -50,6 +31,25 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import org.apache.shindig.common.JsonProperty;
+import org.apache.shindig.common.JsonSerializer;
+import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.protocol.ContentTypes;
+import org.apache.shindig.protocol.model.Enum;
+import org.apache.shindig.protocol.model.EnumImpl;
+import org.apache.shindig.protocol.model.ExtendableBean;
+import org.joda.time.DateTime;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
+import com.google.common.collect.MapMaker;
+import com.google.inject.Inject;
+import com.google.inject.Injector;
 
 /**
  * Converts between JSON and java objects.
@@ -261,6 +261,19 @@ public class BeanJsonConverter implements BeanConverter {
 
   private Object convertToClass(JSONObject in, Class<?> type) {
     Object out = injector.getInstance(type);
+    
+    /*
+     * Simple hack to add support for arbitrary extensions to Shindig's data
+     * model.  It initializes keys/values of an ExtendableBean class, which is
+     * a Map under the covers.  If a class implements ExtendableBean.java, it
+     * will support arbitrary mappings to JSON & XML.
+     */
+    if (ExtendableBean.class.isAssignableFrom(type)) {
+      for (String name : JSONObject.getNames(in)) {
+        ((ExtendableBean) out).put(name, convertToObject(in.opt(name), null));
+      }
+    }
+  
     for (Map.Entry<String, Method> entry : getSetters(out.getClass()).entrySet()) {
       Object value = in.opt(entry.getKey());
       if (value != null) {

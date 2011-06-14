@@ -20,14 +20,17 @@ package org.apache.shindig.social.core.model;
 
 import java.util.List;
 
+import org.apache.shindig.protocol.model.ExtendableBean;
+import org.apache.shindig.protocol.model.ExtendableBeanImpl;
 import org.apache.shindig.social.opensocial.model.ActivityObject;
 import org.apache.shindig.social.opensocial.model.MediaLink;
 
 /**
  * <p>ActivityObjectImpl class.</p>
  */
-public class ActivityObjectImpl implements ActivityObject {
+public class ActivityObjectImpl extends ExtendableBeanImpl implements ActivityObject {
   
+  private static final long serialVersionUID = 1L;
   private List<ActivityObject> attachments;
   private ActivityObject author;
   private String content;
@@ -41,6 +44,7 @@ public class ActivityObjectImpl implements ActivityObject {
   private String updated;
   private List<String> upstreamDuplicates;
   private String url;
+  private ExtendableBean openSocial;
   
   /**
    * Constructs an empty ActivityObject.
@@ -175,5 +179,15 @@ public class ActivityObjectImpl implements ActivityObject {
   /** {@inheritDoc} */
   public void setUrl(String url) {
     this.url = url;
+  }
+  
+  /** {@inheritDoc} */
+  public ExtendableBean getOpenSocial() {
+    return openSocial;
+  }
+
+  /** {@inheritDoc} */
+  public void setOpenSocial(ExtendableBean openSocial) {
+    this.openSocial = openSocial;
   }
 }

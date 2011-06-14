@@ -21,6 +21,7 @@ package org.apache.shindig.social.opensocial.model;
 import java.util.List;
 
 import org.apache.shindig.protocol.model.Exportablebean;
+import org.apache.shindig.protocol.model.ExtendableBean;
 import org.apache.shindig.social.core.model.ActivityObjectImpl;
 
 import com.google.inject.ImplementedBy;
@@ -34,7 +35,7 @@ import com.google.inject.ImplementedBy;
  */
 @ImplementedBy(ActivityObjectImpl.class)
 @Exportablebean
-public interface ActivityObject {
+public interface ActivityObject extends ExtendableBean {
   
   /**
    * Fields that represent the JSON elements.
@@ -53,7 +54,8 @@ public interface ActivityObject {
     SUMMARY("summary"),
     UPDATED("updated"),
     UPSTREAM_DUPLICATES("upstreamDuplicates"),
-    URL("url");
+    URL("url"),
+    OPENSOCIAL("openSocial");
     
     // The name of the JSON element
     private final String jsonString;
@@ -258,4 +260,18 @@ public interface ActivityObject {
    * @param url a {@link java.lang.String} object.
    */
   void setUrl(String url);
+  
+  /**
+   * <p>getOpenSocial</p>
+   * 
+   * @return a {@link org.apache.shindig.protocol.model.ExtendableBean} object
+   */
+  ExtendableBean getOpenSocial();
+  
+  /**
+   * <p>setOpenSocial</p>
+   * 
+   * @return a {@link org.apache.shindig.protocol.model.ExtendableBean} object
+   */
+  void setOpenSocial(ExtendableBean opensocial);
 }

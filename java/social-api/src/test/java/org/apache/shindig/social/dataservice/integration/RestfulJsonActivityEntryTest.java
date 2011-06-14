@@ -83,13 +83,27 @@ public class RestfulJsonActivityEntryTest extends AbstractLargeRestfulTests{
   
   @Test
   public void testCreateActivityEntryJson() throws Exception {
-    String expected = TestUtils.loadTestFixture(FIXTURE_LOC + "ActivityEntryJsonCreated.json");;
+    String expected = TestUtils.loadTestFixture(FIXTURE_LOC + "ActivityEntryJsonCreated.json");
     
     // Create activity
     String postData = "{id: 'activityCreated', title : 'Super Created Activity', actor: {id: 'john.doe'}, object : {id: 'objectCreated'}}";
     String postResp = getResponse("/activitystreams/john.doe/@self/1", "POST", postData, null, ContentTypes.OUTPUT_JSON_CONTENT_TYPE);
     assertTrue(TestUtils.jsonsEqual(expected, postResp));
     
+    // Retrieve created activity & test
+    String getResp = getResponse("/activitystreams/john.doe/@self/1/activityCreated", "GET", null, ContentTypes.OUTPUT_JSON_CONTENT_TYPE);
+    assertTrue(TestUtils.jsonsEqual(expected, getResp));
+  }
+  
+  @Test
+  public void testActivityEntryExtensionJson() throws Exception {
+    String expected = TestUtils.loadTestFixture(FIXTURE_LOC + "ActivityEntryJsonExtension.json");
+
+    // Create activity with extensions
+    String postData = "{extension1: 'extension1Value', id: 'activityCreated', title : 'Super Created Activity', actor: {id: 'john.doe', extension2: 'extension2Value'}, object : {extension3: [{ext1: 'ext1Value'}], id: 'objectCreated'}}";
+    String postResp = getResponse("/activitystreams/john.doe/@self/1", "POST", postData, null, ContentTypes.OUTPUT_JSON_CONTENT_TYPE);
+    assertTrue(TestUtils.jsonsEqual(expected, postResp));
+
     // Retrieve created activity & test
     String getResp = getResponse("/activitystreams/john.doe/@self/1/activityCreated", "GET", null, ContentTypes.OUTPUT_JSON_CONTENT_TYPE);
     assertTrue(TestUtils.jsonsEqual(expected, getResp));

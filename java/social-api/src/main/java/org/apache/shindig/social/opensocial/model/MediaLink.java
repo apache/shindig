@@ -18,6 +18,7 @@
 package org.apache.shindig.social.opensocial.model;
 
 import org.apache.shindig.protocol.model.Exportablebean;
+import org.apache.shindig.protocol.model.ExtendableBean;
 import org.apache.shindig.social.core.model.MediaLinkImpl;
 
 import com.google.inject.ImplementedBy;
@@ -27,7 +28,7 @@ import com.google.inject.ImplementedBy;
  */
 @ImplementedBy(MediaLinkImpl.class)
 @Exportablebean
-public interface MediaLink {
+public interface MediaLink extends ExtendableBean {
 
   /**
    * Fields that represent the JSON elements.
@@ -36,7 +37,8 @@ public interface MediaLink {
     DURATION("duration"),
     HEIGHT("height"),
     URL("url"),
-    WIDTH("width");
+    WIDTH("width"),
+    OPENSOCIAL("openSocial");
     
     // The name of the JSON element
     private final String jsonString;
@@ -115,4 +117,18 @@ public interface MediaLink {
    * @param width is the target's width
    */
   void setWidth(Integer width);
+  
+  /**
+   * <p>getOpenSocial</p>
+   * 
+   * @return a {@link org.apache.shindig.protocol.model.ExtendableBean} object
+   */
+  ExtendableBean getOpenSocial();
+  
+  /**
+   * <p>setOpenSocial</p>
+   * 
+   * @return a {@link org.apache.shindig.protocol.model.ExtendableBean} object
+   */
+  void setOpenSocial(ExtendableBean opensocial);
 }
