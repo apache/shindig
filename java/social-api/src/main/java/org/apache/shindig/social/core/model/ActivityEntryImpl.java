@@ -22,6 +22,7 @@ import org.apache.shindig.protocol.model.ExtendableBean;
 import org.apache.shindig.protocol.model.ExtendableBeanImpl;
 import org.apache.shindig.social.opensocial.model.ActivityEntry;
 import org.apache.shindig.social.opensocial.model.ActivityObject;
+import org.apache.shindig.social.opensocial.model.MediaLink;
 
 /**
  * A simple bean implementation of an ActivityStream Entry.
@@ -32,7 +33,7 @@ public class ActivityEntryImpl extends ExtendableBeanImpl implements ActivityEnt
   private ActivityObject actor;
   private String content;
   private ActivityObject generator;
-  private String icon;
+  private MediaLink icon;
   private String id;
   private ActivityObject object;
   private String published;
@@ -80,12 +81,12 @@ public class ActivityEntryImpl extends ExtendableBeanImpl implements ActivityEnt
   }
 
   /** {@inheritDoc} */
-  public String getIcon() {
+  public MediaLink getIcon() {
     return icon;
   }
 
   /** {@inheritDoc} */
-  public void setIcon(String icon) {
+  public void setIcon(MediaLink icon) {
     this.icon = icon;
   }
 

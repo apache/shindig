@@ -118,16 +118,16 @@ public interface ActivityEntry extends Comparable<ActivityEntry>, ExtendableBean
   /**
    * <p>getIcon</p>
    *
-   * @return a {@link java.lang.String} object.
+   * @return a {@link org.apache.shindig.extras.as.opensocial.model.MediaLink} object.
    */
-  String getIcon();
+  MediaLink getIcon();
 
   /**
    * <p>setIcon</p>
    *
-   * @param icon a {@link java.lang.String} object.
+   * @param icon a {@link org.apache.shindig.extras.as.opensocial.model.MediaLink} object.
    */
-  void setIcon(String icon);
+  void setIcon(MediaLink icon);
   
   /**
    * <p>getId</p>
