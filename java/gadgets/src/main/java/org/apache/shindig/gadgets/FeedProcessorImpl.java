@@ -21,8 +21,8 @@ package org.apache.shindig.gadgets;
 import java.io.StringReader;
 import java.util.List;
 
+import com.google.common.base.Strings;
 import com.sun.syndication.feed.module.mediarss.types.UrlReference;
-
 import com.sun.syndication.feed.module.mediarss.MediaEntryModule;
 import com.sun.syndication.feed.module.mediarss.MediaModule;
 import com.sun.syndication.feed.module.mediarss.types.MediaContent;
@@ -35,61 +35,56 @@ import com.sun.syndication.feed.synd.SyndImage;
 import com.sun.syndication.feed.synd.SyndPerson;
 import com.sun.syndication.io.FeedException;
 import com.sun.syndication.io.SyndFeedInput;
+
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
- * Processes RSS & Atom Feeds and converts them into JSON output.
+ * Processes RSS/Atom Feeds and converts them into JSON output.
  */
 public class FeedProcessorImpl implements FeedProcessor {
 
   /**
    * Converts feed XML to JSON.
-   * 
-   * @param feedUrl
-   *            The url that the feed was retrieved from.
-   * @param feedXml
-   *            The raw XML of the feed to be converted.
-   * @param getSummaries
-   *            True if summaries should be returned.
-   * @param numEntries
-   *            Number of entries to return.
+   *
+   * @param feedUrl      The url that the feed was retrieved from.
+   * @param feedXml      The raw XML of the feed to be converted.
+   * @param getSummaries True if summaries should be returned.
+   * @param numEntries   Number of entries to return.
    * @return The JSON representation of the feed.
    */
-  @SuppressWarnings("unchecked")
+  //@SuppressWarnings("unchecked")
   public JSONObject process(String feedUrl, String feedXml, boolean getSummaries, int numEntries)
-          throws GadgetException {
+      throws GadgetException {
     try {
       SyndFeed feed = new SyndFeedInput().build(new StringReader(feedXml));
       JSONObject json = new JSONObject();
-      json.put("Title", feed.getTitle());
+      json.put("Title", Strings.nullToEmpty(feed.getTitle()));
       json.put("URL", feedUrl);
-      json.put("Description", feed.getDescription());
-      json.put("Link", feed.getLink());
+      json.put("Description", Strings.nullToEmpty(feed.getDescription()));
+      json.put("Link", Strings.nullToEmpty(feed.getLink()));
 
       //Retrieve the feed image if it is available as well as an image url if the image is available.
-      if (feed.getImage() != null && !feed.getImage().getUrl().isEmpty()){
-        SyndImage feedImage = (SyndImage)feed.getImage();
+      if (feed.getImage() != null && !Strings.isNullOrEmpty(feed.getImage().getUrl())) {
+        SyndImage feedImage = feed.getImage();
         JSONObject jsonImage = new JSONObject();
         jsonImage.put("Url", feedImage.getUrl());
-        if(feedImage.getTitle() != null 
-                && !feedImage.getTitle().isEmpty()){
-            jsonImage.put("Title", feedImage.getTitle());
+
+        if (!Strings.isNullOrEmpty(feedImage.getTitle())) {
+          jsonImage.put("Title", feedImage.getTitle());
         }
-        if(feedImage.getDescription() != null &&
-                !feedImage.getDescription().isEmpty()){
-            jsonImage.put("Description", feedImage.getDescription());
+        if (!Strings.isNullOrEmpty(feedImage.getDescription())) {
+          jsonImage.put("Description", feedImage.getDescription());
         }
-        if(feedImage.getLink() != null && 
-        		  !feedImage.getLink().isEmpty()){
+        if (!Strings.isNullOrEmpty(feedImage.getLink())) {
           jsonImage.put("Link", feedImage.getLink());
         }
         json.put("Image", jsonImage);
       }
 
-      
+
       List<SyndPerson> authors = feed.getAuthors();
       String jsonAuthor = null;
       if (authors != null && !authors.isEmpty()) {
