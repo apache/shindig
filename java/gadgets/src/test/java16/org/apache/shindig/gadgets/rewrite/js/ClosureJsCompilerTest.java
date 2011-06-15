@@ -18,11 +18,13 @@
 package org.apache.shindig.gadgets.rewrite.js;
 
 import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.createMockBuilder;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.isA;
 import static org.easymock.EasyMock.replay;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.javascript.jscomp.Compiler;
 import com.google.javascript.jscomp.CompilerOptions;
@@ -30,6 +32,8 @@ import com.google.javascript.jscomp.DiagnosticType;
 import com.google.javascript.jscomp.JSError;
 import com.google.javascript.jscomp.JSSourceFile;
 import com.google.javascript.jscomp.Result;
+import com.google.javascript.jscomp.SourceMap;
+import com.google.javascript.jscomp.SourceMap.Format;
 
 import junit.framework.TestCase;
 
@@ -45,10 +49,29 @@ import org.apache.shindig.gadgets.js.JsResponse;
 import org.apache.shindig.gadgets.rewrite.js.DefaultJsCompiler;
 import org.apache.shindig.gadgets.uri.UriStatus;
 import org.apache.shindig.gadgets.uri.JsUriManager.JsUri;
+import org.easymock.EasyMock;
 
 import java.util.List;
+import java.util.Map;
 
 public class ClosureJsCompilerTest extends TestCase {
+  private static final String ACTUAL_COMPILER_OUTPUT = "window.abc={};";
+  private static final String EXPORT_COMPILER_STRING = "window['abc'] = {};";
+  private static final Iterable<JsContent> EXPORT_COMPILER_CONTENTS =
+      newJsContents(EXPORT_COMPILER_STRING);
+  private static final List<String> EXPORTS = ImmutableList.of("foo", "bar");
+  private static final String EXTERN = "extern";
+  private static final String ERROR_NAME = "error";
+  private static final JSError JS_ERROR = JSError.make("js", 12, 34,
+      DiagnosticType.error(ERROR_NAME, "errDesc"));
+  private static final Map<String, String> COMPILER_IO = ImmutableMap.<String, String>builder()
+      .put("  ", "")
+      .put(EXPORT_COMPILER_STRING, ACTUAL_COMPILER_OUTPUT)
+      .put("var foo = function(x) {}", "var foo=function(x){};")
+      .put("var foo = function(x) { bar(x, x) }; \n var bar = function(x, y) { bar(x) };",
+          "var foo=function(x){bar(x,x)};var bar=function(x,y){bar(x)};")
+      .put("", "")
+      .build();
 
   private Compiler realCompMock;
   private CompilerOptions realOptionsMock;
@@ -59,27 +82,11 @@ public class ClosureJsCompilerTest extends TestCase {
   private CacheProvider cacheMock;
   private ClosureJsCompiler compiler;
 
-  private final String ACTUAL_COMPILER_OUTPUT = "window.abc={};";
-  private final String EXPORT_COMPILER_STRING = "window['abc'] = {};";
-  private final Iterable<JsContent> EXPORT_COMPILER_CONTENTS =
-      newJsContents(EXPORT_COMPILER_STRING);
-
-  private final String CLOSURE_ACTUAL_COMPILER_OUTPUT = ACTUAL_COMPILER_OUTPUT;
-  private final String CLOSURE_EXPORT_COMPILER_OUTPUT = EXPORT_COMPILER_STRING;
-
-  private final List<String> EXPORTS = ImmutableList.of("foo", "bar");
-
-  private final String EXTERN = "extern";
-  private final String ERROR_NAME = "error";
-  private final JSError JS_ERROR = JSError.make(
-      "js", 12, 34, DiagnosticType.error(ERROR_NAME, "errDesc"));
-
-  @Override
   protected void setUp() throws Exception {
     super.setUp();
     cacheMock = new MockProvider();
-    exportResponseMock = mockJsResponse();
-    compilerMock = mockDefaultJsCompiler(exportResponseMock);
+    exportResponseMock = mockJsResponse(EXPORT_COMPILER_STRING);
+    compilerMock = mockDefaultJsCompiler(exportResponseMock, EXPORT_COMPILER_CONTENTS);
   }
 
   public void testGetJsContentWithGoogSymbolExports() throws Exception {
@@ -107,10 +114,33 @@ public class ClosureJsCompilerTest extends TestCase {
     realCompMock = mockRealJsCompiler(null, realResultMock, ACTUAL_COMPILER_OUTPUT);
     realOptionsMock = mockRealJsCompilerOptions(false);
     compiler = newClosureJsCompiler(realCompMock, realOptionsMock, compilerMock, cacheMock);
-    JsResponse actual = compiler.compile(jsUriMock, EXPORT_COMPILER_CONTENTS,
-        ImmutableList.of(EXTERN));
-    assertEquals(CLOSURE_ACTUAL_COMPILER_OUTPUT, actual.toJsString());
+    JsResponse actual = compiler.compile(jsUriMock, EXPORT_COMPILER_CONTENTS, EXTERN);
+    assertEquals(ACTUAL_COMPILER_OUTPUT, actual.toJsString());
     assertTrue(actual.getErrors().isEmpty());
+  }
+
+  @SuppressWarnings("unchecked")
+  public void testCompileSuccessOptWithProfiling() throws Exception {
+    jsUriMock = mockJsUri(false); // opt
+
+    realOptionsMock = new CompilerOptions();
+    realOptionsMock.enableExternExports(false);
+    realOptionsMock.sourceMapOutputPath = "test.out";
+    realOptionsMock.sourceMapFormat = Format.V2;
+    realOptionsMock.sourceMapDetailLevel = SourceMap.DetailLevel.ALL;
+    realOptionsMock.ideMode = false;
+    realOptionsMock.convertToDottedProperties = true;
+
+    for (Map.Entry<String, String> compilerTest : COMPILER_IO.entrySet()) {
+      List<JsContent> content = newJsContents(compilerTest.getKey());
+      exportResponseMock = mockJsResponse(compilerTest.getKey());
+      compilerMock = mockDefaultJsCompiler(exportResponseMock, content);
+      compiler = newProfilingClosureJsCompiler(realOptionsMock, compilerMock, cacheMock);
+
+      JsResponse actual = compiler.compile(jsUriMock, content, EXTERN);
+      assertEquals(compilerTest.getValue(), actual.toJsString());
+      assertTrue(actual.getErrors().isEmpty());
+    }
   }
 
   public void testCompileSuccessDeb() throws Exception {
@@ -119,9 +149,8 @@ public class ClosureJsCompilerTest extends TestCase {
     realCompMock = mockRealJsCompiler(null, realResultMock, ACTUAL_COMPILER_OUTPUT);
     realOptionsMock = mockRealJsCompilerOptions(false);
     compiler = newClosureJsCompiler(realCompMock, realOptionsMock, compilerMock, cacheMock);
-    JsResponse actual = compiler.compile(jsUriMock, EXPORT_COMPILER_CONTENTS,
-        ImmutableList.of(EXTERN));
-    assertEquals(CLOSURE_EXPORT_COMPILER_OUTPUT, actual.toJsString());
+    JsResponse actual = compiler.compile(jsUriMock, EXPORT_COMPILER_CONTENTS, EXTERN);
+    assertEquals(EXPORT_COMPILER_STRING, actual.toJsString());
     assertTrue(actual.getErrors().isEmpty());
   }
 
@@ -130,8 +159,7 @@ public class ClosureJsCompilerTest extends TestCase {
     realCompMock = mockRealJsCompiler(JS_ERROR, realResultMock, ACTUAL_COMPILER_OUTPUT);
     realOptionsMock = mockRealJsCompilerOptions(true); // force compiler to run
     compiler = newClosureJsCompiler(realCompMock, realOptionsMock, compilerMock, cacheMock);
-    JsResponse actual = compiler.compile(jsUriMock, EXPORT_COMPILER_CONTENTS,
-        ImmutableList.of(EXTERN));
+    JsResponse actual = compiler.compile(jsUriMock, EXPORT_COMPILER_CONTENTS, EXTERN);
     assertTrue(actual.getErrors().get(0).contains(ERROR_NAME));
     assertEquals(1, actual.getErrors().size());
   }
@@ -141,53 +169,65 @@ public class ClosureJsCompilerTest extends TestCase {
     realCompMock = mockRealJsCompiler(JS_ERROR, realResultMock, ACTUAL_COMPILER_OUTPUT);
     realOptionsMock = mockRealJsCompilerOptions(true); // force compiler to run
     compiler = newClosureJsCompiler(realCompMock, realOptionsMock, compilerMock, cacheMock);
-    JsResponse actual = compiler.compile(jsUriMock, EXPORT_COMPILER_CONTENTS,
-        ImmutableList.of(EXTERN));
+    JsResponse actual = compiler.compile(jsUriMock, EXPORT_COMPILER_CONTENTS, EXTERN);
     assertTrue(actual.getErrors().get(0).contains(ERROR_NAME));
     assertEquals(1, actual.getErrors().size());
   }
 
   private ClosureJsCompiler newClosureJsCompiler(final Compiler realComp,
       CompilerOptions realOptions, DefaultJsCompiler defaultComp, CacheProvider cache) {
-    return new ClosureJsCompiler(defaultComp, cache) {
-      @Override
-      Compiler newCompiler() {
-        return realComp;
-      }
-      
-      @Override
-      protected CompilerOptions getCompilerOptions(JsUri uri) {
-        return realOptionsMock;
-      }
-    };
+    ClosureJsCompiler compiler = createMockBuilder(ClosureJsCompiler.class)
+        .addMockedMethods("newCompiler", "getCompilerOptions", "outputCorrelatedJs")
+        .withConstructor(defaultComp, cache)
+        .createMock();
+    expect(compiler.newCompiler()).andReturn(realComp).anyTimes();
+    expect(compiler.getCompilerOptions(isA(JsUri.class))).andReturn(realOptionsMock).anyTimes();
+    expect(compiler.outputCorrelatedJs()).andReturn(false).anyTimes();
+    replay(compiler);
+    return compiler;
   }
 
-  private JsResponse mockJsResponse() {
+  private ClosureJsCompiler newProfilingClosureJsCompiler(CompilerOptions realOptions,
+      DefaultJsCompiler defaultComp, CacheProvider cache) {
+    ClosureJsCompiler compiler =
+        createMockBuilder(ClosureJsCompiler.class)
+            .addMockedMethods("getCompilerOptions", "outputCorrelatedJs")
+            .withConstructor(defaultComp, cache).createMock();
+    expect(compiler.getCompilerOptions(isA(JsUri.class))).andReturn(realOptions).anyTimes();
+    expect(compiler.outputCorrelatedJs()).andReturn(true).anyTimes();
+    replay(compiler);
+    return compiler;
+  }
+
+  private JsResponse mockJsResponse(String content) {
     JsResponse result = createMock(JsResponse.class);
-    expect(result.toJsString()).andReturn(EXPORT_COMPILER_STRING).anyTimes();
-    expect(result.getAllJsContent()).andReturn(EXPORT_COMPILER_CONTENTS).anyTimes();
+    expect(result.toJsString()).andReturn(content).anyTimes();
+    expect(result.getAllJsContent()).andReturn(newJsContents(content)).anyTimes();
     replay(result);
     return result;
   }
 
   @SuppressWarnings("unchecked")
-  private DefaultJsCompiler mockDefaultJsCompiler(JsResponse res) {
+  private DefaultJsCompiler mockDefaultJsCompiler(JsResponse res, Iterable<JsContent> content) {
     DefaultJsCompiler result = createMock(DefaultJsCompiler.class);
     expect(result.getJsContent(isA(JsUri.class), isA(FeatureBundle.class)))
-        .andReturn(EXPORT_COMPILER_CONTENTS).anyTimes();
-    expect(result.compile(isA(JsUri.class), isA(Iterable.class), isA(List.class)))
+        .andReturn(content).anyTimes();
+    expect(result.compile(isA(JsUri.class), isA(Iterable.class), isA(String.class)))
         .andReturn(res).anyTimes();
     replay(result);
     return result;
   }
 
   private Result mockRealJsResult() {
-    return createMock(Result.class);
+    Result result = createMock(Result.class);
+    replay(result);
+    return result;
   }
 
   private Compiler mockRealJsCompiler(JSError error, Result res, String toSource) {
     Compiler result = createMock(Compiler.class);
-    expect(result.compile(isA(JSSourceFile[].class), isA(JSSourceFile[].class),
+    expect(result.compile(EasyMock.<List<JSSourceFile>>anyObject(),
+        EasyMock.<List<JSSourceFile>>anyObject(),
         isA(CompilerOptions.class))).andReturn(res);
     if (error != null) {
       expect(result.hasErrors()).andReturn(true);
@@ -217,13 +257,15 @@ public class ClosureJsCompilerTest extends TestCase {
     expect(result.getContext()).andReturn(RenderingContext.CONFIGURED_GADGET).anyTimes();
     expect(result.getRefresh()).andReturn(1000).anyTimes();
     expect(result.isNoCache()).andReturn(false).anyTimes();
-    expect(result.getGadget()).andReturn("http://foo.com/g.xml").anyTimes();
+    expect(result.getGadget()).andReturn("http://foo.com/g.xml").anyTimes();    
     expect(result.getLibs()).andReturn(ImmutableList.<String>of()).anyTimes();
     expect(result.getLoadedLibs()).andReturn(ImmutableList.<String>of()).anyTimes();
     expect(result.getOnload()).andReturn("foo").anyTimes();
     expect(result.isJsload()).andReturn(true).anyTimes();
     expect(result.isNohint()).andReturn(true).anyTimes();
     expect(result.getOrigUri()).andReturn(null).anyTimes();
+    expect(result.getRepository()).andReturn(null).anyTimes();
+    expect(result.getExtensionParams()).andReturn(null).anyTimes();
     replay(result);
     return result;
   }
@@ -252,7 +294,7 @@ public class ClosureJsCompilerTest extends TestCase {
 
   private static List<JsContent> newJsContents(String jsCode) {
     List<JsContent> result = Lists.newArrayList();
-    result.add(JsContent.fromText(jsCode, null));
+    result.add(JsContent.fromText(jsCode, "testSource"));
     return result;
   }
 }

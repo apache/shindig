@@ -19,9 +19,15 @@ package org.apache.shindig.gadgets.rewrite.js;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
+import com.google.common.base.Objects;
+import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.debugging.sourcemap.SourceMapping;
+import com.google.debugging.sourcemap.SourceMapConsumerFactory;
+import com.google.debugging.sourcemap.SourceMapParseException;
+import com.google.debugging.sourcemap.proto.Mapping.OriginalMapping;
 import com.google.inject.Inject;
 import com.google.javascript.jscomp.BasicErrorManager;
 import com.google.javascript.jscomp.CheckLevel;
@@ -45,13 +51,8 @@ import org.apache.shindig.gadgets.js.JsResponse;
 import org.apache.shindig.gadgets.js.JsResponseBuilder;
 import org.apache.shindig.gadgets.rewrite.js.JsCompiler;
 import org.apache.shindig.gadgets.uri.JsUriManager.JsUri;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.StringReader;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -82,6 +83,7 @@ public class ClosureJsCompiler implements JsCompiler {
     return result;
   }
 
+  @VisibleForTesting
   protected CompilerOptions getCompilerOptions(JsUri uri) {
     CompilerOptions options = defaultCompilerOptions();
 
@@ -94,7 +96,7 @@ public class ClosureJsCompiler implements JsCompiler {
 
   protected void setSourceMapCompilerOptions(CompilerOptions options) {
     options.sourceMapOutputPath = "create.out";
-    options.sourceMapFormat = SourceMap.Format.V1;
+    options.sourceMapFormat = SourceMap.Format.DEFAULT;
     options.sourceMapDetailLevel = SourceMap.DetailLevel.ALL;
   }
 
@@ -173,14 +175,13 @@ public class ClosureJsCompiler implements JsCompiler {
     if (outputCorrelatedJs()) {
       // Emit code correlated w/ original source.
       // This operation is equivalent in final code to bundled-output,
-      // but is less efficient and should perhaps only be used in code profiling.
-      SourceMappings sm = processSourceMap(result, allContent);
-      if (sm != null) {
-        builder.appendAllJs(sm.mapCompiled(compiled));
+      // but is less efficient and should perhaps only be used in code
+      // profiling.
+      SourceMapParser parser = processSourceMap(result, allContent);
+      if (parser != null) {
+        builder.appendAllJs(parser.mapCompiled(compiled));
       } else {
-        return cacheAndReturnErrorResult(
-            builder, cacheKey,
-            HttpResponse.SC_INTERNAL_SERVER_ERROR,
+        return cacheAndReturnErrorResult(builder, cacheKey, HttpResponse.SC_INTERNAL_SERVER_ERROR,
             Lists.newArrayList("Parse error for source map"));
       }
     } else {
@@ -284,122 +285,135 @@ public class ClosureJsCompiler implements JsCompiler {
   }
 
   /**
-   * Pull the source map out of the given Closure Result, and convert
-   * it to a local SourceMappings object used to correlate compiled
+   * Pull the source map out of the given closure {@link Result} and construct a
+   * {@link SourceMapParser}. This instance can be used to correlate compiled
    * content with originating source.
-   * @param result Closure result object with source map.
-   * @param allInputs All inputs supplied to the compiler, in JsContent form.
-   * @return SourceMappings object correlating compiled with originating input.
+   *
+   * @param result Closure result object with source map
+   * @param allInputs All inputs supplied to the compiler, in JsContent form
+   * @return Utility to parse the sourcemap
    */
-  private SourceMappings processSourceMap(Result result, List<JsContent> allInputs) {
+  private SourceMapParser processSourceMap(Result result, List<JsContent> allInputs) {
     StringBuilder sb = new StringBuilder();
     try {
-      result.sourceMap.appendTo(sb, "done");
-      return SourceMappings.parseV1(sb.toString(), allInputs);
-    } catch (IOException e) {
-      return null;
-    } catch (JSONException e) {
-      return null;
+      if (result.sourceMap != null) {
+        result.sourceMap.appendTo(sb, "done");
+        return SourceMapParser.parse(sb.toString(), allInputs);
+      }
+    } catch (SourceMapParseException e) { // null response
+    } catch (IOException e) { // null response
     }
+    return null;
   }
 
-  private static class SourceMappings {
-    private final Map<String, JsContent> orig;
-    private final int[][] lines;
-    private final String[] mappings;
+  /**
+   * Parser for the string representation of a {@link SourceMap}.
+   */
+  private static class SourceMapParser {
+    /**
+     * Default source name for constructed {@link JsContent} entries.
+     */
+    private static final String DEFAULT_JSSOURCE = "[closure-compiler-synthesized]";
 
-    private SourceMappings(int[][] lines, String[] mappings, List<JsContent> content) {
-      this.lines = lines;
-      this.mappings = mappings;
+    /**
+     * Utility to parse a {@link SourceMap} string.
+     */
+    private final SourceMapping consumer;
+
+    /**
+     * Map of mapping identifier to code components.
+     */
+    private final Map<String, JsContent> orig;
+
+    private SourceMapParser(SourceMapping consumer, List<JsContent> content) {
+      this.consumer = consumer;
       this.orig = Maps.newHashMap();
       for (JsContent js : content) {
         orig.put(js.getSource(), js);
       }
     }
 
-    private List<JsContent> mapCompiled(String compiled) {
-      List<JsContent> compiledOut = Lists.newLinkedList();
-      int codeStart = 0;
-      int codePos = 0;
-      int curMapping = -1;
-      for (int line = 0; line < lines.length; ++line) {
-        for (int col = 0; col < lines[line].length; ++col) {
-          int nextMapping = lines[line][col];
-          codePos++;
-          if (nextMapping != curMapping && curMapping != -1) {
-            appendJsContent(compiledOut, codeStart, codePos, compiled, curMapping);
-            codeStart = codePos;
+    /**
+     * Deconstruct the original javascript content for compiled content.
+     *
+     * This routine iterates through the mapping at every row-column combination
+     * of the mapping in order to generate the original content. It is expected
+     * to be a considerably expensive operation.
+     *
+     * @param compiled the compiled javascript
+     * @return {@link JsContent} entries for code fragments belonging to a single source
+     */
+    public Iterable<JsContent> mapCompiled(String compiled) {
+      int row = 1, column = 1; // current row-col being parsed
+      StringBuilder codeFragment = new StringBuilder(); // code fragment for a single mapping
+
+      OriginalMapping previousMapping = null, // the row-col mapping at the previous valid position
+          currentMapping = null; // the row-col mapping at the current valid position
+
+      ImmutableList.Builder<JsContent> contentEntries = ImmutableList.builder();
+      Iterable<String> compiledLines = Splitter.on("\n").split(compiled);
+      for (String compiledLine : compiledLines) {
+        for (column = 0; column < compiledLine.length(); column++) {
+          currentMapping = consumer.getMappingForLine(row, column + 1);
+          if (!Objects.equal(getSource(currentMapping), getSource(previousMapping))) {
+            contentEntries.add(getJsContent(codeFragment.toString(), getSource(previousMapping)));
+            codeFragment = new StringBuilder();
           }
-          curMapping = nextMapping;
+          previousMapping = currentMapping;
+          codeFragment.append(compiledLine.charAt(column));
         }
+        row++;
+        codeFragment.append('\n');
       }
-      appendJsContent(compiledOut, codeStart, codePos + 1, compiled, curMapping);
-      return compiledOut;
+
+      // add the last fragment
+      codeFragment.deleteCharAt(codeFragment.length() - 1);
+      if (codeFragment.length() > 0) {
+        contentEntries.add(getJsContent(codeFragment.toString(), getSource(previousMapping)));
+      }
+      return contentEntries.build();
     }
 
-    private void appendJsContent(List<JsContent> out, int startPos, int codePos,
-        String compiled, int mapping) {
-      JsContent sourceJs = orig.get(getRootSrc(mappings[mapping]));
-      String sourceName = "[closure-compiler-synthesized]";
+    /**
+     * Utility to get the source of an {@link OriginalMapping}.
+     *
+     * @param mapping the mapping
+     * @return source of the mapping or a blank source if none is present
+     */
+    private final String getSource(OriginalMapping mapping) {
+      return (mapping != null) ? mapping.getOriginalFile() : "";
+    }
+
+    /**
+     * Construct {@link JsContent} instances for a given compiled code
+     * component.
+     *
+     * @param codeFragment the fragment of compiled code for this component
+     * @param mappingIdentifier positional mapping identifier
+     * @return {@link JsContent} for this component
+     */
+    private JsContent getJsContent(String codeFragment, String mappingIdentifier) {
+      JsContent sourceJs = orig.get(getRootSrc(mappingIdentifier));
+      String sourceName = DEFAULT_JSSOURCE;
       FeatureBundle bundle = null;
       if (sourceJs != null) {
         sourceName = sourceJs.getSource() != null ? sourceJs.getSource() : "";
         bundle = sourceJs.getFeatureBundle();
       }
-      out.add(JsContent.fromFeature(compiled.substring(startPos, codePos),
-          sourceName, bundle, null));
+      return JsContent.fromFeature(codeFragment, sourceName, bundle, null);
     }
 
-    private static final String BEGIN_COMMENT = "/*";
-    private static final String END_COMMENT = "*/";
-    private static SourceMappings parseV1(String sourcemap, List<JsContent> orig)
-        throws IOException, JSONException {
-      BufferedReader reader = new BufferedReader(new StringReader(sourcemap));
-      JSONObject summary = new JSONObject(stripComment(reader.readLine()));
-
-      int lineCount = summary.getInt("count");
-
-      // Read lines info.
-      int maxMappingIndex = 0;
-      int[][] lines = new int[lineCount][];
-      for (int i = 0; i < lineCount; ++i) {
-        String lineDescriptor = reader.readLine();
-        JSONArray lineArr = new JSONArray(lineDescriptor);
-        lines[i] = new int[lineArr.length()];
-        for (int j = 0; j < lineArr.length(); ++j) {
-          int mappingIndex = lineArr.getInt(j);
-          lines[i][j] = mappingIndex;
-          maxMappingIndex = Math.max(mappingIndex, maxMappingIndex);
-        }
-      }
-
-      // Bypass comment and unused file info for each line.
-      reader.readLine(); // comment
-      for (int i = 0; i < lineCount; ++i) {
-        reader.readLine();
-      }
-
-      // Read mappings objects.
-      reader.readLine(); // comment
-      String[] mappings = new String[maxMappingIndex + 1];
-      for (int i = 0; i <= maxMappingIndex; ++i) {
-        String mappingLine = reader.readLine();
-        JSONArray mappingObj = new JSONArray(mappingLine);
-        mappings[i] = mappingObj.getString(0);
-      }
-
-      return new SourceMappings(lines, mappings, orig);
-    }
-
-    private static String stripComment(String line) {
-      int begin = line.indexOf(BEGIN_COMMENT);
-      if (begin != -1) {
-        int end = line.indexOf(END_COMMENT, begin + 1);
-        if (end != -1) {
-          return line.substring(0, begin) + line.substring(end + END_COMMENT.length());
-        }
-      }
-      return line;
+    /**
+     * Parse the provided string and return an instance of this parser.
+     *
+     * @param string the {@link SourceMap} in a string representation
+     * @param originalContent the origoinal content
+     * @return parsing utility
+     * @throws SourceMapParseException
+     */
+    public static SourceMapParser parse(String string, List<JsContent> originalContent)
+        throws SourceMapParseException {
+      return new SourceMapParser(SourceMapConsumerFactory.parse(string), originalContent);
     }
   }
 }
