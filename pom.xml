@@ -88,7 +88,7 @@
     <!-- This is the technical website for Shindig 2.0.x -->
     <site>
       <id>apache.website</id>
-      <url>scp://people.apache.org/www/shindig.apache.org/shindig-2.0.x</url>
+      <url>scp://people.apache.org/www/shindig.apache.org/shindig-3.0.x</url>
     </site>
   </distributionManagement>
 
@@ -593,16 +593,19 @@
       <reporting>
         <!-- ordered alphabetically by owner -->
         <plugins>
+        <!--
+          TODO(lindner): re-add once maven-site plugin works with checkstyle again..
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-checkstyle-plugin</artifactId>
-            <version>2.6</version>
+            <version>2.5</version>
             <configuration>
               <configLocation>http://svn.apache.org/repos/asf/shindig/trunk/etc/checkstyle/checkstyle.xml</configLocation>
               <headerLocation>http://svn.apache.org/repos/asf/shindig/trunk/etc/checkstyle/java.header</headerLocation>
               <encoding>${project.build.sourceEncoding}</encoding>
             </configuration>
           </plugin>
+          -->
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-javadoc-plugin</artifactId>
@@ -1102,7 +1105,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-site-plugin</artifactId>
-          <version>3.0-beta-3</version>
+          <version>3.0-beta-4-SNAPSHOT</version>
           <configuration>
             <inputEncoding>${project.build.sourceEncoding}</inputEncoding>
             <outputEncoding>${project.build.sourceEncoding}</outputEncoding>
