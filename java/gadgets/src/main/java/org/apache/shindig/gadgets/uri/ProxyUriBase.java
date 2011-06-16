@@ -21,6 +21,7 @@ package org.apache.shindig.gadgets.uri;
 import com.google.common.base.Objects;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import org.apache.commons.lang.math.NumberUtils;
@@ -191,6 +192,20 @@ public class ProxyUriBase {
 
   public boolean cajoleContent() {
     return cajoleContent;
+  }
+
+  public void setExtensionParam(String key, String val) {
+    if (extensionParams == null) {
+      extensionParams = Maps.newHashMap();
+    }
+    extensionParams.put(key, val);
+  }
+
+  public String getExtensionParam(String key) {
+    if (extensionParams == null) {
+      return null;
+    }
+    return extensionParams.get(key);
   }
 
   public ProxyUriBase setExtensionParams(Map<String, String> extensionParams) {
