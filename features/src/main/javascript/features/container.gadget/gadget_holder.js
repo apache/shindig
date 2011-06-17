@@ -387,7 +387,7 @@ osapi.container.GadgetHolder.prototype.updateUserPrefParams_ = function(uri) {
 };
 
 function init(config) {
-  if (config.container) {
+  if (config['container']) {
     var rpath = config['container']['relayPath'];
     osapi.container.GadgetHolder.prototype.relayPath_ = rpath;
   }

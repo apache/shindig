@@ -696,3 +696,28 @@ osapi.container.Container.prototype.applyLifecycleCallbacks_ = function(
     }
   } 
 };
+
+/**
+ * Creates a new URL site
+ * @param {Element} element the element to put the site in
+*/
+osapi.container.Container.prototype.newUrlSite = function(element){
+  var args = {};
+  args[osapi.container.UrlSite.URL_ELEMENT] = element;
+  return new osapi.container.UrlSite(args);
+};
+
+
+/**
+ * Navigates to a URL
+ * @param {osapi.container.UrlSite} site the URL site to render the URL in
+ * @param {String} url the URL to render
+ * @param {object} renderParams params to augment the rendering.
+ * Valid rendering parameters include osapi.container.RenderParam.CLASS,
+ * osapi.container.RenderParam.HEIGHT, and osapi.container.RenderParam.WIDTH
+ */
+osapi.container.Container.prototype.navigateUrl = function(site, url, renderParams){
+  site.render(url, renderParams);
+  return site;
+};
+ 

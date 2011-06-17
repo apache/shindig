@@ -26,6 +26,9 @@ features/caja-debug/feature.xml
 features/caja-guest-frame/feature.xml
 features/caja-taming-frame/feature.xml
 features/container/feature.xml
+features/container.gadget/feature.xml
+features/container.url/feature.xml
+features/container.util/feature.xml
 features/content-rewrite/feature.xml
 features/core.config/feature.xml
 features/core.config.base/feature.xml

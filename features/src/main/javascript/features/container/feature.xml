@@ -25,12 +25,11 @@ under the License.
   <dependency>shindig.uri.ext</dependency>
   <dependency>osapi</dependency>
   <dependency>rpc</dependency>
+  <dependency>container.util</dependency>
+  <dependency>container.gadget</dependency>
+  <dependency>container.url</dependency>
   <container>
-    <script src="constant.js"/>
-    <script src="util.js"/>
     <script src="service.js"/>
-    <script src="gadget_holder.js"/>
-    <script src="gadget_site.js"/>
     <script src="container.js"/>
     <script src="init.js"/>
     <api>
@@ -55,24 +54,6 @@ under the License.
       <exports type="js">osapi.container.ContainerConfig.PRELOAD_REF_TIME</exports>
       <exports type="js">osapi.container.ContainerConfig.PRELOAD_METADATAS</exports>
       <exports type="js">osapi.container.ContainerConfig.PRELOAD_TOKENS</exports>
-      <exports type="js">osapi.container.RenderParam.ALLOW_DEFAULT_VIEW</exports>
-      <exports type="js">osapi.container.RenderParam.CAJOLE</exports>
-      <exports type="js">osapi.container.RenderParam.CLASS</exports>
-      <exports type="js">osapi.container.RenderParam.DEBUG</exports>
-      <exports type="js">osapi.container.RenderParam.HEIGHT</exports>
-      <exports type="js">osapi.container.RenderParam.NO_CACHE</exports>
-      <exports type="js">osapi.container.RenderParam.TEST_MODE</exports>
-      <exports type="js">osapi.container.RenderParam.USER_PREFS</exports>
-      <exports type="js">osapi.container.RenderParam.VIEW</exports>
-      <exports type="js">osapi.container.RenderParam.WIDTH</exports>
-      <exports type="js">osapi.container.GadgetSite.prototype.setHeight</exports>
-      <exports type="js">osapi.container.GadgetSite.prototype.setWidth</exports>
-      <exports type="js">osapi.container.GadgetSite.prototype.getId</exports>
-      <exports type="js">osapi.container.GadgetSite.prototype.getActiveGadgetHolder</exports>
-      <exports type="js">osapi.container.GadgetSite.prototype.rpcCall</exports>
-      <exports type="js">osapi.container.GadgetSite.prototype.close</exports>
-      <!-- TODO: deprecate this. It should have the same id as siteId -->
-      <exports type="js">osapi.container.GadgetHolder.prototype.getIframeId</exports>
     </api>
   </container>
 </feature>

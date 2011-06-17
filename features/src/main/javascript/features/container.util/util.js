@@ -142,3 +142,30 @@ osapi.container.util.warn = function(message) {
 osapi.container.util.getCurrentTimeMs = function() {
   return new Date().getTime();
 };
+
+/**
+ * Crates the HTML for the iFrame
+ * @param {iframeParams} iframe Params.
+ * @return the HTML for the iFrame
+ */
+osapi.container.util.createIframeHtml = function(iframeParams) {
+
+  // Do not use DOM API (createElement(), setAttribute()), since it is slower,
+  // requires more code, and creating an element with it results in a click
+  // sound in IE (unconfirmed), setAttribute('class') may need browser-specific
+  // variants.
+  var out = [];
+  out.push('<iframe ');
+  for ( var key in iframeParams) {
+      var value = iframeParams[key];
+      if (value) {
+          out.push(key);
+          out.push('="');
+          out.push(value);
+          out.push('" ');
+      }
+  }
+  out.push('></iframe>');
+
+  return out.join('');
+};

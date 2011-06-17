@@ -51,11 +51,13 @@ if (!this.JsUtil) {
   eval(JsUtil.prototype.include(srcDir + '/core.prefs/prefs.js'));
   eval(JsUtil.prototype.include(srcDir + '/core.log/log.js'));
   eval(JsUtil.prototype.include(srcDir + '/core.io/io.js'));
-  eval(JsUtil.prototype.include(srcDir + '/container/constant.js'));
-  eval(JsUtil.prototype.include(srcDir + '/container/util.js'));
+  eval(JsUtil.prototype.include(srcDir + '/container.util/constant.js'));
+  eval(JsUtil.prototype.include(srcDir + '/container.util/util.js'));
   eval(JsUtil.prototype.include(srcDir + '/container/service.js'));
-  eval(JsUtil.prototype.include(srcDir + '/container/gadget_holder.js'));
-  eval(JsUtil.prototype.include(srcDir + '/container/gadget_site.js'));
+  eval(JsUtil.prototype.include(srcDir + '/container.gadget/gadget_holder.js'));
+  eval(JsUtil.prototype.include(srcDir + '/container.gadget/gadget_site.js'));
+  eval(JsUtil.prototype.include(srcDir + '/container.url/url_holder.js'));
+  eval(JsUtil.prototype.include(srcDir + '/container.url/url_site.js'));
   eval(JsUtil.prototype.include(srcDir + '/container/container.js'));
   eval(JsUtil.prototype.include(srcDir + '/i18n/currencycodemap.js'));
   eval(JsUtil.prototype.include(srcDir + '/i18n/datetimeformat.js'));
