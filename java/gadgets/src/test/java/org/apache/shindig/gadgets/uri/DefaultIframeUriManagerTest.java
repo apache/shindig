@@ -62,7 +62,7 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
   private static final String LD_SUFFIX = ".lockeddomain.com";
   private static final String LD_SUFFIX_ALT = ".altld.com";
   private static final String UNLOCKED_DOMAIN = "unlockeddomain.com";
-  private static final String UNLOCKED_DOMAIN_CONFIG_VALUE = "//" + UNLOCKED_DOMAIN;
+  private static final String UNLOCKED_DOMAIN_CONFIG_VALUE = UNLOCKED_DOMAIN;
   private static final int TYPE_URL_NUM_BASE_PARAMS = 8;
   private static final int TYPE_HTML_NUM_BASE_PARAMS = 8;
 

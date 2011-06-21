@@ -133,12 +133,12 @@ public class DefaultIframeUriManager implements IframeUriManager, ContainerConfi
       uri.setPath(getReqVal(container, IFRAME_BASE_PATH_KEY));
 
       // 2. Set host/authority.
-      String host;
+      String host = "//";
       if (usingLockedDomain(gadget, container)) {
-        host = "//" + ldGen.getLockedDomainPrefix(gadget.getSpec().getUrl()) +
+        host += ldGen.getLockedDomainPrefix(gadget.getSpec().getUrl()) +
             getReqVal(container, LOCKED_DOMAIN_SUFFIX_KEY);
       } else {
-        host = getReqVal(container, UNLOCKED_DOMAIN_KEY);
+        host += getReqVal(container, UNLOCKED_DOMAIN_KEY);
       }
 
       Uri gadgetUri = Uri.parse(host);

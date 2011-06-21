@@ -84,8 +84,7 @@
 
 "gadgets.uri.js.host" : "http://www.example.com/",
 "gadgets.uri.js.path" : "${CONTEXT_ROOT}/gadgets/js",
-	
-	
+
 // Callback URL.  Scheme relative URL for easy switch between https/http.
 "gadgets.uri.oauth.callbackTemplate" : "//%host%${CONTEXT_ROOT}/gadgets/oauthcallback",
 
@@ -102,27 +101,25 @@
 //"gadgets.securityTokenType" : "secure",
 //"gadgets.securityTokenKeyFile" : "/path/to/key/file.txt",
 
-// URI for the default shindig test instance.
-//"defaultShindigTestHost": "http://${SERVER_HOST}:${SERVER_PORT}",
-"defaultShindigTestHost":"http://%authority%",
-
-
-// Authority (host:port without scheme) for the proxy and concat servlets.
-//"defaultShindigProxyConcatAuthority": "${SERVER_HOST}:${SERVER_PORT}",
-"defaultShindigProxyConcatAuthority":"%authority%",
-
 // OS 2.0 Gadget DOCTYPE: used in Gadgets with @specificationVersion 2.0 or greater and
 // quirksmode on Gadget has not been set.
 "gadgets.doctype_qname" : "HTML",  //HTML5 doctype
 "gadgets.doctype_pubid" : "",
 "gadgets.doctype_sysid" : "",
 
+
+// Authority (host:port without scheme) for the default shindig test instance.
+"defaultShindigTestAuthority":"%authority%",
+
+// Authority (host:port without scheme) for the proxy and concat servlets.
+"defaultShindigProxyConcatAuthority":"%authority%",
+
 // Default Uri config: these must be overridden - specified here for testing purposes
-"gadgets.uri.iframe.unlockedDomain": "${Cur['defaultShindigTestHost']}",
-"gadgets.uri.iframe.lockedDomainSuffix": "${Cur['defaultShindigTestHost']}",
+"gadgets.uri.iframe.unlockedDomain": "${Cur['defaultShindigTestAuthority']}",
+"gadgets.uri.iframe.lockedDomainSuffix": "${Cur['defaultShindigTestAuthority']}",
 
 // Default Js Uri config: also must be overridden.
-"gadgets.uri.js.host": "${Cur['defaultShindigTestHost']}",
+"gadgets.uri.js.host": "//${Cur['defaultShindigTestAuthority']}",
 "gadgets.uri.js.path": "${CONTEXT_ROOT}/gadgets/js",
 
 // Default concat Uri config; used for testing.
@@ -133,6 +130,7 @@
 // Default proxy Uri config; used for testing.
 "gadgets.uri.proxy.host" : "${Cur['defaultShindigProxyConcatAuthority']}",
 "gadgets.uri.proxy.path" : "${CONTEXT_ROOT}/gadgets/proxy",
+
 
 // This config data will be passed down to javascript. Please
 // configure your object using the feature name rather than
