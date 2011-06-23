@@ -29,6 +29,14 @@
                       {"name": "Horoscope", "url": "http://www.google.com/ig/modules/horoscope.xml"},
                       {"name": "TODO", "url": "http://www.labpixies.com/campaigns/todo/todo.xml"}
                       ]
+             },
+             {
+             "name": "OpenSearch Demo",
+             "Description": "Sample gadgets used for opensearch",
+             "apps" : [
+                      {"name": "Twitter", "url": "http://hosting.gmodules.com/ig/gadgets/file/109228598702359180066/twitterfinal.xml"},
+                      {"name": "MySpace", "url": "http://hosting.gmodules.com/ig/gadgets/file/109228598702359180066/myspacefinal.xml"}
+                      ]
              }
          ]
 }

@@ -21,9 +21,9 @@
 <head>
 
 	<!-- My OpenSocial Beginnings -->
-	<link rel="stylesheet" href="../../../container/gadgets.css">
-	<script src="../../../gadgets/js/container:rpc:pubsub-2.js?c=1&debug=1&container=default"></script>
-	</script>
+	<link rel="stylesheet" href="/container/gadgets.css">
+	<script type="text/javascript"
+		src="/gadgets/js/container:views:opensearch:rpc:pubsub-2.js?c=1&debug=1&container=default""></script>
 	<script
 		src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.3/jquery.min.js"></script>
 	<script
@@ -34,6 +34,8 @@
 	<script type="text/javascript" src="./assembler.js"></script>
 	<script type="text/javascript" src="./viewController.js"></script>
 	<script type="text/javascript" src="./layout.js"></script>
+    <script type="text/javascript" src="./cconviews.js"></script>
+    <script type="text/javascript" src="./search.js"></script>
 
 	<style>
 	  .portlet-header .ui-icon { float: right; }
@@ -78,13 +80,29 @@
 	  #viewsDropdown li.li-header ul li a { 
 	    padding: 5px; height: 17px; 
 	  }
-		
+    
+      #tabs li .ui-icon-close { float: left; margin: 0.4em 0.2em 0 0; cursor: pointer; }
+      
+	  .resultTitle {
+        color: blue;
+      }
+
+      .searchEngine {
+        border: 1px solid blue;
+      }
+
 	</style>
 </head>
 
 <body onLoad="CommonContainer.init();">
 <!--  Need to add in an improved header with links to specification -->
-<a href="http://www.opensocial.org/"><img alt="OpenSocial" src="http://api.ning.com/files/chwE7fbkJ5D1q8NSzNCYJzzCqOiuo3xYyToZCsYuY0SViOKQ7EG-3UUv4KFSxOMACbIzs3oWtD076*cbEL-*ABd9hCO0p7Al/opensocialsitelogo1.png?width=288&amp;height=70&amp;xn_auth=no&amp;type=png"></a><div id="content">
+<a href="http://www.opensocial.org/"><img alt="OpenSocial" src="http://api.ning.com/files/chwE7fbkJ5D1q8NSzNCYJzzCqOiuo3xYyToZCsYuY0SViOKQ7EG-3UUv4KFSxOMACbIzs3oWtD076*cbEL-*ABd9hCO0p7Al/opensocialsitelogo1.png?width=288&amp;height=70&amp;xn_auth=no&amp;type=png"></a>
+<span style="float:right">
+<input type="text" id="query"/>
+  <button name="search" id="searchButton" onClick="updateSearchURLs()">Search </button>   
+  <br/><span id="engineList"></span>  
+ </span>
+<div id="content">
 
 <div id="controlPanel">
 
@@ -143,6 +161,8 @@ Enter the event payload
 <h3><a href="#">Test Area</a></h3>
 <div>
 <div id="gadgetArea" class="column"> 
+</div>
+<div id="results"></div>
 </div>
 </div>
 </div>
