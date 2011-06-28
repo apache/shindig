@@ -136,8 +136,10 @@ public class DefaultJsUriManager implements JsUriManager {
 
     // Finally, version it, but only if !nocache.
     if (versioner != null && !ctx.isNoCache()) {
-      uri.addQueryParameter(Param.VERSION.getKey(),
-          versioner.version(ctx.getGadget(), container, ctx.getLibs()));
+      String version = versioner.version(ctx);
+      if (version != null && version.length() > 0) {
+        uri.addQueryParameter(Param.VERSION.getKey(), version);
+      }
     }
     if (ctx.getExtensionParams() != null) {
       uri.addQueryParameters(ctx.getExtensionParams());
@@ -204,12 +206,16 @@ public class DefaultJsUriManager implements JsUriManager {
 
     UriStatus status = UriStatus.VALID_UNVERSIONED;
     String version = uri.getQueryParameter(Param.VERSION.getKey());
+    JsUri jsUri = new JsUri(status, uri, libs, have);
     if (version != null && versioner != null) {
       String gadgetParam = uri.getQueryParameter(Param.URL.getKey());
-      status = versioner.validate(gadgetParam, container, libs, version);
+      status = versioner.validate(jsUri, version);
+      if (status != UriStatus.VALID_UNVERSIONED) {
+        jsUri = new JsUri(status, jsUri);
+      }
     }
 
-    return new JsUri(status, uri, libs, have);
+    return jsUri;
   }
 
   static String addJsLibs(Collection<String> extern) {

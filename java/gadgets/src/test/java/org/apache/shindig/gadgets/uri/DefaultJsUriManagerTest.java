@@ -23,6 +23,8 @@ import static org.apache.shindig.gadgets.uri.DefaultJsUriManager.addJsLibs;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.isA;
+import static org.easymock.EasyMock.eq;
 import static org.junit.Assert.*;
 
 import com.google.common.collect.ImmutableList;
@@ -123,7 +125,7 @@ public class DefaultJsUriManagerTest {
     List<String> extern = Lists.newArrayList("feature");
     JsUri ctx = mockGadgetContext(false, false, extern);
     String version = "verstring";
-    Versioner versioner = this.mockVersioner(extern, version, version);
+    Versioner versioner = this.mockVersioner(ctx, version, version);
     TestDefaultJsUriManager manager = makeManager(config, versioner);
     Uri jsUri = manager.makeExternJsUri(ctx);
     assertFalse(manager.hadError());
@@ -144,7 +146,7 @@ public class DefaultJsUriManagerTest {
     List<String> extern = Lists.newArrayList("feature");
     JsUri ctx = mockGadgetContext(true, false, extern);  // no cache
     String version = "verstring";
-    Versioner versioner = this.mockVersioner(extern, version, version);
+    Versioner versioner = this.mockVersioner(ctx, version, version);
     TestDefaultJsUriManager manager = makeManager(config, versioner);
     Uri jsUri = manager.makeExternJsUri(ctx);
     assertFalse(manager.hadError());
@@ -290,7 +292,8 @@ public class DefaultJsUriManagerTest {
     List<String> extern = Lists.newArrayList("feature", "another");
     String version = "verstring";
     String badVersion = version + "-a";
-    Versioner versioner = mockVersioner(extern, version, badVersion);
+    JsUri ctx = mockGadgetContext(false, false, extern);
+    Versioner versioner = mockVersioner(ctx, version, badVersion);
     TestDefaultJsUriManager manager = makeManager(config, versioner);
     Uri testUri = Uri.parse("http://target-host.org/gadgets/js/" + addJsLibs(extern) +
         JS_SUFFIX + '?' + Param.CONTAINER.getKey() + '=' + CONTAINER + '&' +
@@ -307,7 +310,8 @@ public class DefaultJsUriManagerTest {
     ContainerConfig config = mockConfig("http://" + targetHost, "/gadgets/js");
     List<String> extern = Lists.newArrayList("feature", "another");
     String version = "verstring";
-    Versioner versioner = mockVersioner(extern, version, version);
+    JsUri ctx = mockGadgetContext(false, false, extern);
+    Versioner versioner = mockVersioner(ctx, version, version);
     TestDefaultJsUriManager manager = makeManager(config, versioner);
     Uri testUri = Uri.parse("http://target-host.org/gadgets/js/" + addJsLibs(extern) +
         JS_SUFFIX + '?' + Param.CONTAINER.getKey() + '=' + CONTAINER);
@@ -323,7 +327,8 @@ public class DefaultJsUriManagerTest {
     ContainerConfig config = mockConfig("http://" + targetHost, "/gadgets/js");
     List<String> extern = Lists.newArrayList("feature", "another");
     String version = "verstring";
-    Versioner versioner = mockVersioner(extern, version, version);
+    JsUri ctx = mockGadgetContext(false, false, extern);
+    Versioner versioner = mockVersioner(ctx, version, version);
     TestDefaultJsUriManager manager = makeManager(config, versioner);
     Uri testUri = Uri.parse("http://target-host.org/gadgets/js/" + addJsLibs(extern) +
         JS_SUFFIX + '?' + Param.CONTAINER.getKey() + '=' + CONTAINER + '&' +
@@ -342,7 +347,7 @@ public class DefaultJsUriManagerTest {
     List<String> extern = Lists.newArrayList("feature1", "feature2", "feature3");
     JsUri ctx = mockGadgetContext(false, false, extern);
     String version = "verstring";
-    Versioner versioner = mockVersioner(extern, version, version);
+    Versioner versioner = mockVersioner(ctx, version, version);
     TestDefaultJsUriManager manager = makeManager(config, versioner);
     Uri jsUri = manager.makeExternJsUri(ctx);
     assertFalse(manager.hadError());
@@ -395,17 +400,12 @@ public class DefaultJsUriManagerTest {
     return config;
   }
 
-  private Versioner mockVersioner(
-      Collection<String> extern, String genVersion, String testVersion) {
+  private Versioner mockVersioner(JsUri jsUri, String genVersion, String testVersion) {
     JsUriManager.Versioner versioner = createMock(Versioner.class);
-    expect(versioner.version(GADGET_URI, CONTAINER, extern)).andReturn(genVersion).anyTimes();
-    expect(versioner.version(null, CONTAINER, extern)).andReturn(genVersion).anyTimes();
+    expect(versioner.version(jsUri)).andStubReturn(genVersion);
     UriStatus status = (genVersion != null && genVersion.equals(testVersion)) ?
-          UriStatus.VALID_VERSIONED : UriStatus.INVALID_VERSION;
-    expect(versioner.validate(GADGET_URI, CONTAINER, extern, testVersion))
-        .andReturn(status).anyTimes();
-    expect(versioner.validate(null, CONTAINER, extern, testVersion))
-        .andReturn(status).anyTimes();
+        UriStatus.VALID_VERSIONED : UriStatus.INVALID_VERSION;
+    expect(versioner.validate(isA(JsUri.class), eq(testVersion))).andStubReturn(status);
     replay(versioner);
     return versioner;
   }

@@ -30,12 +30,13 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.features.FeatureRegistry;
 import org.apache.shindig.gadgets.features.FeatureResource;
+import org.apache.shindig.gadgets.uri.JsUriManager.JsUri;
 
-import org.easymock.EasyMock;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -48,9 +49,6 @@ import java.util.List;
  * gets appropriately cached and differs when JS content differs.
  */
 public class DefaultJsVersionerTest {
-  private static final String URI = "http://apache.org/gadget.xml";
-  private static final String CONTAINER = "container";
-
   private DefaultJsVersioner versioner;
   private FeatureRegistry registry;
 
@@ -66,9 +64,10 @@ public class DefaultJsVersionerTest {
     expectReq(feature, "content");
     replay(registry);
     Collection<String> libs = Lists.newArrayList(feature);
-    String version = versioner.version(URI, CONTAINER, libs);
+    JsUri jsUri = new JsUri(UriStatus.VALID_UNVERSIONED, null, libs, null);
+    String version = versioner.version(jsUri);
     assertNotNull(version);
-    String versionAgain = versioner.version(URI, CONTAINER, libs);
+    String versionAgain = versioner.version(jsUri);
     assertSame(version, versionAgain);
     verify(registry);
   }
@@ -81,9 +80,11 @@ public class DefaultJsVersionerTest {
     expectReq(feature2, "content2");
     replay(registry);
     Collection<String> libs1 = Lists.newArrayList(feature1);
-    String version1 = versioner.version(URI, CONTAINER, libs1);
+    JsUri jsUri1 = new JsUri(UriStatus.VALID_UNVERSIONED, null, libs1, null);
+    String version1 = versioner.version(jsUri1);
     Collection<String> libs2 = Lists.newArrayList(feature2);
-    String version2 = versioner.version(URI, CONTAINER, libs2);
+    JsUri jsUri2 = new JsUri(UriStatus.VALID_UNVERSIONED, null, libs2, null);
+    String version2 = versioner.version(jsUri2);
     assertNotNull(version1);
     assertNotNull(version2);
     assertFalse(version1.equals(version2));
@@ -96,9 +97,10 @@ public class DefaultJsVersionerTest {
     expectReq(feature, "content");
     replay(registry);
     Collection<String> libs = Lists.newArrayList(feature);
-    String version = versioner.version(URI, CONTAINER, libs);
+    JsUri jsUri = new JsUri(UriStatus.VALID_UNVERSIONED, null, libs, null);
+    String version = versioner.version(jsUri);
     assertNotNull(version);
-    UriStatus status = versioner.validate(URI, CONTAINER, libs, version + "-nomatch");
+    UriStatus status = versioner.validate(jsUri, version + "-nomatch");
     assertEquals(UriStatus.INVALID_VERSION, status);
     verify(registry);
   }
@@ -109,9 +111,10 @@ public class DefaultJsVersionerTest {
     expectReq(feature, "content");
     replay(registry);
     Collection<String> libs = Lists.newArrayList(feature);
-    String version = versioner.version(URI, CONTAINER, libs);
+    JsUri jsUri = new JsUri(UriStatus.VALID_UNVERSIONED, null, libs, null);
+    String version = versioner.version(jsUri);
     assertNotNull(version);
-    UriStatus status = versioner.validate(URI, CONTAINER, libs, null);
+    UriStatus status = versioner.validate(jsUri, null);
     assertEquals(UriStatus.VALID_UNVERSIONED, status);
     verify(registry);
   }
@@ -122,9 +125,10 @@ public class DefaultJsVersionerTest {
     expectReq(feature, "content");
     replay(registry);
     Collection<String> libs = Lists.newArrayList(feature);
-    String version = versioner.version(URI, CONTAINER, libs);
+    JsUri jsUri = new JsUri(UriStatus.VALID_UNVERSIONED, null, libs, null);
+    String version = versioner.version(jsUri);
     assertNotNull(version);
-    UriStatus status = versioner.validate(URI, CONTAINER, libs, "");
+    UriStatus status = versioner.validate(jsUri, "");
     assertEquals(UriStatus.VALID_UNVERSIONED, status);
     verify(registry);
   }
@@ -135,9 +139,10 @@ public class DefaultJsVersionerTest {
     expectReq(feature, "content");
     replay(registry);
     Collection<String> libs = Lists.newArrayList(feature);
-    String version = versioner.version(URI, CONTAINER, libs);
+    JsUri jsUri = new JsUri(UriStatus.VALID_UNVERSIONED, null, libs, null);
+    String version = versioner.version(jsUri);
     assertNotNull(version);
-    UriStatus status = versioner.validate(URI, CONTAINER, libs, version);
+    UriStatus status = versioner.validate(jsUri, version);
     assertEquals(UriStatus.VALID_VERSIONED, status);
     verify(registry);
   }
@@ -145,11 +150,12 @@ public class DefaultJsVersionerTest {
   private void expectReq(String feature, String content) {
     FeatureResource resource = new FeatureResource.Simple(content, "", "js");
     Collection<String> libs = Lists.newArrayList(feature);
+    List<String> loaded = ImmutableList.of();
     List<FeatureResource> resources = Lists.newArrayList(resource);
     final FeatureRegistry.LookupResult lr = createMock(FeatureRegistry.LookupResult.class);
     expect(lr.getResources()).andReturn(resources).anyTimes();
     replay(lr);
-    expect(registry.getFeatureResources(isA(GadgetContext.class), eq(libs),
-        EasyMock.<List<String>>isNull())).andReturn(lr).anyTimes();
+    expect(registry.getFeatureResources(isA(GadgetContext.class), eq(libs), eq(loaded)))
+        .andStubReturn(lr);
   }
 }

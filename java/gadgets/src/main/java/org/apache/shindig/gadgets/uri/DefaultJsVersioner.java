@@ -18,13 +18,12 @@
  */
 package org.apache.shindig.gadgets.uri;
 
-import java.util.Collection;
-
 import org.apache.shindig.common.util.HashUtil;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.RenderingContext;
 import org.apache.shindig.gadgets.features.FeatureRegistry;
 import org.apache.shindig.gadgets.features.FeatureResource;
+import org.apache.shindig.gadgets.uri.JsUriManager.JsUri;
 import org.apache.shindig.gadgets.uri.JsUriManager.Versioner;
 
 import com.google.common.collect.Maps;
@@ -48,22 +47,22 @@ public class DefaultJsVersioner implements Versioner {
     this.versionCache = Maps.newHashMap();
   }
 
-  public String version(String gadgetUri, final String container, Collection<String> extern) {
+  public String version(final JsUri jsUri) {
     GadgetContext ctx = new GadgetContext() {
       @Override
       public String getContainer() {
-        return container;
+        return jsUri.getContainer();
       }
 
       @Override
       public RenderingContext getRenderingContext() {
-        return RenderingContext.GADGET;
+        return jsUri.getContext();
       }
     };
 
     // Registry itself will cache these requests.
     List<FeatureResource> resources =
-        registry.getFeatureResources(ctx, extern, null).getResources();
+        registry.getFeatureResources(ctx, jsUri.getLibs(), null).getResources();
     if (versionCache.containsKey(resources)) {
       return versionCache.get(resources);
     }
@@ -78,14 +77,13 @@ public class DefaultJsVersioner implements Versioner {
     return checksum;
   }
 
-  public UriStatus validate(String gadgetUri, String container,
-      Collection<String> extern, String version) {
+  public UriStatus validate(JsUri jsUri, String version) {
     if (version == null || version.length() == 0) {
       return UriStatus.VALID_UNVERSIONED;
     }
 
     // Punt up to version(), utilizing its cache.
-    String expectedVersion = version(gadgetUri, container, extern);
+    String expectedVersion = version(jsUri);
     if (version.equals(expectedVersion)) {
       return UriStatus.VALID_VERSIONED;
     }
