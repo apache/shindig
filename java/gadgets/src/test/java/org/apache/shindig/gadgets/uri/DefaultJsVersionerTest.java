@@ -37,6 +37,7 @@ import org.apache.shindig.gadgets.features.FeatureRegistry;
 import org.apache.shindig.gadgets.features.FeatureResource;
 import org.apache.shindig.gadgets.uri.JsUriManager.JsUri;
 
+import org.easymock.EasyMock;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -155,7 +156,7 @@ public class DefaultJsVersionerTest {
     final FeatureRegistry.LookupResult lr = createMock(FeatureRegistry.LookupResult.class);
     expect(lr.getResources()).andReturn(resources).anyTimes();
     replay(lr);
-    expect(registry.getFeatureResources(isA(GadgetContext.class), eq(libs), eq(loaded)))
-        .andStubReturn(lr);
+    expect(registry.getFeatureResources(isA(GadgetContext.class), eq(libs),
+        EasyMock.<List<String>>isNull())).andReturn(lr).anyTimes();
   }
 }
