@@ -194,7 +194,6 @@ public class CajaContentRewriter implements GadgetRewriter {
     MessageQueue mq = new SimpleMessageQueue();
     MessageContext context = new MessageContext();
     PluginMeta meta = new PluginMeta(fetcher, policy);
-    meta.setEnableES53(true);
     PluginCompiler compiler = makePluginCompiler(meta, mq);
     compiler.setMessageContext(context);
     if (moduleCache != null) {

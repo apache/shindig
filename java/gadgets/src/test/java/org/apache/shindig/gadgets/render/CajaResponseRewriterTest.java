@@ -56,7 +56,7 @@ public class CajaResponseRewriterTest extends RewriterTestBase {
     req.setRewriteMimeType("text/javascript");
     req.setCajaRequested(true);
     HttpResponse response = new HttpResponseBuilder().setResponseString("var a;").create();
-    String sanitized = "$v.initOuter('a');";
+    String sanitized = "___.di(IMPORTS___,'a');";
 
     assertTrue(rewrite(req, response).contains(sanitized));
   }
