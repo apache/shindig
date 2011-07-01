@@ -59,6 +59,7 @@ public class ActivityObjectImpl extends ExtendableBeanImpl implements ActivityOb
   /** {@inheritDoc} */
   public void setAttachments(List<ActivityObject> attachments) {
     this.attachments = attachments;
+    put("attachments", attachments);
   }
 
   /** {@inheritDoc} */
@@ -69,6 +70,7 @@ public class ActivityObjectImpl extends ExtendableBeanImpl implements ActivityOb
   /** {@inheritDoc} */
   public void setAuthor(ActivityObject author) {
     this.author = author;
+    put("author", author);
   }
   
   /** {@inheritDoc} */
@@ -79,6 +81,7 @@ public class ActivityObjectImpl extends ExtendableBeanImpl implements ActivityOb
   /** {@inheritDoc} */
   public void setContent(String content) {
     this.content = content;
+    put("content", content);
   }
 
   /** {@inheritDoc} */
@@ -89,6 +92,7 @@ public class ActivityObjectImpl extends ExtendableBeanImpl implements ActivityOb
   /** {@inheritDoc} */
   public void setDisplayName(String displayName) {
     this.displayName = displayName;
+    put("displayName", displayName);
   }
 
   /** {@inheritDoc} */
@@ -99,6 +103,7 @@ public class ActivityObjectImpl extends ExtendableBeanImpl implements ActivityOb
   /** {@inheritDoc} */
   public void setDownstreamDuplicates(List<String> downstreamDuplicates) {
     this.downstreamDuplicates = downstreamDuplicates;
+    put("downstreamDuplicates", downstreamDuplicates);
   }
   
   /** {@inheritDoc} */
@@ -109,6 +114,7 @@ public class ActivityObjectImpl extends ExtendableBeanImpl implements ActivityOb
   /** {@inheritDoc} */
   public void setId(String id) {
     this.id = id;
+    put("id", id);
   }
 
   /** {@inheritDoc} */
@@ -119,6 +125,7 @@ public class ActivityObjectImpl extends ExtendableBeanImpl implements ActivityOb
   /** {@inheritDoc} */
   public void setImage(MediaLink image) {
     this.image = image;
+    put("image", image);
   }
 
   /** {@inheritDoc} */
@@ -129,6 +136,7 @@ public class ActivityObjectImpl extends ExtendableBeanImpl implements ActivityOb
   /** {@inheritDoc} */
   public void setObjectType(String objectType) {
     this.objectType = objectType;
+    put("objectType", objectType);
   }
   
   /** {@inheritDoc} */
@@ -139,6 +147,7 @@ public class ActivityObjectImpl extends ExtendableBeanImpl implements ActivityOb
   /** {@inheritDoc} */
   public void setPublished(String published) {
     this.published = published;
+    put("published", published);
   }
 
   /** {@inheritDoc} */
@@ -149,6 +158,7 @@ public class ActivityObjectImpl extends ExtendableBeanImpl implements ActivityOb
   /** {@inheritDoc} */
   public void setSummary(String summary) {
     this.summary = summary;
+    put("summary", summary);
   }
   
   /** {@inheritDoc} */
@@ -159,6 +169,7 @@ public class ActivityObjectImpl extends ExtendableBeanImpl implements ActivityOb
   /** {@inheritDoc} */
   public void setUpdated(String updated) {
     this.updated = updated;
+    put("updated", updated);
   }
 
   /** {@inheritDoc} */
@@ -169,6 +180,7 @@ public class ActivityObjectImpl extends ExtendableBeanImpl implements ActivityOb
   /** {@inheritDoc} */
   public void setUpstreamDuplicates(List<String> upstreamDuplicates) {
     this.upstreamDuplicates = upstreamDuplicates;
+    put("upstreamDuplicates", upstreamDuplicates);
   }
   
   /** {@inheritDoc} */
@@ -179,6 +191,7 @@ public class ActivityObjectImpl extends ExtendableBeanImpl implements ActivityOb
   /** {@inheritDoc} */
   public void setUrl(String url) {
     this.url = url;
+    put("url", url);
   }
   
   /** {@inheritDoc} */
@@ -189,5 +202,6 @@ public class ActivityObjectImpl extends ExtendableBeanImpl implements ActivityOb
   /** {@inheritDoc} */
   public void setOpenSocial(ExtendableBean openSocial) {
     this.openSocial = openSocial;
+    put("openSocial", openSocial);
   }
 }

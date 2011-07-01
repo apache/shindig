@@ -58,6 +58,7 @@ public class ActivityEntryImpl extends ExtendableBeanImpl implements ActivityEnt
   /** {@inheritDoc} */
   public void setActor(ActivityObject actor) {
     this.actor = actor;
+    put("actor", actor);
   }
 
   /** {@inheritDoc} */
@@ -68,6 +69,7 @@ public class ActivityEntryImpl extends ExtendableBeanImpl implements ActivityEnt
   /** {@inheritDoc} */
   public void setContent(String content) {
     this.content = content;
+    put("content", content);
   }
 
   /** {@inheritDoc} */
@@ -78,6 +80,7 @@ public class ActivityEntryImpl extends ExtendableBeanImpl implements ActivityEnt
   /** {@inheritDoc} */
   public void setGenerator(ActivityObject generator) {
     this.generator = generator;
+    put("generator", generator);
   }
 
   /** {@inheritDoc} */
@@ -88,6 +91,7 @@ public class ActivityEntryImpl extends ExtendableBeanImpl implements ActivityEnt
   /** {@inheritDoc} */
   public void setIcon(MediaLink icon) {
     this.icon = icon;
+    put("icon", icon);
   }
 
   /** {@inheritDoc} */
@@ -98,6 +102,7 @@ public class ActivityEntryImpl extends ExtendableBeanImpl implements ActivityEnt
   /** {@inheritDoc} */
   public void setId(String id) {
     this.id = id;
+    put("id", id);
   }
 
   /** {@inheritDoc} */
@@ -108,6 +113,7 @@ public class ActivityEntryImpl extends ExtendableBeanImpl implements ActivityEnt
   /** {@inheritDoc} */
   public void setObject(ActivityObject object) {
     this.object = object;
+    put("object", object);
   }
 
   /** {@inheritDoc} */
@@ -118,6 +124,7 @@ public class ActivityEntryImpl extends ExtendableBeanImpl implements ActivityEnt
   /** {@inheritDoc} */
   public void setPublished(String published) {
     this.published = published;
+    put("published", published);
   }
 
   /** {@inheritDoc} */
@@ -128,6 +135,7 @@ public class ActivityEntryImpl extends ExtendableBeanImpl implements ActivityEnt
   /** {@inheritDoc} */
   public void setProvider(ActivityObject provider) {
     this.provider = provider;
+    put("provider", provider);
   }
 
   /** {@inheritDoc} */
@@ -138,6 +146,7 @@ public class ActivityEntryImpl extends ExtendableBeanImpl implements ActivityEnt
   /** {@inheritDoc} */
   public void setTarget(ActivityObject target) {
     this.target = target;
+    put("target", target);
   }
 
   /** {@inheritDoc} */
@@ -148,6 +157,7 @@ public class ActivityEntryImpl extends ExtendableBeanImpl implements ActivityEnt
   /** {@inheritDoc} */
   public void setTitle(String title) {
     this.title = title;
+    put("title", title);
   }
 
   /** {@inheritDoc} */
@@ -158,6 +168,7 @@ public class ActivityEntryImpl extends ExtendableBeanImpl implements ActivityEnt
   /** {@inheritDoc} */
   public void setUpdated(String updated) {
     this.updated = updated;
+    put("updated", updated);
   }
   
   /** {@inheritDoc} */
@@ -168,6 +179,7 @@ public class ActivityEntryImpl extends ExtendableBeanImpl implements ActivityEnt
   /** {@inheritDoc} */
   public void setUrl(String url) {
     this.url = url;
+    put("url", url);
   }
 
   /** {@inheritDoc} */
@@ -178,6 +190,7 @@ public class ActivityEntryImpl extends ExtendableBeanImpl implements ActivityEnt
   /** {@inheritDoc} */
   public void setVerb(String verb) {
     this.verb = verb;
+    put("verb", verb);
   }
 
   /** {@inheritDoc} */
@@ -188,6 +201,7 @@ public class ActivityEntryImpl extends ExtendableBeanImpl implements ActivityEnt
   /** {@inheritDoc} */
   public void setOpenSocial(ExtendableBean openSocial) {
     this.openSocial = openSocial;
+    put("openSocial", openSocial);
   }
   
   /** {@inheritDoc} */
@@ -198,6 +212,7 @@ public class ActivityEntryImpl extends ExtendableBeanImpl implements ActivityEnt
   /** {@inheritDoc} */
   public void setExtensions(ExtendableBean extensions) {
     this.extensions = extensions;
+    put("extensions", extensions);
   }
 
   /**

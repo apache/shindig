@@ -48,6 +48,7 @@ public class MediaLinkImpl extends ExtendableBeanImpl implements MediaLink {
   /** {@inheritDoc} */
   public void setDuration(Integer duration) {
     this.duration = duration;
+    put("duration", duration);
   }
 
   /** {@inheritDoc} */
@@ -58,6 +59,7 @@ public class MediaLinkImpl extends ExtendableBeanImpl implements MediaLink {
   /** {@inheritDoc} */
   public void setHeight(Integer height) {
     this.height = height;
+    put("height", height);
   }
 
   /** {@inheritDoc} */
@@ -68,6 +70,7 @@ public class MediaLinkImpl extends ExtendableBeanImpl implements MediaLink {
   /** {@inheritDoc} */
   public void setUrl(String url) {
     this.url = url;
+    put("url", url);
   }
 
   /** {@inheritDoc} */
@@ -78,6 +81,7 @@ public class MediaLinkImpl extends ExtendableBeanImpl implements MediaLink {
   /** {@inheritDoc} */
   public void setWidth(Integer width) {
     this.width = width;
+    put("width", width);
   }
   
   /** {@inheritDoc} */
@@ -88,5 +92,6 @@ public class MediaLinkImpl extends ExtendableBeanImpl implements MediaLink {
   /** {@inheritDoc} */
   public void setOpenSocial(ExtendableBean openSocial) {
     this.openSocial = openSocial;
+    put("openSocial", openSocial);
   }
 }
