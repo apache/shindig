@@ -331,7 +331,7 @@ osapi.container.Container.prototype.rpcRegister = function(service, callback) {
     for (var i = 0; i < arguments.length; ++i) {
       argsCopy.push(arguments[i]);
     }
-    callback.apply(self, argsCopy);
+    return callback.apply(self, argsCopy);
   });
 };
 
