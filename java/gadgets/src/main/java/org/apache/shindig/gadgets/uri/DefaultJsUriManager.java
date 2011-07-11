@@ -208,7 +208,6 @@ public class DefaultJsUriManager implements JsUriManager {
     String version = uri.getQueryParameter(Param.VERSION.getKey());
     JsUri jsUri = new JsUri(status, uri, libs, have);
     if (version != null && versioner != null) {
-      String gadgetParam = uri.getQueryParameter(Param.URL.getKey());
       status = versioner.validate(jsUri, version);
       if (status != UriStatus.VALID_UNVERSIONED) {
         jsUri = new JsUri(status, jsUri);
