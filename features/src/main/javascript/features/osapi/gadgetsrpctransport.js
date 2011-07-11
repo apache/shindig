@@ -78,20 +78,25 @@ if (gadgets && gadgets.rpc) { //Dont bind if gadgets.rpc not defined
       // expose directly which is the preferred option for production environments
       if (osapi.container && osapi.container.listMethods) {
 
-        // Swap out the onload handler with a latch so that it is not called
-        // until two of the three following events occur
-        // 1 - gadgets.util.runOnLoadHandlers called at end of gadget content
-        // 2 - callback from container.listMethods
-        // 3 - callback from window.setTimeout
+        // Intercept the onload handler so that it is not called until
+        // - gadgets.util.runOnLoadHandlers called at end of gadget,
+        //   and either
+        //   - callback from container.listMethods
+        //   - callback from window.setTimeout
         var originalRunOnLoadHandlers = gadgets.util.runOnLoadHandlers;
-        var count = 2;
-        var newRunOnLoadHandlers = function() {
-          count--;
-          if (count == 0) {
+        var gadgetFlag = false;
+        var listMethodsFlag = false;
+        var triggered = false;
+        var trigger = function() {
+          if (!triggered && gadgetFlag && listMethodsFlag) {
+            triggered = true;
             originalRunOnLoadHandlers();
           }
         };
-        gadgets.util.runOnLoadHandlers = newRunOnLoadHandlers;
+        gadgets.util.runOnLoadHandlers = function() {
+          gadgetFlag = true;
+          trigger();
+        };
 
         // Call for the container methods and bind them to osapi.
         osapi.container.listMethods({}).execute(function(response) {
@@ -103,14 +108,17 @@ if (gadgets && gadgets.rpc) { //Dont bind if gadgets.rpc not defined
               }
             }
           }
-          // Notify completion
-          newRunOnLoadHandlers();
+          listMethodsFlag = true;
+          trigger();
         });
 
         // Wait 500ms for the rpc. This should be a reasonable upper bound
         // even for slow transports while still allowing for reasonable testing
         // in a development environment
-        window.setTimeout(newRunOnLoadHandlers, 500);
+        window.setTimeout(function() {
+          listMethodsFlag = true;
+          trigger();
+        }, 500);
       }
     }
 
