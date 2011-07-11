@@ -380,6 +380,7 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
     JsUri jsUri = new JsUri(null, context.getDebug(), false, context.getContainer(), null,
         libs, loaded, null, false, false, RenderingContext.getDefault(), null,
         getFeatureRepositoryId(gadget));
+    jsUri.setCajoleContent(gadget.requiresCaja());
 
     String content = "";
     if (!inline) {

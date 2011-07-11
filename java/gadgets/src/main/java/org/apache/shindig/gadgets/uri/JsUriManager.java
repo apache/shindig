@@ -142,6 +142,7 @@ public interface JsUriManager {
           origJsUri.isNoCache(),
           origJsUri.getContainer(),
           origJsUri.getGadget());
+      this.setCajoleContent(origJsUri.cajoleContent());
       this.libs = origJsUri.getLibs();
       this.loadedLibs = origJsUri.getLoadedLibs();
       this.onload = origJsUri.getOnload();
