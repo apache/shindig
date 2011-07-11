@@ -32,9 +32,15 @@ caja___ = (function() {
   var uriCallback = {
     rewrite: function rewrite(uri, mimeTypes) {
       uri = String(uri);
-      // Allow references to anchors within the gadget
       if (/^#/.test(uri)) {
+        // Allow references to anchors within the gadget
         return '#' + encodeURIComponent(decodeURIComponent(uri.substring(1)));
+      } else if (/^\/[^\/]/.test(uri)) {
+        // Unqualified uris aren't resolved in a useful way in gadgets, so
+        // this isn't a real case, but some of the samples use relative
+        // uris for images, and it looks odd if they don't work cajoled.
+        return gadgets.io.getProxyUrl(
+          location.protocol + '//' + location.host + uri);
       } else {
         // Proxy all other dynamically constructed urls
         return gadgets.io.getProxyUrl(uri);
