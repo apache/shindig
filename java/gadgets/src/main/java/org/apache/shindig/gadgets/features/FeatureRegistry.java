@@ -591,6 +591,10 @@ public class FeatureRegistry {
     public List<ApiDirective> getApis() {
       return bundle.getApis();
     }
+    
+    public boolean isSupportDefer() {
+      return bundle.isSupportDefer();
+    }
 
     public List<String> getApis(ApiDirective.Type type, boolean isExports) {
       ImmutableList.Builder<String> builder = ImmutableList.builder();

@@ -50,6 +50,7 @@ class FeatureParser {
     String name = null;
     List<String> deps = Lists.newArrayList();
     List<ParsedFeature.Bundle> bundles = Lists.newArrayList();
+    boolean supportDefer = false;
    
     NodeList children = doc.getChildNodes();
     for (int i = 0, j = children.getLength(); i < j; ++i) {
@@ -86,6 +87,7 @@ class FeatureParser {
           NodeList apiKids = element.getElementsByTagName("api");
           for (int x = 0, y = apiKids.getLength(); x < y; ++x) {
             Element apiChild = (Element)apiKids.item(x);
+            supportDefer = "true".equalsIgnoreCase(apiChild.getAttribute("supportDefer"));
             NodeList apiElems = apiChild.getChildNodes();
             for (int a = 0, b = apiElems.getLength(); a < b; ++a) {
               Node apiElemNode = apiElems.item(a);
@@ -100,7 +102,8 @@ class FeatureParser {
               }
             }
           }
-          bundles.add(new ParsedFeature.Bundle(name, type, getAttribs(element), resources, apiDirectives));
+          bundles.add(new ParsedFeature.Bundle(name, type, getAttribs(element),
+              resources, apiDirectives, supportDefer));
         }
       }
     }
@@ -149,14 +152,16 @@ class FeatureParser {
       private final Map<String, String> attribs;
       private final List<Resource> resources;
       private final List<ApiDirective> apiDirectives;
+      private final boolean supportDefer;
       
       private Bundle(String name, String type, Map<String, String> attribs,
-          List<Resource> resources, List<ApiDirective> apiDirectives) {
+          List<Resource> resources, List<ApiDirective> apiDirectives, boolean supportDefer) {
         this.name = name;
         this.type = type;
         this.attribs = attribs;
         this.resources = resources;
         this.apiDirectives = apiDirectives;
+        this.supportDefer = supportDefer;
       }
       
       public String getName() {
@@ -177,6 +182,10 @@ class FeatureParser {
       
       public List<ApiDirective> getApis() {
         return apiDirectives;
+      }
+      
+      public boolean isSupportDefer() {
+        return supportDefer;
       }
     }
     
