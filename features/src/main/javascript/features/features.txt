@@ -46,6 +46,7 @@ features/core.util.onload/feature.xml
 features/core.util.string/feature.xml
 features/core.util.urlparams/feature.xml
 features/core/feature.xml
+features/defer.test/feature.xml
 features/dynamic-height.height/feature.xml
 features/dynamic-height.util/feature.xml
 features/dynamic-height/feature.xml
