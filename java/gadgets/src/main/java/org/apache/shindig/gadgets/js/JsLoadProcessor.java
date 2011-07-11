@@ -43,10 +43,18 @@ public class JsLoadProcessor implements JsProcessor {
   public static final String JSLOAD_JS_TPL = "(function() {" +
       "document.write('<scr' + 'ipt type=\"text/javascript\" src=\"%s\"></scr' + 'ipt>');" +
       "})();"; // Concatenated to avoid some browsers do dynamic script injection.
+  
+  @VisibleForTesting
+  public static final String ASYNC_JSLOAD_JS_TPL = "(function() {" +
+      "var s=document.createElement('script');" +
+      "s.src=\"%s\";" +
+      "document.getElementsByTagName('head')[0].appendChild(s);" +
+      "})();";
 
   private final JsUriManager jsUriManager;
   private final int jsloadTtlSecs;
   private final boolean requireOnload;
+  private String template;
 
   @Inject
   public JsLoadProcessor(
@@ -56,6 +64,14 @@ public class JsLoadProcessor implements JsProcessor {
     this.jsUriManager = jsUriManager;
     this.jsloadTtlSecs = jsloadTtlSecs;
     this.requireOnload = requireOnload;
+    this.template = JSLOAD_JS_TPL;
+  }
+  
+  @Inject(optional = true)
+  public void setUseAsync(@Named("shindig.jsload.async-mode") Boolean jsloadAsync) {
+    if (jsloadAsync) {
+      template = ASYNC_JSLOAD_JS_TPL;
+    }
   }
 
   public boolean process(JsRequest request, JsResponseBuilder builder)
@@ -97,7 +113,7 @@ public class JsLoadProcessor implements JsProcessor {
 
   protected String createJsloadScript(Uri uri) {
     String uriString = uri.toString();
-    return String.format(JSLOAD_JS_TPL, uriString);
+    return String.format(template, uriString);
   }
 
   private int getCacheTtlSecs(JsUri jsUri) {
