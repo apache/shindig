@@ -1,0 +1,10 @@
+<feature>
+  <name>defer.test</name>
+  <dependency>globals</dependency>
+  <all>
+    <script src="defertest.js"/>
+    <api supportDefer="true">
+      <exports type="js">shindig.defer.callback</exports>
+    </api>
+  </all>
+</feature>
