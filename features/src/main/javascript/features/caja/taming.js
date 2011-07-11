@@ -23,10 +23,12 @@
 
 caja___ = (function() {
   // currently limited to one cajoled gadget per ifr
+  var guestFrame;
   var tamingFrame;
   var tame___;      // tame___ === tamingFrame.contentWindow.___
-  var guestFrame;
   var pendingScript;
+  var guestFrameReady = false;
+  var tamingFrameReady = false;
 
   // URI policy: Rewrites all uris in a cajoled gadget
   var uriCallback = {
@@ -54,10 +56,6 @@ caja___ = (function() {
         tamings___[tamer].call(tame___.USELESS, globalScope);
       }
     }
-  }
-
-  function getPendingScript() {
-    return pendingScript;
   }
 
   function getTameGlobal() {
@@ -143,38 +141,56 @@ caja___ = (function() {
   }
 
   function start(script, debug) {
-    var debugArg = debug ? '?debug=1' : '';
+    // feral object marker for directConstructor
+    window.Object.FERAL_FRAME_OBJECT___ = window.Object;
 
-    // guestFrame must be created before loadedTamingFrame fires
+    pendingScript = script;
+    debug = debug ? '?debug=1' : '';
+
     guestFrame = makeFrame('caja-guest-frame');
     var gdoc = guestFrame.contentWindow.document;
+    gdoc.write('<!doctype html>\n');
     gdoc.write('<html><head>\n');
     gdoc.write('<script>var cajaIframeDone___ = function(){};<\/script>\n');
-    gdoc.write(
-        '<script src="js/caja-guest-frame' + debugArg + '"><\/script>\n');
+    gdoc.write('<script src="js/caja-guest-frame' + debug + '"><\/script>\n');
+    gdoc.write('<script>\n');
+    gdoc.write('  function cajaRun(script) {\n');
+    gdoc.write('    eval(script);\n');
+    gdoc.write('    parent.gadgets.util.runOnLoadHandlers();\n');
+    gdoc.write('  }\n');
+    gdoc.write('  parent.caja___.loadedGuestFrame();\n');
+    gdoc.write('<\/script>\n');
+    gdoc.write('</head></html>');
+    gdoc.close();
 
     tamingFrame = makeFrame('caja-taming-frame');
     var tdoc = tamingFrame.contentWindow.document;
+    tdoc.write('<!doctype html>\n');
     tdoc.write('<html><head>\n');
     tdoc.write('<script>var cajaIframeDone___ = function(){};<\/script>\n');
-    tdoc.write(
-        '<script src="js/caja-taming-frame' + debugArg + '"><\/script>\n');
+    tdoc.write('<script src="js/caja-taming-frame' + debug + '"><\/script>\n');
     tdoc.write('<script>parent.caja___.loadedTamingFrame();<\/script>\n');
     tdoc.write('</head></html>');
     tdoc.close();
-
-    pendingScript = script;
-
-    // feral object marker for directConstructor
-    window.Object.FERAL_FRAME_OBJECT___ = window.Object;
   }
 
   function loadedTamingFrame() {
-    var gdoc = guestFrame.contentWindow.document;
-    gdoc.write('<script>parent.caja___.loadedGuestFrame();<\/script>\n');
+    tamingFrameReady = true;
+    readyTrigger();
   }
 
   function loadedGuestFrame() {
+    guestFrameReady = true;
+    readyTrigger();
+  }
+
+  function readyTrigger() {
+    if (guestFrameReady && tamingFrameReady) {
+      window.setTimeout(ready, 0);
+    }
+  }
+
+  function ready() {
     var guestWin = guestFrame.contentWindow;
     var imports = guestWin.___.getNewModuleHandler().getImports();
 
@@ -207,17 +223,10 @@ caja___ = (function() {
     guestWin.___.getNewModuleHandler().setImports(imports);
     guestWin.___.useDebugSymbols = function(){};
 
-    var gdoc = guestWin.document;
-    gdoc.write('<script>\n');
-    gdoc.write('eval(parent.caja___.getPendingScript());');
-    gdoc.write('parent.gadgets.util.runOnLoadHandlers();\n');
-    gdoc.write('<\/script>\n');
-    gdoc.write('</head></html>');
-    gdoc.close();
+    guestWin.cajaRun(pendingScript);
   }
 
   return {
-    getPendingScript: getPendingScript,
     getTameGlobal: getTameGlobal,
     getUseless: getUseless,
     loadedGuestFrame: loadedGuestFrame,
