@@ -46,11 +46,24 @@
  * feature directive: <exports type="js">gadgets.foo.bar</exports>
  * gadgets.foo = {};
  * gadgets.foo.bar = function() { ... };
+ *
+ * Also supports deferred symbol binding. When deferred mode is specified,
+ * undefined symbols being defined in context here are treated as functions
+ * with no return value. Stub functions are created for them at the
+ * specified named endpoint. These functions enqueue requests and immediately
+ * return. When the real method implementation is loaded and exported,
+ * the real method is executed with the enqueued arguments.
  */
-function exportJs(namespace, components, opt_props) {
+function exportJs(namespace, components, opt_props, opt_defer) {
+  var JSL = '___jsl';
+  var DEFER_KEY = 'df';
   var base = window;
   var prevBase = null;
   var nsParts = namespace.split('.');
+  var sliceFn = [].slice;
+
+  // Set up defer function queue.
+  var deferMap = ((window[JSL] = window[JSL] || {})[DEFER_KEY] = window[JSL][DEFER_KEY] || {});
 
   for (var i = 0, part; part = nsParts.shift(); i++) {
     base[part] = base[part] || components[i] || {};
@@ -58,18 +71,51 @@ function exportJs(namespace, components, opt_props) {
     base = base[part];
   }
 
-  var exportProps = function(root) {
+  /**
+   * Exports properties/functions on the provided base object.
+   * If a property to export is a function, does not exist in its full
+   * form, and deferred mode is enabled, a stub is created.
+   * The stub enqueues requests that are executed by the real method
+   * when it is loaded and exported.
+   *
+   * @param root {Object} Base object to which to attach properties.
+   */
+  function exportProps(root) {
     var props = opt_props || {};
     for (var prop in props) {
-      if (props.hasOwnProperty(prop) && root.hasOwnProperty(prop)) {
-        if (!root[props[prop]]) root[props[prop]] = root[prop];
+      if (props.hasOwnProperty(prop)) {
+        var curalias = props[prop];
+        var fulltok = namespace + '.' + curalias;
+        if (root.hasOwnProperty(prop)) {
+          if (!root[curalias]) {
+            root[curalias] = root[prop];
+          } else if (!opt_defer && deferMap[fulltok]) {
+            // Executes enqueued requests for the method,
+            // then replaces the export.
+            deferMap[fulltok](root, root[prop]);
+            delete deferMap[fulltok];
+            root[curalias] = root[prop];
+          }
+        } else if (opt_defer) {
+          root[prop] = (function() {
+            var queue = [];
+            var ret = function() {
+              queue.push(sliceFn.call(arguments, 0));
+            };
+            deferMap[fulltok] = function(ctx, method) {
+              for (var i = 0, len = queue.length; i < len; ++i) {
+                method.apply(ctx, queue[i]);
+              }
+            };
+            return ret;
+          })();
+        }
       }
     }
   };
 
   if (typeof base === 'object') {
     exportProps(base);
-
   } else if (typeof base === 'function') {
     var exportedFn = function() {
       var result = base.apply(null, arguments);
