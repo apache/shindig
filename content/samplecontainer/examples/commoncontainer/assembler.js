@@ -28,6 +28,10 @@ testConfig[osapi.container.ContainerConfig.RENDER_DEBUG] = "1";
 //  Create the new CommonContainer 
 var CommonContainer = new osapi.container.Container(testConfig);
 
+// Default the security token for the container. Using this example security token requires enabling
+// the DefaultSecurityTokenCodec to let UrlParameterAuthenticationHandler create valid security token.
+shindig.auth.updateSecurityToken('john.doe:john.doe:appid:cont:url:0:default');
+
 // Need to pull these from values supplied in the dialog
 CommonContainer.init = function() {
   //Create my new managed hub
