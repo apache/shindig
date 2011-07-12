@@ -22,6 +22,7 @@ import com.google.inject.Inject;
 
 import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.features.FeatureRegistry;
 import org.apache.shindig.gadgets.uri.JsUriManager;
 import org.apache.shindig.gadgets.uri.JsUriManager.JsUri;
 
@@ -33,10 +34,13 @@ import javax.servlet.http.HttpServletRequest;
 public class JsRequestBuilder {
 
   private final JsUriManager jsUriManager;
+  private final FeatureRegistry registry;
 
   @Inject
-  public JsRequestBuilder(JsUriManager jsUriManager) {
+  public JsRequestBuilder(JsUriManager jsUriManager,
+                          FeatureRegistry registry) {
     this.jsUriManager = jsUriManager; 
+    this.registry = registry;
   }
   
   /**
@@ -64,6 +68,6 @@ public class JsRequestBuilder {
   }
 
   protected JsRequest build(JsUri jsUri, String host, boolean inCache) {
-    return new JsRequest(jsUri, host, inCache);
+    return new JsRequest(jsUri, host, inCache, registry);
   }
 }

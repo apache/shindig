@@ -87,7 +87,7 @@ public class GadgetsHandlerServiceTest extends EasyMockTestCase {
   private final ProxyHandler proxyHandler = mock(ProxyHandler.class);
   private final CajaContentRewriter cajaContentRewriter = mock(CajaContentRewriter.class);
   private final JsServingPipeline jsPipeline = mock(JsServingPipeline.class);
-  private final JsRequestBuilder jsRequestBuilder = new JsRequestBuilder(jsUriManager);
+  private final JsRequestBuilder jsRequestBuilder = new JsRequestBuilder(jsUriManager, null);
 
   private FakeSecurityTokenCodec tokenCodec;
   private GadgetsHandlerService gadgetHandler;

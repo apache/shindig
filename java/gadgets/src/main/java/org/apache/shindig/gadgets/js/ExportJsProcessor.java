@@ -49,40 +49,57 @@ public class ExportJsProcessor implements JsProcessor {
 
   private final FeatureRegistryProvider featureRegistryProvider;
   private final Provider<GadgetContext> context;
+  private final boolean deferredMode;
 
   @Inject
   public ExportJsProcessor(FeatureRegistryProvider featureRegistryProvider,
       Provider<GadgetContext> context) {
+    this(featureRegistryProvider, context, false);
+  }
+  
+  private ExportJsProcessor(FeatureRegistryProvider featureRegistryProvider,
+      Provider<GadgetContext> context, boolean defer) {
     this.featureRegistryProvider = featureRegistryProvider;
     this.context = context;
+    this.deferredMode = defer;
+  }
+  
+  public ExportJsProcessor getDeferredInstance() {
+    return new ExportJsProcessor(featureRegistryProvider, context, true);
   }
 
   public boolean process(JsRequest jsRequest, JsResponseBuilder builder) throws JsException {
     JsUri jsUri = jsRequest.getJsUri();
     ImmutableList.Builder<JsContent> resp = ImmutableList.builder();
 
-    boolean neededExportJs = false;
-    FeatureBundle last = null;
-    for (JsContent jsc : builder.build().getAllJsContent()) {
-      FeatureBundle current = jsc.getFeatureBundle();
-      if (last != null && current != last) {
-        neededExportJs |= appendExportJsStatementsForFeature(resp, jsUri, last);
-      }
-      resp.add(jsc);
-      last = current;
-    }
-    if (last != null) {
-      neededExportJs |= appendExportJsStatementsForFeature(resp, jsUri, last);
+    FeatureRegistry featureRegistry;
+    try {
+      featureRegistry = featureRegistryProvider.get(jsUri.getRepository());
+    } catch (GadgetException e) {
+      throw new JsException(e.getHttpStatusCode(), e.getMessage());
     }
 
+    boolean neededExportJs = false;
+    FeatureBundle last = null;
+    if (!jsUri.isJsload()) {
+      for (JsContent jsc : builder.build().getAllJsContent()) {
+        FeatureBundle current = jsc.getFeatureBundle();
+        if (last != null && current != last) {
+          neededExportJs |= appendExportJsStatementsForFeature(resp, jsUri, last);
+        }
+        resp.add(jsc);
+        last = current;
+      }
+      if (last != null) {
+        neededExportJs |= appendExportJsStatementsForFeature(resp, jsUri, last);
+      }
+    } else if (deferredMode) {
+      // append all exports for deferred symbols
+      neededExportJs = appendExportJsStatementsDeferred(featureRegistry, resp, jsRequest);
+    }
+    
     builder.clearJs();
     if (neededExportJs) {
-      FeatureRegistry featureRegistry;
-      try {
-        featureRegistry = featureRegistryProvider.get(jsUri.getRepository());
-      } catch (GadgetException e) {
-        throw new JsException(e.getHttpStatusCode(), e.getMessage());
-      }
       builder.appendAllJs(getExportJsContents(featureRegistry));
     }
     builder.appendAllJs(resp.build());
@@ -103,17 +120,30 @@ public class ExportJsProcessor implements JsProcessor {
         exports = bundle.getApis(ApiDirective.Type.JS, true);
       }
     }
-
+    
     if (!exports.isEmpty()) {
       StringBuilder sb = new StringBuilder();
       for (Input input : generateInputs(exports)) {
-        sb.append(input.toExportStatement());
+        sb.append(input.toExportStatement(jsUri.isJsload()));
       }
       builder.add(JsContent.fromFeature(sb.toString(),
           "[generated-symbol-exports]", bundle, null));
       return true;
     }
     return false;
+  }
+
+  private boolean appendExportJsStatementsDeferred(FeatureRegistry registry,
+      ImmutableList.Builder<JsContent> builder, JsRequest jsRequest) {
+    LookupResult lookup = registry.getFeatureResources(context.get(),
+        jsRequest.getNewFeatures(), null, false);
+    
+    boolean neededExports = false;
+    for (FeatureBundle bundle : lookup.getBundles()) {
+      neededExports |= appendExportJsStatementsForFeature(builder, jsRequest.getJsUri(), bundle);
+    }
+    
+    return neededExports;
   }
 
   private List<JsContent> getExportJsContents(FeatureRegistry featureRegistry) {
@@ -149,12 +179,13 @@ public class ExportJsProcessor implements JsProcessor {
       return new Input(namespace, components);
     }
 
-    public String toExportStatement() {
+    public String toExportStatement(boolean isJsload) {
       StringBuilder result = new StringBuilder();
 
       // Local namespace.
       if (namespace != null) {
         result.append(FUNCTION_NAME).append("('").append(namespace).append("',[");
+        result.append(isJsload ? "window." : "");
         result.append(Joiner.on(',').join(components));
         result.append("],{");
         for (int i = 0; i < properties.size(); i++) {
@@ -162,14 +193,24 @@ public class ExportJsProcessor implements JsProcessor {
           if (i > 0) result.append(",");
           result.append(prop).append(":'").append(prop).append("'");
         }
-        result.append("});");
+        result.append("}");
+        if (isJsload) {
+          result.append(",1");
+        }
+        result.append(");");
 
       // Global/window namespace.
       } else {
         for (String prop : properties) {
           result.append(FUNCTION_NAME).append("(");
-          result.append("'").append(prop).append("',[").append(prop);
-          result.append("]);");
+          result.append("'").append(prop).append("',[");
+          result.append(isJsload ? "window." : "");
+          result.append(prop);
+          result.append("]");
+          if (isJsload) {
+            result.append(",{},1");
+          }
+          result.append(");");
         }
       }
       return result.toString();

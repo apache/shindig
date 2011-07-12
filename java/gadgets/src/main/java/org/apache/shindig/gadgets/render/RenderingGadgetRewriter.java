@@ -35,7 +35,6 @@ import org.apache.shindig.gadgets.UnsupportedFeatureException;
 import org.apache.shindig.gadgets.config.ConfigProcessor;
 import org.apache.shindig.gadgets.features.FeatureRegistry;
 import org.apache.shindig.gadgets.features.FeatureRegistryProvider;
-import org.apache.shindig.gadgets.features.FeatureResource;
 import org.apache.shindig.gadgets.js.JsException;
 import org.apache.shindig.gadgets.js.JsRequest;
 import org.apache.shindig.gadgets.js.JsRequestBuilder;
@@ -336,9 +335,8 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
     // Get all resources requested by the gadget's requires/optional features.
     Map<String, Feature> featureMap = gadget.getViewFeatures();
     List<String> gadgetFeatureKeys = Lists.newLinkedList(gadget.getDirectFeatureDeps());
-    List<FeatureResource> gadgetResources =
-        featureRegistry.getFeatureResources(gadget.getContext(), gadgetFeatureKeys, unsupported)
-            .getResources();
+    featureRegistry.getFeatureResources(gadget.getContext(), gadgetFeatureKeys, unsupported)
+                   .getResources();
     if (!unsupported.isEmpty()) {
       List<String> requiredUnsupported = Lists.newLinkedList();
       for (String notThere : unsupported) {
@@ -354,11 +352,12 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
   }
 
   /**
-   * Get the js content for a request (JsUri)
+   * Get the JS content for a request (JsUri)
    */
   protected String getFeaturesContent(JsUri jsUri) throws GadgetException {
     // Inject js content, fetched from JsPipeline
-    JsRequest jsRequest = new JsRequestBuilder(jsUriManager).build(jsUri, null);
+    JsRequest jsRequest = new JsRequestBuilder(jsUriManager,
+        featureRegistryProvider.get(jsUri.getRepository())).build(jsUri, null);
     JsResponse jsResponse;
     try {
       jsResponse = jsServingPipeline.execute(jsRequest);

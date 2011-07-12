@@ -69,7 +69,7 @@ public class JsServletTest extends ServletTestFixture {
     servlet.setCachingSetter(httpUtilMock);
 
     jsUriManagerMock = mock(JsUriManager.class);
-    servlet.setJsRequestBuilder(new JsRequestBuilder(jsUriManagerMock));
+    servlet.setJsRequestBuilder(new JsRequestBuilder(jsUriManagerMock, null));
 
     getJsProcessorMock = mock(GetJsContentProcessor.class);
   }

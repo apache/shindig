@@ -50,8 +50,10 @@ public class JsServingPipelineModule extends AbstractModule {
       ConfigInjectionProcessor configInjectionProcessor,
       AddJslLoadedVariableProcessor addJslLoadedVariableProcessor,
       AddOnloadFunctionProcessor addOnloadFunctionProcessor) {
+    jsLoaderGeneratorProcessor.setUseAsync(true);
     return ImmutableList.of(
         addJslInfoVariableProcessor,
+        exportJsProcessor.getDeferredInstance(),
         jsLoaderGeneratorProcessor,
         ifModifiedSinceProcessor,
         getJsContentProcessor,
