@@ -41,6 +41,21 @@
     <container> (optional)
       <script src="code-to-run-inside-container.js"> (same as for <gadget>)
     </container>
+    <all> (optional, to mean for both gadget and container)
+      <script src="code-to-run-inside-either-gadget-or-container.js"> (same as for <gadget> or <container>)
+      <api>
+          optional, to export API in compiled JS for external usages and incremental-loading,
+          via ExportJsProcessor.java and exportJs JS.
+        <exports type="js">gadgets.rpc.call</exports>
+            optional, the API to export, for two scenarios:
+            1. the JS code internally can use obfuscated/property-renamed g.r.c() to reduce
+               size, but external clients continue to use unobfuscated (exported-to-window)
+               gadgets.rpc.call.
+            2. incremental-loading of JS. rpc.js is loaded (gadgets.rpc.* is exported). Then,
+               dynamic-height!rpc.js can be loaded without rpc (and its transitive dependencies)
+               and it will use unobfuscated (or extern'ed) gadgets.rpc.
+      </api>
+    </all>
   </feature>
 
   Please always make sure that all files you provide are encoded as utf8.
