@@ -54,9 +54,29 @@ CommonContainer.init = function() {
   gadgets.pubsub2router.init({
     hub: CommonContainer.managedHub
   });
+
+  try {
+
+    // Connect to the ManagedHub
+    CommonContainer.inlineClient =
+      new OpenAjax.hub.InlineContainer(CommonContainer.managedHub, "container",
+    {
+      Container: {
+        onSecurityAlert: function(source, alertType) { /* Handle client-side security alerts */ },
+        onConnect: function(container){ /* Called when client connects */ },
+        onDisconnect: function(container){ /* Called when client connects */ }
+      }
+    });
+    //connect to the inline client
+    CommonContainer.inlineClient.connect();
+
+  } catch(e) {
+    // TODO: error handling should be consistent with other OS gadget initialization error handling
+    alert("ERROR creating or connecting InlineClient in CommonContainer.managedHub [" + e.message + "]");
+  }
 };
 
-//Wrapper function to set the gadget site/id and default width.  Currently have some inconsistency with width actually being set. This 
+//Wrapper function to set the gadget site/id and default width.  Currently have some inconsistency with width actually being set. This
 //seems to be related to the pubsub2 feature.
 CommonContainer.renderGadget = function(gadgetURL, gadgetId) {
 	//going to hardcode these values for width.  
