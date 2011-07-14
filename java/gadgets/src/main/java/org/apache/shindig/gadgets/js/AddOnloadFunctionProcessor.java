@@ -82,7 +82,7 @@ public class AddOnloadFunctionProcessor implements JsProcessor {
   }
   
   @VisibleForTesting
-  String createOnloadScript(String function) {
+  protected String createOnloadScript(String function) {
     return String.format(ONLOAD_JS_TPL, StringEscapeUtils.escapeJavaScript(function));
   }
 
