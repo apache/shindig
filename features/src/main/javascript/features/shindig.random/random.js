@@ -34,7 +34,9 @@ shindig.random = (function() {
   var hex = '0123456789ABCDEF';
   var start = 1;
   var m = ((screen.width * screen.width) + screen.height) * 1e6;
+  var sliceFn = [].slice;
 
+  // TODO: consider using addEventListener
   var orig_onmousemove = window.onmousemove || function() { };
 
   window.onmousemove = function(e) {
@@ -46,7 +48,7 @@ shindig.random = (function() {
     ac += (e.screenY + e.clientY);
     ac *= new Date().getTime() % 1e6;
     start = (start * ac) % m;
-    return orig_onmousemove.call(window, Array.prototype.slice.call(arguments));
+    return orig_onmousemove.apply(window, sliceFn.call(arguments, 0));
   };
 
   function sha1(str) {
