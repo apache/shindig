@@ -159,10 +159,6 @@ public class DefaultJsUriManager implements JsUriManager {
       container = ContainerConfig.DEFAULT_CONTAINER;
     }
 
-    // Get config values up front.
-    getReqConfig(container, JS_HOST_PARAM); // validate that it exists
-    String jsPrefix = getReqConfig(container, JS_PATH_PARAM);
-
     String host = uri.getAuthority();
     if (host == null) {
       issueUriFormatError("Unexpected: Js Uri has no host");
@@ -175,11 +171,11 @@ public class DefaultJsUriManager implements JsUriManager {
       issueUriFormatError("Unexpected: Js Uri has no path");
       return INVALID_URI;
     }
-    if (!path.startsWith(jsPrefix)) {
-      issueUriFormatError("Js Uri path invalid, expected prefix: " + jsPrefix + ", is: " + path);
-      return INVALID_URI;
+
+    int lastSlash = path.lastIndexOf("/");
+    if (lastSlash != -1) {
+      path = path.substring(lastSlash + 1);
     }
-    path = path.substring(jsPrefix.length());
 
     // Convenience suffix: pull off .js if present; leave alone otherwise.
     if (path.endsWith(JS_SUFFIX)) {

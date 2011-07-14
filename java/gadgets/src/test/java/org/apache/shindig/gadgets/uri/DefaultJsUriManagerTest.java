@@ -204,20 +204,6 @@ public class DefaultJsUriManagerTest {
   }
 
   // processJsUri tests
-  @Test(expected = RuntimeException.class)
-  public void processMissingHostConfig() throws GadgetException {
-    ContainerConfig config = mockConfig(null, "/gadgets/js");
-    DefaultJsUriManager manager = makeManager(config, null);
-    manager.processExternJsUri(Uri.parse("http://example.com?container=" + CONTAINER));
-  }
-
-  @Test(expected = RuntimeException.class)
-  public void processMissingPathConfig() throws GadgetException {
-    ContainerConfig config = mockConfig("foo", null);
-    DefaultJsUriManager manager = makeManager(config, null);
-    manager.processExternJsUri(Uri.parse("http://example.com?container=" + CONTAINER));
-  }
-
   @Test
   public void processDefaultConfig() throws GadgetException {
     ContainerConfig config = mockDefaultConfig("foo", "/gadgets/js");
@@ -233,9 +219,13 @@ public class DefaultJsUriManagerTest {
     Uri testUri = Uri.parse("http://target-host.org/gadgets/other-js/feature" + JS_SUFFIX + '?' +
         Param.CONTAINER.getKey() + '=' + CONTAINER);
     JsUri jsUri = manager.processExternJsUri(testUri);
-    assertTrue(manager.hadError());
-    assertEquals(jsUri.getStatus(), UriStatus.BAD_URI);
-    assertSame(DefaultJsUriManager.INVALID_URI, jsUri);
+    assertFalse(manager.hadError());
+    List<String> extern = Lists.newArrayList("feature");
+    assertEquals(extern, jsUri.getLibs());
+    List<String> loaded = Lists.newArrayList();
+    assertEquals(loaded, jsUri.getLoadedLibs());
+    assertEquals(CONTAINER, jsUri.getContainer());
+    assertEquals(RenderingContext.GADGET, jsUri.getContext());
   }
 
   @Test
@@ -262,8 +252,6 @@ public class DefaultJsUriManagerTest {
     JsUri jsUri = manager.processExternJsUri(testUri);
     assertFalse(manager.hadError());
     List<String> extern = Lists.newArrayList("feature", "another");
-    List<String> loadsInPath = Lists.newArrayList("load1", "load2");
-    List<String> loadsInQueryParam = Lists.newArrayList("load3", "load4");
     assertCollectionEquals(jsUri.getLibs(), extern);
     assertCollectionEquals(jsUri.getLoadedLibs(), Lists.newArrayList(
         "load1", "load2", "load3", "load4"));
