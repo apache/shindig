@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+-->
+<Module>
+<ModulePrefs title="VOIP Gadget"
+             height="250">
+<Require feature="selection"/>
+<Optional feature="actions">
+<Param name="action-contributions"><![CDATA[<actions>
+<action id="org.samplevoip.chatwithperson" dataType="opensocial.Person" 
+      		label="Chat" tooltip="Chat" view="DialByPerson" />
+<action id="org.samplevoip.callbyperson" dataType="opensocial.Person" 
+      		label="Call" tooltip="Call" view="DialByPerson" />
+<action id="org.samplevoip.navLink" path="container/navigationLinks" label="Call Person" tooltip="Dial a Number"/>
+</actions>]]></Param>
+</Optional>
+</ModulePrefs>
+<Content type="html">
+<![CDATA[
+<script>
+var chat = function(selectedObj) {
+	var msgStr = 'Starting Chat';
+	if (selectedObj) {
+		msgStr += ' with '+ selectedObj["name"]["formatted"];
+	}
+	msgStr += "...";
+	
+	document.getElementById("output").innerHTML = msgStr;
+};
+var call = function(selectedObj) {
+	var msgStr = 'Dialing number';
+	if (selectedObj) {
+		msgStr += ' for '+ selectedObj["name"]["formatted"];
+	}
+	msgStr += "...";
+	
+	document.getElementById("output").innerHTML =msgStr;
+};
+if (gadgets.actions) {		
+	// add actions   
+    var chatAction = {
+    	id: "org.samplevoip.chatwithperson",
+    	callback: chat
+    };
+    gadgets.actions.updateAction(chatAction);
+	    
+    var callAction = {
+    	id: "org.samplevoip.callbyperson",
+    	callback: call
+    };
+    gadgets.actions.updateAction(callAction);
+	    
+    var callNavLinkAction = {
+    	id: "org.samplevoip.navLink",
+    	callback: call
+    };
+    gadgets.actions.updateAction(callNavLinkAction);
+}
+</script>
+<div>
+VOIP Status:
+</div>
+<div id="output">
+</div>
+]]>
+</Content>
+</Module>
