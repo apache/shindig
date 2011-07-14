@@ -19,6 +19,7 @@
 # List each feature you want to support here
 
 features/globals/feature.xml
+features/actions/feature.xml
 features/analytics/feature.xml
 features/auth-refresh/feature.xml
 features/caja/feature.xml
@@ -77,6 +78,7 @@ features/osml/feature.xml
 features/pubsub/feature.xml
 features/rpc/feature.xml
 features/security-token/feature.xml
+features/selection/feature.xml
 features/setprefs/feature.xml
 features/settitle/feature.xml
 features/shindig.auth/feature.xml

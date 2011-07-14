@@ -177,6 +177,10 @@
                 <source>osapi/peoplehelpers.js</source>
                 <source>../../../../src/test/javascript/lib/testutils.js</source>
                 <source>oauthpopup/oauthpopup.js</source>
+                <source>selection/selection_container.js</source>
+                <source>selection/selection.js</source>
+                <source>actions/actions_container.js</source>
+                <source>actions/actions.js</source>
                 <source>opensearch/opensearch.js</source>
               </sources>
               <testSourceDirectory>${basedir}/src/test/javascript/features</testSourceDirectory>

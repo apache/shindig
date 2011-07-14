@@ -1,0 +1,20 @@
+<feature>
+  <name>actions</name>
+  <dependency>globals</dependency>
+  <dependency>rpc</dependency>
+  <dependency>gadgets.json.ext</dependency>
+  <gadget>
+    <script src="actions.js"/>
+    <script src="taming.js"/>
+    <api>
+      <exports type="js">gadgets.actions.addAction</exports>
+      <exports type="js">gadgets.actions.updateAction</exports>
+      <exports type="js">gadgets.actions.removeAction</exports>
+      <exports type="js">gadgets.actions.getActionsByPath</exports>
+      <exports type="js">gadgets.actions.getActionsByDataType</exports>
+    </api>
+  </gadget>
+  <container>
+    <script src="actions_container.js"/>
+  </container>
+</feature>
