@@ -64,7 +64,7 @@ public class ExportJsProcessor implements JsProcessor {
     this.deferredMode = defer;
   }
   
-  public ExportJsProcessor getDeferredInstance() {
+  public JsProcessor getDeferredInstance() {
     return new ExportJsProcessor(featureRegistryProvider, context, true);
   }
 
@@ -140,7 +140,9 @@ public class ExportJsProcessor implements JsProcessor {
     
     boolean neededExports = false;
     for (FeatureBundle bundle : lookup.getBundles()) {
-      neededExports |= appendExportJsStatementsForFeature(builder, jsRequest.getJsUri(), bundle);
+      if (bundle.isSupportDefer()) {
+        neededExports |= appendExportJsStatementsForFeature(builder, jsRequest.getJsUri(), bundle);
+      }
     }
     
     return neededExports;
