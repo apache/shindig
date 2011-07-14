@@ -61,7 +61,7 @@ public class AnonymousSecurityToken extends AbstractSecurityToken implements Sec
   }
 
   public String getDomain() {
-    return "";
+    return "*";
   }
 
   public String getContainer() {
