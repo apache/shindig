@@ -58,11 +58,12 @@ osapi.container.GadgetSite = function(args) {
   this.loadingGadgetEl_ = args['bufferEl'];
 
   /**
-   * Unique ID of this site.
-   * @type {number}
+   * Unique ID of this site.  Uses the ID of the gadgetEl, if set, or an auto-generated number.
+   * @type {string}
    * @private
    */
-  this.id_ = osapi.container.GadgetSite.nextUniqueId_++;
+  this.id_ = (this.currentGadgetEl && this.currentGadgetEl_.id) ? this.currentGadgetEl_.id
+    : osapi.container.GadgetSite.nextUniqueId_++;
 
   /**
    * ID of parent gadget.
@@ -141,7 +142,7 @@ osapi.container.GadgetSite.prototype.setParentId = function(value) {
 
 
 /**
- * @return {number} The ID of this gadget site.
+ * @return {string} The ID of this gadget site.
  */
 osapi.container.GadgetSite.prototype.getId = function() {
   return this.id_;
@@ -195,6 +196,7 @@ osapi.container.GadgetSite.prototype.navigateTo = function(
   var callback = opt_callback || function() {};
   var request = osapi.container.util.newMetadataRequest([gadgetUrl]);
   var self = this;
+  
   this.service_.getGadgetMetadata(request, function(response) {
     var xrt = (!cached) ? (osapi.container.util.getCurrentTimeMs() - start) : 0;
     var gadgetInfo = response[gadgetUrl];

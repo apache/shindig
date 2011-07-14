@@ -65,7 +65,14 @@ ServiceTest.prototype.setupUtilCurrentTimeMs = function(time) {
 };
 
 ServiceTest.prototype.testGetGadgetMetadata = function() {
-  var service = new osapi.container.Service();
+  var service = new osapi.container.Service({
+    GET_LANGUAGE: function() {
+      return 'pt'; 
+    },
+    GET_COUNTRY: function() {
+      return 'BR';
+    }
+  });
   service.cachedMetadatas_ = {
     'cached1.xml' : {
       'url' : 'cached1.xml',
@@ -128,6 +135,11 @@ ServiceTest.prototype.testGetGadgetMetadata = function() {
   this.assertTrue(service.cachedMetadatas_['resp1.xml'] != null);
   this.assertTrue(service.cachedMetadatas_['resp2.xml'] != null);
   this.assertTrue(service.cachedMetadatas_['resp3.xml'] != null);
+  
+  this.assertEquals('pt', service.getLanguage());
+  this.assertEquals('BR', service.getCountry());
+  this.assertEquals('pt', request.language);
+  this.assertEquals('BR', request.country);
 };
 
 ServiceTest.prototype.testUncacheStaleGadgetMetadataExcept = function() {

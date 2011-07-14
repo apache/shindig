@@ -57,6 +57,20 @@ osapi.container.Service = function(opt_config) {
    * @private
    */
   this.cachedTokens_ = {};
+  
+  /**
+   * @see osapi.container.Container.prototype.getLanguage
+   */
+  if (config.GET_LANGUAGE) {
+    this.getLanguage = config.GET_LANGUAGE;
+  }
+  
+  /**
+   * @see osapi.container.Container.prototype.getCountry
+   */
+  if (config.GET_COUNTRY) {
+    this.getCountry = config.GET_COUNTRY;
+  }
 
   this.registerOsapiServices();
 
@@ -80,8 +94,7 @@ osapi.container.Service.prototype.onConstructed = function(opt_config) {};
  * @param {Object} request JSON object representing the request.
  * @param {function(Object)=} opt_callback function to call upon data receive.
  */
-osapi.container.Service.prototype.getGadgetMetadata = function(
-    request, opt_callback) {
+osapi.container.Service.prototype.getGadgetMetadata = function(request, opt_callback) {
   // TODO: come up with an expiration mechanism to evict cached gadgets.
   // Can be based on renderParam['nocache']. Be careful with preloaded and
   // arbitrarily-navigated gadgets. The former should be indefinite, unless
@@ -99,7 +112,9 @@ osapi.container.Service.prototype.getGadgetMetadata = function(
   // Otherwise, request for uncached metadatas.
   } else {
     var self = this;
-    request = osapi.container.util.newMetadataRequest(uncachedUrls);
+    request['ids'] = uncachedUrls;
+    request['language'] = this.getLanguage();
+    request['country'] = this.getCountry();
     osapi['gadgets']['metadata'](request).execute(function(response) {
 
       // If response entirely fails, augment individual errors.
@@ -318,6 +333,49 @@ osapi.container.Service.prototype.filterCachedDataByRequest_ = function(
     }
   }
   return result;
+};
+
+
+/**
+ * @returns {string} Best-guess locale for current browser.
+ */
+osapi.container.Service.prototype.getLocale_ = function() {
+  var nav = window.navigator;
+  return nav.userLanguage || nav.systemLanguage || nav.language;
+}; 
+
+
+/**
+ * A callback function that will return the correct language locale part to use when 
+ * asking the server to render a gadget or when asking the server for 1 or more
+ * gadget's metadata. 
+ * <br>
+ * May be overridden by passing in a config parameter during container construction.
+ *  * @returns {string} Language locale part.
+ */
+osapi.container.Service.prototype.getLanguage = function() {
+  try {
+    return this.getLocale_().split('-')[0] || "ALL";
+  } catch (e) {
+    return "ALL";
+  }
+};
+
+
+/**
+ * A callback function that will return the correct country locale part to use when 
+ * asking the server to render a gadget or when asking the server for 1 or more
+ * gadget's metadata. 
+ * <br>
+ * May be overridden by passing in a config parameter during container construction.
+ * @returns {string} Country locale part.
+ */
+osapi.container.Service.prototype.getCountry = function() {
+  try {
+    return this.getLocale_().split('-')[1] || "ALL";
+  } catch (e) {
+    return "ALL";
+  }
 };
 
 

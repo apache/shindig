@@ -28,7 +28,7 @@
  * @constructor
  */
 osapi.container.Container = function(opt_config) {
-  var config = opt_config || {};
+  var config = this.config_ = opt_config || {};
  
   /**
    * A list of objects containing functions to be invoked when gadgets are 
@@ -173,23 +173,32 @@ osapi.container.Container.prototype.newGadgetSite = function(
  */
 osapi.container.Container.prototype.navigateGadget = function(
     site, gadgetUrl, viewParams, renderParams, opt_callback) {
-  var callback = opt_callback || function() {};
+  var callback = opt_callback || function() {},
+    ContainerConfig = osapi.container.ContainerConfig,
+    RenderParam = osapi.container.RenderParam;
+  
   if (this.allowDefaultView_) {
-    renderParams[osapi.container.RenderParam.ALLOW_DEFAULT_VIEW] = true;
+    renderParams[RenderParam.ALLOW_DEFAULT_VIEW] = true;
   }
   if (this.renderCajole_) {
-    renderParams[osapi.container.RenderParam.CAJOLE] = true;
+    renderParams[RenderParam.CAJOLE] = true;
   }
   if (this.renderDebug_) {
-    renderParams[osapi.container.RenderParam.NO_CACHE] = true;
-    renderParams[osapi.container.RenderParam.DEBUG] = true;
+    renderParams[RenderParam.NO_CACHE] = true;
+    renderParams[RenderParam.DEBUG] = true;
   }
   if (this.renderTest_) {
-    renderParams[osapi.container.RenderParam.TEST_MODE] = true;
+    renderParams[RenderParam.TEST_MODE] = true;
   }
 
   this.refreshService_();
-
+  
+  // Try to retrieve preferences for the gadget if no preferences were explicitly provided.
+  if (this.config_[ContainerConfig.GET_PREFERENCES] && !renderParams[RenderParam.USER_PREFS]) {
+    renderParams[RenderParam.USER_PREFS] = 
+      this.config_[ContainerConfig.GET_PREFERENCES](site.getId(), gadgetUrl); 
+  }
+  
   var self = this;
   var selfSite = site;
   // TODO: Lifecycle, add ability for current gadget to cancel nav.
@@ -432,6 +441,26 @@ osapi.container.ContainerConfig.PRELOAD_METADATAS = 'preloadMetadatas';
  * @const
  */
 osapi.container.ContainerConfig.PRELOAD_TOKENS = 'preloadTokens';
+/**
+ * Used to query the language locale part of the container page.
+ * @type {function}
+ */
+osapi.container.ContainerConfig.GET_LANGUAGE = 'GET_LANGUAGE';
+/**
+ * Used to query the country locale part of the container page.
+ * @type {function}
+ */
+osapi.container.ContainerConfig.GET_COUNTRY = 'GET_COUNTRY';
+/**
+ * Used to retrieve the persisted preferences for a gadget.
+ * @type {function}
+ */
+osapi.container.ContainerConfig.GET_PREFERENCES = 'GET_PREFERENCES';
+/**
+ * Used to persist preferences for a gadget.
+ * @type {function}
+ */
+osapi.container.ContainerConfig.SET_PREFERENCES = 'SET_PREFERENCES';
 
 
 // -----------------------------------------------------------------------------
@@ -581,10 +610,27 @@ osapi.container.Container.prototype.isRefreshTokensEnabled_ = function() {
  * @private
  */
 osapi.container.Container.prototype.registerRpcServices_ = function() {
+  var self = this;
+  
   this.rpcRegister('resize_iframe', function(rpcArgs, data) {
     var site = rpcArgs[osapi.container.GadgetSite.RPC_ARG_KEY];
     if (site) { // Check if site is not already closed.
       site.setHeight(data);
+    }
+  });
+  
+  /**
+   * @see setprefs.js setprefs feature.
+   */
+  this.rpcRegister('set_pref', function(rpcArgs, key, value) {
+    var site = rpcArgs[osapi.container.GadgetSite.RPC_ARG_KEY];
+    var setPrefs = self.config_[osapi.container.ContainerConfig.SET_PREFERENCES];
+    if (site && setPrefs) { // Check if site is not already closed.
+      var data = {};
+      for (var i = 2, j = arguments.length; i < j; i += 2) {
+	    data[arguments[i]] = arguments[i + 1];
+	  }   
+      setPrefs(site.getId(), site.getActiveGadgetHolder().getUrl(), data);
     }
   });
 };
@@ -720,4 +766,3 @@ osapi.container.Container.prototype.navigateUrl = function(site, url, renderPara
   site.render(url, renderParams);
   return site;
 };
- 

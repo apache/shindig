@@ -62,23 +62,26 @@ osapi.container.util.mergeJsons = function(json1, json2) {
  * Construct a JSON request to get gadget metadata. For now, this will request
  * a super-set of data needed for all CC APIs requiring gadget metadata, since
  * the caching of response is not additive.
- * @param {Array} gadgetUrls A list of gadget URLs.
+ * @param {Array} gadgetUrls An array of gadget URLs.
  * @return {Object} the resulting JSON.
  */
 osapi.container.util.newMetadataRequest = function(gadgetUrls) {
+  if (!osapi.container.util.isArray(gadgetUrls)) {
+	gadgetUrls = [gadgetUrls];
+  }
   return {
-      'container': window.__CONTAINER,
-      'ids': gadgetUrls,
-      'fields': [
-          'iframeUrl',
-          'modulePrefs.*',
-          'needsTokenRefresh',
-          'userPrefs.*',
-          'views.preferredHeight',
-          'views.preferredWidth',
-          'expireTimeMs',
-          'responseTimeMs'
-      ]
+    'container': window.__CONTAINER,
+    'ids': gadgetUrls,
+    'fields': [
+      'iframeUrl',
+      'modulePrefs.*',
+      'needsTokenRefresh',
+      'userPrefs.*',
+      'views.preferredHeight',
+      'views.preferredWidth',
+      'expireTimeMs',
+      'responseTimeMs'
+    ]
   };
 };
 
@@ -89,12 +92,15 @@ osapi.container.util.newMetadataRequest = function(gadgetUrls) {
  * @return {Object} the resulting JSON.
  */
 osapi.container.util.newTokenRequest = function(gadgetUrls) {
+  if (!osapi.container.util.isArray(gadgetUrls)) {
+    gadgetUrls = [gadgetUrls];
+  }
   return {
-      'container': window.__CONTAINER,
-      'ids': gadgetUrls,
-      'fields': [
-          'token'
-      ]
+    'container': window.__CONTAINER,
+    'ids': gadgetUrls,
+    'fields': [
+      'token'
+    ]
   };
 };
 
@@ -110,6 +116,16 @@ osapi.container.util.toArrayOfJsonKeys = function(json) {
     result.push(key);
   }
   return result;
+};
+
+
+/**
+ * Tests an object to see if it is an array or not.
+ * @param {object} ojb Object to test.
+ * @return {boolean} If obj is an array.
+ */
+osapi.container.util.isArray = function(obj) {
+	return Object.prototype.toString.call(obj) == "[object Array]";
 };
 
 
