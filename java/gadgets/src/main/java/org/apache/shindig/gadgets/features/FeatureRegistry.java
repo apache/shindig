@@ -130,7 +130,7 @@ public class FeatureRegistry {
    * That is, their dependencies must all be valid features as well, and the
    * dependency tree must not contain circular dependencies.
    *
-   * @param resourceList The files or directories                                                                                                             to load the feature from. If feature.xml
+   * @param resourceList The files or directories to load the feature from. If feature.xml
    *    is passed in directly, it will be loaded as a single feature. If a
    *    directory is passed, any features in that directory (recursively) will
    *    be loaded. If res://*.txt or res:*.txt is passed, we will look for named resources
