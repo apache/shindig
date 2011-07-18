@@ -289,8 +289,6 @@ public class JsonContainerConfigLoader {
       }
     }
   }
-  
- 
 
   private static void addContainersToTransaction(
       Transaction transaction, List<Map<String, Object>> config) {
