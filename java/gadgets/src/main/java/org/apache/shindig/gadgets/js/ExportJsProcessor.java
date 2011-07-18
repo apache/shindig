@@ -47,25 +47,14 @@ public class ExportJsProcessor implements JsProcessor {
 
   private static final String FUNCTION_NAME = "exportJs";
 
-  private final FeatureRegistryProvider featureRegistryProvider;
-  private final Provider<GadgetContext> context;
-  private final boolean deferredMode;
+  protected final FeatureRegistryProvider featureRegistryProvider;
+  protected final Provider<GadgetContext> context;
 
   @Inject
   public ExportJsProcessor(FeatureRegistryProvider featureRegistryProvider,
       Provider<GadgetContext> context) {
-    this(featureRegistryProvider, context, false);
-  }
-  
-  private ExportJsProcessor(FeatureRegistryProvider featureRegistryProvider,
-      Provider<GadgetContext> context, boolean defer) {
     this.featureRegistryProvider = featureRegistryProvider;
     this.context = context;
-    this.deferredMode = defer;
-  }
-  
-  public JsProcessor getDeferredInstance() {
-    return new ExportJsProcessor(featureRegistryProvider, context, true);
   }
 
   public boolean process(JsRequest jsRequest, JsResponseBuilder builder) throws JsException {
@@ -93,9 +82,6 @@ public class ExportJsProcessor implements JsProcessor {
       if (last != null) {
         neededExportJs |= appendExportJsStatementsForFeature(resp, jsUri, last);
       }
-    } else if (deferredMode) {
-      // append all exports for deferred symbols
-      neededExportJs = appendExportJsStatementsDeferred(featureRegistry, resp, jsRequest);
     }
     
     builder.clearJs();
@@ -106,7 +92,7 @@ public class ExportJsProcessor implements JsProcessor {
     return true;
   }
 
-  private boolean appendExportJsStatementsForFeature(ImmutableList.Builder<JsContent> builder,
+  protected boolean appendExportJsStatementsForFeature(ImmutableList.Builder<JsContent> builder,
       JsUri jsUri, FeatureBundle bundle) {
     List<String> exports = Lists.newArrayList();
 
@@ -133,22 +119,7 @@ public class ExportJsProcessor implements JsProcessor {
     return false;
   }
 
-  private boolean appendExportJsStatementsDeferred(FeatureRegistry registry,
-      ImmutableList.Builder<JsContent> builder, JsRequest jsRequest) {
-    LookupResult lookup = registry.getFeatureResources(context.get(),
-        jsRequest.getNewFeatures(), null, false);
-    
-    boolean neededExports = false;
-    for (FeatureBundle bundle : lookup.getBundles()) {
-      if (bundle.isSupportDefer()) {
-        neededExports |= appendExportJsStatementsForFeature(builder, jsRequest.getJsUri(), bundle);
-      }
-    }
-    
-    return neededExports;
-  }
-
-  private List<JsContent> getExportJsContents(FeatureRegistry featureRegistry) {
+  protected List<JsContent> getExportJsContents(FeatureRegistry featureRegistry) {
     ImmutableList.Builder<JsContent> result = ImmutableList.builder();
     LookupResult lookup = featureRegistry.getFeatureResources(context.get(),
         ImmutableList.of(FEATURE_NAME), null);

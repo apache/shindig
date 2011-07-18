@@ -45,13 +45,8 @@ import org.junit.Test;
 
 import java.util.List;
 
-public class ExportJsProcessorTest {
+public class DeferredExportJsProcessorTest {
   private final String EXPORT_JS_DEB = "function exportJs() { };";
-  private final String TEXT_CONTENT_1 = "text1;";
-  private final String TEXT_CONTENT_2 = "text2;";
-  private final String FEATURE_CONTENT_1 = "feature1;";
-  private final String FEATURE_CONTENT_2 = "feature2;";
-  private final String FEATURE_CONTENT_3 = "feature3;";
 
   private final List<String> EXPORTS_1 = ImmutableList.of(
       "gadgets",
@@ -63,36 +58,17 @@ public class ExportJsProcessorTest {
       "foo",
       "foo.prototype.bar");
 
-  private final List<String> EXPORTS_3 = ImmutableList.<String>of();
-
-  private final String EXPORT_STRING_1 =
-      "exportJs('gadgets',[gadgets]);" +
-      "exportJs('shindig',[shindig]);" +
-      "exportJs('gadgets.rpc',[gadgets,gadgets.rpc],{call:'call'});" +
-      "exportJs('shindig',[shindig],{random:'random'});";
-  
   private final String EXPORT_STRING_1_DEFER =
     "exportJs('gadgets',[window.gadgets],{},1);" +
     "exportJs('shindig',[window.shindig],{},1);" +
     "exportJs('gadgets.rpc',[window.gadgets,gadgets.rpc],{call:'call'},1);" +
     "exportJs('shindig',[window.shindig],{random:'random'},1);";
 
-  private final String EXPORT_STRING_2 =
-      "exportJs('foo',[foo]);" +
-      "exportJs('foo.prototype',[foo,foo.prototype],{bar:'bar'});";
-
-  private final String EXPORT_STRING_3 = "";
-  
-  private final List<String> LIBS_DEFER = Lists.newArrayList("lib1");
-  private final List<String> LIBS = Lists.newArrayList("lib2");
+  private final List<String> LIBS_WITH_DEFER = Lists.newArrayList("lib1");
+  private final List<String> LIBS_WITHOUT_DEFER = Lists.newArrayList("lib2");
   private final List<String> LOADED = Lists.newArrayList();
 
-  private JsContent textJsContent1;
-  private JsContent textJsContent2;
-  private JsContent featureJsContent1;
-  private JsContent featureJsContent2;
-  private JsContent featureJsContent3;
-  private ExportJsProcessor compiler;
+  private DeferredExportJsProcessor compiler;
   private FeatureRegistry featureRegistry;
 
   @Before
@@ -109,15 +85,33 @@ public class ExportJsProcessorTest {
         return featureRegistryMock;
       }
     };
-
-    textJsContent1 = JsContent.fromText(TEXT_CONTENT_1, "source1");
-    textJsContent2 = JsContent.fromText(TEXT_CONTENT_2, "source2");
-    featureJsContent1 = JsContent.fromFeature(FEATURE_CONTENT_1, "source3", mockBundle(EXPORTS_1), null);
-    featureJsContent2 = JsContent.fromFeature(FEATURE_CONTENT_2, "source4", mockBundle(EXPORTS_2), null);
-    featureJsContent3 = JsContent.fromFeature(FEATURE_CONTENT_3, "source5", mockBundle(EXPORTS_3), null);
-    compiler = new ExportJsProcessor(registryProvider, contextProviderMock);
+    compiler = new DeferredExportJsProcessor(registryProvider, contextProviderMock);
   }
 
+  @Test
+  public void testProcessWithOneNonEmptyFeatureDeferred() throws Exception {
+    JsUri jsUri = mockJsUri(JsCompileMode.CONCAT_COMPILE_EXPORT_ALL, true, LIBS_WITH_DEFER);
+    JsRequest jsRequest = new JsRequest(jsUri, null, false, featureRegistry);
+    JsResponseBuilder jsBuilder = new JsResponseBuilder();
+    boolean actualReturnCode = compiler.process(jsRequest, jsBuilder);
+    assertTrue(actualReturnCode);
+    assertEquals(
+        EXPORT_JS_DEB + EXPORT_STRING_1_DEFER,
+        jsBuilder.build().toJsString());
+  }
+  
+  @Test
+  public void testProcessWithOneNonEmptyFeatureDeferredNotSupported() throws Exception {
+    JsUri jsUri = mockJsUri(JsCompileMode.CONCAT_COMPILE_EXPORT_ALL, true, LIBS_WITHOUT_DEFER);
+    JsRequest jsRequest = new JsRequest(jsUri, null, false, featureRegistry);
+    JsResponseBuilder jsBuilder = new JsResponseBuilder();
+    boolean actualReturnCode = compiler.process(jsRequest, jsBuilder);
+    assertTrue(actualReturnCode);
+    assertEquals(
+        "",
+        jsBuilder.build().toJsString());
+  }
+  
   @SuppressWarnings("unchecked")
   private FeatureRegistry mockRegistry(LookupResult lookupMock) {
     FeatureRegistry result = createMock(FeatureRegistry.class);
@@ -125,26 +119,18 @@ public class ExportJsProcessorTest {
         isA(GadgetContext.class), isA(List.class), EasyMock.isNull(List.class))).
         andReturn(lookupMock).anyTimes();
     expect(result.getFeatureResources(
-        isA(GadgetContext.class), eq(LIBS_DEFER), EasyMock.isNull(List.class), eq(false))).
-        andReturn(mockLookupResult(mockBundle(EXPORTS_1))).anyTimes();
+        isA(GadgetContext.class), eq(LIBS_WITH_DEFER), EasyMock.isNull(List.class), eq(false))).
+        andReturn(mockLookupResult(mockBundle(EXPORTS_1, true))).anyTimes();
     expect(result.getFeatureResources(
-        isA(GadgetContext.class), eq(LIBS), EasyMock.isNull(List.class), eq(false))).
-        andReturn(mockLookupResult(mockBundle(EXPORTS_2))).anyTimes();
-    expect(result.getFeatures(LIBS)).andReturn(LIBS).anyTimes();
-    expect(result.getFeatures(LIBS_DEFER)).andReturn(LIBS_DEFER).anyTimes();
+        isA(GadgetContext.class), eq(LIBS_WITHOUT_DEFER), EasyMock.isNull(List.class), eq(false))).
+        andReturn(mockLookupResult(mockBundle(EXPORTS_2, false))).anyTimes();
+    expect(result.getFeatures(LIBS_WITHOUT_DEFER)).andReturn(LIBS_WITHOUT_DEFER).anyTimes();
+    expect(result.getFeatures(LIBS_WITH_DEFER)).andReturn(LIBS_WITH_DEFER).anyTimes();
     expect(result.getFeatures(LOADED)).andReturn(LOADED).anyTimes();
     replay(result);
     return result;
   }
 
-  private JsUri mockJsUri(JsCompileMode mode) {
-    return mockJsUri(mode, false);
-  }
-  
-  private JsUri mockJsUri(JsCompileMode mode, boolean isJsload) {
-    return mockJsUri(mode, isJsload, LIBS);
-  }
-  
   private JsUri mockJsUri(JsCompileMode mode, boolean isJsload, List<String> libs) {
     JsUri result = createMock(JsUri.class);
     expect(result.getCompileMode()).andStubReturn(mode);
@@ -171,12 +157,12 @@ public class ExportJsProcessorTest {
     return result;
   }
 
-  private FeatureBundle mockBundle(List<String> exports) {
+  private FeatureBundle mockBundle(List<String> exports, boolean isDefer) {
     List<ApiDirective> apis = Lists.newArrayList();
     for (String e : exports) apis.add(mockApiDirective(true, e));
     FeatureBundle result = createMock(FeatureBundle.class);
     expect(result.getApis(ApiDirective.Type.JS, true)).andReturn(exports).anyTimes();
-    expect(result.isSupportDefer()).andReturn(false).anyTimes();
+    expect(result.isSupportDefer()).andReturn(isDefer).anyTimes();
     replay(result);
     return result;
   }
@@ -196,86 +182,5 @@ public class ExportJsProcessorTest {
     expect(result.isExports()).andReturn(isExports).anyTimes();
     replay(result);
     return result;
-  }
-
-  @Test
-  public void testProcessEmpty() throws Exception {
-    JsUri jsUri = mockJsUri(JsCompileMode.CONCAT_COMPILE_EXPORT_ALL);
-    JsRequest jsRequest = new JsRequest(jsUri, null, false, null);
-    JsResponseBuilder jsBuilder = new JsResponseBuilder();
-    boolean actualReturnCode = compiler.process(jsRequest, jsBuilder);
-    assertTrue(actualReturnCode);
-    assertEquals("", jsBuilder.build().toJsString());
-  }
-
-  @Test
-  public void testProcessWithOneText() throws Exception {
-    JsUri jsUri = mockJsUri(JsCompileMode.CONCAT_COMPILE_EXPORT_ALL);
-    JsRequest jsRequest = new JsRequest(jsUri, null, false, null);
-    JsResponseBuilder jsBuilder = new JsResponseBuilder();
-    jsBuilder.appendJs(textJsContent1);
-    boolean actualReturnCode = compiler.process(jsRequest, jsBuilder);
-    assertTrue(actualReturnCode);
-    assertEquals(
-        TEXT_CONTENT_1,
-        jsBuilder.build().toJsString());
-  }
-
-  @Test
-  public void testProcessWithOneNonEmptyFeature() throws Exception {
-    JsUri jsUri = mockJsUri(JsCompileMode.CONCAT_COMPILE_EXPORT_ALL);
-    JsRequest jsRequest = new JsRequest(jsUri, null, false, null);
-    JsResponseBuilder jsBuilder = new JsResponseBuilder();
-    jsBuilder.appendJs(featureJsContent1);
-    boolean actualReturnCode = compiler.process(jsRequest, jsBuilder);
-    assertTrue(actualReturnCode);
-    assertEquals(
-        EXPORT_JS_DEB + FEATURE_CONTENT_1 + EXPORT_STRING_1,
-        jsBuilder.build().toJsString());
-  }
-    
-  @Test
-  public void testProcessWithOneNonEmptyFeatureNotDeferredMode() throws Exception {
-    JsUri jsUri = mockJsUri(JsCompileMode.CONCAT_COMPILE_EXPORT_ALL, true);
-    JsRequest jsRequest = new JsRequest(jsUri, null, false, featureRegistry);
-    JsResponseBuilder jsBuilder = new JsResponseBuilder();
-    boolean actualReturnCode = compiler.process(jsRequest, jsBuilder);
-    assertTrue(actualReturnCode);
-    assertEquals(
-        "",
-        jsBuilder.build().toJsString());
-  }
-
-  @Test
-  public void testProcessWithOneEmptyFeature() throws Exception {
-    JsUri jsUri = mockJsUri(JsCompileMode.CONCAT_COMPILE_EXPORT_ALL);
-    JsRequest jsRequest = new JsRequest(jsUri, null, false, null);
-    JsResponseBuilder jsBuilder = new JsResponseBuilder();
-    jsBuilder.appendJs(featureJsContent3);
-    boolean actualReturnCode = compiler.process(jsRequest, jsBuilder);
-    assertTrue(actualReturnCode);
-    assertEquals(
-        FEATURE_CONTENT_3 + EXPORT_STRING_3,
-        jsBuilder.build().toJsString());
-  }
-
-  @Test
-  public void testProcessWithFeaturesAndTexts() throws Exception {
-    JsUri jsUri = mockJsUri(JsCompileMode.CONCAT_COMPILE_EXPORT_ALL);
-    JsRequest jsRequest = new JsRequest(jsUri, null, false, null);
-    JsResponseBuilder jsBuilder = new JsResponseBuilder();
-    jsBuilder.appendJs(textJsContent1);
-    jsBuilder.appendJs(featureJsContent1);
-    jsBuilder.appendJs(featureJsContent2);
-    jsBuilder.appendJs(textJsContent2);
-    jsBuilder.appendJs(featureJsContent3);
-    boolean actualReturnCode = compiler.process(jsRequest, jsBuilder);
-    assertTrue(actualReturnCode);
-    assertEquals(EXPORT_JS_DEB + TEXT_CONTENT_1 +
-        FEATURE_CONTENT_1 + EXPORT_STRING_1 +
-        FEATURE_CONTENT_2 + EXPORT_STRING_2 +
-        TEXT_CONTENT_2 +
-        FEATURE_CONTENT_3 + EXPORT_STRING_3,
-        jsBuilder.build().toJsString());
   }
 }
