@@ -51,6 +51,7 @@ features/defer.test/feature.xml
 features/dynamic-height.height/feature.xml
 features/dynamic-height.util/feature.xml
 features/dynamic-height/feature.xml
+features/embeddedexperiences/feature.xml
 features/exportjs/feature.xml
 features/flash/feature.xml
 features/gadgets.json.ext/feature.xml

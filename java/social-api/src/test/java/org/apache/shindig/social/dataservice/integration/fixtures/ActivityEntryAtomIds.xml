@@ -1,7 +1,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:osearch="http://a9.com/-/spec/opensearch/1.1">
   <entry>
     <id>activity2</id>
-    <title>John posted a new video to his album.</title>
+    <title>John posted a new photo album.</title>
     <summary>Photo posted</summary>
     <author>
       <uri>john.doe</uri>
@@ -51,9 +51,19 @@
         </object>
         <openSocial>
           <embed>
-            <context>1234</context>
-            <gadget>http://example.org/albumViewer.xml</gadget>
-            <url>http://example.org/album/</url>
+            <context>
+                <albumName>Germany 2009</albumName>
+                <photoUrls>
+                  <java.lang.String>http://farm4.static.flickr.com/3495/3925132517_5959dac775_t.jpg</java.lang.String>
+                  <java.lang.String>http://farm4.static.flickr.com/3629/3394799776_47676abb46_t.jpg</java.lang.String>
+                  <java.lang.String>http://farm5.static.flickr.com/4009/4413640211_715d924d9b_t.jpg</java.lang.String>
+                  <java.lang.String>http://farm3.static.flickr.com/2340/3528537244_d2fb037aba_t.jpg</java.lang.String>
+                  <java.lang.String>http://farm1.static.flickr.com/36/98407782_9c4c5866d1_t.jpg</java.lang.String>
+                  <java.lang.String>http://farm1.static.flickr.com/48/180544479_bb0d0f6559_t.jpg</java.lang.String>
+                  <java.lang.String>http://farm3.static.flickr.com/2668/3858018351_1e7b73c0b7_t.jpg</java.lang.String>
+                </photoUrls>              
+            </context>
+            <gadget>http://localhost:8080/samplecontainer/examples/embeddedexperiences/AlbumViewer.xml</gadget>
           </embed>
         </openSocial>
         <provider>
@@ -71,14 +81,14 @@
           <objectType>photo-album</objectType>
           <url>http://example.org/album/</url>
         </target>
-        <title>John posted a new video to his album.</title>
+        <title>John posted a new photo album.</title>  
         <verb>post</verb>
       </activityEntry>
     </content>
   </entry>
   <entry>
     <id>activity1</id>
-    <title>John posted a new blog entry</title>
+    <title>John shared new photos with you</title>
     <author>
       <uri>john.doe</uri>
       <name xmlns="http://ns.opensocial.org/2008/opensocial">John Doe</name>
@@ -101,6 +111,23 @@
           <id>object1</id>
           <url>http://example.org/blog/2011/02/entry</url>
         </object>
+         <openSocial>
+          <embed>
+            <context>
+                <albumName>Germany 2009</albumName>
+                <photoUrls>
+                  <java.lang.String>http://farm4.static.flickr.com/3495/3925132517_5959dac775.jpg</java.lang.String>
+                  <java.lang.String>http://farm4.static.flickr.com/3629/3394799776_47676abb46.jpg</java.lang.String>
+                  <java.lang.String>http://farm5.static.flickr.com/4009/4413640211_715d924d9b.jpg</java.lang.String>
+                  <java.lang.String>http://farm3.static.flickr.com/2340/3528537244_d2fb037aba.jpg</java.lang.String>
+                  <java.lang.String>http://farm1.static.flickr.com/36/98407782_9c4c5866d1.jpg</java.lang.String>
+                  <java.lang.String>http://farm1.static.flickr.com/48/180544479_bb0d0f6559.jpg</java.lang.String>
+                  <java.lang.String>http://farm3.static.flickr.com/2668/3858018351_1e7b73c0b7.jpg</java.lang.String>
+                </photoUrls>              
+            </context>
+            <gadget>http://localhost:8080/samplecontainer/examples/embeddedexperiences/PhotoList.xml</gadget>
+          </embed>
+        </openSocial>
         <published>2011-02-10T15:04:55Z</published>
         <target>
           <displayName>John&apos;s Blog</displayName>
@@ -108,7 +135,7 @@
           <objectType>blog</objectType>
           <url>http://example.org/blog/</url>
         </target>
-        <title>John posted a new blog entry</title>
+        <title>John shared new photos with you</title>
         <verb>post</verb>
       </activityEntry>
     </content>

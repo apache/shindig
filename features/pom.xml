@@ -182,6 +182,8 @@
                 <source>actions/actions_container.js</source>
                 <source>actions/actions.js</source>
                 <source>opensearch/opensearch.js</source>
+                <source>embeddedexperiences/constant.js</source>
+                <source>embeddedexperiences/embedded_experiences_container.js</source>
               </sources>
               <testSourceDirectory>${basedir}/src/test/javascript/features</testSourceDirectory>
               <testSuites>
