@@ -125,7 +125,7 @@ osapi.container.util.toArrayOfJsonKeys = function(json) {
  * @return {boolean} If obj is an array.
  */
 osapi.container.util.isArray = function(obj) {
-	return Object.prototype.toString.call(obj) == "[object Array]";
+	return Object.prototype.toString.call(obj) == '[object Array]';
 };
 
 
@@ -162,7 +162,7 @@ osapi.container.util.getCurrentTimeMs = function() {
 /**
  * Crates the HTML for the iFrame
  * @param {iframeParams} iframe Params.
- * @return the HTML for the iFrame
+ * @return the HTML for the iFrame.
  */
 osapi.container.util.createIframeHtml = function(iframeParams) {
 
@@ -172,7 +172,7 @@ osapi.container.util.createIframeHtml = function(iframeParams) {
   // variants.
   var out = [];
   out.push('<iframe ');
-  for ( var key in iframeParams) {
+  for (var key in iframeParams) {
       var value = iframeParams[key];
       if (value) {
           out.push(key);

@@ -156,7 +156,7 @@ osapi.container.GadgetHolder.prototype.getIframeElement = function() {
 
 /**
  * @param {string} value The value to set this social/security token to.
- * @return {osapi.container.GadgetHolder} the current GadgetHolder
+ * @return {osapi.container.GadgetHolder} the current GadgetHolder.
  */
 osapi.container.GadgetHolder.prototype.setSecurityToken = function(value) {
   this.securityToken_ = value;

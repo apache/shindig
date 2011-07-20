@@ -19,8 +19,8 @@
 /**
  * @fileoverview Constructs a new URL holder. This class is similar in
  * functionality to GadgetHolder from the common container.
- * @param {number} siteId The id of the URL site
- * @param {Element} el The element to contain the URL renders in
+ * @param {number} siteId The id of the URL site.
+ * @param {Element} el The element to contain the URL renders in.
  */
 osapi.container.UrlHolder = function(siteId, el) {
 
@@ -55,7 +55,7 @@ osapi.container.UrlHolder = function(siteId, el) {
   this.renderParams_ = null;
 
   this.onConstructed();
-}
+};
 
 /**
  * Callback for when the holder is constructed.

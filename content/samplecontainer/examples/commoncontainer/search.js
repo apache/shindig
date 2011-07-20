@@ -20,20 +20,20 @@
 var currentEngines = [];
 var templateMap = [];
 /**
- * Helper function to extract create map of new engines, keyed by template url 
- * @param searchURLs template search urls
+ * Helper function to extract create map of new engines, keyed by template url
+ * @param searchURLs template search urls.
  * @param description
- *        opensearch description being added or removed
+ *        opensearch description being added or removed.
  * @param added
  *            true if new description, false if removed.
  */
 extractURLs = function(searchUrls, description, added) {
   var newEngines = [];
   for (var i in searchUrls) {
-    var template = searchUrls[i]["@template"];
+    var template = searchUrls[i]['@template'];
     if (template != null) {
-      var descType = searchUrls[i]["@type"];
-      if (descType == "application/atom+xml") {
+      var descType = searchUrls[i]['@type'];
+      if (descType == 'application/atom+xml') {
         if (added) {
           if (currentEngines[template] == null) {
             newEngines[template] = description.OpenSearchDescription.ShortName;
@@ -56,14 +56,14 @@ extractURLs = function(searchUrls, description, added) {
     }
   }
   return newEngines;
-}
+};
 
 /**
  * Callback passed to the opensearch feature to react to addition/removal of
  * gadgets containing OpenSearch descriptions.
- * 
+ *
  * @param description
- *            opensearch description being added or removed
+ *            opensearch description being added or removed.
  * @param added
  *            true if new description, false if removed.
  */
@@ -78,49 +78,49 @@ updateEngines = function(description, added) {
 
   var newEngines = extractURLs(searchUrls, description, added);
 
-  var span = document.getElementById("engineList");
+  var span = document.getElementById('engineList');
   for (templateUrl in newEngines) {
     var current = newEngines[templateUrl];
     span.innerHTML = span.innerHTML
-        + "<input type=\"checkbox\" checked=\"true\" id=\"" + templateUrl
-        + "\" />" + current;
-    span.innerHTML = span.innerHTML + "<br/>";
+        + '<input type=\"checkbox\" checked=\"true\" id=\"' + templateUrl
+        + '\" />' + current;
+    span.innerHTML = span.innerHTML + '<br/>';
     currentEngines[templateUrl] = current;
   }
 
-}
+};
 
 CommonContainer.opensearch.addOpenSearchCallback(updateEngines);
 
 /**
  * Clears old search results, and fetches new ones.
- * 
+ *
  */
 function updateSearchURLs() {
   // clear the old results
   $(function() {
-    $("#results").dialog( {
-      autoOpen : false
+    $('#results').dialog({
+      autoOpen: false
     });
   });
-  $("#results").dialog("option", "minWidth", 1000);
-  $("#results").dialog('open');
+  $('#results').dialog('option', 'minWidth', 1000);
+  $('#results').dialog('open');
   //var div = document.getElementById("results");
   /*while (div.hasChildNodes()) {
     div.removeChild(div.firstChild);
   }*/
-  $("#results").empty();
+  $('#results').empty();
   //div.innerHTML = document.getElementById("query").value;
-  $("#results").innerHTML = document.getElementById("query").value;
+  $('#results').innerHTML = document.getElementById('query').value;
   // fetch new results.
-  getSearchResults(currentEngines, document.getElementById("query").value);
+  getSearchResults(currentEngines, document.getElementById('query').value);
 }
 
 /**
  * Iterates over template urls and fetches search results.
- * 
+ *
  * @param urls
- *            all the opensearch template urls in the container
+ *            all the opensearch template urls in the container.
  * @param query
  *            query string.
  */
@@ -128,56 +128,56 @@ function getSearchResults(urls, query) {
   // callback function to be called by the fetching code.
   /**
    * @param obj
-   *            the result data object, should be XML
+   *            the result data object, should be XML.
    * @param engineTitle
-   *            title of the engine being searched
+   *            title of the engine being searched.
    */
   function urlResponse(obj, engineTitle) {
     // create placeholder for results
-    var su = document.getElementById("results");
-    var resultDiv = document.createElement("div");
+    var su = document.getElementById('results');
+    var resultDiv = document.createElement('div');
     su.appendChild(resultDiv);
     // if there are no errors, parse the results
     if (obj.errors.length == 0) {
-      resultDiv.className = "searchEngine";
+      resultDiv.className = 'searchEngine';
       var domdata = obj.data;
       if (domdata != null) {
-        var entries = domdata.getElementsByTagName("entry");
-        resultDiv.innerHTML = resultDiv.innerHTML + engineTitle + ":<br/>";
+        var entries = domdata.getElementsByTagName('entry');
+        resultDiv.innerHTML = resultDiv.innerHTML + engineTitle + ':<br/>';
         if (entries.legnth == 0) {
-          resultDiv.innerHTML = resultDiv.innerHTML + ("No results found");
+          resultDiv.innerHTML = resultDiv.innerHTML + ('No results found');
         } else {
           var resultCount = entries.length;
           if (resultCount > 15) {
             resultCount = 15;
           }
           for (i = 0; i < resultCount; i++) {
-            if (entries[i].getElementsByTagName("title").length > 0) {
-              titles = entries[i].getElementsByTagName("title")
-              title =  titles[0].childNodes[0].nodeValue;
+            if (entries[i].getElementsByTagName('title').length > 0) {
+              titles = entries[i].getElementsByTagName('title');
+              title = titles[0].childNodes[0].nodeValue;
             } else {
-              title = "Untitled";
+              title = 'Untitled';
             }
             var link = null;
             //for standard atom results, we can extract the link
-            if (entries[i].getElementsByTagName("link").length > 0) {
-              links = entries[i].getElementsByTagName("link");
+            if (entries[i].getElementsByTagName('link').length > 0) {
+              links = entries[i].getElementsByTagName('link');
               link = links[0].attributes.href.nodeValue;
-            } 
-            var summaryNode = entries[i].getElementsByTagName("summary")[0];
+            }
+            var summaryNode = entries[i].getElementsByTagName('summary')[0];
             if (summaryNode == null) {
-              summaryNode = entries[i].getElementsByTagName("description")[0];
+              summaryNode = entries[i].getElementsByTagName('description')[0];
             }
             if (link == null) {
             resultDiv.innerHTML = resultDiv.innerHTML
-                + "<p style=\"color:blue\"/>"
+                + '<p style=\"color:blue\"/>'
                 + gadgets.util.escapeString(title);
             } else {
               resultDiv.innerHTML = resultDiv.innerHTML
-              + "<p style=\"color:blue\"/>"
-              + "<a href=\""+link+"\" target=\"_blank\">"
+              + '<p style=\"color:blue\"/>'
+              + '<a href=\"'+ link + '\" target=\"_blank\">'
               + gadgets.util.escapeString(title)
-              + "</a>";
+              + '</a>';
             }
             if (summaryNode != null) {
               var summary = summaryNode.textContent;
@@ -191,7 +191,7 @@ function getSearchResults(urls, query) {
       }
     } else { // errors occured, notify the user.
       resultDiv.innerHTML = resultDiv.innerHTML + engineTitle
-          + "<br/> An error has occured:" + obj.errors[0];
+          + '<br/> An error has occured:' + obj.errors[0];
     }
   }
   var params = {};
@@ -208,7 +208,7 @@ function getSearchResults(urls, query) {
       var callback = function() {
         var myTitle = '' + title;
         return function(response) {
-          urlResponse(response, myTitle)
+          urlResponse(response, myTitle);
         };
       }();
       // go fetch the results.
@@ -218,4 +218,4 @@ function getSearchResults(urls, query) {
     }
   }
 
-};
+}

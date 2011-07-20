@@ -57,14 +57,14 @@ osapi.container.Service = function(opt_config) {
    * @private
    */
   this.cachedTokens_ = {};
-  
+
   /**
    * @see osapi.container.Container.prototype.getLanguage
    */
   if (config.GET_LANGUAGE) {
     this.getLanguage = config.GET_LANGUAGE;
   }
-  
+
   /**
    * @see osapi.container.Container.prototype.getCountry
    */
@@ -337,44 +337,44 @@ osapi.container.Service.prototype.filterCachedDataByRequest_ = function(
 
 
 /**
- * @returns {string} Best-guess locale for current browser.
+ * @return {string} Best-guess locale for current browser.
  */
 osapi.container.Service.prototype.getLocale_ = function() {
   var nav = window.navigator;
   return nav.userLanguage || nav.systemLanguage || nav.language;
-}; 
+};
 
 
 /**
- * A callback function that will return the correct language locale part to use when 
+ * A callback function that will return the correct language locale part to use when
  * asking the server to render a gadget or when asking the server for 1 or more
- * gadget's metadata. 
+ * gadget's metadata.
  * <br>
  * May be overridden by passing in a config parameter during container construction.
- *  * @returns {string} Language locale part.
+ *  * @return {string} Language locale part.
  */
 osapi.container.Service.prototype.getLanguage = function() {
   try {
-    return this.getLocale_().split('-')[0] || "ALL";
+    return this.getLocale_().split('-')[0] || 'ALL';
   } catch (e) {
-    return "ALL";
+    return 'ALL';
   }
 };
 
 
 /**
- * A callback function that will return the correct country locale part to use when 
+ * A callback function that will return the correct country locale part to use when
  * asking the server to render a gadget or when asking the server for 1 or more
- * gadget's metadata. 
+ * gadget's metadata.
  * <br>
  * May be overridden by passing in a config parameter during container construction.
- * @returns {string} Country locale part.
+ * @return {string} Country locale part.
  */
 osapi.container.Service.prototype.getCountry = function() {
   try {
-    return this.getLocale_().split('-')[1] || "ALL";
+    return this.getLocale_().split('-')[1] || 'ALL';
   } catch (e) {
-    return "ALL";
+    return 'ALL';
   }
 };
 

@@ -196,7 +196,7 @@ osapi.container.GadgetSite.prototype.navigateTo = function(
   var callback = opt_callback || function() {};
   var request = osapi.container.util.newMetadataRequest([gadgetUrl]);
   var self = this;
-  
+
   this.service_.getGadgetMetadata(request, function(response) {
     var xrt = (!cached) ? (osapi.container.util.getCurrentTimeMs() - start) : 0;
     var gadgetInfo = response[gadgetUrl];

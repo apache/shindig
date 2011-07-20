@@ -17,10 +17,10 @@
  */
 
 /**
- * @fileoverview Constructs a new URL site.  This class is very similar in functionality to 
+ * @fileoverview Constructs a new URL site.  This class is very similar in functionality to
  * the GadgetSite class which is part of the common container.
  * @param {Object} args containing DOM element to rende the iFrame in, and URL
- *                 to render in the iFrame
+ *                 to render in the iFrame.
  * @constructor
  */
 osapi.container.UrlSite = function(args) {
@@ -52,7 +52,7 @@ osapi.container.UrlSite = function(args) {
    * @type {string}
    * @private
    */
-  this.url_ = null
+  this.url_ = null;
 
   this.onConstructed();
 };
@@ -141,14 +141,14 @@ osapi.container.UrlSite.prototype.close = function() {
 
 /**
  * Renders the URL in this site
- * @param {string} url to render in the iFrame
- * @param {object} the parameters to render the site
+ * @param {string} url to render in the iFrame.
+ * @param {object} the parameters to render the site.
  */
 osapi.container.UrlSite.prototype.render = function(url, renderParams) {
   this.holder_ = new osapi.container.UrlHolder(this.id_, this.el_);
 
   var localRenderParams = {};
-  for ( var key in renderParams) {
+  for (var key in renderParams) {
     localRenderParams[key] = renderParams[key];
   }
 

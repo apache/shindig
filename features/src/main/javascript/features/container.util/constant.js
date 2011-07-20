@@ -141,7 +141,7 @@ osapi.container.ViewParam = {
 };
 
 /**
- * Constants to define lifecycle callback 
+ * Constants to define lifecycle callback
  */
 osapi.container.CallbackType = {};
 osapi.container.CallbackType.ON_PRELOADED = 'onPreloaded';

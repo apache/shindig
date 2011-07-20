@@ -28,8 +28,8 @@
  */
 gadgets.util = gadgets.util || {};
 
-(function() {  
-  
+(function() {
+
   var features = {};
   var services = {};
 

@@ -29,25 +29,25 @@
  */
 osapi.container.Container = function(opt_config) {
   var config = this.config_ = opt_config || {};
- 
+
   /**
-   * A list of objects containing functions to be invoked when gadgets are 
+   * A list of objects containing functions to be invoked when gadgets are
    * preloaded, navigated, closed or unloaded. Sample object:
-   * 
+   *
    * var callback = new Object();
-   * callback[osapi.container.CallbackType.ON_PRELOADED] 
-   *            = function(response){}; 
-   * callback[osapi.container.CallbackType.ON_CLOSED] 
+   * callback[osapi.container.CallbackType.ON_PRELOADED]
+   *            = function(response){};
+   * callback[osapi.container.CallbackType.ON_CLOSED]
    *            = function(gadgetSite){};
-   * callback[osapi.container.CallbackType.ON_NAVIGATED] 
+   * callback[osapi.container.CallbackType.ON_NAVIGATED]
    *            = function(gadgetSite){};
-   * callback[osapi.container.CallbackType.ON_UNLOADED] 
-   *            = function(gadgetURL){};   
-   * @type {Array} 
+   * callback[osapi.container.CallbackType.ON_UNLOADED]
+   *            = function(gadgetURL){};
+   * @type {Array}
    * @private
    */
   this.gadgetLifecycleCallbacks_ = {};
-  
+
   /**
    * A JSON list of preloaded gadget URLs.
    * @type {Object}
@@ -176,7 +176,7 @@ osapi.container.Container.prototype.navigateGadget = function(
   var callback = opt_callback || function() {},
     ContainerConfig = osapi.container.ContainerConfig,
     RenderParam = osapi.container.RenderParam;
-  
+
   if (this.allowDefaultView_) {
     renderParams[RenderParam.ALLOW_DEFAULT_VIEW] = true;
   }
@@ -192,13 +192,13 @@ osapi.container.Container.prototype.navigateGadget = function(
   }
 
   this.refreshService_();
-  
+
   // Try to retrieve preferences for the gadget if no preferences were explicitly provided.
   if (this.config_[ContainerConfig.GET_PREFERENCES] && !renderParams[RenderParam.USER_PREFS]) {
-    renderParams[RenderParam.USER_PREFS] = 
-      this.config_[ContainerConfig.GET_PREFERENCES](site.getId(), gadgetUrl); 
+    renderParams[RenderParam.USER_PREFS] =
+      this.config_[ContainerConfig.GET_PREFERENCES](site.getId(), gadgetUrl);
   }
-  
+
   var self = this;
   var selfSite = site;
   // TODO: Lifecycle, add ability for current gadget to cancel nav.
@@ -212,8 +212,8 @@ osapi.container.Container.prototype.navigateGadget = function(
     } else if (gadgetInfo[osapi.container.MetadataResponse.NEEDS_TOKEN_REFRESH]) {
       self.scheduleRefreshTokens_();
     }
-    
-    self.applyLifecycleCallbacks_(osapi.container.CallbackType.ON_NAVIGATED, 
+
+    self.applyLifecycleCallbacks_(osapi.container.CallbackType.ON_NAVIGATED,
         selfSite);
     callback(gadgetInfo);
   });
@@ -235,9 +235,9 @@ osapi.container.Container.prototype.closeGadget = function(site) {
 
 /**
  * Add a callback to be called when one or more gadgets are preloaded, navigated to or closed.
- * @param {Object} callback object to call back when a gadget is preloaded, navigated to or closed. 
- * called via preloaded, navigated and closed methods
- * @return true if added successfully, false if a callback with that name is already registered. 
+ * @param {Object} callback object to call back when a gadget is preloaded, navigated to or closed.
+ * called via preloaded, navigated and closed methods.
+ * @return true if added successfully, false if a callback with that name is already registered.
  */
 osapi.container.Container.prototype.addGadgetLifecycleCallback = function(name, lifeCycleCallback) {
   if (!this.gadgetLifecycleCallbacks_[name]) {
@@ -249,7 +249,7 @@ osapi.container.Container.prototype.addGadgetLifecycleCallback = function(name, 
 
 /**
  * remove a lifecycle callback previously registered with the container
- * @param {Object} callback object to be removed
+ * @param {Object} callback object to be removed.
  */
 osapi.container.Container.prototype.removeGadgetLifecycleCallback = function(name) {
   delete this.gadgetLifecycleCallbacks_[name];
@@ -280,9 +280,9 @@ osapi.container.Container.prototype.preloadGadgets = function(gadgetUrls, opt_ca
   this.refreshService_();
   this.service_.getGadgetMetadata(request, function(response) {
     self.addPreloadGadgets_(response);
-    self.applyLifecycleCallbacks_(osapi.container.CallbackType.ON_PRELOADED, 
+    self.applyLifecycleCallbacks_(osapi.container.CallbackType.ON_PRELOADED,
         response);
-    callback(response);  
+    callback(response);
   });
 };
 
@@ -304,7 +304,7 @@ osapi.container.Container.prototype.unloadGadgets = function(gadgetUrls) {
   for (var i = 0; i < gadgetUrls.length; i++) {
     var url = gadgetUrls[i];
     delete this.preloadedGadgetUrls_[url];
-    this.applyLifecycleCallbacks_(osapi.container.CallbackType.ON_UNLOADED, 
+    this.applyLifecycleCallbacks_(osapi.container.CallbackType.ON_UNLOADED,
         url);
   }
 };
@@ -611,14 +611,14 @@ osapi.container.Container.prototype.isRefreshTokensEnabled_ = function() {
  */
 osapi.container.Container.prototype.registerRpcServices_ = function() {
   var self = this;
-  
+
   this.rpcRegister('resize_iframe', function(rpcArgs, data) {
     var site = rpcArgs[osapi.container.GadgetSite.RPC_ARG_KEY];
     if (site) { // Check if site is not already closed.
       site.setHeight(data);
     }
   });
-  
+
   /**
    * @see setprefs.js setprefs feature.
    */
@@ -629,7 +629,7 @@ osapi.container.Container.prototype.registerRpcServices_ = function() {
       var data = {};
       for (var i = 2, j = arguments.length; i < j; i += 2) {
 	    data[arguments[i]] = arguments[i + 1];
-	  }   
+	  }
       setPrefs(site.getId(), site.getActiveGadgetHolder().getUrl(), data);
     }
   });
@@ -727,10 +727,10 @@ osapi.container.Container.prototype.refreshTokens_ = function() {
 
 
 /**
- * invokes methods on the gadget lifecycle callback registered with the 
+ * invokes methods on the gadget lifecycle callback registered with the
  * container.
  * @param {string} name of the callback method to be called.
- * @param {Object} data to be passed to the callback method
+ * @param {Object} data to be passed to the callback method.
  * @private
  */
 osapi.container.Container.prototype.applyLifecycleCallbacks_ = function(
@@ -740,14 +740,14 @@ osapi.container.Container.prototype.applyLifecycleCallbacks_ = function(
     if (method) {
       method(data);
     }
-  } 
+  }
 };
 
 /**
  * Creates a new URL site
- * @param {Element} element the element to put the site in
+ * @param {Element} element the element to put the site in.
 */
-osapi.container.Container.prototype.newUrlSite = function(element){
+osapi.container.Container.prototype.newUrlSite = function(element) {
   var args = {};
   args[osapi.container.UrlSite.URL_ELEMENT] = element;
   return new osapi.container.UrlSite(args);
@@ -756,13 +756,13 @@ osapi.container.Container.prototype.newUrlSite = function(element){
 
 /**
  * Navigates to a URL
- * @param {osapi.container.UrlSite} site the URL site to render the URL in
- * @param {String} url the URL to render
+ * @param {osapi.container.UrlSite} site the URL site to render the URL in.
+ * @param {String} url the URL to render.
  * @param {object} renderParams params to augment the rendering.
  * Valid rendering parameters include osapi.container.RenderParam.CLASS,
- * osapi.container.RenderParam.HEIGHT, and osapi.container.RenderParam.WIDTH
+ * osapi.container.RenderParam.HEIGHT, and osapi.container.RenderParam.WIDTH.
  */
-osapi.container.Container.prototype.navigateUrl = function(site, url, renderParams){
+osapi.container.Container.prototype.navigateUrl = function(site, url, renderParams) {
   site.render(url, renderParams);
   return site;
 };

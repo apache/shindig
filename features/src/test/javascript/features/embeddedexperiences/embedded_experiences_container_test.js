@@ -18,7 +18,7 @@
  */
 
 /**
- * @fileoverview Tests for container APIs for embedded experiences
+ * @fileoverview Tests for container APIs for embedded experiences.
  */
 
 function EEContainerTest(name) {
@@ -46,7 +46,7 @@ EEContainerTest.prototype.tearDown = function() {
       gadgets.rpc = this.gadgetsRpc;
 };
 
-EEContainerTest.prototype.testNavigateGadget = function(){
+EEContainerTest.prototype.testNavigateGadget = function() {
       this.setupGadgetsRpcRegister();
       var container = new osapi.container.Container({
         'allowDefaultView' : true,
@@ -54,23 +54,23 @@ EEContainerTest.prototype.testNavigateGadget = function(){
         'renderDebug' : true,
         'renderTest' : true
       });
-      
-      var eeDataModel = {"gadget" : "http://example.com/gadget.xml", "context" : "123"};
+
+      var eeDataModel = {'gadget' : 'http://example.com/gadget.xml', 'context' : '123'};
 
       this.setupGadgetSite(1, {}, null);
       this.setupPreload();
       container.ee.navigate({}, eeDataModel, {});
       var renderParamDataModel = this.site_navigateTo_renderParams['eeDataModel'];
-      this.assertEquals("http://example.com/gadget.xml", renderParamDataModel.gadget);
-      this.assertEquals("123", renderParamDataModel.context);
+      this.assertEquals('http://example.com/gadget.xml', renderParamDataModel.gadget);
+      this.assertEquals('123', renderParamDataModel.context);
       this.assertEquals('embedded', this.site_navigateTo_renderParams['view']);
-      this.assertEquals("http://example.com/gadget.xml", this.site_navigateTo_gadgetUrl);
+      this.assertEquals('http://example.com/gadget.xml', this.site_navigateTo_gadgetUrl);
       this.assertTrue(this.site_navigateTo_renderParams['allowDefaultView']);
       this.assertTrue(this.site_navigateTo_renderParams['cajole']);
       this.assertTrue(this.site_navigateTo_renderParams['debug']);
       this.assertTrue(this.site_navigateTo_renderParams['nocache']);
       this.assertTrue(this.site_navigateTo_renderParams['testmode']);
-    
+
 };
 
 EEContainerTest.prototype.setupGadgetsRpcRegister = function() {
@@ -100,14 +100,14 @@ EEContainerTest.prototype.setupGadgetSite = function(id, gadgetInfo, gadgetHolde
     };
 };
 
-EEContainerTest.prototype.setupUrlSite = function(id, url, urlHolder){
+EEContainerTest.prototype.setupUrlSite = function(id, url, urlHolder) {
     var self = this;
-    osapi.container.UrlSite = function(){
+    osapi.container.UrlSite = function() {
         return {
-            "getId" : function(){
+            'getId' : function() {
                 return id;
             },
-            "render" : function(url, renderParams){
+            'render' : function(url, renderParams) {
                 self.urlsite_render_url = url;
                 self.urlsite_render_renderParams = renderParams;
             }
@@ -115,8 +115,8 @@ EEContainerTest.prototype.setupUrlSite = function(id, url, urlHolder){
     };
 };
 
-EEContainerTest.prototype.setupPreload = function(){
-  osapi.container.Container.prototype.preloadGadget = function(gadgetUrl, func){
+EEContainerTest.prototype.setupPreload = function() {
+  osapi.container.Container.prototype.preloadGadget = function(gadgetUrl, func) {
     var ret = [];
     ret[gadgetUrl] = {};
     func(ret);

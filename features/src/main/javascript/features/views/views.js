@@ -325,7 +325,7 @@ gadgets.views = function() {
     getParams: function() {
       return params;
     },
-    
+
     ViewType: _viewType
   };
 }();

@@ -1,30 +1,30 @@
 $(function() {
-  
+
   // Base html template that is used for the gadget wrapper and site
-  var gadgetTemplate ='<div class="portlet">' +
+  var gadgetTemplate = '<div class="portlet">' +
                 '<div class="portlet-header" id="portlet-id">' +
                 'sample to replace</div>' +
                 '<div id="gadget-site" class="portlet-content"></div>' +
                 '</div>';
-  
-  // Variable to keep track of gadget current view 
+
+  // Variable to keep track of gadget current view
   // for collapse and expand gadget actions.
-  var currentView="default";
-  
+  var currentView = 'default';
+
   // ID used to associate gadget site
   var curId = 0;
-  
+
   // Navigate to the new view and save it as current view
-  navigateView = function(gadgetSite, gadgetURL, toView){
+  navigateView = function(gadgetSite, gadgetURL, toView) {
     // Save the current view for collapse, expand gadget
     currentView = toView;
-    CommonContainer.navigateView(gadgetSite,gadgetURL,toView); 
+    CommonContainer.navigateView(gadgetSite, gadgetURL, toView);
   };
-    
+
   // Handle gadget collapse, expand, and remove gadget actions
   handleNavigateAction = function(portlet, gadgetSite, gadgetURL, actionId) {
     // Remove button was click, remove the portlet/gadget
-    if (actionId === "remove") {
+    if (actionId === 'remove') {
       if (confirm('This gadget will be removed, ok?')) {
         if (gadgetSite) {
           CommonContainer.closeGadget(gadgetSite);
@@ -35,7 +35,7 @@ $(function() {
         }
         portlet.remove();
       }
-    } else if (actionId === "expand") {
+    } else if (actionId === 'expand') {
       // Navigate to currentView prior to collapse gadget
       if (gadgetSite) {
         CommonContainer.navigateView(gadgetSite, gadgetURL, currentView);
@@ -43,59 +43,59 @@ $(function() {
       else {
         preRenderGadget(gadgetURL);
       }
-    } else if (actionId === "collapse") {
+    } else if (actionId === 'collapse') {
       CommonContainer.closeGadget(gadgetSite);
     }
   };
-    
-  // Create a gadget with navigation tool bar header 
+
+  // Create a gadget with navigation tool bar header
   // enabling gadget collapse, expand and remove.
   buildGadget = function(result,gadgetURL,lazyload) {
-    var gadgetSiteString="$(this).closest(\'.portlet\')." + 
-      "find(\'.portlet-content\').data(\'gadgetSite\')";  
+    var gadgetSiteString = "$(this).closest(\'.portlet\')." +
+      "find(\'.portlet-content\').data(\'gadgetSite\')";
     var newGadgetSite = gadgetTemplate;
-    newGadgetSite = newGadgetSite.replace(/(portlet-id)/g,'$1-'+ curId);
-    newGadgetSite = newGadgetSite.replace(/(gadget-site)/g,'$1-'+ curId);
+    newGadgetSite = newGadgetSite.replace(/(portlet-id)/g, '$1-' + curId);
+    newGadgetSite = newGadgetSite.replace(/(gadget-site)/g, '$1-' + curId);
     var gadgetSiteData = null;
-    $(newGadgetSite).appendTo($( '#gadgetArea' )).addClass(
-        "ui-widget ui-widget-content ui-helper-clearfix ui-corner-all")
-        .find(".portlet-header")
-        .addClass("ui-widget-header ui-corner-all")
+    $(newGadgetSite).appendTo($('#gadgetArea')).addClass(
+        'ui-widget ui-widget-content ui-helper-clearfix ui-corner-all')
+        .find('.portlet-header')
+        .addClass('ui-widget-header ui-corner-all')
         .text(result[gadgetURL]['modulePrefs'].title)
-    .append('<span id="remove" class="ui-icon ui-icon-closethick"></span>')         
+    .append('<span id="remove" class="ui-icon ui-icon-closethick"></span>')
     .append('<span id="expand" class="ui-icon ui-icon-plusthick"></span>')
     .append('<span id="collapse" class="ui-icon ui-icon-minusthick"></span>')
     .end()
-      .find(".portlet-content")
-      .data("gadgetSite", lazyload ? null :
+      .find('.portlet-content')
+      .data('gadgetSite', lazyload ? null :
         CommonContainer.renderGadget(gadgetURL, curId));
-     
+
     // determine which button was clicked and handle the appropriate event.
-    $("#portlet-id-"+curId+" > .ui-icon").click(
+    $('#portlet-id-'+ curId + ' > .ui-icon').click(
         function() {
           handleNavigateAction(
-              $(this).closest('.portlet'), 
-              $(this).closest('.portlet').find(".portlet-content")
-                .data("gadgetSite"),
-              gadgetURL,this.id);
+              $(this).closest('.portlet'),
+              $(this).closest('.portlet').find('.portlet-content')
+                .data('gadgetSite'),
+              gadgetURL, this.id);
         }
-    ); 
-   
+    );
+
     var gadgetId = urlsToGadgetIdMap[gadgetURL];
     if (!gadgetId) {
       urlsToGadgetIdMap[gadgetURL] = curId;
     }
   };
-      
-  // Add single gadget 
-  addGadget=function(gadgetUrl, lazyload) {
-    CommonContainer.preloadGadget(gadgetUrl, function(result){    
+
+  // Add single gadget
+  addGadget = function(gadgetUrl, lazyload) {
+    CommonContainer.preloadGadget(gadgetUrl, function(result) {
       for (var gadgetURL in result) {
-       buildGadget(result,gadgetURL, lazyload);
+       buildGadget(result, gadgetURL, lazyload);
        curId++;
       }
     });
-    return true; 
+    return true;
   };
-  
+
 });

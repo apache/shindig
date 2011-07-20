@@ -30,7 +30,7 @@ shindig.samplecontainer = {};
  * Hide our functions and variables from other javascript
  */
 
-(function(){
+(function() {
 
   /**
    * Private Variables
@@ -40,7 +40,7 @@ shindig.samplecontainer = {};
   var baseUrl = parentUrl.substring(0, parentUrl.indexOf('samplecontainer'));
 
   // TODO: This is gross, it needs to use the config just like the gadget js does
-  var socialDataPath = baseUrl + "social/rest/samplecontainer/";
+  var socialDataPath = baseUrl + 'social/rest/samplecontainer/';
 
   var gadgetUrlMatches = /[?&]url=((?:[^#&]+|&amp;)+)/.exec(parentUrl);
   var gadgetUrl = (gadgetUrlMatches)
@@ -58,13 +58,13 @@ shindig.samplecontainer = {};
   var doEvil;
   var gadget;
 
-  var viewerId = "john.doe";
-  var ownerId = "canonical";
+  var viewerId = 'john.doe';
+  var ownerId = 'canonical';
 
   var viewMatches = /[?&]view=((?:[^#&]+|&amp;)+)/.exec(parentUrl);
   var current_view = (viewMatches)
       ? viewMatches[1]
-      : "default";
+      : 'default';
 
   /**
    * Public Variables
@@ -80,12 +80,12 @@ shindig.samplecontainer = {};
     for (var i = 0; i < gadgetUrl.length; i++) {
       appId += gadgetUrl.charCodeAt(i);
     }
-    var fields = [ownerId, viewerId, appId, "shindig", gadgetUrl, "0", "default"];
+    var fields = [ownerId, viewerId, appId, 'shindig', gadgetUrl, '0', 'default'];
     for (var i = 0; i < fields.length; i++) {
       // escape each field individually, for metachars in URL
       fields[i] = escape(fields[i]);
     }
-    return fields.join(":");
+    return fields.join(':');
   }
 
   SampleContainerGadget = function(opt_params) {
@@ -103,10 +103,10 @@ shindig.samplecontainer = {};
     var params = '';
 
     if (useCaja) {
-      params += "&caja=1&libs=caja";
+      params += '&caja=1&libs=caja';
     }
     if (useDebug) {
-      params += "&debug=1";
+      params += '&debug=1';
     }
     return params;
   };
@@ -119,7 +119,7 @@ shindig.samplecontainer = {};
 
   function reloadStateFile(opt_callback) {
     sendRequestToServer('setstate', 'POST',
-        gadgets.json.stringify({"fileurl" : stateFileUrl}),
+        gadgets.json.stringify({'fileurl' : stateFileUrl}),
         opt_callback);
   };
 
@@ -128,12 +128,12 @@ shindig.samplecontainer = {};
     opt_postParams = opt_postParams || {};
 
     var makeRequestParams = {
-      "CONTENT_TYPE" : "JSON",
-      "METHOD" : method,
-      "POST_DATA" : opt_postParams};
+      'CONTENT_TYPE' : 'JSON',
+      'METHOD' : method,
+      'POST_DATA' : opt_postParams};
 
     if (!opt_excludeSecurityToken) {
-      url = socialDataPath + url + "?st=" + gadget.secureToken;
+      url = socialDataPath + url + '?st=' + gadget.secureToken;
     }
 
     gadgets.io.makeNonProxiedRequest(url,
@@ -144,7 +144,7 @@ shindig.samplecontainer = {};
         }
       },
       makeRequestParams,
-      "application/javascript"
+      'application/javascript'
     );
   };
 
@@ -156,9 +156,9 @@ shindig.samplecontainer = {};
       gadget = shindig.container.createGadget({'specUrl': metadata.gadgets[i].url,
           'title': metadata.gadgets[i].title, 'userPrefs': metadata.gadgets[i].userPrefs});
       // Shindigs rpc code uses direct javascript calls when running on the same domain
-      // to simulate cross-domain when running sample container we replace 
-      // 'localhost' with '127.0.0.1' 
-      var iframeBaseUrl = baseUrl.replace("localhost", "127.0.0.1") + 'gadgets/';
+      // to simulate cross-domain when running sample container we replace
+      // 'localhost' with '127.0.0.1'
+      var iframeBaseUrl = baseUrl.replace('localhost', '127.0.0.1') + 'gadgets/';
 
       gadget.setServerBase(iframeBaseUrl);
       gadget.secureToken = escape(generateSecureToken());
@@ -188,10 +188,10 @@ shindig.samplecontainer = {};
   function requestGadgetMetaData(opt_callback) {
     var request = {
       context: {
-        country: "default",
-        language: "default",
+        country: 'default',
+        language: 'default',
         view: current_view,
-        container: "default"
+        container: 'default'
       },
       gadgets: [{
         url: gadgetUrl,
@@ -199,7 +199,7 @@ shindig.samplecontainer = {};
       }]
     };
 
-    sendRequestToServer(baseUrl+"gadgets/metadata", "POST",
+    sendRequestToServer(baseUrl + 'gadgets/metadata', 'POST',
         gadgets.json.stringify(request), opt_callback, true);
   }
 
@@ -210,8 +210,8 @@ shindig.samplecontainer = {};
      // Upon initial load, check for the cache query parameter (we don't want
      // to overwrite when clicking "refresh all")
      var cacheUrlMatches = /[?&]cache=([01])/.exec(parentUrl);
-     if (cacheUrlMatches && cacheUrlMatches[1] == "0") {
-       document.getElementById("useCacheCheckbox").checked = false;
+     if (cacheUrlMatches && cacheUrlMatches[1] == '0') {
+       document.getElementById('useCacheCheckbox').checked = false;
      }
      gadgets.pubsubrouter.init(function() { return gadgetUrl; });
   };
@@ -219,33 +219,33 @@ shindig.samplecontainer = {};
   shindig.samplecontainer.initGadget = function() {
     // Fetch cookies
     var cookieGadgetUrl = decodeURIComponent(shindig.cookies.get(gadgetUrlCookie));
-    if (cookieGadgetUrl && cookieGadgetUrl != "undefined") {
+    if (cookieGadgetUrl && cookieGadgetUrl != 'undefined') {
       gadgetUrl = cookieGadgetUrl;
     }
 
     var cookieStateFileUrl = decodeURIComponent(shindig.cookies.get(stateFileUrlCookie));
-    if (cookieStateFileUrl && cookieStateFileUrl != "undefined") {
+    if (cookieStateFileUrl && cookieStateFileUrl != 'undefined') {
       stateFileUrl = cookieStateFileUrl;
     }
 
     // Setup state file
-    document.getElementById("stateFileUrl").value = stateFileUrl;
+    document.getElementById('stateFileUrl').value = stateFileUrl;
 
     // Render gadget
-    document.getElementById("gadgetUrl").value = gadgetUrl;
+    document.getElementById('gadgetUrl').value = gadgetUrl;
 
     // Viewer and Owner
-    document.getElementById("viewerId").value = viewerId;
-    document.getElementById("ownerId").value = ownerId;
+    document.getElementById('viewerId').value = viewerId;
+    document.getElementById('ownerId').value = ownerId;
 
     requestGadgetMetaData(generateGadgets);
   };
 
   shindig.samplecontainer.unpackFormState = function() {
-    useCaja = document.getElementById("useCajaCheckbox").checked;
-    useCache = document.getElementById("useCacheCheckbox").checked;
-    useDebug = document.getElementById("useDebugCheckbox").checked;
-    doEvil = document.getElementById("doEvilCheckbox").checked;
+    useCaja = document.getElementById('useCajaCheckbox').checked;
+    useCache = document.getElementById('useCacheCheckbox').checked;
+    useDebug = document.getElementById('useDebugCheckbox').checked;
+    doEvil = document.getElementById('doEvilCheckbox').checked;
   };
 
   shindig.samplecontainer.changeGadgetUrl = function() {
@@ -255,12 +255,12 @@ shindig.samplecontainer = {};
     // TODO(felix8a): implement in server
     //setEvilBit();
 
-    stateFileUrl = document.getElementById("stateFileUrl").value;
+    stateFileUrl = document.getElementById('stateFileUrl').value;
     shindig.cookies.set(stateFileUrlCookie, encodeURIComponent(stateFileUrl));
 
-    viewerId = document.getElementById("viewerId").value;
-    ownerId = document.getElementById("ownerId").value;
-    gadgetUrl = document.getElementById("gadgetUrl").value;
+    viewerId = document.getElementById('viewerId').value;
+    ownerId = document.getElementById('ownerId').value;
+    gadgetUrl = document.getElementById('gadgetUrl').value;
 
     shindig.cookies.set(gadgetUrlCookie, encodeURIComponent(gadgetUrl));
 
@@ -271,7 +271,7 @@ shindig.samplecontainer = {};
     sendRequestToServer('dumpstate', 'GET', null,
       function(data) {
         if (!data) {
-          alert("Could not dump the current state.");
+          alert('Could not dump the current state.');
         }
         document.getElementById('gadgetState').innerHTML
           = gadgets.json.stringify(data);
@@ -285,17 +285,17 @@ shindig.samplecontainer = {};
 
   osapi.messages = {};
   osapi.messages.requestSend = function(request, callback) {
-    alert("osapi.messages.requestSend called");
+    alert('osapi.messages.requestSend called');
     callback({});
   };
 
   osapi.requestShareApp = function(request, callback) {
-    alert("osapi.requestShareApp called");
+    alert('osapi.requestShareApp called');
     callback({});
   };
 
   osapi.requestPermission = function(request, callback) {
-    alert("osapi.requestPermission called");
+    alert('osapi.requestPermission called');
     callback({});
   };
 

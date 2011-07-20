@@ -19,78 +19,78 @@
 
  //  Setup the base container objects for managing layout, gadget, and container configuration
 $(function() {
-	
+
 		//TODO:  enable drag and drop with the portlet at some point
-		$(".column").sortable({
+		$('.column').sortable({
 			connectWith: '.column',
-			update:  function(event, ui) {
-					//TODO:  There is an issue with drag & drop 
+			update: function(event, ui) {
+					//TODO:  There is an issue with drag & drop
 		}
 		});
 
-		$(".portlet").addClass("ui-widget ui-widget-content ui-helper-clearfix ui-corner-all")
-			.find(".portlet-header")
-				.addClass("ui-widget-header ui-corner-all")
+		$('.portlet').addClass('ui-widget ui-widget-content ui-helper-clearfix ui-corner-all')
+			.find('.portlet-header')
+				.addClass('ui-widget-header ui-corner-all')
 				.prepend('<span class="ui-icon ui-icon-minusthick"></span>')
 				.end()
-			.find(".portlet-content");
-		$(".portlet-header .ui-icon").click(function() {
-			$(this).toggleClass("ui-icon-minusthick").toggleClass("ui-icon-plusthick");
-			$(this).parents(".portlet:first").find(".portlet-content").toggle();
+			.find('.portlet-content');
+		$('.portlet-header .ui-icon').click(function() {
+			$(this).toggleClass('ui-icon-minusthick').toggleClass('ui-icon-plusthick');
+			$(this).parents('.portlet:first').find('.portlet-content').toggle();
 		});
 
-		$(".column").disableSelection();
+		$('.column').disableSelection();
 	});
-		
+
 	$(function() {
-		$( "#accordion" ).accordion({
+		$('#accordion').accordion({
 			fillSpace: true,
 			collapsible: true
-			
+
 		});
 	});
 	$(function() {
-		$( "#accordionResizer" ).resizable({
+		$('#accordionResizer').resizable({
 			minHeight: 140,
 			resize: function() {
-				$( "#accordion" ).accordion( "resize" );
+				$('#accordion').accordion('resize');
 			}
 		});
 	});
 	$(function() {
-		$( "#accordionEvents" ).accordion({
+		$('#accordionEvents').accordion({
 			fillSpace: true,
 			collapsible: true
-			
+
 		});
 	});
 	$(function() {
-		$( "#accordionResizerEvents" ).resizable({
+		$('#accordionResizerEvents').resizable({
 			minHeight: 140,
 			resize: function() {
-				$( "#accordionEvents" ).accordion( "resize" );
+				$('#accordionEvents').accordion('resize');
 			}
 		});
 	});
 	$(function() {
-		$( "#accordionGadgetControls" ).accordion({
+		$('#accordionGadgetControls').accordion({
 			fillSpace: true,
 			collapsible: true
-			
+
 		});
 	});
 	$(function() {
-		$( "#accordionContainerControls" ).accordion({
+		$('#accordionContainerControls').accordion({
 			fillSpace: true,
 			collapsible: true
-			
+
 		});
 	});
 	$(function() {
-		$( "#accordionResizerControls" ).resizable({
+		$('#accordionResizerControls').resizable({
 			minHeight: 140,
 			resize: function() {
-				$( "#accordionGadgetControls" ).accordion( "resize" );
+				$('#accordionGadgetControls').accordion('resize');
 			}
 		});
 	});

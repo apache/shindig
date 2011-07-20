@@ -27,14 +27,14 @@ function SocialWrapper() {
     this.getViewer = function(callback) {
         osapi.people.getViewer().execute(callback);
     }
-    
+
     /*
      * Retrieves the current owner.
      */
     this.getOwner = function(callback) {
         osapi.people.getOwner().execute(callback);
     }
-    
+
     //------------------------ ALBUMS ----------------------
     /*
      * Retrieves albums by ID(s).
@@ -43,21 +43,21 @@ function SocialWrapper() {
         var params = {userId: userId, albumId: albumId};
         osapi.albums.get(params).execute(callback);
     }
-     
+
     /*
      * Retrieves albums by user.
      */
     this.getAlbumsByUser = function(userId, callback) {
         osapi.albums.get({userId: userId}).execute(callback);
     }
-    
+
     /*
      * Retrieves albums by group.
      */
     this.getAlbumsByGroup = function(userId, groupId, callback) {
         osapi.albums.get({userId: userId, groupId: groupId}).execute(callback);
     }
-    
+
     /*
      * Creates an album for the given user.
      */
@@ -68,7 +68,7 @@ function SocialWrapper() {
         };
         osapi.albums.create(params).execute(callback);
     }
-    
+
     /*
      * Updates an album by ID.
      */
@@ -80,7 +80,7 @@ function SocialWrapper() {
         };
         osapi.albums.update(params).execute(callback);
     }
-    
+
     /*
      * Deletes an album by ID.
      */
@@ -88,7 +88,7 @@ function SocialWrapper() {
         var params = {userId: userId, albumId: albumId};
         osapi.albums.delete(params).execute(callback);
     }
-    
+
     //------------------------------- MEDIAITEMS ----------------------------
     /*
      * Creates a MediaItem.
@@ -101,7 +101,7 @@ function SocialWrapper() {
         };
         osapi.mediaItems.create(params).execute(callback);
     }
-    
+
     /*
      * Updates a MediaItem by ID.
      */
@@ -112,10 +112,10 @@ function SocialWrapper() {
             mediaItemId: mediaItemId,
             mediaItem: mediaItem
         };
-        console.log("PARAMS: " + JSON.stringify(params));
+        console.log('PARAMS: ' + JSON.stringify(params));
         osapi.mediaItems.update(params).execute(callback);
     }
-    
+
     /*
      * Retrieves MediaItems by ID(s).
      */
@@ -127,21 +127,21 @@ function SocialWrapper() {
         };
         osapi.mediaItems.get(params).execute(callback);
     }
-    
+
     /*
      * Retrieves MediaItems by album.
      */
     this.getMediaItemsByAlbum = function(userId, albumId, callback) {
         osapi.mediaItems.get({userId: userId, albumId: albumId}).execute(callback);
     }
-     
+
     /*
      * Retrieves MediaItems by user and group.
      */
     this.getMediaItemsByUser = function(userId, groupId, callback) {
         osapi.mediaItems.get({userId: userId, groupId: groupId}).execute(callback);
     }
-     
+
     /*
      * Deletes a MediaItem by ID.
      */

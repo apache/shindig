@@ -17,14 +17,14 @@
  */
 
 function OpenSocialWrapper() {
-	
+
 	// =============================== PEOPLE ===============================
-	
+
 	/*
 	 * Loads the owner, the viewer, the owner's friends, and the viewer's
 	 * friends.  Response data is put into the variables owner, viewer,
 	 * ownerFriends, and viewerFriends, respectively.
-	 * 
+	 *
 	 * @param callback is the function to return the response to
 	 */
 	this.loadPeople = function(callback) {
@@ -35,15 +35,15 @@ function OpenSocialWrapper() {
 		batch.add('ownerFriends', osapi.people.getOwnerFriends());
 		batch.execute(callback);
 	}
-	
+
 	this.loadViewerFriends = function(callback) {
 		osapi.people.getViewerFriends().execute(callback);
 	}
-	
+
 	this.loadOwnerFriends = function(callback) {
 		osapi.people.getOwnerFriends().execute(callback);
 	}
-	
+
 	// ========================= ACTIVITIES =============================
 	this.loadActivities = function(callback) {
 		var batch = osapi.newBatch();
@@ -52,23 +52,23 @@ function OpenSocialWrapper() {
 		batch.add('friendActivities', osapi.activities.get({userId: '@viewer', groupId: '@friend'}));
 		batch.execute(callback);
 	}
-	
+
 	this.loadViewerActivities = function(callback) {
 		var req = osapi.activities.get({userId: '@viewer', groupId: '@self'});
 		req.execute(callback);
 	}
-	
+
 	this.loadViewerFriendsActivities = function(callback) {
 		var req = osapi.activities.get({userId: '@viewer', groupId: '@friends'});
 		req.execute(this.onLoadActivitiesFriends);
 	}
-	
+
 	this.loadOwnerActivities = function(callback) {
 		var req = osapi.activities.get({userId: '@owner', groupId: '@self'});
 		req.execute(callback);
 	}
 
-	
+
 	// ========================= ACTIVITY STREAMS =============================
 	this.loadActivityEntries = function(callback) {
 		var batch = osapi.newBatch();
@@ -77,24 +77,24 @@ function OpenSocialWrapper() {
 		//batch.add('friendEntries', osapi.activitystreams.get({userId: '@viewer', groupId: '@friend'}));
 		batch.execute(callback);
 	}
-	
+
 	this.loadViewerActivityEntries = function(callback) {
-		var params = {userId: '@viewer', groupId: '@self'}
+		var params = {userId: '@viewer', groupId: '@self'};
 		osapi.activitystreams.get(params).execute(callback);
 	}
-	
+
 	this.loadOwnerActivityEntries = function(callback) {
-		var params = {userId: '@owner', groupId: '@self'}
+		var params = {userId: '@owner', groupId: '@self'};
 		osapi.activitystreams.get(params).execute(callback);
 	}
-	
+
 	this.loadViewerFriendsActivityEntries = function(callback) {
-		var params = {userId: '@viewer', groupId: '@friends'}
+		var params = {userId: '@viewer', groupId: '@friends'};
 		osapi.activitystreams.get(params).execute(callback);
 	}
-	
+
 	this.postActivityEntry = function(title, content, verb, actorId, actorName, objectName, objectSummary,
-									  objectPermalink, objectType, callback) { 
+									  objectPermalink, objectType, callback) {
 		var params = {
 			userId: '@viewer',
 			groupId: '@self',
@@ -115,19 +115,19 @@ function OpenSocialWrapper() {
 					summary: objectSummary
 				}
 			}
-		}
+		};
 		osapi.activitystreams.create(params).execute(callback);
 	}
-	
+
 	this.deleteActivityEntryById = function(activityEntryId, callback) {
 		var params = {
 			userId: '@viewer',
 			groupId: '@self',
 			activityId: activityEntryId
-		}
+		};
 		osapi.activitystreams.delete(params).execute(callback);
 	}
-	
+
 	this.getActivityEntryById = function(activityEntryId, callback) {
 		var params = {activityId: activityEntryId};
 		osapi.activitystreams.get(params).execute(callback);

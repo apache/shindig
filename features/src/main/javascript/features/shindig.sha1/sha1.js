@@ -39,7 +39,7 @@
  */
 shindig.sha1 = (function() {
   var hex = '0123456789ABCDEF';
-  
+
   /**
    * Holds the previous values of accumulated variables a-e in the compress_
    * function.

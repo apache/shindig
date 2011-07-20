@@ -33,20 +33,20 @@
 function MediaUI(social) {
     var viewer = null;
     var divManager = null;
-    
-    var folderUrl = "http://www.clker.com/cliparts/2/b/b/3/1194983972976950993blue_folder_seth_yastrov_01.svg.med.png";
-    var docUrl = "http://www.plastyc.com/images/document-icon.png";
-    
+
+    var folderUrl = 'http://www.clker.com/cliparts/2/b/b/3/1194983972976950993blue_folder_seth_yastrov_01.svg.med.png';
+    var docUrl = 'http://www.plastyc.com/images/document-icon.png';
+
     /*
      * Initializes the gadget.
      */
     this.init = function() {
-        console.log("initializing AlbumsUI");
-        
+        console.log('initializing AlbumsUI');
+
         // Manages high-level divs
         divManager = new DivManager();
         divManager.init();
-        
+
         // Load data and render
         loadData(function() {
             social.getAlbumsByUser(viewer.id, function(response) {
@@ -55,7 +55,7 @@ function MediaUI(social) {
             });
         });
     }
-    
+
     /*
      * Pre-load data for gadget.
      */
@@ -65,16 +65,16 @@ function MediaUI(social) {
             callback();
         });
     }
-    
+
     /*
      * Manages the gadgets main DIV elements.
-     * 
+     *
      * TODO: use dojo.query() & classes rather than divs[]
      * TODO: showOnly() function to avoid flashing/pauses
      */
     function DivManager() {
         var divs = [];
-    
+
         this.init = function() {
             console.log('DivManager.init');
             addDiv('albumsDiv');
@@ -82,39 +82,39 @@ function MediaUI(social) {
             addDiv('mediaItemDiv');
             hideAll();
         }
-    
+
         this.showAlbums = function() {
             console.log('DivManager.showAlbums');
             hideAll();
             divs['albumsDiv'].style.display = 'block';
             this.refreshWindow();
         }
-        
+
         this.showMediaItems = function() {
             console.log('DivManager.showMediaItems');
             hideAll();
             divs['mediaItemsDiv'].style.display = 'block';
             this.refreshWindow();
         }
-        
+
         this.showMediaItem = function() {
             console.log('DivManager.showMediaItem');
             hideAll();
             divs['mediaItemDiv'].style.display = 'block';
             this.refreshWindow();
         }
-        
+
         this.refreshWindow = function() {
             gadgets.window.adjustHeight(500);
         }
-        
+
         function hideAll() {
             for (key in divs) { divs[key].style.display = 'none'; }
         }
-        
+
         function addDiv(id) { divs[id] = dojo.create('div', {id: id}, dojo.body()); }
     }
-    
+
     /*
      * Renders a list of the given albums.
      */
@@ -123,14 +123,14 @@ function MediaUI(social) {
 
         dojo.empty('albumsDiv');
         var albumsDiv = dojo.byId('albumsDiv');
-        
+
         var albumsBanner = dojo.create('div', null, albumsDiv);
         var table = dojo.create('table', null, albumsBanner);
         var tbody = dojo.create('tbody', null, table);
         var tr = dojo.create('tr', null, tbody);
         dojo.create('td', {innerHTML: viewer.name.formatted + "'s Albums", className: 'albumsTitle'}, tr);
         dojo.create('td', null, tr).appendChild(new dijit.form.Button({label: '+ New Album', onClick: dojo.hitch(this, editAlbumPopup, null)}).domNode);
-        
+
         var albumsList = dojo.create('div', null, albumsDiv);
         if (albums.length > 0) {
             var table = dojo.create('table', {className: 'albumsTable'}, albumsList);
@@ -138,11 +138,11 @@ function MediaUI(social) {
             for (i = 0; i < albums.length; i++) {
                 var albumRow = dojo.create('tr', null, tbody);
                 var albumLeft = dojo.create('td', {className: 'albumListThumbnail'}, albumRow);
-                var imgLink = dojo.create('a', {href: "javascript:;", onclick: dojo.hitch(this, onClickAlbum, viewer.id, albums[i])}, albumLeft);
+                var imgLink = dojo.create('a', {href: 'javascript:;', onclick: dojo.hitch(this, onClickAlbum, viewer.id, albums[i])}, albumLeft);
                 dojo.create('img', {src: albums[i].thumbnailUrl, onerror: "this.src='" + folderUrl + "';", width: '100%'}, imgLink);
                 var albumRight = dojo.create('td', {className: 'albumListRight'}, albumRow);
                 var albumTitleRow = dojo.create('tr', null, albumRight);
-                var titleTd = dojo.create('td', {className: 'albumListTitle'}, albumTitleRow); 
+                var titleTd = dojo.create('td', {className: 'albumListTitle'}, albumTitleRow);
                 dojo.create('a', {innerHTML: albums[i].title, href: 'javascript:;', onclick: dojo.hitch(this, onClickAlbum, viewer.id, albums[i])}, titleTd);
                 var editTd = dojo.create('td', {className: 'actionLinks', style: 'text-align: right'}, albumTitleRow);
                 dojo.create('a', {innerHTML: 'edit', href: 'javascript:;', onclick: dojo.hitch(this, editAlbumPopup, albums[i])}, editTd);
@@ -157,10 +157,10 @@ function MediaUI(social) {
                 //dojo.create('td', {innerHTML: infoStr, className: 'albumListInfo', colspan: '2'}, albumInfo);
             }
         } else {
-            albumsDiv.appendChild(dojo.doc.createTextNode("No albums found."));
+            albumsDiv.appendChild(dojo.doc.createTextNode('No albums found.'));
         }
         divManager.refreshWindow();
-        
+
         // Handles when user clicks an album
         function onClickAlbum(userId, album) {
             social.getMediaItemsByAlbum(userId, album.id, function(response) {
@@ -169,7 +169,7 @@ function MediaUI(social) {
             });
         }
     }
-    
+
     /*
      * Convenience function to retrieve albums and render.
      */
@@ -180,10 +180,10 @@ function MediaUI(social) {
             if (callback != null) callback();
         });
     }
-    
+
     /*
      * Renders a grid of the given MediaItems.
-     * 
+     *
      * TODO: simplify this by simply taking in 'album', retrieving MediaItems here
      */
     function renderMediaItems(album, mediaItems) {
@@ -191,7 +191,7 @@ function MediaUI(social) {
         dojo.empty('mediaItemsDiv');
         var mediaItemsDiv = dojo.byId('mediaItemsDiv');
         var numCols = 5;
-        
+
         // Div to display navation bar and Create button
         var topDiv = dojo.create('div', null, mediaItemsDiv);
         var table = dojo.create('table', null, topDiv);
@@ -203,7 +203,7 @@ function MediaUI(social) {
         td = dojo.create('td', {style: 'width:100%'}, tr);
         var createButton = new dijit.form.Button({label: '+ New MediaItem', onClick: dojo.hitch(this, editMediaItemPopup, album, null)});
         td.appendChild(createButton.domNode);
-        
+
         // Div to display MediaItems in a grid
         var gridDiv = dojo.create('div', null, mediaItemsDiv);
         if (mediaItems.length > 0) {
@@ -217,10 +217,10 @@ function MediaUI(social) {
                 var td = dojo.create('td', {className: 'mediaItemBox'}, tr);
                 var imageTd = dojo.create('tr', null, td).appendChild(dojo.create('td', {className: 'mediaItemThumbnail'}));
                 if (mediaItems[i].url) {
-                    var imageLink = dojo.create('a', {href: "javascript:;", onclick: dojo.hitch(this, renderMediaItem, album, mediaItems[i])}, imageTd);
-                    imageLink.appendChild(dojo.create('img', {src: mediaItems[i].thumbnailUrl, onerror: "this.src='" + docUrl + "';", style:'height:100px;'}));
+                    var imageLink = dojo.create('a', {href: 'javascript:;', onclick: dojo.hitch(this, renderMediaItem, album, mediaItems[i])}, imageTd);
+                    imageLink.appendChild(dojo.create('img', {src: mediaItems[i].thumbnailUrl, onerror: "this.src='" + docUrl + "';", style: 'height:100px;'}));
                 } else {
-                    dojo.create('img', {src: mediaItems[i].thumbnailUrl, onerror: "this.src='" + docUrl + "';", style:'height:100px;'}, imageTd);
+                    dojo.create('img', {src: mediaItems[i].thumbnailUrl, onerror: "this.src='" + docUrl + "';", style: 'height:100px;'}, imageTd);
                 }
                 var titleTd = dojo.create('tr', null, td).appendChild(dojo.create('td', {style: "text-align:center; font-family:'comic sans ms';white-space:nowrap;"}));
                 titleTd.appendChild(dojo.doc.createTextNode(mediaItems[i].title));
@@ -234,7 +234,7 @@ function MediaUI(social) {
         }
         divManager.refreshWindow();
     }
-    
+
     /*
      * Convenience function to retriev & render MediaItems by Album.
      */
@@ -244,7 +244,7 @@ function MediaUI(social) {
             renderMediaItems(album, response.list);
         });
     }
-    
+
     /*
      * Renders the view for a single MediaItem.
      */
@@ -252,7 +252,7 @@ function MediaUI(social) {
         console.log('renderMediaItem');
         dojo.empty('mediaItemDiv');
         var mediaItemDiv = dojo.byId('mediaItemDiv');
-        
+
         // Div to display navation bar and Create button
         var topDiv = dojo.create('div', null, mediaItemDiv);
         var table = dojo.create('table', null, topDiv);
@@ -260,10 +260,10 @@ function MediaUI(social) {
         var tr = dojo.create('tr', null, tbody);
         var td = dojo.create('td', {style: 'width:100%'}, tr);
         dojo.create('a', {innerHTML: 'Albums', href: 'javascript:;', onclick: dojo.hitch(this, renderAlbumsByUser, viewer.id, null)}, td);
-        td.appendChild(dojo.doc.createTextNode(" > "));
-        dojo.create('a', {innerHTML: album.title, href: "javascript:;", onclick: dojo.hitch(this, retrieveAndRenderMediaItems, album)}, td);
-        td.appendChild(dojo.doc.createTextNode(" > " + mediaItem.title));
-        
+        td.appendChild(dojo.doc.createTextNode(' > '));
+        dojo.create('a', {innerHTML: album.title, href: 'javascript:;', onclick: dojo.hitch(this, retrieveAndRenderMediaItems, album)}, td);
+        td.appendChild(dojo.doc.createTextNode(' > ' + mediaItem.title));
+
         // Div to show MediaItem
         var itemDiv = dojo.create('div', null, mediaItemDiv);
         var table = dojo.create('table', null, itemDiv);
@@ -276,20 +276,20 @@ function MediaUI(social) {
             td = dojo.create('td', null, tr);
             td.appendChild(dojo.doc.createTextNode(mediaItem.description));
         }
-        
+
         divManager.showMediaItem();
     }
-    
+
     /*
      * Popup to edit album.
      */
     function editAlbumPopup(album) {
         console.log('editAlbumPopup: ' + JSON.stringify(album));
-        
+
         var title = (album == null ? 'Create' : 'Edit') + ' Album';
         var dialog = new dijit.Dialog({id: 'editAlbumPopup', title: title, onCancel: destroyDialog});
         dojo.body().appendChild(dialog.domNode);
-        
+
         var formDiv = dojo.create('div', {id: 'editAlbumFormDiv'});
         var form = new dijit.form.Form({id: 'editAlbumForm'});
         formDiv.appendChild(form.domNode);
@@ -331,10 +331,10 @@ function MediaUI(social) {
                 onClick: destroyDialog
             }).domNode
         );
-        
+
         dialog.set('content', formDiv);
         dialog.show();
-        
+
         function saveForm() {
             console.log('saveForm');
             var values = form.get('value');
@@ -346,20 +346,20 @@ function MediaUI(social) {
             };
             if (album == null) {
                 social.createAlbum(viewer.id, newAlbum, function(response) {
-                	publish("org.apache.shindig.album.created", newAlbum);
+                	publish('org.apache.shindig.album.created', newAlbum);
                     console.log('created album response: ' + JSON.stringify(response));
                     renderAlbumsByUser(viewer.id);
                 });
             } else {
                 social.updateAlbum(viewer.id, album.id, newAlbum, function(response) {
-                	publish("org.apache.shindig.album.updated", newAlbum);
+                	publish('org.apache.shindig.album.updated', newAlbum);
                     console.log('updated album response: ' + JSON.stringify(response));
                     renderAlbumsByUser(viewer.id);
                 });
             }
             destroyDialog();
         }
-        
+
         // Handles destroying the dialog popup
         function destroyDialog() {
             console.log('destroyDialog');
@@ -368,18 +368,18 @@ function MediaUI(social) {
             dialog.destroy(false);
         }
     }
-    
+
     /*
      * Popup to edit MediaItem.
      */
     function editMediaItemPopup(album, mediaItem) {
         console.log('editMediaItemPopup: ' + JSON.stringify(mediaItem));
-        
+
         var albumId = mediaItem == null ? album.id : mediaItem.albumId;
         var title = (mediaItem == null ? 'Create' : 'Edit') + ' MediaItem';
         var dialog = new dijit.Dialog({id: 'editMediaItemPopup', title: title, onCancel: destroyDialog});
         dojo.body().appendChild(dialog.domNode);
-        
+
         // Form div
         var formDiv = dojo.create('div', {id: 'editMediaItemFormDiv'});
         var form = new dijit.form.Form({id: 'editMediaItemForm'});
@@ -438,25 +438,25 @@ function MediaUI(social) {
                 onClick: destroyDialog
             }).domNode
         );
-        
+
         // Textarea div for JSON
-        var textAreaDiv = dojo.create('div', {style: "width:100%; height:100%;", id: 'textAreaDiv'});
-        var textArea = new dijit.form.Textarea({value: JSON.stringify(mediaItem), rows: "20"});
+        var textAreaDiv = dojo.create('div', {style: 'width:100%; height:100%;', id: 'textAreaDiv'});
+        var textArea = new dijit.form.Textarea({value: JSON.stringify(mediaItem), rows: '20'});
         textAreaDiv.appendChild(textArea.domNode);
-        
+
         // Put divs together
-        var tabContainer = new dijit.layout.TabContainer({style: "width:400px; height:300px;"});
-        var formContentPane = new dijit.layout.ContentPane({title: "Form", content: formDiv});
+        var tabContainer = new dijit.layout.TabContainer({style: 'width:400px; height:300px;'});
+        var formContentPane = new dijit.layout.ContentPane({title: 'Form', content: formDiv});
         tabContainer.addChild(formContentPane);
-        var textAreaContentPane = new dijit.layout.ContentPane({title: "JSON", content: textAreaDiv});
+        var textAreaContentPane = new dijit.layout.ContentPane({title: 'JSON', content: textAreaDiv});
         tabContainer.addChild(textAreaContentPane);
         tabContainer.startup();
         var dialogDiv = dojo.create('div', null);
         dialogDiv.appendChild(tabContainer.domNode);
-        
+
         dialog.set('content', dialogDiv);
         dialog.show();
-        
+
         function saveForm() {
             console.log('saveForm mediaItem');
             var values = form.get('value');
@@ -467,10 +467,10 @@ function MediaUI(social) {
                 thumbnailUrl: values.thumbnailUrl,
                 url: values.url
             };
-            if (newMediaItem.type == null || newMediaItem.type == "") newMediaItem.type = "image";
+            if (newMediaItem.type == null || newMediaItem.type == '') newMediaItem.type = 'image';
             if (mediaItem == null) {
                 social.createMediaItem(viewer.id, albumId, newMediaItem, function(response) {
-                	publish("org.apache.shindig.mediaItem.created", newMediaItem);
+                	publish('org.apache.shindig.mediaItem.created', newMediaItem);
                     console.log('created MediaItem response: ' + JSON.stringify(response));
                     social.getMediaItemsByAlbum(viewer.id, album.id, function(response) {
                         renderMediaItems(album, response.list);
@@ -478,7 +478,7 @@ function MediaUI(social) {
                 });
             } else {
                 social.updateMediaItem(viewer.id, albumId, mediaItem.id, newMediaItem, function(response) {
-                	publish("org.apache.shindig.mediaItem.updated", newMediaItem);
+                	publish('org.apache.shindig.mediaItem.updated', newMediaItem);
                     console.log('updated MediaItem response: ' + JSON.stringify(response));
                     social.getMediaItemsByAlbum(viewer.id, album.id, function(response) {
                         renderMediaItems(album, response.list);
@@ -487,7 +487,7 @@ function MediaUI(social) {
             }
             destroyDialog();
         }
-        
+
         // Handles destroying the dialog popup
         function destroyDialog() {
             console.log('destroyDialog');
@@ -496,7 +496,7 @@ function MediaUI(social) {
             dialog.destroy(false);
         }
     }
-    
+
     /*
      * Popup to confirm that the user wants to delete album.
      */
@@ -504,13 +504,13 @@ function MediaUI(social) {
         console.log('deleteAlbumPopup');
         if (confirm("Delete '" + album.title + "'?")) {
             social.deleteAlbum(viewer.id, album.id, function(response) {
-            	publish("org.apache.shindig.album.deleted", album);
+            	publish('org.apache.shindig.album.deleted', album);
                 console.log('delete album response: ' + JSON.stringify(response));
                 renderAlbumsByUser(viewer.id);
             });
         }
     }
-    
+
     /*
      * Popup to confirm user wants to delete MediaItem.
      */
@@ -519,7 +519,7 @@ function MediaUI(social) {
         var albumId = mediaItem.albumId;
         if (confirm("Delete '" + mediaItem.title + "'?")) {
             social.deleteMediaItem(viewer.id, albumId, mediaItem.id, function(response) {
-            	publish("org.apache.shindig.mediaItem.deleted", mediaItem);
+            	publish('org.apache.shindig.mediaItem.deleted', mediaItem);
                 console.log('delete mediaItem response: ' + JSON.stringify(response));
                 social.getMediaItemsByAlbum(viewer.id, albumId, function(response) {
                     renderMediaItems(album, response.list);
@@ -527,7 +527,7 @@ function MediaUI(social) {
             });
         }
     }
-    
+
     /*
      * Publishers.
      */

@@ -4,42 +4,42 @@ var CommonContainer = new osapi.container.Container({});
 // Wrapper function to set the gadget site/id and default width.
 CommonContainer.renderGadget = function(gadgetURL, gadgetId) {
   // going to hardcode these values for width.
-  var el = document.getElementById("gadget-site-" + gadgetId);
+  var el = document.getElementById('gadget-site-' + gadgetId);
   var parms = {};
-  parms[osapi.container.RenderParam.WIDTH] = "100%";
+  parms[osapi.container.RenderParam.WIDTH] = '100%';
   var gadgetSite = CommonContainer.newGadgetSite(el);
   CommonContainer.navigateGadget(gadgetSite, gadgetURL, {}, parms);
   return gadgetSite;
 };
 
 // Function for pre-rendering gadgets.  Gadget pre-rendering
-// occurs when an action contributed by a pre-loaded gadget 
+// occurs when an action contributed by a pre-loaded gadget
 // is executed.
 function preRenderGadget(gadgetUrl, opt_metadata) {
   var gadgetId = getGadgetId(gadgetUrl);
-  var el = $("#gadget-site-" + gadgetId);
+  var el = $('#gadget-site-' + gadgetId);
   var gadgetSite = CommonContainer.renderGadget(gadgetUrl, gadgetId);
-  el.data("gadgetSite", gadgetSite);
+  el.data('gadgetSite', gadgetSite);
   return gadgetSite;
-};
+}
 
 // Common container init function.
-CommonContainer.init = new function(){  
+CommonContainer.init = new function() {
   // Map needed for lazy loading of gadgets
   urlsToGadgetIdMap = {};
-  
+
   // Register our rendering functions with the action service
   if (CommonContainer.actions) {
     // Called when an action should be displayed in the container
     CommonContainer.actions.registerShowActionHandler(showAction);
-    
+
     // Called when a action should be removed from the container
     CommonContainer.actions.registerHideActionHandler(hideAction);
-    
+
     // Called for actions contributed by pre-loaded gadgets (lazy load)
     CommonContainer.actions.registerNavigateGadgetHandler(preRenderGadget);
   }
-};
+}
 
 // Support for lazy loading gadgets
 function getGadgetId(url) {
@@ -56,10 +56,10 @@ CommonContainer.addGadgetToPage = function(gadgetURL, lazyLoad) {
 // Wrapper function to expand a gadget
 CommonContainer.navigateView = function(gadgetSite, gadgetURL, view) {
   var renderParms = {};
-  if (view === null || view === "") {
-    view = "default";
+  if (view === null || view === '') {
+    view = 'default';
   }
-  renderParms[osapi.container.RenderParam.WIDTH] = "100%";
+  renderParms[osapi.container.RenderParam.WIDTH] = '100%';
   renderParms['view'] = view;
   CommonContainer.navigateGadget(gadgetSite, gadgetURL, {}, renderParms);
 };
@@ -80,15 +80,15 @@ osapi.people.getViewerFriends = function(options) {
   return osapi.people.get(options);
 };
 
-// Function to display actions 
-function showAction(itemObj) {  
+// Function to display actions
+function showAction(itemObj) {
   if (!itemObj.path && !itemObj.dataType) {
     // object is invalid!
     return;
   }
   // bind the action to the specified data object type
   if (itemObj.dataType) {
-    if (itemObj.dataType == "opensocial.Person") {
+    if (itemObj.dataType == 'opensocial.Person') {
       addPersonAction(itemObj);
     }
   }
@@ -96,78 +96,78 @@ function showAction(itemObj) {
   if (itemObj.path && itemObj.path.length > 0) {
     addContainerAction(itemObj);
   }
-};
+}
 
 // Adds the specified action to a person element.
 function addPersonAction(itemObj) {
   // select all person elements
-  var personActionDiv = $(".personActions");
-  
+  var personActionDiv = $('.personActions');
+
   // create a link and append it to each person element
   var actionStr = '';
   if (itemObj.icon && itemObj.icon.length > 0) {
-    actionStr += '<img src="'+itemObj.icon+'"/>';
+    actionStr += '<img src="' + itemObj.icon + '"/>';
   }
-  actionStr += '<a name="person-action-'+itemObj.id+'" title="'+
-               itemObj.tooltip+'" href="#">'+itemObj.label+'</a>';
-  actionStr = '<span class="'+itemObj.id+'">'+actionStr+'</span>';
+  actionStr += '<a name="person-action-' + itemObj.id + '" title="' +
+               itemObj.tooltip + '" href="#">' + itemObj.label + '</a>';
+  actionStr = '<span class="' + itemObj.id + '">' + actionStr + '</span>';
   var actionLink = $(actionStr);
-  
+
   // add a separator if needed
   if (personActionDiv.children().length > 0) {
-    personActionDiv.append(" | ");
-  }  
-  
+    personActionDiv.append(' | ');
+  }
+
   // select all links that were added and set the click handler
   personActionDiv.append(actionLink);
-  $('a[name="person-action-'+itemObj.id+'"]').each(function(i) {
+  $('a[name="person-action-' + itemObj.id + '"]').each(function(i) {
     $(this).click(function() {
       CommonContainer.actions.runAction(itemObj.id);
     });
-  }); 
-};
+  });
+}
 
 // Adds an action to the container UI
 function addContainerAction(itemObj) {
-  var pathParts = itemObj.path.split("/");
+  var pathParts = itemObj.path.split('/');
   var pathType = pathParts.shift();
   var pathScope = pathParts.shift();
-  var remainingPath = pathParts.join("/");
+  var remainingPath = pathParts.join('/');
   var contributionBar;
-  
+
   // right now we support contributing to the global menubar
-  if (pathType == "container" && pathScope == "navigationLinks") {
+  if (pathType == 'container' && pathScope == 'navigationLinks') {
     contributionBar = $('#globalMenubar');
     contributionBar.show();
   }
-  
+
   // create the action element
   var actionStr = '';
   if (itemObj.icon && itemObj.icon.length > 0) {
-    actionStr += '<img src="'+itemObj.icon+'"/>';
+    actionStr += '<img src="' + itemObj.icon + '"/>';
   }
-  actionStr += '<a title="'+itemObj.tooltip+'" href="#">'
-               +itemObj.label+'</a>';
-  actionStr = '<span class="'+itemObj.id+'">'+actionStr+'</span>';
+  actionStr += '<a title="' + itemObj.tooltip + '" href="#">'
+               + itemObj.label + '</a>';
+  actionStr = '<span class="' + itemObj.id + '">' + actionStr + '</span>';
   var actionLink = $(actionStr);
-  
+
   // add a separator if needed
   if (contributionBar.children().length > 0) {
-    contributionBar.append(" | ");
+    contributionBar.append(' | ');
   }
-  
+
   // add the new action
-  contributionBar.append(actionLink);    
-  actionLink.click(function(){
+  contributionBar.append(actionLink);
+  actionLink.click(function() {
     CommonContainer.actions.runAction(itemObj.id);
   });
-};
+}
 
-// Function to hide actions 
-function hideAction(itemObj) {  
+// Function to hide actions
+function hideAction(itemObj) {
   if (itemObj.path || itemObj.dataType) {
     // remove the action from the specified data object type
-    if (itemObj.dataType && itemObj.dataType == "opensocial.Person") {
+    if (itemObj.dataType && itemObj.dataType == 'opensocial.Person') {
       removePersonAction(itemObj);
     }
     // remove the action to the specified path (container UI elements)
@@ -175,17 +175,17 @@ function hideAction(itemObj) {
       removeContainerAction(itemObj);
     }
   }
-};
+}
 
 // Removes the specified action from a person element.
 function removePersonAction(itemObj) {
   // hack - actions should be removed individually
-  $(".personActions").empty();
-};
+  $('.personActions').empty();
+}
 
 // Removes the specified action from the container UI
 function removeContainerAction(itemObj) {
   // hack - actions should be removed individually
   $('#globalMenubar').empty();
   $('#globalMenubar').hide();
-};
+}
