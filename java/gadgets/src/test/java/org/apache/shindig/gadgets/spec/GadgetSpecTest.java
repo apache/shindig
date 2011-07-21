@@ -27,6 +27,9 @@ import org.apache.shindig.gadgets.variables.Substitutions.Type;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.Collection;
+import java.util.Iterator;
+
 public class GadgetSpecTest extends Assert {
   private static final Uri SPEC_URL = Uri.parse("http://example.org/g.xml");
 
@@ -44,6 +47,26 @@ public class GadgetSpecTest extends Assert {
     assertEquals("Hello!", spec.getView(GadgetSpec.DEFAULT_VIEW).getContent());
   }
 
+  @Test
+  public void testUserPrefsOrder() throws Exception {
+    String xml = "<Module>" +
+                 "<ModulePrefs title=\"title\"/>" +
+                 "<UserPref name=\"a\" datatype=\"string\"/>" +
+                 "<UserPref name=\"z\" datatype=\"string\"/>" +
+                 "<UserPref name=\"b\" datatype=\"string\"/>" +
+                 "<UserPref name=\"y\" datatype=\"string\"/>" +
+                 "<Content type=\"html\">Hello!</Content>" +
+                 "</Module>";
+    GadgetSpec spec = new GadgetSpec(SPEC_URL, xml);
+    assertEquals("title", spec.getModulePrefs().getTitle());
+    Collection<UserPref> prefs = spec.getUserPrefs().values();
+    Iterator<UserPref> iter = prefs.iterator();
+    assertEquals("a", iter.next().getName());
+    assertEquals("z", iter.next().getName());
+    assertEquals("b", iter.next().getName());
+    assertEquals("y", iter.next().getName());
+    assertEquals("Hello!", spec.getView(GadgetSpec.DEFAULT_VIEW).getContent());
+  }
 
   @Test
   public void testAlternativeConstructor() throws Exception {

@@ -72,8 +72,9 @@ public class GadgetSpec {
     setAttribute(ATTR_SPECIFICATION_VERSION,doc.getAttribute(ATTR_SPECIFICATION_VERSION));
 
     ModulePrefs modulePrefs = null;
-    Map<String,UserPref> prefsBuilder = Maps.newHashMap();
-    Map<String, List<Element>> views = Maps.newHashMap();
+    // Lets try keep order of user prefs and views
+    Map<String,UserPref> prefsBuilder = Maps.newLinkedHashMap();
+    Map<String, List<Element>> views = Maps.newLinkedHashMap();
     for (int i = 0, j = children.getLength(); i < j; ++i) {
       Node child = children.item(i);
       if (!(child instanceof Element)) {
