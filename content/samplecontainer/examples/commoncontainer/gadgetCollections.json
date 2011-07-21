@@ -31,6 +31,13 @@
                       ]
              },
              {
+             "name": "Sample Media Items Gadget with openGadget API",
+             "Description": "Sample gadget used in the view enhancements sample",
+             "apps" : [
+                     {"name": "publisher", "url": "/samplecontainer/examples/media-openGadgets/Media.xml"}
+                     ]
+             },
+             {
              "name": "OpenSearch Demo",
              "Description": "Sample gadgets used for opensearch",
              "apps" : [

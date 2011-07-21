@@ -184,6 +184,8 @@
                 <source>opensearch/opensearch.js</source>
                 <source>embeddedexperiences/constant.js</source>
                 <source>embeddedexperiences/embedded_experiences_container.js</source>
+                <source>open-views/viewenhancements-container.js</source>
+                <source>open-views/viewenhancements.js</source>
               </sources>
               <testSourceDirectory>${basedir}/src/test/javascript/features</testSourceDirectory>
               <testSuites>
