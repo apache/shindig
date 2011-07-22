@@ -21,6 +21,10 @@ package org.apache.shindig.gadgets.servlet;
 import static junitx.framework.StringAssert.assertContains;
 import static org.easymock.EasyMock.expect;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.LockedDomainService;
@@ -29,19 +33,36 @@ import org.apache.shindig.gadgets.uri.ProxyUriManager;
 import org.junit.Before;
 import org.junit.Test;
 
+import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletResponse;
 
 /**
  * Tests for ProxyServlet.
- *
+ * 
  * Tests are trivial; real tests are in ProxyHandlerTest.
  */
 public class ProxyServletTest extends ServletTestFixture {
   private static final Uri REQUEST_URL = Uri.parse("http://example.org/file");
-  private static final String BASIC_SYNTAX_URL
-      = "http://opensocial.org/proxy?foo=bar&url=" + REQUEST_URL;
+  private static final String BASIC_SYNTAX_URL = "http://opensocial.org/proxy?foo=bar&url="
+          + REQUEST_URL;
   private static final String RESPONSE_BODY = "Hello, world!";
   private static final String ERROR_MESSAGE = "Broken!";
+  private static final String POST_CONTENT = "my post stuff";
+  private static final String POST_METHOD = "POST";
+  
+  private ServletInputStream postContentStream = new ServletInputStream() {
+    InputStream is = new ByteArrayInputStream(POST_CONTENT.getBytes());
+    @Override
+    public int read() throws IOException {
+      return is.read();
+    }
+
+    @Override
+    public void close() throws IOException {
+      is.close();
+    }
+
+  };
 
   private final ProxyUriManager proxyUriManager = mock(ProxyUriManager.class);
   private final LockedDomainService lockedDomainService = mock(LockedDomainService.class);
@@ -62,6 +83,7 @@ public class ProxyServletTest extends ServletTestFixture {
 
   private void setupRequest(String str, boolean ldSafe) throws Exception {
     Uri uri = Uri.parse(str);
+
     expect(request.getScheme()).andReturn(uri.getScheme());
     expect(request.getServerName()).andReturn(uri.getAuthority());
     expect(request.getServerPort()).andReturn(80);
@@ -80,7 +102,7 @@ public class ProxyServletTest extends ServletTestFixture {
   @Test
   public void testIfModifiedSinceAlwaysReturnsEarly() throws Exception {
     expect(request.getHeader("If-Modified-Since")).andReturn("Yes, this is an invalid header");
-   
+
     replay();
     servlet.doGet(request, recorder);
     verify();
@@ -93,7 +115,7 @@ public class ProxyServletTest extends ServletTestFixture {
   public void testDoGetNormal() throws Exception {
     setupRequest(BASIC_SYNTAX_URL);
     expect(proxyHandler.fetch(proxyUri)).andReturn(new HttpResponse(RESPONSE_BODY));
-    
+
     replay();
     servlet.doGet(request, recorder);
     verify();
@@ -105,7 +127,7 @@ public class ProxyServletTest extends ServletTestFixture {
   public void testDoGetHttpError() throws Exception {
     setupRequest(BASIC_SYNTAX_URL);
     expect(proxyHandler.fetch(proxyUri)).andReturn(HttpResponse.notFound());
-    
+
     replay();
     servlet.doGet(request, recorder);
     verify();
@@ -117,8 +139,8 @@ public class ProxyServletTest extends ServletTestFixture {
   public void testDoGetException() throws Exception {
     setupRequest(BASIC_SYNTAX_URL);
     expect(proxyHandler.fetch(proxyUri)).andThrow(
-        new GadgetException(GadgetException.Code.FAILED_TO_RETRIEVE_CONTENT, ERROR_MESSAGE));
-   
+            new GadgetException(GadgetException.Code.FAILED_TO_RETRIEVE_CONTENT, ERROR_MESSAGE));
+
     replay();
     servlet.doGet(request, recorder);
     verify();
@@ -126,15 +148,71 @@ public class ProxyServletTest extends ServletTestFixture {
     assertEquals(HttpServletResponse.SC_BAD_REQUEST, recorder.getHttpStatusCode());
     assertContains(ERROR_MESSAGE, recorder.getResponseAsString());
   }
-  
+
   @Test
   public void testDoGetNormalWithLockedDomainUnsafe() throws Exception {
     setupRequest(BASIC_SYNTAX_URL, false);
-    
+
     replay();
     servlet.doGet(request, recorder);
     verify();
-    
+
+    assertEquals(HttpServletResponse.SC_BAD_REQUEST, recorder.getHttpStatusCode());
+    assertContains("wrong domain", recorder.getResponseAsString());
+  }
+
+  @Test
+  public void testDoPostNormal() throws Exception {
+    setupRequest(BASIC_SYNTAX_URL);
+    expect(request.getInputStream()).andReturn(postContentStream);
+    expect(request.getMethod()).andReturn(POST_METHOD);    
+    expect(proxyHandler.fetch(proxyUri, POST_CONTENT)).andReturn(new HttpResponse(RESPONSE_BODY));
+
+    replay();
+    servlet.doPost(request, recorder);
+    verify();
+
+    assertResponseOk(HttpResponse.SC_OK, RESPONSE_BODY);
+  }
+
+  @Test
+  public void testDoPostHttpError() throws Exception {
+    setupRequest(BASIC_SYNTAX_URL);
+    expect(proxyHandler.fetch(proxyUri, POST_CONTENT)).andReturn(HttpResponse.notFound());
+    expect(request.getMethod()).andReturn(POST_METHOD);
+    expect(request.getInputStream()).andReturn(postContentStream);
+
+    replay();
+    servlet.doPost(request, recorder);
+    verify();
+
+    assertResponseOk(HttpResponse.SC_NOT_FOUND, "");
+  }
+
+  @Test
+  public void testDoPostException() throws Exception {
+    setupRequest(BASIC_SYNTAX_URL);
+    expect(request.getInputStream()).andReturn(postContentStream);
+    expect(request.getMethod()).andReturn(POST_METHOD);
+    expect(proxyHandler.fetch(proxyUri, POST_CONTENT)).andThrow(
+            new GadgetException(GadgetException.Code.FAILED_TO_RETRIEVE_CONTENT, ERROR_MESSAGE));
+
+    replay();
+    servlet.doPost(request, recorder);
+    verify();
+
+    assertEquals(HttpServletResponse.SC_BAD_REQUEST, recorder.getHttpStatusCode());
+    assertContains(ERROR_MESSAGE, recorder.getResponseAsString());
+  }
+
+  @Test
+  public void testDoPostNormalWithLockedDomainUnsafe() throws Exception {
+    setupRequest(BASIC_SYNTAX_URL, false);
+
+    replay();
+    servlet.doGet(request, recorder);
+    verify();
+
     assertEquals(HttpServletResponse.SC_BAD_REQUEST, recorder.getHttpStatusCode());
     assertContains("wrong domain", recorder.getResponseAsString());
   }

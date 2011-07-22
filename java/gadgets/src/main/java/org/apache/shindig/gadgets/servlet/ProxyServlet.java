@@ -27,7 +27,9 @@ import org.apache.shindig.gadgets.LockedDomainService;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.uri.ProxyUriManager;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -37,16 +39,15 @@ import javax.servlet.http.HttpServletResponse;
 import com.google.inject.Inject;
 
 /**
- * Handles open proxy requests (used in rewriting and for URLs returned by
- * gadgets.io.getProxyUrl).
+ * Handles open proxy requests (used in rewriting and for URLs returned by gadgets.io.getProxyUrl).
  */
 public class ProxyServlet extends InjectedServlet {
   private static final long serialVersionUID = 9085050443492307723L;
-  
-  //class name for logging purpose
+
+  // class name for logging purpose
   private static final String classname = ProxyServlet.class.getName();
-  private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
-  
+  private static final Logger LOG = Logger.getLogger(classname, MessageKeys.MESSAGES);
+
   private transient ProxyUriManager proxyUriManager;
   private transient LockedDomainService lockedDomainService;
   private transient ProxyHandler proxyHandler;
@@ -56,13 +57,13 @@ public class ProxyServlet extends InjectedServlet {
     checkInitialized();
     this.proxyHandler = proxyHandler;
   }
-  
+
   @Inject
   public void setProxyUriManager(ProxyUriManager proxyUriManager) {
     checkInitialized();
     this.proxyUriManager = proxyUriManager;
   }
-  
+
   @Inject
   public void setLockedDomainService(LockedDomainService lockedDomainService) {
     checkInitialized();
@@ -72,13 +73,25 @@ public class ProxyServlet extends InjectedServlet {
   @Override
   protected void doGet(HttpServletRequest request, HttpServletResponse servletResponse)
       throws IOException {
+    processRequest(request, servletResponse);
+  }
+
+  @Override
+  protected void doPost(HttpServletRequest request, HttpServletResponse servletResponse)
+      throws IOException {
+    processRequest(request, servletResponse);
+  }
+
+  private void processRequest(HttpServletRequest request, HttpServletResponse servletResponse)
+      throws IOException {
     if (request.getHeader("If-Modified-Since") != null) {
       servletResponse.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
       return;
     }
 
     Uri reqUri = new UriBuilder(request).toUri();
-    HttpResponse response = null;
+
+    HttpResponse response;
     try {
       // Parse request uri:
       ProxyUriManager.ProxyUri proxyUri = proxyUriManager.process(reqUri);
@@ -89,21 +102,49 @@ public class ProxyServlet extends InjectedServlet {
         // Force embedded images and the like to their own domain to avoid XSS
         // in gadget domains.
         Uri resourceUri = proxyUri.getResource();
-        String msg = "Embed request for url " +
-            (resourceUri != null ? resourceUri.toString() : "n/a") + " made to wrong domain " + host;
+        String msg = "Embed request for url " + (resourceUri != null ? resourceUri.toString() : "n/a")
+            + " made to wrong domain " + host;
         if (LOG.isLoggable(Level.INFO)) {
-          LOG.logp(Level.INFO, classname, "doGet", MessageKeys.EMBEDED_IMG_WRONG_DOMAIN, new Object[] {resourceUri != null ? resourceUri.toString() : "n/a", host});
+          LOG.logp(Level.INFO, classname, "processRequest", MessageKeys.EMBEDED_IMG_WRONG_DOMAIN,
+            new Object[] { resourceUri != null ? resourceUri.toString() : "n/a", host });
         }
         throw new GadgetException(GadgetException.Code.INVALID_PARAMETER, msg,
-            HttpResponse.SC_BAD_REQUEST);
+          HttpResponse.SC_BAD_REQUEST);
       }
-      
-      response = proxyHandler.fetch(proxyUri);
+      if ("POST".equalsIgnoreCase(request.getMethod())) {
+        StringBuffer buffer = getPOSTContent(request);
+        response = proxyHandler.fetch(proxyUri, buffer.toString());
+      } else {
+        response = proxyHandler.fetch(proxyUri);
+      }
     } catch (GadgetException e) {
       response = ServletUtil.errorResponse(new GadgetException(e.getCode(), e.getMessage(),
           HttpServletResponse.SC_BAD_REQUEST));
     }
-    
+
     ServletUtil.copyToServletResponseAndOverrideCacheHeaders(response, servletResponse);
+  }
+
+  private StringBuffer getPOSTContent(HttpServletRequest request) throws IOException {
+    // Convert POST content from request to a string
+    StringBuffer buffer = new StringBuffer();
+    BufferedReader reader = null;
+    try {
+      reader = new BufferedReader(new InputStreamReader(request.getInputStream()));
+      int letter = 0;
+      while ((letter = reader.read()) != -1) {
+        buffer.append((char) letter);
+      }
+      reader.close();
+    } catch (IOException e) {
+      LOG.logp(Level.WARNING, classname, "getPOSTContent", "Caught exception while reading POST body:"
+          + e.getMessage());
+    } finally {
+      if (reader != null) {
+        reader.close();
+        reader = null;
+      }
+    }
+    return buffer;
   }
 }
