@@ -298,7 +298,7 @@
         }
       }
       return false;
-    },
+    }//,
 
     /*
      * Convenience method for unit testing, allowing the test script to set
@@ -307,7 +307,7 @@
      */
     //setDescriptions_: function(testDescriptions) {
     // descriptions=testDescriptions;
-    //},
+    //}
     }
   });
 })();
