@@ -50,8 +50,8 @@
 			clear: both;
 		} 	
      </style>
-     
- 
+
+
      <script type="text/javascript">     	
      	function initAlbum(){
      		opensocial.data.getDataContext().registerListener('org.opensocial.ee.context', function(key){
@@ -72,7 +72,7 @@
      	
      	gadgets.util.registerOnLoadHandler(initAlbum);
    	 </script>
-	 
+
 	 <div id="wrapper">
 	 	<div id="header"></div>
 	 	<div id="album"></div>

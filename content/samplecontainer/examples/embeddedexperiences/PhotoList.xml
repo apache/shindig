@@ -34,27 +34,27 @@
             padding: 2px 2px 2px 2px;
             border: 1px solid black;
         }
-        
+
         #wrapper{
             border: 1px solid black;
         }
-        
+
         #header{
             font-size: 120%;
             padding: 10px 10px 10px 10px;
             color: #0F67A1;
-        }         
-        
+        }
+
         .clear{
             clear: both;
-        }     
+        }
      </style>
-     
- 
-     <script type="text/javascript"> 
-     
+
+
+     <script type="text/javascript">
+
          var currentSite;
-                 
+
          function initAlbum(){
              opensocial.data.getDataContext().registerListener('org.opensocial.ee.context', function(key){
                  createAlbumHTML(opensocial.data.getDataContext().getDataSet(key));
@@ -72,24 +72,24 @@
              document.getElementById('header').innerHTML = context.albumName;
              document.getElementById("album").innerHTML = result;
          };
-         
+
          gadgets.util.registerOnLoadHandler(initAlbum);
-         
+
          function showPreviewPhoto(index) {
-                  
+
             var eeDataModel = {
                 'gadget' : 'http://localhost:8080/samplecontainer/examples/embeddedexperiences/AlbumViewer.xml',
-                'context' : {              
-                  "albumName": context.albumName, 
+                'context' : {
+                  "albumName": context.albumName,
                   "photoUrls": [context.photoUrls[index]]
               }
             };
-            
-            var navigateCallback = function(site, metadata){currentSite = site; console.log("Nagivate callback");};  
+
+            var navigateCallback = function(site, metadata){currentSite = site; console.log("Nagivate callback");};
             var returnCallback = function(returnValue){console.log("Return Value: " + returnValue);};
             gadgets.views.openEmbeddedExperience(returnCallback, navigateCallback, eeDataModel, {'viewTarget' : 'preview'});
          };
-         
+
          function closePreview(){
             if(currentSite != null){
                 gadgets.views.close(currentSite);
@@ -97,7 +97,7 @@
             return false;
          };
         </script>
-     
+
      <div id="wrapper">
          <div id="header"></div>
          <div id="album"></div>

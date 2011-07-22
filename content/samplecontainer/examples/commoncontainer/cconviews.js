@@ -38,7 +38,7 @@ CommonContainer['views'] = CommonContainer['views'] || {};
  * @return {object} The DOM element to place the GadgetSite in.
  */
 
-CommonContainer.views.createElementForGadget = function(gadgetMetadata, 
+CommonContainer.views.createElementForGadget = function(gadgetMetadata,
         opt_view, opt_viewTarget) {
   var surfaceView = 'default';
   var viewTarget = 'default';
