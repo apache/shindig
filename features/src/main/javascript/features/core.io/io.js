@@ -510,6 +510,10 @@ gadgets.io = function() {
      * @member gadgets.io
      */
     getProxyUrl: function(url, opt_params) {
+      var proxyUrl = config['proxyUrl'];
+      if (!proxyUrl) {
+        return proxyUrl;
+      }
       var params = opt_params || {};
       var refresh = params['REFRESH_INTERVAL'];
       if (refresh === undefined) {
@@ -520,7 +524,7 @@ gadgets.io = function() {
 
       var rewriteMimeParam =
           params['rewriteMime'] ? '&rewriteMime=' + encodeURIComponent(params['rewriteMime']) : '';
-      var ret = config['proxyUrl'].replace('%url%', encodeURIComponent(url)).
+      var ret = proxyUrl.replace('%url%', encodeURIComponent(url)).
           replace('%host%', document.location.host).
           replace('%rawurl%', url).
           replace('%refresh%', encodeURIComponent(refresh)).
