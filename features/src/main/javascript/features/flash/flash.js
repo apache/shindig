@@ -24,9 +24,7 @@
  */
 
 /**
- * @static
  * @class Embeds Flash content in gadgets.
- * @name gadgets.flash
  */
 gadgets.flash = gadgets.flash || {};
 
@@ -34,8 +32,6 @@ gadgets.flash = gadgets.flash || {};
  * Detects Flash Player and its major version.
  * @return {number} The major version of Flash Player
  *                  or 0 if Flash is not supported.
- *
- * @member gadgets.flash
  */
 gadgets.flash.getMajorVersion = function() {
   var flashMajorVersion = 0;
@@ -60,6 +56,11 @@ gadgets.flash.getMajorVersion = function() {
   return flashMajorVersion;
 };
 
+/**
+ * Used for unique IDs.
+ * @type {number}
+ * @private
+ */
 gadgets.flash.swfContainerId_ = 0;
 
 /**
@@ -72,8 +73,6 @@ gadgets.flash.swfContainerId_ = 0;
  *     parameter. All attributes will be passed through to the flash movie on
  *     creation.
  * @return {boolean} Whether the function call completes successfully.
- *
- * @member gadgets.flash
  */
 gadgets.flash.embedFlash = function(swfUrl, swfContainer, swfVersion, opt_params) {
   switch (typeof swfContainer) {

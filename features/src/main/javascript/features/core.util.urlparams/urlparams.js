@@ -21,14 +21,13 @@
  * @fileoverview General purpose utilities that gadgets can use.
  */
 
+
 /**
- * @static
  * @class Provides a thin method for parsing url parameters.
- * @name gadgets.util
  */
 gadgets.util = gadgets.util || {};
 
-(function() {  
+(function() {
   var parameters = null;
 
   /**
@@ -58,7 +57,6 @@ gadgets.util = gadgets.util || {};
    * @param {string=} opt_url Optional URL whose parameters to parse.
    *                         Defaults to window's current URL.
    * @return {Object} Parameters passed into the query string.
-   * @member gadgets.util
    * @private Implementation detail.
    */
   gadgets.util.getUrlParameters = function(opt_url) {

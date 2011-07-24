@@ -21,14 +21,13 @@
  * @fileoverview General purpose utilities that gadgets can use.
  */
 
+
 /**
- * @static
  * @class Provides general-purpose utility functions.
- * @name gadgets.util
  */
 gadgets.util = gadgets.util || {};
 
-(function() {  
+(function() {
 
   var XHTML_SPEC = 'http://www.w3.org/1999/xhtml';
 
@@ -103,7 +102,7 @@ gadgets.util = gadgets.util || {};
     }
     attachAttributes(frame, opt_attribs);
     return frame;
-  };  
+  };
 
   /**
    * Gets the HTML or XHTML body element.

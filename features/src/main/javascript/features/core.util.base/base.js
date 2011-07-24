@@ -21,12 +21,12 @@
  * @fileoverview General purpose utilities that gadgets can use.
  */
 
+
 /**
- * @static
  * @class Provides general-purpose utility functions.
- * @name gadgets.util
  */
 gadgets.util = gadgets.util || {};
+
 
 /**
  * Creates a closure that is suitable for passing as a callback.
@@ -37,12 +37,11 @@ gadgets.util = gadgets.util || {};
  * @param {Object} scope The execution scope; may be null if there is no
  *     need to associate a specific instance of an object with this
  *     callback.
- * @param {function(Object,Object)} callback The callback to invoke when this is run;
- *     any arguments passed in will be passed after your initial arguments.
+ * @param {function(Object,Object)} callback The callback to invoke when
+ *     this is run; any arguments passed in will be passed after your initial
+ *     arguments.
  * @param {Object} var_args Initial arguments to be passed to the callback.
- *
- * @member gadgets.util
- * @private Implementation detail.
+ * @return {function()} a callback function.
  */
 gadgets.util.makeClosure = function(scope, callback, var_args) {
   // arguments isn't a real array, so we copy it into one.
@@ -67,8 +66,6 @@ gadgets.util.makeClosure = function(scope, callback, var_args) {
  * @param {Array.<string>} values The values to generate.
  * @return {Object.<string,string>} An object with member fields to handle
  *   the enum.
- *
- * @private Implementation detail.
  */
 gadgets.util.makeEnum = function(values) {
   var i, v, obj = {};

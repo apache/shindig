@@ -78,7 +78,7 @@ function exportJs(namespace, components, opt_props, opt_defer) {
    * The stub enqueues requests that are executed by the real method
    * when it is loaded and exported.
    *
-   * @param root {Object} Base object to which to attach properties.
+   * @param {Object} root Base object to which to attach properties.
    */
   function exportProps(root) {
     var props = opt_props || {};

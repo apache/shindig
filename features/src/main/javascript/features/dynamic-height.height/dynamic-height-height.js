@@ -110,10 +110,10 @@ gadgets.window = gadgets.window || {};
     }
 
     // Add border, padding and margin of the containing body.
-    return result
-        + parseIntFromElemPxAttribute(document.body, 'border-bottom')
-        + parseIntFromElemPxAttribute(document.body, 'margin-bottom')
-        + parseIntFromElemPxAttribute(document.body, 'padding-bottom');
+    return result +
+        parseIntFromElemPxAttribute(document.body, 'border-bottom') +
+        parseIntFromElemPxAttribute(document.body, 'margin-bottom') +
+        parseIntFromElemPxAttribute(document.body, 'padding-bottom');
   }
 
   /**
@@ -122,7 +122,7 @@ gadgets.window = gadgets.window || {};
    *     specified, will attempt to fit the gadget to its content.
    * @member gadgets.window
    */
-  
+
   /**
    * Calculate inner content height is hard and different between
    * browsers rendering in Strict vs. Quirks mode.  We use a combination of
@@ -182,7 +182,7 @@ gadgets.window = gadgets.window || {};
       }
     }
   };
-  
+
   /**
    * Parse out the value (specified in px) for a CSS attribute of an element.
    *
@@ -262,10 +262,9 @@ gadgets.window = gadgets.window || {};
     }
 
     // Add border, padding and margin of the containing body.
-    return result
-        + parseIntFromElemPxAttribute(document.body, 'border-bottom')
-        + parseIntFromElemPxAttribute(document.body, 'margin-bottom')
-        + parseIntFromElemPxAttribute(document.body, 'padding-bottom');
-  }  
-  
+    return result +
+        parseIntFromElemPxAttribute(document.body, 'border-bottom') +
+        parseIntFromElemPxAttribute(document.body, 'margin-bottom') +
+        parseIntFromElemPxAttribute(document.body, 'padding-bottom');
+  }
 }());

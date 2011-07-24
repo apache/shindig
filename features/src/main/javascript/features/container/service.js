@@ -338,6 +338,7 @@ osapi.container.Service.prototype.filterCachedDataByRequest_ = function(
 
 /**
  * @return {string} Best-guess locale for current browser.
+ * @private
  */
 osapi.container.Service.prototype.getLocale_ = function() {
   var nav = window.navigator;

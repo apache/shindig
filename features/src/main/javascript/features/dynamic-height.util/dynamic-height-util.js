@@ -31,7 +31,6 @@ gadgets.window = gadgets.window || {};
    * See: http://www.quirksmode.org/viewport/compatibility.html for more
    * information.
    * @return {Object} An object with width and height properties.
-   * @member gadgets.window
    */
   gadgets.window.getViewportDimensions = function() {
     var x = 0;

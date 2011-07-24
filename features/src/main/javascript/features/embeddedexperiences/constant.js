@@ -31,9 +31,10 @@ osapi.container.ee = {};
  * Rendering params for an embedded experience
  * @enum {string}
  */
-osapi.container.ee.RenderParams = {};
-osapi.container.ee.RenderParams.GADGET_RENDER_PARAMS = 'gadgetRenderParams';
-osapi.container.ee.RenderParams.GADGET_VIEW_PARAMS = 'gadgetViewParams';
-osapi.container.ee.RenderParams.URL_RENDER_PARAMS = 'urlRenderParams';
-osapi.container.ee.RenderParams.DATA_MODEL = 'eeDataModel';
-osapi.container.ee.RenderParams.EMBEDDED = 'embedded';
+osapi.container.ee.RenderParams = {
+    GADGET_RENDER_PARAMS: 'gadgetRenderParams',
+    GADGET_VIEW_PARAMS: 'gadgetViewParams',
+    URL_RENDER_PARAMS: 'urlRenderParams',
+    DATA_MODEL: 'eeDataModel',
+    EMBEDDED: 'embedded'
+};

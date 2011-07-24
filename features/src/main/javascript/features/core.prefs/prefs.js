@@ -97,8 +97,6 @@
 var name = prefs.getString("name");
 var lang = prefs.getLang();</pre>
  *
- * @description Creates a new Prefs object.
- *
  * Note: this is actually a singleton. All prefs are linked. If you're wondering
  * why this is a singleton and not just a collection of package functions, the
  * simple answer is that it's how the spec is written. The spec is written this

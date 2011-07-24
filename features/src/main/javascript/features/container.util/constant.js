@@ -142,9 +142,11 @@ osapi.container.ViewParam = {
 
 /**
  * Constants to define lifecycle callback
+ * @enum {string}
  */
-osapi.container.CallbackType = {};
-osapi.container.CallbackType.ON_PRELOADED = 'onPreloaded';
-osapi.container.CallbackType.ON_NAVIGATED = 'onNavigated';
-osapi.container.CallbackType.ON_CLOSED = 'onClosed';
-osapi.container.CallbackType.ON_UNLOADED = 'onUnloaded';
+osapi.container.CallbackType = {
+    ON_PRELOADED: 'onPreloaded',
+    ON_NAVIGATED: 'onNavigated',
+    ON_CLOSED: 'onClosed',
+    ON_UNLOADED: 'onUnloaded'
+};

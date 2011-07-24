@@ -19,6 +19,10 @@
 /**
  * @fileoverview Constructs a new URL holder. This class is similar in
  * functionality to GadgetHolder from the common container.
+ */
+
+/**
+ * @constructor
  * @param {number} siteId The id of the URL site.
  * @param {Element} el The element to contain the URL renders in.
  */
@@ -103,8 +107,8 @@ osapi.container.UrlHolder.prototype.getIframeElement = function() {
 
 /**
  * Renders the embedded experience URL.
- * @param {string} the URL to render.
- * @param {object} rendering params to apply to the iFrame.
+ * @param {string} url the URL to render.
+ * @param {object} renderParams params to apply to the iFrame.
  */
 osapi.container.UrlHolder.prototype.render = function(url, renderParams) {
   this.iframeId_ = osapi.container.UrlHolder.IFRAME_PREFIX_ + this.siteId_;
@@ -116,7 +120,7 @@ osapi.container.UrlHolder.prototype.render = function(url, renderParams) {
 
 /**
  * Crates the HTML for the iFrame.
- * @return the HTML for the iFrame.
+ * @return {string} the HTML for the iFrame.
  * @private
  */
 osapi.container.UrlHolder.prototype.createIframeHtml_ = function() {

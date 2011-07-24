@@ -29,109 +29,109 @@
  */
 gadgets.json.xml = (function() {
 
-	//Integer which represents a text node
-	var TEXT_NODE = 3;
+  //Integer which represents a text node
+  var TEXT_NODE = 3;
 
     /**
      * Parses all the child nodes of a specific DOM element and adds them to the JSON object
      * passed in.
      *
-     * @param childNodes an array of DOM nodes.
-     * @param json The JSON object to use for the conversion.  The DOM nodes will be added to
+     * @param {Array} childNodes an array of DOM nodes.
+     * @param {Object} json The JSON object to use for the conversion.  The DOM nodes will be added to
      * this JSON object.
      */
-	function parseChildNodes(childNodes, json) {
-		for (var index = 0; index < childNodes.length; index++) {
-			var node = childNodes[index];
-			if (node.nodeType == TEXT_NODE) {
-				setTextNodeValue(json, node.nodeName, node);
-			}
-			else {
+  function parseChildNodes(childNodes, json) {
+    for (var index = 0; index < childNodes.length; index++) {
+      var node = childNodes[index];
+      if (node.nodeType == TEXT_NODE) {
+        setTextNodeValue(json, node.nodeName, node);
+      }
+      else {
 
-				if (node.childNodes.length == 0) {
-					if (node.attributes != null && node.attributes.length != 0) {
-						/*
-						 * If there are no children but there are attributes set the value for
-						 * this node in the JSON object to the JSON for the attributes.  There is nothing
-						 * left to do since there are no children.
-						 */
-					  setAttributes(node, json);
-					}
-					else {
-						/*
-						 * If there are no children and no attributes set the value to null.
-						 */
-						json[node.nodeName] = null;
-					}
-				}
-				else {
-					if (node.childNodes.length == 1 && node.firstChild.nodeType == TEXT_NODE && (node.attributes == null || node.attributes.length == 0)) {
-						/*
-						 * There is only one child node and it is a text node AND we have no attributes so
-						 * just extract the text value from the text node and set it in the JSON object.
-						 */
-						setTextNodeValue(json, node.nodeName, node.firstChild);
-					}
-					else {
-						/*
-						 * There are both children and attributes, so recursively call this method until we have
-						 * reached the end.
-						 */
-						setChildrenValues(json, node);
-					}
-				}
-			}
-		}
+        if (node.childNodes.length == 0) {
+          if (node.attributes != null && node.attributes.length != 0) {
+            /*
+             * If there are no children but there are attributes set the value for
+             * this node in the JSON object to the JSON for the attributes.  There is nothing
+             * left to do since there are no children.
+             */
+            setAttributes(node, json);
+          }
+          else {
+            /*
+             * If there are no children and no attributes set the value to null.
+             */
+            json[node.nodeName] = null;
+          }
+        }
+        else {
+          if (node.childNodes.length == 1 && node.firstChild.nodeType == TEXT_NODE && (node.attributes == null || node.attributes.length == 0)) {
+            /*
+             * There is only one child node and it is a text node AND we have no attributes so
+             * just extract the text value from the text node and set it in the JSON object.
+             */
+            setTextNodeValue(json, node.nodeName, node.firstChild);
+          }
+          else {
+            /*
+             * There are both children and attributes, so recursively call this method until we have
+             * reached the end.
+             */
+            setChildrenValues(json, node);
+          }
+        }
+      }
+    }
     };
 
     /**
      * Sets the JSON values for the children of a specified DOM element.
-     * @param json the JSON object to set the values in.
+     * @param {Object} json the JSON object to set the values in.
      * @param node the DOM node containing children.
      */
     function setChildrenValues(json, node) {
-    	var currentValue = json[node.nodeName];
-    	if (currentValue == null) {
-    		/*
-    		 * If there is no value for this property (node name) than
-    		 * add the attributes and parse the children.
-    		 */
-    		json[node.nodeName] = {};
-    		if (node.attributes != null && node.attributes.length != 0) {
-    			setAttributesValues(node.attributes, json[node.nodeName]);
-    		}
-    		parseChildNodes(node.childNodes, json[node.nodeName]);
-    	}
-    	else {
-    		/*
-    		 * There is a value already for this property (node name) so
-    		 * we need to create an array for the values of this property.
-    		 * First add all the attributes then parse the children and create
-    		 * an array from the result.
-    		 */
-    		var temp = {};
-    		if (node.attributes != null && node.attributes.length != 0) {
-    			setAttributesValues(node.attributes, temp);
-    		}
-    		parseChildNodes(node.childNodes, temp);
-    		json[node.nodeName] = createValue(currentValue, temp);
-    	}
+      var currentValue = json[node.nodeName];
+      if (currentValue == null) {
+        /*
+         * If there is no value for this property (node name) than
+         * add the attributes and parse the children.
+         */
+        json[node.nodeName] = {};
+        if (node.attributes != null && node.attributes.length != 0) {
+          setAttributesValues(node.attributes, json[node.nodeName]);
+        }
+        parseChildNodes(node.childNodes, json[node.nodeName]);
+      }
+      else {
+        /*
+         * There is a value already for this property (node name) so
+         * we need to create an array for the values of this property.
+         * First add all the attributes then parse the children and create
+         * an array from the result.
+         */
+        var temp = {};
+        if (node.attributes != null && node.attributes.length != 0) {
+          setAttributesValues(node.attributes, temp);
+        }
+        parseChildNodes(node.childNodes, temp);
+        json[node.nodeName] = createValue(currentValue, temp);
+      }
     };
 
     /**
      * Sets the JSON value for a text node.
-     * @param json the JSON object to set the values in.
-     * @param nodeName the node name to set the value to.
+     * @param {Object} json the JSON object to set the values in.
+     * @param {string} nodeName the node name to set the value to.
      * @param textNode the text node containing the value to set.
      */
     function setTextNodeValue(json, nodeName, textNode) {
-    	var currentValue = json[nodeName];
-    	if (currentValue != null) {
-    		json[nodeName] = createValue(currentValue, textNode.nodeValue);
-    	}
-    	else {
-    		json[nodeName] = textNode.nodeValue;
-    	}
+      var currentValue = json[nodeName];
+      if (currentValue != null) {
+        json[nodeName] = createValue(currentValue, textNode.nodeValue);
+      }
+      else {
+        json[nodeName] = textNode.nodeValue;
+      }
     };
 
     /**
@@ -142,13 +142,13 @@ gadgets.json.xml = (function() {
      * @param node the text node containing the value.
      */
     function createValue(currentValue, value) {
-    	if (currentValue instanceof Array) {
-    		currentValue[currentValue.length] = value;
-    		return currentValue;
-    	}
-    	else {
-    		return new Array(currentValue, value);
-    	}
+      if (currentValue instanceof Array) {
+        currentValue[currentValue.length] = value;
+        return currentValue;
+      }
+      else {
+        return new Array(currentValue, value);
+      }
     };
 
 
@@ -173,23 +173,23 @@ gadgets.json.xml = (function() {
     /**
      * Sets the values from attributes from a DOM node in a JSON object.
      * @param attributes the DOM node's attributes.
-     * @param json the JSON object to set the values in.
+     * @param {Object} json the JSON object to set the values in.
      */
     function setAttributesValues(attributes, json) {
-    	var attribute = null;
-    	for (var attrIndex = 0; attrIndex < attributes.length; attrIndex++) {
-    		attribute = attributes[attrIndex];
-    		json['@' + attribute.nodeName] = attribute.nodeValue;
-    	}
+      var attribute = null;
+      for (var attrIndex = 0; attrIndex < attributes.length; attrIndex++) {
+        attribute = attributes[attrIndex];
+        json['@' + attribute.nodeName] = attribute.nodeValue;
+      }
     };
 
     return {
-    	convertXmlToJson: function(xmlDoc) {
-    		var childNodes = xmlDoc.childNodes;
-    		var result = {};
-    		parseChildNodes(childNodes, result);
-    		return result;
-    	}
+      convertXmlToJson: function(xmlDoc) {
+        var childNodes = xmlDoc.childNodes;
+        var result = {};
+        parseChildNodes(childNodes, result);
+        return result;
+      }
     };
 
 })();

@@ -19,9 +19,12 @@
 /**
  * @fileoverview Constructs a new URL site.  This class is very similar in functionality to
  * the GadgetSite class which is part of the common container.
+ */
+
+/**
+ * @constructor
  * @param {Object} args containing DOM element to rende the iFrame in, and URL
  *                 to render in the iFrame.
- * @constructor
  */
 osapi.container.UrlSite = function(args) {
   /**
@@ -64,7 +67,7 @@ osapi.container.UrlSite.prototype.onConstructed = function() {};
 
 /**
  * Sets the height of the iFrame.
- * @param {number} the height of the embedded experience.
+ * @param {number} height the height of the embedded experience.
  * @return {osapi.container.UrlSite} this gadget site.
  */
 osapi.container.UrlSite.prototype.setHeight = function(height) {
@@ -79,7 +82,7 @@ osapi.container.UrlSite.prototype.setHeight = function(height) {
 
 /**
  * Set the width of the iFrame.
- * @param {number} the width of the embedded experience.
+ * @param {number} width the width of the embedded experience.
  * @return {osapi.container.UrlSite} this instance.
  */
 osapi.container.UrlSite.prototype.setWidth = function(width) {
@@ -94,7 +97,7 @@ osapi.container.UrlSite.prototype.setWidth = function(width) {
 
 /**
  * Sets the id of the parent DOM element containing this embedded experience.
- * @param {number} the id of the parent DOM element.
+ * @param {number} parentId the id of the parent DOM element.
  * @return {osapi.container.UrlSite} this instance.
  */
 osapi.container.UrlSite.prototype.setParentId = function(parentId) {
@@ -142,7 +145,7 @@ osapi.container.UrlSite.prototype.close = function() {
 /**
  * Renders the URL in this site
  * @param {string} url to render in the iFrame.
- * @param {object} the parameters to render the site.
+ * @param {object} renderParams the parameters to render the site.
  */
 osapi.container.UrlSite.prototype.render = function(url, renderParams) {
   this.holder_ = new osapi.container.UrlHolder(this.id_, this.el_);
@@ -157,10 +160,14 @@ osapi.container.UrlSite.prototype.render = function(url, renderParams) {
 
 /**
  * The next unique id for URL sites.
+ * @private
+ * @type {number}
  */
 osapi.container.UrlSite.nextUniqueId_ = 0;
 
 /**
  * The URL element key
+ * @const
+ * @type {string}
  */
 osapi.container.UrlSite.URL_ELEMENT = 'urlEl';

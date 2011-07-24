@@ -21,10 +21,9 @@
  * @fileoverview General purpose utilities that gadgets can use.
  */
 
+
 /**
- * @static
  * @class Provides general-purpose utility functions for onload.
- * @name gadgets.util
  */
 gadgets.util = gadgets.util || {};
 
@@ -35,8 +34,6 @@ gadgets.util = gadgets.util || {};
   /**
    * Registers an onload handler.
    * @param {function()} callback The handler to run.
-   *
-   * @member gadgets.util
    */
   gadgets.util.registerOnLoadHandler = function(callback) {
     onLoadHandlers.push(callback);

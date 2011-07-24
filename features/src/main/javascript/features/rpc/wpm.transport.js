@@ -77,7 +77,7 @@ if (!gadgets.rpctx.wpm) {  // make lib resilient to double-inclusion
       // event.origin does not exist, use event.domain.  The other difference is that
       // while event.origin looks like <scheme>://<hostname>:<port>, event.domain
       // consists only of <hostname>.
-      if (forceSecure && (typeof packet.origin !== "undefined"
+      if (forceSecure && (typeof packet.origin !== 'undefined'
           ? packet.origin !== origin
           : packet.domain !== /^.+:\/\/([^:]+).*/.exec(origin)[1])) {
         return;

@@ -67,7 +67,7 @@ osapi.container.util.mergeJsons = function(json1, json2) {
  */
 osapi.container.util.newMetadataRequest = function(gadgetUrls) {
   if (!osapi.container.util.isArray(gadgetUrls)) {
-	gadgetUrls = [gadgetUrls];
+    gadgetUrls = [gadgetUrls];
   }
   return {
     'container': window.__CONTAINER,
@@ -121,11 +121,11 @@ osapi.container.util.toArrayOfJsonKeys = function(json) {
 
 /**
  * Tests an object to see if it is an array or not.
- * @param {object} ojb Object to test.
+ * @param {object} obj Object to test.
  * @return {boolean} If obj is an array.
  */
 osapi.container.util.isArray = function(obj) {
-	return Object.prototype.toString.call(obj) == '[object Array]';
+  return Object.prototype.toString.call(obj) == '[object Array]';
 };
 
 
@@ -161,8 +161,8 @@ osapi.container.util.getCurrentTimeMs = function() {
 
 /**
  * Crates the HTML for the iFrame
- * @param {iframeParams} iframe Params.
- * @return the HTML for the iFrame.
+ * @param {Object.<string,string>} iframeParams iframe Params.
+ * @return {string} the HTML for the iFrame.
  */
 osapi.container.util.createIframeHtml = function(iframeParams) {
 

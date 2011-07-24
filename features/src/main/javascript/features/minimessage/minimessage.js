@@ -31,6 +31,7 @@
  *
  * @description Used to create messages that will appear to the user within the
  *     gadget.
+ * @constructor
  * @param {string=} opt_moduleId Optional module Id.
  * @param {Element=} opt_container Optional HTML container element where
  *                                mini-messages will appear.

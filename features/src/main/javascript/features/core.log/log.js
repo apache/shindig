@@ -46,13 +46,13 @@ gadgets.log = (function() {
   /** @const */
   var none_ = 4;
 
-  /**
+/**
  * Log an informational message
  * @param {Object} message - the message to log.
  * @member gadgets
- * @name log
- * @function
- */
+  * @name log
+  * @function
+  */
   var log = function(message) {
     logAtLevel(info_, message);
   };

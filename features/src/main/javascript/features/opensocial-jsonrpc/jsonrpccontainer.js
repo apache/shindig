@@ -431,7 +431,7 @@ var JsonRpcRequestItem = function(rpc, opt_processData) {
   };
 
   JsonRpcContainer.prototype.newAlbum = function(opt_params) {
-	  return new JsonAlbum(opt_params);
+    return new JsonAlbum(opt_params);
   };
 
   JsonRpcContainer.prototype.newMediaItem = function(mimeType, url, opt_params) {

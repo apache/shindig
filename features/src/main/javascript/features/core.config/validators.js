@@ -26,10 +26,6 @@
     * Also supports argument sytax: EnumValidator("Dog", "Cat", "Fish");
     *
     * @param {Array.<string>} list The list of valid values.
-    *
-    * @member gadgets.config
-    * @name  EnumValidator
-    * @function
     */
   gadgets.config.EnumValidator = function(list) {
     var listItems = [];
@@ -53,8 +49,6 @@
   /**
    * Tests the value against a regular expression.
    * @member gadgets.config
-   * @name RegexValidator
-   * @function
    */
   gadgets.config.RegExValidator = function(re) {
     return function(data) {
@@ -65,9 +59,6 @@
   /**
    * Validates that a value was provided.
    * @param {*} data
-   * @member gadgets.config
-   * @name ExistsValidator
-   * @function
    */
   gadgets.config.ExistsValidator = function(data) {
     return typeof data !== 'undefined';
@@ -76,9 +67,6 @@
   /**
    * Validates that a value is a non-empty string.
    * @param {*} data
-   * @member gadgets.config
-   * @name NonEmptyStringValidator
-   * @function
    */
   gadgets.config.NonEmptyStringValidator = function(data) {
     return typeof data === 'string' && data.length > 0;
@@ -87,9 +75,6 @@
   /**
    * Validates that the value is a boolean.
    * @param {*} data
-   * @member gadgets.config
-   * @name BooleanValidator
-   * @function
    */
   gadgets.config.BooleanValidator = function(data) {
     return typeof data === 'boolean';
@@ -112,9 +97,6 @@
    *
    *
    * @param {Object} test The object to test against.
-   * @member gadgets.config
-   * @name BooleanValidator
-   * @function
    */
   gadgets.config.LikeValidator = function(test) {
     return function(data) {

@@ -21,10 +21,9 @@
  * @fileoverview General purpose utilities that gadgets can use.
  */
 
+
 /**
- * @static
  * @class Provides a thin method for parsing url parameters.
- * @name gadgets.util
  */
 gadgets.util = gadgets.util || {};
 

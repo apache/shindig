@@ -21,10 +21,9 @@
  * @fileoverview General purpose utilities that gadgets can use.
  */
 
+
 /**
- * @static
  * @class Provides general-purpose utility functions.
- * @name gadgets.util
  */
 gadgets.util = gadgets.util || {};
 
@@ -48,8 +47,6 @@ gadgets.util = gadgets.util || {};
    *
    * @param {string} feature The feature to get parameters for.
    * @return {Object} The parameters for the given feature, or null.
-   *
-   * @member gadgets.util
    */
   gadgets.util.getFeatureParameters = function(feature) {
     return typeof features[feature] === 'undefined' ? null : features[feature];
@@ -60,8 +57,6 @@ gadgets.util = gadgets.util || {};
    *
    * @param {string} feature The feature to test for.
    * @return {boolean} True if the feature is supported.
-   *
-   * @member gadgets.util
    */
   gadgets.util.hasFeature = function(feature) {
     return typeof features[feature] !== 'undefined';
@@ -72,8 +67,6 @@ gadgets.util = gadgets.util || {};
    * serving this gadget.
    *
    * @return {Object} List of Services that enumerate their methods.
-   *
-   * @member gadgets.util
    */
   gadgets.util.getServices = function() {
     return services;

@@ -62,8 +62,8 @@ osapi.container.GadgetSite = function(args) {
    * @type {string}
    * @private
    */
-  this.id_ = (this.currentGadgetEl && this.currentGadgetEl_.id) ? this.currentGadgetEl_.id
-    : osapi.container.GadgetSite.nextUniqueId_++;
+  this.id_ = (this.currentGadgetEl && this.currentGadgetEl_.id) ? this.currentGadgetEl_.id :
+    osapi.container.GadgetSite.nextUniqueId_++;
 
   /**
    * ID of parent gadget.

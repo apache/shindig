@@ -489,10 +489,10 @@ shindig.Gadget.prototype.getAdditionalParams = function() {
 shindig.BaseIfrGadget = function(opt_params) {
   shindig.Gadget.call(this, opt_params);
   
-  if(!this.serverBase_){
-	  this.serverBase_ = '/gadgets/'; // default gadget server
-  } else if(this.serverBase_.indexOf('/gadgets')<0) {
-	  this.serverBase_ += '/gadgets/';
+  if (!this.serverBase_){
+    this.serverBase_ = '/gadgets/'; // default gadget server
+  } else if (this.serverBase_.indexOf('/gadgets')<0) {
+    this.serverBase_ += '/gadgets/';
   }
   this.queryIfrGadgetType_();
 };
@@ -971,14 +971,13 @@ shindig.IfrContainer.prototype.renderGadget = function(gadget) {
 };
 
 function init(config) {
-    var sbase = config["shindig-container"];
+    var sbase = config['shindig-container'];
     shindig.Gadget.prototype.setServerBase(sbase.serverBase);
-    
-};
+}
 
 // We do run this in the container mode in the new common container
 if (gadgets.config) {
-  gadgets.config.register("shindig-container", null, init);
+  gadgets.config.register('shindig-container', null, init);
 };
 
 /**

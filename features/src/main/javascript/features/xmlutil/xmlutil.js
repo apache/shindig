@@ -78,10 +78,10 @@ opensocial.xmlutil.getRequiredNamespaces = function(xml, opt_container) {
   var namespaces = opt_container ?
       opensocial.xmlutil.getNamespaceDeclarations_(opt_container) : {};
   for (var prefix in opensocial.xmlutil.NSMAP) {
-    if (opensocial.xmlutil.NSMAP.hasOwnProperty(prefix)
-        && !namespaces.hasOwnProperty(prefix)
-        && xml.indexOf('<' + prefix + ':') >= 0
-        && xml.indexOf('xmlns:' + prefix + ':') < 0) {
+    if (opensocial.xmlutil.NSMAP.hasOwnProperty(prefix) &&
+        !namespaces.hasOwnProperty(prefix) &&
+        xml.indexOf('<' + prefix + ':') >= 0 &&
+        xml.indexOf('xmlns:' + prefix + ':') < 0) {
       namespaces[prefix] = opensocial.xmlutil.NSMAP[prefix];
     }
   }
@@ -90,6 +90,7 @@ opensocial.xmlutil.getRequiredNamespaces = function(xml, opt_container) {
 
 /**
  * @private
+ * @return {string}
  */
 opensocial.xmlutil.serializeNamespaces_ = function(namespaces) {
   var buffer = [];

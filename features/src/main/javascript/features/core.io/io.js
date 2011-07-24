@@ -26,9 +26,7 @@
  */
 
 /**
- * @static
  * @class Provides remote content retrieval functions.
- * @name gadgets.io
  */
 
 gadgets.io = function() {
@@ -44,6 +42,7 @@ gadgets.io = function() {
 
   /**
    * Internal facility to create an xhr request.
+   * @return {XMLHttpRequest}
    */
   function makeXhr() {
     var x;
@@ -431,8 +430,8 @@ gadgets.io = function() {
         if (httpMethod === 'GET' && refreshInterval > 0) {
           // this content should be cached
           // Add paramData to the URL
-          var extraparams = '?refresh=' + refreshInterval + '&'
-              + gadgets.io.encodeValues(paramData);
+          var extraparams = '?refresh=' + refreshInterval + '&' +
+              gadgets.io.encodeValues(paramData);
 
           makeXhrRequest(url, proxyUrl + extraparams, callback,
               null, 'GET', params, processResponse);

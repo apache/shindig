@@ -48,7 +48,8 @@ if (!(window.JSON && window.JSON.parse && window.JSON.stringify)) {
 
     /**
      * Formats integers to 2 digits.
-     * @param {number} n
+     * @param {number} n number to format.
+     * @return {string} the formatted number.
      * @private
      */
     function f(n) {

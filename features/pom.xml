@@ -295,6 +295,10 @@
               <recurse>3</recurse><!-- This is the level of recursion, not a boolean -->
               <srcDir>${basedir}/src/main/javascript/features</srcDir>
               <ext>js</ext>
+              <exclude>
+                <param>.+.opt.js</param>
+                <param>swfobject.js</param>
+              </exclude>
             </configuration>
           </plugin>
         </plugins>

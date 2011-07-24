@@ -92,8 +92,8 @@ caja___ = (function() {
             schema[2] /* parent */,
             schema[1] /* name */);
       } else {
-        gadgets.warn('Error taming constructor: '
-                     + schema[0] + '.' + schema[1]);
+        gadgets.warn('Error taming constructor: ' +
+            schema[0] + '.' + schema[1]);
       }
     }
   }
@@ -205,7 +205,7 @@ caja___ = (function() {
         new tameWin.HtmlEmitter(gadgetBody, imports.document);
 
     imports.onerror = tame___.tame(
-        tame___.markTameAsFunction(function (msg, source, line) {
+        tame___.markTameAsFunction(function(msg, source, line) {
             gadgets.log([msg, source, line]);
         }));
 
@@ -221,7 +221,7 @@ caja___ = (function() {
     guestWin.plugin_dispatchEvent___ = tameWin.plugin_dispatchEvent___;
     guestWin.plugin_dispatchToHandler___ = tameWin.plugin_dispatchToHandler___;
     guestWin.___.getNewModuleHandler().setImports(imports);
-    guestWin.___.useDebugSymbols = function(){};
+    guestWin.___.useDebugSymbols = function() {};
 
     guestWin.cajaRun(pendingScript);
   }

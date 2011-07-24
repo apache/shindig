@@ -20,7 +20,7 @@
  * @fileoverview This library adds open search support to the container.
  */
 
-(function(){
+(function() {
   // array of opensearch descriptors.
   var descriptions = {};
   var ids = {};
@@ -29,34 +29,32 @@
 
   /**
    * Converts an XML string into a DOM object
-   * 
-   * @param {xmlString}
-   *            string representation of a valid XML object
+   *
+   * @param {string} xmlString representation of a valid XML object.
    * @return DOM Object
    */
-  function createDom(xmlString){
+  function createDom(xmlString) {
     var xmlDoc;
-    if (window.DOMParser){
+    if (window.DOMParser) {
       var parser = new DOMParser();
-      xmlDoc = parser.parseFromString(xmlString,"text/xml");
-    }
-    else{
-      xmlDoc = new ActiveXObject("Microsoft.XMLDOM");
-      xmlDoc.async = "false";
-      xmlDoc.loadXML(xmlString); 
+      xmlDoc = parser.parseFromString(xmlString, 'text/xml');
+    } else {
+      xmlDoc = new ActiveXObject('Microsoft.XMLDOM');
+      xmlDoc.async = 'false';
+      xmlDoc.loadXML(xmlString);
     }
     return xmlDoc;
   }
 
   /**
-   * Extracts OpenSearch descriptions from XML string containing the 
-   * description and stores them in the internal map If valid 
+   * Extracts OpenSearch descriptions from XML string containing the
+   * description and stores them in the internal map If valid
    * descriptions are found, notifies all callbacks about changes.
-   * 
-   * @param {domDesc}
-   *            stringified XML OpenSearch description
-   * @param {title}
-   *            the title of the gadget that the description belongs to
+   *
+   * @param {string} domDesc
+   *            stringified XML OpenSearch description.
+   * @param {string} title
+   *            the title of the gadget that the description belongs to.
    */
   function extractDescriptions(domDesc, url) {
     var jsonDesc = gadgets.json.xml.convertXmlToJson(domDesc);
@@ -72,12 +70,10 @@
 
   /**
    * Notifies the registered callbacks of changes in the OpenSearch registry.
-   * 
-   * @param added
+   *
+   * @param {boolean} added
    *            true if added, false if removed.
-   * @param description
-   *            opensearch description
-   * @return
+   * @param {string} description opensearch description.
    */
   function applyCallbacks(added, description) {
     for (var i in callbacks) {
@@ -88,28 +84,27 @@
   /**
    * Removes an opensearch description from the registry after the containing
    * gadget is unloaded or closed.
-   * 
-   * @param url
-   *            url of the gadget to be removed.
+   *
+   * @param {string} url Url of the gadget to be removed.
    */
   function removeDescription(url) {
     if (descriptions[url] != null) {
       applyCallbacks(false, descriptions[url]);
-      delete descriptions[url];    
+      delete descriptions[url];
     }
   }
-  
+
   /**
    * Processes a new gadget definition and checks if it has an opensearch
    * feature
-   * 
-   * @param {response}
+   *
+   * @param {Array} response
    *            Metadata response containing the json representation of the
-   *            gadget module
+   *            gadget module.
    */
   function preloaded(response) {
     for (item in response) {
-      if (!response[item].error) { 
+      if (!response[item].error) {
         // check for os feature
         var feature = response[item].modulePrefs.features['opensearch'];
         var title = response[item].modulePrefs.title;
@@ -117,7 +112,7 @@
           var params = feature.params;
           if (params != null) {
             // retrieve the description
-            var desc = params["opensearch-description"];
+            var desc = params['opensearch-description'];
             // The full description is in the gadget
             if (desc != null) {
               // convert string to dom object
@@ -126,9 +121,9 @@
               extractDescriptions(domDesc, item);
               // only the url to the full description is provided.
             } else {
-              var openSearchUrl = params["opensearch-url"];
+              var openSearchUrl = params['opensearch-url'];
               if (openSearchUrl != null) {
-                function urlCallback(response){
+                function urlCallback(response) {
                   if (response.errors.length == 0) {
                     var domData = response.data;
                     if (domData != null) {
@@ -137,13 +132,13 @@
                   }
                 }
                 var params = {};
-                params[gadgets.io.RequestParameters.CONTENT_TYPE] 
-                       = gadgets.io.ContentType.DOM;
+                params[gadgets.io.RequestParameters.CONTENT_TYPE] =
+                    gadgets.io.ContentType.DOM;
                 gadgets.io.makeRequest(openSearchUrl, urlCallback, params);
               }
             }
           }
-        } 
+        }
       }
     }
   }
@@ -152,20 +147,20 @@
    * When a gadget is closed, checks if it has a corresponding OpenSearch
    * definition that needs to be removed, and notifies the appropriate
    * callbacks.
-   * 
+   *
    * @param {gadgetSite}
-   *            site of the gadget being closed
+   *            site of the gadget being closed.
    */
   function closed(gadgetSite) {
     if (gadgetSite != null) {
-      url=ids[gadgetSite.getId()];
+      url = ids[gadgetSite.getId()];
       removeDescription(url);
     }
   }
 
   /**
    * called when a gadget is navigated to.
-   * 
+   *
    * @param {gadgetInfo}
    *            json object representing the gadget module.
    */
@@ -173,33 +168,33 @@
     if (gadgetSite != null) {
       if (gadgetSite.getActiveGadgetHolder() != null) {
         url = gadgetSite.getActiveGadgetHolder().getUrl();
-        if (descriptions[url]==null) {
+        if (descriptions[url] == null) {
           preloaded([gadgetSite.getActiveGadgetHolder().getGadgetInfo()]);
-        }  
-        ids[gadgetSite.getId()]=url;
+        }
+        ids[gadgetSite.getId()] = url;
       }
     }
   }
 
   /**
    * called when a gadget is unloaded
-   * 
+   *
    * @param {gadgetURL}
    *            the gadget url of the unloaded gadget.
    */
   function unloaded(gadgetURL) {
     // do nothing--this doesn't guarantee the gadget is actually removed.
   }
-  
+
   /**
    * finds opensearch descriptions/urls based on the mimetype of the search
    * results
-   * 
+   *
    * @param {type}
-   *            mimeType of the search results
+   *            mimeType of the search results.
    * @param {isUrl}
    *            true if looking for template urls, false if looking for full
-   *            OpenSearch descriptions
+   *            OpenSearch descriptions.
    */
   var findByType = function(type, isUrl) {
     var typedDescriptions = [];
@@ -216,9 +211,9 @@
       // entire description is returned. For URLs, only the matching
       // template url is returned.
       for (var i in searchUrls) {
-        var template = searchUrls[i]["@template"];
+        var template = searchUrls[i]['@template'];
         if (template != null) {
-          var descType = searchUrls[i]["@type"];
+          var descType = searchUrls[i]['@type'];
           if (descType == type || type == null) {
             if (isUrl) {
               typedDescriptions.push(template);
@@ -226,7 +221,7 @@
               typedDescriptions.push(descriptions[url]);
               break;
             }
-          } 
+          }
         }
       }
     }
@@ -234,66 +229,63 @@
   }
 
   var containerCallback = new Object();
-  containerCallback[osapi.container.CallbackType.ON_PRELOADED] 
-                    = preloaded;
-  containerCallback[osapi.container.CallbackType.ON_CLOSED] 
-                    = closed;
-  containerCallback[osapi.container.CallbackType.ON_NAVIGATED] 
-                    = navigated;
-  
-  osapi.container.Container.addMixin('opensearch',function(context){
+  containerCallback[osapi.container.CallbackType.ON_PRELOADED] =
+      preloaded;
+  containerCallback[osapi.container.CallbackType.ON_CLOSED] =
+      closed;
+  containerCallback[osapi.container.CallbackType.ON_NAVIGATED] =
+      navigated;
 
+  osapi.container.Container.addMixin('opensearch', function(context) {
     context.addGadgetLifecycleCallback('opensearch', containerCallback);
 
     return /** @scope container.opensearch */ {
     /**
-     * @param {type}
-     *            type type name, eg search-xml, search-atom, search-hmtl
+     * @param {type} type type name, eg search-xml, search-atom, search-hmtl.
      * @return opensearch template URLs of a given type, or all URLs if type
-     *         was null
+     *         was null.
      */
     getOpenSearchURLs: function(type) {
       return findByType(type, true);
     },
-    
+
     /**
-     * 
      * @param {type}
-     *            type type name, eg search-xml, search-atom, search-hmtl
+     *            type type name, eg search-xml, search-atom, search-html.
      * @return Returns OpenSearch descriptions of a given type, or all
-     *         descriptions if type was null
+     *         descriptions if type was null.
      */
     getOpenSearchDescriptions: function(type) {
       return findByType(type, false);
     },
 
     /**
-     * Allows other functions to subscribe to changes in the OpenSearch 
-     * registry
-     * 
+     * Allows other functions to subscribe to changes in the OpenSearch
+     * registry.
+     *
      * @param {callback}
      *           function(description, boolean added), where description is the
      *           opensearch description being updated and where added is true
      *           if the gadget is new, and false if it has been
      *           closed/unloaded.
-     * 
+     *
      */
     addOpenSearchCallback: function(callback) {
       callbacks.push(callback);
     },
-    
+
     /**
      * Removes a previously registered callback
-     * 
+     *
      * @param {callback}
-     *            previously registered callback function
-     * @return true if function was present, false otherwise.
-     * 
+     *            previously registered callback function.
+     * @return {boolean} true if function was present, false otherwise.
+     *
      */
     removeOpenSearchCallback: function(callback) {
-      for (index in callbacks) { 
-        if(callbacks[index]==callback) {
-          callbacks.splice(index,1);
+      for (index in callbacks) {
+        if (callbacks[index] == callback) {
+          callbacks.splice(index, 1);
           return true;
         }
       }
@@ -303,11 +295,12 @@
     /*
      * Convenience method for unit testing, allowing the test script to set
      * internal descriptions. Uncomment for unit testing.
-     * 
+     *
      */
     //setDescriptions_: function(testDescriptions) {
     // descriptions=testDescriptions;
     //}
-    }
+    };
   });
 })();
+

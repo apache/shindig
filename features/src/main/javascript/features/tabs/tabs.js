@@ -97,6 +97,7 @@ gadgets.Tab.prototype.getIndex = function() {
  * @class A class gadgets can use to make tabs.
  * @description Creates a new TabSet object
  *
+ * @constructor
  * @param {string=} opt_moduleId Optional suffix for the ID of tab container.
  * @param {string=} opt_defaultTab Optional tab name that specifies the name of
  *                   of the tab that is selected after initialization.
