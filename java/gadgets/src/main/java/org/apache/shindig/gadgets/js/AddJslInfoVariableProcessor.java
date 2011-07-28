@@ -40,10 +40,13 @@ public class AddJslInfoVariableProcessor implements JsProcessor {
   private static final String CODE_ID = "[jsload-code-info]";
 
   @VisibleForTesting
-  static final String HINT_TEMPLATE = 
-      "window['___jsl'] = window['___jsl'] || {};" +
-      "window['___jsl']['u'] = '%s';" +
-      "window['___jsl']['f'] = [%s];";
+  static final String BASE_HINT_TEMPLATE = "window['___jsl'] = window['___jsl'] || {};";
+
+  @VisibleForTesting
+  static final String FEATURES_HINT_TEMPLATE = "window['___jsl']['f'] = [%s];";
+
+  @VisibleForTesting
+  static final String URL_HINT_TEMPLATE = "window['___jsl']['u'] = '%s';";
 
   private final JsUriManager jsUriManager;
 
@@ -57,7 +60,11 @@ public class AddJslInfoVariableProcessor implements JsProcessor {
     if (!jsUri.isNohint()) {
       String uri = StringEscapeUtils.escapeJavaScript(getUri(jsUri));
       String features = getFeatures(jsUri);
-      builder.prependJs(String.format(HINT_TEMPLATE, uri, features), CODE_ID);
+      builder.prependJs(String.format(FEATURES_HINT_TEMPLATE, features), CODE_ID);
+      if (uri != null && !"".equals(uri)) {
+        builder.prependJs(String.format(URL_HINT_TEMPLATE, uri), CODE_ID);
+      }
+      builder.prependJs(BASE_HINT_TEMPLATE, CODE_ID);
     }
     return true;
   }

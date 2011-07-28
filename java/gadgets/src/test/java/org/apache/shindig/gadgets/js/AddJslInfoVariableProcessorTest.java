@@ -77,7 +77,10 @@ public class AddJslInfoVariableProcessorTest {
     setJsUri(URI);
     control.replay();
     processor.process(request, response);
-    String expected = String.format(AddJslInfoVariableProcessor.HINT_TEMPLATE, URI_JS, LIBS_JS);
+    String expected = String.format(AddJslInfoVariableProcessor.BASE_HINT_TEMPLATE +
+        AddJslInfoVariableProcessor.URL_HINT_TEMPLATE +
+        AddJslInfoVariableProcessor.FEATURES_HINT_TEMPLATE,
+        URI_JS, LIBS_JS);
     assertEquals(expected, response.build().toJsString());
     control.verify();    
   }
@@ -89,10 +92,25 @@ public class AddJslInfoVariableProcessorTest {
     EasyMock.expect(jsUriManager.makeExternJsUri(EasyMock.capture(captureJsUri))).andReturn(Uri.parse(GENERATED_URI));
     control.replay();
     processor.process(request, response);
-    String expected = String.format(AddJslInfoVariableProcessor.HINT_TEMPLATE, GENERATED_URI_JS, LIBS_JS);
+    String expected = String.format(AddJslInfoVariableProcessor.BASE_HINT_TEMPLATE +
+        AddJslInfoVariableProcessor.URL_HINT_TEMPLATE +
+        AddJslInfoVariableProcessor.FEATURES_HINT_TEMPLATE,
+        GENERATED_URI_JS, LIBS_JS);
     assertEquals(expected, response.build().toJsString());
     assertFalse(captureJsUri.getValue().isJsload());
     assertTrue(captureJsUri.getValue().isNohint());
+    control.verify();    
+  }
+  
+  @Test
+  public void testAddsHintWithoutUriIfBlank() throws Exception {
+    setJsUri("");
+    control.replay();
+    processor.process(request, response);
+    String expected = String.format(AddJslInfoVariableProcessor.BASE_HINT_TEMPLATE +
+        AddJslInfoVariableProcessor.FEATURES_HINT_TEMPLATE,
+        LIBS_JS);
+    assertEquals(expected, response.build().toJsString());
     control.verify();    
   }
   
