@@ -66,20 +66,18 @@ public class ExportJsProcessorTest {
   private final List<String> EXPORTS_3 = ImmutableList.<String>of();
 
   private final String EXPORT_STRING_1 =
-      "exportJs('gadgets',[gadgets]);" +
-      "exportJs('shindig',[shindig]);" +
-      "exportJs('gadgets.rpc',[gadgets,gadgets.rpc],{call:'call'});" +
-      "exportJs('shindig',[shindig],{random:'random'});";
+      "exportJs('gadgets',{gadgets:'gadgets'},{});" +
+      "exportJs('gadgets.rpc',{gadgets:'gadgets',rpc:'rpc'},{call:'call'});" +
+      "exportJs('shindig',{shindig:'shindig'},{random:'random'});";
   
   private final String EXPORT_STRING_1_DEFER =
-    "exportJs('gadgets',[window.gadgets],{},1);" +
-    "exportJs('shindig',[window.shindig],{},1);" +
-    "exportJs('gadgets.rpc',[window.gadgets,gadgets.rpc],{call:'call'},1);" +
-    "exportJs('shindig',[window.shindig],{random:'random'},1);";
+    "exportJs('gadgets',{gadgets:'gadgets'},{},1);" +
+    "exportJs('gadgets.rpc',{gadgets:'gadgets',rpc:'rpc'},{call:'call'},1);" +
+    "exportJs('shindig',{shindig:'shindig'},{random:'random'},1);";
 
   private final String EXPORT_STRING_2 =
-      "exportJs('foo',[foo]);" +
-      "exportJs('foo.prototype',[foo,foo.prototype],{bar:'bar'});";
+      "exportJs('foo',{foo:'foo'},{});" +
+      "exportJs('foo.prototype',{foo:'foo'},{bar:'bar'});";
 
   private final String EXPORT_STRING_3 = "";
   

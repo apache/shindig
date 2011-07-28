@@ -65,8 +65,20 @@ function exportJs(namespace, components, opt_props, opt_defer) {
   // Set up defer function queue.
   var deferMap = ((window[JSL] = window[JSL] || {})[DEFER_KEY] = window[JSL][DEFER_KEY] || {});
 
+  // TODO: Remove support for arrayStyle after a reasonable amount of time.
+  var arrayStyle = components.constructor === Array;
+
+  // New-style: object mapping. Doesn't require symbols be pre-defined.
+  // array/old-style supported only for transition; will be removed.
+  var rmap = {};
+  for (var rkey in components) {
+    if (components.hasOwnProperty(rkey)) {
+      rmap[components[rkey]] = rkey;
+    }
+  }
+
   for (var i = 0, part; part = nsParts.shift(); i++) {
-    base[part] = base[part] || components[i] || {};
+    base[part] = base[part] || (arrayStyle ? components[i] : base[rmap[part]]) || {};
     prevBase = base;
     base = base[part];
   }

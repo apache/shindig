@@ -18,7 +18,6 @@
 package org.apache.shindig.gadgets.js;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -36,7 +35,9 @@ import org.apache.shindig.gadgets.features.FeatureRegistryProvider;
 import org.apache.shindig.gadgets.features.FeatureResource;
 import org.apache.shindig.gadgets.uri.JsUriManager.JsUri;
 
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -135,74 +136,39 @@ public class ExportJsProcessor implements JsProcessor {
 
   private static class Input {
     String namespace;
-    List<String> components;
     List<String> properties;
 
-    private Input(String namespace, List<String> components) {
+    private Input(String namespace) {
       this.namespace = namespace;
-      this.components = components;
       this.properties = Lists.newArrayList();
-    }
-
-    static Input newGlobal() {
-      return new Input(null, ImmutableList.<String>of());
-    }
-
-    static Input newLocal(String namespace, List<String> components) {
-      return new Input(namespace, components);
     }
 
     public String toExportStatement(boolean isJsload) {
       StringBuilder result = new StringBuilder();
-
-      // Local namespace.
-      if (namespace != null) {
-        result.append(FUNCTION_NAME).append("('").append(namespace).append("',[");
-        result.append(isJsload ? "window." : "");
-        result.append(Joiner.on(',').join(components));
-        result.append("],{");
-        for (int i = 0; i < properties.size(); i++) {
-          String prop = properties.get(i);
-          if (i > 0) result.append(",");
-          result.append(prop).append(":'").append(prop).append("'");
-        }
-        result.append("}");
-        if (isJsload) {
-          result.append(",1");
-        }
-        result.append(");");
-
-      // Global/window namespace.
-      } else {
-        for (String prop : properties) {
-          result.append(FUNCTION_NAME).append("(");
-          result.append("'").append(prop).append("',[");
-          result.append(isJsload ? "window." : "");
-          result.append(prop);
-          result.append("]");
-          if (isJsload) {
-            result.append(",{},1");
-          }
-          result.append(");");
-        }
+      result.append(FUNCTION_NAME).append("('").append(namespace).append("',");
+      appendPropMap(result, Arrays.asList(namespace.split("\\.")));
+      result.append(',');
+      appendPropMap(result, properties);
+      if (isJsload) {
+        result.append(",1");
       }
+      result.append(");");
       return result.toString();
     }
-  }
-
-  private List<String> expandNamespace(String namespace) {
-    List<String> result = Lists.newArrayList();
-    for (int from = 0; ;) {
-      int idx = namespace.indexOf('.', from);
-      if (idx >= 0) {
-        result.add(namespace.substring(0, idx));
-        from = idx + 1;
-      } else {
-        result.add(namespace);
-        break;
+    
+    private void appendPropMap(StringBuilder result, Iterable<String> properties) {
+      result.append("{");
+      boolean first = true;
+      Iterator<String> propIterator = properties.iterator();
+      while (propIterator.hasNext()) {
+        String prop = propIterator.next();
+        if ("prototype".equals(prop)) continue;
+        if (!first) result.append(",");
+        first = false;
+        result.append(prop).append(":'").append(prop).append("'");
       }
+      result.append("}");
     }
-    return result;
   }
 
   private Collection<Input> generateInputs(List<String> symbols) {
@@ -211,11 +177,13 @@ public class ExportJsProcessor implements JsProcessor {
       String ns = getNamespace(symbol);
       Input input = result.get(ns);
       if (input == null) {
-        input = (ns != null) ? Input.newLocal(ns, expandNamespace(ns)) : Input.newGlobal();
+        input = new Input(ns);
         result.put(ns, input);
       }
-      String property = (ns != null) ? getProperty(symbol) : symbol;
-      input.properties.add(property);
+      String property = getProperty(symbol);
+      if (property != null) {
+        input.properties.add(property);
+      }
     }
     return result.values();
   }
@@ -226,7 +194,7 @@ public class ExportJsProcessor implements JsProcessor {
    */
   private String getNamespace(String symbol) {
     int idx = symbol.lastIndexOf('.');
-    return (idx >= 0) ? symbol.substring(0, idx) : null;
+    return (idx >= 0) ? symbol.substring(0, idx) : symbol;
   }
 
   /**
@@ -235,7 +203,7 @@ public class ExportJsProcessor implements JsProcessor {
    */
   private String getProperty(String symbol) {
     int idx = symbol.lastIndexOf('.');
-    return (idx >= 0) ? symbol.substring(idx + 1) : symbol;
+    return (idx >= 0) ? symbol.substring(idx + 1) : null;
   }
 
 }
