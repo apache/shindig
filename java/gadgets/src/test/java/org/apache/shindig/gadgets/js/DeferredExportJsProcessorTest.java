@@ -59,10 +59,9 @@ public class DeferredExportJsProcessorTest {
       "foo.prototype.bar");
 
   private final String EXPORT_STRING_1_DEFER =
-    "exportJs('gadgets',[window.gadgets],{},1);" +
-    "exportJs('shindig',[window.shindig],{},1);" +
-    "exportJs('gadgets.rpc',[window.gadgets,gadgets.rpc],{call:'call'},1);" +
-    "exportJs('shindig',[window.shindig],{random:'random'},1);";
+    "exportJs('gadgets',{gadgets:'gadgets'},{},1);" +
+    "exportJs('gadgets.rpc',{gadgets:'gadgets',rpc:'rpc'},{call:'call'},1);" +
+    "exportJs('shindig',{shindig:'shindig'},{random:'random'},1);";
 
   private final List<String> LIBS_WITH_DEFER = Lists.newArrayList("lib1");
   private final List<String> LIBS_WITHOUT_DEFER = Lists.newArrayList("lib2");
@@ -99,7 +98,7 @@ public class DeferredExportJsProcessorTest {
         EXPORT_JS_DEB + EXPORT_STRING_1_DEFER,
         jsBuilder.build().toJsString());
   }
-  
+
   @Test
   public void testProcessWithOneNonEmptyFeatureDeferredNotSupported() throws Exception {
     JsUri jsUri = mockJsUri(JsCompileMode.CONCAT_COMPILE_EXPORT_ALL, true, LIBS_WITHOUT_DEFER);
@@ -111,7 +110,7 @@ public class DeferredExportJsProcessorTest {
         "",
         jsBuilder.build().toJsString());
   }
-  
+
   @SuppressWarnings("unchecked")
   private FeatureRegistry mockRegistry(LookupResult lookupMock) {
     FeatureRegistry result = createMock(FeatureRegistry.class);
