@@ -24,10 +24,6 @@ import com.google.inject.Inject;
 
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.shindig.gadgets.GadgetContext;
-import org.apache.shindig.gadgets.GadgetException;
-import org.apache.shindig.gadgets.features.FeatureRegistry;
-import org.apache.shindig.gadgets.features.FeatureRegistry.FeatureBundle;
-import org.apache.shindig.gadgets.features.FeatureRegistryProvider;
 import org.apache.shindig.gadgets.uri.JsUriManager.JsUri;
 
 import java.util.Collection;
@@ -45,13 +41,6 @@ public class AddJslLoadedVariableProcessor implements JsProcessor {
   static final String TEMPLATE =
       "window['___jsl']['l'] = (window['___jsl']['l'] || []).concat(%s);";
 
-  private final FeatureRegistryProvider registryProvider;
-
-  @Inject
-  public AddJslLoadedVariableProcessor(FeatureRegistryProvider featureRegistryProvider) {
-    this.registryProvider = featureRegistryProvider;
-  }
-
   public boolean process(JsRequest jsRequest, JsResponseBuilder builder) throws JsException {
     JsUri jsUri = jsRequest.getJsUri();
     if (!jsUri.isNohint()) {
@@ -63,23 +52,11 @@ public class AddJslLoadedVariableProcessor implements JsProcessor {
     return true;
   }
 
-  // TODO: factor this logic into somewhere shared. it's now used in GetJsContentProcessor.
-  private Set<String> getBundleNames(JsUri jsUri, boolean loaded) throws JsException {
+  protected Set<String> getBundleNames(JsUri jsUri, boolean loaded) throws JsException {
     GadgetContext ctx = new JsGadgetContext(jsUri);
     Collection<String> libs = loaded ? jsUri.getLoadedLibs() : jsUri.getLibs();
-    FeatureRegistry registry;
-    try {
-      registry = registryProvider.get(jsUri.getRepository());
-    } catch (GadgetException e) {
-      throw new JsException(e.getHttpStatusCode(), e.getMessage());
-    }
-
-    // TODO: possibly warn on unknown/unrecognized libs.
-    FeatureRegistry.LookupResult lookup = registry.getFeatureResources(ctx, libs, null);
     Set<String> ret = Sets.newLinkedHashSet(); // ordered set for testability.
-    for (FeatureBundle bundle : lookup.getBundles()) {
-      ret.add(bundle.getName());
-    }
+    ret.addAll(libs);
     return ret;
   }
 

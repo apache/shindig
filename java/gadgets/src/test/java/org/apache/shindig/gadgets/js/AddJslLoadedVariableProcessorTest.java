@@ -18,20 +18,11 @@
 
 package org.apache.shindig.gadgets.js;
 
-import static org.easymock.EasyMock.eq;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.isA;
-import static org.easymock.EasyMock.isNull;
 import static org.junit.Assert.assertEquals;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 
 import org.apache.shindig.common.uri.Uri;
-import org.apache.shindig.gadgets.features.FeatureRegistry;
-import org.apache.shindig.gadgets.features.FeatureRegistry.FeatureBundle;
-import org.apache.shindig.gadgets.features.FeatureRegistry.LookupResult;
-import org.apache.shindig.gadgets.features.FeatureRegistryProvider;
 import org.apache.shindig.gadgets.uri.JsUriManager.JsUri;
 import org.apache.shindig.gadgets.uri.UriStatus;
 import org.easymock.EasyMock;
@@ -46,18 +37,16 @@ import java.util.List;
  */
 public class AddJslLoadedVariableProcessorTest {
   private static final String REQ_1_LIB = "foo";
-  private static final String REQ_1_DEP_LIB = "bar";
   private static final String REQ_2_LIB = "gig";
   private static final String LOAD_LIB = "bar";
   private static final String URI = "http://localhost";
   private static final List<String> REQ_LIBS = ImmutableList.of(
-      REQ_1_LIB, REQ_2_LIB, REQ_1_LIB, REQ_2_LIB);
+      REQ_1_LIB, REQ_2_LIB, REQ_1_LIB, REQ_2_LIB, LOAD_LIB);
   private static final List<String> LOAD_LIBS = ImmutableList.of(
       LOAD_LIB, LOAD_LIB);
 
   private IMocksControl control;
   private JsRequest request;
-  private FeatureRegistry registry;
   private JsUri jsUri;
   private JsResponseBuilder response;
   private AddJslLoadedVariableProcessor processor;
@@ -66,20 +55,13 @@ public class AddJslLoadedVariableProcessorTest {
   public void setUp() {
     control = EasyMock.createControl();
     request = control.createMock(JsRequest.class);
-    registry = control.createMock(FeatureRegistry.class);
     response = new JsResponseBuilder();
-    FeatureRegistryProvider registryProvider = new FeatureRegistryProvider() {
-      public FeatureRegistry get(String repository) {
-        return registry;
-      }
-    };
-    processor = new AddJslLoadedVariableProcessor(registryProvider);
+    processor = new AddJslLoadedVariableProcessor();
   }
 
   @Test
   public void testSucceeds() throws Exception {
     setUpJsUri(URI + "/" + REQ_1_LIB + ".js");
-    setUpRegistry();
     control.replay();
     processor.process(request, response);
     assertEquals(String.format(AddJslLoadedVariableProcessor.TEMPLATE,
@@ -99,31 +81,5 @@ public class AddJslLoadedVariableProcessorTest {
   private void setUpJsUri(String uri) {
     jsUri = new JsUri(UriStatus.VALID_UNVERSIONED, Uri.parse(uri), REQ_LIBS, LOAD_LIBS);
     EasyMock.expect(request.getJsUri()).andReturn(jsUri);
-  }
-
-  @SuppressWarnings("unchecked")
-  private void setUpRegistry() {
-    FeatureBundle bundle1 = mockBundle(REQ_1_LIB);
-    FeatureBundle bundle2 = mockBundle(REQ_1_DEP_LIB);
-    FeatureBundle bundle3 = mockBundle(REQ_2_LIB);
-    FeatureBundle bundle4 = mockBundle(LOAD_LIB);
-    LookupResult reqResult = mockLookupResult(Lists.newArrayList(bundle1, bundle2, bundle3));
-    expect(registry.getFeatureResources(isA(JsGadgetContext.class), eq(REQ_LIBS),
-        isNull(List.class))).andReturn(reqResult);
-    LookupResult loadResult = mockLookupResult(Lists.newArrayList(bundle4));
-    expect(registry.getFeatureResources(isA(JsGadgetContext.class), eq(LOAD_LIBS),
-        isNull(List.class))).andReturn(loadResult);
-  }
-
-  private LookupResult mockLookupResult(List<FeatureBundle> bundles) {
-    LookupResult result = control.createMock(LookupResult.class);
-    expect(result.getBundles()).andReturn(bundles);
-    return result;
-  }
-
-  private FeatureBundle mockBundle(String name) {
-    FeatureBundle result = control.createMock(FeatureBundle.class);
-    expect(result.getName()).andReturn(name);
-    return result;
   }
 }
