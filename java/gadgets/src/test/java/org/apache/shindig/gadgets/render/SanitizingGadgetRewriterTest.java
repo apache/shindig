@@ -123,7 +123,7 @@ public class SanitizingGadgetRewriterTest extends RewriterTestBase {
         new ContentRewriterFeature.Factory(null,
           Providers.of(new ContentRewriterFeature.DefaultConfig(
             ".*", "", "HTTP", "embed,img,script,link,style", false, false, false)));
-    return new SanitizingGadgetRewriter(newTags, attributes, rewriterFeatureFactory,
+    return new SanitizingGadgetRewriter(Providers.of(newTags), Providers.of(attributes), rewriterFeatureFactory,
         new CajaCssSanitizer(new CajaCssParser()), new PassthruManager("host.com", "/proxy"));
   }
 

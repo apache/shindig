@@ -22,6 +22,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.BindingAnnotation;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
@@ -97,8 +98,8 @@ public class SanitizingGadgetRewriter extends DomWalker.Rewriter {
   };
 
   @Inject
-  public SanitizingGadgetRewriter(@AllowedTags Set<String> allowedTags,
-      @AllowedAttributes Set<String> allowedAttributes,
+  public SanitizingGadgetRewriter(@AllowedTags Provider<Set<String>> allowedTags,
+      @AllowedAttributes Provider<Set<String>> allowedAttributes,
       ContentRewriterFeature.Factory rewriterFeatureFactory,
       CajaCssSanitizer cssSanitizer,
       ProxyUriManager proxyUriManager) {
@@ -212,23 +213,23 @@ public class SanitizingGadgetRewriter extends DomWalker.Rewriter {
    * Restrict the set of allowed tags and attributes
    */
   static final class BasicElementFilter extends SanitizingWalker {
-    private final Set<String> allowedTags;
-    private final Set<String> allowedAttributes;
+    private final Provider<Set<String>> allowedTags;
+    private final Provider<Set<String>> allowedAttributes;
     
-    private BasicElementFilter(Set<String> allowedTags,
-                               Set<String> allowedAttributes) {
+    private BasicElementFilter(Provider<Set<String>> allowedTags,
+                               Provider<Set<String>> allowedAttributes) {
       this.allowedTags = allowedTags;
       this.allowedAttributes = allowedAttributes;
     }
     
     @Override
     public boolean removeTag(Gadget gadget, Element elem, Uri context) {
-      return !allowedTags.contains(elem.getNodeName().toLowerCase());
+      return !allowedTags.get().contains(elem.getNodeName().toLowerCase());
     }
 
     @Override
     public boolean removeAttr(Gadget gadget, Attr attr, Uri context) {
-      return !allowedAttributes.contains(attr.getName().toLowerCase());
+      return !allowedAttributes.get().contains(attr.getName().toLowerCase());
     }
   }
 
