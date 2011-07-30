@@ -46,6 +46,9 @@ public class ConfigInjectionProcessor implements JsProcessor {
   static final String GLOBAL_CONFIG_KEY_TPL = "window['___cfg']=%s;\n";
   @VisibleForTesting
   static final String CONFIG_FEATURE = "core.config.base";
+  @VisibleForTesting
+  static final String CONFIG_INJECT_CODE =
+      "(window['___jsl']['ci'] = (window['___jsl']['ci'] || [])).push(%s);";
 
   private final FeatureRegistryProvider registryProvider;
   private final ConfigProcessor configProcessor;
@@ -82,14 +85,23 @@ public class ConfigInjectionProcessor implements JsProcessor {
         String configJson = JsonSerializer.serialize(config);
         if (allReq.contains(CONFIG_FEATURE) || loaded.contains(CONFIG_FEATURE)) {
           // config lib is present: pass it data
-          builder.appendJs(String.format(CONFIG_INIT_TPL, configJson), CONFIG_INIT_ID);
+          injectBaseConfig(configJson, builder);
         } else {
           // config lib not available: use global variable
-          builder.appendJs(String.format(GLOBAL_CONFIG_KEY_TPL, configJson), CONFIG_INIT_ID);
+          injectGlobalConfig(configJson, builder);
         }
       }
     }
     return true;
+  }
+  
+  protected void injectBaseConfig(String configJson, JsResponseBuilder builder) {
+    builder.prependJs(String.format(CONFIG_INJECT_CODE, configJson), CONFIG_INIT_ID);
+    builder.appendJs(String.format(CONFIG_INIT_TPL, configJson), CONFIG_INIT_ID);
+  }
+
+  protected void injectGlobalConfig(String configJson, JsResponseBuilder builder) {
+    builder.appendJs(String.format(GLOBAL_CONFIG_KEY_TPL, configJson), CONFIG_INIT_ID);
   }
 
   private List<String> subtractCollection(Collection<String> root, Collection<String> subtracted) {
