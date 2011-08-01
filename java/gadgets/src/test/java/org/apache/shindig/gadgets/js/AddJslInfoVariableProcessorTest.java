@@ -64,16 +64,16 @@ public class AddJslInfoVariableProcessorTest {
   }
 
   @Test
-  public void testSkipsWhenNohintIsTrue() throws Exception {
-    response = control.createMock(JsResponseBuilder.class);
+  public void skipsWhenNohintIsTrue() throws Exception {
     setJsUri(URI + "?nohint=1");
     control.replay();
     processor.process(request, response);
+    assertEquals("", response.build().toJsString());
     control.verify();
   }
   
   @Test
-  public void testAddsHint() throws Exception {
+  public void addsHint() throws Exception {
     setJsUri(URI);
     control.replay();
     processor.process(request, response);
@@ -86,7 +86,7 @@ public class AddJslInfoVariableProcessorTest {
   }
 
   @Test
-  public void testAddsHintWithoutJsLoad() throws Exception {
+  public void addsHintWithoutJsLoad() throws Exception {
     setJsUri(URI + "?jsload=1");
     Capture<JsUri> captureJsUri = new Capture<JsUri>();
     EasyMock.expect(jsUriManager.makeExternJsUri(EasyMock.capture(captureJsUri))).andReturn(Uri.parse(GENERATED_URI));
@@ -103,7 +103,7 @@ public class AddJslInfoVariableProcessorTest {
   }
   
   @Test
-  public void testAddsHintWithoutUriIfBlank() throws Exception {
+  public void addsHintWithoutUriIfBlank() throws Exception {
     setJsUri("");
     control.replay();
     processor.process(request, response);

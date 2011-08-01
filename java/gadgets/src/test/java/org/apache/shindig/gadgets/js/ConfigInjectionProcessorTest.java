@@ -212,7 +212,8 @@ public class ConfigInjectionProcessorTest {
     assertTrue(processor.process(request, builder));
     control.verify();
     String jsCode = builder.build().toJsString();
-    String baseMatch = "(window['___jsl']['ci'] = (window['___jsl']['ci'] || [])).push(";
+    String baseMatch = "window['___jsl'] = window['___jsl'] || {};" +
+        "(window['___jsl']['ci'] = (window['___jsl']['ci'] || [])).push(";
     assertTrue(jsCode.startsWith(baseMatch));
     String endMatch = ");\n";
     assertTrue(jsCode.endsWith(endMatch));

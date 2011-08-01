@@ -48,6 +48,7 @@ public class ConfigInjectionProcessor implements JsProcessor {
   static final String CONFIG_FEATURE = "core.config.base";
   @VisibleForTesting
   static final String CONFIG_INJECT_CODE =
+      "window['___jsl'] = window['___jsl'] || {};" +
       "(window['___jsl']['ci'] = (window['___jsl']['ci'] || [])).push(%s);";
 
   private final FeatureRegistryProvider registryProvider;
