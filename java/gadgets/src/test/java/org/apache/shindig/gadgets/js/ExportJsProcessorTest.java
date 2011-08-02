@@ -56,6 +56,7 @@ public class ExportJsProcessorTest {
   private final List<String> EXPORTS_1 = ImmutableList.of(
       "gadgets",
       "gadgets.rpc.call",
+      "gadgets.rpc.register",
       "shindig",
       "shindig.random");
 
@@ -66,23 +67,19 @@ public class ExportJsProcessorTest {
   private final List<String> EXPORTS_3 = ImmutableList.<String>of();
 
   private final String EXPORT_STRING_1 =
-      "exportJs('gadgets',{gadgets:'gadgets'},{});" +
-      "exportJs('gadgets.rpc',{gadgets:'gadgets',rpc:'rpc'},{call:'call'});" +
-      "exportJs('shindig',{shindig:'shindig'},{random:'random'});";
+      "exportJs('gadgets',[gadgets]);" +
+      "exportJs('shindig',[shindig]);" +
+      "exportJs('gadgets.rpc',[gadgets,gadgets.rpc],{call:'call',register:'register'});" +
+      "exportJs('shindig',[shindig],{random:'random'});";
   
-  private final String EXPORT_STRING_1_DEFER =
-    "exportJs('gadgets',{gadgets:'gadgets'},{},1);" +
-    "exportJs('gadgets.rpc',{gadgets:'gadgets',rpc:'rpc'},{call:'call'},1);" +
-    "exportJs('shindig',{shindig:'shindig'},{random:'random'},1);";
-
   private final String EXPORT_STRING_2 =
-      "exportJs('foo',{foo:'foo'},{});" +
-      "exportJs('foo.prototype',{foo:'foo'},{bar:'bar'});";
+      "exportJs('foo',[foo]);" +
+      "exportJs('foo.prototype',[foo,foo.prototype],{bar:'bar'});";
 
   private final String EXPORT_STRING_3 = "";
   
-  private final List<String> LIBS_DEFER = Lists.newArrayList("lib1");
-  private final List<String> LIBS = Lists.newArrayList("lib2");
+  private final List<String> LIBS1 = Lists.newArrayList("lib1");
+  private final List<String> LIBS2 = Lists.newArrayList("lib2");
   private final List<String> LOADED = Lists.newArrayList();
 
   private JsContent textJsContent1;
@@ -90,8 +87,7 @@ public class ExportJsProcessorTest {
   private JsContent featureJsContent1;
   private JsContent featureJsContent2;
   private JsContent featureJsContent3;
-  private ExportJsProcessor compiler;
-  private FeatureRegistry featureRegistry;
+  private ExportJsProcessor processor;
 
   @Before
   public void setUp() throws Exception {
@@ -101,8 +97,8 @@ public class ExportJsProcessorTest {
     FeatureRegistry.FeatureBundle bundle = mockExportJsBundle(resource);
     LookupResult lookupMock = mockLookupResult(bundle);
     final FeatureRegistry featureRegistryMock = mockRegistry(lookupMock);
-    featureRegistry = featureRegistryMock;
     FeatureRegistryProvider registryProvider = new FeatureRegistryProvider() {
+      @Override
       public FeatureRegistry get(String repository) {
         return featureRegistryMock;
       }
@@ -113,7 +109,7 @@ public class ExportJsProcessorTest {
     featureJsContent1 = JsContent.fromFeature(FEATURE_CONTENT_1, "source3", mockBundle(EXPORTS_1), null);
     featureJsContent2 = JsContent.fromFeature(FEATURE_CONTENT_2, "source4", mockBundle(EXPORTS_2), null);
     featureJsContent3 = JsContent.fromFeature(FEATURE_CONTENT_3, "source5", mockBundle(EXPORTS_3), null);
-    compiler = new ExportJsProcessor(registryProvider, contextProviderMock);
+    processor = new ExportJsProcessor(registryProvider, contextProviderMock);
   }
 
   @SuppressWarnings("unchecked")
@@ -123,13 +119,13 @@ public class ExportJsProcessorTest {
         isA(GadgetContext.class), isA(List.class), EasyMock.isNull(List.class))).
         andReturn(lookupMock).anyTimes();
     expect(result.getFeatureResources(
-        isA(GadgetContext.class), eq(LIBS_DEFER), EasyMock.isNull(List.class), eq(false))).
+        isA(GadgetContext.class), eq(LIBS1), EasyMock.isNull(List.class), eq(false))).
         andReturn(mockLookupResult(mockBundle(EXPORTS_1))).anyTimes();
     expect(result.getFeatureResources(
-        isA(GadgetContext.class), eq(LIBS), EasyMock.isNull(List.class), eq(false))).
+        isA(GadgetContext.class), eq(LIBS2), EasyMock.isNull(List.class), eq(false))).
         andReturn(mockLookupResult(mockBundle(EXPORTS_2))).anyTimes();
-    expect(result.getFeatures(LIBS)).andReturn(LIBS).anyTimes();
-    expect(result.getFeatures(LIBS_DEFER)).andReturn(LIBS_DEFER).anyTimes();
+    expect(result.getFeatures(LIBS2)).andReturn(LIBS2).anyTimes();
+    expect(result.getFeatures(LIBS1)).andReturn(LIBS1).anyTimes();
     expect(result.getFeatures(LOADED)).andReturn(LOADED).anyTimes();
     replay(result);
     return result;
@@ -140,7 +136,7 @@ public class ExportJsProcessorTest {
   }
   
   private JsUri mockJsUri(JsCompileMode mode, boolean isJsload) {
-    return mockJsUri(mode, isJsload, LIBS);
+    return mockJsUri(mode, isJsload, LIBS2);
   }
   
   private JsUri mockJsUri(JsCompileMode mode, boolean isJsload, List<String> libs) {
@@ -197,22 +193,22 @@ public class ExportJsProcessorTest {
   }
 
   @Test
-  public void testProcessEmpty() throws Exception {
+  public void processEmpty() throws Exception {
     JsUri jsUri = mockJsUri(JsCompileMode.CONCAT_COMPILE_EXPORT_ALL);
     JsRequest jsRequest = new JsRequest(jsUri, null, false, null);
     JsResponseBuilder jsBuilder = new JsResponseBuilder();
-    boolean actualReturnCode = compiler.process(jsRequest, jsBuilder);
+    boolean actualReturnCode = processor.process(jsRequest, jsBuilder);
     assertTrue(actualReturnCode);
     assertEquals("", jsBuilder.build().toJsString());
   }
 
   @Test
-  public void testProcessWithOneText() throws Exception {
+  public void processWithOneText() throws Exception {
     JsUri jsUri = mockJsUri(JsCompileMode.CONCAT_COMPILE_EXPORT_ALL);
     JsRequest jsRequest = new JsRequest(jsUri, null, false, null);
     JsResponseBuilder jsBuilder = new JsResponseBuilder();
     jsBuilder.appendJs(textJsContent1);
-    boolean actualReturnCode = compiler.process(jsRequest, jsBuilder);
+    boolean actualReturnCode = processor.process(jsRequest, jsBuilder);
     assertTrue(actualReturnCode);
     assertEquals(
         TEXT_CONTENT_1,
@@ -220,37 +216,25 @@ public class ExportJsProcessorTest {
   }
 
   @Test
-  public void testProcessWithOneNonEmptyFeature() throws Exception {
+  public void processWithOneNonEmptyFeature() throws Exception {
     JsUri jsUri = mockJsUri(JsCompileMode.CONCAT_COMPILE_EXPORT_ALL);
     JsRequest jsRequest = new JsRequest(jsUri, null, false, null);
     JsResponseBuilder jsBuilder = new JsResponseBuilder();
     jsBuilder.appendJs(featureJsContent1);
-    boolean actualReturnCode = compiler.process(jsRequest, jsBuilder);
+    boolean actualReturnCode = processor.process(jsRequest, jsBuilder);
     assertTrue(actualReturnCode);
     assertEquals(
         EXPORT_JS_DEB + FEATURE_CONTENT_1 + EXPORT_STRING_1,
         jsBuilder.build().toJsString());
   }
-    
-  @Test
-  public void testProcessWithOneNonEmptyFeatureNotDeferredMode() throws Exception {
-    JsUri jsUri = mockJsUri(JsCompileMode.CONCAT_COMPILE_EXPORT_ALL, true);
-    JsRequest jsRequest = new JsRequest(jsUri, null, false, featureRegistry);
-    JsResponseBuilder jsBuilder = new JsResponseBuilder();
-    boolean actualReturnCode = compiler.process(jsRequest, jsBuilder);
-    assertTrue(actualReturnCode);
-    assertEquals(
-        "",
-        jsBuilder.build().toJsString());
-  }
 
   @Test
-  public void testProcessWithOneEmptyFeature() throws Exception {
+  public void processWithOneEmptyFeature() throws Exception {
     JsUri jsUri = mockJsUri(JsCompileMode.CONCAT_COMPILE_EXPORT_ALL);
     JsRequest jsRequest = new JsRequest(jsUri, null, false, null);
     JsResponseBuilder jsBuilder = new JsResponseBuilder();
     jsBuilder.appendJs(featureJsContent3);
-    boolean actualReturnCode = compiler.process(jsRequest, jsBuilder);
+    boolean actualReturnCode = processor.process(jsRequest, jsBuilder);
     assertTrue(actualReturnCode);
     assertEquals(
         FEATURE_CONTENT_3 + EXPORT_STRING_3,
@@ -258,7 +242,7 @@ public class ExportJsProcessorTest {
   }
 
   @Test
-  public void testProcessWithFeaturesAndTexts() throws Exception {
+  public void processWithFeaturesAndTexts() throws Exception {
     JsUri jsUri = mockJsUri(JsCompileMode.CONCAT_COMPILE_EXPORT_ALL);
     JsRequest jsRequest = new JsRequest(jsUri, null, false, null);
     JsResponseBuilder jsBuilder = new JsResponseBuilder();
@@ -267,7 +251,7 @@ public class ExportJsProcessorTest {
     jsBuilder.appendJs(featureJsContent2);
     jsBuilder.appendJs(textJsContent2);
     jsBuilder.appendJs(featureJsContent3);
-    boolean actualReturnCode = compiler.process(jsRequest, jsBuilder);
+    boolean actualReturnCode = processor.process(jsRequest, jsBuilder);
     assertTrue(actualReturnCode);
     assertEquals(EXPORT_JS_DEB + TEXT_CONTENT_1 +
         FEATURE_CONTENT_1 + EXPORT_STRING_1 +

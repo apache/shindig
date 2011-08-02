@@ -17,19 +17,27 @@
  */
 package org.apache.shindig.gadgets.js;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
 import org.apache.shindig.gadgets.GadgetContext;
-import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.features.FeatureRegistry;
 import org.apache.shindig.gadgets.features.FeatureRegistry.FeatureBundle;
 import org.apache.shindig.gadgets.features.FeatureRegistry.LookupResult;
 import org.apache.shindig.gadgets.features.FeatureRegistryProvider;
 import org.apache.shindig.gadgets.uri.JsUriManager.JsUri;
 
-public class DeferJsProcessor extends ExportJsProcessor {
+import java.util.List;
+
+public class DeferJsProcessor extends BaseSurfaceJsProcessor {
+
+  @VisibleForTesting
+  static final String FEATURE_NAME = "deferjs";
+
+  private static final String FUNCTION_NAME = "deferJs";
 
   @Inject
   public DeferJsProcessor(FeatureRegistryProvider featureRegistryProvider,
@@ -37,45 +45,76 @@ public class DeferJsProcessor extends ExportJsProcessor {
     super(featureRegistryProvider, context);
   }
 
-  @Override
   public boolean process(JsRequest jsRequest, JsResponseBuilder builder) throws JsException {
     JsUri jsUri = jsRequest.getJsUri();
     ImmutableList.Builder<JsContent> resp = ImmutableList.builder();
+    FeatureRegistry featureRegistry = getFeatureRegistry(jsUri);
 
-    FeatureRegistry featureRegistry;
-    try {
-      featureRegistry = featureRegistryProvider.get(jsUri.getRepository());
-    } catch (GadgetException e) {
-      throw new JsException(e.getHttpStatusCode(), e.getMessage());
-    }
-
-    boolean neededExportJs = false;
-    FeatureBundle last = null;
+    boolean needDefers = false;
     if (jsUri.isJsload()) {
       // append all exports for deferred symbols
-      neededExportJs = appendExportJsStatementsDeferred(featureRegistry, resp, jsRequest);
+      List<FeatureBundle> bundles = getSupportDeferBundles(featureRegistry, jsRequest);
+      for (FeatureBundle bundle : bundles) {
+        needDefers |= appendDeferJsStatements(resp, jsRequest.getJsUri(), bundle);
+      }
     }
     
-    builder.clearJs();
-    if (neededExportJs) {
-      builder.appendAllJs(getExportJsContents(featureRegistry));
+    // TODO: Instead of clearing, do a replacement of feature impl with defer stubs.
+    // Clearing has an effect of ignoring previous processors work.  
+    if (needDefers) {
+      builder.clearJs();
+      builder.appendAllJs(getSurfaceJsContents(featureRegistry, FEATURE_NAME));
     }
     builder.appendAllJs(resp.build());
     return true;
   }
 
-  private boolean appendExportJsStatementsDeferred(FeatureRegistry registry,
-      ImmutableList.Builder<JsContent> builder, JsRequest jsRequest) {
-    LookupResult lookup = registry.getFeatureResources(context.get(),
-        jsRequest.getNewFeatures(), null, false);
-    
-    boolean neededExports = false;
-    for (FeatureBundle bundle : lookup.getBundles()) {
-      if (bundle.isSupportDefer()) {
-        neededExports |= appendExportJsStatementsForFeature(builder, jsRequest.getJsUri(), bundle);
+  private boolean appendDeferJsStatements(ImmutableList.Builder<JsContent> builder,
+       JsUri jsUri, FeatureBundle bundle) {
+    List<String> exports = getExports(bundle, jsUri);
+    if (!exports.isEmpty()) {
+      StringBuilder sb = new StringBuilder();
+      for (Input input : generateInputs(exports)) {
+        sb.append(toDeferStatement(input));
+      }
+      builder.add(JsContent.fromFeature(sb.toString(), "[generated-symbol-exports]",
+          bundle, null));
+      return true;
+    }
+    return false;
+  }
+  
+  private String toDeferStatement(Input input) {
+    StringBuilder result = new StringBuilder();
+
+    // Local namespace.
+    if (input.namespace != null) {
+      result.append(FUNCTION_NAME).append("('").append(input.namespace).append("',[");
+      for (int i = 0; i < input.properties.size(); i++) {
+        String prop = input.properties.get(i);
+        if (i > 0) result.append(",");
+        result.append("'").append(prop).append("'");
+      }
+      result.append("]);");
+
+    // Global/window namespace.
+    } else {
+      for (String prop : input.properties) {
+        result.append(FUNCTION_NAME).append("('").append(prop).append("');");
       }
     }
-    
-    return neededExports;
+    return result.toString();
+  }
+
+  private List<FeatureBundle> getSupportDeferBundles(FeatureRegistry registry, JsRequest jsRequest) {
+    List<FeatureBundle> result = Lists.newArrayList();
+    LookupResult lookup = registry.getFeatureResources(context.get(),
+      jsRequest.getNewFeatures(), null, false);
+    for (FeatureBundle bundle : lookup.getBundles()) {
+      if (bundle.isSupportDefer()) {
+        result.add(bundle);
+      }
+    }
+    return result;
   }
 }

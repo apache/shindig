@@ -46,11 +46,12 @@ import org.junit.Test;
 import java.util.List;
 
 public class DeferJsProcessorTest {
-  private final String DEFER_JS_DEB = "function deferJs() { };";
+  private final String DEFER_JS_DEB = "function deferJs() {};";
 
   private final List<String> EXPORTS_1 = ImmutableList.of(
       "gadgets",
       "gadgets.rpc.call",
+      "gadgets.rpc.register",
       "shindig",
       "shindig.random");
 
@@ -59,15 +60,16 @@ public class DeferJsProcessorTest {
       "foo.prototype.bar");
 
   private final String EXPORT_STRING_1_DEFER =
-    "exportJs('gadgets',{gadgets:'gadgets'},{},1);" +
-    "exportJs('gadgets.rpc',{gadgets:'gadgets',rpc:'rpc'},{call:'call'},1);" +
-    "exportJs('shindig',{shindig:'shindig'},{random:'random'},1);";
+    "deferJs('gadgets');" +
+    "deferJs('shindig');" +
+    "deferJs('gadgets.rpc',['call','register']);" +
+    "deferJs('shindig',['random']);";
 
   private final List<String> LIBS_WITH_DEFER = Lists.newArrayList("lib1");
   private final List<String> LIBS_WITHOUT_DEFER = Lists.newArrayList("lib2");
   private final List<String> LOADED = Lists.newArrayList();
 
-  private DeferJsProcessor compiler;
+  private DeferJsProcessor processor;
   private FeatureRegistry featureRegistry;
 
   @Before
@@ -80,19 +82,20 @@ public class DeferJsProcessorTest {
     final FeatureRegistry featureRegistryMock = mockRegistry(lookupMock);
     featureRegistry = featureRegistryMock;
     FeatureRegistryProvider registryProvider = new FeatureRegistryProvider() {
+      @Override
       public FeatureRegistry get(String repository) {
         return featureRegistryMock;
       }
     };
-    compiler = new DeferJsProcessor(registryProvider, contextProviderMock);
+    processor = new DeferJsProcessor(registryProvider, contextProviderMock);
   }
 
   @Test
-  public void testProcessWithOneNonEmptyFeatureDeferred() throws Exception {
+  public void processWithOneNonEmptyFeatureDeferred() throws Exception {
     JsUri jsUri = mockJsUri(JsCompileMode.CONCAT_COMPILE_EXPORT_ALL, true, LIBS_WITH_DEFER);
     JsRequest jsRequest = new JsRequest(jsUri, null, false, featureRegistry);
     JsResponseBuilder jsBuilder = new JsResponseBuilder();
-    boolean actualReturnCode = compiler.process(jsRequest, jsBuilder);
+    boolean actualReturnCode = processor.process(jsRequest, jsBuilder);
     assertTrue(actualReturnCode);
     assertEquals(
         DEFER_JS_DEB + EXPORT_STRING_1_DEFER,
@@ -100,11 +103,11 @@ public class DeferJsProcessorTest {
   }
 
   @Test
-  public void testProcessWithOneNonEmptyFeatureDeferredNotSupported() throws Exception {
+  public void processWithOneNonEmptyFeatureDeferredNotSupported() throws Exception {
     JsUri jsUri = mockJsUri(JsCompileMode.CONCAT_COMPILE_EXPORT_ALL, true, LIBS_WITHOUT_DEFER);
     JsRequest jsRequest = new JsRequest(jsUri, null, false, featureRegistry);
     JsResponseBuilder jsBuilder = new JsResponseBuilder();
-    boolean actualReturnCode = compiler.process(jsRequest, jsBuilder);
+    boolean actualReturnCode = processor.process(jsRequest, jsBuilder);
     assertTrue(actualReturnCode);
     assertEquals(
         "",
