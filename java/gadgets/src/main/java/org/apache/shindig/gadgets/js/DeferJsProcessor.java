@@ -17,38 +17,22 @@
  */
 package org.apache.shindig.gadgets.js;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
-import org.apache.shindig.gadgets.JsCompileMode;
-import org.apache.shindig.gadgets.features.ApiDirective;
 import org.apache.shindig.gadgets.features.FeatureRegistry;
 import org.apache.shindig.gadgets.features.FeatureRegistry.FeatureBundle;
 import org.apache.shindig.gadgets.features.FeatureRegistry.LookupResult;
 import org.apache.shindig.gadgets.features.FeatureRegistryProvider;
-import org.apache.shindig.gadgets.features.FeatureResource;
 import org.apache.shindig.gadgets.uri.JsUriManager.JsUri;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-
-public class DeferredExportJsProcessor extends ExportJsProcessor {
-
-  @VisibleForTesting
-  static final String FEATURE_NAME = "exportjs";
-
-  private static final String FUNCTION_NAME = "exportJs";
+public class DeferJsProcessor extends ExportJsProcessor {
 
   @Inject
-  public DeferredExportJsProcessor(FeatureRegistryProvider featureRegistryProvider,
+  public DeferJsProcessor(FeatureRegistryProvider featureRegistryProvider,
       Provider<GadgetContext> context) {
     super(featureRegistryProvider, context);
   }

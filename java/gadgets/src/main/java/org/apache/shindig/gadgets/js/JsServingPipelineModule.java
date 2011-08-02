@@ -41,7 +41,7 @@ public class JsServingPipelineModule extends AbstractModule {
   @Named("shindig.js.optional-processors")
   public List<JsProcessor> provideProcessors(
       AddJslInfoVariableProcessor addJslInfoVariableProcessor,
-      DeferredExportJsProcessor deferredExportJsProcessor,
+      DeferJsProcessor deferJsProcessor,
       JsLoadProcessor jsLoaderGeneratorProcessor,
       IfModifiedSinceProcessor ifModifiedSinceProcessor,
       GetJsContentProcessor getJsContentProcessor,
@@ -54,7 +54,7 @@ public class JsServingPipelineModule extends AbstractModule {
     jsLoaderGeneratorProcessor.setUseAsync(true);
     return ImmutableList.of(
         addJslInfoVariableProcessor,
-        deferredExportJsProcessor,
+        deferJsProcessor,
         jsLoaderGeneratorProcessor,
         ifModifiedSinceProcessor,
         getJsContentProcessor,

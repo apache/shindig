@@ -45,8 +45,8 @@ import org.junit.Test;
 
 import java.util.List;
 
-public class DeferredExportJsProcessorTest {
-  private final String EXPORT_JS_DEB = "function exportJs() { };";
+public class DeferJsProcessorTest {
+  private final String DEFER_JS_DEB = "function deferJs() { };";
 
   private final List<String> EXPORTS_1 = ImmutableList.of(
       "gadgets",
@@ -67,14 +67,14 @@ public class DeferredExportJsProcessorTest {
   private final List<String> LIBS_WITHOUT_DEFER = Lists.newArrayList("lib2");
   private final List<String> LOADED = Lists.newArrayList();
 
-  private DeferredExportJsProcessor compiler;
+  private DeferJsProcessor compiler;
   private FeatureRegistry featureRegistry;
 
   @Before
   public void setUp() throws Exception {
     GadgetContext ctx = new GadgetContext();
     Provider<GadgetContext> contextProviderMock = Providers.of(ctx);
-    FeatureResource resource = mockResource(EXPORT_JS_DEB);
+    FeatureResource resource = mockResource(DEFER_JS_DEB);
     FeatureRegistry.FeatureBundle bundle = mockExportJsBundle(resource);
     LookupResult lookupMock = mockLookupResult(bundle);
     final FeatureRegistry featureRegistryMock = mockRegistry(lookupMock);
@@ -84,7 +84,7 @@ public class DeferredExportJsProcessorTest {
         return featureRegistryMock;
       }
     };
-    compiler = new DeferredExportJsProcessor(registryProvider, contextProviderMock);
+    compiler = new DeferJsProcessor(registryProvider, contextProviderMock);
   }
 
   @Test
@@ -95,7 +95,7 @@ public class DeferredExportJsProcessorTest {
     boolean actualReturnCode = compiler.process(jsRequest, jsBuilder);
     assertTrue(actualReturnCode);
     assertEquals(
-        EXPORT_JS_DEB + EXPORT_STRING_1_DEFER,
+        DEFER_JS_DEB + EXPORT_STRING_1_DEFER,
         jsBuilder.build().toJsString());
   }
 
