@@ -119,7 +119,7 @@
 "gadgets.uri.iframe.lockedDomainSuffix": "${Cur['defaultShindigTestAuthority']}",
 
 // Default Js Uri config: also must be overridden.
-"gadgets.uri.js.host": "http://${Cur['defaultShindigTestAuthority']}",
+"gadgets.uri.js.host": "//${Cur['defaultShindigTestAuthority']}",
 "gadgets.uri.js.path": "${CONTEXT_ROOT}/gadgets/js",
 
 // Default concat Uri config; used for testing.
