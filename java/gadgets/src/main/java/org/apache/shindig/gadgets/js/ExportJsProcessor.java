@@ -31,7 +31,7 @@ import org.apache.shindig.gadgets.uri.JsUriManager.JsUri;
 
 import java.util.List;
 
-public class ExportJsProcessor extends BaseSurfaceJsProcessor {
+public class ExportJsProcessor extends BaseSurfaceJsProcessor implements JsProcessor {
 
   @VisibleForTesting
   static final String FEATURE_NAME = "exportjs";

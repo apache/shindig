@@ -18,7 +18,6 @@
 package org.apache.shindig.gadgets.js;
 
 import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.isA;
 import static org.easymock.EasyMock.replay;
@@ -78,10 +77,6 @@ public class ExportJsProcessorTest {
 
   private final String EXPORT_STRING_3 = "";
   
-  private final List<String> LIBS1 = Lists.newArrayList("lib1");
-  private final List<String> LIBS2 = Lists.newArrayList("lib2");
-  private final List<String> LOADED = Lists.newArrayList();
-
   private JsContent textJsContent1;
   private JsContent textJsContent2;
   private JsContent featureJsContent1;
@@ -117,15 +112,6 @@ public class ExportJsProcessorTest {
     expect(result.getFeatureResources(
         isA(GadgetContext.class), isA(List.class), EasyMock.isNull(List.class))).
         andReturn(lookupMock).anyTimes();
-    expect(result.getFeatureResources(
-        isA(GadgetContext.class), eq(LIBS1), EasyMock.isNull(List.class), eq(false))).
-        andReturn(mockLookupResult(mockBundle(EXPORTS_1))).anyTimes();
-    expect(result.getFeatureResources(
-        isA(GadgetContext.class), eq(LIBS2), EasyMock.isNull(List.class), eq(false))).
-        andReturn(mockLookupResult(mockBundle(EXPORTS_2))).anyTimes();
-    expect(result.getFeatures(LIBS2)).andReturn(LIBS2).anyTimes();
-    expect(result.getFeatures(LIBS1)).andReturn(LIBS1).anyTimes();
-    expect(result.getFeatures(LOADED)).andReturn(LOADED).anyTimes();
     replay(result);
     return result;
   }
@@ -135,16 +121,10 @@ public class ExportJsProcessorTest {
   }
   
   private JsUri mockJsUri(JsCompileMode mode, boolean isJsload) {
-    return mockJsUri(mode, isJsload, LIBS2);
-  }
-  
-  private JsUri mockJsUri(JsCompileMode mode, boolean isJsload, List<String> libs) {
     JsUri result = createMock(JsUri.class);
     expect(result.getCompileMode()).andStubReturn(mode);
     expect(result.getRepository()).andStubReturn(null);
     expect(result.isJsload()).andReturn(isJsload).anyTimes();
-    expect(result.getLibs()).andReturn(libs).anyTimes();
-    expect(result.getLoadedLibs()).andReturn(LOADED).anyTimes();
     replay(result);
     return result;
   }

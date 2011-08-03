@@ -32,7 +32,7 @@ import org.apache.shindig.gadgets.uri.JsUriManager.JsUri;
 
 import java.util.List;
 
-public class DeferJsProcessor extends BaseSurfaceJsProcessor {
+public class DeferJsProcessor extends BaseSurfaceJsProcessor implements JsProcessor {
 
   @VisibleForTesting
   static final String FEATURE_NAME = "deferjs";
