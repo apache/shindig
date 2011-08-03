@@ -37,17 +37,15 @@ import java.util.Map;
 import java.util.Set;
 
 public class ConfigInjectionProcessor implements JsProcessor {
-  private static final String CONFIG_INIT_ID = "[config-injection]";
   @VisibleForTesting
   static final String GADGETS_FEATURES_KEY = "gadgets.features";
   @VisibleForTesting
-  static final String CONFIG_INIT_TPL = "gadgets.config.init(%s);\n";
-  @VisibleForTesting
-  static final String GLOBAL_CONFIG_KEY_TPL = "window['___cfg']=%s;\n";
-  @VisibleForTesting
   static final String CONFIG_FEATURE = "core.config.base";
-  @VisibleForTesting
-  static final String CONFIG_INJECT_CODE =
+
+  protected static final String CONFIG_GLOBAL_KEY_TPL = "window['___cfg']=%s;\n";
+  protected static final String CONFIG_INIT_ID = "[config-injection]";
+  protected static final String CONFIG_INIT_TPL = "gadgets.config.init(%s);\n";
+  protected static final String CONFIG_INJECT_CODE =
       "window['___jsl'] = window['___jsl'] || {};" +
       "(window['___jsl']['ci'] = (window['___jsl']['ci'] || [])).push(%s);";
 
@@ -102,7 +100,7 @@ public class ConfigInjectionProcessor implements JsProcessor {
   }
 
   protected void injectGlobalConfig(String configJson, JsResponseBuilder builder) {
-    builder.appendJs(String.format(GLOBAL_CONFIG_KEY_TPL, configJson), CONFIG_INIT_ID);
+    builder.appendJs(String.format(CONFIG_GLOBAL_KEY_TPL, configJson), CONFIG_INIT_ID);
   }
 
   private List<String> subtractCollection(Collection<String> root, Collection<String> subtracted) {
