@@ -82,7 +82,6 @@ public class DeferJsProcessorTest {
     final FeatureRegistry featureRegistryMock = mockRegistry(lookupMock);
     featureRegistry = featureRegistryMock;
     FeatureRegistryProvider registryProvider = new FeatureRegistryProvider() {
-      @Override
       public FeatureRegistry get(String repository) {
         return featureRegistryMock;
       }

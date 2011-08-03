@@ -98,7 +98,6 @@ public class ExportJsProcessorTest {
     LookupResult lookupMock = mockLookupResult(bundle);
     final FeatureRegistry featureRegistryMock = mockRegistry(lookupMock);
     FeatureRegistryProvider registryProvider = new FeatureRegistryProvider() {
-      @Override
       public FeatureRegistry get(String repository) {
         return featureRegistryMock;
       }
