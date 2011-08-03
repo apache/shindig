@@ -70,8 +70,8 @@ public class BlobCrypterSecurityToken extends AbstractSecurityToken implements S
   }
 
   /**
-   * Decrypt and verify a token.  Note this is not public, use BlobCrypterSecurityTokenCodec
-   * instead.
+   * Decrypt and verify a token.  Note that this is a low level API dealing directly with encrypted
+   * data, for a higher level API consider using the BlobCrypterSecurityTokenCodec instead.
    *
    * @param crypter crypter to use for decryption
    * @param container container that minted the token
@@ -81,7 +81,7 @@ public class BlobCrypterSecurityToken extends AbstractSecurityToken implements S
    *
    * @throws BlobCrypterException
    */
-  static BlobCrypterSecurityToken decrypt(BlobCrypter crypter, String container, String domain,
+  public static BlobCrypterSecurityToken decrypt(BlobCrypter crypter, String container, String domain,
         String token, String activeUrl) throws BlobCrypterException {
     Map<String, String> values = crypter.unwrap(token, MAX_TOKEN_LIFETIME_SECS);
     BlobCrypterSecurityToken t = new BlobCrypterSecurityToken(crypter, container, domain);
