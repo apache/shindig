@@ -47,38 +47,21 @@
  * gadgets.foo = {};
  * gadgets.foo.bar = function() { ... };
  *
- * Also supports deferred symbol binding. When deferred mode is specified,
- * undefined symbols being defined in context here are treated as functions
- * with no return value. Stub functions are created for them at the
- * specified named endpoint. These functions enqueue requests and immediately
- * return. When the real method implementation is loaded and exported,
- * the real method is executed with the enqueued arguments.
+ * Support for deferred symbol binding (via deferJs()) is also provided.
+ * A 'real' method is executed with the enqueued arguments when in deferMap.
  */
-function exportJs(namespace, components, opt_props, opt_defer) {
+function exportJs(namespace, components, opt_props) {
   var JSL = '___jsl';
   var DEFER_KEY = 'df';
   var base = window;
   var prevBase = null;
   var nsParts = namespace.split('.');
-  var sliceFn = [].slice;
 
   // Set up defer function queue.
   var deferMap = ((window[JSL] = window[JSL] || {})[DEFER_KEY] = window[JSL][DEFER_KEY] || {});
 
-  // TODO: Remove support for arrayStyle after a reasonable amount of time.
-  var arrayStyle = components.constructor === Array;
-
-  // New-style: object mapping. Doesn't require symbols be pre-defined.
-  // array/old-style supported only for transition; will be removed.
-  var rmap = {};
-  for (var rkey in components) {
-    if (components.hasOwnProperty(rkey)) {
-      rmap[components[rkey]] = rkey;
-    }
-  }
-
   for (var i = 0, part; part = nsParts.shift(); i++) {
-    base[part] = base[part] || (arrayStyle ? components[i] : base[rmap[part]]) || {};
+    base[part] = base[part] || components[i] || {};
     prevBase = base;
     base = base[part];
   }
@@ -101,26 +84,13 @@ function exportJs(namespace, components, opt_props, opt_defer) {
         if (root.hasOwnProperty(prop)) {
           if (!root[curalias]) {
             root[curalias] = root[prop];
-          } else if (!opt_defer && deferMap[fulltok]) {
+          } else if (deferMap[fulltok]) {
             // Executes enqueued requests for the method,
             // then replaces the export.
             deferMap[fulltok](root, root[prop]);
             delete deferMap[fulltok];
             root[curalias] = root[prop];
           }
-        } else if (opt_defer) {
-          root[prop] = (function() {
-            var queue = [];
-            var ret = function() {
-              queue.push(sliceFn.call(arguments, 0));
-            };
-            deferMap[fulltok] = function(ctx, method) {
-              for (var i = 0, len = queue.length; i < len; ++i) {
-                method.apply(ctx, queue[i]);
-              }
-            };
-            return ret;
-          })();
         }
       }
     }
