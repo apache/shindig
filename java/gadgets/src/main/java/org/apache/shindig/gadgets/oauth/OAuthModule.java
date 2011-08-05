@@ -21,6 +21,7 @@ import org.apache.shindig.common.crypto.BasicBlobCrypter;
 import org.apache.shindig.common.crypto.BlobCrypter;
 import org.apache.shindig.common.crypto.Crypto;
 import org.apache.shindig.common.logging.i18n.MessageKeys;
+import org.apache.shindig.common.servlet.Authority;
 import org.apache.shindig.common.util.ResourceLoader;
 import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.oauth.BasicOAuthStoreConsumerKeyAndSecret.KeyType;
@@ -112,16 +113,18 @@ public class OAuthModule extends AbstractModule {
   @Singleton
   public static class OAuthStoreProvider implements Provider<OAuthStore> {
 
-    private final BasicOAuthStore store;
+    private final BasicOAuthStore store; 
 
     @Inject
     public OAuthStoreProvider(
         @Named(OAUTH_SIGNING_KEY_FILE) String signingKeyFile,
         @Named(OAUTH_SIGNING_KEY_NAME) String signingKeyName,
-        @Named(OAUTH_CALLBACK_URL) String defaultCallbackUrl) {
+        @Named(OAUTH_CALLBACK_URL) String defaultCallbackUrl,
+        Provider<Authority> hostProvider) {
       store = new BasicOAuthStore();
       loadDefaultKey(signingKeyFile, signingKeyName);
       store.setDefaultCallbackUrl(defaultCallbackUrl);
+      store.setHostProvider(hostProvider);
       loadConsumers();
     }
 

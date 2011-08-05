@@ -74,6 +74,7 @@
     <url-pattern>/gadgets/js/*</url-pattern>
     <url-pattern>/gadgets/proxy/*</url-pattern>
     <url-pattern>/gadgets/concat</url-pattern>
+    <url-pattern>/gadgets/makeRequest</url-pattern>
     <url-pattern>/rpc/*</url-pattern>
     <url-pattern>/rest/*</url-pattern>
   </filter-mapping>

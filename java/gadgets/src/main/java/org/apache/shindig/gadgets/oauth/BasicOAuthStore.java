@@ -19,6 +19,7 @@ package org.apache.shindig.gadgets.oauth;
 
 import com.google.common.collect.Maps;
 
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
 import net.oauth.OAuth;
@@ -27,6 +28,7 @@ import net.oauth.OAuthServiceProvider;
 import net.oauth.signature.RSA_SHA1;
 
 import org.apache.shindig.auth.SecurityToken;
+import org.apache.shindig.common.servlet.Authority;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.oauth.BasicOAuthStoreConsumerKeyAndSecret.KeyType;
 import org.json.JSONException;
@@ -86,6 +88,8 @@ public class BasicOAuthStore implements OAuthStore {
 
   /** Number of times we removed an access token */
   private int accessTokenRemoveCount = 0;
+  
+  private Provider<Authority> hostProvider;
 
   public BasicOAuthStore() {
     consumerInfos = Maps.newHashMap();
@@ -160,6 +164,10 @@ public class BasicOAuthStore implements OAuthStore {
       BasicOAuthStoreConsumerIndex providerKey, BasicOAuthStoreConsumerKeyAndSecret keyAndSecret) {
     consumerInfos.put(providerKey, keyAndSecret);
   }
+  
+  public void setHostProvider( Provider<Authority> hostProvider) {
+    this.hostProvider = hostProvider;
+  }
 
   public ConsumerInfo getConsumerKeyAndSecret(
       SecurityToken securityToken, String serviceName, OAuthServiceProvider provider)
@@ -189,6 +197,11 @@ public class BasicOAuthStore implements OAuthStore {
       consumer.setProperty(OAuth.OAUTH_SIGNATURE_METHOD, OAuth.HMAC_SHA1);
     }
     String callback = (cks.getCallbackUrl() != null ? cks.getCallbackUrl() : defaultCallbackUrl);
+    
+    if (hostProvider != null) {
+      callback = callback.replace("%authority%", hostProvider.get().getAuthority());
+    }
+ 
     return new ConsumerInfo(consumer, cks.getKeyName(), callback);
   }
 
