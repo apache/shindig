@@ -62,7 +62,6 @@ public class DeferJsProcessor extends BaseSurfaceJsProcessor implements JsProces
     // TODO: Instead of clearing, do a replacement of feature impl with defer stubs.
     // Clearing has an effect of ignoring previous processors work.  
     if (needDefers) {
-      builder.clearJs();
       builder.appendAllJs(getSurfaceJsContents(featureRegistry, FEATURE_NAME));
     }
     builder.appendAllJs(resp.build());
