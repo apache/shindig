@@ -386,6 +386,15 @@
         <role>PMC Member</role>
       </roles>
     </developer>
+    <developer>
+      <id>rbaxter85</id>
+      <name>Ryan Baxter</name>
+      <email>rbaxter85@apache.org</email>
+      <organization>ASF</organization>
+      <roles>
+        <role>PMC Member</role>
+      </roles>
+    </developer>
 
     <!-- Mentors -->
     <developer>
