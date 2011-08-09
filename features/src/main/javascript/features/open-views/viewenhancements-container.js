@@ -216,7 +216,7 @@
 
         var gadgetRenderParams = {};
         gadgetRenderParams[osapi.container.RenderParam.VIEW] =
-            osapi.container.ee.RenderParams.EMBEDDED;
+            osapi.container.ee.RenderParam.EMBEDDED;
         gadgetRenderParams[osapi.container.RenderParam.WIDTH] = '100%';
         gadgetRenderParams[osapi.container.RenderParam.HEIGHT] = '100%';
 
@@ -225,11 +225,11 @@
         urlRenderParams[osapi.container.RenderParam.HEIGHT] = '100%';
 
         var eeRenderParams = {};
-        eeRenderParams[osapi.container.ee.RenderParams.GADGET_RENDER_PARAMS] =
+        eeRenderParams[osapi.container.ee.RenderParam.GADGET_RENDER_PARAMS] =
             gadgetRenderParams;
-        eeRenderParams[osapi.container.ee.RenderParams.URL_RENDER_PARAMS] =
+        eeRenderParams[osapi.container.ee.RenderParam.URL_RENDER_PARAMS] =
             urlRenderParams;
-        eeRenderParams[osapi.container.ee.RenderParams.GADGET_VIEW_PARAMS] =
+        eeRenderParams[osapi.container.ee.RenderParam.GADGET_VIEW_PARAMS] =
             viewParams;
 
         context.ee.navigate(element, dataModel, eeRenderParams, function(site,

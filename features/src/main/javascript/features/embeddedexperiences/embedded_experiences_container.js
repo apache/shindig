@@ -34,12 +34,12 @@
      */
     function navigateGadget_(element, dataModel, 
             renderParams, opt_callback) {
-      var viewParams = renderParams[osapi.container.ee.RenderParams.GADGET_VIEW_PARAMS] || {};
+      var viewParams = renderParams[osapi.container.ee.RenderParam.GADGET_VIEW_PARAMS] || {};
       var localRenderParams =
-        renderParams[osapi.container.ee.RenderParams.GADGET_RENDER_PARAMS] || {};
-      localRenderParams[osapi.container.ee.RenderParams.DATA_MODEL] = dataModel;
+        renderParams[osapi.container.ee.RenderParam.GADGET_RENDER_PARAMS] || {};
+      localRenderParams[osapi.container.ee.RenderParam.DATA_MODEL] = dataModel;
       localRenderParams[osapi.container.RenderParam.VIEW] =
-        osapi.container.ee.RenderParams.EMBEDDED;
+        osapi.container.ee.RenderParam.EMBEDDED;
       var site = context.newGadgetSite(element);
       var gadgetUrl = dataModel.gadget;
 
@@ -77,7 +77,7 @@
      */
     function navigateUrl_(element, dataModel, renderParams, opt_callback) {
       var urlRenderParams =
-        renderParams[osapi.container.ee.RenderParams.URL_RENDER_PARAMS] || {};
+        renderParams[osapi.container.ee.RenderParam.URL_RENDER_PARAMS] || {};
       var site = context.newUrlSite(element);
       var toReturn = context.navigateUrl(site, dataModel.url, urlRenderParams);
       if (opt_callback) {

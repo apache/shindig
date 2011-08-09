@@ -32,11 +32,11 @@ specific language governing permissions and limitations under the License.
             <exports type="js">osapi.container.Container.ee</exports>
             <exports type="js">osapi.container.Container.ee.navigate</exports>
             <exports type="js">osapi.container.Container.ee.close</exports>
-            <exports type="js">osapi.container.ee.RenderParams.GADGET_RENDER_PARAMS</exports>
-            <exports type="js">osapi.container.ee.RenderParams.GADGET_VIEW_PARAMS</exports>
-            <exports type="js">osapi.container.ee.RenderParams.URL_RENDER_PARAMS</exports>
-            <exports type="js">osapi.container.ee.RenderParams.DATA_MODEL</exports>
-            <exports type="js">osapi.container.ee.RenderParams.EMBEDDED</exports>
+            <exports type="js">osapi.container.ee.RenderParam.GADGET_RENDER_PARAMS</exports>
+            <exports type="js">osapi.container.ee.RenderParam.GADGET_VIEW_PARAMS</exports>
+            <exports type="js">osapi.container.ee.RenderParam.URL_RENDER_PARAMS</exports>
+            <exports type="js">osapi.container.ee.RenderParam.DATA_MODEL</exports>
+            <exports type="js">osapi.container.ee.RenderParam.EMBEDDED</exports>
         </api>
     </container>
 </feature>

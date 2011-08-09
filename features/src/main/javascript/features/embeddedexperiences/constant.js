@@ -31,7 +31,7 @@ osapi.container.ee = {};
  * Rendering params for an embedded experience
  * @enum {string}
  */
-osapi.container.ee.RenderParams = {
+osapi.container.ee.RenderParam = {
     GADGET_RENDER_PARAMS: 'gadgetRenderParams',
     GADGET_VIEW_PARAMS: 'gadgetViewParams',
     URL_RENDER_PARAMS: 'urlRenderParams',
