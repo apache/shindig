@@ -46,7 +46,7 @@ public class OAuthSecurityToken extends AbstractSecurityToken implements Securit
     this.domain = domain;
     this.container = container;
     this.authMode = authMode;
-    this.expiresAt = null; // TODO add
+    this.expiresAt = expiresAt;
   }
 
   public String getOwnerId() {
