@@ -85,6 +85,21 @@
       }
     };
 
+    /**
+     * Handles the RPC request letting the container know that the embedded experience gadget is rendered.
+     * @param rpcArgs the RPC args from the request.
+     * @return void.
+     */
+    function gadgetRendered_(rpcArgs) {
+      var gadgetSite = rpcArgs.gs;
+      var renderParams = gadgetSite.currentGadgetHolder_.renderParams_;
+      var eeDataModel = renderParams.eeDataModel;
+      return eeDataModel ? eeDataModel.context : null;
+    };
+
+    //Add the RPC handler to pass the context to the gadget
+    context.rpcRegister('ee_gadget_rendered', gadgetRendered_);
+
     return {
 
       /**

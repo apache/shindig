@@ -16,18 +16,11 @@
  * specific language governing permissions and limitations under the License.
  */
 
-//The URL to request the activity stream
-var ACTIVITY_STREAMS_URL = 'http://localhost:8080/social/rest/activitystreams/john.doe/';
-
 //When the document is ready kick off the request so we can render the activity stream
 $(document).ready(function() {
-	var makeRequestParams = {'CONTENT_TYPE' : 'JSON', 'METHOD' : 'GET', 'POST_DATA' : {}};
-	gadgets.io.makeNonProxiedRequest(
-			ACTIVITY_STREAMS_URL,
-			function(response) {renderAS(response.data);},
-			makeRequestParams,
-			'application/javascript'
-	);
+  osapi.activitystreams.get({userId: 'john.doe'}).execute(function(response){
+    renderAS(response);
+  });
 });
 
 
@@ -35,8 +28,6 @@ $(document).ready(function() {
 //Initiate the common container code and register any RPC listeners for embedded experiences
 var CommonContainer = new osapi.container.Container({});
 CommonContainer.init = new function() {
-
-	CommonContainer.rpcRegister('ee_gadget_rendered', gadgetRendered);
 
 	CommonContainer.views.createElementForEmbeddedExperience = function(opt_viewTarget) {
 	  return document.getElementById('preview');
@@ -48,29 +39,12 @@ CommonContainer.init = new function() {
 }
 
 /**
- * Handles the RPC request letting the container know that the embedded experience gadget is rendered.
- * @param rpcArgs the RPC args from the request.
- * @param data any data passed in from the caller.
- * @return void.
- */
-function gadgetRendered(rpcArgs, data) {
-	var gadgetSite = rpcArgs.gs;
-	var renderParams = gadgetSite.currentGadgetHolder_.renderParams_;
-	var eeDataModel = renderParams.eeDataModel;
-	var context = null;
-	if (eeDataModel) {
-		context = eeDataModel.context;
-	}
-	rpcArgs.callback(context);
-}
-
-/**
  * Renders the activity stream on the page
  * @param stream the activity stream json.
  * @return void.
  */
 function renderAS(stream) {
-	jQuery.each(stream.entry, createAccordianEntry);
+	jQuery.each(stream.list, createAccordianEntry);
 	$('#accordion').accordion({
 		clearStyle: true,
 		active: false,
@@ -111,7 +85,7 @@ function closeCurrentGadget() {
 function onAccordionChange(stream, event, ui) {
 	var id = ui.newHeader.context.id;
 	var localStream = stream;
-	var entry = localStream.entry[id];
+	var entry = localStream.list[id];
 	var extensions = entry.openSocial;
 	if (extensions) {
 		var embed = extensions.embed;
