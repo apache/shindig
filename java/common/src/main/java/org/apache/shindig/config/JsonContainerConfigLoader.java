@@ -21,6 +21,7 @@ package org.apache.shindig.config;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 
 import com.google.common.collect.Maps;
@@ -265,8 +266,12 @@ public class JsonContainerConfigLoader {
   }
 
   private static Map<String, Object> jsonToMap(JSONObject json) {
+    String[] keys = JSONObject.getNames(json);
+    if (keys == null) {
+      return ImmutableMap.of();
+    }
     Map<String, Object> values = new HashMap<String, Object>(json.length(), 1);
-    for (String key : JSONObject.getNames(json)) {
+    for (String key : keys) {
       Object val = jsonToConfig(json.opt(key));
       values.put(key, val);
     }

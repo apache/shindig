@@ -77,6 +77,7 @@ public abstract class AbstractHttpCache implements HttpCache {
   private static final String RESIZE_HEIGHT = UriCommon.Param.RESIZE_HEIGHT.getKey();
   private static final String RESIZE_WIDTH = UriCommon.Param.RESIZE_WIDTH.getKey();
   private static final String RESIZE_QUALITY = UriCommon.Param.RESIZE_QUALITY.getKey();
+  private static final String NO_EXPAND = UriCommon.Param.NO_EXPAND.getKey();
 
   // Amount of time after which the entry in cache should be considered for a refetch for a
   // non-userfacing internal fetch when the response is strict-no-cache. 
@@ -205,6 +206,7 @@ public abstract class AbstractHttpCache implements HttpCache {
    * - the resize height parameter
    * - the resize width parameter
    * - the resize quality parameter
+   * - the no_expand parameter
    *
    * Except for the first two, all of these may be unset or <code>null</code>,
    * depending on authentication rules. See individual methods for details.  New cache key items
@@ -230,6 +232,7 @@ public abstract class AbstractHttpCache implements HttpCache {
         .setParam("rh", request.getParam(RESIZE_HEIGHT))
         .setParam("rw", request.getParam(RESIZE_WIDTH))
         .setParam("rq", request.getParam(RESIZE_QUALITY))
+        .setParam("ne", request.getParam(NO_EXPAND))
         .setParam("rm", request.getRewriteMimeType());
 
     return keyBuilder.build();

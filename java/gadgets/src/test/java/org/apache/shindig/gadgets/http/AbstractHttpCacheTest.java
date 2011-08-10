@@ -69,7 +69,7 @@ public class AbstractHttpCacheTest {
   }
 
   private HttpRequest getMockImageRequest(String height, String width, String quality,
-      String mimeType) {
+      boolean noExpand, String mimeType) {
     HttpRequest request = EasyMock.createMock(HttpRequest.class);
     expect(request.getUri()).andReturn(IMAGE_URI).anyTimes();
     expect(request.getAuthType()).andReturn(AuthType.NONE).anyTimes();
@@ -77,6 +77,7 @@ public class AbstractHttpCacheTest {
     expect(request.getParam(Param.RESIZE_HEIGHT.getKey())).andReturn(height).anyTimes();
     expect(request.getParam(Param.RESIZE_WIDTH.getKey())).andReturn(width).anyTimes();
     expect(request.getParam(Param.RESIZE_QUALITY.getKey())).andReturn(quality).anyTimes();
+    expect(request.getParam(Param.NO_EXPAND.getKey())).andReturn(noExpand ? "1" : null).anyTimes();
     expect(request.getRewriteMimeType()).andReturn(mimeType).anyTimes();
     replay(request);
     return request;
@@ -85,7 +86,7 @@ public class AbstractHttpCacheTest {
   @Test
   public void createKeySimpleImageRequest() throws Exception {
     // Mock the Request with Image Resize (Quality) params, without rewrite mimeType.
-    HttpRequest request = getMockImageRequest("100", "80", "70", null);
+    HttpRequest request = getMockImageRequest("100", "80", "70", false, null);
     CacheKeyBuilder key = new CacheKeyBuilder()
         .setLegacyParam(0, IMAGE_URI)
         .setLegacyParam(1, AuthType.NONE)
@@ -99,13 +100,14 @@ public class AbstractHttpCacheTest {
   @Test
   public void createKeyImageRequestRewrite() throws Exception {
     // Mock the Request with Image Resize (Quality) params and specified rewrite mimeType.
-    HttpRequest request = getMockImageRequest("100", "80", "70", "image/jpg");
+    HttpRequest request = getMockImageRequest("100", "80", "70", true, "image/jpg");
     CacheKeyBuilder key = new CacheKeyBuilder()
         .setLegacyParam(0, IMAGE_URI)
         .setLegacyParam(1, AuthType.NONE)
         .setParam("rh", "100")
         .setParam("rw", "80")
         .setParam("rq", "70")
+        .setParam("ne", "1")
         .setParam("rm", "image/jpg");
 
     assertEquals(key.build(), cache.createKey(request));
