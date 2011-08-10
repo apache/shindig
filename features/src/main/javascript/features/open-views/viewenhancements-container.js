@@ -332,21 +332,23 @@
 
   /**
    * Gets the dimensions of the container displaying the gadget.
+   *
+   * @param {function}
+   *          resultCallback: Callback function will be called with the return
+   *          value as a parameter.
    */
-  function getContainerDimensions() {
-    var el = document.documentElement; // Container
-    // element
-    if (el !== undefined)
-      // return client width and client height
-      return {
-        'width' : el.clientWidth,
-        'height' : el.clientHeight
-      };
-    else
-      return {
-        'width' : -1,
-        'height' : -1
-      };
+  function getContainerDimensions(resultCallback) {
+    if (resultCallback == null) {
+      return;
+    }
+    var el = document.documentElement; // Container element
+    var result = {'width' : -1, 'height': -1};
+    if (el !== undefined) {
+      result.width = el.clientWidth;
+      result.height = el.clientHeight;
+    }
+    // return client width and client height
+    resultCallback(result);
   }
 
   osapi.container.Container.addMixin('views', function(container) {

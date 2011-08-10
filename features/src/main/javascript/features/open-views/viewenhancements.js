@@ -35,8 +35,8 @@ gadgets['window'] = gadgets['window'] || {};
    *          closes. The function will be called with the return value as a
    *          parameter.
    * @param {function}
-   *          idCallback: Callback function to be called with the id of the
-   *          Site which has been opened.
+   *          navigateCallback: Callback function to be called with the
+   *          site and gadget metadata.
    * @param {Object}
    *          opt_params: These are optional parameters which can be used to
    *          open gadgets. The following parameters may be included in this
@@ -48,9 +48,10 @@ gadgets['window'] = gadgets['window'] || {};
    *          parameters for the view being rendered.
    */
 
-  gadgets.views.openGadget = function(resultCallback, idCallback, opt_params) {
+  gadgets.views.openGadget = function(resultCallback, navigateCallback,
+          opt_params) {
     gadgets.rpc.call('..', 'gadgets.views.openGadget', null, resultCallback,
-        idCallback, opt_params);
+        navigateCallback, opt_params);
   };
 
   /**
@@ -92,14 +93,14 @@ gadgets['window'] = gadgets['window'] || {};
    *          url: URL to a web page to open in a URL site in the container.
    *          (Note this should not be a URL to a gadget definition.).
    * @param {function}
-   *          idCallback: Callback function to be called with the id of the
+   *          navigateCallback: Callback function to be called with the
    *          site which has been opened.
    * @param {string=}
    *          opt_viewTarget: Optional parameter,the view that indicates where
    *          to open the URL.
    */
-  gadgets.views.openUrl = function(url, idCallback, opt_viewTarget) {
-    gadgets.rpc.call('..', 'gadgets.views.openUrl', null, url, idCallback,
+  gadgets.views.openUrl = function(url, navigateCallback, opt_viewTarget) {
+    gadgets.rpc.call('..', 'gadgets.views.openUrl', null, url, navigateCallback,
         opt_viewTarget);
   }
 
@@ -107,12 +108,12 @@ gadgets['window'] = gadgets['window'] || {};
    * Closes an opened site. If the opt_id parameter is null the container will
    * close the calling site.
    *
-   * @param {string}
-   *          opt_id: Optional parameter which specifies what site to close.
+   * @param {Object=}
+   *          opt_site: Optional parameter which specifies what site to close.
    *          If null it will close the current gadget site.
    */
-  gadgets.views.close = function(id) {
-    gadgets.rpc.call('..', 'gadgets.views.close', null, id);
+  gadgets.views.close = function(opt_site) {
+    gadgets.rpc.call('..', 'gadgets.views.close', null, opt_site);
   };
 
   /**
@@ -138,7 +139,7 @@ gadgets['window'] = gadgets['window'] || {};
    */
   gadgets.window.getContainerDimensions = function(resultCallback) {
     gadgets.rpc.call('..', 'gadgets.window.getContainerDimensions',
-        resultCallback, null);
+        null, resultCallback);
   }
 
 }());

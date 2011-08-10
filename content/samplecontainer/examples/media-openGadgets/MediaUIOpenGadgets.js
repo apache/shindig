@@ -349,6 +349,17 @@ function MediaUI(social) {
    */
   function editMediaItemPopupInGadget(album, mediaItem) {
 
+    function resultCallback(result) {
+      if (result != null) {
+        console.log('container width = ' + result.width);
+        console.log('container height = ' + result.height);
+      }
+    }
+    // Just an example to show how to use the getContainerDimensions API,
+    // it doesn't serve any other purpose for editMediaItemPopupInGadget
+    // function.
+    gadgets.window.getContainerDimensions(resultCallback);
+
     function callback(newMediaItem) {
       var albumId = mediaItem == null ? album.id : mediaItem.albumId;
 

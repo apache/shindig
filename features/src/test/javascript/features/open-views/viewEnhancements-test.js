@@ -130,8 +130,8 @@ ViewEnhancementsTest.inherits(TestCase);
 
     this.assertEquals('..', rpcs[0][0]);
     this.assertEquals('gadgets.window.getContainerDimensions', rpcs[0][1]);
-    this.assertEquals(resultCallback, rpcs[0][2]);
-    this.assertNull('Assert null error', rpcs[0][3]);
+    this.assertNull('Assert null error', rpcs[0][2]);
+    this.assertEquals(resultCallback, rpcs[0][3]);
   };
 
 })();
