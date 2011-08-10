@@ -59,7 +59,7 @@ public class SampleOAuthDataStore implements OAuthDataStore {
   @Inject
   public SampleOAuthDataStore(JsonDbOpensocialService dbService, @Named("shindig.oauth.base-url") String baseUrl) {
     this.service = dbService;
-    this.SERVICE_PROVIDER = new OAuthServiceProvider(baseUrl + "requestToken", baseUrl + "authorize", baseUrl + "accessToken");
+    this.SERVICE_PROVIDER = new OAuthServiceProvider(baseUrl + "/requestToken", baseUrl + "/authorize", baseUrl + "/accessToken");
   }
 
   // All valid OAuth tokens
