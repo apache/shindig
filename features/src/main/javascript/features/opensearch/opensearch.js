@@ -290,7 +290,7 @@
         }
       }
       return false;
-    }//,
+    }
 
     /*
      * Convenience method for unit testing, allowing the test script to set

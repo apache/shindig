@@ -17,6 +17,9 @@
  */
 package org.apache.shindig.gadgets.js;
 
+import org.apache.shindig.gadgets.rewrite.js.ClosureJsCompiler;
+import org.apache.shindig.gadgets.rewrite.js.JsCompiler;
+
 import com.google.inject.AbstractModule;
 
 /**
@@ -26,6 +29,6 @@ public class JsCompilerModule extends AbstractModule {
 
   @Override
   protected void configure() {
-    // nothing to configure here
+    bind(JsCompiler.class).to(ClosureJsCompiler.class);
   }
 }

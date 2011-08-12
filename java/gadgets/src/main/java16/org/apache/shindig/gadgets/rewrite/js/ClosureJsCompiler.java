@@ -17,31 +17,17 @@
  */
 package org.apache.shindig.gadgets.rewrite.js;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Joiner;
-import com.google.common.base.Objects;
-import com.google.common.base.Splitter;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.debugging.sourcemap.SourceMapping;
-import com.google.debugging.sourcemap.SourceMapConsumerFactory;
-import com.google.debugging.sourcemap.SourceMapParseException;
-import com.google.debugging.sourcemap.proto.Mapping.OriginalMapping;
-import com.google.inject.Inject;
-import com.google.javascript.jscomp.BasicErrorManager;
-import com.google.javascript.jscomp.CheckLevel;
-import com.google.javascript.jscomp.CompilationLevel;
-import com.google.javascript.jscomp.Compiler;
-import com.google.javascript.jscomp.CompilerOptions;
-import com.google.javascript.jscomp.JSError;
-import com.google.javascript.jscomp.JSSourceFile;
-import com.google.javascript.jscomp.Result;
-import com.google.javascript.jscomp.SourceMap;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.shindig.common.cache.Cache;
 import org.apache.shindig.common.cache.CacheProvider;
+import org.apache.shindig.common.logging.i18n.MessageKeys;
 import org.apache.shindig.common.util.HashUtil;
 import org.apache.shindig.gadgets.features.ApiDirective;
 import org.apache.shindig.gadgets.features.FeatureRegistry.FeatureBundle;
@@ -49,13 +35,31 @@ import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.js.JsContent;
 import org.apache.shindig.gadgets.js.JsResponse;
 import org.apache.shindig.gadgets.js.JsResponseBuilder;
-import org.apache.shindig.gadgets.rewrite.js.JsCompiler;
 import org.apache.shindig.gadgets.uri.JsUriManager.JsUri;
 
-import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Joiner;
+import com.google.common.base.Objects;
+import com.google.common.base.Splitter;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.debugging.sourcemap.SourceMapConsumerFactory;
+import com.google.debugging.sourcemap.SourceMapParseException;
+import com.google.debugging.sourcemap.SourceMapping;
+import com.google.debugging.sourcemap.proto.Mapping.OriginalMapping;
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
+import com.google.javascript.jscomp.BasicErrorManager;
+import com.google.javascript.jscomp.CheckLevel;
+import com.google.javascript.jscomp.CommandLineRunner;
+import com.google.javascript.jscomp.CompilationLevel;
+import com.google.javascript.jscomp.Compiler;
+import com.google.javascript.jscomp.CompilerOptions;
+import com.google.javascript.jscomp.JSError;
+import com.google.javascript.jscomp.JSSourceFile;
+import com.google.javascript.jscomp.Result;
+import com.google.javascript.jscomp.SourceMap;
 
 public class ClosureJsCompiler implements JsCompiler {
   // Based on Closure Library's goog.exportSymbol implementation.
@@ -65,32 +69,65 @@ public class ClosureJsCompiler implements JsCompiler {
               + "for(;parts.length&&(part=parts.shift());){if(!parts.length){"
               + "cur[part]=obj;}else{cur=cur[part]||(cur[part]={})}}};", "[goog.exportSymbol]");
 
+  //class name for logging purpose
+  private static final String classname = ClosureJsCompiler.class.getName();
+  private static final Logger LOG = Logger.getLogger(classname, MessageKeys.MESSAGES);
+
   @VisibleForTesting
   static final String CACHE_NAME = "CompiledJs";
 
   private final DefaultJsCompiler defaultCompiler;
   private final Cache<String, JsResponse> cache;
+  private final List<JSSourceFile> defaultExterns;
+  private final String compileLevel;
+  private final CompilerOptions compilerOptions;
 
   @Inject
-  public ClosureJsCompiler(DefaultJsCompiler defaultCompiler, CacheProvider cacheProvider) {
+  public ClosureJsCompiler(DefaultJsCompiler defaultCompiler, CacheProvider cacheProvider,
+      @Named("shindig.closure.compile.level") String level) {
     this.cache = cacheProvider.createCache(CACHE_NAME);
     this.defaultCompiler = defaultCompiler;
+    List<JSSourceFile> externs = null;
+    try {
+      externs = Collections.unmodifiableList(CommandLineRunner.getDefaultExterns());
+    } catch(IOException e) {
+      if (LOG.isLoggable(Level.WARNING)) {
+        LOG.log(Level.WARNING, "Unable to load default closure externs: " + e.getMessage(), e);
+      }
+    }
+    defaultExterns = externs;
+
+    compileLevel = level.toLowerCase().trim();
+    compilerOptions = defaultCompilerOptions();
   }
 
-  public static CompilerOptions defaultCompilerOptions() {
+  public CompilerOptions defaultCompilerOptions() {
     CompilerOptions result = new CompilerOptions();
-    CompilationLevel.ADVANCED_OPTIMIZATIONS.setOptionsForCompilationLevel(result);
+    if (compileLevel.equals("advanced")) {
+      CompilationLevel.ADVANCED_OPTIMIZATIONS.setOptionsForCompilationLevel(result);
+    }
+    else if (compileLevel.equals("whitespace_only")) {
+      CompilationLevel.WHITESPACE_ONLY.setOptionsForCompilationLevel(result);
+    }
+    else {
+      // If 'none', this complier will not run, @see compile
+      CompilationLevel.SIMPLE_OPTIMIZATIONS.setOptionsForCompilationLevel(result);
+    }
     return result;
   }
 
   @VisibleForTesting
   protected CompilerOptions getCompilerOptions(JsUri uri) {
-    CompilerOptions options = defaultCompilerOptions();
-
-    if (outputCorrelatedJs()) {
-      setSourceMapCompilerOptions(options);
+    /*
+     * This method gets called many times over the course of a single compilation.
+     * Keep the instantiated compiler options unless we need to set SourceMap options
+     */
+    if (!outputCorrelatedJs()) {
+      return compilerOptions;
     }
 
+    CompilerOptions options = defaultCompilerOptions();
+    setSourceMapCompilerOptions(options);
     return options;
   }
 
@@ -125,8 +162,15 @@ public class ClosureJsCompiler implements JsCompiler {
     // Only run actual compiler if necessary.
     CompilerOptions options = getCompilerOptions(jsUri);
 
-    if (!jsUri.isDebug() || options.isExternExportsEnabled()) {
-      return doCompile(jsUri, content, externs, cacheKey);
+    if (!compileLevel.equals("none")) {
+      /*
+       *  isDebug usually will turn off all compilation, however, setting
+       *  isExternExportsEnabled and specifying an export path will keep the
+       *  closure compiler on and export the externs for debugging.
+       */
+      if (!jsUri.isDebug() || options.isExternExportsEnabled()) {
+        return doCompile(jsUri, content, externs, cacheKey);
+      }
     }
 
     return doDebug(content, cacheKey);
@@ -148,6 +192,9 @@ public class ClosureJsCompiler implements JsCompiler {
 
     List<JSSourceFile> allExterns = Lists.newArrayList();
     allExterns.add(JSSourceFile.fromCode("externs", externs));
+    if (defaultExterns != null) {
+      allExterns.addAll(defaultExterns);
+    }
 
     List<JsContent> allContent = Lists.newLinkedList(content);
     if (options.isExternExportsEnabled()) {

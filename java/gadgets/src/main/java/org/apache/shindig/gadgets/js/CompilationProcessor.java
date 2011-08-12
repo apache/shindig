@@ -33,7 +33,6 @@ public class CompilationProcessor implements JsProcessor {
 
   /**
    * Compile content in the inbound JsResponseBuilder.
-   * TODO: Re-add support for externs here if they're ever used.
    * TODO: Convert JsCompiler to take JsResponseBuilder directly rather than Iterable<JsContent>
    * @throws JsException
    */
@@ -42,7 +41,7 @@ public class CompilationProcessor implements JsProcessor {
     for (JsContent jsc : jsContents) {
       FeatureBundle bundle = jsc.getFeatureBundle();
       if (bundle != null) {
-        builder.appendExterns(bundle.getApis(ApiDirective.Type.JS, false));
+        builder.appendExterns(bundle.getApis(ApiDirective.Type.JS, true));
       }
     }
 

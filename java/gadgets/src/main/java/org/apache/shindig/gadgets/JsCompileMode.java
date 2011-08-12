@@ -48,7 +48,7 @@ public enum JsCompileMode {
         return mode;
       }
     }
-    return JsCompileMode.COMPILE_CONCAT;
+    return getDefault();
   }
 
   public static JsCompileMode getDefault() {

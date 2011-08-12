@@ -108,7 +108,7 @@ public class CompilationProcessorTest {
 
   private FeatureBundle mockBundle(String... externs) {
     FeatureBundle result = createMock(FeatureBundle.class);
-    expect(result.getApis(ApiDirective.Type.JS, false)).andReturn(
+    expect(result.getApis(ApiDirective.Type.JS, true)).andReturn(
         Lists.newArrayList(externs)).anyTimes();
     replay(result);
     return result;

@@ -350,9 +350,9 @@ public class EndToEndTest {
     // to synchronous, saving the test from needing to wait or sleep for XHR
     // completion.
     webClient.setAjaxController(new NicelyResynchronizingAjaxController());
-    webClient.waitForBackgroundJavaScript(2000);
+    webClient.waitForBackgroundJavaScript(120000);  // Closure can take a long time...
     webClient.setHTMLParserListener(HTMLParserListener.LOG_REPORTER);
-    webClient.setTimeout(3000);
+    webClient.setTimeout(120000);  // Closure can take a long time...
 
     alertHandler = new CollectingAlertHandler();
     webClient.setAlertHandler(alertHandler);
@@ -427,7 +427,6 @@ public class EndToEndTest {
     if (!(page instanceof HtmlPage)) {
       fail("Got wrong page type. Was: " + page.getWebResponse().getContentType());
     }
-    webClient.waitForBackgroundJavaScript(5000);
     return (HtmlPage) page;
   }
 

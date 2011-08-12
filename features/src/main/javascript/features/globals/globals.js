@@ -20,16 +20,16 @@
  * @namespace The global gadgets namespace
  * @type {Object}
  */
-var gadgets = window['gadgets'] || {};
+gadgets = window['gadgets'] || {};
 
 /**
  * @namespace The global shindig namespace, used for shindig specific extensions and data
  * @type {Object}
  */
-var shindig = window['shindig'] || {};
+shindig = window['shindig'] || {};
 
 /**
  * @namespace The global osapi namespace, used for opensocial API specific extensions
  * @type {Object}
  */
-var osapi = window['osapi'] || {};
+osapi = window['osapi'] || {};
