@@ -363,6 +363,7 @@ function MediaUI(social) {
         // Handles destroying the dialog popup
         function destroyDialog() {
             console.log('destroyDialog');
+            dialog.hide();
             dialog.destroyRecursive(false);
             dialog.destroyRendering(false);
             dialog.destroy(false);
@@ -491,6 +492,7 @@ function MediaUI(social) {
         // Handles destroying the dialog popup
         function destroyDialog() {
             console.log('destroyDialog');
+            dialog.hide();
             dialog.destroyRecursive(false);
             dialog.destroyRendering(false);
             dialog.destroy(false);
