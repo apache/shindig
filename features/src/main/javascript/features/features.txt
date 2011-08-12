@@ -50,8 +50,10 @@ features/core/feature.xml
 features/defer.test/feature.xml
 features/deferjs/feature.xml
 features/dynamic-height.height/feature.xml
-features/dynamic-height.util/feature.xml
 features/dynamic-height/feature.xml
+features/dynamic-size.util/feature.xml
+features/dynamic-width.width/feature.xml
+features/dynamic-width/feature.xml
 features/embeddedexperiences/feature.xml
 features/exportjs/feature.xml
 features/flash/feature.xml

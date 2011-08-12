@@ -20,7 +20,7 @@ specific language governing permissions and limitations under the License.
   <name>dynamic-height.height</name>
   <dependency>globals</dependency>
   <dependency>taming</dependency>
-  <dependency>dynamic-height.util</dependency>
+  <dependency>dynamic-size.util</dependency>
   <all>
     <script src="dynamic-height-height.js"/>
     <script src="taming.js" caja="1"/>

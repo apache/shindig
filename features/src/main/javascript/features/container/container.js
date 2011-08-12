@@ -625,6 +625,14 @@ osapi.container.Container.prototype.registerRpcServices_ = function() {
     }
   });
 
+  this.rpcRegister('resize_iframe_width', function(rpcArgs, newWidth) {
+    var site = rpcArgs[osapi.container.GadgetSite.RPC_ARG_KEY];
+    if (site) { // Check if site is not already closed.
+      site.setWidth(newWidth);
+    }
+    return true;
+  });
+
   /**
    * @see setprefs.js setprefs feature.
    */

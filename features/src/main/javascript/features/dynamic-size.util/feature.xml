@@ -19,11 +19,11 @@ specific language governing permissions and limitations under the License.
 
 <!-- TODO: rename to dynamic-height.viewport -->
 <feature>
-  <name>dynamic-height.util</name>
+  <name>dynamic-size.util</name>
   <dependency>globals</dependency>
   <dependency>taming</dependency>
   <all>
-    <script src="dynamic-height-util.js"/>
+    <script src="dynamic-size-util.js"/>
     <script src="taming.js" caja="1"/>
     <api>
       <exports type="js">gadgets.window.getViewportDimensions</exports>

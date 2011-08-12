@@ -21,7 +21,7 @@ specific language governing permissions and limitations under the License.
   <dependency>globals</dependency>
   <dependency>taming</dependency>
   <dependency>dynamic-height.height</dependency>
-  <dependency>dynamic-height.util</dependency>
+  <dependency>dynamic-size.util</dependency>
   <dependency>rpc</dependency>
   <gadget>
     <script src="dynamic-height.js"/>

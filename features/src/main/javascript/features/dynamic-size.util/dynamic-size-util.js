@@ -17,8 +17,8 @@
  */
 
 /**
- * @fileoverview This library augments gadgets.window with functionality
- * to get the frame's viewport dimensions.
+ * @fileoverview This library augments gadgets.window with functionality to get the frame's viewport
+ *               dimensions.
  */
 
 gadgets.window = gadgets.window || {};
@@ -27,10 +27,11 @@ gadgets.window = gadgets.window || {};
 // as members of gadgets.window.
 (function() {
   /**
-   * Detects the inner dimensions of a frame.
-   * See: http://www.quirksmode.org/viewport/compatibility.html for more
-   * information.
+   * Detects the inner dimensions of a frame. See:
+   * http://www.quirksmode.org/viewport/compatibility.html for more information.
+   * 
    * @return {Object} An object with width and height properties.
+   * @member gadgets.window
    */
   gadgets.window.getViewportDimensions = function() {
     var x = 0;
@@ -39,8 +40,7 @@ gadgets.window = gadgets.window || {};
       // all except Explorer
       x = self.innerWidth;
       y = self.innerHeight;
-    } else if (document.documentElement &&
-               document.documentElement.clientHeight) {
+    } else if (document.documentElement && document.documentElement.clientHeight) {
       // Explorer 6 Strict Mode
       x = document.documentElement.clientWidth;
       y = document.documentElement.clientHeight;
@@ -49,6 +49,9 @@ gadgets.window = gadgets.window || {};
       x = document.body.clientWidth;
       y = document.body.clientHeight;
     }
-    return {width: x, height: y};
+    return {
+            width : x,
+            height : y
+    };
   };
 })();
