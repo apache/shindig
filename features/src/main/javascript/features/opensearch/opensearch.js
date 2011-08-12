@@ -103,7 +103,7 @@
    *            gadget module.
    */
   function preloaded(response) {
-    for (item in response) {
+    for (var item in response) {
       if (!response[item].error) {
         // check for os feature
         var feature = response[item].modulePrefs.features['opensearch'];
