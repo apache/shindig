@@ -29,6 +29,7 @@ import com.google.common.collect.Lists;
 
 import org.junit.Test;
 
+import java.io.FileNotFoundException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
@@ -106,7 +107,7 @@ public class DefaultSecurityTokenCodecTest {
       fail("Should have thrown");
     } catch (RuntimeException e) {
       assertTrue("root cause should have been FileNotFoundException: " + e,
-          e.getMessage().contains("FileNotFoundException: container key file: somecontainer"));
+          e.getCause() instanceof FileNotFoundException);
     }
   }
 }

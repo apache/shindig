@@ -78,13 +78,7 @@ public class BasicBlobCrypter implements BlobCrypter {
       FileInputStream openFile = new FileInputStream(keyfile);
       reader = new BufferedReader(
           new InputStreamReader(openFile, Charsets.UTF_8));
-      String line = reader.readLine();
-      if (line == null) {
-        throw new IOException("Unexpectedly empty keyfile:" + keyfile);
-      }
-      line = line.trim();
-      byte[] keyBytes = CharsetUtil.getUtf8Bytes(line);
-      init(keyBytes);
+      init(reader.readLine());
     } finally {
       try {
         if (reader != null) {
@@ -103,6 +97,24 @@ public class BasicBlobCrypter implements BlobCrypter {
    */
   public BasicBlobCrypter(byte[] masterKey) {
     init(masterKey);
+  }
+
+  /**
+   * Builds a BlobCrypter from the specified master key
+   *
+   * @param masterKey
+   */
+  public BasicBlobCrypter(String masterKey) {
+    init(masterKey);
+  }
+
+  private void init(String masterKey) {
+    if (masterKey == null) {
+      throw new IllegalArgumentException("Unexpectedly empty masterKey:" + masterKey);
+    }
+    masterKey = masterKey.trim();
+    byte[] keyBytes = CharsetUtil.getUtf8Bytes(masterKey);
+    init(keyBytes);
   }
 
   private void init(byte[] masterKey) {

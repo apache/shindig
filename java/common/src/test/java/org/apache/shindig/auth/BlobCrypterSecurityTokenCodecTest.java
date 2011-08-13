@@ -91,14 +91,16 @@ public class BlobCrypterSecurityTokenCodecTest {
     }
 
     /**
-     * @return a crypter based on the name of the file passed in, rather than the contents
+     * @param file the location of the file.
+     * @return a crypter based on the name of the file passed in, rather than the contents.
+     * @throws IOException when passed a filename with 'fail' in it.
      */
     @Override
-    protected BlobCrypter loadCrypterFromFile(File file) throws IOException {
-      if (file.getPath().contains("fail")) {
+    protected BlobCrypter loadCrypter(String file) throws IOException {
+      if (file.contains("fail")) {
         throw new IOException("Load failed: " + file);
       }
-      return getBlobCrypter(file.getPath());
+      return getBlobCrypter(file);
     }
   }
 

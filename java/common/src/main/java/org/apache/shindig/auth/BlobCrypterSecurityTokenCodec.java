@@ -18,10 +18,12 @@
  */
 package org.apache.shindig.auth;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.crypto.BasicBlobCrypter;
 import org.apache.shindig.common.crypto.BlobCrypter;
 import org.apache.shindig.common.crypto.BlobCrypterException;
+import org.apache.shindig.common.util.ResourceLoader;
 import org.apache.shindig.config.ContainerConfig;
 
 import com.google.common.collect.Maps;
@@ -76,6 +78,7 @@ public class BlobCrypterSecurityTokenCodec implements SecurityTokenCodec, Contai
     } catch (IOException e) {
       // Someone specified securityTokenKeyFile, but we couldn't load the key.  That merits killing
       // the server.
+      LOG.log(Level.SEVERE, "Error while initializing BlobCrypterSecurityTokenCodec", e);
       throw new RuntimeException(e);
     }
   }
@@ -106,7 +109,7 @@ public class BlobCrypterSecurityTokenCodec implements SecurityTokenCodec, Contai
     for (String container : containers) {
       String keyFile = config.getString(container, SECURITY_TOKEN_KEY_FILE);
       if (keyFile != null) {
-        BlobCrypter crypter = loadCrypterFromFile(new File(keyFile));
+        BlobCrypter crypter = loadCrypter(keyFile);
         crypters.put(container, crypter);
       }
       String domain = config.getString(container, SIGNED_FETCH_DOMAIN);
@@ -115,11 +118,16 @@ public class BlobCrypterSecurityTokenCodec implements SecurityTokenCodec, Contai
   }
 
   /**
-   * Load a BlobCrypter from the specified file.  Override this if you have your own
+   * Load a BlobCrypter from the key file.  Override this if you have your own
    * BlobCrypter implementation.
+   *
+   * @param keyFile The key file to load from.  This can either be an absolute file path or a
+   * reference to a resource that should be loaded from the classpath (ie res://key-file.txt).
+   * @return The BlobCrypter.
+   * @throws IOException If the key file is invalid.
    */
-  protected BlobCrypter loadCrypterFromFile(File file) throws IOException {
-    return new BasicBlobCrypter(file);
+  protected BlobCrypter loadCrypter(String keyFile) throws IOException {
+    return new BasicBlobCrypter(IOUtils.toString(ResourceLoader.open(keyFile), "UTF-8"));
   }
 
   /**
