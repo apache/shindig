@@ -1,6 +1,11 @@
 // Create the common container object.
 var CommonContainer = new osapi.container.Container({});
 
+// Default the security token for the container. Using this example security
+// token requires enabling the DefaultSecurityTokenCodec to let
+// UrlParameterAuthenticationHandler create valid security token.
+shindig.auth.updateSecurityToken('john.doe:john.doe:appid:cont:url:0:default');
+
 // Wrapper function to set the gadget site/id and default width.
 CommonContainer.renderGadget = function(gadgetURL, gadgetId) {
   // going to hardcode these values for width.
@@ -15,7 +20,7 @@ CommonContainer.renderGadget = function(gadgetURL, gadgetId) {
 // Function for pre-rendering gadgets.  Gadget pre-rendering
 // occurs when an action contributed by a pre-loaded gadget
 // is executed.
-function preRenderGadget(gadgetUrl, opt_metadata) {
+function preRenderGadget(gadgetUrl, opt_params) {
   var gadgetId = getGadgetId(gadgetUrl);
   var el = $('#gadget-site-' + gadgetId);
   var gadgetSite = CommonContainer.renderGadget(gadgetUrl, gadgetId);

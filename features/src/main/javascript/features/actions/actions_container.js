@@ -43,9 +43,6 @@
     // one-to-many association of urls to gadget sites
     this.urlToSite = {};
 
-    // one-to-one relationship of each url to the gadget metadata
-    this.urlToMetadata = {};
-
     // one-to-one relationship of each action to the url
     this.actionToUrl = {};
 
@@ -297,29 +294,6 @@
     this.getUrl = function(actionId) {
       return this.actionToUrl[actionId];
     };
-
-    /**
-     * Saves the metadata associated with a url
-     *
-     * @param {String}
-     *          url Gadget spec url.
-     * @param {Object}
-     *          metadata Metadata of the gadget.
-     */
-    this.setGadgetMetadata = function(url, metadata) {
-      this.urlToMetadata[url] = metadata;
-    };
-
-    /**
-     * Returns the metadata associated with a url
-     *
-     * @param {String}
-     *          url Gadget spec url.
-     * @return {Object} metadata Metadata for a gadget.
-     */
-    this.getGadgetMetadata = function(url) {
-      return this.urlToMetadata[url];
-    };
   };
 
   /**
@@ -451,7 +425,6 @@
     for (var url in response) {
       var metadata = response[url];
       if (!metadata.error) {
-        registry.setGadgetMetadata(url, metadata);
         if (metadata.modulePrefs) {
           var feature = metadata.modulePrefs.features['actions'];
           if (feature && feature.params) {
@@ -581,9 +554,9 @@
    * @param {String}
    *          gadgetSpecUrl The gadget spec url.
    * @param {Object}
-   *          gadgetMetadata  The gadget meta data.
+   *          opt_params  The optional parameters for rendering the gadget.
    */
-  var renderGadgetInContainer = function(gadgetSpecUrl, gadgetMetadata) {};
+  var renderGadgetInContainer = function(gadgetSpecUrl, opt_params) {};
 
   // instantiate the singleton action registry
   var registry = new ActionRegistry();
@@ -608,7 +581,6 @@
     }
 
     return /** @scope osapi.container.actions */ {
-
       /**
        * Registers a function to display actions in the container.
        *
@@ -643,7 +615,7 @@
        * @param {function}
        *          The container's function to render gadgets in its UI.
        *          The function takes in two parameters: the gadget spec
-       *          url and the gadget metadata.
+       *          url and optional parameters.
        */
       registerNavigateGadgetHandler: function(renderGadgetFunction) {
         if (typeof renderGadgetFunction === 'function') {
@@ -664,17 +636,24 @@
        *          The action id.
        */
       runAction: function(actionId) {
-        if (registry.getItemById(actionId)) {
+        var action = registry.getItemById(actionId);
+        if (action) {
           // if gadget site has not been registered yet
           // the gadget needs to be rendered
           var gadgetSite = registry.getGadgetSite(actionId);
           if (!gadgetSite) {
             var gadgetUrl = registry.getUrl(actionId);
-            var gadgetMetadata = registry.getGadgetMetadata(gadgetUrl);
             pendingActions[actionId] = {
               selection: container_.selection.getSelection()
             };
-            renderGadgetInContainer(gadgetUrl, gadgetMetadata);
+            var opt_params = {};
+            if (action.view) {
+              opt_params[osapi.container.actions.OptParam.VIEW] = action.view;
+            }
+            if (action.viewTarget) {
+              opt_params[osapi.container.actions.OptParam.VIEW_TARGET] = action.viewTarget;
+            }
+            renderGadgetInContainer(gadgetUrl, opt_params);
           } else {
             runAction(actionId);
           }
