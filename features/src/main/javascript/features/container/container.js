@@ -193,30 +193,37 @@ osapi.container.Container.prototype.navigateGadget = function(
 
   this.refreshService_();
 
+  var
+    self = this,
+    selfSite = site,
+    finishNavigate = function(preferences) {
+      renderParams[RenderParam.USER_PREFS] = preferences;
+
+      // TODO: Lifecycle, add ability for current gadget to cancel nav.
+      site.navigateTo(gadgetUrl, viewParams, renderParams, function(gadgetInfo) {
+        // TODO: Navigate to error screen on primary gadget load failure
+        // TODO: Should display error without doing a standard navigate.
+        // TODO: Bad if the error gadget fails to load.
+        if (gadgetInfo.error) {
+          gadgets.warn(['Failed to possibly schedule token refresh for gadget ',
+              gadgetUrl, '.'].join(''));
+        } else if (gadgetInfo[osapi.container.MetadataResponse.NEEDS_TOKEN_REFRESH]) {
+          self.scheduleRefreshTokens_();
+        }
+
+        self.applyLifecycleCallbacks_(osapi.container.CallbackType.ON_NAVIGATED,
+            selfSite);
+        callback(gadgetInfo);
+      });
+    };
+
   // Try to retrieve preferences for the gadget if no preferences were explicitly provided.
   if (this.config_[ContainerConfig.GET_PREFERENCES] && !renderParams[RenderParam.USER_PREFS]) {
-    renderParams[RenderParam.USER_PREFS] =
-      this.config_[ContainerConfig.GET_PREFERENCES](site.getId(), gadgetUrl);
+    this.config_[ContainerConfig.GET_PREFERENCES](site.getId(), gadgetUrl, finishNavigate);
   }
-
-  var self = this;
-  var selfSite = site;
-  // TODO: Lifecycle, add ability for current gadget to cancel nav.
-  site.navigateTo(gadgetUrl, viewParams, renderParams, function(gadgetInfo) {
-    // TODO: Navigate to error screen on primary gadget load failure
-    // TODO: Should display error without doing a standard navigate.
-    // TODO: Bad if the error gadget fails to load.
-    if (gadgetInfo.error) {
-      gadgets.warn(['Failed to possibly schedule token refresh for gadget ',
-          gadgetUrl, '.'].join(''));
-    } else if (gadgetInfo[osapi.container.MetadataResponse.NEEDS_TOKEN_REFRESH]) {
-      self.scheduleRefreshTokens_();
-    }
-
-    self.applyLifecycleCallbacks_(osapi.container.CallbackType.ON_NAVIGATED,
-        selfSite);
-    callback(gadgetInfo);
-  });
+  else {
+    finishNavigate(renderParams[RenderParam.USER_PREFS]);
+  }
 };
 
 
