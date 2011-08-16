@@ -128,7 +128,7 @@ osapi.container.UrlHolder.prototype.createIframeHtml_ = function() {
           'id' : this.iframeId_,
           'name' : this.iframeId_,
           'src' : this.getUrl(),
-          'scrolling' : 'yes',
+          'scrolling' : 'auto',
           'marginwidth' : '0',
           'marginheight' : '0',
           'frameborder' : '0',

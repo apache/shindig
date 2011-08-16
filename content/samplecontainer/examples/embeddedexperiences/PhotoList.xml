@@ -85,6 +85,16 @@
               }
             };
 
+            // Test the use case of Url data model
+            if (index == context.photoUrls.length-1) {
+              eeDataModel = {
+                'url' : context.photoUrls[index],
+                'context' : {
+                  "albumName": context.albumName,
+                  "photoUrls": [context.photoUrls[index]]
+                }
+              };
+            }
             var navigateCallback = function(site, metadata){currentSite = site; console.log("Nagivate callback");};
             var returnCallback = function(returnValue){console.log("Return Value: " + returnValue);};
             gadgets.views.openEmbeddedExperience(returnCallback, navigateCallback, eeDataModel, {'viewTarget' : 'preview'});

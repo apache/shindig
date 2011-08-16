@@ -50,7 +50,7 @@ UrlHolderTest.prototype.testRenderWithoutParams = function() {
   this.assertNull(holder.getIframeId());
   holder.render(url, {});
   this.assertEquals('<iframe' + ' marginwidth="0"' + ' hspace="0"' + ' frameborder="0"'
-          + ' scrolling="yes"' + ' marginheight="0"' + ' vspace="0"' + ' id="__url_123"'
+          + ' scrolling="auto"' + ' marginheight="0"' + ' vspace="0"' + ' id="__url_123"'
           + ' name="__url_123"' + ' src="http://example.com"' + ' ></iframe>', element.innerHTML);
   this.assertEquals(url, holder.getUrl());
   this.assertEquals("__url_123", holder.getIframeId());
@@ -68,7 +68,7 @@ UrlHolderTest.prototype.testRenderWithParams = function() {
           "height" : 104
   });
   this.assertEquals('<iframe' + ' marginwidth="0"' + ' hspace="0"' + ' height="104"'
-          + ' frameborder="0"' + ' scrolling="yes"' + ' class="myClass"' + ' marginheight="0"'
+          + ' frameborder="0"' + ' scrolling="auto"' + ' class="myClass"' + ' marginheight="0"'
           + ' vspace="0"' + ' id="__url_123"' + ' width="54"' + ' name="__url_123"'
           + ' src="http://example.com"' + ' ></iframe>', element.innerHTML);
   this.assertEquals(url, holder.getUrl());
