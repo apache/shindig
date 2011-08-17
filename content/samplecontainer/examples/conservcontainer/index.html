@@ -1,17 +1,19 @@
 <html>
 	<head>
-		<link rel="stylesheet" href="/container/gadgets.css">
+		<link rel="stylesheet" href="../../../container/gadgets.css">
 		<link rel="stylesheet" href="portlet.css">
 		<link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css" rel="stylesheet" type="text/css"/>
 		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"></script>
   		<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
-		<script type="text/javascript" src="/gadgets/js/core:container:rpc:selection:actions.js?c=1&debug=1&container=default"></script>	
+		<script type="text/javascript" src="../../../gadgets/js/core:container:rpc:selection:actions.js?c=1&debug=1&container=default"></script>	
 		<script type="text/javascript" src="ConServContainer.js"></script>
 		<script type="text/javascript" src="viewController.js"></script>
 		<script type="text/javascript" src="layout.js"></script>
 		<script type="text/javascript">
 			var my = {};
-			var base = 'http://' + window.location.host + '/samplecontainer/examples/conservcontainer/';
+			var urlBase = location.href.substr(0, location.href.indexOf('/samplecontainer/examples/conservcontainer/'));
+			var contextRoot = urlBase.substr(urlBase.indexOf(location.port) + location.port.length);
+			var base = 'http://' + window.location.host + '/'+ contextRoot + '/samplecontainer/examples/conservcontainer/';
 			my.gadgetSpecUrls = [ base + 'sample-selection-listener.xml'];
 			my.renderGadgets = function() {
 				  // uncomment this to render gadgets specified in my.gadgetSpecUrls
@@ -46,7 +48,7 @@
 		       margin-bottom: 10px;
 		     }
 		     div.bubble {
-		       background-image: url(/samplecontainer/examples/bubble.gif);
+		       background-image: url(../../../samplecontainer/examples/bubble.gif);
 		       background-repeat: no-repeat;
 		       width: 202px;
 		       height: 66px;
@@ -78,32 +80,31 @@
 				text-align: right;
 				padding: 10px;
 			}
-		     
 	    </style>
 	
 	    <script type="text/javascript">
 		     var hellos = new Array('Hello World', 'Hallo Welt', 'Ciao a tutti', 'Hola mundo',
-		       '&#1055;&#1086;&#1103;&#1074;&#1083;&#1077;&#1085;&#1080;&#1077; &#1085;&#1072; &#1089;&#1074;&#1077;&#1090;', 
-		       '&#12371;&#12435;&#12395;&#12385;&#12399;&#19990;&#30028;', 
-		       '&#20320;&#22909;&#19990;&#30028;', 
+		       '&#1055;&#1086;&#1103;&#1074;&#1083;&#1077;&#1085;&#1080;&#1077; &#1085;&#1072; &#1089;&#1074;&#1077;&#1090;',
+		       '&#12371;&#12435;&#12395;&#12385;&#12399;&#19990;&#30028;',
+		       '&#20320;&#22909;&#19990;&#30028;',
 		       '&#50668;&#47084;&#48516;, &#50504;&#45397;&#54616;&#49464;&#50836;');
 		     var numberOfStyles = 6;
 		     var viewerCount;
 		     var allPeople, viewerFriendData;
 		     var selected_id = null;
-		     
+
 		     function highlight(id) {
 		     	if (selected_id == id) return;
 		     	element = document.getElementById("person_"+id);
 				element.style.background = "#73A6FF";
 		     }
-		     
+
 		     function unhighlight(id) {
 		     	if (selected_id == id) return;
 		     	element = document.getElementById("person_"+id);
 				element.style.background = "#FFF";
 		     }
-		     
+
 		     function select(id) {
 		     	if (selected_id != null) {
 		     		unselect = selected_id;
@@ -117,7 +118,7 @@
 				// set selection
 				setSelection(allPeople[id]);
 		     }
-		     
+
 		     function render(data) {
 		       var viewer = data.viewer;
 		       allPeople = data.viewerFriends.list;
@@ -149,7 +150,7 @@
 		             && allPeople[i].thumbnailUrl.indexOf('null') == -1) {
 		           html += '<img src="' + allPeople[i].thumbnailUrl + '"/>';
 		         } else {
-		           html += '<img src="/samplecontainer/examples/nophoto.gif"/>';
+		           html += '<img src="../../../samplecontainer/examples/nophoto.gif"/>';
 		         }
 		         html += '<br style="clear:both"></div>';
 		       }
@@ -176,12 +177,12 @@
 	</head>
 	
 	<body onLoad="my.renderGadgets(); initData();">
-		<div id="globalMenubar" width="100%"></div>  
+		<div id="globalMenubar" width="100%"></div>
 		
 		<h2>Sample: Action+Selection Service</h2>	  		
 		<p>Press preload to preload the voip gadget.  You will see actions appear that
 		   have been contributed declaratively by the voip gadget.  Select a person
-		   object from the list and then select one of the actions.  This will 
+		   object from the list and then select one of the actions.  This will
 		   render the voip gadget and execute the selected action.  Finally, you can
 		   close the gadget by pressing the 'x' icon and the action will be removed.
 		   You can also use the Sample Selection Listener gadget to view the contents
@@ -193,7 +194,7 @@
 	  	<input type="submit" value="Preload" onclick="onPreloadGadget();"/>
 		<input type="submit" value="Add" onclick="onAddGadget();"/>
 		</div>
-	  	<div id="gadgetArea" class="column" style="float: left;"> 
+	  	<div id="gadgetArea" class="column" style="float: left;">
 	  	</div>
 	</body>
 </html>
