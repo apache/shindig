@@ -42,7 +42,7 @@ osapi.container.Service = function(opt_config) {
    * @private
    */
   this.apiPath_ = String(osapi.container.util.getSafeJsonValue(config,
-      osapi.container.ServiceConfig.API_PATH, '/api/rpc/cs'));
+      osapi.container.ServiceConfig.API_PATH, '/rpc'));
 
   /**
    * Map of gadget URLs to cached gadgetInfo response.
