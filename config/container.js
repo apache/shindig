@@ -285,7 +285,7 @@
   },
   "osapi" : {
     // The endpoints to query for available JSONRPC/REST services
-    "endPoints" : [ "http://%host%${CONTEXT_ROOT}/rpc" ]
+    "endPoints" : [ "//%host%${CONTEXT_ROOT}/rpc" ]
   },
   "osml": {
     // OSML library resource.  Can be set to null or the empty string to disable OSML

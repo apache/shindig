@@ -26,6 +26,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.shindig.common.logging.i18n.MessageKeys;
+import org.apache.shindig.common.servlet.Authority;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.GadgetException;
@@ -42,6 +43,8 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
+
 
 /**
  * Retrieves the rpc services for a container by fetching them from the container's
@@ -69,12 +72,19 @@ public class DefaultServiceFetcher {
   private final ContainerConfig containerConfig;
 
   private final HttpFetcher fetcher;
+  
+  private Provider<Authority> hostProvider;
 
   /** @param config Container Config for looking up endpoints */
   @Inject
   public DefaultServiceFetcher(ContainerConfig config, HttpFetcher fetcher) {
     this.containerConfig = config;
     this.fetcher = fetcher;
+  }
+  
+  @Inject(optional = true)
+  public void setHostProvider( Provider<Authority> hostProvider) {
+    this.hostProvider = hostProvider;
   }
 
   /**
@@ -104,7 +114,11 @@ public class DefaultServiceFetcher {
     // Merge services lazily loaded from the endpoints if any
     List<String> endpoints = getEndpointsFromContainerConfig(container, host);
     for (String endpoint : endpoints) {
-      endpointServices.putAll(endpoint, retrieveServices(endpoint.replace("%host%", host)));
+      String endpointVal = endpoint;	
+      if ( endpoint.startsWith("//") && hostProvider != null ){
+    	endpointVal = hostProvider.get().getScheme() + ":" + endpoint;
+      }
+      endpointServices.putAll(endpoint, retrieveServices(endpointVal.replace("%host%", host)));
     }
     
     return ImmutableMultimap.copyOf(endpointServices);

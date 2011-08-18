@@ -35,4 +35,10 @@ public interface Authority {
    * @return the scheme and authority part of the hierarchical URI
    */
   public String getOrigin();
+  
+  /**
+   * The scheme part of the hierarchical URI. Eg "http://localhost:8080"
+   * @return the scheme a of the hierarchical URI
+   */
+  public String getScheme();
 }
