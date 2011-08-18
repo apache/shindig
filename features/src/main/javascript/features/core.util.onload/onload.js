@@ -44,9 +44,14 @@ gadgets.util = gadgets.util || {};
    * @private Only to be used by the container, not gadgets.
    */
   gadgets.util.runOnLoadHandlers = function() {
+    gadgets.util.registerOnLoadHandler = function(cb) {
+      cb();
+    };
+
     for (var i = 0, j = onLoadHandlers.length; i < j; ++i) {
       onLoadHandlers[i]();
     }
+    onLoadHandlers = undefined;  // No need to hold these references anymore.
   };
 
 })();
