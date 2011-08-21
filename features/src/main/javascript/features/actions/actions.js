@@ -29,11 +29,11 @@ gadgets['actions'] = (function() {
    * Example:
    *
    * <pre>
-   * gadgets.actions.runAction(actionId);
+   * gadgets.actions.runAction(action);
    * </pre>
    *
-   * @param {String}
-   *          actionId The action identifier.
+   * @param {Object}
+   *          action The action object.
    *
    * @member gadgets.actions
    */
@@ -137,6 +137,23 @@ gadgets['actions'] = (function() {
     },
 
     /**
+     * Executes the action callback associated with the specified actionId
+     * in the context of the gadget which contributed that action. The
+     * gadget should call this method whenever an action is triggered by
+     * the user.
+     *
+     * @param {String, Object}
+     *          actionId The id of the action to execute.
+     *          opt_selection The current selection. This is optional.
+     *
+     * @member gadgets.actions
+     */
+    runAction: function(actionId, opt_selection) {
+      actionData = {"id" : actionId, "selection" : opt_selection};
+      gadgets.rpc.call('..', 'actions', null, 'runAction', actionData);
+    },
+
+    /**
      * Removes the association of a callback function with an action id.
      *
      * Example:
@@ -207,6 +224,34 @@ gadgets['actions'] = (function() {
     getActionsByDataType: function(dataType, callback) {
       gadgets.rpc.call('..', 'actions', callback, 'getActionsByDataType',
           dataType);
+    },
+
+    /**
+     * Registers a function to display actions in the gadget.
+     *
+     * @param {function}
+     *          The gadget's function to render actions
+     *          in its UI. The function takes the action object as
+     *          a parameter.
+     */
+    registerShowActionsListener: function(listener) {
+      if (typeof listener === 'function') {
+        gadgets.rpc.call('..', 'actions', null, 'addShowActionListener', listener);
+      }
+    },
+
+    /**
+     * Registers a function to hide (remove) actions in the gadget
+     *
+     * @param {function}
+     *          The gadget's function to hide (remove) actions
+     *          in its UI. The function takes the action object as
+     *          a parameter.
+     */
+    registerHideActionsListener: function(listener) {
+      if (typeof listener === 'function') {
+	gadgets.rpc.call('..', 'actions', null, 'addHideActionListener', listener);
+      }
     }
   };
 })();

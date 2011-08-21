@@ -10,8 +10,11 @@
       <exports type="js">gadgets.actions.addAction</exports>
       <exports type="js">gadgets.actions.updateAction</exports>
       <exports type="js">gadgets.actions.removeAction</exports>
+      <exports type="js">gadgets.actions.runAction</exports>
       <exports type="js">gadgets.actions.getActionsByPath</exports>
       <exports type="js">gadgets.actions.getActionsByDataType</exports>
+      <exports type="js">gadgets.actions.registerShowActionsListener</exports>
+      <exports type="js">gadgets.actions.registerHideActionsListener</exports>
       <exports type="js">osapi.container.actions.OptParam.VIEW</exports>
       <exports type="js">osapi.container.actions.OptParam.VIEW_TARGET</exports>
     </api>

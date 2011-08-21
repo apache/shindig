@@ -36,10 +36,10 @@ CommonContainer.init = new function() {
   // Register our rendering functions with the action service
   if (CommonContainer.actions) {
     // Called when an action should be displayed in the container
-    CommonContainer.actions.registerShowActionHandler(showAction);
+    CommonContainer.actions.registerShowActionsHandler(showActions);
 
     // Called when a action should be removed from the container
-    CommonContainer.actions.registerHideActionHandler(hideAction);
+    CommonContainer.actions.registerHideActionsHandler(hideActions);
 
     // Called for actions contributed by pre-loaded gadgets (lazy load)
     CommonContainer.actions.registerNavigateGadgetHandler(preRenderGadget);
@@ -86,7 +86,8 @@ osapi.people.getViewerFriends = function(options) {
 };
 
 // Function to display actions
-function showAction(itemObj) {
+function showActions(actions) {
+  var itemObj = actions[0];
   if (!itemObj.path && !itemObj.dataType) {
     // object is invalid!
     return;
@@ -169,7 +170,8 @@ function addContainerAction(itemObj) {
 }
 
 // Function to hide actions
-function hideAction(itemObj) {
+function hideActions(actions) {
+  var itemObj = actions[0];
   if (itemObj.path || itemObj.dataType) {
     // remove the action from the specified data object type
     if (itemObj.dataType && itemObj.dataType == 'opensocial.Person') {
@@ -193,4 +195,10 @@ function removeContainerAction(itemObj) {
   // hack - actions should be removed individually
   $('#globalMenubar').empty();
   $('#globalMenubar').hide();
+}
+
+// Runs the action specified in the action_id_field
+function runAction() {
+  id = document.getElementById('action_id_field').value;
+    CommonContainer.actions.runAction(id, CommonContainer.selection.getSelection());
 }

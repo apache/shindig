@@ -14,7 +14,8 @@
 			var urlBase = location.href.substr(0, location.href.indexOf('/samplecontainer/examples/conservcontainer/'));
 			var contextRoot = urlBase.substr(urlBase.indexOf(location.port) + location.port.length);
 			var base = 'http://' + window.location.host + '/'+ contextRoot + '/samplecontainer/examples/conservcontainer/';
-			my.gadgetSpecUrls = [ base + 'sample-selection-listener.xml'];
+			my.gadgetSpecUrls = [ base + 'sample-selection-listener.xml',
+                                              base + 'sample-actions-runner.xml'];
 			my.renderGadgets = function() {
 				  // uncomment this to render gadgets specified in my.gadgetSpecUrls
 				  for (var i = 0; i < my.gadgetSpecUrls.length; ++i) {
@@ -170,16 +171,17 @@
 		       batch.add('viewerFriendData', osapi.appdata.get({groupId:'@friends',keys:['count']}));
 		       batch.execute(render);
 		     }
-		
 		     gadgets.util.registerOnLoadHandler(initData);
 	   </script>
-		
+
 	</head>
-	
+
 	<body onLoad="my.renderGadgets(); initData();">
-		<div id="globalMenubar" width="100%"></div>
-		
-		<h2>Sample: Action+Selection Service</h2>	  		
+		<div id="globalMenubar" width="100%">
+		    <input type="text" id="action_id_field" value="org.samplevoip.chatwithperson"/>
+		    <input type="button" value="Run Action" onclick="runAction()"/>
+		</div>
+		<h2>Sample: Action+Selection Service</h2>
 		<p>Press preload to preload the voip gadget.  You will see actions appear that
 		   have been contributed declaratively by the voip gadget.  Select a person
 		   object from the list and then select one of the actions.  This will

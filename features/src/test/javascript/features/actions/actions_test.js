@@ -68,8 +68,16 @@ DeclarativeActionsTest.prototype.testGadgetsAddAction = function() {
 DeclarativeActionsTest.prototype.testGadgetsRemoveAction = function() {
   var actionId = "testAction";
   gadgets.actions.removeAction(actionId);
-  this.assertRpcCalled('..', 'actions', null, 
+  this.assertRpcCalled('..', 'actions', null,
       'removeAction', actionId);
+};
+
+DeclarativeActionsTest.prototype.testGadgetsRunAction = function() {
+  var actionId = "testAction";
+  var opt_selection = "testSelection";
+  gadgets.actions.runAction(actionId, opt_selection);
+  this.assertRpcCalled('..', 'actions', null,
+    'runAction', {"id":actionId, "selection":opt_selection});
 };
 
 
