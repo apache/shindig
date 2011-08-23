@@ -28,15 +28,13 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
-
-
-
 /**
  * A Filter that can cache ServletRequest information in ThreadLocal variable
  */
 public class HostFilter implements Filter {
 
-  public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {	
+  public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+      throws IOException, ServletException {
     ServletRequestContext.setRequestInfo(request);
     chain.doFilter(request, response);
   }
@@ -44,6 +42,6 @@ public class HostFilter implements Filter {
   public void destroy() {
   }
 
-  public void init(FilterConfig arg0) throws ServletException {
+  public void init(FilterConfig filterConfig) throws ServletException {
   }
 }
