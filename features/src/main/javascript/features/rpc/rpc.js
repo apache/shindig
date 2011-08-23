@@ -438,17 +438,17 @@ if (!window['gadgets']['rpc']) { // make lib resilient to double-inclusion
 
       // Cast to a String to avoid an index lookup.
       id = String(id);
-
-      // Try window.frames first
-      var target = window.frames[id];
-      if (target) {
-        return target;
-      }
-
-      // Fall back to getElementById()
+      
+      // Try getElementById() first
       target = document.getElementById(id);
       if (target && target.contentWindow) {
         return target.contentWindow;
+      }
+
+      // Fallback to window.frames
+      var target = window.frames[id];
+      if (target && !target.closed) {
+        return target;
       }
 
       return null;
@@ -539,7 +539,9 @@ if (!window['gadgets']['rpc']) { // make lib resilient to double-inclusion
      * @return {boolean}
      */
     function callSameDomain(target, rpc) {
-      if (typeof sameDomain[target] === 'undefined') {
+      var targetEl = getTargetWin(target);
+      if (typeof sameDomain[target] === 'undefined' ||
+              targetEl.Function.prototype !== sameDomain[target].constructor.prototype) {
         // Seed with a negative, typed value to avoid
         // hitting this code path repeatedly.
         sameDomain[target] = false;
@@ -549,7 +551,6 @@ if (!window['gadgets']['rpc']) { // make lib resilient to double-inclusion
           return false;
         }
 
-        var targetEl = getTargetWin(target);
         try {
           // If this succeeds, then same-domain policy applied
           var targetGadgets = targetEl['gadgets'];
