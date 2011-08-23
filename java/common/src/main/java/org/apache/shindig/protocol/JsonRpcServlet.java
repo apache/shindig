@@ -71,7 +71,8 @@ public class JsonRpcServlet extends ApiServlet {
   
   private String jsonRpcResultField = "result";
   private boolean jsonRpcBothFields = false;
-  @Inject
+
+  @Inject(optional = true)
   void setJsonRpcResultField(@Named("shindig.json-rpc.result-field")String jsonRpcResultField) {
     this.jsonRpcResultField = jsonRpcResultField;
     jsonRpcBothFields = "both".equals(jsonRpcResultField);
@@ -236,8 +237,9 @@ public class JsonRpcServlet extends ApiServlet {
     if (jsonRpcBothFields) {
       result.put("result", data);
       result.put("data", data);
+    } else {
+      result.put(jsonRpcResultField, data);
     }
-    result.put(jsonRpcResultField, data);
   }
 
   /**
