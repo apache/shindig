@@ -67,7 +67,7 @@
              var result = "";
              for(var i = 0; i < photos.length; i++){
                  count = i+1;
-                 result = result + '<li style="text-decoration: underline; color: blue; cursor: pointer" onclick="showPreviewPhoto(\''+i+'\')">Photo '+count+'</li></br>';
+                 result = result + '<li style="text-decoration: underline; color: blue; cursor: pointer" onclick="showPreviewPhoto(\''+i+'\',\''+context.eeGadget+'\')">Photo '+count+'</li></br>';
              }
              document.getElementById('header').innerHTML = context.albumName;
              document.getElementById("album").innerHTML = result;
@@ -75,10 +75,10 @@
 
          gadgets.util.registerOnLoadHandler(initAlbum);
 
-         function showPreviewPhoto(index) {
+         function showPreviewPhoto(index, eeGadget) {
 
             var eeDataModel = {
-                'gadget' : 'http://localhost:8080/samplecontainer/examples/embeddedexperiences/AlbumViewer.xml',
+                'gadget' : eeGadget,
                 'context' : {
                   "albumName": context.albumName,
                   "photoUrls": [context.photoUrls[index]]

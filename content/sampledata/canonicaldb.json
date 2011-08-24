@@ -378,9 +378,10 @@
 	    },
           "openSocial": {
           "embed" : {
-          "gadget" : "http://localhost:8080/samplecontainer/examples/embeddedexperiences/PhotoList.xml",
+          "gadget" : "%origin%%contextroot%/samplecontainer/examples/embeddedexperiences/PhotoList.xml",
           "context" : {
             "albumName": "Germany 2009",
+            "eeGadget" : "%origin%%contextroot%/samplecontainer/examples/embeddedexperiences/AlbumViewer.xml",
             "photoUrls": [
               "http://farm4.static.flickr.com/3495/3925132517_5959dac775.jpg",
                  "http://farm4.static.flickr.com/3629/3394799776_47676abb46.jpg",
@@ -445,7 +446,7 @@
         },
         "openSocial": {
           "embed" : {
-          "gadget" : "http://localhost:8080/samplecontainer/examples/embeddedexperiences/AlbumViewer.xml",
+          "gadget" : "%origin%%contextroot%/samplecontainer/examples/embeddedexperiences/AlbumViewer.xml",
           "context" : {
             "albumName": "Germany 2009",
             "photoUrls": [
@@ -615,31 +616,31 @@
 // Gadgets/App information.  OAuth Consumer Key defaults to the app url.
 //
 "apps" : {
-    "http://localhost:8080/samplecontainer/examples/SocialHelloWorld.xml":
+    "http://localhost:8080%contextroot%/samplecontainer/examples/SocialHelloWorld.xml":
         { "title" : "Social Hello World",
           "consumerSecret" : "secret",
-           "icon" : "http://localhost:8080/samplecontainer/examples/icon.png"},
-    "http://localhost:8080/samplecontainer/examples/SocialActivitiesWorld.xml" :
+           "icon" : "http://localhost:8080%contextroot%/samplecontainer/examples/icon.png"},
+    "http://localhost:8080%contextroot%/samplecontainer/examples/SocialActivitiesWorld.xml" :
         { "title" : "Social Activities World",
           "consumerSecret" : "secret",
-          "icon" : "http://localhost:8080/samplecontainer/examples/icon.png"},
-    "http://localhost:8080/samplecontainer/examples/oauth.xml" :
+          "icon" : "http://localhost:8080%contextroot%/samplecontainer/examples/icon.png"},
+    "http://localhost:8080%contextroot%/samplecontainer/examples/oauth.xml" :
         { "title" : "Demo OAuth Gadget",
           "consumerSecret" : "secret",
-          "icon" : "http://localhost:8080/samplecontainer/examples/icon.png"},
-    "http://localhost:8080/samplecontainer/examples/shindigoauth.xml" :
+          "icon" : "http://localhost:8080%contextroot%/samplecontainer/examples/icon.png"},
+    "http://localhost:8080%contextroot%/samplecontainer/examples/shindigoauth.xml" :
         { "title" : "Demo OAuth Gadget",
           "consumerSecret" : "secret",
-          "icon" : "http://localhost:8080/samplecontainer/examples/icon.png"}
+          "icon" : "http://localhost:8080%contextroot%/samplecontainer/examples/icon.png"}
  },
 
  // duplicates userApplications as above..
  "permissions": {
-   "john.doe" : { "http://localhost:8080/samplecontainer/examples/SocialHelloWorld.xml" : { "installed" : true},
-                  "http://localhost:8080/samplecontainer/examples/SocialActivitiesWorld.xml" : { "installed" : true}
+   "john.doe" : { "http://localhost:8080%contextroot%/samplecontainer/examples/SocialHelloWorld.xml" : { "installed" : true},
+                  "http://localhost:8080%contextroot%/samplecontainer/examples/SocialActivitiesWorld.xml" : { "installed" : true}
    },
-   "canonical" :{ "http://localhost:8080/samplecontainer/examples/SocialHelloWorld.xml" : { "installed" : true},
-                  "http://localhost:8080/samplecontainer/examples/SocialActivitiesWorld.xml" : { "installed" : true}
+   "canonical" :{ "http://localhost:8080%contextroot%/samplecontainer/examples/SocialHelloWorld.xml" : { "installed" : true},
+                  "http://localhost:8080%contextroot%/samplecontainer/examples/SocialActivitiesWorld.xml" : { "installed" : true}
    }
  },
 // Passwords for authenticaiton service

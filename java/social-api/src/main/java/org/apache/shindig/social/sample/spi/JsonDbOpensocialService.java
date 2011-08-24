@@ -30,6 +30,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.shindig.auth.SecurityToken;
+import org.apache.shindig.common.servlet.Authority;
 import org.apache.shindig.common.util.ImmediateFuture;
 import org.apache.shindig.common.util.ResourceLoader;
 import org.apache.shindig.protocol.DataCollection;
@@ -63,6 +64,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
@@ -92,22 +94,22 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
   private BeanConverter converter;
 
   /**
-   * db["activities"] -> Array<Person>
+   * db["people"] -> Array<Person>
    */
   private static final String PEOPLE_TABLE = "people";
 
   /**
-   * db["people"] -> Map<Person.Id, Array<Activity>>
+   * db["activities"] -> Map<Person.Id, Array<Activity>>
    */
   private static final String ACTIVITIES_TABLE = "activities";
-  
+
   /**
-   * db["people"] -> Map<Person.Id, Array<Album>>
+   * db["albums"] -> Map<Person.Id, Array<Album>>
    */
   private static final String ALBUMS_TABLE = "albums";
-  
+
   /**
-   * db["people"] -> Map<Person.Id, Array<MediaItem>>
+   * db["mediaItems"] -> Map<Person.Id, Array<MediaItem>>
    */
   private static final String MEDIAITEMS_TABLE = "mediaItems";
 
@@ -130,11 +132,13 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
    * db["passwords"] -> Map<Person.Id, String>
    */
   private static final String PASSWORDS_TABLE = "passwords";
-  
+
   /**
-   * db["people"] -> Map<Person.Id, Array<ActivityEntry>>
+   * db["activityEntries"] -> Map<Person.Id, Array<ActivityEntry>>
    */
   private static final String ACTIVITYSTREAMS_TABLE = "activityEntries";
+
+  private Provider<Authority> hostProvider;
 
   /**
    * Initializes the JsonDbOpensocialService using Guice
@@ -146,9 +150,10 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
   @Inject
   public JsonDbOpensocialService(@Named("shindig.canonical.json.db")
   String jsonLocation, @Named("shindig.bean.converter.json")
-  BeanConverter converter) throws Exception {
-    String content = IOUtils.toString(ResourceLoader.openResource(jsonLocation), "UTF-8");
-    this.db = new JSONObject(content);
+  BeanConverter converter,
+  @Named("shindig.contextroot") String contextroot) throws Exception {
+    String content = IOUtils.toString(ResourceLoader.openResource(jsonLocation), "UTF-8");    
+    this.db = new JSONObject(content.replace("%contextroot%", contextroot));
     this.converter = converter;
   }
 
@@ -161,7 +166,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
     return db;
   }
 
-  /**
+   /**
    * override the json database
    * @param db a {@link org.json.JSONObject}.
    */
@@ -1287,7 +1292,8 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
     }
   }
   
-  /** {@inheritDoc} */
+
+/** {@inheritDoc} */
   public Future<RestfulCollection<ActivityEntry>> getActivityEntries(
       Set<UserId> userIds, GroupId groupId, String appId, Set<String> fields,
       CollectionOptions options, SecurityToken token)
@@ -1311,7 +1317,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
       throw new ProtocolException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, je.getMessage(), je);
     }
   }
-  
+
   /** {@inheritDoc} */
   public Future<RestfulCollection<ActivityEntry>> getActivityEntries(
       UserId userId, GroupId groupId, String appId, Set<String> fields,
@@ -1369,6 +1375,13 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
       object = new JSONObject(object, fields.toArray(new String[fields
           .size()]));
     }
-    return converter.convertToObject(object.toString(), clz);
+    String objectVal = object.toString();
+    if ( hostProvider != null ) {
+      objectVal = objectVal.replace("%origin%", hostProvider.get().getOrigin());
+    } else { 
+      //provide default for junit tests
+      objectVal = objectVal.replace("%origin%", "http://localhost:8080");
+    }
+    return converter.convertToObject(objectVal, clz);
   }
 }

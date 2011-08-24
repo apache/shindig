@@ -30,6 +30,7 @@
             "gadget" : "http://localhost:8080/samplecontainer/examples/embeddedexperiences/PhotoList.xml",
             "context" : {
               "albumName": "Germany 2009",
+              "eeGadget" : "http://localhost:8080/samplecontainer/examples/embeddedexperiences/AlbumViewer.xml",
               "photoUrls": [
                 "http://farm4.static.flickr.com/3495/3925132517_5959dac775.jpg",
      	        "http://farm4.static.flickr.com/3629/3394799776_47676abb46.jpg",

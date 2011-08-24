@@ -115,6 +115,7 @@
           <embed>
             <context>
                 <albumName>Germany 2009</albumName>
+                <eeGadget>http://localhost:8080/samplecontainer/examples/embeddedexperiences/AlbumViewer.xml</eeGadget>
                 <photoUrls>
                   <java.lang.String>http://farm4.static.flickr.com/3495/3925132517_5959dac775.jpg</java.lang.String>
                   <java.lang.String>http://farm4.static.flickr.com/3629/3394799776_47676abb46.jpg</java.lang.String>
