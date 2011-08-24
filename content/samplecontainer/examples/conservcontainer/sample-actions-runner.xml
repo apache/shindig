@@ -27,7 +27,7 @@
 <![CDATA[
 <script>
 var selection;
-gadgets.selection.addSelectionListener(
+gadgets.selection.addListener(
   function(s){selection = s;}
 );
 

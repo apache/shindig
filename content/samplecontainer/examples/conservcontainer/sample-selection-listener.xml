@@ -31,20 +31,20 @@ function selectionListener(selection) {
     "selection: " + gadgets.util.escapeString(JSON.stringify(selection) + "") + "<br/>";
 }
 
-function addSelectionListener() {
-  gadgets.selection.addSelectionListener(selectionListener);
+function addListener() {
+  gadgets.selection.addListener(selectionListener);
   document.getElementById("output").innerHTML = "Selection listener added...";
 }
 
-function removeSelectionListener() {
-  gadgets.selection.removeSelectionListener(selectionListener);
+function removeListener() {
+  gadgets.selection.removeListener(selectionListener);
   document.getElementById("output").innerHTML = "";
 }
 
 </script>
 <div>
-<input type="button" value="Add Selection Listener" onclick="addSelectionListener()"/>
-<input type="button" value="Remove Selection Listener" onclick="removeSelectionListener()"/>
+<input type="button" value="Add Selection Listener" onclick="addListener()"/>
+<input type="button" value="Remove Selection Listener" onclick="removeListener()"/>
 </div>
 <div id="output">
 </div>

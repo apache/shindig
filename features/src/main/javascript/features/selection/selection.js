@@ -54,7 +54,7 @@ gadgets['selection'] = function() {
      * Registers a listener for selection.
      * @param {function} listener The listener to remove.
      */
-    addSelectionListener: function(listener) {
+    addListener: function(listener) {
       if (typeof listener === 'function') {
         // add the listener to the list
         listeners.push(listener);
@@ -76,7 +76,7 @@ gadgets['selection'] = function() {
      * Removes a listener for selection.
      * @param {function} listener The listener to remove.
      */
-    removeSelectionListener: function(listener) {
+    removeListener: function(listener) {
       var index = listeners.indexOf(listener);
       if (index != -1) {
         listeners.splice(index, 1);

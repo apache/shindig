@@ -38,7 +38,16 @@
   }
 
   function addSelectionListener(listener) {
-    listeners.push(listener);
+    if (typeof listener === 'function') {
+      listeners.push(listener);
+    }
+  }
+
+  function removeSelectionListener(listener) {
+    var index = listeners.indexOf(listener);
+    if (index != -1) {
+      listeners.splice(index, 1);
+    }
   }
 
   function router(command, param) {
@@ -70,6 +79,22 @@
        */
       getSelection: function() {
         return _selection;
+      },
+
+      /**
+       * Registers a listener for selection.
+       * @param {function} listener The listener to remove.
+       */
+      addListener: function(listener) {
+        addSelectionListener(listener);
+      },
+
+      /**
+       * Removes a listener for selection.
+       * @param {function} listener The listener to remove.
+       */
+      removeListener: function(listener) {
+        removeSelectionListener(listener);
       }
     };
   });
