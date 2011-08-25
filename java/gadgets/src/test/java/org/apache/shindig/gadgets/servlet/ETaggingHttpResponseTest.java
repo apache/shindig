@@ -19,12 +19,18 @@ package org.apache.shindig.gadgets.servlet;
 
 import static org.junit.Assert.*;
 
+import com.google.common.base.Function;
+import com.google.common.base.Joiner;
+import com.google.common.collect.Lists;
+
 import org.apache.http.util.ByteArrayBuffer;
 import org.apache.shindig.gadgets.servlet.ETaggingHttpResponse.BufferServletOutputStream;
 import org.easymock.EasyMock;
 import org.easymock.IMocksControl;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.Arrays;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
@@ -49,6 +55,12 @@ public class ETaggingHttpResponseTest {
   private static final String SECOND_ETAG = "b6e56fb0129c3530f23dbb795daa3200";
   private static final String BAD_ETAG = "some bogus etag";
   private static final String EMPTY_CONTENT_ETAG = "d41d8cd98f00b204e9800998ecf8427e";
+  
+  private static final Function<String, String> ETAG_QUOTER = new Function<String, String>() {
+    public String apply(String input) {
+      return '"' + input + '"';
+    }
+  };
 
   private IMocksControl control;
   private HttpServletRequest request;
@@ -73,7 +85,7 @@ public class ETaggingHttpResponseTest {
 
   @Test
   public void testTagContentWithPrint() throws Exception {
-    expectRequestETag(null);
+    expectRequestETag();
     expectFullResponse();
     control.replay();
     
@@ -83,10 +95,23 @@ public class ETaggingHttpResponseTest {
     assertResponseHasBody();
     control.verify();
   }
-
+  
   @Test
   public void testNotModifiedWithPrint() throws Exception {
     expectRequestETag(GOOD_ETAG);
+    expectNotModifiedResponse(GOOD_ETAG);
+    control.replay();
+
+    response.getWriter().print(RESPONSE_BODY);
+    response.flushBuffer();
+
+    assertResponseBodyIsEmpty();
+    control.verify();
+  }
+  
+  @Test
+  public void testNotModifiedWithManyETagsInRequest() throws Exception {
+    expectRequestETag(SECOND_ETAG, GOOD_ETAG, BAD_ETAG);
     expectNotModifiedResponse(GOOD_ETAG);
     control.replay();
 
@@ -109,10 +134,23 @@ public class ETaggingHttpResponseTest {
     assertResponseHasBody();
     control.verify();
   }
+  
+  @Test
+  public void testNonMatchingETagWithManyETagsInRequest() throws Exception {
+    expectRequestETag(BAD_ETAG, SECOND_ETAG, EMPTY_CONTENT_ETAG);
+    expectFullResponse();
+    control.replay();
+
+    response.getWriter().print(RESPONSE_BODY);
+    response.flushBuffer();
+
+    assertResponseHasBody();
+    control.verify();
+  }
 
   @Test
   public void testTagContentWithWrite() throws Exception {
-    expectRequestETag(null);
+    expectRequestETag();
     expectFullResponse();
     control.replay();
 
@@ -151,8 +189,8 @@ public class ETaggingHttpResponseTest {
 
   @Test
   public void testTagEmptyContent() throws Exception {
-    expectRequestETag(null);
-    origResponse.setHeader(ETaggingHttpResponse.RESPONSE_HEADER, EMPTY_CONTENT_ETAG);
+    expectRequestETag();
+    origResponse.setHeader(ETaggingHttpResponse.RESPONSE_HEADER, '"' + EMPTY_CONTENT_ETAG + '"');
     origResponse.setContentLength(0);
     control.replay();
     
@@ -165,7 +203,7 @@ public class ETaggingHttpResponseTest {
 
   @Test
   public void testStreamingMode() throws Exception {
-    expectRequestETag(null);
+    expectRequestETag();
     control.replay();
     
     response.getWriter().print(RESPONSE_BODY);
@@ -213,17 +251,21 @@ public class ETaggingHttpResponseTest {
     control.verify();
   }
 
-  private void expectRequestETag(String eTag) {
-    EasyMock.expect(request.getHeader(ETaggingHttpResponse.REQUEST_HEADER)).andReturn(eTag);
+  private void expectRequestETag(String... eTag) {
+    String eTags = null;
+    if (eTag.length > 0) {
+      eTags = Joiner.on(',').join(Lists.transform(Arrays.asList(eTag), ETAG_QUOTER));
+    }
+    EasyMock.expect(request.getHeader(ETaggingHttpResponse.REQUEST_HEADER)).andReturn(eTags);
   }
 
   private void expectFullResponse() {
-    origResponse.setHeader(ETaggingHttpResponse.RESPONSE_HEADER, GOOD_ETAG);
+    origResponse.setHeader(ETaggingHttpResponse.RESPONSE_HEADER, '"' + GOOD_ETAG + '"');
     origResponse.setContentLength(RESPONSE_BODY_LENGTH);
   }
 
   private void expectNotModifiedResponse(String eTag) {
-    origResponse.setHeader(ETaggingHttpResponse.RESPONSE_HEADER, eTag);
+    origResponse.setHeader(ETaggingHttpResponse.RESPONSE_HEADER, '"' + eTag + '"');
     origResponse.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
     origResponse.setContentLength(0);
   }

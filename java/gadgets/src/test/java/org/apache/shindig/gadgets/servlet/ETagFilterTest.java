@@ -69,7 +69,7 @@ public class ETagFilterTest {
     EasyMock.expect(response.getOutputStream()).andReturn(stream).anyTimes();
     EasyMock.expect(response.getCharacterEncoding()).andReturn(ENCODING).anyTimes();
     EasyMock.expect(request.getHeader(ETaggingHttpResponse.REQUEST_HEADER)).andReturn(null);
-    response.setHeader(ETaggingHttpResponse.RESPONSE_HEADER, GOOD_ETAG);
+    response.setHeader(ETaggingHttpResponse.RESPONSE_HEADER, '"' + GOOD_ETAG + '"');
     response.setContentLength(RESPONSE_BODY_LENGTH);
   }
 

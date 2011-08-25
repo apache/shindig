@@ -18,6 +18,10 @@
 package org.apache.shindig.gadgets.servlet;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.CharMatcher;
+import com.google.common.base.Splitter;
+import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableList;
 
 import org.apache.http.util.ByteArrayBuffer;
 import org.apache.shindig.common.util.HashUtil;
@@ -47,6 +51,9 @@ public class ETaggingHttpResponse extends HttpServletResponseWrapper {
 
   public static final String RESPONSE_HEADER = "ETag";
   public static final String REQUEST_HEADER = "If-None-Match";
+
+  private static final Splitter IF_NONE_MATCH_SPLITTER =
+      Splitter.on(',').trimResults().trimResults(CharMatcher.is('"'));
 
   protected final HttpServletRequest request;
   protected final BufferServletOutputStream stream;
@@ -145,16 +152,15 @@ public class ETaggingHttpResponse extends HttpServletResponseWrapper {
    *
    * @throws IOException If there was a problem writing to the output.
    */
-  void writeToOutput() throws IOException {
+  protected void writeToOutput() throws IOException {
     if (writer != null) {
       writer.flush();
     }
     byte[] bytes = stream.getBuffer().toByteArray();
     if (batching) {
       String etag = stream.getContentHash();
-      String reqEtag = request.getHeader(REQUEST_HEADER);
-      ((HttpServletResponse) getResponse()).setHeader(RESPONSE_HEADER, etag);
-      if (etag.equals(reqEtag)) {
+      ((HttpServletResponse) getResponse()).setHeader(RESPONSE_HEADER, '"' + etag + '"');
+      if (etagMatches(etag)) {
         emitETagMatchedResult();
       } else {
         emitFullResponseBody(bytes);
@@ -163,6 +169,14 @@ public class ETaggingHttpResponse extends HttpServletResponseWrapper {
       originalStream.write(bytes);
       stream.getBuffer().clear();
     }
+  }
+
+  protected boolean etagMatches(String etag) {
+    String ifNoneMatches = request.getHeader(REQUEST_HEADER);
+    if (Strings.isNullOrEmpty(ifNoneMatches)) {
+      return false;
+    }
+    return ImmutableList.copyOf(IF_NONE_MATCH_SPLITTER.split(ifNoneMatches)).contains(etag);
   }
 
   protected void emitETagMatchedResult() {
