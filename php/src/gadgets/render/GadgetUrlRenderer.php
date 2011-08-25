@@ -65,7 +65,39 @@ class GadgetUrlRenderer extends GadgetRenderer {
     } else {
       $redirURI = $redirURI . '?' . $query;
     }
-    
+
+    $authz = $this->getAuthz($view);
+
+    if ($authz === 'signed') {
+      $gadgetSigner = Config::get('security_token_signer');
+      $gadgetSigner = new $gadgetSigner();
+      $token = $gadget->gadgetContext->extractAndValidateToken($gadgetSigner);
+
+      $signingFetcherFactory = new SigningFetcherFactory(Config::get("private_key_file"));
+
+      $redirURI .= '&xoauth_signature_publickey=' . urlencode($signingFetcherFactory->getKeyName());
+      $redirURI .= '&xoauth_public_key=' . urlencode($signingFetcherFactory->getKeyName());
+
+      if ($this->getSignOwner($view)) {
+        $redirURI .= '&opensocial_owner_id=' . urlencode($token->getOwnerId());
+      }
+      if ($this->getSignViewer($view)) {
+        $redirURI .= '&opensocial_viewer_id=' . urlencode($token->getViewerId());
+      }
+
+      $redirURI .= '&opensocial_app_url=' . urlencode($token->getAppUrl());
+      $redirURI .= '&opensocial_app_id=' . urlencode($token->getAppId());
+      $redirURI .= '&opensocial_instance_id=' . urlencode($token->getModuleId());
+
+      $consumer = new OAuthConsumer(NULL, NULL, NULL);
+      $signatureMethod = new ShindigRsaSha1SignatureMethod($signingFetcherFactory->getPrivateKey(), null);
+      $req_req = OAuthRequest::from_consumer_and_token($consumer, NULL, 'GET', $redirURI);
+      $req_req->sign_request($signatureMethod, $consumer, NULL);
+      $redirURI = $req_req->to_url();
+
+
+    }
+
     return $redirURI;
   }
 
@@ -104,4 +136,36 @@ class GadgetUrlRenderer extends GadgetRenderer {
     }
     return $ret;
   }
+
+  /**
+   * Returns the authz attribute of the view, can be 'none', 'signed' or 'oauth'
+   *
+   * @param array $view
+   * @return string authz attribute
+   */
+  private function getAuthz($view) {
+    return ! empty($view['authz']) ? strtolower($view['authz']) : 'none';
+  }
+
+
+  /**
+   * Returns the signOwner attribute of the view (true or false, default is true)
+   *
+   * @param array $view
+   * @return string signOwner attribute
+   */
+  private function getSignOwner($view) {
+    return ! empty($view['signOwner']) && strcasecmp($view['signOwner'], 'false') == 0 ? false : true;
+  }
+
+  /**
+   * Returns the signViewer attribute of the view (true or false, default is true)
+   *
+   * @param array $view
+   * @return string signViewer attribute
+   */
+  private function getSignViewer($view) {
+    return ! empty($view['signViewer']) && strcasecmp($view['signViewer'], 'false') == 0 ? false : true;
+  }
 }
+
