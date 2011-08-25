@@ -94,33 +94,33 @@ $(function() {
       var viewItems = '';
       var gadgetViews = result[gadgetURL].views;
       for (var aView in gadgetViews) {
-	    viewItems = viewItems + '<li><a href="#" onclick="navigateView(' + gadgetSiteString + ',' + '\'' + gadgetURL + '\'' + ',' + '\'' + aView + '\'' + '); return false;">' + aView + '</a></li>';
-	  }
-	  var newGadgetSite = gadgetTemplate;
-	  newGadgetSite = newGadgetSite.replace(/(gadget-site)/g, '$1-' + curId);
-	  $(newGadgetSite).appendTo($('#gadgetArea')).addClass('ui-widget ui-widget-content ui-helper-clearfix ui-corner-all')
-		.find('.portlet-header')
-		.addClass('ui-widget-header ui-corner-all')
-		.text(result[gadgetURL]['modulePrefs'].title)
-		.append('<ul id="viewsDropdown">' +
-			     '<li class="li-header">' +
-			       '<a href="#" class="hidden"><span id="dropdownIcon" class="ui-icon ui-icon-triangle-1-s"></span></a>' +
-				   '<ul>' +
-				   	 viewItems +
-				   '</ul>' +
-			      '</li>' +
-		         '</ul>')
-		.append('<span id="remove" class="ui-icon ui-icon-closethick"></span>')
-		.append('<span id="expand" class="ui-icon ui-icon-plusthick"></span>')
-		.append('<span id="collapse" class="ui-icon ui-icon-minusthick"></span>')
-		.end()
-	    .find('.portlet-content')
-	    .data('gadgetSite', CommonContainer.renderGadget(gadgetURL, curId));
+	      viewItems = viewItems + '<li><a href="#" onclick="navigateView(' + gadgetSiteString + ',' + '\'' + gadgetURL + '\'' + ',' + '\'' + aView + '\'' + '); return false;">' + aView + '</a></li>';
+	    }
+      var newGadgetSite = gadgetTemplate;
+      newGadgetSite = newGadgetSite.replace(/(gadget-site)/g, '$1-' + curId);
+      $(newGadgetSite).appendTo($('#gadgetArea')).addClass('ui-widget ui-widget-content ui-helper-clearfix ui-corner-all')
+      .find('.portlet-header')
+      .addClass('ui-widget-header ui-corner-all')
+      .text(result[gadgetURL]['modulePrefs'].title)
+      .append('<ul id="viewsDropdown">' +
+             '<li class="li-header">' +
+               '<a href="#" class="hidden"><span id="dropdownIcon" class="ui-icon ui-icon-triangle-1-s"></span></a>' +
+             '<ul>' +
+               viewItems +
+             '</ul>' +
+              '</li>' +
+               '</ul>')
+      .append('<span id="remove" class="ui-icon ui-icon-closethick"></span>')
+      .append('<span id="expand" class="ui-icon ui-icon-plusthick"></span>')
+      .append('<span id="collapse" class="ui-icon ui-icon-minusthick"></span>')
+      .end()
+      .find('.portlet-content')
+      .data('gadgetSite', CommonContainer.renderGadget(gadgetURL, curId));
 
-		 //determine which button was click and handle the appropriate event.
-		 $('.portlet-header .ui-icon').click(function() {
-			 handleNavigateAction($(this).closest('.portlet'), $(this).closest('.portlet').find('.portlet-content').data('gadgetSite'), gadgetURL, this.id);
-	     });
+       //determine which button was click and handle the appropriate event.
+      $('.portlet-header .ui-icon').click(function() {
+        handleNavigateAction($(this).closest('.portlet'), $(this).closest('.portlet').find('.portlet-content').data('gadgetSite'), gadgetURL, this.id);
+        });
     };
 
 	//  Publish the container event
