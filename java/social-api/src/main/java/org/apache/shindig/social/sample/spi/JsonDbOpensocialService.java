@@ -173,6 +173,11 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
   public void setDb(JSONObject db) {
     this.db = db;
   }
+  
+  @Inject(optional = true)
+  public void setHostProvider(Provider<Authority> hostProvider) {
+    this.hostProvider = hostProvider;
+  }
 
   /** {@inheritDoc} */
   public Future<RestfulCollection<Activity>> getActivities(Set<UserId> userIds, GroupId groupId,
@@ -1376,7 +1381,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
           .size()]));
     }
     String objectVal = object.toString();
-    if ( hostProvider != null ) {
+    if (hostProvider != null) {
       objectVal = objectVal.replace("%origin%", hostProvider.get().getOrigin());
     } else { 
       //provide default for junit tests
