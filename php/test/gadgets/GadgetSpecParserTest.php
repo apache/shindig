@@ -32,8 +32,8 @@ class GadgetSpecParserTest extends PHPUnit_Framework_TestCase {
    * @var Gadget
    */
   private $Gadget = '<?xml version="1.0" encoding="UTF-8" ?>
-<Module>
-  <ModulePrefs title="Test" />
+<Module specificationVersion="2.0.0">
+  <ModulePrefs title="Test" doctype="html" />
   <Content type="html" view="home">
   <![CDATA[
     <h1>Hello, world!</h1>
@@ -80,6 +80,8 @@ class GadgetSpecParserTest extends PHPUnit_Framework_TestCase {
     $gadgetParsed = $this->GadgetSpecParser->parse($this->Gadget, $this->Context);
     $view = $gadgetParsed->views['home'];
     $this->assertEquals('<h1>Hello, world!</h1>', trim($view['content']));
+    $this->assertEquals('2.0.0', (string) $gadgetParsed->specificationVersion);
+    $this->assertEquals('html', $gadgetParsed->doctype);
   }
 }
 

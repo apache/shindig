@@ -89,7 +89,7 @@ class GadgetHtmlRendererTest extends PHPUnit_Framework_TestCase {
     $gadgetSpecFactory = new MockHtmlGadgetFactory($this->gadgetContext, null);
     $gadgetSpecFactory->fetchGadget = null;
     $this->gadget = $gadgetSpecFactory->createGadget();
-
+    $this->view = $this->gadget->gadgetSpec->views['home'];
     // init gadgetRenderer;
     $this->gadgetHtmlRenderer = new GadgetHtmlRenderer($this->gadgetContext);
 
@@ -172,11 +172,48 @@ class GadgetHtmlRendererTest extends PHPUnit_Framework_TestCase {
   /**
    * Tests GadgetHtmlRenderer->renderGadget()
    */
-  public function testRenderGadget() {
+  public function testRenderGadgetDefaultDoctype() {
     Config::set('P3P', ''); // prevents "modify header information" errors
     ob_start();
     $this->gadgetHtmlRenderer->renderGadget($this->gadget, $this->view);
-    ob_end_clean();
+    $content = ob_get_clean();
+    $this->assertTrue(strpos($content, '!DOCTYPE HTML>') > 0, $content);
+  }
+  
+  public function testLegacyDoctypeBecauseOfOldOpenSocialVersion() {
+    Config::set('P3P', ''); // prevents "modify header information" errors
+    $this->gadget->gadgetSpec->specificationVersion = new OpenSocialVersion('1.0.0');
+    ob_start();
+    $this->gadgetHtmlRenderer->renderGadget($this->gadget, $this->view);
+    $content = ob_get_clean();
+    $this->assertTrue(strpos($content, '!DOCTYPE HTML PUBLIC') > 0);
+  }
+  
+  public function testCustomDoctypeDoctype() {
+    Config::set('P3P', ''); // prevents "modify header information" errors
+    $this->gadget->gadgetSpec->doctype = 'CUSTOM';
+    ob_start();
+    $this->gadgetHtmlRenderer->renderGadget($this->gadget, $this->view);
+    $content = ob_get_clean();
+    $this->assertTrue(strpos($content, '!DOCTYPE CUSTOM') > 0);
+  }
+  
+  public function testQuirksModeBecauseOfQuirksDoctype() {
+    Config::set('P3P', ''); // prevents "modify header information" errors
+    $this->gadget->gadgetSpec->doctype = GadgetSpec::DOCTYPE_QUIRKSMODE;
+    ob_start();
+    $this->gadgetHtmlRenderer->renderGadget($this->gadget, $this->view);
+    $content = ob_get_clean();
+    $this->assertTrue(strpos($content, '!DOCTYPE') === false);
+  }
+  
+  public function testQuirksModeBecauseOfContentBlockAttribute() {
+    Config::set('P3P', ''); // prevents "modify header information" errors
+    $this->view['quirks'] = true;
+    ob_start();
+    $this->gadgetHtmlRenderer->renderGadget($this->gadget, $this->view);
+    $content = ob_get_clean();
+    $this->assertTrue(strpos($content, '!DOCTYPE') === false);
   }
 
   /**

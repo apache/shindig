@@ -19,6 +19,8 @@
  */
 
 class GadgetSpec {
+  const DOCTYPE_QUIRKSMODE = "quirksmode";
+    
   /**
    * MD5 checksum of the xml's content
    *
@@ -174,4 +176,14 @@ class GadgetSpec {
    * @var boolean
    */
   public $templatesDisableAutoProcessing = false;
+  
+  /**
+   * @var string
+   */
+  public $doctype;
+  
+  /**
+   * @var OpenSocialVersion
+   */
+  public $specificationVersion;
 }

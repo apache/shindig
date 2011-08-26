@@ -73,6 +73,31 @@ class Gadget {
   }
 
   /**
+   * @return OpenSocialVersion
+   */
+  public function getSpecificationVersion() {
+    return $this->gadgetSpec->specificationVersion;
+  }
+  
+  /**
+   * Returns if the doctype attribute is set to quirksmode.  
+   * Needed to override default OpenSocial 2.0 behavior which is to render in standards mode,
+   * may not be possible to honor this attribute when inlining (caja)
+   * 
+   * @return boolean TRUE if this Gadget should be rendered in browser quirks mode
+   */
+  public function useQuirksMode() {
+    return GadgetSpec::DOCTYPE_QUIRKSMODE == $this->gadgetSpec->doctype;
+  }
+  
+  /**
+   * @return string
+   */
+  public function getDoctype() {
+    return $this->gadgetSpec->doctype;
+  }
+  
+  /**
    * @return unknown
    */
   public function getAuthor() {

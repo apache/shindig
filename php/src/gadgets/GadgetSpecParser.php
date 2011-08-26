@@ -53,6 +53,7 @@ class GadgetSpecParser {
     $gadgetSpecClass = Config::get('gadget_spec_class');
     $gadget = new $gadgetSpecClass();
     $gadget->checksum = md5($xmlContent);
+    $this->parseModuleTag($doc, $gadget);
     $this->parseModulePrefs($doc, $gadget);
     $this->parseUserPrefs($doc, $gadget);
     $this->parseViews($doc, $gadget);
@@ -174,6 +175,27 @@ class GadgetSpecParser {
   }
 
   /**
+   *
+   * @param DOMDocument $doc
+   * @param GadgetSpec $gadget
+   */
+  private function parseModuleTag(DOMDocument &$doc, GadgetSpec &$gadget) {
+    $moduleTag = $doc->getElementsByTagName("Module");
+    if ($moduleTag->length < 1) {
+      throw new GadgetSpecException("Missing Module block");
+    } elseif ($moduleTag->length > 1) {
+      throw new GadgetSpecException("More then one Module block found");
+    }
+    $moduleTag = $moduleTag->item(0);
+    $specVersion = $moduleTag->getAttribute('specificationVersion');
+    if ($specVersion) {
+        $gadget->specificationVersion = new OpenSocialVersion(str_replace(' ', '', $specVersion));
+    } else {
+        $gadget->specificationVersion = new OpenSocialVersion();
+    }
+  }
+  
+  /**
    * Parses the ModulePrefs section of the xml structure. The ModulePrefs
    * section is required, so if it's missing or if there's 2 an GadgetSpecException will be thrown.
    *
@@ -195,7 +217,7 @@ class GadgetSpecParser {
         'directoryTitle', 'screenshot', 'thumbnail', 'titleUrl', 'authorAffiliation',
         'authorLocation', 'authorPhoto', 'authorAboutme', 'authorQuote', 'authorLink',
         'showStats', 'showInDirectory', 'string', 'width', 'height', 'category',
-        'category2', 'singleton', 'renderInline', 'scaling', 'scrolling');
+        'category2', 'singleton', 'renderInline', 'scaling', 'scrolling', 'doctype');
     foreach ($modulePrefs->attributes as $key => $attribute) {
       $attrValue = trim($attribute->value);
       // var format conversion from directory_title => directoryTitle
