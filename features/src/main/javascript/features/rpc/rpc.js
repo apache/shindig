@@ -528,6 +528,7 @@ if (!window['gadgets']['rpc']) { // make lib resilient to double-inclusion
       }
     }
 
+    var _flagCrossOrigin = {};
     /**
      * Attempts to make an rpc by calling the target's receive method directly.
      * This works when gadgets are rendered on the same domain as their container,
@@ -540,14 +541,13 @@ if (!window['gadgets']['rpc']) { // make lib resilient to double-inclusion
      */
     function callSameDomain(target, rpc) {
       var targetEl = getTargetWin(target);
-      if (typeof sameDomain[target] === 'undefined' ||
-              targetEl.Function.prototype !== sameDomain[target].constructor.prototype) {
-        // Seed with a negative, typed value to avoid
-        // hitting this code path repeatedly.
-        sameDomain[target] = false;
+      if (!sameDomain[target] || (sameDomain[target] !== _flagCrossOrigin &&
+              targetEl.Function.prototype !== sameDomain[target].constructor.prototype)) {
+
         var targetRelay = getRelayUrl(target);
         if (getOrigin(targetRelay) !== getOrigin(window.location.href)) {
           // Not worth trying -- avoid the error and just return.
+          sameDomain[target] = _flagCrossOrigin; // never try this again
           return false;
         }
 
@@ -559,10 +559,14 @@ if (!window['gadgets']['rpc']) { // make lib resilient to double-inclusion
           // Shouldn't happen due to origin check. Caught to emit more
           // meaningful error to the caller. Consider emitting in non-opt mode.
           // gadgets.log('Same domain call failed: parent= incorrectly set.');
+          sameDomain[target] = _flagCrossOrigin; // never try this again
+          return false;
         }
       }
 
-      if (typeof sameDomain[target] === 'function') {
+      // Cross window functions in IE often look like objects in nearly every way
+      // (typeof() will lie to you)
+      if (sameDomain[target] && sameDomain[target] !== _flagCrossOrigin) {
         // Call target's receive method
         sameDomain[target](rpc);
         return true;
