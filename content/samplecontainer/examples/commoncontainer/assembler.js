@@ -19,7 +19,7 @@
 
 // url base should be <host>:<port>//<contextRoot>
 var urlBase = location.href.substr(0, location.href.indexOf('/samplecontainer/examples/commoncontainer/'));
-var contextRoot = urlBase.substr(urlBase.indexOf(location.port) + location.port.length);
+var contextRoot = urlBase.substr(urlBase.indexOf(location.host) + location.host.length);
 
 var testConfig = testConfig || {};
 testConfig[osapi.container.ServiceConfig.API_PATH] = contextRoot + '/rpc';

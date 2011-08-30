@@ -43,8 +43,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.inject.Inject;
-import com.google.inject.Provider;
-
 
 /**
  * Retrieves the rpc services for a container by fetching them from the container's
@@ -73,7 +71,7 @@ public class DefaultServiceFetcher {
 
   private final HttpFetcher fetcher;
   
-  private Provider<Authority> hostProvider;
+  private Authority authority;
 
   /** @param config Container Config for looking up endpoints */
   @Inject
@@ -83,8 +81,8 @@ public class DefaultServiceFetcher {
   }
   
   @Inject(optional = true)
-  public void setHostProvider( Provider<Authority> hostProvider) {
-    this.hostProvider = hostProvider;
+  public void setAuthority(Authority authority) {
+    this.authority = authority;
   }
 
   /**
@@ -114,13 +112,12 @@ public class DefaultServiceFetcher {
     // Merge services lazily loaded from the endpoints if any
     List<String> endpoints = getEndpointsFromContainerConfig(container, host);
     for (String endpoint : endpoints) {
-      String endpointVal = endpoint;	
-      if ( endpoint.startsWith("//") && hostProvider != null ){
-    	endpointVal = hostProvider.get().getScheme() + ":" + endpoint;
+      String endpointVal = endpoint;
+      if ( endpoint.startsWith("//") && authority != null ){
+        endpointVal = authority.getScheme() + ":" + endpoint;
       }
       endpointServices.putAll(endpoint, retrieveServices(endpointVal.replace("%host%", host)));
     }
-    
     return ImmutableMultimap.copyOf(endpointServices);
   }
 

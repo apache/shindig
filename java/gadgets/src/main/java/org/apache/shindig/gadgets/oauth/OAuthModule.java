@@ -120,11 +120,11 @@ public class OAuthModule extends AbstractModule {
         @Named(OAUTH_SIGNING_KEY_FILE) String signingKeyFile,
         @Named(OAUTH_SIGNING_KEY_NAME) String signingKeyName,
         @Named(OAUTH_CALLBACK_URL) String defaultCallbackUrl,
-        Provider<Authority> hostProvider) {
+        Authority authority) {
       store = new BasicOAuthStore();
       loadDefaultKey(signingKeyFile, signingKeyName);
       store.setDefaultCallbackUrl(defaultCallbackUrl);
-      store.setHostProvider(hostProvider);
+      store.setAuthority(authority);
       loadConsumers();
     }
 

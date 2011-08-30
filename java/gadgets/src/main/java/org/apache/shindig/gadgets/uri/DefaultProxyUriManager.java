@@ -22,7 +22,6 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.name.Named;
 
 import org.apache.commons.lang.StringUtils;
@@ -75,7 +74,7 @@ public class DefaultProxyUriManager implements ProxyUriManager {
   private final ContainerConfig config;
   private final Versioner versioner;
   private boolean strictParsing = false;
-  private Provider<Authority> hostProvider;
+  private Authority authority;
 
   @Inject
   public DefaultProxyUriManager(ContainerConfig config,
@@ -90,8 +89,8 @@ public class DefaultProxyUriManager implements ProxyUriManager {
   }
 
   @Inject(optional = true)
-  public void setHostProvider(Provider<Authority> hostProvider) {
-    this.hostProvider = hostProvider;
+  public void setAuthority(Authority authority) {
+    this.authority = authority;
   }
 
   public List<Uri> make(List<ProxyUri> resources, Integer forcedRefresh) {
@@ -288,9 +287,9 @@ public class DefaultProxyUriManager implements ProxyUriManager {
       throw new RuntimeException("Missing required container config key: " + key + " for " +
           "container: " + container);
     }
-    if (hostProvider != null) {
-      val = val.replace("%authority%", hostProvider.get().getAuthority());
-    }else{
+    if (authority != null) {
+      val = val.replace("%authority%", authority.getAuthority());
+    } else{
       //require this for test purpose, %host% needs to be replaced with default value eg. StyleTagProxyEmbeddedUrlsVisitorTest
       if (val.contains("%authority%")) {
         val = val.replace("%authority%", "localhost:8080");

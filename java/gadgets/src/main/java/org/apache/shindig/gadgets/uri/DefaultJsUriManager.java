@@ -22,7 +22,6 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
@@ -54,7 +53,7 @@ public class DefaultJsUriManager implements JsUriManager {
 
   private final ContainerConfig config;
   private final Versioner versioner;
-  private Provider<Authority> hostProvider;
+  private Authority authority;
 
   @Inject
   public DefaultJsUriManager(ContainerConfig config, Versioner versioner) {
@@ -63,8 +62,8 @@ public class DefaultJsUriManager implements JsUriManager {
   }
 
   @Inject(optional = true)
-  public void setHostProvider(Provider<Authority> hostProvider) {
-    this.hostProvider = hostProvider;
+  public void setAuthority(Authority authority) {
+    this.authority = authority;
   }
 
   public Uri makeExternJsUri(JsUri ctx) {
@@ -232,8 +231,8 @@ public class DefaultJsUriManager implements JsUriManager {
             "' missing config for required param: " + key);
       }
     }
-    if (hostProvider != null) {
-      ret = ret.replace("%authority%", hostProvider.get().getAuthority());
+    if (authority != null) {
+      ret = ret.replace("%authority%", authority.getAuthority());
     }
     return ret;
   }

@@ -21,7 +21,6 @@ package org.apache.shindig.gadgets.uri;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.name.Named;
 
 import org.apache.commons.lang.StringEscapeUtils;
@@ -56,7 +55,7 @@ public class DefaultConcatUriManager implements ConcatUriManager {
   private final ContainerConfig config;
   private final Versioner versioner;
   private boolean strictParsing;
-  private Provider<Authority> hostProvider;
+  private Authority authority;
   private static int DEFAULT_URL_MAX_LENGTH = 2048;
   private int urlMaxLength = DEFAULT_URL_MAX_LENGTH;
   private static final float URL_LENGTH_BUFFER_MARGIN = .8f;
@@ -80,8 +79,8 @@ public class DefaultConcatUriManager implements ConcatUriManager {
   }
 
   @Inject(optional = true)
-  public void setHostProvider(Provider<Authority> hostProvider) {
-    this.hostProvider = hostProvider;
+  public void setAuthority(Authority authority) {
+    this.authority = authority;
   }
 
   public int getUrlMaxLength() {
@@ -232,8 +231,8 @@ public class DefaultConcatUriManager implements ConcatUriManager {
       throw new RuntimeException(
           "Missing required config '" + key + "' for container: " + container);
     }
-    if (hostProvider != null) {
-      val = val.replace("%authority%", hostProvider.get().getAuthority());
+    if (authority != null) {
+      val = val.replace("%authority%", authority.getAuthority());
     }
 
     return val;

@@ -17,40 +17,35 @@
  */
 package org.apache.shindig.common.servlet;
 
-import org.apache.shindig.common.Nullable;
-import org.apache.shindig.common.servlet.ServletRequestContext;
-
-import com.google.inject.Inject;
-import com.google.inject.name.Named;
-
 import com.google.common.base.Joiner;
 import com.google.common.base.Objects;
-import com.google.common.base.Strings;
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
+import org.apache.commons.lang.StringUtils;
+import org.apache.shindig.common.Nullable;
 
 /**
  * Basic implementation for Authority Interface.
  *
  * Authority information is calculated based on following procedure.
- * 1. Optionally default host and default port can be provided as ServletContext Parameters in web.xml. Once it's provided,
- *    default host and default port are used to construct authority information.
- * 2. If default host and default port are not provided, host and port from current HttpServletRequest will be used if available.
- * 3. If HttpServletRequest is not available, jetty host/port will be used. This is required for junit tests.
+ * 1. Optionally default host and default port can be provided as ServletContext Parameters in web.xml.
+ *    Once it's provided, default host and default port are used to construct authority information.
+ * 2. If default host and default port are not provided, host and port from current HttpServletRequest
+ *    will be used if available.
+ * 3. If HttpServletRequest is not available, jetty host/port will be used.
+ *    This is required for junit tests.
  */
 public class BasicAuthority implements Authority {
-  private String host;
-  private String port;
+  private final String host;
+  private final String port;
   public final static String JETTY_HOST = "jetty.host";
   public final static String JETTY_PORT = "jetty.port";
 
   @Inject
   public BasicAuthority(@Nullable @Named("shindig.host") String defaultHost,
       @Nullable @Named("shindig.port") String defaultPort) {
-    if (!Strings.isNullOrEmpty(defaultHost)) {
-      this.host = defaultHost;
-    }
-    if (!Strings.isNullOrEmpty(defaultPort)) {
-      this.port = defaultPort;
-    }
+    this.host = StringUtils.isNotBlank(defaultHost) ? defaultHost : null;
+    this.port =  StringUtils.isNotBlank(defaultPort) ? defaultPort : null;
   }
 
   public String getAuthority() {

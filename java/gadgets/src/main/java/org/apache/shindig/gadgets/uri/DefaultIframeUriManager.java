@@ -21,7 +21,6 @@ package org.apache.shindig.gadgets.uri;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.ImplementedBy;
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.name.Named;
 
 import org.apache.commons.lang.StringUtils;
@@ -60,7 +59,7 @@ public class DefaultIframeUriManager implements IframeUriManager, ContainerConfi
   private boolean ldEnabled = true;
   private TemplatingSignal tplSignal = null;
   private Versioner versioner = null;
-  private Provider<Authority> hostProvider;
+  private Authority authority;
 
   private final ContainerConfig config;
   private final LockedDomainPrefixGenerator ldGen;
@@ -108,8 +107,8 @@ public class DefaultIframeUriManager implements IframeUriManager, ContainerConfi
   }
 
   @Inject(optional = true)
-  public void setHostProvider( Provider<Authority> hostProvider) {
-    this.hostProvider = hostProvider;
+  public void setAuthority(Authority authority) {
+    this.authority = authority;
   }
 
   public Uri makeRenderingUri(Gadget gadget) {
@@ -356,8 +355,8 @@ public class DefaultIframeUriManager implements IframeUriManager, ContainerConfi
       throw new RuntimeException("Missing required container config param, key: "
           + key + ", container: " + container);
     }
-    if (hostProvider != null) {
-      val = val.replace("%authority%", hostProvider.get().getAuthority());
+    if (authority != null) {
+      val = val.replace("%authority%", authority.getAuthority());
     }
 
     return val;

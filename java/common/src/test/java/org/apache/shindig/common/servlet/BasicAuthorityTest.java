@@ -21,39 +21,36 @@ import org.apache.shindig.common.EasyMockTestCase;
 
 import org.junit.Test;
 
-import org.apache.shindig.common.servlet.BasicAuthorityProvider;
-
 /**
- * Simple test for AuthorityProvider.
+ * Simple test for BasicAuthority.
  */
-public class BasicAuthorityProviderTest extends EasyMockTestCase {
+public class BasicAuthorityTest extends EasyMockTestCase {
 
   @Test
-  public void testProviderWorks() {
+  public void testBasicAuthorityWorks() {
     String host = "myhost";
     String port = "9080";
-    BasicAuthorityProvider provider = new BasicAuthorityProvider(host,port);
-    assertEquals( "myhost:9080", provider.get().getAuthority());
+    BasicAuthority authority = new BasicAuthority(host,port);
+    assertEquals( "myhost:9080", authority.getAuthority());
   }
 
   @Test
   public void testDefaultHostAndPort() {
-	String host = "";
-	String port = "";
-	BasicAuthorityProvider provider = new BasicAuthorityProvider(host,port);
-	assertEquals("localhost:8080", provider.get().getAuthority() );
+    String host = "";
+    String port = "";
+    BasicAuthority authority = new BasicAuthority(host,port);
+    assertEquals("localhost:8080", authority.getAuthority());
   }
 
   @Test
   public void testJettyHostAndPort() {
-	String host = "";
-	String port = "";
-	System.setProperty("jetty.host", "localhost");
-	System.setProperty("jetty.port", "9003");
-	BasicAuthorityProvider provider = new BasicAuthorityProvider(host,port);
-	assertEquals("localhost:9003", provider.get().getAuthority() );
-	System.clearProperty("jetty.host");
-	System.clearProperty("jetty.port");
+    String host = "";
+    String port = "";
+    System.setProperty("jetty.host", "localhost");
+    System.setProperty("jetty.port", "9003");
+    BasicAuthority authority = new BasicAuthority(host,port);
+    assertEquals("localhost:9003", authority.getAuthority() );
+    System.clearProperty("jetty.host");
+    System.clearProperty("jetty.port");
   }
-
 }

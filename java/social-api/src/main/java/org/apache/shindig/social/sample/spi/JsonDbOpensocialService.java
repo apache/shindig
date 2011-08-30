@@ -64,7 +64,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
@@ -138,7 +137,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
    */
   private static final String ACTIVITYSTREAMS_TABLE = "activityEntries";
 
-  private Provider<Authority> hostProvider;
+  private Authority authority;
 
   /**
    * Initializes the JsonDbOpensocialService using Guice
@@ -173,10 +172,10 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
   public void setDb(JSONObject db) {
     this.db = db;
   }
-  
+
   @Inject(optional = true)
-  public void setHostProvider(Provider<Authority> hostProvider) {
-    this.hostProvider = hostProvider;
+  public void setAuthority(Authority authority) {
+    this.authority = authority;
   }
 
   /** {@inheritDoc} */
@@ -1381,9 +1380,9 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
           .size()]));
     }
     String objectVal = object.toString();
-    if (hostProvider != null) {
-      objectVal = objectVal.replace("%origin%", hostProvider.get().getOrigin());
-    } else { 
+    if (authority != null) {
+      objectVal = objectVal.replace("%origin%", authority.getOrigin());
+    } else {
       //provide default for junit tests
       objectVal = objectVal.replace("%origin%", "http://localhost:8080");
     }

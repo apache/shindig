@@ -29,6 +29,7 @@ import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 
+import org.apache.shindig.common.servlet.BasicAuthority;
 import org.apache.shindig.common.servlet.GuiceServletContextListener;
 import org.apache.shindig.gadgets.config.DefaultConfigContributorModule;
 import org.apache.shindig.gadgets.http.AbstractHttpCache;
@@ -47,7 +48,6 @@ import org.apache.shindig.gadgets.uri.ProxyUriBase;
 import org.apache.shindig.gadgets.uri.UriModule;
 
 import org.apache.shindig.common.servlet.Authority;
-import org.apache.shindig.common.servlet.BasicAuthorityProvider;
 
 import org.apache.shindig.gadgets.variables.SubstituterModule;
 
@@ -70,7 +70,7 @@ public class DefaultGuiceModule extends AbstractModule {
     bind(ExecutorService.class).to(ShindigExecutorService.class);
     bind(Executor.class).annotatedWith(Names.named("shindig.concat.executor")).to(ShindigExecutorService.class);
 
-    bind(Authority.class).toProvider(BasicAuthorityProvider.class);
+    bind(Authority.class).to(BasicAuthority.class);
 
     bindConstant().annotatedWith(Names.named("shindig.jsload.ttl-secs")).to(60 * 60); // 1 hour
     bindConstant().annotatedWith(Names.named("shindig.jsload.require-onload-with-jsload")).to(true);

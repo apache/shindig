@@ -89,7 +89,7 @@ public class BasicOAuthStore implements OAuthStore {
   /** Number of times we removed an access token */
   private int accessTokenRemoveCount = 0;
   
-  private Provider<Authority> hostProvider;
+  private Authority authority;
 
   public BasicOAuthStore() {
     consumerInfos = Maps.newHashMap();
@@ -165,8 +165,8 @@ public class BasicOAuthStore implements OAuthStore {
     consumerInfos.put(providerKey, keyAndSecret);
   }
   
-  public void setHostProvider( Provider<Authority> hostProvider) {
-    this.hostProvider = hostProvider;
+  public void setAuthority(Authority authority) {
+    this.authority = authority;
   }
 
   public ConsumerInfo getConsumerKeyAndSecret(
@@ -198,8 +198,8 @@ public class BasicOAuthStore implements OAuthStore {
     }
     String callback = (cks.getCallbackUrl() != null ? cks.getCallbackUrl() : defaultCallbackUrl);
     
-    if (hostProvider != null) {
-      callback = callback.replace("%authority%", hostProvider.get().getAuthority());
+    if (authority != null) {
+      callback = callback.replace("%authority%", authority.getAuthority());
     }
  
     return new ConsumerInfo(consumer, cks.getKeyName(), callback);
