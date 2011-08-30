@@ -122,6 +122,9 @@ public class Processor {
 
   /**
    * Attempts to extract the "current" view for the given gadget.
+   *
+   * There is common container JavaScript code that performs this same type of aliasing check before
+   * render. If the common container is being used, the view should never have to be aliased here.
    */
   private View getView(GadgetContext context, GadgetSpec spec) {
     String viewName = context.getView();

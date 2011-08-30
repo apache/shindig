@@ -237,6 +237,10 @@ osapi.container.GadgetSite.prototype.onNavigateTo = function(data) {
 
 /**
  * Render a gadget in this site, using a JSON gadget description.
+ *
+ * Note: A view provided in either renderParams or viewParams is subject to aliasing if the gadget
+ * does not support the view specified.
+ *
  * @param {Object} gadgetInfo the JSON gadget description.
  * @param {Object} viewParams Look at osapi.container.ViewParam.
  * @param {Object} renderParams Look at osapi.container.RenderParam.
@@ -250,16 +254,46 @@ osapi.container.GadgetSite.prototype.render = function(
     previousView = this.currentGadgetHolder_.getView();
   }
 
+  // Simple function to find a suitable alias
+  var findAliasInfo = function(viewConf) {
+    if (typeof viewConf !== 'undefined' && viewConf != null) {
+      var aliases = viewConf['aliases'] || [];
+      for (var i = 0; i < aliases.length; i++) {
+        if (gadgetInfo[osapi.container.MetadataResponse.VIEWS][aliases[i]]) {
+          return {'view':aliases[i],
+                  'viewInfo':gadgetInfo[osapi.container.MetadataResponse.VIEWS][aliases[i]]};
+        }
+      }
+    }
+    return null;
+  };
+
   // Find requested view.
   var view = renderParams[osapi.container.RenderParam.VIEW] ||
       viewParams[osapi.container.ViewParam.VIEW] ||
       previousView;
   var viewInfo = gadgetInfo[osapi.container.MetadataResponse.VIEWS][view];
+  if (view && !viewInfo) {
+    var aliasInfo = findAliasInfo(gadgets.config.get('views')[view]);
+    if (aliasInfo) {
+      view = aliasInfo['view'];
+      viewInfo = aliasInfo['viewInfo'];
+    }
+  }
 
-  // Allow default view if requested view is not found.
-  if (!viewInfo && renderParams[osapi.container.RenderParam.ALLOW_DEFAULT_VIEW]) {
+  // Allow default view if requested view is not found.  No sense doing this if the view is already "default".
+  if (!viewInfo &&
+          renderParams[osapi.container.RenderParam.ALLOW_DEFAULT_VIEW]  &&
+          view != osapi.container.GadgetSite.DEFAULT_VIEW_) {
     view = osapi.container.GadgetSite.DEFAULT_VIEW_;
     viewInfo = gadgetInfo[osapi.container.MetadataResponse.VIEWS][view];
+    if (!viewInfo) {
+      var aliasInfo = findAliasInfo(gadgets.config.get('views')[view]);
+      if (aliasInfo) {
+        view = aliasInfo['view'];
+        viewInfo = aliasInfo['viewInfo'];
+      }
+    }
   }
 
   // Check if view exists.

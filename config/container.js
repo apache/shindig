@@ -156,6 +156,11 @@
       "isOnlyVisible" : true,
       "urlTemplate" : "http://localhost${CONTEXT_ROOT}/gadgets/canvas?{var}",
       "aliases" : ["FULL_PAGE"]
+    },
+    "default" : {
+      "isOnlyVisible" : false,
+      "urlTemplate" : "http://localhost${CONTEXT_ROOT}/gadgets/default?{var}",
+      "aliases" : ["home", "profile", "canvas"]
     }
   },
   "tabs": {

@@ -138,7 +138,9 @@ osapi.container.GadgetHolder.prototype.getUrl = function() {
 
 
 /**
- * @return {string} The view of current gadget.
+ * @return {string} The view of current gadget. This is the view that was actually rendered once
+ *         view aliases were applied.
+ * @see osapi.container.GadgetSite.prototype.render
  */
 osapi.container.GadgetHolder.prototype.getView = function() {
   return this.renderParams_[osapi.container.RenderParam.VIEW];
