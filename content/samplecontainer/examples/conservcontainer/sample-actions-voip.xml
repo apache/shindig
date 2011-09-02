@@ -24,9 +24,9 @@
 <Optional feature="actions">
 <Param name="action-contributions"><![CDATA[<actions>
 <action id="org.samplevoip.chatwithperson" dataType="opensocial.Person" 
-      		label="Chat" tooltip="Chat" view="DialByPerson" />
+      		label="Chat" tooltip="Chat" />
 <action id="org.samplevoip.callbyperson" dataType="opensocial.Person" 
-      		label="Call" tooltip="Call" view="DialByPerson" />
+      		label="Call" tooltip="Call" />
 <action id="org.samplevoip.navLink" path="container/navigationLinks" label="Call Person" tooltip="Dial a Number"/>
 </actions>]]></Param>
 </Optional>

@@ -271,16 +271,31 @@
     };
 
     /**
-     * Returns the gadget site associated with the specified action object.
+     * Return the gadget sites associated with the specified action object.
      *
      * @param {Object}
      *          actionId The id of the action.
-     * @return {osapi.container.GadgetSite} The gadget site instance associated
-     *         with the action object.
+     * @return {Array} An array of the gadget site instances associated
+     *         with the action object, or undefined if there are none.
      */
-    this.getGadgetSite = function(actionId) {
-      var url = this.actionToUrl[actionId];
-      var sites = this.urlToSite[url];
+    this.getGadgetSites = function(actionId) {
+      var action = this.getItemById(actionId);
+
+      var url = this.actionToUrl[actionId],
+          sites,
+          candidates;
+
+      if (candidates = this.urlToSite[url]) {
+        // Return subset of matching sites (gadget view matches declared action view,
+        // if the action declared a view) Do not modify existing array.
+        for (var i = 0, site; site = candidates[i]; i++) {
+          var holder = site.getActiveGadgetHolder();
+          if (!action.view || (holder && holder.getView() === action.view)) {
+            (sites = sites || []).push(site);
+          }
+        }
+      }
+
       return sites;
     };
 
@@ -406,12 +421,18 @@
     if (!selection && container_ && container_.selection) {
       actionData.selectionObj = container_.selection.getSelection();
     }
-    // make rpc call to get gadget to run callback based on action id
-    var gadgetSites = registry.getGadgetSite(actionId);
-    if (gadgetSites && gadgetSites.length > 0) {
-      var frameId = gadgetSites[0].getActiveGadgetHolder().getIframeId();
+
+    // make rpc call to get gadgets to run callback based on action id
+    var gadgetSites = registry.getGadgetSites(actionId);
+    if (gadgetSites) {
+      for (var i = 0, site; site = gadgetSites[i]; i++) {
+        var holder = site.getActiveGadgetHolder();
+        if (holder) {
+          var frameId = holder.getIframeId();
+          gadgets.rpc.call(frameId, 'actions', null, 'runAction', actionData);
+        }
+      }
     }
-    gadgets.rpc.call(frameId, 'actions', null, 'runAction', actionData);
   };
 
   /**
@@ -677,17 +698,12 @@
         if (action) {
           // if gadget site has not been registered yet
           // the gadget needs to be rendered
-          var gadgetSite = registry.getGadgetSite(actionId);
-          if (!gadgetSite) {
+          var gadgetSites = registry.getGadgetSites(actionId);
+          if (!gadgetSites) {
             var gadgetUrl = registry.getUrl(actionId);
             pendingActions[actionId] = {
-              selection: container_.selection.getSelection()
+              selection: opt_selection || container_.selection.getSelection()
             };
-
-            // set selection
-	    if (opt_selection != null) {
-	      pendingActions[actionId].selection = opt_selection;
-	    }
 
             // set optional params
             var opt_params = {};
