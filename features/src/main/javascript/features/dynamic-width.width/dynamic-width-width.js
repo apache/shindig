@@ -50,8 +50,7 @@ gadgets.window = gadgets.window || {};
       // document.documentElement.offsetWidth
       // Based on studying the values output by different browsers,
       // use the value that's NOT equal to the viewport width found above.
-      return docEl.scrollWidth !== vw ? docEl.scrollWidth : docEl.offsetWidth;
-
+      return docEl.scrollWidth !== viewportWidth ? docEl.scrollWidth : docEl.offsetWidth;
     } else if (body) {
       var scrollWidth = body.scrollWidth;
       var offsetWidth = body.offsetWidth;
