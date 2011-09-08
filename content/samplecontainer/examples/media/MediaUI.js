@@ -296,7 +296,7 @@ function MediaUI(social) {
         var table = dojo.create('table', null, form.domNode);
         var tbody = dojo.create('tbody', null, table);
         var tr = dojo.create('tr', null, tbody);
-        dojo.create('td', null, tr).appendChild(dojo.create('label', {innerHTML: 'Title', for: 'title'}));
+        dojo.create('td', null, tr).appendChild(dojo.create('label', {'innerHTML': 'Title', 'for': 'title'}));
         dojo.create('td', null, tr).appendChild(
             new dijit.form.ValidationTextBox({
                 name: 'title',
@@ -304,7 +304,7 @@ function MediaUI(social) {
             }).domNode
         );
         tr = dojo.create('tr', null, tbody);
-        dojo.create('td', null, tr).appendChild(dojo.create('label', {innerHTML: 'Thumnail URL', for: 'thumbnail'}));
+        dojo.create('td', null, tr).appendChild(dojo.create('label', {'innerHTML': 'Thumnail URL', 'for': 'thumbnail'}));
         dojo.create('td', null, tr).appendChild(
             new dijit.form.ValidationTextBox({
                 name: 'thumbnail',
@@ -312,7 +312,7 @@ function MediaUI(social) {
             }).domNode
         );
         tr = dojo.create('tr', null, tbody);
-        dojo.create('td', null, tr).appendChild(dojo.create('label', {innerHTML: 'Description', for: 'description'}));
+        dojo.create('td', null, tr).appendChild(dojo.create('label', {'innerHTML': 'Description', 'for': 'description'}));
         dojo.create('td', null, tr).appendChild(
             new dijit.form.Textarea({
                 name: 'description',
@@ -388,7 +388,7 @@ function MediaUI(social) {
         var table = dojo.create('table', null, form.domNode);
         var tbody = dojo.create('tbody', null, table);
         var tr = dojo.create('tr', null, tbody);
-        dojo.create('td', null, tr).appendChild(dojo.create('label', {innerHTML: 'Title', for: 'title'}));
+        dojo.create('td', null, tr).appendChild(dojo.create('label', {'innerHTML': 'Title', 'for': 'title'}));
         dojo.create('td', null, tr).appendChild(
             new dijit.form.ValidationTextBox({
                 name: 'title',
@@ -396,7 +396,7 @@ function MediaUI(social) {
             }).domNode
         );
         tr = dojo.create('tr', null, tbody);
-        dojo.create('td', null, tr).appendChild(dojo.create('label', {innerHTML: 'Description', for: 'description'}));
+        dojo.create('td', null, tr).appendChild(dojo.create('label', {'innerHTML': 'Description', 'for': 'description'}));
         dojo.create('td', null, tr).appendChild(
             new dijit.form.Textarea({
                 name: 'description',
@@ -404,7 +404,7 @@ function MediaUI(social) {
             }).domNode
         );
         tr = dojo.create('tr', null, tbody);
-        dojo.create('td', null, tr).appendChild(dojo.create('label', {innerHTML: 'Type', for: 'type'}));
+        dojo.create('td', null, tr).appendChild(dojo.create('label', {'innerHTML': 'Type', 'for': 'type'}));
         dojo.create('td', null, tr).appendChild(
             new dijit.form.ValidationTextBox({
                 name: 'type',
@@ -412,7 +412,7 @@ function MediaUI(social) {
             }).domNode
         );
         tr = dojo.create('tr', null, tbody);
-        dojo.create('td', null, tr).appendChild(dojo.create('label', {innerHTML: 'Thumnail URL', for: 'thumbnailUrl'}));
+        dojo.create('td', null, tr).appendChild(dojo.create('label', {'innerHTML': 'Thumnail URL', 'for': 'thumbnailUrl'}));
         dojo.create('td', null, tr).appendChild(
             new dijit.form.ValidationTextBox({
                 name: 'thumbnailUrl',
@@ -420,7 +420,7 @@ function MediaUI(social) {
             }).domNode
         );
         tr = dojo.create('tr', null, tbody);
-        dojo.create('td', null, tr).appendChild(dojo.create('label', {innerHTML: 'URL', for: 'url'}));
+        dojo.create('td', null, tr).appendChild(dojo.create('label', {'innerHTML': 'URL', 'for': 'url'}));
         dojo.create('td', null, tr).appendChild(
             new dijit.form.ValidationTextBox({
                 name: 'url',

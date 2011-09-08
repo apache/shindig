@@ -125,7 +125,7 @@ function OpenSocialWrapper() {
 			groupId: '@self',
 			activityId: activityEntryId
 		};
-		osapi.activitystreams.delete(params).execute(callback);
+		osapi.activitystreams['delete'](params).execute(callback);
 	}
 
 	this.getActivityEntryById = function(activityEntryId, callback) {
