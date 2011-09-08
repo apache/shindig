@@ -58,6 +58,8 @@ import org.apache.shindig.gadgets.spec.Feature;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.LinkSpec;
 import org.apache.shindig.gadgets.spec.ModulePrefs;
+import org.apache.shindig.gadgets.spec.OAuthService;
+import org.apache.shindig.gadgets.spec.OAuthSpec;
 import org.apache.shindig.gadgets.spec.UserPref;
 import org.apache.shindig.gadgets.spec.View;
 import org.apache.shindig.gadgets.spec.UserPref.EnumValuePair;
@@ -98,10 +100,15 @@ public class GadgetsHandlerService {
           .put(ModulePrefs.class, GadgetsHandlerApi.ModulePrefs.class)
           .put(Feature.class, GadgetsHandlerApi.Feature.class)
           .put(LinkSpec.class, GadgetsHandlerApi.LinkSpec.class)
+          .put(OAuthSpec.class, GadgetsHandlerApi.OAuthSpec.class)
+          .put(OAuthService.class, GadgetsHandlerApi.OAuthService.class)
+          .put(OAuthService.EndPoint.class, GadgetsHandlerApi.EndPoint.class)
           // Enums
           .put(View.ContentType.class, GadgetsHandlerApi.ViewContentType.class)
           .put(UserPref.DataType.class, GadgetsHandlerApi.UserPrefDataType.class)
           .put(GadgetsHandlerApi.RenderingContext.class, RenderingContext.class)
+          .put(OAuthService.Method.class, GadgetsHandlerApi.Method.class)
+          .put(OAuthService.Location.class, GadgetsHandlerApi.Location.class)
           .build();
 
   // Provide mapping for internal enums to api enums
@@ -114,6 +121,10 @@ public class GadgetsHandlerService {
           // UserPref.DataType mapping
           .putAll(BeanDelegator.createDefaultEnumMap(UserPref.DataType.class,
               GadgetsHandlerApi.UserPrefDataType.class))
+          .putAll(BeanDelegator.createDefaultEnumMap(OAuthService.Method.class,
+              GadgetsHandlerApi.Method.class))
+          .putAll(BeanDelegator.createDefaultEnumMap(OAuthService.Location.class,
+              GadgetsHandlerApi.Location.class))
           .putAll(BeanDelegator.createDefaultEnumMap(GadgetsHandlerApi.RenderingContext.class,
               RenderingContext.class))
           .build();

@@ -21,6 +21,9 @@ package org.apache.shindig.gadgets.servlet;
 import com.google.common.collect.Multimap;
 
 import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.gadgets.spec.OAuthService.EndPoint;
+import org.apache.shindig.gadgets.spec.OAuthService.Location;
+import org.apache.shindig.gadgets.spec.OAuthService.Method;
 import org.apache.shindig.protocol.conversion.BeanFilter.Unfiltered;
 
 // Keep imports clean, so it is clear what is used by API
@@ -158,6 +161,7 @@ public class GadgetsHandlerApi {
     public List<String> getCategories();
     public Map<String, Feature> getFeatures();
     public Map<String, LinkSpec> getLinks();
+    public OAuthSpec getOAuthSpec();
     // TODO: Provide better interface for locale if needed
     // public Map<Locale, LocaleSpec> getLocales();
   }
@@ -171,6 +175,23 @@ public class GadgetsHandlerApi {
   public interface LinkSpec {
     public String getRel();
     public Uri getHref();
+  }
+
+  public interface OAuthSpec {
+	  public Map<String, OAuthService> getServices();
+  }
+
+  public interface OAuthService {
+	  public EndPoint getRequestUrl();
+	  public EndPoint getAccessUrl();
+      public Uri getAuthorizationUrl();
+      public String getName();
+  }
+
+  public interface EndPoint {
+	    public Uri getUrl();
+	    public Method getMethod();
+	    public Location getLocation();
   }
 
   public interface TokenRequest extends BaseRequest {
@@ -220,6 +241,22 @@ public class GadgetsHandlerApi {
     FATAL_ERROR
   }
 
+  public enum Method {
+	    GET,
+	    POST
+  }
+
+  public enum Location {
+	    HEADER("auth-header"),
+	    URL("uri-query"),
+	    BODY("post-body");
+
+	   private String locationString;
+    private Location(String locationString) {
+      this.locationString = locationString;
+    }
+
+  }
   public interface ProxyRequest extends BaseRequest {
     // The BaseRequest.url store the resource to proxy
     public String getGadget();

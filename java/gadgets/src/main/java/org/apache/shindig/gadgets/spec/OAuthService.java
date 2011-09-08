@@ -191,7 +191,19 @@ public class OAuthService {
    */
   public static class EndPoint {
     public final Uri url;
-    public final Method method;
+    public Uri getUrl() {
+		return url;
+	}
+
+	public Method getMethod() {
+		return method;
+	}
+
+	public Location getLocation() {
+		return location;
+	}
+
+	public final Method method;
     public final Location location;
 
     public EndPoint(Uri url, Method method, Location location) {
