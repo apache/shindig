@@ -26,7 +26,7 @@
 //  change
 //		{"gadgets.container" : ["default"],
 //  to
-//		﻿{"gadgets.container" : ["myContainer"],
+//		{"gadgets.container" : ["myContainer"],
 // And make your changes that you need to myContainer.js.
 // Just make sure on the iframe URL you specify &container=myContainer
 // for it to use that config.
