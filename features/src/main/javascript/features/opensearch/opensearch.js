@@ -118,7 +118,7 @@
               // convert string to dom object
               var domDesc = createDom(desc);
               // convert dom object to json
-              extractDescriptions(domDesc, item);
+              extractDescriptions(domDesc, response[item].url);
               // only the url to the full description is provided.
             } else {
               var openSearchUrl = params['opensearch-url'];
@@ -127,7 +127,7 @@
                   if (response.errors.length == 0) {
                     var domData = response.data;
                     if (domData != null) {
-                      extractDescriptions(domData, item);
+                      extractDescriptions(domData, response[item].url);
                     }
                   }
                 }
