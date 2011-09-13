@@ -28,7 +28,7 @@
  * @constructor
  */
 osapi.container.Service = function(opt_config) {
-  var config = opt_config || {};
+  var config = this.config_ = opt_config || {};
 
   /**
    * @type {string}
@@ -202,19 +202,18 @@ osapi.container.Service.prototype.updateResponse_ = function(
  * @param {Object} request JSON object representing the request.
  * @param {function(Object)=} opt_callback function to call upon data receive.
  */
-osapi.container.Service.prototype.getGadgetToken = function(
-    request, opt_callback) {
+osapi.container.Service.prototype.getGadgetToken = function(request, opt_callback) {
   var callback = opt_callback || function() {};
 
   // Do not check against cache. Always do a server fetch.
   var self = this;
-  osapi['gadgets']['token'](request).execute(function(response) {
+  var tokenResponseCallback = function(response) {
     var finalResponse = {};
 
     // If response entirely fails, augment individual errors.
     if (response['error']) {
       for (var i = 0; i < request['ids'].length; i++) {
-        finalResponse[id] = { 'error' : response['error'] };
+        finalResponse[request['ids'][i]] = { 'error' : response['error'] };
       }
 
     // Otherwise, cache response. Augment final response with server response.
@@ -227,7 +226,14 @@ osapi.container.Service.prototype.getGadgetToken = function(
     }
 
     callback(finalResponse);
-  });
+  };
+
+  // If we have a custom token fetch function, call it -- otherwise use the default
+  if (this.config_[osapi.container.ContainerConfig.GET_GADGET_TOKEN]) {
+    this.config_[osapi.container.ContainerConfig.GET_GADGET_TOKEN](request, tokenResponseCallback);
+  } else {
+    osapi['gadgets']['token'](request).execute(tokenResponseCallback);
+  }
 };
 
 

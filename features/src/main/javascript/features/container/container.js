@@ -474,6 +474,11 @@ osapi.container.ContainerConfig.GET_PREFERENCES = 'GET_PREFERENCES';
  * @type {function}
  */
 osapi.container.ContainerConfig.SET_PREFERENCES = 'SET_PREFERENCES';
+/**
+ * Used to retrieve security tokens for gadgets.
+ * @type {function}
+ */
+osapi.container.ContainerConfig.GET_GADGET_TOKEN = 'GET_GADGET_TOKEN';
 
 
 // -----------------------------------------------------------------------------
