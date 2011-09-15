@@ -80,6 +80,27 @@ ContainerTest.prototype.testPreloadConfigGadgets = function() {
   this.assertFalse('2', 'preloaded2.xml' in container.preloadedGadgetUrls_);
 };
 
+ContainerTest.prototype.testPreloadCaches = function() {
+  var self = this;
+  this.setupGadgetsRpcRegister();
+  var mockMetadata = {'preloaded1.xml' : {}};
+  var container = new osapi.container.Container();
+  container.service_.addGadgetMetadatas = function(gadgets, refTime) {
+    self.assertEquals(mockMetadata, gadgets);
+    self.assertNull(refTime);
+  };
+  container.service_.addGadgetTokens = function(tokens, refTime) {
+    self.assertEquals(mockMetadata, tokens);
+    self.assertNull(refTime);
+  };
+  container.addPreloadGadgets_ = function(gadgets) {
+    self.assertEquals(mockMetadata, gadgets);
+  };
+  container.preloadCaches({
+    'preloadMetadatas' : mockMetadata,
+    'preloadTokens' : mockMetadata
+  });
+};
 
 ContainerTest.prototype.testNavigateGadget = function() {
   this.setupGadgetsRpcRegister();

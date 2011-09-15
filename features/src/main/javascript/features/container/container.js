@@ -134,7 +134,7 @@ osapi.container.Container = function(opt_config) {
 
   this.initializeMixins_();
 
-  this.preloadFromConfig_(config);
+  this.preloadCaches(config);
 
   this.registerRpcServices_();
 
@@ -527,18 +527,18 @@ osapi.container.Container.prototype.addPreloadGadgets_ = function(response) {
 
 
 /**
- * Preload gadgets and tokens from container config.
- * Support caching by providing server time to override respnse time usage.
- * @param {Object} config container configuration.
- * @private
+ * Preload gadget metadata and tokens to avoid the need for XHR's when navigating gadget sites.
+ * This function is safe to call repeatedly if needed to incrementally build up the internal caches.
+ * Support caching by providing server time to override response time usage.
+ * @param {Object} preloadData object containing data to be preloaded.
  */
-osapi.container.Container.prototype.preloadFromConfig_ = function(config) {
+osapi.container.Container.prototype.preloadCaches = function(preloadData) {
   var gadgets = osapi.container.util.getSafeJsonValue(
-      config, osapi.container.ContainerConfig.PRELOAD_METADATAS, {});
+      preloadData, osapi.container.ContainerConfig.PRELOAD_METADATAS, {});
   var tokens = osapi.container.util.getSafeJsonValue(
-      config, osapi.container.ContainerConfig.PRELOAD_TOKENS, {});
+      preloadData, osapi.container.ContainerConfig.PRELOAD_TOKENS, {});
   var refTime = osapi.container.util.getSafeJsonValue(
-      config, osapi.container.ContainerConfig.PRELOAD_REF_TIME, null);
+      preloadData, osapi.container.ContainerConfig.PRELOAD_REF_TIME, null);
 
   this.service_.addGadgetMetadatas(gadgets, refTime);
   this.service_.addGadgetTokens(tokens, refTime);

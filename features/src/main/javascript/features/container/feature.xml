@@ -39,6 +39,7 @@ under the License.
       <exports type="js">osapi.container.Container.prototype.closeGadget</exports>
       <exports type="js">osapi.container.Container.prototype.preloadGadget</exports>
       <exports type="js">osapi.container.Container.prototype.preloadGadgets</exports>
+      <exports type="js">osapi.container.Container.prototype.preloadCaches</exports>
       <exports type="js">osapi.container.Container.prototype.unloadGadget</exports>
       <exports type="js">osapi.container.Container.prototype.unloadGadgets</exports>
       <exports type="js">osapi.container.Container.prototype.getGadgetMetadata</exports>
