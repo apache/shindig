@@ -33,6 +33,8 @@ public class LinkSpecTest {
   private static final Uri SPEC_URL = Uri.parse("http://example.org/g.xml");
   private static final String REL_VALUE = "foo";
   private static final Uri HREF_VALUE = Uri.parse("http://example.org/foo");
+  private static final String DEFAULT_METHOD_VALUE = "GET";
+  private static final String METHOD_VALUE = "POST";
 
   @Test
   public void parseBasicLink() throws Exception {
@@ -54,6 +56,20 @@ public class LinkSpecTest {
 
     assertEquals(REL_VALUE, link.getRel());
     assertEquals(HREF_VALUE.resolve(Uri.parse("/foo")), link.getHref());
+  }
+
+  @Test
+  public void parseMethodAttribute() throws Exception {
+    String xml = "<Link rel='" + REL_VALUE + "' href='" + HREF_VALUE + "'/>";
+    LinkSpec link = new LinkSpec(XmlUtil.parse(xml), SPEC_URL);
+    assertEquals(DEFAULT_METHOD_VALUE, link.getMethod());
+  }
+
+  @Test
+  public void parseAltMethodAttribute() throws Exception {
+    String xml = "<Link rel='" + REL_VALUE + "' href='" + HREF_VALUE + "' method='POST'/>";
+    LinkSpec link = new LinkSpec(XmlUtil.parse(xml), SPEC_URL);
+    assertEquals(METHOD_VALUE, link.getMethod());
   }
 
   @Test
@@ -102,6 +118,5 @@ public class LinkSpecTest {
     assertEquals(link.getHref(), link2.getHref());
     assertEquals(REL_VALUE, link2.getRel());
     assertEquals(HREF_VALUE, link2.getHref());
-
   }
 }

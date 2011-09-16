@@ -40,12 +40,14 @@ public class LinkSpec {
     if (href == null) {
       throw new SpecParserException("Link/@href is required!");
     }
+    method = getMethodAttribute(element);
   }
 
   private LinkSpec(LinkSpec rhs, Substitutions substitutions) {
     rel = substitutions.substituteString(rhs.rel);
     base = rhs.base;
     href = base.resolve(substitutions.substituteUri(rhs.href));
+    method = rhs.method;
   }
 
   /**
@@ -65,6 +67,14 @@ public class LinkSpec {
   }
 
   /**
+   * Link/@method
+   */
+  private final String method;
+  public String getMethod() {
+    return method;
+  }
+
+  /**
    * Performs variable substitution on all visible elements.
    */
   public LinkSpec substitute(Substitutions substitutions) {
@@ -73,6 +83,12 @@ public class LinkSpec {
 
   @Override
   public String toString() {
-    return "<Link rel='" + rel + "' href='" + href.toString() + "'/>";
+    String methodAttribute = (method != null) ? "method='" + method + "' " : "";
+    return "<Link rel='" + rel + "' href='" + href.toString() + "' " + methodAttribute + "/>";
+  }
+
+  private String getMethodAttribute(Element element) {
+    String method = XmlUtil.getAttribute(element, "method");
+    return ("GET".equals(method) || "POST".equals(method)) ? method : "GET";
   }
 }

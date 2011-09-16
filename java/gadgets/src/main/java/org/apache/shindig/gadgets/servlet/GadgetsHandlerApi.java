@@ -175,6 +175,7 @@ public class GadgetsHandlerApi {
   public interface LinkSpec {
     public String getRel();
     public Uri getHref();
+    public String getMethod();
   }
 
   public interface OAuthSpec {
