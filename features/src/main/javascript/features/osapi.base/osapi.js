@@ -35,15 +35,11 @@ osapi._registerMethod = function(method, transport) {
     last[parts[i]] = last[parts[i]] || {};
     last = last[parts[i]];
   }
-  var basename = parts[parts.length - 1];
+  var basename = parts[parts.length - 1], old;
+
+  // registered methods are now 'last one in wins'.  See tamings__ below.
   if (last[basename]) {
-    if (!last['__dupwarn']) {
-      gadgets.warn('Skipping duplicate osapi method definition '
-                   + method + ' on transport ' + transport['name'] +
-                   '; others may exist, but suppressing warnings');
-    }
-    last['__dupwarn'] = true;
-    return;
+    old = last[basename];
   }
 
   last[basename] = function(rpc) {
@@ -57,9 +53,20 @@ osapi._registerMethod = function(method, transport) {
   };
 
   if (typeof tamings___ !== 'undefined') {
-    tamings___.push(function() {
+    var newTaming = function() {
       caja___.markTameAsFunction(last[basename], method);
-    });
+    };
+
+    // Remove the old taming if we are replacing it, no sense in growing the array
+    // needlessly. This function (_registerMethod) gets called a lot.
+    if (old && old.__taming_index) {
+      last[basename].__taming_index = old.__taming_index;
+      tamings___[old.__taming_index] = newTaming;
+    }
+    else {
+      last[basename].__taming_index = tamings___.length;
+      tamings___.push(newTaming);
+    }
   }
 };
 
