@@ -47,11 +47,11 @@ class GadgetHtmlRenderer extends GadgetBaseRenderer {
       // if quirksmode is not set  
       $version20 = new OpenSocialVersion('2.0.0'); 
       if ($gadget->getDoctype()) {
-        $content .= '<!DOCTYPE ' . $gadget->getDoctype() . '>\n';  
+        $content .= "<!DOCTYPE ' . $gadget->getDoctype() . '>\n";  
       } else if ($gadget->getSpecificationVersion()->isEqualOrGreaterThan($version20)) {
-        $content .= '<!DOCTYPE HTML>\n';    
+        $content .= "<!DOCTYPE HTML>\n";    
       } else { // prior to 2.0 the php version always set this doc type, when no quirks attribute was specified
-        $content .= '<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\" \"http://www.w3.org/TR/html4/strict.dtd\">\n';
+        $content .= "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\" \"http://www.w3.org/TR/html4/strict.dtd\">\n";
       }
     }
     
