@@ -25,6 +25,7 @@ import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.Pair;
 import org.apache.shindig.common.crypto.BlobCrypter;
 import org.apache.shindig.common.crypto.BlobCrypterException;
+import org.apache.shindig.common.logging.i18n.MessageKeys;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
@@ -39,7 +40,7 @@ import java.util.regex.Pattern;
  * Container for OAuth specific data to include in the response to the client.
  */
 public class OAuthResponseParams {
-  private static final Logger LOG = Logger.getLogger(OAuthResponseParams.class.getName());
+  private static final Logger LOG = Logger.getLogger(OAuthResponseParams.class.getName(),MessageKeys.MESSAGES);
 
   // Finds the values of sensitive response params: oauth_token_secret and oauth_session_handle
   private static final Pattern REMOVE_SECRETS =
