@@ -179,20 +179,20 @@ public class GadgetsHandlerApi {
   }
 
   public interface OAuthSpec {
-	  public Map<String, OAuthService> getServices();
+    public Map<String, OAuthService> getServices();
   }
 
   public interface OAuthService {
-	  public EndPoint getRequestUrl();
-	  public EndPoint getAccessUrl();
-      public Uri getAuthorizationUrl();
-      public String getName();
+    public EndPoint getRequestUrl();
+    public EndPoint getAccessUrl();
+    public Uri getAuthorizationUrl();
+    public String getName();
   }
 
   public interface EndPoint {
-	    public Uri getUrl();
-	    public Method getMethod();
-	    public Location getLocation();
+    public Uri getUrl();
+    public Method getMethod();
+    public Location getLocation();
   }
 
   public interface TokenRequest extends BaseRequest {
