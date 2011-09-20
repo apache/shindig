@@ -81,6 +81,7 @@ features/osapi/feature.xml
 features/osml/feature.xml
 features/pubsub/feature.xml
 features/rpc/feature.xml
+features/shared-script-frame/feature.xml
 features/security-token/feature.xml
 features/selection/feature.xml
 features/setprefs/feature.xml

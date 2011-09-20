@@ -305,24 +305,7 @@ osapi.container.GadgetHolder.prototype.getIframeHtml_ = function() {
     'width': this.renderParams_[osapi.container.RenderParam.WIDTH]
   };
 
-  // Do not use DOM API (createElement(), setAttribute()), since it is slower,
-  // requires more code, and creating an element with it results in a click
-  // sound in IE (unconfirmed), setAttribute('class') may need browser-specific
-  // variants.
-  var out = [];
-  out.push('<iframe ');
-  for (var key in iframeParams) {
-    var value = iframeParams[key];
-    if (value) {
-      out.push(key);
-      out.push('="');
-      out.push(value);
-      out.push('" ');
-    }
-  }
-  out.push('></iframe>');
-
-  return out.join('');
+  return osapi.container.util.createIframeHtml(iframeParams);
 };
 
 

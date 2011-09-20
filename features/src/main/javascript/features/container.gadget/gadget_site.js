@@ -34,6 +34,12 @@
  */
 osapi.container.GadgetSite = function(args) {
   /**
+   * @type {osapi.container.Container}
+   * @private
+   */
+  this.container_ = args['container'];
+
+  /**
    * @type {osapi.container.Service}
    * @private
    */
@@ -204,6 +210,7 @@ osapi.container.GadgetSite.prototype.navigateTo = function(
       var message = ['Failed to navigate for gadget ', gadgetUrl, '.'].join('');
       osapi.container.util.warn(message);
     } else {
+      self.container_.applyLifecycleCallbacks_(osapi.container.CallbackType.ON_RENDER, gadgetInfo);
       self.render(gadgetInfo, viewParams, renderParams);
     }
 

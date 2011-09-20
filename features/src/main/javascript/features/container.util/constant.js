@@ -148,5 +148,6 @@ osapi.container.CallbackType = {
     ON_PRELOADED: 'onPreloaded',
     ON_NAVIGATED: 'onNavigated',
     ON_CLOSED: 'onClosed',
-    ON_UNLOADED: 'onUnloaded'
+    ON_UNLOADED: 'onUnloaded',
+    ON_RENDER: 'onRender'
 };

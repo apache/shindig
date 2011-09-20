@@ -152,6 +152,7 @@ osapi.container.Container.prototype.newGadgetSite = function(
     gadgetEl, opt_bufferEl) {
   var bufferEl = opt_bufferEl || null;
   var site = new osapi.container.GadgetSite({
+      'container': this,
       'service' : this.service_,
       'navigateCallback' : this.navigateCallback_,
       'gadgetEl' : gadgetEl,
