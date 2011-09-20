@@ -275,8 +275,8 @@
      *
      * @param {Object}
      *          actionId The id of the action.
-     * @return {Array} An array of the gadget site instances associated
-     *         with the action object, or undefined if there are none.
+     * @return {Array} Always an array of the gadget site instances associated
+     *         with the action object.
      */
     this.getGadgetSites = function(actionId) {
       var action = this.getItemById(actionId);
@@ -407,6 +407,20 @@
   };
 
   /**
+   * A map of all listeners.
+   *
+   * @type {Object.<string, Array.<function(string, Array.<Object>)>>}
+   */
+  var actionListenerMap = {};
+
+  /**
+   * A list of listeners to be notified when any action is invoked.
+   *
+   * @type {Array.<function(string, Array.<Object>)>}
+   */
+  var actionListeners = [];
+
+  /**
    * Runs the action associated with the specified actionId. If the gadget has
    * not yet been rendered, renders the gadget first, then runs the action.
    *
@@ -420,6 +434,17 @@
     actionData.selectionObj = selection;
     if (!selection && container_ && container_.selection) {
       actionData.selectionObj = container_.selection.getSelection();
+    }
+
+    // call all container listeners, if any, for this actionId
+    var list = actionListenerMap[actionId];
+    if (list) {
+      for (var i = 0, listener; listener = list[i]; i++) {
+        listener.call(null, actionId, actionData.selectionObj);
+      }
+    }
+    for (var i = 0, listener; listener = actionListeners[i]; i++) {
+      listener.call(null, actionId, actionData.selectionObj);
     }
 
     // make rpc call to get gadgets to run callback based on action id
@@ -769,6 +794,40 @@
         var actions = [];
         actions = actions.concat(registry.getActionsByDataType(dataType));
         return actions;
+      },
+
+      /**
+       * Adds a listener to be notified when an action is invoked.
+       *
+       * @param {function(string, Array.<Object>)} listener
+       *          A callback to fire when a matching action is run.
+       * @param {string=} opt_actionId
+       *          An optional action id.  If not provided, listener will be
+       *          notified for all action ids.
+       */
+      addListener: function(listener, opt_actionId) {
+        if (listener && typeof(listener) != 'function') {
+          throw new Error('listener param must be a function');
+        }
+        if (opt_actionId) {
+          (actionListenerMap[opt_actionId] = actionListenerMap[opt_actionId] || []).push(listener);
+        }
+        else {
+          actionListeners.push(listener);
+        }
+      },
+
+      /**
+       * Removes the specified listener.
+       *
+       * @param {function(string, Array.<Object>)} listener
+       *          The listener to remove.
+       */
+      removeListener: function(listener) {
+        var index = listeners.indexOf(listener);
+        if (index != -1) {
+          listeners.splice(index, 1);
+        }
       }
     };
   });
