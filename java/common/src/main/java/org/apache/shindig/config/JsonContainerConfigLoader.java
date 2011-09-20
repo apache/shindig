@@ -289,7 +289,7 @@ public class JsonContainerConfigLoader {
         newContainer.putAll(container);
         newContainer.put(SERVER_PORT, port);
         newContainer.put(SERVER_HOST, host);
-        newContainer.put(CONTEXT_ROOT,contextRoot);
+        newContainer.put(CONTEXT_ROOT, contextRoot);
         config.set(i, Collections.unmodifiableMap(newContainer));
       }
     }
