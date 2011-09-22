@@ -88,6 +88,9 @@ public class GadgetsHandlerApi {
     public String getViewerId();
     public String getDomain();
     public long getModuleId();
+    public String getAuthenticationMode();
+    public Long getExpiresAt();
+    public String getTrustedJson();
   }
 
   public interface MetadataResponse extends BaseResponse {

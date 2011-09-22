@@ -50,8 +50,8 @@ public class BlobCrypterSecurityTokenTest {
 
   @Test(expected=UnsupportedOperationException.class)
   public void testNullValues() throws Exception {
-    BlobCrypterSecurityToken t = new BlobCrypterSecurityToken(crypter, CONTAINER, DOMAIN);
-    String token = t.encrypt();
+    BlobCrypterSecurityToken t = new BlobCrypterSecurityToken(CONTAINER, DOMAIN);
+    String token = BlobCrypterSecurityToken.encrypt(t, crypter);
     assertTrue("should start with container: " + token, token.startsWith("container:"));
     String[] fields = StringUtils.split(token, ':');
     BlobCrypterSecurityToken t2 =
@@ -72,13 +72,13 @@ public class BlobCrypterSecurityTokenTest {
 
   @Test
   public void testRealValues() throws Exception {
-    BlobCrypterSecurityToken t = new BlobCrypterSecurityToken(crypter, CONTAINER, DOMAIN);
+    BlobCrypterSecurityToken t = new BlobCrypterSecurityToken(CONTAINER, DOMAIN);
     t.setAppUrl("http://www.example.com/gadget.xml");
     t.setModuleId(12345L);
     t.setOwnerId("owner");
     t.setViewerId("viewer");
     t.setTrustedJson("trusted");
-    String token = t.encrypt();
+    String token = BlobCrypterSecurityToken.encrypt(t, crypter);
     assertTrue("should start with container: " + token, token.startsWith("container:"));
     String[] fields = StringUtils.split(token, ':');
     BlobCrypterSecurityToken t2 =
@@ -96,8 +96,8 @@ public class BlobCrypterSecurityTokenTest {
 
   @Test(expected=BlobExpiredException.class)
   public void testExpired() throws Exception {
-    BlobCrypterSecurityToken t = new BlobCrypterSecurityToken(crypter, CONTAINER, DOMAIN);
-    String token = t.encrypt();
+    BlobCrypterSecurityToken t = new BlobCrypterSecurityToken(CONTAINER, DOMAIN);
+    String token = BlobCrypterSecurityToken.encrypt(t, crypter);
     // one hour plus clock skew
     timeSource.incrementSeconds(3600 + 181);
     String[] fields = StringUtils.split(token, ':');

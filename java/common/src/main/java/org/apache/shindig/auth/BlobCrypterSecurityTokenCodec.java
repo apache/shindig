@@ -160,14 +160,18 @@ public class BlobCrypterSecurityTokenCodec implements SecurityTokenCodec, Contai
   }
 
   public String encodeToken(SecurityToken token) throws SecurityTokenException {
-    if (! (token instanceof BlobCrypterSecurityToken)) {
+    if (!token.getAuthenticationMode().equals(
+            AuthenticationMode.SECURITY_TOKEN_URL_PARAMETER.name())) {
       throw new SecurityTokenException("Can only encode BlogCrypterSecurityTokens");
     }
 
-    BlobCrypterSecurityToken t = (BlobCrypterSecurityToken)token;
-
+    BlobCrypter crypter = crypters.get(token.getContainer());
+    if (crypter == null) {
+      throw new SecurityTokenException("Unknown container " + token.getContainer());
+    }
+    
     try {
-      return t.encrypt();
+      return BlobCrypterSecurityToken.encrypt(token, crypter);
     } catch (BlobCrypterException e) {
       throw new SecurityTokenException(e);
     }

@@ -43,7 +43,6 @@ public class BlobCrypterSecurityToken extends AbstractSecurityToken implements S
   protected static final String TRUSTED_JSON_KEY = "j";
   protected static final String EXPIRES_KEY = "x";
 
-  protected final BlobCrypter crypter;
   protected final String container;
   protected final String domain;
 
@@ -63,8 +62,7 @@ public class BlobCrypterSecurityToken extends AbstractSecurityToken implements S
    * @param container container that is issuing the token
    * @param domain domain to use for signed fetch with default signed fetch key.
    */
-  public BlobCrypterSecurityToken(BlobCrypter crypter, String container, String domain) {
-    this.crypter = crypter;
+  public BlobCrypterSecurityToken(String container, String domain) {
     this.container = container;
     this.domain = domain;
   }
@@ -84,7 +82,7 @@ public class BlobCrypterSecurityToken extends AbstractSecurityToken implements S
   public static BlobCrypterSecurityToken decrypt(BlobCrypter crypter, String container, String domain,
         String token, String activeUrl) throws BlobCrypterException {
     Map<String, String> values = crypter.unwrap(token, MAX_TOKEN_LIFETIME_SECS);
-    BlobCrypterSecurityToken t = new BlobCrypterSecurityToken(crypter, container, domain);
+    BlobCrypterSecurityToken t = new BlobCrypterSecurityToken(container, domain);
     setTokenValues(t, values);
     t.setActiveUrl(activeUrl);
     return t;
@@ -109,30 +107,30 @@ public class BlobCrypterSecurityToken extends AbstractSecurityToken implements S
    * Encrypt and sign the token.  The returned value is *not* web safe, it should be URL
    * encoded before being used as a form parameter.
    */
-  public String encrypt() throws BlobCrypterException {
-    Map<String, String> values = buildValuesMap();
-    return container + ':' + crypter.wrap(values);
+  public static String encrypt(SecurityToken token, BlobCrypter crypter) throws BlobCrypterException {
+    Map<String, String> values = buildValuesMap(token);
+    return token.getContainer() + ':' + crypter.wrap(values);
   }
 
-  protected Map<String, String> buildValuesMap() {
+  protected static Map<String, String> buildValuesMap(SecurityToken token) {
     Map<String, String> values = Maps.newHashMap();
-    if (ownerId != null) {
-      values.put(OWNER_KEY, ownerId);
+    if (token.getOwnerId() != null) {
+      values.put(OWNER_KEY, token.getOwnerId());
     }
-    if (viewerId != null) {
-      values.put(VIEWER_KEY, viewerId);
+    if (token.getViewerId() != null) {
+      values.put(VIEWER_KEY, token.getViewerId());
     }
-    if (appUrl != null) {
-      values.put(GADGET_KEY, appUrl);
+    if (token.getAppUrl() != null) {
+      values.put(GADGET_KEY, token.getAppUrl());
     }
-    if (moduleId != 0) {
-      values.put(GADGET_INSTANCE_KEY, Long.toString(moduleId));
+    if (token.getModuleId() != 0) {
+      values.put(GADGET_INSTANCE_KEY, Long.toString(token.getModuleId()));
     }
-    if (expiresAt != null) {
-      values.put(EXPIRES_KEY, Long.toString(expiresAt));
+    if (token.getExpiresAt() != null) {
+      values.put(EXPIRES_KEY, Long.toString(token.getExpiresAt()));
     }
-    if (trustedJson != null) {
-      values.put(TRUSTED_JSON_KEY, trustedJson);
+    if (token.getTrustedJson() != null) {
+      values.put(TRUSTED_JSON_KEY, token.getTrustedJson());
     }
     return values;                                                                                           
    }

@@ -106,14 +106,14 @@ public class BlobCrypterSecurityTokenCodecTest {
 
   @Test
   public void testCreateToken() throws Exception {
-    BlobCrypterSecurityToken t = new BlobCrypterSecurityToken(
-        getBlobCrypter(getContainerKey("container")), "container", null);
+    BlobCrypterSecurityToken t = new BlobCrypterSecurityToken("container", null);
     t.setAppUrl("http://www.example.com/gadget.xml");
     t.setModuleId(12345L);
     t.setOwnerId("owner");
     t.setViewerId("viewer");
     t.setTrustedJson("trusted");
-    String encrypted = t.encrypt();
+    String encrypted = BlobCrypterSecurityToken.encrypt(t,
+            getBlobCrypter(getContainerKey("container")));
 
     SecurityToken t2 = codec.createToken(
         ImmutableMap.of(SecurityTokenCodec.SECURITY_TOKEN_NAME, encrypted));
@@ -129,14 +129,14 @@ public class BlobCrypterSecurityTokenCodecTest {
 
   @Test
   public void testUnknownContainer() throws Exception {
-    BlobCrypterSecurityToken t = new BlobCrypterSecurityToken(
-        getBlobCrypter(getContainerKey("container")), "container", null);
+    BlobCrypterSecurityToken t = new BlobCrypterSecurityToken("container", null);
     t.setAppUrl("http://www.example.com/gadget.xml");
     t.setModuleId(12345L);
     t.setOwnerId("owner");
     t.setViewerId("viewer");
     t.setTrustedJson("trusted");
-    String encrypted = t.encrypt();
+    String encrypted = BlobCrypterSecurityToken.encrypt(t,
+            getBlobCrypter(getContainerKey("container")));
     encrypted = encrypted.replace("container:", "other:");
 
     try {
@@ -149,14 +149,14 @@ public class BlobCrypterSecurityTokenCodecTest {
 
   @Test
   public void testWrongContainer() throws Exception {
-    BlobCrypterSecurityToken t = new BlobCrypterSecurityToken(
-        getBlobCrypter(getContainerKey("container")), "container", null);
+    BlobCrypterSecurityToken t = new BlobCrypterSecurityToken("container", null);
     t.setAppUrl("http://www.example.com/gadget.xml");
     t.setModuleId(12345L);
     t.setOwnerId("owner");
     t.setViewerId("viewer");
     t.setTrustedJson("trusted");
-    String encrypted = t.encrypt();
+    String encrypted = BlobCrypterSecurityToken.encrypt(t,
+            getBlobCrypter(getContainerKey("container")));
     encrypted = encrypted.replace("container:", "example:");
 
     try {
@@ -169,14 +169,14 @@ public class BlobCrypterSecurityTokenCodecTest {
 
   @Test
   public void testExpired() throws Exception {
-    BlobCrypterSecurityToken t = new BlobCrypterSecurityToken(
-        getBlobCrypter(getContainerKey("container")), "container", null);
+    BlobCrypterSecurityToken t = new BlobCrypterSecurityToken("container", null);
     t.setAppUrl("http://www.example.com/gadget.xml");
     t.setModuleId(12345L);
     t.setOwnerId("owner");
     t.setViewerId("viewer");
     t.setTrustedJson("trusted");
-    String encrypted = t.encrypt();
+    String encrypted = BlobCrypterSecurityToken.encrypt(t,
+            getBlobCrypter(getContainerKey("container")));
 
     timeSource.incrementSeconds(3600 + 181); // one hour plus clock skew
     try {
@@ -223,14 +223,14 @@ public class BlobCrypterSecurityTokenCodecTest {
   @Test
   public void testChangingContainers() throws Exception {
     String newContainer = "newcontainer";
-    BlobCrypterSecurityToken t = new BlobCrypterSecurityToken(
-        getBlobCrypter(getContainerKey(newContainer)), newContainer, null);
+    BlobCrypterSecurityToken t = new BlobCrypterSecurityToken(newContainer, null);
     t.setAppUrl("http://www.example.com/gadget.xml");
     t.setModuleId(12345L);
     t.setOwnerId("owner");
     t.setViewerId("viewer");
     t.setTrustedJson("trusted");
-    String encrypted = t.encrypt();
+    String encrypted = BlobCrypterSecurityToken.encrypt(t,
+            getBlobCrypter(getContainerKey(newContainer)));
 
     // fails when trying to create a token for a non-existing container
     try {
