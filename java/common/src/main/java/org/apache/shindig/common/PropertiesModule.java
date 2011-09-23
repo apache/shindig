@@ -97,8 +97,7 @@ public class PropertiesModule extends AbstractModule {
     return properties;
   }
 
-  
-  private Properties readPropertyFile(String propertyFile) {
+  protected Properties readPropertyFile(String propertyFile) {
     Properties properties = new Properties();
     InputStream is = null;
     String contextRoot = getContextRoot();
@@ -117,10 +116,8 @@ public class PropertiesModule extends AbstractModule {
       throw new CreationException(Arrays.asList(
           new Message("Unable to load properties: " + propertyFile)));
     } finally {
-      IOUtils.closeQuietly( is );
+      IOUtils.closeQuietly(is);
     }
-
     return properties;
   }
-
 }
