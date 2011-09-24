@@ -100,7 +100,7 @@ opensocial.Container.prototype.getEnvironment = function() {};
 opensocial.Container.prototype.requestSendMessage = function(recipients,
     message, opt_callback, opt_params) {
   gadgets.rpc.call(null, 'requestSendMessage', opt_callback, recipients,
-      message, opt_callback, opt_params);
+      message.toJsonObject(), opt_callback, opt_params);
 };
 
 
