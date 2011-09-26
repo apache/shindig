@@ -29,5 +29,7 @@
   <dependency>security-token</dependency>
   <gadget>   
     <script src="jsonrpccontainer.js"></script>
+    <exports type="rpc">shindig.requestShareApp_callback</exports>
+    <uses type="rpc">shindig.requestShareApp</uses>
   </gadget>
 </feature>

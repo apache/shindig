@@ -27,6 +27,7 @@ specific language governing permissions and limitations under the License.
       <exports type="js">gadgets.Prefs</exports>
       <exports type="js">gadgets.Prefs.prototype.set</exports>
       <exports type="js">gadgets.Prefs.prototype.setArray</exports>
+      <uses type="rpc">set_pref</uses>
     </api>
   </gadget>
 </feature>

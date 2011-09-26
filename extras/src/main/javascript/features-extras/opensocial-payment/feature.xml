@@ -30,6 +30,16 @@ specific language governing permissions and limitations under the License.
     <script src="paymentprocessor.js"/>
     <script src="container.js"/>
     <script src="jsoncontainer.js"/>
+    <api>
+      <exports type="rpc">shindig.requestPayment_callback</exports>
+      <exports type="rpc">shindig.requestPaymentRecords_callback</exports>
+      <exports type="rpc">shindig.requestPayment</exports>
+      <exports type="rpc">shindig.requestPaymentRecords</exports>
+      <uses type="rpc">shindig.requestPayment</uses>
+      <uses type="rpc">shindig.requestPaymentRecords</uses>
+      <uses type="rpc">shindig.requestPayment_callback</uses>
+      <uses type="rpc">shindig.requestPaymentRecords_callback</uses>
+    </api>
   </container>
   <gadget>
     <!-- common -->

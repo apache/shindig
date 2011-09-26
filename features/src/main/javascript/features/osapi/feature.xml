@@ -31,13 +31,16 @@
   <dependency>security-token</dependency>
   <container>
     <script src="jsonrpctransport.js"></script>
-    <script src="peoplehelpers.js"></script>    
+    <script src="peoplehelpers.js"></script>
     <script src="taming.js" caja="1"></script>    
   </container>
   <gadget>
     <script src="jsonrpctransport.js"></script>
     <script src="gadgetsrpctransport.js"></script>
     <script src="peoplehelpers.js"></script>    
-    <script src="taming.js" caja="1"></script>    
+    <script src="taming.js" caja="1"></script>
+    <api>
+      <uses type="rpc">osapi._handleGadgetRpcMethod</uses>
+    </api>
   </gadget>
 </feature>

@@ -45,6 +45,7 @@ A map of view names to view attributes. Examples:
       <exports type="js">gadgets.views.View.prototype.getUrlTemplate</exports>
       <exports type="js">gadgets.views.View.prototype.bind</exports>
       <exports type="js">gadgets.views.View.prototype.isOnlyVisibleGadget</exports>
+      <uses type="rpc">requestNavigateTo</uses>
     </api>
   </gadget>
 </feature>

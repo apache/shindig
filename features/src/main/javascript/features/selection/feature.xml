@@ -28,9 +28,13 @@ specific language governing permissions and limitations under the License.
       <exports type="js">gadgets.selection.getSelection</exports>
       <exports type="js">gadgets.selection.addListener</exports>
       <exports type="js">gadgets.selection.removeListener</exports>
+      <uses type="rpc">gadgets.selection</uses>
     </api>
   </gadget>
   <container>
     <script src="selection_container.js"/>
+    <api>
+      <exports type="rpc">gadgets.selection</exports>
+    </api>
   </container>
 </feature>

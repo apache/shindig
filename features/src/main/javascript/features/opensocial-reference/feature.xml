@@ -46,5 +46,8 @@
     <script src="responseitem.js"/>
     <script src="url.js"/>
     <script src="taming.js" caja="1"/>
+    <api>
+      <uses type="rpc">requestSendMessage</uses>
+    </api>
   </gadget>
 </feature>

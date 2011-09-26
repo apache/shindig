@@ -28,6 +28,7 @@ specific language governing permissions and limitations under the License.
     <script src="taming.js" caja="1"/>
     <api>
       <exports type="js">gadgets.window.adjustWidth</exports>
+      <uses type="rpc">resize_iframe_width</uses>
     </api>
   </gadget>
 </feature>

@@ -23,6 +23,9 @@ specific language governing permissions and limitations under the License.
   <dependency>rpc</dependency>
   <container>
     <script src="shared-script-frame-container.js"/>
+    <api>
+      <exports type="rpc">get_script_frame_name</exports>
+    </api>
   </container>
   <gadget>
     <script src="shared-script-frame.js"/>

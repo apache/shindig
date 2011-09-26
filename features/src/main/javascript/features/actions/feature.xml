@@ -17,10 +17,22 @@
       <exports type="js">gadgets.actions.registerHideActionsListener</exports>
       <exports type="js">osapi.container.actions.OptParam.VIEW</exports>
       <exports type="js">osapi.container.actions.OptParam.VIEW_TARGET</exports>
+      <exports type="rpc">actions</exports>
+      <uses type="rpc">bindAction</uses>
+      <uses type="rpc">runAction</uses>
+      <uses type="rpc">removeAction</uses>
+      <uses type="rpc">getActionsByPath</uses>
+      <uses type="rpc">getActionsByDataType</uses>
+      <uses type="rpc">addShowActionListener</uses>
+      <uses type="rpc">addHideActionListener</uses>
     </api>
   </gadget>
   <container>
     <script src="constants.js"/>
     <script src="actions_container.js"/>
+    <api>
+      <exports type="rpc">actions</exports>
+      <uses type="rpc">runAction</uses>
+    </api>
   </container>
 </feature>

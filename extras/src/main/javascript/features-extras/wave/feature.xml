@@ -31,5 +31,18 @@ specific language governing permissions and limitations under the License.
     <script src="util.js"/>
     <script src="wave.js"/>
     <script src="wave.ui.js"/>
+    <api>
+      <exports type="rpc">wave_participants</exports>
+      <exports type="rpc">wave_gadget_state</exports>
+      <exports type="rpc">wave_state_delta</exports>
+      <exports type="rpc">wave_private_gadget_state</exports>
+      <exports type="rpc">wave_private_state_delta</exports>
+      <exports type="rpc">wave_gadget_mode</exports>
+      <uses type="rpc">setIframeWidth</uses>
+      <uses type="rpc">wave_gadget_state</uses>
+      <uses type="rpc">wave_log</uses>
+      <uses type="rpc">set_snippet</uses>
+      <uses type="rpc">wave_enable</uses>
+    </api>
   </gadget>
 </feature>

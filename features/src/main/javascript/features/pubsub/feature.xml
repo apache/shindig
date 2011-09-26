@@ -24,8 +24,15 @@ specific language governing permissions and limitations under the License.
   <gadget>
     <script src="pubsub.js"/>
     <script src="taming.js" caja="1"/>
+    <api>
+      <exports type="rpc">pubsub</exports>
+      <uses type="rpc">pubsub</uses>
+    </api>
   </gadget>
   <container>
     <script src="pubsub-router.js"/>
+    <api>
+      <exports type="rpc">pubsub</exports>
+    </api>
   </container>
 </feature>

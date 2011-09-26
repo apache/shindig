@@ -23,11 +23,19 @@ specific language governing permissions and limitations under the License.
     <script src="OpenAjax-mashup.js"/>
     <script src="iframe.js"/>
     <script src="crypto.js"/>
+    <api>
+      <exports type="rpc">openajax.pubsub</exports>
+      <uses type="rpc">openajax.pubsub</uses>
+    </api>
   </gadget>
   <container>
     <script src="OpenAjax-mashup.js"/>
     <script src="iframe.js"/>
     <script src="inline.js"/> 
     <script src="crypto.js"/>
+    <api>
+      <exports type="rpc">openajax.pubsub</exports>
+      <uses type="rpc">openajax.pubsub</uses>
+    </api>
   </container>
 </feature>

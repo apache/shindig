@@ -55,6 +55,10 @@ under the License.
       <exports type="js">osapi.container.ContainerConfig.PRELOAD_REF_TIME</exports>
       <exports type="js">osapi.container.ContainerConfig.PRELOAD_METADATAS</exports>
       <exports type="js">osapi.container.ContainerConfig.PRELOAD_TOKENS</exports>
+      <exports type="rpc">resize_iframe</exports>
+      <exports type="rpc">resize_iframe_width</exports>
+      <exports type="rpc">set_pref</exports>
+      <uses type="rpc">update_security_token</uses>
     </api>
   </container>
 </feature>

@@ -22,5 +22,8 @@ specific language governing permissions and limitations under the License.
   <dependency>rpc</dependency>
   <gadget>
     <script src="auth-refresh.js"/>
+    <api>
+      <exports type="rpc">update_security_token</exports>
+    </api>
   </gadget>
 </feature>

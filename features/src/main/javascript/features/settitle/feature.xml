@@ -27,6 +27,7 @@ specific language governing permissions and limitations under the License.
     <api>
       <exports type="js">gadgets.window.setTitle</exports>
       <exports type="js">_IG_SetTitle</exports>
+      <uses type="rpc">set_title</uses>
     </api>
   </gadget>
 </feature>

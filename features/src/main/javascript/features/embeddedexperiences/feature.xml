@@ -24,6 +24,10 @@ specific language governing permissions and limitations under the License.
     <dependency>container</dependency>
     <gadget>
         <script src="embedded_experiences_gadgets.js" />
+        <api>
+          <exports type="rpc">ee_set_context</exports>
+          <uses type="rpc">ee_gadget_rendered</uses>
+        </api>
     </gadget>
     <container>
         <script src="constant.js" />
@@ -37,6 +41,7 @@ specific language governing permissions and limitations under the License.
             <exports type="js">osapi.container.ee.RenderParam.URL_RENDER_PARAMS</exports>
             <exports type="js">osapi.container.ee.RenderParam.DATA_MODEL</exports>
             <exports type="js">osapi.container.ee.RenderParam.EMBEDDED</exports>
+            <exports type="rpc">ee_gadget_rendered</exports>
         </api>
     </container>
 </feature>

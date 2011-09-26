@@ -34,5 +34,13 @@ A map of view names to view attributes. Examples:
     <script src="cookies.js"/>
     <script src="shindig-container.js"/>
     <script src="osapi.js"/>
+    <api>
+      <exports type="rpc">osapi._handleGadgetRpcMethod</exports>
+      <exports type="rpc">resize_iframe</exports>
+      <exports type="rpc">set_pref</exports>
+      <exports type="rpc">set_title</exports>
+      <exports type="rpc">requestNavigateTo</exports>
+      <exports type="rpc">requestSendMessage</exports>
+    </api>
   </container>
 </feature>
