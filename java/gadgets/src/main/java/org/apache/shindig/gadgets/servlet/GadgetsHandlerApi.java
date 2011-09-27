@@ -255,12 +255,17 @@ public class GadgetsHandlerApi {
 	    URL("uri-query"),
 	    BODY("post-body");
 
-	   private String locationString;
+    private String locationString;
     private Location(String locationString) {
       this.locationString = locationString;
     }
 
+    @Override
+    public String toString() {
+      return locationString;
+    }
   }
+
   public interface ProxyRequest extends BaseRequest {
     // The BaseRequest.url store the resource to proxy
     public String getGadget();
