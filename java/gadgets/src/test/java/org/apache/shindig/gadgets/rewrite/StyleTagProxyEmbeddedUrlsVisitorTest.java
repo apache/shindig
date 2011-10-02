@@ -18,16 +18,15 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
+import static org.junit.Assert.assertEquals;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.PropertiesModule;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.DefaultGuiceModule;
 import org.apache.shindig.gadgets.Gadget;
+import org.apache.shindig.gadgets.admin.GadgetAdminModule;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.oauth.OAuthModule;
 import org.apache.shindig.gadgets.parse.ParseModule;
@@ -41,7 +40,10 @@ import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 
-import static org.junit.Assert.assertEquals;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 
 /**
  * Tests for StyleTagProxyEmbeddedUrlsVisitor.
@@ -64,7 +66,8 @@ public class StyleTagProxyEmbeddedUrlsVisitorTest extends DomWalkerTestBase {
   public void setUp() throws Exception {
     super.setUp();
     injector = Guice.createInjector(
-        new PropertiesModule(), new DefaultGuiceModule(), new OAuthModule());
+        new PropertiesModule(), new GadgetAdminModule(), new DefaultGuiceModule(),
+        new OAuthModule());
     ParseModule.DOMImplementationProvider domImpl =
         new ParseModule.DOMImplementationProvider();
     htmlParser = new CajaHtmlParser(domImpl.get());

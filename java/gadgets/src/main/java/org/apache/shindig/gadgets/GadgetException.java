@@ -71,7 +71,7 @@ public class GadgetException extends Exception {
     UNKNOWN_VIEW_SPECIFIED,
 
     // Blacklisting
-    BLACKLISTED_GADGET,
+    NON_WHITELISTED_GADGET,
 
     // OAuth
     OAUTH_STORAGE_ERROR,
@@ -79,14 +79,18 @@ public class GadgetException extends Exception {
 
     // Signed fetch
     REQUEST_SIGNING_FAILURE,
-    
+
     // Error in the JavaScript processing pipeline
     JS_PROCESSING_ERROR,
+
+    //Gadget Admin Error
+    GADGET_ADMIN_STORAGE_ERROR,
+    GADGET_ADMIN_FEATURE_NOT_ALLOWED
   }
 
   private final Code code;
   private final int httpStatusCode;
-  
+
   public GadgetException(Code code, int httpStatusCode) {
     this.code = code;
     this.httpStatusCode = httpStatusCode;

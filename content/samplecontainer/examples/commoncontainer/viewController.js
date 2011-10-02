@@ -79,6 +79,7 @@ $(function() {
 		 if (actionId === 'remove') {
 			if (confirm('This gadget will be removed, ok?')) {
 			  portlet.remove();
+			  delete siteToTitleMap[gadgetSite.getId()];
 		    }
 		 }else if (actionId === 'expand') {
 			//navigate to currentView prior to colapse gadget
@@ -86,6 +87,12 @@ $(function() {
 	     }else if (actionId === 'collapse') {
 	    	CommonContainer.colapseGadget(gadgetSite);
 		 }
+    };
+
+    //RPC handler for the set-title feature
+    setTitleHandler = function(rpcArgs, title) {
+      var titleId = siteToTitleMap[rpcArgs.gs.id_];
+      $('#' + titleId).text(title);
     };
 
     //create a gadget with navigation tool bar header enabling gadget collapse, expand, remove, navigate to view actions.
@@ -98,11 +105,13 @@ $(function() {
 	    }
       var newGadgetSite = gadgetTemplate;
       newGadgetSite = newGadgetSite.replace(/(gadget-site)/g, '$1-' + curId);
+      siteToTitleMap['gadget-site-' + curId] = 'gadget-title-' + curId;
       $(newGadgetSite).appendTo($('#gadgetArea')).addClass('ui-widget ui-widget-content ui-helper-clearfix ui-corner-all')
       .find('.portlet-header')
       .addClass('ui-widget-header ui-corner-all')
-      .text(result[gadgetURL]['modulePrefs'].title)
-      .append('<ul id="viewsDropdown">' +
+      .text('')
+      .append('<span id="gadget-title-' + curId + '">' + result[gadgetURL]['modulePrefs'].title + '</span>' +
+              '<ul id="viewsDropdown">' +
              '<li class="li-header">' +
                '<a href="#" class="hidden"><span id="dropdownIcon" class="ui-icon ui-icon-triangle-1-s"></span></a>' +
              '<ul>' +
@@ -142,8 +151,10 @@ $(function() {
 	$('#addGadget').click(function() {
 		CommonContainer.preloadGadget(newGadgetUrl.val(), function(result) {
 		  for (var gadgetURL in result) {
-			 buildGadget(result, gadgetURL);
-			 curId++;
+		    if(!result[gadgetURL].error) {
+			    buildGadget(result, gadgetURL);
+			    curId++;
+		    }
 		  }
 
 	      //Clear Values
@@ -161,8 +172,10 @@ $(function() {
 		var testGadgets = $('#gadgetCollection').val().split(',');
 		CommonContainer.preloadGadgets(testGadgets, function(result) {
 		  for (var gadgetURL in result) {
-			buildGadget(result, gadgetURL);
-		    curId++;
+		    if(!result[gadgetURL].error) {
+		      buildGadget(result, gadgetURL);
+		      curId++;
+		    }
 		  }
 
 		});

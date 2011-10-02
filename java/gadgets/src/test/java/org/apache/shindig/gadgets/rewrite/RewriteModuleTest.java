@@ -18,25 +18,27 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
-import com.google.inject.Guice;
-import com.google.inject.Inject;
-import com.google.inject.Injector;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import java.util.List;
 
 import org.apache.shindig.common.PropertiesModule;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.DefaultGuiceModule;
+import org.apache.shindig.gadgets.admin.GadgetAdminModule;
 import org.apache.shindig.gadgets.oauth.OAuthModule;
 import org.apache.shindig.gadgets.render.CajaResponseRewriter;
 import org.apache.shindig.gadgets.render.SanitizingResponseRewriter;
 import org.apache.shindig.gadgets.rewrite.ResponseRewriterList.RewriteFlow;
 import org.apache.shindig.gadgets.rewrite.image.BasicImageRewriter;
 import org.apache.shindig.gadgets.uri.AccelUriManager;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.List;
+import com.google.inject.Guice;
+import com.google.inject.Inject;
+import com.google.inject.Injector;
 
 /**
  * Tests for RewriteModule. Tests the flows and the associated rewriters.
@@ -66,6 +68,7 @@ public class RewriteModuleTest {
   public void setUp() {
     injector = Guice.createInjector(
         new PropertiesModule(),
+        new GadgetAdminModule(),
         new DefaultGuiceModule(), new OAuthModule());
   }
 

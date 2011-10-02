@@ -23,7 +23,14 @@ import static org.easymock.EasyMock.capture;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.isA;
 
-import com.google.common.collect.Lists;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+
+import javax.servlet.http.HttpServletRequest;
 
 import org.apache.shindig.auth.AuthInfoUtil;
 import org.apache.shindig.auth.SecurityToken;
@@ -32,8 +39,8 @@ import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.AuthType;
-import org.apache.shindig.gadgets.GadgetBlacklist;
 import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.admin.GadgetAdminStore;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
@@ -46,14 +53,7 @@ import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-
-import javax.servlet.http.HttpServletRequest;
+import com.google.common.collect.Lists;
 
 /**
  * Tests for MakeRequestHandler.
@@ -64,9 +64,10 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
   private static final String RESPONSE_BODY = "makeRequest response body";
   private static final SecurityToken DUMMY_TOKEN = new FakeGadgetToken();
 
-  private final GadgetBlacklist gadgetBlacklist = mock(GadgetBlacklist.class);
+  private final GadgetAdminStore gadgetAdminStore = mock(GadgetAdminStore.class);
   private final MakeRequestHandler handler
-      = new MakeRequestHandler(pipeline, rewriterRegistry, feedProcessorProvider, gadgetBlacklist);
+      = new MakeRequestHandler(pipeline, rewriterRegistry, feedProcessorProvider,
+              gadgetAdminStore);
 
   private void expectGetAndReturnBody(String response) throws Exception {
     expectGetAndReturnBody(AuthType.NONE, response);
@@ -175,9 +176,9 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
   }
 
   @Test
-  public void GetRequestWithBlacklistedGadget() throws Exception {
+  public void GetRequestWithNonWhitelistedGadget() throws Exception {
     expect(request.getParameter(Param.GADGET.getKey())).andReturn("http://some/gadget.xml").anyTimes();
-    expect(gadgetBlacklist.isBlacklisted(isA(Uri.class))).andReturn(true);
+    expect(gadgetAdminStore.isWhitelisted(isA(String.class), isA(String.class))).andReturn(false);
     replay();
     boolean exceptionThrown = false;
     try {
@@ -185,10 +186,26 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
     } catch (GadgetException e) {
       exceptionThrown = true;
       assertEquals(403, e.getHttpStatusCode());
-      assertEquals(GadgetException.Code.BLACKLISTED_GADGET, e.getCode());
+      assertEquals(GadgetException.Code.NON_WHITELISTED_GADGET, e.getCode());
     }
     assertTrue(exceptionThrown);
     verify();
+  }
+
+  @Test
+  public void GetRequestWithWhitelistedGadget() throws Exception {
+    expect(request.getParameter(Param.GADGET.getKey())).andReturn("http://some/gadget.xml").anyTimes();
+    expect(gadgetAdminStore.isWhitelisted(isA(String.class), isA(String.class)))
+    .andReturn(true);
+    expectGetAndReturnBody(RESPONSE_BODY);
+    replay();
+
+    handler.fetch(request, recorder);
+
+    JSONObject results = extractJsonFromResponse();
+    assertEquals(HttpResponse.SC_OK, results.getInt("rc"));
+    assertEquals(RESPONSE_BODY, results.get("body"));
+    assertTrue(rewriter.responseWasRewritten());
   }
 
   @Test

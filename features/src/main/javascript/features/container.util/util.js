@@ -80,7 +80,8 @@ osapi.container.util.newMetadataRequest = function(gadgetUrls) {
       'views.preferredHeight',
       'views.preferredWidth',
       'expireTimeMs',
-      'responseTimeMs'
+      'responseTimeMs',
+      'rpcServiceIds'
     ]
   };
 };

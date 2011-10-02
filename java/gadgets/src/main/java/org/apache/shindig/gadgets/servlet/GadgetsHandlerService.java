@@ -25,12 +25,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
-import com.google.inject.Inject;
-import com.google.inject.name.Named;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -46,6 +40,12 @@ import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.RenderingContext;
+import org.apache.shindig.gadgets.admin.GadgetAdminStore;
+import org.apache.shindig.gadgets.features.ApiDirective;
+import org.apache.shindig.gadgets.features.FeatureRegistry;
+import org.apache.shindig.gadgets.features.FeatureRegistry.FeatureBundle;
+import org.apache.shindig.gadgets.features.FeatureRegistry.LookupResult;
+import org.apache.shindig.gadgets.features.FeatureRegistryProvider;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.js.JsException;
 import org.apache.shindig.gadgets.js.JsRequestBuilder;
@@ -61,12 +61,12 @@ import org.apache.shindig.gadgets.spec.ModulePrefs;
 import org.apache.shindig.gadgets.spec.OAuthService;
 import org.apache.shindig.gadgets.spec.OAuthSpec;
 import org.apache.shindig.gadgets.spec.UserPref;
-import org.apache.shindig.gadgets.spec.View;
 import org.apache.shindig.gadgets.spec.UserPref.EnumValuePair;
+import org.apache.shindig.gadgets.spec.View;
 import org.apache.shindig.gadgets.uri.IframeUriManager;
 import org.apache.shindig.gadgets.uri.JsUriManager;
-import org.apache.shindig.gadgets.uri.ProxyUriManager;
 import org.apache.shindig.gadgets.uri.JsUriManager.JsUri;
+import org.apache.shindig.gadgets.uri.ProxyUriManager;
 import org.apache.shindig.gadgets.uri.ProxyUriManager.ProxyUri;
 import org.apache.shindig.protocol.conversion.BeanDelegator;
 import org.apache.shindig.protocol.conversion.BeanFilter;
@@ -78,6 +78,13 @@ import com.google.caja.render.JsMinimalPrinter;
 import com.google.caja.render.JsPrettyPrinter;
 import com.google.caja.reporting.MessageContext;
 import com.google.caja.reporting.RenderContext;
+import com.google.caja.util.Sets;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
 
 /**
  * Service that interfaces with the system to provide information about gadgets.
@@ -142,6 +149,8 @@ public class GadgetsHandlerService {
   protected final long specRefreshInterval;
   protected final BeanFilter beanFilter;
   protected final CajaContentRewriter cajaContentRewriter;
+  protected final GadgetAdminStore gadgetAdminStore;
+  protected final FeatureRegistryProvider featureRegistryProvider;
 
   @Inject
   public GadgetsHandlerService(TimeSource timeSource, Processor processor,
@@ -149,7 +158,9 @@ public class GadgetsHandlerService {
       ProxyUriManager proxyUriManager, JsUriManager jsUriManager, ProxyHandler proxyHandler,
       JsServingPipeline jsPipeline, JsRequestBuilder jsRequestBuilder,
       @Named("shindig.cache.xml.refreshInterval") long specRefreshInterval,
-      BeanFilter beanFilter, CajaContentRewriter cajaContentRewriter) {
+      BeanFilter beanFilter, CajaContentRewriter cajaContentRewriter,
+      GadgetAdminStore gadgetAdminStore,
+      FeatureRegistryProvider featureRegistryProvider) {
     this.timeSource = timeSource;
     this.processor = processor;
     this.iframeUriManager = iframeUriManager;
@@ -162,6 +173,8 @@ public class GadgetsHandlerService {
     this.specRefreshInterval = specRefreshInterval;
     this.beanFilter = beanFilter;
     this.cajaContentRewriter = cajaContentRewriter;
+    this.gadgetAdminStore = gadgetAdminStore;
+    this.featureRegistryProvider = featureRegistryProvider;
 
     this.beanDelegator = new BeanDelegator(API_CLASSES, ENUM_CONVERSION_MAP);
   }
@@ -179,17 +192,59 @@ public class GadgetsHandlerService {
 
     GadgetContext context = new MetadataGadgetContext(request);
     Gadget gadget = processor.process(context);
+
     boolean needIfrUrl = isFieldIncluded(fields, "iframeurl");
-    if (needIfrUrl && gadget.getCurrentView() == null) {
-      throw new ProcessingException("View " + request.getView() + " does not exist",
-          HttpResponse.SC_BAD_REQUEST);
+    if (needIfrUrl) {
+      if(!gadgetAdminStore.checkFeatureAdminInfo(gadget)) {
+        throw new ProcessingException("Gadget is not trusted to render in this container.",
+              HttpResponse.SC_BAD_REQUEST);
+      }
+
+      if(gadget.getCurrentView() == null) {
+        throw new ProcessingException("View " + request.getView() + " does not exist",
+                HttpResponse.SC_BAD_REQUEST);
+      }
     }
     String iframeUrl = needIfrUrl ? iframeUriManager.makeRenderingUri(gadget).toString() : null;
     Boolean needsTokenRefresh =
         isFieldIncluded(fields, "needstokenrefresh") ?
             gadget.getAllFeatures().contains("auth-refresh") : null;
+
+    Set<String> rpcServiceIds = getRpcServiceIds(gadget);
     return createMetadataResponse(context.getUrl(), gadget.getSpec(), iframeUrl,
-        needsTokenRefresh, fields, timeSource.currentTimeMillis() + specRefreshInterval);
+        needsTokenRefresh, fields, timeSource.currentTimeMillis() + specRefreshInterval,
+        rpcServiceIds);
+  }
+
+  /**
+   * Gets the set of allowed RPC service ids.
+   *
+   * @param gadget
+   *          the gadget to get the service ids for.
+   * @return the set of allowed RPC service ids.
+   */
+  private Set<String> getRpcServiceIds(Gadget gadget) {
+    GadgetContext context = gadget.getContext();
+    Set<String> rpcEndpoints = Sets.newHashSet();
+    List<Feature> modulePrefFeatures = gadget.getSpec().getModulePrefs().getAllFeatures();
+    List<String> featureNames = Lists.newArrayList();
+    for(Feature feature : modulePrefFeatures) {
+      if(gadgetAdminStore.isAllowedFeature(feature, gadget)) {
+        featureNames.add(feature.getName());
+      }
+    }
+    try {
+      FeatureRegistry featureRegistry = featureRegistryProvider.get(context.getRepository());
+      LookupResult result = featureRegistry.getFeatureResources(context, featureRegistry.getFeatures(featureNames),
+              null);
+      List<FeatureBundle> bundles = result.getBundles();
+      for (FeatureBundle bundle : bundles) {
+        rpcEndpoints.addAll(bundle.getApis(ApiDirective.Type.RPC, false));
+      }
+    } catch (GadgetException e) {
+      LOG.log(Level.WARNING, "Error getting features from feature registry", e);
+    }
+    return rpcEndpoints;
   }
 
   private boolean isFieldIncluded(Set<String> fields, String name) {
@@ -471,7 +526,7 @@ public class GadgetsHandlerService {
   @VisibleForTesting
   GadgetsHandlerApi.MetadataResponse createMetadataResponse(
       Uri url, GadgetSpec spec, String iframeUrl, Boolean needsTokenRefresh,
-      Set<String> fields, Long expireTime) {
+      Set<String> fields, Long expireTime, Set<String> rpcServiceIds) {
     return (GadgetsHandlerApi.MetadataResponse) beanFilter.createFilteredBean(
         beanDelegator.createDelegator(spec, GadgetsHandlerApi.MetadataResponse.class,
             ImmutableMap.<String, Object>builder()
@@ -480,7 +535,8 @@ public class GadgetsHandlerService {
                 .put("iframeurl", BeanDelegator.nullable(iframeUrl))
                 .put("needstokenrefresh", BeanDelegator.nullable(needsTokenRefresh))
                 .put("responsetimems", timeSource.currentTimeMillis())
-                .put("expiretimems", BeanDelegator.nullable(expireTime)).build()),
+                .put("expiretimems", BeanDelegator.nullable(expireTime))
+                .put("rpcserviceids", BeanDelegator.nullable(rpcServiceIds)).build()),
         fields);
   }
 

@@ -1,0 +1,22 @@
+{
+  "default" : {
+    "gadgets" : {
+      "http://www.google.com/ig/modules/horoscope.xml" : {
+        "features" : ["views", "tabs", "setprefs", "dynamic-height"],
+        "type" : "blacklist"
+      },
+      "http://www.labpixies.com/campaigns/todo/todo.xml" : {
+        "features" : ["setprefs", "dynamic-height", "views"],
+        "type" : "whitelist"
+      },
+      "http://localhost:8080/samplecontainer/examples/media-openGadgets/Media.xml" : {
+        "features" : [],
+        "type" : "blacklist"
+      },
+      "http://localhost:8080/*" : {
+        "features" : [],
+        "type" : "whitelist"
+      }
+    }
+  }
+}

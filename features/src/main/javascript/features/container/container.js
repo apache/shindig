@@ -134,6 +134,8 @@ osapi.container.Container = function(opt_config) {
 
   this.initializeMixins_();
 
+  this.setupRpcArbitrator_(config);
+
   this.preloadCaches(config);
 
   this.registerRpcServices_();
@@ -476,6 +478,11 @@ osapi.container.ContainerConfig.GET_PREFERENCES = 'GET_PREFERENCES';
  */
 osapi.container.ContainerConfig.SET_PREFERENCES = 'SET_PREFERENCES';
 /**
+ * Used to arbitrate RPC calls.
+ * @type {function}
+ */
+osapi.container.ContainerConfig.RPC_ARBITRATOR = 'rpcArbitrator';
+/**
  * Used to retrieve security tokens for gadgets.
  * @type {function}
  */
@@ -660,6 +667,42 @@ osapi.container.Container.prototype.registerRpcServices_ = function() {
       setPrefs(site.getId(), site.getActiveGadgetHolder().getUrl(), data);
     }
   });
+};
+
+/**
+ * Sets up the RPC arbitrator if enabled in the container js.  If
+ * a function is provided in the containers config the container will use
+ * that, if not it will use the default arbitrator.
+ * @private
+ */
+osapi.container.Container.prototype.setupRpcArbitrator_ = function(config) {
+  var container = gadgets.config.get('container');
+  if(typeof container.enableRpcArbitration !== 'undefined' &&
+          container.enableRpcArbitration) {
+    var arbitrate = osapi.container.util.getSafeJsonValue(
+            config, osapi.container.ContainerConfig.RPC_ARBITRATOR, null);
+    if(!arbitrate) {
+      var self = this;
+      //This implementation uses the metadata cache to check to allowed rpc service ids
+      arbitrate = function(serviceId, from) {
+        var site = self.getGadgetSiteByIframeId_(from);
+        if(site && site.getActiveGadgetHolder()) {
+          var cachedResponse = self.service_.getCachedGadgetMetadata(
+                  site.getActiveGadgetHolder().getUrl());
+          if(!cachedResponse.error && cachedResponse.rpcServiceIds) {
+            for(var i = 0, rpcServiceId; rpcServiceId = cachedResponse.rpcServiceIds[i]; i++) {
+              if(rpcServiceId == serviceId) {
+                return true;
+              }
+            }
+          }
+        }
+        gadgets.warn('RPC call to ' + serviceId + ' was not allowed.');
+        return false;
+      };
+    }
+    gadgets.rpc.config({'arbitrator' : arbitrate});
+  }
 };
 
 

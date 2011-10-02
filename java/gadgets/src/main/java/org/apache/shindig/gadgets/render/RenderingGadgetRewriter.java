@@ -18,6 +18,13 @@
  */
 package org.apache.shindig.gadgets.render;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.JsonSerializer;
 import org.apache.shindig.common.logging.i18n.MessageKeys;
@@ -32,6 +39,7 @@ import org.apache.shindig.gadgets.GadgetException.Code;
 import org.apache.shindig.gadgets.MessageBundleFactory;
 import org.apache.shindig.gadgets.RenderingContext;
 import org.apache.shindig.gadgets.UnsupportedFeatureException;
+import org.apache.shindig.gadgets.admin.GadgetAdminStore;
 import org.apache.shindig.gadgets.config.ConfigProcessor;
 import org.apache.shindig.gadgets.features.FeatureRegistry;
 import org.apache.shindig.gadgets.features.FeatureRegistryProvider;
@@ -57,13 +65,6 @@ import org.w3c.dom.DocumentType;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.Text;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableSet;
@@ -112,6 +113,7 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
   protected final JsServingPipeline jsServingPipeline;
   protected final JsUriManager jsUriManager;
   protected final ConfigProcessor configProcessor;
+  protected final GadgetAdminStore gadgetAdminStore;
 
   protected Set<String> defaultExternLibs = ImmutableSet.of();
 
@@ -131,13 +133,15 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
                                  FeatureRegistryProvider featureRegistryProvider,
                                  JsServingPipeline jsServingPipeline,
                                  JsUriManager jsUriManager,
-                                 ConfigProcessor configProcessor) {
+                                 ConfigProcessor configProcessor,
+                                 GadgetAdminStore gadgetAdminStore) {
     this.messageBundleFactory = messageBundleFactory;
     this.containerConfig = containerConfig;
     this.featureRegistryProvider = featureRegistryProvider;
     this.jsServingPipeline = jsServingPipeline;
     this.jsUriManager = jsUriManager;
     this.configProcessor = configProcessor;
+    this.gadgetAdminStore = gadgetAdminStore;
   }
 
   public void setDefaultDoctypeQName(String qname) {
@@ -297,6 +301,10 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
     FeatureRegistry featureRegistry = featureRegistryProvider.get(repository);
 
     checkRequiredFeatures(gadget, featureRegistry);
+    //Check to make sure all the required features that are about to be injected are allowed
+    if(!gadgetAdminStore.checkFeatureAdminInfo(gadget)) {
+      throw new GadgetException(Code.GADGET_ADMIN_FEATURE_NOT_ALLOWED);
+    }
 
     // Set of extern libraries requested by the container
     Set<String> externForcedLibs = defaultExternLibs;
@@ -312,7 +320,15 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
       injectScript(externForcedLibs, null, false, gadget, headTag, firstHeadChild, "");
     }
 
-    Collection<String> gadgetLibs = gadget.getDirectFeatureDeps();
+    Collection<String> gadgetLibs = Lists.newArrayList(gadget.getDirectFeatureDeps());
+    List<Feature> gadgetFeatures = gadget.getSpec().getModulePrefs().getAllFeatures();
+    for(Feature feature : gadgetFeatures) {
+      if(!feature.getRequired() &&
+              !gadgetAdminStore.isAllowedFeature(feature, gadget)) {
+        //If the feature is optional and the admin has not allowed it don't include it
+        gadgetLibs.remove(feature.getName());
+      }
+    }
 
     // Get config for all features
     Set<String> allLibs = ImmutableSet.<String>builder()

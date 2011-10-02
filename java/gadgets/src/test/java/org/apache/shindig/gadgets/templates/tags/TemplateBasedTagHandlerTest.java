@@ -18,10 +18,18 @@
  */
 package org.apache.shindig.gadgets.templates.tags;
 
+import static org.junit.Assert.assertEquals;
+
+import java.io.IOException;
+
+import javax.el.ELResolver;
+
 import org.apache.shindig.common.PropertiesModule;
 import org.apache.shindig.expressions.RootELResolver;
+import org.apache.shindig.gadgets.DefaultGuiceModule;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.admin.GadgetAdminModule;
 import org.apache.shindig.gadgets.oauth.OAuthModule;
 import org.apache.shindig.gadgets.parse.DefaultHtmlSerializer;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
@@ -29,12 +37,6 @@ import org.apache.shindig.gadgets.parse.SocialDataTags;
 import org.apache.shindig.gadgets.templates.TagRegistry;
 import org.apache.shindig.gadgets.templates.TemplateContext;
 import org.apache.shindig.gadgets.templates.TemplateProcessor;
-import org.apache.shindig.gadgets.DefaultGuiceModule;
-
-import com.google.common.collect.ImmutableSet;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -44,8 +46,9 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import javax.el.ELResolver;
-import java.io.IOException;
+import com.google.common.collect.ImmutableSet;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 
 /**
  * Tests the behavior of template-based tag handlers.
@@ -61,7 +64,8 @@ public class TemplateBasedTagHandlerTest {
   
   @Before
   public void setUp() throws Exception {
-    Injector injector = Guice.createInjector(new DefaultGuiceModule(), new OAuthModule(), new PropertiesModule());
+    Injector injector = Guice.createInjector(new GadgetAdminModule(), new DefaultGuiceModule(),
+            new OAuthModule(), new PropertiesModule());
     parser = injector.getInstance(GadgetHtmlParser.class);
     processor = injector.getInstance(TemplateProcessor.class);
     context = new TemplateContext(new Gadget(), null);

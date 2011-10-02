@@ -17,14 +17,19 @@
  */
 package org.apache.shindig.gadgets.process;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.shindig.common.logging.i18n.MessageKeys;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.Gadget;
-import org.apache.shindig.gadgets.GadgetBlacklist;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.GadgetSpecFactory;
+import org.apache.shindig.gadgets.admin.GadgetAdminStore;
 import org.apache.shindig.gadgets.features.FeatureRegistry;
 import org.apache.shindig.gadgets.features.FeatureRegistryProvider;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
@@ -33,11 +38,6 @@ import org.apache.shindig.gadgets.variables.VariableSubstituter;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import javax.servlet.http.HttpServletResponse;
 
 /**
  * Converts an input Context into an output Gadget.
@@ -50,18 +50,18 @@ public class Processor {
   private final GadgetSpecFactory gadgetSpecFactory;
   private final VariableSubstituter substituter;
   private final ContainerConfig containerConfig;
-  private final GadgetBlacklist blacklist;
+  private final GadgetAdminStore gadgetAdminStore;
   private final FeatureRegistryProvider featureRegistryProvider;
 
   @Inject
   public Processor(GadgetSpecFactory gadgetSpecFactory,
                    VariableSubstituter substituter,
                    ContainerConfig containerConfig,
-                   GadgetBlacklist blacklist,
+                   GadgetAdminStore gadgetAdminStore,
                    FeatureRegistryProvider featureRegistryProvider) {
     this.gadgetSpecFactory = gadgetSpecFactory;
     this.substituter = substituter;
-    this.blacklist = blacklist;
+    this.gadgetAdminStore = gadgetAdminStore;
     this.containerConfig = containerConfig;
     this.featureRegistryProvider = featureRegistryProvider;
   }
@@ -104,13 +104,12 @@ public class Processor {
     }
 
     validateGadgetUrl(url);
-
-    if (blacklist.isBlacklisted(url)) {
+    if (!gadgetAdminStore.isWhitelisted(context.getContainer(), url.toString())) {
       if (LOG.isLoggable(Level.INFO)) {
-        LOG.logp(Level.INFO, classname, "process", MessageKeys.RENDER_BLACKLISTED_GADGET, new Object[] {url});
+        LOG.logp(Level.INFO, classname, "process", MessageKeys.RENDER_NON_WHITELISTED_GADGET, new Object[] {url});
       }
       throw new ProcessingException("The requested gadget is unavailable",
-          HttpServletResponse.SC_FORBIDDEN);
+              HttpServletResponse.SC_FORBIDDEN);
     }
 
     return new Gadget()

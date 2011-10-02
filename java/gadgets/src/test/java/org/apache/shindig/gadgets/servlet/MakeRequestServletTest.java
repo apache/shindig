@@ -22,22 +22,21 @@ import static junitx.framework.StringAssert.assertContains;
 import static junitx.framework.StringAssert.assertStartsWith;
 import static org.easymock.EasyMock.expect;
 
-import org.apache.shindig.common.uri.Uri;
-import org.apache.shindig.gadgets.GadgetBlacklist;
-import org.apache.shindig.gadgets.GadgetException;
-import org.apache.shindig.gadgets.http.HttpRequest;
-import org.apache.shindig.gadgets.http.HttpResponse;
-import org.apache.shindig.gadgets.uri.UriCommon.Param;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.junit.Before;
-import org.junit.Test;
-
 import java.util.Collections;
 import java.util.Enumeration;
 
 import javax.servlet.http.HttpServletResponse;
+
+import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.admin.GadgetAdminStore;
+import org.apache.shindig.gadgets.http.HttpRequest;
+import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.uri.UriCommon.Param;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.junit.Before;
+import org.junit.Test;
 
 /**
  * Tests for MakeRequestServlet.
@@ -51,10 +50,10 @@ public class MakeRequestServletTest extends ServletTestFixture {
   private static final Enumeration<String> EMPTY_ENUM
       = Collections.enumeration(Collections.<String>emptyList());
 
-  private final GadgetBlacklist gadgetBlacklist = mock(GadgetBlacklist.class);
+  private final GadgetAdminStore gadgetAdminStore = mock(GadgetAdminStore.class);
   private final MakeRequestServlet servlet = new MakeRequestServlet();
   private final MakeRequestHandler handler =
-      new MakeRequestHandler(pipeline, null, feedProcessorProvider, gadgetBlacklist);
+      new MakeRequestHandler(pipeline, null, feedProcessorProvider, gadgetAdminStore);
 
   private final HttpRequest internalRequest = new HttpRequest(REQUEST_URL);
   private final HttpResponse internalResponse = new HttpResponse(RESPONSE_BODY);

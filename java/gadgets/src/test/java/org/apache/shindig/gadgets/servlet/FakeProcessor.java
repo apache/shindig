@@ -109,7 +109,7 @@ public class FakeProcessor extends Processor {
 
   private final FeatureRegistry featureRegistry;
 
-  public static final List FEATURE_NAMES=ImmutableList.of(FEATURE1, FEATURE2, FEATURE3);
+  public static final List<String> FEATURE_NAMES=ImmutableList.of(FEATURE1, FEATURE2, FEATURE3);
 
   public FakeProcessor() {
     this(null);
@@ -133,7 +133,7 @@ public class FakeProcessor extends Processor {
     }
 
     try {
-      GadgetSpec spec = new GadgetSpec(Uri.parse("#"), gadgets.get(context.getUrl()));
+      GadgetSpec spec = new GadgetSpec(context.getUrl(), gadgets.get(context.getUrl()));
       View view = spec.getView(context.getView());
       return new Gadget()
           .setContext(context)

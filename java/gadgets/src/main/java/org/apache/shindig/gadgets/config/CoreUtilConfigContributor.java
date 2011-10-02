@@ -18,16 +18,18 @@
  */
 package org.apache.shindig.gadgets.config;
 
-import com.google.common.collect.Maps;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-import org.apache.shindig.gadgets.Gadget;
-import org.apache.shindig.gadgets.features.FeatureRegistry;
-import org.apache.shindig.gadgets.spec.Feature;
-
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
+
+import org.apache.shindig.gadgets.Gadget;
+import org.apache.shindig.gadgets.admin.GadgetAdminStore;
+import org.apache.shindig.gadgets.features.FeatureRegistry;
+import org.apache.shindig.gadgets.spec.Feature;
+
+import com.google.common.collect.Maps;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 /**
  * Populates the core.util configuration, which at present includes the list
@@ -37,11 +39,15 @@ import java.util.Set;
  */
 @Singleton
 public class CoreUtilConfigContributor implements ConfigContributor {
+
   private final FeatureRegistry registry;
+  private final GadgetAdminStore gadgetAdminStore;
 
   @Inject
-  public CoreUtilConfigContributor(final FeatureRegistry registry) {
+  public CoreUtilConfigContributor(final FeatureRegistry registry,
+          GadgetAdminStore gadgetAdminStore) {
     this.registry = registry;
+    this.gadgetAdminStore = gadgetAdminStore;
   }
 
 
@@ -54,7 +60,8 @@ public class CoreUtilConfigContributor implements ConfigContributor {
 
     for (Feature feature : features) {
       // Skip unregistered features
-      if (!allFeatureNames.contains(feature.getName())) {
+      if ((!allFeatureNames.contains(feature.getName())) ||
+              (!gadgetAdminStore.isAllowedFeature(feature, gadget))) {
         continue;
       }
       // Flatten out the multimap a bit for backwards compatibility:  map keys

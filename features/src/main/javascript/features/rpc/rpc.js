@@ -133,6 +133,7 @@ if (!window['gadgets']['rpc']) { // make lib resilient to double-inclusion
     var rpcId = window.name;
 
     var securityCallback = function() {};
+    var arbitrator = null;
     var LOAD_TIMEOUT = 0;
     var FRAME_PHISH = 1;
     var FORGED_MSG = 2;
@@ -284,6 +285,10 @@ if (!window['gadgets']['rpc']) { // make lib resilient to double-inclusion
       //
       if (rpc && typeof rpc['s'] === 'string' && typeof rpc['f'] === 'string' &&
           rpc['a'] instanceof Array) {
+
+        if (typeof arbitrate === 'function' && !arbitrate(rpc['s'], rpc['f'])) {
+          return;
+        }
 
         // Validate auth token.
         if (authToken[rpc['f']]) {
@@ -801,6 +806,9 @@ if (!window['gadgets']['rpc']) { // make lib resilient to double-inclusion
       config: function(config) {
         if (typeof config.securityCallback === 'function') {
           securityCallback = config.securityCallback;
+        }
+        if (typeof config.arbitrator === 'function') {
+          arbitrate = config.arbitrator;
         }
       },
 

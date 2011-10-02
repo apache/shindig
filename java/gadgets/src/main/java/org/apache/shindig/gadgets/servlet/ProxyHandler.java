@@ -18,17 +18,16 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
-import com.google.common.base.Strings;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-import com.google.inject.name.Named;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.Nullable;
 import org.apache.shindig.common.uri.Uri;
-import org.apache.shindig.gadgets.GadgetBlacklist;
 import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.admin.GadgetAdminStore;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
@@ -41,10 +40,10 @@ import org.apache.shindig.gadgets.uri.ProxyUriManager;
 import org.apache.shindig.gadgets.uri.UriUtils;
 import org.apache.shindig.gadgets.uri.UriUtils.DisallowedHeaders;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import com.google.common.base.Strings;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 
 /**
  * Handles open proxy requests.
@@ -54,7 +53,7 @@ public class ProxyHandler {
   private final RequestPipeline requestPipeline;
   private final ResponseRewriterRegistry contentRewriterRegistry;
   protected final boolean remapInternalServerError;
-  private final GadgetBlacklist gadgetBlacklist;
+  private final GadgetAdminStore gadgetAdminStore;
   private final Integer longLivedRefreshSec;
   private static final String POST = "POST";
 
@@ -62,12 +61,12 @@ public class ProxyHandler {
   public ProxyHandler(RequestPipeline requestPipeline,
       @RewriterRegistry(rewriteFlow = RewriteFlow.DEFAULT) ResponseRewriterRegistry contentRewriterRegistry,
       @Named("shindig.proxy.remapInternalServerError") Boolean remapInternalServerError,
-      GadgetBlacklist gadgetBlacklist,
+      GadgetAdminStore gadgetAdminStore,
       @Named("org.apache.shindig.gadgets.servlet.longLivedRefreshSec") int longLivedRefreshSec) {
     this.requestPipeline = requestPipeline;
     this.contentRewriterRegistry = contentRewriterRegistry;
     this.remapInternalServerError = remapInternalServerError;
-    this.gadgetBlacklist = gadgetBlacklist;
+    this.gadgetAdminStore = gadgetAdminStore;
     this.longLivedRefreshSec = longLivedRefreshSec;
   }
 
@@ -102,8 +101,9 @@ public class ProxyHandler {
         "No url parameter in request", HttpResponse.SC_BAD_REQUEST);
     }
 
-    if (rcr.getGadget() != null && gadgetBlacklist.isBlacklisted(rcr.getGadget())) {
-      throw new GadgetException(GadgetException.Code.BLACKLISTED_GADGET,
+    if (rcr.getGadget() != null &&
+            !gadgetAdminStore.isWhitelisted(rcr.getContainer(), rcr.getGadget().toString())) {
+      throw new GadgetException(GadgetException.Code.NON_WHITELISTED_GADGET,
         "The requested content is unavailable", HttpResponse.SC_FORBIDDEN);
     }
 

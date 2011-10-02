@@ -18,9 +18,13 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
-import com.google.inject.Inject;
-import com.google.inject.Provider;
-import com.google.inject.Singleton;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.Collections;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.auth.AuthInfoUtil;
@@ -33,9 +37,9 @@ import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.AuthType;
 import org.apache.shindig.gadgets.FeedProcessor;
 import org.apache.shindig.gadgets.FetchResponseUtils;
-import org.apache.shindig.gadgets.GadgetBlacklist;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.GadgetException.Code;
+import org.apache.shindig.gadgets.admin.GadgetAdminStore;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.RequestPipeline;
@@ -47,13 +51,9 @@ import org.apache.shindig.gadgets.rewrite.RewritingException;
 import org.apache.shindig.gadgets.uri.UriCommon;
 import org.apache.shindig.gadgets.uri.UriCommon.Param;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.util.Collections;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.google.inject.Singleton;
 
 /**
  * Handles gadgets.io.makeRequest requests.
@@ -77,18 +77,18 @@ public class MakeRequestHandler {
   private final RequestPipeline requestPipeline;
   private final ResponseRewriterRegistry contentRewriterRegistry;
   private final Provider<FeedProcessor> feedProcessorProvider;
-  private final GadgetBlacklist gadgetBlacklist;
+  private final GadgetAdminStore gadgetAdminStore;
 
   @Inject
   public MakeRequestHandler(RequestPipeline requestPipeline,
       @RewriterRegistry(rewriteFlow = RewriteFlow.DEFAULT)
       ResponseRewriterRegistry contentRewriterRegistry,
       Provider<FeedProcessor> feedProcessorProvider,
-      GadgetBlacklist gadgetBlacklist) {
+      GadgetAdminStore gadgetAdminStore) {
     this.requestPipeline = requestPipeline;
     this.contentRewriterRegistry = contentRewriterRegistry;
     this.feedProcessorProvider = feedProcessorProvider;
-    this.gadgetBlacklist = gadgetBlacklist;
+    this.gadgetAdminStore = gadgetAdminStore;
   }
 
   /**
@@ -97,12 +97,15 @@ public class MakeRequestHandler {
   public void fetch(HttpServletRequest request, HttpServletResponse response)
       throws GadgetException, IOException {
     HttpRequest rcr = buildHttpRequest(request);
+    String container = rcr.getContainer();
+    Uri gadget = rcr.getGadget();
 
-    if (rcr.getGadget() != null && gadgetBlacklist.isBlacklisted(rcr.getGadget())) {
-      throw new GadgetException(GadgetException.Code.BLACKLISTED_GADGET,
-          "The requested content is unavailable", HttpResponse.SC_FORBIDDEN);
+    if (gadget != null &&
+            !gadgetAdminStore.isWhitelisted(container, gadget.toString())) {
+      throw new GadgetException(GadgetException.Code.NON_WHITELISTED_GADGET,
+              "The requested content is unavailable", HttpResponse.SC_FORBIDDEN);
     }
-    
+
     // Serialize the response
     HttpResponse results = requestPipeline.execute(rcr);
 

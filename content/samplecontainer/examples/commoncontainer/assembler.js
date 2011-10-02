@@ -28,6 +28,9 @@ testConfig[osapi.container.ContainerConfig.RENDER_DEBUG] = '1';
 //  Create the new CommonContainer
 var CommonContainer = new osapi.container.Container(testConfig);
 
+//Gadget site to title id map
+var siteToTitleMap = {};
+
 // Default the security token for the container. Using this example security token requires enabling
 // the DefaultSecurityTokenCodec to let UrlParameterAuthenticationHandler create valid security token.
 shindig.auth.updateSecurityToken('john.doe:john.doe:appid:cont:url:0:default');
@@ -54,6 +57,8 @@ CommonContainer.init = function() {
   gadgets.pubsub2router.init({
     hub: CommonContainer.managedHub
   });
+
+  CommonContainer.rpcRegister('set_title', setTitleHandler);
 
   try {
 

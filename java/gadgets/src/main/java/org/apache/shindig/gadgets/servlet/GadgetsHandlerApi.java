@@ -18,19 +18,15 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
-import com.google.common.collect.Multimap;
-
-import org.apache.shindig.common.uri.Uri;
-import org.apache.shindig.gadgets.spec.OAuthService.EndPoint;
-import org.apache.shindig.gadgets.spec.OAuthService.Location;
-import org.apache.shindig.gadgets.spec.OAuthService.Method;
-import org.apache.shindig.protocol.conversion.BeanFilter.Unfiltered;
-
-// Keep imports clean, so it is clear what is used by API
-
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
+
+import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.protocol.conversion.BeanFilter.Unfiltered;
+
+import com.google.common.collect.Multimap;
 
 /**
  * Gadget Handler Interface data.
@@ -100,6 +96,7 @@ public class GadgetsHandlerApi {
     public Map<String, UserPref> getUserPrefs();
     public Map<String, View> getViews();
     public Boolean getNeedsTokenRefresh();
+    public Set<String> getRpcServiceIds();
   }
 
   public enum ViewContentType {
@@ -251,9 +248,9 @@ public class GadgetsHandlerApi {
   }
 
   public enum Location {
-	    HEADER("auth-header"),
-	    URL("uri-query"),
-	    BODY("post-body");
+    HEADER("auth-header"),
+    URL("uri-query"),
+    BODY("post-body");
 
     private String locationString;
     private Location(String locationString) {

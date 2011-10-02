@@ -22,6 +22,7 @@ import org.apache.shindig.auth.AuthenticationServletFilter;
 import org.apache.shindig.common.PropertiesModule;
 import org.apache.shindig.common.servlet.GuiceServletContextListener;
 import org.apache.shindig.gadgets.DefaultGuiceModule;
+import org.apache.shindig.gadgets.admin.GadgetAdminModule;
 import org.apache.shindig.gadgets.oauth.OAuthModule;
 import org.apache.shindig.gadgets.servlet.ConcatProxyServlet;
 import org.apache.shindig.gadgets.servlet.GadgetRenderingServlet;
@@ -122,7 +123,8 @@ public class EndToEndServer {
     Map<String, String> initParams = Maps.newHashMap();
     String modules = Joiner.on(":")
         .join(SocialApiGuiceModule.class.getName(),
-              SampleModule.class.getName(), 
+              SampleModule.class.getName(),
+              GadgetAdminModule.class.getName(),
               DefaultGuiceModule.class.getName(),
               PropertiesModule.class.getName(), 
               OAuthModule.class.getName()

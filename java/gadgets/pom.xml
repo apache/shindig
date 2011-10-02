@@ -53,6 +53,7 @@
         <includes>
           <include>oauth.json</include>
           <include>OSML_library.xml</include>
+          <include>gadget-admin.json</include>
         </includes>
       </resource>
 

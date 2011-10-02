@@ -131,6 +131,11 @@
 "gadgets.uri.proxy.host" : "${Cur['defaultShindigProxyConcatAuthority']}",
 "gadgets.uri.proxy.path" : "${CONTEXT_ROOT}/gadgets/proxy",
 
+//Enables/Disables feature administration
+"gadgets.admin.enableFeatureAdministration" : "false",
+
+//Enables whitelist checks
+"gadgets.admin.enableGadgetWhitelist" : "false",
 
 // This config data will be passed down to javascript. Please
 // configure your object using the feature name rather than
@@ -301,6 +306,9 @@
     "serverBase": "${CONTEXT_ROOT}/gadgets/"
   },
   "container" : {
-    "relayPath": "${CONTEXT_ROOT}/gadgets/files/container/rpc_relay.html"
+    "relayPath": "${CONTEXT_ROOT}/gadgets/files/container/rpc_relay.html",
+
+    //Enables/Disables the RPC arbitrator functionality in the common container
+    "enableRpcArbitration": false
   }
 }}

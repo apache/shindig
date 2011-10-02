@@ -83,7 +83,7 @@ public interface MessageKeys {
 	//PipelineExecutor
 	public static final String ERROR_PRELOADING="errorPreloading";
 	//Processor
-	public static final String RENDER_BLACKLISTED_GADGET="renderBlacklistedGadget";
+	public static final String RENDER_NON_WHITELISTED_GADGET="renderNonWhitelistedGadget";
 	//CajaResponseRewriter
 	public static final String FAILED_TO_RETRIEVE="failedToRetrieve";
 	public static final String FAILED_TO_READ="failedToRead";

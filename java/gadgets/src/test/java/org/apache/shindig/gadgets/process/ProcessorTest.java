@@ -17,36 +17,33 @@
  */
 package org.apache.shindig.gadgets.process;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.isA;
 
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.shindig.common.EasyMockTestCase;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.config.JsonContainerConfig;
 import org.apache.shindig.expressions.Expressions;
 import org.apache.shindig.gadgets.Gadget;
-import org.apache.shindig.gadgets.GadgetBlacklist;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.GadgetSpecFactory;
+import org.apache.shindig.gadgets.admin.GadgetAdminStore;
 import org.apache.shindig.gadgets.features.FeatureRegistry;
 import org.apache.shindig.gadgets.features.FeatureRegistryProvider;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
+import org.apache.shindig.gadgets.variables.Substituter;
 import org.apache.shindig.gadgets.variables.VariableSubstituter;
-
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
-import javax.servlet.http.HttpServletResponse;
-
 import com.google.common.collect.Lists;
 
-import org.apache.shindig.gadgets.variables.Substituter;
-
-public class ProcessorTest {
+public class ProcessorTest extends EasyMockTestCase {
   private static final Uri SPEC_URL = Uri.parse("http://example.org/gadget.xml");
   private static final Uri TYPE_URL_HREF = Uri.parse("http://example.org/gadget.php");
   private static final String BASIC_HTML_CONTENT = "Hello, World!";
@@ -60,7 +57,7 @@ public class ProcessorTest {
 
   private final FakeGadgetSpecFactory gadgetSpecFactory = new FakeGadgetSpecFactory();
   private final FakeVariableSubstituter substituter = new FakeVariableSubstituter();
-  private final FakeBlacklist blacklist = new FakeBlacklist();
+  private final GadgetAdminStore gadgetAdminStore = mock(GadgetAdminStore.class);
 
   private ContainerConfig containerConfig;
   private Processor processor;
@@ -79,7 +76,8 @@ public class ProcessorTest {
         return null;
       }
     };
-    processor = new Processor(gadgetSpecFactory, substituter, containerConfig, blacklist,
+
+    processor = new Processor(gadgetSpecFactory, substituter, containerConfig, gadgetAdminStore,
         registryProvider);
   }
 
@@ -111,6 +109,8 @@ public class ProcessorTest {
 
   @Test
   public void normalProcessing() throws Exception {
+    expect(gadgetAdminStore.isWhitelisted(isA(String.class), isA(String.class))).andReturn(true);
+    replay();
     Gadget gadget = processor.process(makeContext("html"));
     assertEquals(BASIC_HTML_CONTENT, gadget.getCurrentView().getContent());
   }
@@ -123,44 +123,48 @@ public class ProcessorTest {
 
   @Test
   public void doViewAliasing() throws Exception {
+    expect(gadgetAdminStore.isWhitelisted(isA(String.class), isA(String.class))).andReturn(true);
+    replay();
     Gadget gadget = processor.process(makeContext("aliased"));
     assertEquals(BASIC_HTML_CONTENT, gadget.getCurrentView().getContent());
   }
 
   @Test
   public void noSupportedViewHasNoCurrentView() throws Exception {
+    expect(gadgetAdminStore.isWhitelisted(isA(String.class), isA(String.class))).andReturn(true);
+    replay();
     Gadget gadget = processor.process(makeContext("not-real-view"));
     assertNull(gadget.getCurrentView());
   }
 
   @Test
   public void substitutionsPerformedTypeHtml() throws Exception {
+    expect(gadgetAdminStore.isWhitelisted(isA(String.class), isA(String.class))).andReturn(true);
+    replay();
     processor.process(makeContext("html"));
     assertTrue("Substitutions not performed", substituter.wasSubstituted);
   }
 
   @Test
   public void substitutionsPerformedTypeUrl() throws Exception {
+    expect(gadgetAdminStore.isWhitelisted(isA(String.class), isA(String.class))).andReturn(true);
+    replay();
     processor.process(makeContext("url"));
     assertTrue("Substitutions not performed", substituter.wasSubstituted);
   }
 
   @Test
-  public void blacklistChecked() throws Exception {
+  public void whitelistChecked() throws Exception {
+    expect(gadgetAdminStore.isWhitelisted(isA(String.class), isA(String.class))).andReturn(true);
+    replay();
     processor.process(makeContext("url"));
-    assertTrue("Blacklist not checked", blacklist.wasChecked);
   }
 
-  @Test
-  public void blacklistedGadgetThrows() throws Exception {
-    blacklist.isBlacklisted = true;
-    try {
-      processor.process(makeContext("html"));
-      fail("expected ProcessingException");
-    } catch (ProcessingException e) {
-      assertEquals(HttpServletResponse.SC_FORBIDDEN, e.getHttpStatusCode());
-    }
-
+  @Test(expected = ProcessingException.class)
+  public void nonWhitelistedGadgetThrows() throws Exception {
+    expect(gadgetAdminStore.isWhitelisted(isA(String.class), isA(String.class))).andReturn(false);
+    replay();
+    processor.process(makeContext("html"));
   }
 
   @Test
@@ -185,23 +189,13 @@ public class ProcessorTest {
 
   @Test
   public void typeUrlViewsAreSkippedForSanitizedGadget() throws Exception {
+    expect(gadgetAdminStore.isWhitelisted(isA(String.class), isA(String.class)))
+    .andReturn(true).anyTimes();
+    replay();
     Gadget gadget = processor.process(makeContext("url", SPEC_URL, true));
     assertNull(gadget.getCurrentView());
     gadget = processor.process(makeContext("html", SPEC_URL, true));
     assertEquals(BASIC_HTML_CONTENT, gadget.getCurrentView().getContent());
-  }
-
-  private static class FakeBlacklist implements GadgetBlacklist {
-    protected boolean wasChecked;
-    protected boolean isBlacklisted;
-
-    protected FakeBlacklist() {
-    }
-
-    public boolean isBlacklisted(Uri gadgetUri) {
-      wasChecked = true;
-      return isBlacklisted;
-    }
   }
 
   private static class FakeGadgetSpecFactory implements GadgetSpecFactory {

@@ -635,7 +635,7 @@ public class FeatureRegistry {
       String tagMatch = null;
       String directTag = rctx.getFeatureBundleTag();
       for (FeatureBundle bundle : bundles) {
-        if (directTag.equalsIgnoreCase(bundle.getType())) {
+        if (directTag != null && directTag.equalsIgnoreCase(bundle.getType())) {
           tagMatch = directTag;
         }
       }

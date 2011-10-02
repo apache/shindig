@@ -26,13 +26,18 @@ import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.getCurrentArguments;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.reset;
+import static org.easymock.EasyMock.isA;
 import static org.easymock.EasyMock.same;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.apache.shindig.common.EasyMockTestCase;
 import org.apache.shindig.common.JsonAssert;
 import org.apache.shindig.common.PropertiesModule;
 import org.apache.shindig.common.uri.Uri;
@@ -41,6 +46,7 @@ import org.apache.shindig.config.BasicContainerConfig;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.admin.GadgetAdminStore;
 import org.apache.shindig.gadgets.config.ConfigContributor;
 import org.apache.shindig.gadgets.config.CoreUtilConfigContributor;
 import org.apache.shindig.gadgets.config.DefaultConfigProcessor;
@@ -58,6 +64,7 @@ import org.apache.shindig.gadgets.preload.PreloadException;
 import org.apache.shindig.gadgets.preload.PreloadedData;
 import org.apache.shindig.gadgets.rewrite.MutableContent;
 import org.apache.shindig.gadgets.rewrite.RewritingException;
+import org.apache.shindig.gadgets.spec.Feature;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.View;
 import org.apache.shindig.gadgets.uri.JsUriManager;
@@ -68,14 +75,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
@@ -91,7 +90,7 @@ import com.google.inject.Injector;
 /**
  * Tests for RenderingContentRewriter.
  */
-public class RenderingGadgetRewriterTest {
+public class RenderingGadgetRewriterTest extends EasyMockTestCase{
   private static final Uri SPEC_URL = Uri.parse("http://example.org/gadget.xml");
   private static final String BODY_CONTENT = "Some body content";
   static final Pattern DOCUMENT_SPLIT_PATTERN = Pattern.compile(
@@ -111,6 +110,7 @@ public class RenderingGadgetRewriterTest {
   private final FakeContainerConfig config = new FakeContainerConfig();
   private final JsUriManager jsUriManager = new FakeJsUriManager();
   private final MapGadgetContext context = new MapGadgetContext();
+  private final GadgetAdminStore gadgetAdminStore = mock(GadgetAdminStore.class);
 
   private FeatureRegistry featureRegistry;
   private JsServingPipeline jsServingPipeline;
@@ -127,13 +127,14 @@ public class RenderingGadgetRewriterTest {
     };
     jsServingPipeline = createMock(JsServingPipeline.class);
     Map<String, ConfigContributor> configContributors = ImmutableMap.of(
-        "core.util", new CoreUtilConfigContributor(featureRegistry),
+        "core.util", new CoreUtilConfigContributor(featureRegistry,
+                gadgetAdminStore),
         "shindig.xhrwrapper", new XhrwrapperConfigContributor()
     );
     rewriter
         = new RenderingGadgetRewriter(messageBundleFactory, config, featureRegistryProvider,
             jsServingPipeline, jsUriManager,
-            new DefaultConfigProcessor(configContributors, config));
+            new DefaultConfigProcessor(configContributors, config), gadgetAdminStore);
     Injector injector = Guice.createInjector(new ParseModule(), new PropertiesModule());
     parser = injector.getInstance(GadgetHtmlParser.class);
   }
@@ -153,6 +154,13 @@ public class RenderingGadgetRewriterTest {
         ImmutableList.<FeatureResource>of(),
         ImmutableSet.<String>of(),
         ImmutableList.<FeatureResource>of());
+
+    //Convenience: by default expect that the gadget is allowed to render
+    reset(gadgetAdminStore);
+    expect(gadgetAdminStore.checkFeatureAdminInfo(isA(Gadget.class))).andReturn(true);
+    expect(gadgetAdminStore.isAllowedFeature(isA(Feature.class), isA(Gadget.class)))
+    .andReturn(true).anyTimes();
+    replay(gadgetAdminStore);
     return gadget;
   }
 
@@ -600,6 +608,103 @@ public class RenderingGadgetRewriterTest {
     assertTrue("Requested scripts not inlined.", rewritten.contains("foo_content();"));
     assertTrue("Forced external file not forced.",
         rewritten.contains("<script src=\"http://example.org/external.js\">"));
+  }
+
+  @Test(expected = RewritingException.class)
+  public void exceptionWhenFeatureNotAllowed() throws Exception {
+    Gadget gadget = makeDefaultGadget();
+    reset(gadgetAdminStore);
+    expect(gadgetAdminStore.checkFeatureAdminInfo(isA(Gadget.class))).andReturn(false);
+    replay(gadgetAdminStore);
+    rewrite(gadget, BODY_CONTENT);
+  }
+
+  @Test
+  public void  gadgetAdminDefaultContent() throws Exception {
+    String gadgetXml =
+      "<Module><ModulePrefs title=''>" +
+      "  <Require feature='foo'/>" +
+      "</ModulePrefs>" +
+      "<Content type='html'/>" +
+      "</Module>";
+
+    final Set<String> libs = ImmutableSortedSet.of("foo", "bar", "baz");
+    GadgetContext context = new GadgetContext() {
+      @Override
+      public String getParameter(String name) {
+        if (name.equals("libs")) {
+          return Joiner.on(':').join(libs);
+        }
+        return null;
+      }
+    };
+
+    Gadget gadget = makeGadgetWithSpec(gadgetXml).setContext(context);
+    FeatureResource fooResource = inline("foo-content", "foo-debug");
+    expectFeatureCalls(gadget,
+        ImmutableList.of(fooResource),
+        libs,
+        ImmutableList.of(fooResource, inline("bar-c", "bar-d"), inline("baz-c", "baz-d")));
+    String rewritten = rewrite(gadget, BODY_CONTENT);
+
+    Matcher matcher = DOCUMENT_SPLIT_PATTERN.matcher(rewritten);
+    assertTrue("Output is not valid HTML.", matcher.matches());
+    assertTrue("Missing opening html tag", matcher.group(BEFORE_HEAD_GROUP).
+        toLowerCase().contains("<html>"));
+    assertTrue("Default CSS missing.", matcher.group(HEAD_GROUP).contains(DEFAULT_CSS));
+    // Not very accurate -- could have just been user prefs.
+    assertTrue("Default javascript not included.",
+        matcher.group(HEAD_GROUP).contains("<script>"));
+    assertTrue("Original document not preserved.",
+        matcher.group(BODY_GROUP).contains(BODY_CONTENT));
+    assertTrue("gadgets.util.runOnLoadHandlers not invoked.",
+        matcher.group(BODY_GROUP).contains("gadgets.util.runOnLoadHandlers();"));
+  }
+
+  @Test
+  public void optionalDeniedFeature() throws Exception {
+    String gadgetXml =
+      "<Module><ModulePrefs title=''>" +
+      "  <Require feature='core.util'/>" +
+      "  <Require feature='foo'/>" +
+      "  <Optional feature='hello'/>" +
+      "</ModulePrefs>" +
+      "<Content type='html'/>" +
+      "</Module>";
+
+    final Set<String> libs = ImmutableSortedSet.of("core.util", "foo", "bar", "baz");
+    GadgetContext context = new GadgetContext() {
+      @Override
+      public String getParameter(String name) {
+        if (name.equals("libs")) {
+          return Joiner.on(':').join(libs);
+        }
+        return null;
+      }
+    };
+
+    Gadget gadget = makeGadgetWithSpec(gadgetXml).setContext(context);
+    reset(gadgetAdminStore);
+    Feature denied = mock(Feature.class);
+    expect(denied.getName()).andReturn("hello");
+    expect(gadgetAdminStore.checkFeatureAdminInfo(isA(Gadget.class))).andReturn(true);
+    expect(gadgetAdminStore.isAllowedFeature(eq(denied), isA(Gadget.class))).andReturn(false);
+    replay();
+
+    FeatureResource fooResource = inline("foo-content", "foo-debug");
+    expectFeatureCalls(gadget,
+        ImmutableList.of(fooResource),
+        libs,
+        ImmutableList.of(fooResource, inline("bar-c", "bar-d"), inline("baz-c", "baz-d")));
+
+    String rewritten = rewrite(gadget, "");
+    JSONObject json = getConfigJson(rewritten);
+
+    Set<String> actual = getInjectedScript(rewritten);
+    Set<String> expected = ImmutableSortedSet.of("core.util", "foo", "bar", "baz");
+    assertFalse(actual.contains("hello"));
+    assertEquals(expected, actual);
+    assertFalse(json.getJSONObject("core.util").has("hello"));
   }
 
   private JSONObject getConfigJson(String content) throws JSONException {
@@ -1134,6 +1239,17 @@ public class RenderingGadgetRewriterTest {
         BODY_CONTENT.equals(rewrite(gadget, BODY_CONTENT)));
   }
 
+  private List<String> getAllRequiredFeatures(Gadget gadget) {
+    List<String> names = Lists.newArrayList();
+    List<Feature> features = gadget.getSpec().getModulePrefs().getAllFeatures();
+    for(Feature feature : features) {
+      if(feature.getRequired()) {
+        names.add(feature.getName());
+      }
+    }
+    return names;
+  }
+
   private void expectFeatureCalls(Gadget gadget,
                                   List<FeatureResource> gadgetResources,
                                   Set<String> externLibs,
@@ -1144,6 +1260,9 @@ public class RenderingGadgetRewriterTest {
     List<String> allFeatures = Lists.newLinkedList(gadgetFeatures);
     List<String> allFeaturesAndLibs = Lists.newLinkedList(gadgetFeatures);
     allFeaturesAndLibs.addAll(externLibs);
+    List<String> allRequiredFeatures = Lists.newLinkedList(getAllRequiredFeatures(gadget));
+    List<String> allRequiredFeatuesAndLibs = Lists.newLinkedList(allRequiredFeatures);
+    allRequiredFeatuesAndLibs.addAll(externLibs);
     List<String> emptyList = Lists.newLinkedList();
     final FeatureRegistry.LookupResult externLr = createMock(FeatureRegistry.LookupResult.class);
     expect(externLr.getResources()).andReturn(externResources);
@@ -1156,9 +1275,19 @@ public class RenderingGadgetRewriterTest {
     expect(featureRegistry.getFeatureResources(same(gadgetContext), eq(gadgetFeatures),
         eq(emptyList))).andReturn(gadgetLr);
     expect(featureRegistry.getFeatures(eq(allFeatures)))
-        .andReturn(allFeatures);
+        .andReturn(allFeatures).anyTimes();
     expect(featureRegistry.getFeatures(eq(Sets.newHashSet(allFeaturesAndLibs))))
         .andReturn(allFeaturesAndLibs);
+    expect(featureRegistry.getFeatures(eq(ImmutableSet.of("*"))))
+    .andReturn(ImmutableList.<String>of()).anyTimes();
+    expect(featureRegistry.getFeatures(eq(ImmutableSet.of("hello"))))
+    .andReturn(ImmutableList.<String>of("hello")).anyTimes();
+    if(!allRequiredFeatures.equals(allFeatures)) {
+      expect(featureRegistry.getFeatures(eq(allRequiredFeatures)))
+      .andReturn(allRequiredFeatuesAndLibs).anyTimes();
+      expect(featureRegistry.getFeatures(eq(Sets.newHashSet(allRequiredFeatuesAndLibs))))
+      .andReturn(allRequiredFeatuesAndLibs).anyTimes();
+    }
     // Add CoreUtilConfigContributor behavior
     expect(featureRegistry.getAllFeatureNames()).
         andReturn(ImmutableSet.of("foo", "foo2", "core.util")).anyTimes();
