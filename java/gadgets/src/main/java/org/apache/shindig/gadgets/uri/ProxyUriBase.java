@@ -314,9 +314,6 @@ public class ProxyUriBase {
     case INVALID_VERSION:
       retRefresh = 0;
       break;
-    case INVALID_DOMAIN:
-      throw new GadgetException(GadgetException.Code.INVALID_PATH,
-          "Invalid path", HttpResponse.SC_BAD_REQUEST);
     case BAD_URI:
       throw new GadgetException(GadgetException.Code.INVALID_PATH,
           "Invalid path", HttpResponse.SC_BAD_REQUEST);

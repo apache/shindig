@@ -94,7 +94,7 @@ public class Renderer {
         return RenderingResults.mustRedirect(gadget.getCurrentView().getHref());
       }
 
-      if (!lockedDomainService.gadgetCanRender(context.getHost(), gadget, context.getContainer())) {
+      if (!lockedDomainService.isGadgetValidForHost(context.getHost(), gadget, context.getContainer())) {
         return RenderingResults.error("Invalid domain", HttpServletResponse.SC_BAD_REQUEST);
       }
 

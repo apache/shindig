@@ -116,6 +116,7 @@ public class UriManagerTestBase {
       featureMap.put(feature, null);
     }
     expect(gadget.getViewFeatures()).andReturn(featureMap).anyTimes();
+    expect(modulePrefs.getFeatures()).andReturn(featureMap).anyTimes();
 
     // User prefs
     Map<String, UserPref> specPrefMap = Maps.newLinkedHashMap();

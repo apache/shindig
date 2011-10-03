@@ -34,15 +34,15 @@ import org.junit.Test;
  */
 public class HashShaLockedDomainPrefixGeneratorTest {
   private HashShaLockedDomainPrefixGenerator generator = new HashShaLockedDomainPrefixGenerator();
-  
+
   @Test
   public void generate() {
     Uri uri = Uri.parse("http://www.apache.org/gadget.xml");
     assertEquals("e5bld32ce9pe5ln81rjhe0d0e1vao1ba", generator.getLockedDomainPrefix(uri));
   }
-  
+
   @Test(expected = NullPointerException.class)
   public void isNull() {
-    generator.getLockedDomainPrefix(null);
+    generator.getLockedDomainPrefix((Uri)null);
   }
 }

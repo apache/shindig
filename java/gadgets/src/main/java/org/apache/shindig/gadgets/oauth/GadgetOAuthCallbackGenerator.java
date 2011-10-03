@@ -116,7 +116,7 @@ public class GadgetOAuthCallbackGenerator implements OAuthCallbackGenerator {
 
       Uri activeUrl = Uri.parse(securityToken.getActiveUrl());
       String hostname = activeUrl.getAuthority();
-      if (!lockedDomainService.gadgetCanRender(hostname, gadget, securityToken.getContainer())) {
+      if (!lockedDomainService.isGadgetValidForHost(hostname, gadget, securityToken.getContainer())) {
         throw new OAuthRequestException(OAuthError.UNKNOWN_PROBLEM,
             "Gadget should not be using URL " + activeUrl);
       }

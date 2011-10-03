@@ -18,7 +18,6 @@
  */
 package org.apache.shindig.gadgets.uri;
 
-import static org.apache.shindig.gadgets.uri.DefaultIframeUriManager.tplKey;
 import static org.apache.shindig.gadgets.uri.DefaultIframeUriManager.IFRAME_BASE_PATH_KEY;
 import static org.apache.shindig.gadgets.uri.DefaultIframeUriManager.LOCKED_DOMAIN_FEATURE_NAME;
 import static org.apache.shindig.gadgets.uri.DefaultIframeUriManager.LOCKED_DOMAIN_REQUIRED_KEY;
@@ -26,20 +25,18 @@ import static org.apache.shindig.gadgets.uri.DefaultIframeUriManager.LOCKED_DOMA
 import static org.apache.shindig.gadgets.uri.DefaultIframeUriManager.SECURITY_TOKEN_ALWAYS_KEY;
 import static org.apache.shindig.gadgets.uri.DefaultIframeUriManager.SECURITY_TOKEN_FEATURE_NAME;
 import static org.apache.shindig.gadgets.uri.DefaultIframeUriManager.UNLOCKED_DOMAIN_KEY;
-
+import static org.apache.shindig.gadgets.uri.DefaultIframeUriManager.tplKey;
 import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.isA;
 import static org.easymock.EasyMock.replay;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.shindig.auth.BasicSecurityTokenCodec;
 import org.apache.shindig.auth.SecurityTokenCodec;
@@ -49,15 +46,17 @@ import org.apache.shindig.config.BasicContainerConfig;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.config.ContainerConfigException;
 import org.apache.shindig.gadgets.Gadget;
+import org.apache.shindig.gadgets.HashLockedDomainService;
+import org.apache.shindig.gadgets.LockedDomainService;
 import org.apache.shindig.gadgets.uri.UriCommon.Param;
-
 import org.junit.Test;
 
-import java.util.List;
-import java.util.Map;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 public class DefaultIframeUriManagerTest extends UriManagerTestBase {
-  private static final String LD_PREFIX = "LOCKED";
+  private static final String LD_PREFIX = "locked";
   private static final String IFRAME_PATH = "/gadgets/ifr";
   private static final String LD_SUFFIX = ".lockeddomain.com";
   private static final String LD_SUFFIX_ALT = ".altld.com";
@@ -68,6 +67,12 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
 
   private static final LockedDomainPrefixGenerator prefixGen = new LockedDomainPrefixGenerator() {
     public String getLockedDomainPrefix(Uri gadgetUri) {
+      return LD_PREFIX;
+    }
+
+    @Override
+    public String getLockedDomainPrefix(String token) {
+      // TODO Auto-generated method stub
       return LD_PREFIX;
     }
   };
@@ -124,7 +129,6 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
 
     assertFalse(manager.tokenForRenderingCalled());
     assertTrue(manager.schemeCalled());
-    assertTrue(manager.ldExclusionCalled());
     assertTrue(manager.addExtrasCalled());
   }
 
@@ -169,7 +173,6 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
 
     assertFalse(manager.tokenForRenderingCalled());
     assertTrue(manager.schemeCalled());
-    assertTrue(manager.ldExclusionCalled());
     assertTrue(manager.addExtrasCalled());
   }
 
@@ -226,7 +229,6 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
 
     assertFalse(managerTpl.tokenForRenderingCalled());
     assertTrue(managerTpl.schemeCalled());
-    assertTrue(managerTpl.ldExclusionCalled());
     assertTrue(managerTpl.addExtrasCalled());
   }
 
@@ -281,7 +283,6 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
 
     assertFalse(manager.tokenForRenderingCalled());
     assertFalse(manager.schemeCalled());
-    assertFalse(manager.ldExclusionCalled());
     assertTrue(manager.addExtrasCalled());
   }
 
@@ -337,7 +338,6 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
 
     assertFalse(managerTpl.tokenForRenderingCalled());
     assertFalse(managerTpl.schemeCalled());
-    assertFalse(managerTpl.ldExclusionCalled());
     assertTrue(managerTpl.addExtrasCalled());
   }
 
@@ -392,7 +392,8 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
 
     TestDefaultIframeUriManager manager = makeManager(
         false,   // security token beacon not required
-        false);  // locked domain not (always) required
+        false,   // locked domain not (always) required
+        true);
 
     Uri result = manager.makeRenderingUri(gadget);
     assertNotNull(result);
@@ -434,30 +435,7 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
 
     TestDefaultIframeUriManager manager = makeManager(
         false,   // security token beacon not required
-        true);   // locked domain always required
-    manager.setLockedDomainEnabled(false);  // but alas, not enabled in the 1st place
-
-    Uri result = manager.makeRenderingUri(gadget);
-    assertNotNull(result);
-
-    UriBuilder uri = new UriBuilder(result);
-    assertEquals("", uri.getScheme());
-    assertEquals(UNLOCKED_DOMAIN, uri.getAuthority());
-    assertEquals(IFRAME_PATH, uri.getPath());
-
-    // Basic sanity checks on params
-    assertEquals(TYPE_HTML_NUM_BASE_PARAMS, uri.getQueryParameters().size());
-    assertEquals(0, uri.getFragmentParameters().size());
-  }
-
-  @Test
-  public void ldNotAddedWithExclusion() throws Exception {
-    Gadget gadget = mockGadget(LOCKED_DOMAIN_FEATURE_NAME);
-
-    TestDefaultIframeUriManager manager = makeManager(
-        false,   // security token beacon not required
-        true);   // locked domain always required
-    manager.setLdExclusion(true);  // but alas, excluded
+        false);   // locked domain always required
 
     Uri result = manager.makeRenderingUri(gadget);
     assertNotNull(result);
@@ -552,52 +530,6 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
   }
 
   @Test
-  public void invalidLockedDomainValidSuffix() throws Exception {
-    Uri uri = makeValidationTestUri(LD_PREFIX + LD_SUFFIX_ALT, null);
-    DefaultIframeUriManager manager = makeManager(false, false);
-    assertEquals(UriStatus.INVALID_DOMAIN, manager.validateRenderingUri(uri));
-  }
-
-  @Test
-  public void invalidLockedDomainInvalidSuffix() throws Exception {
-    Uri uri = makeValidationTestUri(LD_PREFIX + ".bad." + LD_SUFFIX, null);
-    DefaultIframeUriManager manager = makeManager(false, false);
-    assertEquals(UriStatus.INVALID_DOMAIN, manager.validateRenderingUri(uri));
-  }
-
-  @Test
-  public void invalidLockedDomainValidSuffixExclusionBypass() throws Exception {
-    Uri uri = makeValidationTestUri(LD_PREFIX + LD_SUFFIX_ALT, null);
-    TestDefaultIframeUriManager manager = makeManager(false, false);
-    manager.setLdExclusion(true);
-    assertEquals(UriStatus.VALID_UNVERSIONED, manager.validateRenderingUri(uri));
-  }
-
-  @Test
-  public void invalidLockedDomainInvalidSuffixExclusionBypass() throws Exception {
-    Uri uri = makeValidationTestUri(LD_PREFIX + ".bad." + LD_SUFFIX, null);
-    TestDefaultIframeUriManager manager = makeManager(false, false);
-    manager.setLdExclusion(true);
-    assertEquals(UriStatus.VALID_UNVERSIONED, manager.validateRenderingUri(uri));
-  }
-
-  @Test
-  public void invalidLockedDomainValidSuffixLdDisabled() throws Exception {
-    Uri uri = makeValidationTestUri(LD_PREFIX + LD_SUFFIX_ALT, null);
-    DefaultIframeUriManager manager = makeManager(false, false);
-    manager.setLockedDomainEnabled(false);
-    assertEquals(UriStatus.VALID_UNVERSIONED, manager.validateRenderingUri(uri));
-  }
-
-  @Test
-  public void invalidLockedDomainInvalidSuffixLdDisabled() throws Exception {
-    Uri uri = makeValidationTestUri(LD_PREFIX + ".bad." + LD_SUFFIX, null);
-    DefaultIframeUriManager manager = makeManager(false, false);
-    manager.setLockedDomainEnabled(false);
-    assertEquals(UriStatus.VALID_UNVERSIONED, manager.validateRenderingUri(uri));
-  }
-
-  @Test
   public void validUnversionedNoVersioner() throws Exception {
     Uri uri = makeValidationTestUri(LD_PREFIX + LD_SUFFIX, "version");
     DefaultIframeUriManager manager = makeManager(false, false);
@@ -642,10 +574,10 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
             .put(LOCKED_DOMAIN_REQUIRED_KEY, true)
             .build())
         .commit();
-    TestDefaultIframeUriManager manager = new TestDefaultIframeUriManager(config);
+    LockedDomainService ldService = new HashLockedDomainService(config, true, prefixGen);
+    TestDefaultIframeUriManager manager = new TestDefaultIframeUriManager(config, ldService);
 
     Uri testUri = Uri.parse("http://foobar" + LD_SUFFIX + "/?url=http://example.com");
-    assertEquals(UriStatus.INVALID_DOMAIN, manager.validateRenderingUri(testUri));
 
     config.newTransaction().addContainer(ImmutableMap
         .<String, Object>builder()
@@ -672,7 +604,8 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
                     .build())
                 .commit();
 
-    TestDefaultIframeUriManager manager = new TestDefaultIframeUriManager(config);
+    LockedDomainService ldService = new HashLockedDomainService(config, false, prefixGen);
+    TestDefaultIframeUriManager manager = new TestDefaultIframeUriManager(config, ldService);
 
     Uri renderingUri = manager.makeRenderingUri(gadget);
     assertNotNull(renderingUri);
@@ -701,6 +634,10 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
 
   private TestDefaultIframeUriManager makeManager(boolean alwaysToken, boolean ldRequired)
       throws ContainerConfigException {
+    return makeManager(alwaysToken, ldRequired, ldRequired ? true: false);
+  }
+  private TestDefaultIframeUriManager makeManager(boolean alwaysToken, boolean ldRequired, boolean enabled)
+      throws ContainerConfigException {
     String altContainer = CONTAINER + "-alt";
     ContainerConfig config = new BasicContainerConfig();
     config
@@ -726,7 +663,8 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
             .put(LOCKED_DOMAIN_SUFFIX_KEY, LD_SUFFIX_ALT)
             .build())
         .commit();
-    return new TestDefaultIframeUriManager(config);
+    LockedDomainService ldService = new HashLockedDomainService(config, enabled, prefixGen);
+    return new TestDefaultIframeUriManager(config, ldService);
   }
 
   private IframeUriManager.Versioner mockVersioner(String version, boolean valid) {
@@ -746,21 +684,14 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
   }
 
   private static final class TestDefaultIframeUriManager extends DefaultIframeUriManager {
-    private boolean ldExclusion = false;
-    private boolean ldExclusionCalled = false;
     private String scheme = "";
     private boolean schemeCalled = false;
     private boolean tokenForRendering = true;
     private boolean tokenForRenderingCalled = false;
     private boolean addExtrasCalled = false;
 
-    private TestDefaultIframeUriManager(ContainerConfig config) {
-      super(config, prefixGen, tokenCodec);
-    }
-
-    private TestDefaultIframeUriManager setLdExclusion(boolean ldExclusion) {
-      this.ldExclusion = ldExclusion;
-      return this;
+    private TestDefaultIframeUriManager(ContainerConfig config, LockedDomainService ldService) {
+      super(config, ldService, tokenCodec);
     }
 
     private TestDefaultIframeUriManager setScheme(String scheme) {
@@ -771,17 +702,6 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
     private TestDefaultIframeUriManager setTokenForRendering(boolean tokenForRendering) {
       this.tokenForRendering = tokenForRendering;
       return this;
-    }
-
-    /** Overridden methods for custom behavior */
-    @Override
-    protected boolean lockedDomainExclusion() {
-      this.ldExclusionCalled = true;
-      return ldExclusion;
-    }
-
-    private boolean ldExclusionCalled() {
-      return ldExclusionCalled;
     }
 
     @Override

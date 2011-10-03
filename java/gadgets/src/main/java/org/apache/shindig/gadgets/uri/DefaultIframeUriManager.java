@@ -18,35 +18,33 @@
  */
 package org.apache.shindig.gadgets.uri;
 
-import com.google.common.collect.ImmutableList;
-import com.google.inject.ImplementedBy;
-import com.google.inject.Inject;
-import com.google.inject.name.Named;
+import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.auth.SecurityTokenCodec;
 import org.apache.shindig.auth.SecurityTokenException;
+import org.apache.shindig.common.servlet.Authority;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
+import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.LockedDomainService;
 import org.apache.shindig.gadgets.UserPrefs;
 import org.apache.shindig.gadgets.spec.UserPref;
 import org.apache.shindig.gadgets.spec.View;
 import org.apache.shindig.gadgets.uri.UriCommon.Param;
 
-import org.apache.shindig.common.servlet.Authority;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import com.google.inject.ImplementedBy;
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
 
 /**
  * Default implementation of an IframeUriManager which references the /ifr endpoint.
  */
-public class DefaultIframeUriManager implements IframeUriManager, ContainerConfig.ConfigObserver {
+public class DefaultIframeUriManager implements IframeUriManager {
   // By default, fills in values that could otherwise be templated for client population.
   private static final boolean DEFAULT_USE_TEMPLATES = false;
   static final String IFRAME_BASE_PATH_KEY = "gadgets.uri.iframe.basePath";
@@ -56,44 +54,21 @@ public class DefaultIframeUriManager implements IframeUriManager, ContainerConfi
   public static final String SECURITY_TOKEN_ALWAYS_KEY = "gadgets.uri.iframe.alwaysAppendSecurityToken";
   public static final String LOCKED_DOMAIN_FEATURE_NAME = "locked-domain";
   public static final String SECURITY_TOKEN_FEATURE_NAME = "security-token";
-  private boolean ldEnabled = true;
   private TemplatingSignal tplSignal = null;
   private Versioner versioner = null;
   private Authority authority;
 
   private final ContainerConfig config;
-  private final LockedDomainPrefixGenerator ldGen;
+  private final LockedDomainService ldService;
   private final SecurityTokenCodec securityTokenCodec;
-
-  private List<String> ldSuffixes;
 
   @Inject
   public DefaultIframeUriManager(ContainerConfig config,
-                                 LockedDomainPrefixGenerator ldGen,
+                                 LockedDomainService ldService,
                                  SecurityTokenCodec securityTokenCodec) {
     this.config = config;
-    this.ldGen = ldGen;
+    this.ldService = ldService;
     this.securityTokenCodec = securityTokenCodec;
-
-    if (ldEnabled) {
-      config.addConfigObserver(this, true);
-    }
-  }
-
-  public void containersChanged(
-      ContainerConfig config, Collection<String> changed, Collection<String> removed) {
-    Collection<String> containers = config.getContainers();
-    ImmutableList.Builder<String> ldSuffixes = ImmutableList.builder();
-    for (String container : containers) {
-      ldSuffixes.add(getReqVal(container, LOCKED_DOMAIN_SUFFIX_KEY));
-    }
-    this.ldSuffixes = ldSuffixes.build();
-  }
-
-  @Inject(optional = true)
-  public void setLockedDomainEnabled(
-      @Named("shindig.locked-domain.enabled") Boolean ldEnabled) {
-    this.ldEnabled = ldEnabled;
   }
 
   @Inject(optional = true)
@@ -132,13 +107,14 @@ public class DefaultIframeUriManager implements IframeUriManager, ContainerConfi
       uri.setPath(getReqVal(container, IFRAME_BASE_PATH_KEY));
 
       // 2. Set host/authority.
-      String host = "//";
-      if (usingLockedDomain(gadget, container)) {
-        host += ldGen.getLockedDomainPrefix(gadget.getSpec().getUrl()) +
-            getReqVal(container, LOCKED_DOMAIN_SUFFIX_KEY);
-      } else {
-        host += getReqVal(container, UNLOCKED_DOMAIN_KEY);
+      String ldDomain;
+      try {
+        ldDomain = ldService.getLockedDomainForGadget(gadget, container);
+      } catch (GadgetException e) {
+        throw new RuntimeException(e);
       }
+      String host = "//" +
+        (ldDomain == null ? getReqVal(container, UNLOCKED_DOMAIN_KEY) : ldDomain);
 
       Uri gadgetUri = Uri.parse(host);
       if (gadgetUri.getAuthority() == null
@@ -255,35 +231,6 @@ public class DefaultIframeUriManager implements IframeUriManager, ContainerConfi
       container = ContainerConfig.DEFAULT_CONTAINER;
     }
 
-    // Validate domain.
-    String host = uri.getAuthority().toLowerCase();
-    String gadgetLdPrefix = ldGen.getLockedDomainPrefix(gadgetUri).toLowerCase();
-
-    // If the uri starts with gadget's locked domain prefix, then the suffix
-    // must be an exact match as well.
-    // Lower-case to prevent casing from being relevant.
-    if (ldEnabled && !lockedDomainExclusion()) {
-      if (host.startsWith(gadgetLdPrefix)) {
-        // Strip off prefix.
-        host = host.substring(gadgetLdPrefix.length());
-        String ldSuffix = getReqVal(container, LOCKED_DOMAIN_SUFFIX_KEY);
-        if (!ldSuffix.equalsIgnoreCase(host)) {
-          return UriStatus.INVALID_DOMAIN;
-        }
-      } else {
-        // We need to also ensure that the URI isn't that of another valid
-        // locked-domain gadget. We do this test second as it's less efficient.
-        // Also, since we've already tested the "valid" locked domain case
-        // we can simply say the URI is invalid if it ends with any valid
-        // locked domain suffix.
-        for (String ldSuffix : ldSuffixes) {
-          if (host.endsWith(ldSuffix)) {
-            return UriStatus.INVALID_DOMAIN;
-          }
-        }
-      }
-    }
-
     String version = uri.getQueryParameter(Param.VERSION.getKey());
     if (versioner == null || version == null) {
       return UriStatus.VALID_UNVERSIONED;
@@ -294,12 +241,6 @@ public class DefaultIframeUriManager implements IframeUriManager, ContainerConfi
 
   public static String tplKey(String key) {
     return '%' + key + '%';
-  }
-
-  /** Overridable methods for custom behavior */
-  protected boolean lockedDomainExclusion() {
-    // Subclass/override this to support a custom notion of dev-mode, other exclusions.
-    return false;
   }
 
   protected String getScheme(Gadget gadget, String container) {
@@ -330,22 +271,6 @@ public class DefaultIframeUriManager implements IframeUriManager, ContainerConfi
     } else {
       uri.addFragmentParameter(key, value);
     }
-  }
-
-  private boolean usingLockedDomain(Gadget gadget, String container) {
-    if (!ldEnabled) {
-      return false;
-    }
-
-    if (lockedDomainExclusion()) {
-      return false;
-    }
-
-    if (config.getBool(container, LOCKED_DOMAIN_REQUIRED_KEY)) {
-      return true;
-    }
-
-    return gadget.getAllFeatures().contains(LOCKED_DOMAIN_FEATURE_NAME);
   }
 
   private String getReqVal(String container, String key) {

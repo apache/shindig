@@ -56,11 +56,16 @@
 "gadgets.parent" : null,
 
 // Should all gadgets be forced on to a locked domain?
-"gadgets.lockedDomainRequired" : false,
+"gadgets.uri.iframe.lockedDomainRequired" : false,
 
 // DNS domain on which gadgets should render.
-"gadgets.lockedDomainSuffix" : "-a.example.com:8080",
-	
+// Default Uri config: these must be overridden - specified here for testing purposes
+"gadgets.uri.iframe.unlockedDomain": "${Cur['defaultShindigTestAuthority']}",
+// When setting up the server to enable locked domains, you should set this to something that does not
+// attempt to use the authority at all.  Ideally it would be another hostname that points to this server.
+// Example: unlockedDomain="shindig.example.com" lockedDomainSuffix="-locked.gadgets.example.com"
+"gadgets.uri.iframe.lockedDomainSuffix": "${Cur['defaultShindigTestAuthority']}",
+
 // Origins for CORS requests and/or Referer validation
 // Indicate a set of origins or an entry with * to indicate that all origins are allowed
 "gadgets.parentOrigins" : ["*"],
@@ -76,11 +81,6 @@
 // No locked domain special cases, but jsUriTemplate must
 // never conflict with a lockedDomainSuffix.
 "gadgets.jsUriTemplate" : "http://%host%${CONTEXT_ROOT}/gadgets/js/%js%",
-
-//New configuration for iframeUri generation:
-"gadgets.uri.iframe.lockedDomainSuffix" :  "-a.example.com:8080",
-"gadgets.uri.iframe.unlockedDomain" : "www.example.com:8080",
-"gadgets.uri.iframe.basePath" : "${CONTEXT_ROOT}/gadgets/ifr",
 
 "gadgets.uri.js.host" : "http://www.example.com/",
 "gadgets.uri.js.path" : "${CONTEXT_ROOT}/gadgets/js",
@@ -113,10 +113,6 @@
 
 // Authority (host:port without scheme) for the proxy and concat servlets.
 "defaultShindigProxyConcatAuthority":"%authority%",
-
-// Default Uri config: these must be overridden - specified here for testing purposes
-"gadgets.uri.iframe.unlockedDomain": "${Cur['defaultShindigTestAuthority']}",
-"gadgets.uri.iframe.lockedDomainSuffix": "${Cur['defaultShindigTestAuthority']}",
 
 // Default Js Uri config: also must be overridden.
 "gadgets.uri.js.host": "//${Cur['defaultShindigTestAuthority']}",

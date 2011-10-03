@@ -33,13 +33,52 @@ osapi.container.Container.addMixin('SharedScriptFrame', function(container) {
   var siteMap = {};
 
   /**
+   * Generates a key to hash the script frame by for this gadget.  If the
+   * gadget uses locked domains and specifies participants in the locked domain,
+   * those other participants will be figured into this key so that they in turn
+   * generate the same key.
+   *
+   * @param {!string} url The gadget URL that requested the script frame.
+   * @param {?Object} ldFeature The feature segment of the gadget for the
+   *   locked-domain feature.
+   */
+  var getFrameKey = function(url, ldFeature) {
+    var participants, filtered = {};
+    filtered[url.toLowerCase()] = 1;
+
+    if (ldFeature && ldFeature.params && (participants = ldFeature.params.participant)) {
+      if (typeof(participants) == 'string') {
+        filtered[participants.toLowerCase()] = 1;
+      }
+      else {
+        for (var i = 0, participant; participant = participants[i]; i++) {
+          filtered[participant.toLowerCase()] = 1;
+        }
+      }
+    }
+
+    var ret = [];
+    for (i in filtered) {
+      ret.push(i);
+    }
+    return ret.sort().join('');
+  }
+
+  /**
    * Creates a new shared script frame gadget instance on the page.
    *
    * @param {!string} url The gadget URL that requested the script frame.
    * @param {!Object} feature The feature segment of the gadget for the
    *   shared-script-frame feature.
+   * @param {?Object} ldFeature The feature segment of the gadget for the
+   *   locked-domain feature.
    */
-  var createScriptFrame = function(url, feature) {
+  var createScriptFrame = function(url, feature, ldFeature) {
+    var key = getFrameKey(url, ldFeature);
+    if (siteMap[key]) {
+      return;
+    }
+
     var view = osapi.container.GadgetSite.DEFAULT_VIEW_;
     if (feature.params && feature.params.view) {
       view = feature.params.view[0];
@@ -49,7 +88,7 @@ osapi.container.Container.addMixin('SharedScriptFrame', function(container) {
     elem.style.display = 'none';
     document.body.appendChild(elem);
 
-    var site = siteMap[url] = container.newGadgetSite(elem);
+    var site = siteMap[key] = container.newGadgetSite(elem);
     var params = {};
     params[osapi.container.RenderParam.VIEW] = view;
     container.navigateGadget(site, url, undefined, params);
@@ -64,9 +103,10 @@ osapi.container.Container.addMixin('SharedScriptFrame', function(container) {
    * @returns {?string} The name of the script frame
    */
   var getScriptFrameName = function(rpcArgs) {
-    var fromURL = rpcArgs.gs.getActiveGadgetHolder().getUrl();
+    var info = rpcArgs.gs.getActiveGadgetHolder().getGadgetInfo(),
+        key = getFrameKey(info.url, info.modulePrefs.features['locked-domain']);
 
-    var name, scriptSite = siteMap[fromURL];
+    var name, scriptSite = siteMap[key];
     if (scriptSite) {
       name = scriptSite.getActiveGadgetHolder().getIframeId();
     }
@@ -91,9 +131,10 @@ osapi.container.Container.addMixin('SharedScriptFrame', function(container) {
     var url = metadata.url;
     try {
       var feature = metadata.modulePrefs.features['shared-script-frame'];
+      var ldFeature = metadata.modulePrefs.features['locked-domain'];
     } catch(e) {}
-    if (feature && !siteMap[url]) {
-      createScriptFrame(url, feature);
+    if (feature) {
+      createScriptFrame(url, feature, ldFeature);
     }
   };
 

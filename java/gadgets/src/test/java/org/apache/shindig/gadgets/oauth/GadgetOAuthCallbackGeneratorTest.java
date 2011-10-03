@@ -47,7 +47,7 @@ public class GadgetOAuthCallbackGeneratorTest {
 
   private static final String MAKE_REQUEST_URL = "http://renderinghost/gadgets/makeRequest";
   private static final Uri DEST_URL = Uri.parse("http://www.example.com/destination");
-  
+
   private IMocksControl control;
   private Processor processor;
   private LockedDomainService lockedDomainService;
@@ -57,7 +57,7 @@ public class GadgetOAuthCallbackGeneratorTest {
   private Gadget gadget;
   private OAuthFetcherConfig fetcherConfig;
   private OAuthResponseParams responseParams;
-  
+
   @Before
   public void setUp() throws Exception {
     control = EasyMock.createNiceControl();
@@ -71,7 +71,7 @@ public class GadgetOAuthCallbackGeneratorTest {
     fetcherConfig = new OAuthFetcherConfig(null, null, null, null, false);
     responseParams = new OAuthResponseParams(null, null, null);
   }
-  
+
   private GadgetOAuthCallbackGenerator getGenerator() {
     return new GadgetOAuthCallbackGenerator(processor, lockedDomainService, oauthUriManager,
         stateCrypter);
@@ -84,21 +84,21 @@ public class GadgetOAuthCallbackGeneratorTest {
     request.setOAuthArguments(new OAuthArguments());
     expect(processor.process(eqContext(securityToken, request.getOAuthArguments())))
         .andReturn(gadget);
-    expect(lockedDomainService.gadgetCanRender("renderinghost", gadget, "default"))
+    expect(lockedDomainService.isGadgetValidForHost("renderinghost", gadget, "default"))
         .andReturn(false);
-    
+
     control.replay();
-    
+
     try {
       getGenerator().generateCallback(fetcherConfig, "base", request, responseParams);
       fail("Should have thrown");
     } catch (OAuthRequestException e) {
       assertEquals(OAuthError.UNKNOWN_PROBLEM.name(), e.getError());
     }
-    
+
     control.verify();
   }
-  
+
   @Test
   public void testBadGadget() throws Exception {
     HttpRequest request = new HttpRequest(DEST_URL);
@@ -106,19 +106,19 @@ public class GadgetOAuthCallbackGeneratorTest {
     request.setOAuthArguments(new OAuthArguments());
     expect(processor.process(eqContext(securityToken, request.getOAuthArguments())))
         .andThrow(new ProcessingException("doh", HttpServletResponse.SC_BAD_REQUEST));
-    
+
     control.replay();
-    
+
     try {
       getGenerator().generateCallback(fetcherConfig, "base", request, responseParams);
       fail("Should have thrown");
     } catch (OAuthRequestException e) {
       assertEquals(OAuthError.UNKNOWN_PROBLEM.name(), e.getError());
     }
-    
+
     control.verify();
   }
-  
+
   @Test
   public void testGenerateUrl_schemeRelative() throws Exception {
     HttpRequest request = new HttpRequest(DEST_URL);
@@ -126,13 +126,13 @@ public class GadgetOAuthCallbackGeneratorTest {
     request.setOAuthArguments(new OAuthArguments());
     expect(processor.process(eqContext(securityToken, request.getOAuthArguments())))
         .andReturn(gadget);
-    expect(lockedDomainService.gadgetCanRender("renderinghost", gadget, "default"))
+    expect(lockedDomainService.isGadgetValidForHost("renderinghost", gadget, "default"))
         .andReturn(true);
     expect(oauthUriManager.makeOAuthCallbackUri("default", "renderinghost"))
         .andReturn(Uri.parse("//renderinghost/final/callback"));
-    
+
     control.replay();
-    
+
     String callback = getGenerator().generateCallback(fetcherConfig, "http://base/basecallback",
         request, responseParams);
     Uri callbackUri = Uri.parse(callback);
@@ -142,10 +142,10 @@ public class GadgetOAuthCallbackGeneratorTest {
     OAuthCallbackState state = new OAuthCallbackState(stateCrypter,
         callbackUri.getQueryParameter("cs"));
     assertEquals("http://renderinghost/final/callback", state.getRealCallbackUrl());
-    
+
     control.verify();
   }
-  
+
   @Test
   public void testGenerateUrl_absolute() throws Exception {
     HttpRequest request = new HttpRequest(DEST_URL);
@@ -153,13 +153,13 @@ public class GadgetOAuthCallbackGeneratorTest {
     request.setOAuthArguments(new OAuthArguments());
     expect(processor.process(eqContext(securityToken, request.getOAuthArguments())))
         .andReturn(gadget);
-    expect(lockedDomainService.gadgetCanRender("renderinghost", gadget, "default"))
+    expect(lockedDomainService.isGadgetValidForHost("renderinghost", gadget, "default"))
         .andReturn(true);
     expect(oauthUriManager.makeOAuthCallbackUri("default", "renderinghost"))
         .andReturn(Uri.parse("https://renderinghost/final/callback"));
-    
+
     control.replay();
-    
+
     String callback = getGenerator().generateCallback(fetcherConfig, "http://base/basecallback",
         request, responseParams);
     Uri callbackUri = Uri.parse(callback);
@@ -169,10 +169,10 @@ public class GadgetOAuthCallbackGeneratorTest {
     OAuthCallbackState state = new OAuthCallbackState(stateCrypter,
         callbackUri.getQueryParameter("cs"));
     assertEquals("https://renderinghost/final/callback", state.getRealCallbackUrl());
-    
+
     control.verify();
   }
-  
+
   @Test
   public void testGenerateUrl_otherQueryParams() throws Exception {
     HttpRequest request = new HttpRequest(DEST_URL);
@@ -180,13 +180,13 @@ public class GadgetOAuthCallbackGeneratorTest {
     request.setOAuthArguments(new OAuthArguments());
     expect(processor.process(eqContext(securityToken, request.getOAuthArguments())))
         .andReturn(gadget);
-    expect(lockedDomainService.gadgetCanRender("renderinghost", gadget, "default"))
+    expect(lockedDomainService.isGadgetValidForHost("renderinghost", gadget, "default"))
         .andReturn(true);
     expect(oauthUriManager.makeOAuthCallbackUri("default", "renderinghost"))
         .andReturn(Uri.parse("https://renderinghost/final/callback"));
-    
+
     control.replay();
-    
+
     String callback = getGenerator().generateCallback(fetcherConfig,
         "http://base/basecallback?foo=bar%20baz", request, responseParams);
     Uri callbackUri = Uri.parse(callback);
@@ -197,10 +197,10 @@ public class GadgetOAuthCallbackGeneratorTest {
     OAuthCallbackState state = new OAuthCallbackState(stateCrypter,
         callbackUri.getQueryParameter("cs"));
     assertEquals("https://renderinghost/final/callback", state.getRealCallbackUrl());
-    
+
     control.verify();
   }
-  
+
   @Test
   public void testGenerateUrl_noGadgetDomainCallback() throws Exception {
     HttpRequest request = new HttpRequest(DEST_URL);
@@ -208,19 +208,19 @@ public class GadgetOAuthCallbackGeneratorTest {
     request.setOAuthArguments(new OAuthArguments());
     expect(processor.process(eqContext(securityToken, request.getOAuthArguments())))
         .andReturn(gadget);
-    expect(lockedDomainService.gadgetCanRender("renderinghost", gadget, "default"))
+    expect(lockedDomainService.isGadgetValidForHost("renderinghost", gadget, "default"))
         .andReturn(true);
     expect(oauthUriManager.makeOAuthCallbackUri("default", "renderinghost"))
         .andReturn(null);
-    
+
     control.replay();
-    
+
     assertNull(getGenerator().generateCallback(fetcherConfig,
         "http://base/basecallback?foo=bar%20baz", request, responseParams));
-    
+
     control.verify();
   }
-  
+
   private GadgetContext eqContext(SecurityToken securityToken, OAuthArguments arguments) {
     reportMatcher(new GadgetContextMatcher(securityToken, arguments));
     return null;

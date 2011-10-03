@@ -38,12 +38,19 @@ import org.apache.shindig.common.servlet.HttpUtilTest;
 import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.config.ContainerConfig;
+import org.apache.shindig.config.JsonContainerConfig;
+import org.apache.shindig.expressions.Expressions;
 import org.apache.shindig.gadgets.AuthType;
+import org.apache.shindig.gadgets.Gadget;
+import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.HashLockedDomainService;
+import org.apache.shindig.gadgets.LockedDomainService;
 import org.apache.shindig.gadgets.admin.GadgetAdminStore;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
+import org.apache.shindig.gadgets.uri.HashShaLockedDomainPrefixGenerator;
 import org.apache.shindig.gadgets.uri.UriCommon.Param;
 import org.easymock.Capture;
 import org.easymock.IAnswer;
@@ -65,9 +72,11 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
   private static final SecurityToken DUMMY_TOKEN = new FakeGadgetToken();
 
   private final GadgetAdminStore gadgetAdminStore = mock(GadgetAdminStore.class);
-  private final MakeRequestHandler handler
-      = new MakeRequestHandler(pipeline, rewriterRegistry, feedProcessorProvider,
-              gadgetAdminStore);
+  private ContainerConfig containerConfig;
+  private LockedDomainService ldService;
+  private MakeRequestHandler handler;
+  private Gadget gadget = mock(Gadget.class);
+  private Capture<GadgetContext> context = new Capture<GadgetContext>();
 
   private void expectGetAndReturnBody(String response) throws Exception {
     expectGetAndReturnBody(AuthType.NONE, response);
@@ -102,10 +111,25 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
   }
 
   @Before
-  public void setUp() {
+  public void setUp() throws Exception {
     expect(request.getMethod()).andReturn("POST").anyTimes();
     expect(request.getParameter(Param.URL.getKey()))
         .andReturn(REQUEST_URL.toString()).anyTimes();
+
+
+    JSONObject config = new JSONObject('{' + ContainerConfig.DEFAULT_CONTAINER + ':' +
+        "{'gadgets.container': ['default']," +
+         "'gadgets.features':{views:" +
+           "{aliased: {aliases: ['some-alias', 'alias']}}" +
+         "}}}");
+
+    containerConfig = new JsonContainerConfig(config, Expressions.forTesting());
+    ldService = new HashLockedDomainService(containerConfig, false, new HashShaLockedDomainPrefixGenerator());
+    handler = new MakeRequestHandler(pipeline, rewriterRegistry, feedProcessorProvider, gadgetAdminStore, processor, ldService);
+
+    expect(request.getParameter(Param.GADGET.getKey())).andReturn("http://some/gadget.xml").anyTimes();
+    expect(processor.process(capture(context))).andReturn(gadget).anyTimes();
+    expect(gadgetAdminStore.isWhitelisted(isA(String.class), isA(String.class))).andReturn(true);
   }
 
   @Test
@@ -177,7 +201,7 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
 
   @Test
   public void GetRequestWithNonWhitelistedGadget() throws Exception {
-    expect(request.getParameter(Param.GADGET.getKey())).andReturn("http://some/gadget.xml").anyTimes();
+    reset(gadgetAdminStore);
     expect(gadgetAdminStore.isWhitelisted(isA(String.class), isA(String.class))).andReturn(false);
     replay();
     boolean exceptionThrown = false;
@@ -190,22 +214,6 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
     }
     assertTrue(exceptionThrown);
     verify();
-  }
-
-  @Test
-  public void GetRequestWithWhitelistedGadget() throws Exception {
-    expect(request.getParameter(Param.GADGET.getKey())).andReturn("http://some/gadget.xml").anyTimes();
-    expect(gadgetAdminStore.isWhitelisted(isA(String.class), isA(String.class)))
-    .andReturn(true);
-    expectGetAndReturnBody(RESPONSE_BODY);
-    replay();
-
-    handler.fetch(request, recorder);
-
-    JSONObject results = extractJsonFromResponse();
-    assertEquals(HttpResponse.SC_OK, results.getInt("rc"));
-    assertEquals(RESPONSE_BODY, results.get("body"));
-    assertTrue(rewriter.responseWasRewritten());
   }
 
   @Test
@@ -241,7 +249,7 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
     assertEquals(RESPONSE_BODY, results.get("body"));
     assertTrue(rewriter.responseWasRewritten());
   }
-  
+
   @Test
   public void testFetchAtom1Feed() throws Exception {
     String txt = "<?xml version='1.0' encoding='utf-8'?>" +
@@ -273,7 +281,7 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
     assertEquals("feed", feed.getString("Title"));
     assertEquals("author@example.org", feed.getString("Author"));
     assertEquals("http://example.org/file", feed.getString("URL"));
-    
+
     JSONObject entry = feed.getJSONArray("Entry").getJSONObject(0);
     assertEquals("howdy", entry.getString("Title"));
     assertEquals("http://example.org/edit/entity1ID", entry.getString("Link"));
@@ -387,7 +395,6 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
 
   @Test
   public void testSignedGetRequest() throws Exception {
-
     expect(request.getAttribute(AuthInfoUtil.Attribute.SECURITY_TOKEN.getId()))
         .andReturn(DUMMY_TOKEN).atLeastOnce();
     expect(request.getParameter(MakeRequestHandler.AUTHZ_PARAM))
@@ -619,7 +626,7 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
     expect(request.getParameter(Param.REFRESH.getKey())).andReturn("30").anyTimes();
     replay();
 
-    // not sure why but the following line seems to help this test past deterministically 
+    // not sure why but the following line seems to help this test past deterministically
     System.out.println("request started at " + HttpUtilTest.testStartTime);
     MakeRequestHandler.setResponseHeaders(request, recorder, results);
     HttpUtilTest.checkCacheControlHeaders(HttpUtilTest.testStartTime, recorder, 30, false);

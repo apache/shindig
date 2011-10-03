@@ -30,6 +30,13 @@ import com.google.inject.ImplementedBy;
 @ImplementedBy(HashLockedDomainService.class)
 public interface LockedDomainService {
   /**
+   * Check whether locked domains feature is enabled on the server.
+   *
+   * @return If locked domains is enabled on the server.
+   */
+  boolean isEnabled();
+
+  /**
    * @return True if the host is safe for use with the open proxy.
    */
   boolean isSafeForOpenProxy(String host);
@@ -43,7 +50,7 @@ public interface LockedDomainService {
    * @param container container
    * @return true if the gadget can render
    */
-  boolean gadgetCanRender(String host, Gadget gadget, String container);
+  boolean isGadgetValidForHost(String host, Gadget gadget, String container);
 
   /**
    * Calculate the locked domain for a particular gadget on a particular
@@ -54,6 +61,23 @@ public interface LockedDomainService {
    * @return the host name on which the gadget should render, or null if locked domain should not
    * be used to render this gadget.
    */
-  String getLockedDomainForGadget(Gadget gadget, String container);
+  String getLockedDomainForGadget(Gadget gadget, String container) throws GadgetException;
 
+  /**
+   * Check whether a host is using a locked domain.
+   *
+   * @param host Host to inspect for locked domain suffix.
+   * @return If the supplied host is using a locked domain.
+   *         Returns false if locked domains are not enabled on the server.
+   */
+  boolean isHostUsingLockedDomain(String host);
+
+  /**
+   * Generates a locked domain prefix given a gadget Uri.
+   *
+   * @param gadget The uri of the gadget.
+   * @return A locked domain prefix for the gadgetUri.
+   *         Returns empty string if locked domains are not enabled on the server.
+   */
+  String getLockedDomainPrefix(Gadget gadget) throws GadgetException;
 }

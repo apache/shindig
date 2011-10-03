@@ -275,7 +275,7 @@ public class RendererTest {
     protected FakeLockedDomainService() {
     }
 
-    public boolean gadgetCanRender(String host, Gadget gadget, String container) {
+    public boolean isGadgetValidForHost(String host, Gadget gadget, String container) {
       wasChecked = true;
       return canRender;
     }
@@ -286,6 +286,24 @@ public class RendererTest {
 
     public boolean isSafeForOpenProxy(String host) {
       return false;
+    }
+
+    @Override
+    public boolean isEnabled() {
+      // TODO Auto-generated method stub
+      return false;
+    }
+
+    @Override
+    public boolean isHostUsingLockedDomain(String host) {
+      // TODO Auto-generated method stub
+      return false;
+    }
+
+    @Override
+    public String getLockedDomainPrefix(Gadget gadget) {
+      // TODO Auto-generated method stub
+      return null;
     }
   }
 }

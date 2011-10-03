@@ -18,21 +18,22 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
+import java.util.Arrays;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.shindig.common.EasyMockTestCase;
 import org.apache.shindig.common.servlet.HttpServletResponseRecorder;
 import org.apache.shindig.gadgets.FeedProcessor;
 import org.apache.shindig.gadgets.FeedProcessorImpl;
 import org.apache.shindig.gadgets.LockedDomainService;
 import org.apache.shindig.gadgets.http.RequestPipeline;
+import org.apache.shindig.gadgets.process.Processor;
 import org.apache.shindig.gadgets.rewrite.CaptureRewriter;
 import org.apache.shindig.gadgets.rewrite.DefaultResponseRewriterRegistry;
 import org.apache.shindig.gadgets.rewrite.ResponseRewriter;
 import org.apache.shindig.gadgets.rewrite.ResponseRewriterRegistry;
-
-import java.util.Arrays;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import com.google.inject.Provider;
 
@@ -51,6 +52,7 @@ public abstract class ServletTestFixture extends EasyMockTestCase {
   public final HttpServletResponse response = mock(HttpServletResponse.class);
   public final HttpServletResponseRecorder recorder = new HttpServletResponseRecorder(response);
   public final LockedDomainService lockedDomainService = mock(LockedDomainService.class);
+  public final Processor processor = mock(Processor.class);
   public final Provider<FeedProcessor> feedProcessorProvider = new Provider<FeedProcessor>() {
     public FeedProcessor get() {
       return new FeedProcessorImpl();

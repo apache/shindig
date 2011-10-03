@@ -37,13 +37,18 @@ import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.AuthType;
 import org.apache.shindig.gadgets.FeedProcessor;
 import org.apache.shindig.gadgets.FetchResponseUtils;
+import org.apache.shindig.gadgets.Gadget;
+import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.GadgetException.Code;
+import org.apache.shindig.gadgets.LockedDomainService;
 import org.apache.shindig.gadgets.admin.GadgetAdminStore;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.RequestPipeline;
 import org.apache.shindig.gadgets.oauth.OAuthArguments;
+import org.apache.shindig.gadgets.process.ProcessingException;
+import org.apache.shindig.gadgets.process.Processor;
 import org.apache.shindig.gadgets.rewrite.ResponseRewriterList.RewriteFlow;
 import org.apache.shindig.gadgets.rewrite.ResponseRewriterRegistry;
 import org.apache.shindig.gadgets.rewrite.RewriterRegistry;
@@ -78,17 +83,24 @@ public class MakeRequestHandler {
   private final ResponseRewriterRegistry contentRewriterRegistry;
   private final Provider<FeedProcessor> feedProcessorProvider;
   private final GadgetAdminStore gadgetAdminStore;
+  private final Processor processor;
+  private final LockedDomainService lockedDomainService;
 
   @Inject
   public MakeRequestHandler(RequestPipeline requestPipeline,
       @RewriterRegistry(rewriteFlow = RewriteFlow.DEFAULT)
       ResponseRewriterRegistry contentRewriterRegistry,
       Provider<FeedProcessor> feedProcessorProvider,
-      GadgetAdminStore gadgetAdminStore) {
+      GadgetAdminStore gadgetAdminStore,
+      Processor processor,
+      LockedDomainService lockedDomainService) {
+
     this.requestPipeline = requestPipeline;
     this.contentRewriterRegistry = contentRewriterRegistry;
     this.feedProcessorProvider = feedProcessorProvider;
     this.gadgetAdminStore = gadgetAdminStore;
+    this.processor = processor;
+    this.lockedDomainService = lockedDomainService;
   }
 
   /**
@@ -98,12 +110,41 @@ public class MakeRequestHandler {
       throws GadgetException, IOException {
     HttpRequest rcr = buildHttpRequest(request);
     String container = rcr.getContainer();
-    Uri gadget = rcr.getGadget();
 
-    if (gadget != null &&
-            !gadgetAdminStore.isWhitelisted(container, gadget.toString())) {
+    final Uri gadgetUri = rcr.getGadget();
+    if (gadgetUri == null) {
+      throw new GadgetException(GadgetException.Code.MISSING_PARAMETER,
+          "Unable to find gadget in request", HttpResponse.SC_FORBIDDEN);
+    }
+
+    Gadget gadget = null;
+    GadgetContext context = new HttpGadgetContext(request) {
+      public Uri getUrl() {
+        return gadgetUri;
+      }
+      public boolean getIgnoreCache() {
+        return getParameter("bypassSpecCache").equals("1");
+      }
+    };
+    try {
+      gadget = processor.process(context);
+    } catch (ProcessingException e) {
+      throw new GadgetException(
+          GadgetException.Code.INTERNAL_SERVER_ERROR, "Error processing gadget",
+          e, HttpResponse.SC_BAD_REQUEST);
+    }
+
+    // Validate gadget is correct for the host.
+    // Ensures that the gadget has not hand crafted this request to represent itself as
+    // another gadget in a locked domain environment.
+    if (!lockedDomainService.isGadgetValidForHost(context.getHost(), gadget, container)) {
+      throw new GadgetException(GadgetException.Code.GADGET_HOST_MISMATCH,
+          "The gadget is incorrect for this request", HttpResponse.SC_FORBIDDEN);
+    }
+
+    if(!gadgetAdminStore.isWhitelisted(container, gadgetUri.toString())) {
       throw new GadgetException(GadgetException.Code.NON_WHITELISTED_GADGET,
-              "The requested content is unavailable", HttpResponse.SC_FORBIDDEN);
+          "The requested content is unavailable", HttpResponse.SC_FORBIDDEN);
     }
 
     // Serialize the response

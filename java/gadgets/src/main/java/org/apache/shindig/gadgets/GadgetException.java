@@ -60,7 +60,7 @@ public class GadgetException extends Exception {
 
     // Caja error
     MALFORMED_FOR_SAFE_INLINING,
-    
+
     // Parsing errors
     CSS_PARSE_ERROR,
     HTML_PARSE_ERROR,
@@ -82,6 +82,9 @@ public class GadgetException extends Exception {
 
     // Error in the JavaScript processing pipeline
     JS_PROCESSING_ERROR,
+
+    // Error validating that the gadget supplied is correct for the locked domain the request came from.
+    GADGET_HOST_MISMATCH,
 
     //Gadget Admin Error
     GADGET_ADMIN_STORAGE_ERROR,
@@ -133,7 +136,7 @@ public class GadgetException extends Exception {
   public Code getCode() {
     return code;
   }
-  
+
   public int getHttpStatusCode() {
     return httpStatusCode;
   }

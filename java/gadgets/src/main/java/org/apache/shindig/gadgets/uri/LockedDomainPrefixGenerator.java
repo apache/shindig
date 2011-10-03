@@ -28,4 +28,5 @@ import com.google.inject.ImplementedBy;
 @ImplementedBy(HashShaLockedDomainPrefixGenerator.class)
 public interface LockedDomainPrefixGenerator {
   String getLockedDomainPrefix(Uri gadgetUri);
+  String getLockedDomainPrefix(String token);
 }
