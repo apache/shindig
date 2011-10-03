@@ -453,8 +453,9 @@ public class GadgetsHandlerTest extends EasyMockTestCase {
 
     JSONArray rpcServiceIds = gadget.getJSONArray("rpcServiceIds");
     assertEquals(2, rpcServiceIds.length());
-    assertEquals(RPC_SERVICE_2, rpcServiceIds.get(0));
-    assertEquals(RPC_SERVICE_1, rpcServiceIds.get(1));
+    boolean result = rpcServiceIds.get(0).equals(RPC_SERVICE_2) || rpcServiceIds.get(0).equals(RPC_SERVICE_1);
+    result &= rpcServiceIds.get(1).equals(RPC_SERVICE_2) || rpcServiceIds.get(1).equals(RPC_SERVICE_1);
+    assertTrue(result);
 
     verify();
   }
