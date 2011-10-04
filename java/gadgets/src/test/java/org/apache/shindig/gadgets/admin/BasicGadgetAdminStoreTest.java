@@ -101,10 +101,12 @@ public class BasicGadgetAdminStoreTest extends EasyMockTestCase {
         return mockRegistry;
       }
     };
-    enabledStore = new BasicGadgetAdminStore(featureRegistryProvider, enabledConfig);
+    enabledStore = new BasicGadgetAdminStore(featureRegistryProvider, enabledConfig,
+        new ServerAdminData());
     enabledStore.init(SAMPLE_STORE);
 
-    disabledStore = new BasicGadgetAdminStore(featureRegistryProvider, disabledConfig);
+    disabledStore = new BasicGadgetAdminStore(featureRegistryProvider, disabledConfig,
+        new ServerAdminData());
 
     horoscopeAdminData = new GadgetAdminData(new FeatureAdminData(HOROSCOPE_FEATURES,
             Type.WHITELIST));

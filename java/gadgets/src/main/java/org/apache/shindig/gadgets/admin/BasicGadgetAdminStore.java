@@ -76,8 +76,8 @@ public class BasicGadgetAdminStore implements GadgetAdminStore {
    */
   @Inject
   public BasicGadgetAdminStore(FeatureRegistryProvider featureRegistryProvider,
-          ContainerConfig config) {
-    this.serverAdminData = new ServerAdminData();
+          ContainerConfig config, ServerAdminData serverAdminData) {
+    this.serverAdminData = serverAdminData;
     this.featureRegistryProvider = featureRegistryProvider;
     this.config = config;
   }

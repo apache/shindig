@@ -22,6 +22,8 @@ import java.util.Map;
 
 import com.google.caja.util.Maps;
 import com.google.common.base.Objects;
+import com.google.inject.Inject;
+import org.apache.shindig.common.Nullable;
 
 /**
  * Administration data for the server.
@@ -34,6 +36,7 @@ public class ServerAdminData {
   /**
    * Constructor.
    */
+  @Inject
   public ServerAdminData() {
     this(null);
   }
@@ -44,11 +47,9 @@ public class ServerAdminData {
    * @param containerAdminMap
    *          a map of container IDs to container.
    */
-  public ServerAdminData(Map<String, ContainerAdminData> containerAdminMap) {
-    if (containerAdminMap == null) {
-      containerAdminMap = Maps.newHashMap();
-    }
-    this.containerAdminDataMap = containerAdminMap;
+  public ServerAdminData(@Nullable Map<String, ContainerAdminData> containerAdminMap) {
+    this.containerAdminDataMap = (containerAdminMap != null) ? containerAdminMap :
+        Maps.<String, ContainerAdminData>newHashMap();
   }
 
   /**
