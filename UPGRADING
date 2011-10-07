@@ -7,6 +7,7 @@ FROM 2.0.x TO 3.0.x
 * nekohtml 1.9.14->1.9.15
 * htmlunit 2.8->2.9 
 
+* closure-compiler r1459
 
 FROM 1.0.x TO 2.0.x
 ===================
