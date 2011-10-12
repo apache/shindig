@@ -3,6 +3,7 @@ FROM 2.0.x TO 3.0.x
 
 == Java Dependency Changes ==
 
+* guava r09->10.0.1
 * guice 2.0->3.0
 * nekohtml 1.9.14->1.9.15
 * htmlunit 2.8->2.9 
