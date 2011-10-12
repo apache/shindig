@@ -254,7 +254,7 @@ public class HashLockedDomainServiceTest extends EasyMockTestCase {
     config.newTransaction().addContainer(makeContainer(
         "other", LOCKED_DOMAIN_REQUIRED_KEY, true, LOCKED_DOMAIN_SUFFIX_KEY, "-a.example.com:8080"))
         .commit();
-    lockedDomainService.containersChanged(
+    lockedDomainService.getConfigObserver().containersChanged(
         config, ImmutableSet.of("other"), ImmutableSet.<String>of());
     assertTrue(lockedDomainService.isGadgetValidForHost(
         "8uhr00296d2o3sfhqilj387krjmgjv3v-a.example.com:8080", wantsLocked, "container"));

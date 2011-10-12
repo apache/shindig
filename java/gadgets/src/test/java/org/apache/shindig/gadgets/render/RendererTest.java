@@ -288,22 +288,12 @@ public class RendererTest {
       return false;
     }
 
-    @Override
     public boolean isEnabled() {
-      // TODO Auto-generated method stub
       return false;
     }
 
-    @Override
     public boolean isHostUsingLockedDomain(String host) {
-      // TODO Auto-generated method stub
       return false;
-    }
-
-    @Override
-    public String getLockedDomainPrefix(Gadget gadget) {
-      // TODO Auto-generated method stub
-      return null;
     }
   }
 }

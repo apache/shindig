@@ -71,13 +71,4 @@ public interface LockedDomainService {
    *         Returns false if locked domains are not enabled on the server.
    */
   boolean isHostUsingLockedDomain(String host);
-
-  /**
-   * Generates a locked domain prefix given a gadget Uri.
-   *
-   * @param gadget The uri of the gadget.
-   * @return A locked domain prefix for the gadgetUri.
-   *         Returns empty string if locked domains are not enabled on the server.
-   */
-  String getLockedDomainPrefix(Gadget gadget) throws GadgetException;
 }
