@@ -49,6 +49,7 @@ public class DefaultInvalidationServiceTest extends Assert {
 
   DefaultRequestPipelineTest.FakeHttpFetcher fetcher;
   DefaultRequestPipelineTest.FakeOAuthRequestProvider oauth;
+  DefaultRequestPipelineTest.FakeOAuth2RequestProvider oauth2;
   DefaultRequestPipeline requestPipeline;
   HttpRequest signedRequest;
 
@@ -77,7 +78,7 @@ public class DefaultInvalidationServiceTest extends Assert {
 
     fetcher = new DefaultRequestPipelineTest.FakeHttpFetcher();
     oauth = new DefaultRequestPipelineTest.FakeOAuthRequestProvider();
-    requestPipeline = new DefaultRequestPipeline(fetcher, cache, oauth,
+    requestPipeline = new DefaultRequestPipeline(fetcher, cache, oauth, oauth2,
         new DefaultResponseRewriterRegistry(null, null), service,
         new HttpResponseMetadataHelper());
   }

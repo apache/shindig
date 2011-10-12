@@ -28,6 +28,8 @@ import org.apache.shindig.common.util.DateUtil;
 import org.apache.shindig.gadgets.AuthType;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.oauth.OAuthRequest;
+import org.apache.shindig.gadgets.oauth2.BasicOAuth2Request;
+import org.apache.shindig.gadgets.oauth2.OAuth2Request;
 import org.apache.shindig.gadgets.rewrite.DefaultResponseRewriterRegistry;
 import org.junit.Before;
 import org.junit.Test;
@@ -40,6 +42,7 @@ public class DefaultRequestPipelineTest {
   private final FakeHttpFetcher fetcher = new FakeHttpFetcher();
   private final FakeHttpCache cache = new FakeHttpCache();
   private final FakeOAuthRequestProvider oauth = new FakeOAuthRequestProvider();
+  private final FakeOAuth2RequestProvider oauth2 = new FakeOAuth2RequestProvider();
 
   private final HttpResponseMetadataHelper helper = new HttpResponseMetadataHelper() {
     @Override
@@ -47,7 +50,7 @@ public class DefaultRequestPipelineTest {
       return resp.getResponseAsString();
     }
   };
-  private final RequestPipeline pipeline = new DefaultRequestPipeline(fetcher, cache, oauth,
+  private final RequestPipeline pipeline = new DefaultRequestPipeline(fetcher, cache, oauth, oauth2,
       new DefaultResponseRewriterRegistry(null, null), new NoOpInvalidationService(), helper);
 
   @Before
@@ -89,7 +92,7 @@ public class DefaultRequestPipelineTest {
 
     fetcher.response = builder.create();
 
-    RequestPipeline pipeline = new DefaultRequestPipeline(fetcher, cache, oauth,
+    RequestPipeline pipeline = new DefaultRequestPipeline(fetcher, cache, oauth, oauth2,
         new DefaultResponseRewriterRegistry(null, null), new NoOpInvalidationService(),
         new HttpResponseMetadataHelper());
     HttpResponse response = pipeline.execute(request);
@@ -115,7 +118,7 @@ public class DefaultRequestPipelineTest {
 
     fetcher.response = builder.create();
 
-    RequestPipeline pipeline = new DefaultRequestPipeline(fetcher, cache, oauth,
+    RequestPipeline pipeline = new DefaultRequestPipeline(fetcher, cache, oauth, oauth2,
         new DefaultResponseRewriterRegistry(null, null), new NoOpInvalidationService(),
         new HttpResponseMetadataHelper());
     HttpResponse response = pipeline.execute(request);
@@ -377,6 +380,30 @@ public class DefaultRequestPipelineTest {
 
     public OAuthRequest get() {
       return oauthRequest;
+    }
+
+  }
+  
+  public static class FakeOAuth2RequestProvider implements Provider<OAuth2Request> {
+    protected int fetchCount = 0;
+    protected HttpRequest httpRequest;
+    protected HttpResponse httpResponse;
+
+    protected FakeOAuth2RequestProvider() {
+    }
+
+
+    private final OAuth2Request oauth2Request = new BasicOAuth2Request(null, null, null, null, null, null, null, false) {
+      @Override
+      public HttpResponse fetch(HttpRequest request) {
+        fetchCount++;
+        httpRequest = request;
+        return httpResponse;
+      }
+    };
+
+    public OAuth2Request get() {
+      return oauth2Request;
     }
 
   }

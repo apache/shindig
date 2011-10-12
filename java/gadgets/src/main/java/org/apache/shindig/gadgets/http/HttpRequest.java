@@ -27,6 +27,7 @@ import org.apache.shindig.common.util.CharsetUtil;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.AuthType;
 import org.apache.shindig.gadgets.oauth.OAuthArguments;
+import org.apache.shindig.gadgets.oauth2.OAuth2Arguments;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -85,6 +86,7 @@ public class HttpRequest {
 
   // TODO: Move this into OAuthRequest.
   private OAuthArguments oauthArguments;
+  private OAuth2Arguments oauth2Arguments;
   private AuthType authType;
 
   private String rewriteMimeType;
@@ -113,6 +115,9 @@ public class HttpRequest {
     securityToken = request.securityToken;
     if (request.oauthArguments != null) {
       oauthArguments = new OAuthArguments(request.oauthArguments);
+    }
+    if (request.oauth2Arguments != null) {
+      oauth2Arguments = new OAuth2Arguments(request.oauth2Arguments);
     }
     authType = request.authType;
     rewriteMimeType = request.rewriteMimeType;
@@ -280,6 +285,14 @@ public class HttpRequest {
   }
 
   /**
+   * @param oauth2Arguments arguments for OAuth2/signed fetched
+   */
+  public HttpRequest setOAuth2Arguments(OAuth2Arguments oauth2Arguments) {
+    this.oauth2Arguments = oauth2Arguments;
+    return this;
+  }
+  
+  /**
    * @param followRedirects whether this request should automatically follow redirects.
    */
   public HttpRequest setFollowRedirects(boolean followRedirects) {
@@ -445,6 +458,14 @@ public class HttpRequest {
     return oauthArguments;
   }
 
+  /**
+   * @return arguments for OAuth2 and signed fetch
+   */
+  public OAuth2Arguments getOAuth2Arguments() {
+    return oauth2Arguments;
+  }
+
+  
   /**
    * @return true if redirects should be followed.
    */

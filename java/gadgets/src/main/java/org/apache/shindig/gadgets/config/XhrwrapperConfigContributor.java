@@ -25,20 +25,21 @@ import org.apache.shindig.gadgets.AuthType;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.oauth.OAuthArguments;
+import org.apache.shindig.gadgets.oauth2.OAuth2Arguments;
 import org.apache.shindig.gadgets.spec.View;
 
 import java.util.Map;
 
 /**
  * Provides config support for the xhrwrapper feature.
- *
+ * 
  * @since 2.0.0
  */
 
 @Singleton
 public class XhrwrapperConfigContributor implements ConfigContributor {
   /** {@inheritDoc} */
-  public void contribute(Map<String,Object> config, Gadget gadget) {
+  public void contribute(Map<String, Object> config, Gadget gadget) {
     Map<String, String> xhrWrapperConfig = Maps.newHashMapWithExpectedSize(2);
     View view = gadget.getCurrentView();
     Uri contentsUri = view.getHref();
@@ -47,6 +48,8 @@ public class XhrwrapperConfigContributor implements ConfigContributor {
       addOAuthConfig(xhrWrapperConfig, view);
     } else if (AuthType.SIGNED.equals(view.getAuthType())) {
       xhrWrapperConfig.put("authorization", "signed");
+    } else if (AuthType.OAUTH2.equals(view.getAuthType())) {
+      addOAuth2Config(xhrWrapperConfig, view);
     }
     config.put("shindig.xhrwrapper", xhrWrapperConfig);
   }
@@ -66,8 +69,16 @@ public class XhrwrapperConfigContributor implements ConfigContributor {
       // Do not add any OAuth configuration if an exception was thrown
     }
   }
-  
-  public void contribute(Map<String,Object> config, String container, String host) {
+
+  private void addOAuth2Config(Map<String, String> xhrWrapperConfig, View view) {
+    Map<String, String> oAuth2Config = Maps.newHashMapWithExpectedSize(3);
+    OAuth2Arguments oAuth2Arguments = new OAuth2Arguments(view);
+    oAuth2Config.put("authorization", "oauth2");
+    oAuth2Config.put("oauthService", oAuth2Arguments.getServiceName());
+    xhrWrapperConfig.putAll(oAuth2Config);
+  }
+
+  public void contribute(Map<String, Object> config, String container, String host) {
     // no-op, no container specific configuration
   }
 }

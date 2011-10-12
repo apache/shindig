@@ -29,6 +29,8 @@ public class AuthTypeTest {
   public void testAuth() {
     assertEquals(AuthType.OAUTH, AuthType.parse("oauth"));
     assertEquals(AuthType.OAUTH, AuthType.parse("   oauth   "));
+    assertEquals(AuthType.OAUTH2, AuthType.parse("oauth2"));
+    assertEquals(AuthType.OAUTH2, AuthType.parse("   oauth2   "));
     assertEquals(AuthType.SIGNED, AuthType.parse("SiGnEd"));
     assertEquals(AuthType.NONE, AuthType.parse("NONE"));
     assertEquals(AuthType.NONE, AuthType.parse(""));
@@ -36,5 +38,6 @@ public class AuthTypeTest {
     assertEquals(AuthType.NONE, AuthType.parse("foo"));
     assertEquals("none", AuthType.NONE.toString());
     assertEquals("oauth", AuthType.OAUTH.toString());
+    assertEquals("oauth2", AuthType.OAUTH2.toString());
   }
 }

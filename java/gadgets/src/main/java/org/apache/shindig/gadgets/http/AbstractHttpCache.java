@@ -239,8 +239,8 @@ public abstract class AbstractHttpCache implements HttpCache {
   }
 
   protected static String getOwnerId(HttpRequest request) {
-    if (request.getAuthType() != AuthType.NONE &&
-        request.getOAuthArguments().getSignOwner()) {
+    if (request.getAuthType() != AuthType.NONE && request.getAuthType() != AuthType.OAUTH2
+        && request.getOAuthArguments().getSignOwner()) {
       Preconditions.checkState(request.getSecurityToken() != null, "No Security Token set for request");
       String ownerId = request.getSecurityToken().getOwnerId();
       return Objects.firstNonNull(ownerId, "");
@@ -250,8 +250,8 @@ public abstract class AbstractHttpCache implements HttpCache {
   }
 
   protected static String getViewerId(HttpRequest request) {
-    if (request.getAuthType() != AuthType.NONE &&
-        request.getOAuthArguments().getSignViewer()) {
+    if (request.getAuthType() != AuthType.NONE && request.getAuthType() != AuthType.OAUTH2
+        && request.getOAuthArguments().getSignViewer()) {
       Preconditions.checkState(request.getSecurityToken() != null, "No Security Token set for request");
       String viewerId = request.getSecurityToken().getViewerId();
       return Objects.firstNonNull(viewerId, "");
@@ -262,8 +262,8 @@ public abstract class AbstractHttpCache implements HttpCache {
 
   protected static String getTokenOwner(HttpRequest request) {
     SecurityToken st = request.getSecurityToken();
-    if (request.getAuthType() != AuthType.NONE &&
-        st.getOwnerId() != null
+    if (request.getAuthType() != AuthType.NONE && request.getAuthType() != AuthType.OAUTH2
+        && st.getOwnerId() != null
         && st.getOwnerId().equals(st.getViewerId())
         && request.getOAuthArguments().mayUseToken()) {
       return st.getOwnerId();
@@ -289,7 +289,7 @@ public abstract class AbstractHttpCache implements HttpCache {
   }
 
   protected static String getServiceName(HttpRequest request) {
-    if (request.getAuthType() != AuthType.NONE) {
+    if ((request.getAuthType() != AuthType.NONE) && (request.getAuthType() != AuthType.OAUTH2)) {
       return request.getOAuthArguments().getServiceName();
     }
     // Requests that don't use authentication can share the result.
@@ -297,7 +297,7 @@ public abstract class AbstractHttpCache implements HttpCache {
   }
 
   protected static String getTokenName(HttpRequest request) {
-    if (request.getAuthType() != AuthType.NONE) {
+    if ((request.getAuthType() != AuthType.NONE) && (request.getAuthType() != AuthType.OAUTH2)) {
       return request.getOAuthArguments().getTokenName();
     }
     // Requests that don't use authentication can share the result.

@@ -44,6 +44,41 @@
                       {"name": "Twitter", "url": "http://hosting.gmodules.com/ig/gadgets/file/109228598702359180066/twitterfinal.xml"},
                       {"name": "MySpace", "url": "http://hosting.gmodules.com/ig/gadgets/file/109228598702359180066/myspacefinal.xml"}
                       ]
+             },
+             {
+             "name": "OAuth2 Demo with Google Provider",
+             "Description": "OAuth2 Demo with Google Provider",
+             "apps" : [
+                      {"name": "oauth2_authorization_g", "url": "/samplecontainer/examples/oauth2/oauth2_google.xml"}
+                      ]
+             },
+             {
+             "name": "OAuth2 Demo with Facebook Provider",
+             "Description": "OAuth2 Demo with Facebook Provider",
+             "apps" : [
+                      {"name": "oauth2_authorization_f", "url": "/samplecontainer/examples/oauth2/oauth2_facebook.xml"}
+                      ]
+             },
+             {
+             "name": "OAuth2 Demo with Windows Live Provider",
+             "Description": "OAuth2 Demo with Windows Live Provider",
+             "apps" : [
+                      {"name": "oauth2_authorization_w", "url": "/samplecontainer/examples/oauth2/oauth2_windowslive.xml"}
+                      ]
+             },
+             {
+             "name": "OAuth2 Demo with Shindig Provider (Authorization Code)",
+             "Description": "OAuth2 Demo with Shindig Provider (Authorization Code)",
+             "apps" : [
+                      {"name": "oauth2_authorization_s", "url": "/samplecontainer/examples/oauth2/shindig_authorization.xml"}
+                      ]
+             },
+             {
+             "name": "OAuth2 Demo with Shindig Provider (Client Credentials)",
+             "Description": "OAuth2 Demo with Shindig Provider (Client Credentials)",
+             "apps" : [
+                      {"name": "oauth2_client_credentials_s", "url": "/samplecontainer/examples/oauth2/shindig_client_credentials.xml"}
+                      ]
              }
          ]
 }

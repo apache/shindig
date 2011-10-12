@@ -29,6 +29,7 @@ import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.RequestPipeline;
 import org.apache.shindig.gadgets.oauth.OAuthArguments;
+import org.apache.shindig.gadgets.oauth2.OAuth2Arguments;
 import org.apache.shindig.gadgets.rewrite.ResponseRewriterList.RewriteFlow;
 import org.apache.shindig.gadgets.rewrite.ResponseRewriterRegistry;
 import org.apache.shindig.gadgets.rewrite.RewriterRegistry;
@@ -203,15 +204,25 @@ public class HttpRequestHandler {
         req.setAuthType(AuthType.parse(httpApiRequest.authz));
       }
 
-      if (req.getAuthType() != AuthType.NONE) {
-        req.setSecurityToken(requestItem.getToken());
-        
-        Map<String, String> authSettings = getAuthSettings(requestItem);
-        OAuthArguments oauthArgs = new OAuthArguments(req.getAuthType(), authSettings);
-        oauthArgs.setSignOwner(httpApiRequest.signOwner);
-        oauthArgs.setSignViewer(httpApiRequest.signViewer);
-        
-        req.setOAuthArguments(oauthArgs);
+      final AuthType authType = req.getAuthType();
+      if (authType != AuthType.NONE) {
+        if (authType == AuthType.OAUTH2) {
+          req.setSecurityToken(requestItem.getToken());
+
+          Map<String, String> authSettings = getAuthSettings(requestItem);
+          OAuth2Arguments oauth2Args = new OAuth2Arguments(req.getAuthType(), authSettings);
+
+          req.setOAuth2Arguments(oauth2Args);
+        } else {
+          req.setSecurityToken(requestItem.getToken());
+
+          Map<String, String> authSettings = getAuthSettings(requestItem);
+          OAuthArguments oauthArgs = new OAuthArguments(req.getAuthType(), authSettings);
+          oauthArgs.setSignOwner(httpApiRequest.signOwner);
+          oauthArgs.setSignViewer(httpApiRequest.signViewer);
+
+          req.setOAuthArguments(oauthArgs);
+        }
       }
 
       // TODO: Allow the rewriter to use an externally forced mime type. This is needed
@@ -246,8 +257,7 @@ public class HttpRequestHandler {
       }
       return httpApiResponse;
     } catch (GadgetException ge) {
-      throw new ProtocolException(ge.getHttpStatusCode(),
-          ge.getMessage(), ge);
+      throw new ProtocolException(ge.getHttpStatusCode(), ge.getMessage(), ge);
     } catch (RewritingException re) {
       throw new ProtocolException(re.getHttpStatusCode(),
           re.getMessage(), re);

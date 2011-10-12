@@ -21,7 +21,7 @@ package org.apache.shindig.gadgets;
  * The supported auth modes for outbound requests.
  */
 public enum AuthType {
-  NONE, SIGNED, OAUTH;
+  NONE, SIGNED, OAUTH, OAUTH2;
 
   /**
    * @return The parsed value (defaults to NONE)

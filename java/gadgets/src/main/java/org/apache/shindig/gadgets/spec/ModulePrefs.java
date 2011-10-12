@@ -109,10 +109,12 @@ public class ModulePrefs {
 
     // Eventually use a list of classes
     MutableBoolean oauthMarker = new MutableBoolean(false);
+    
     Set<ElementVisitor> visitors = ImmutableSet.of(
         new FeatureVisitor(oauthMarker),
         new PreloadVisitor(),
         new OAuthVisitor(oauthMarker),
+        new OAuth2Visitor(oauthMarker),
         new IconVisitor(),
         new LocaleVisitor(),
         new LinkVisitor(),
@@ -143,6 +145,7 @@ public class ModulePrefs {
     allLocales = prefs.allLocales;
     locales = prefs.locales;
     oauth = prefs.oauth;
+    oauth2 = prefs.oauth2;
 
     List<Preload> preloads = Lists.newArrayList();
     for (Preload preload : prefs.preloads) {
@@ -459,6 +462,8 @@ public class ModulePrefs {
   private Map<String, LinkSpec> links;
   private OAuthSpec oauth;
   private Multimap<String,Node> extraElements;
+  private OAuth2Spec oauth2;
+
 
   /**
    * @return Returns a list of flattened attributes for:
@@ -537,6 +542,13 @@ public class ModulePrefs {
    */
   public OAuthSpec getOAuthSpec() {
     return oauth;
+  }
+  
+  /**
+   * @return an OAuth2Spec built from the ModuleSpec/OAuthSpec element
+   */
+  public OAuth2Spec getOAuth2Spec() {
+    return oauth2;
   }
 
   /**
@@ -748,6 +760,34 @@ public class ModulePrefs {
     }
 
   }
+  
+  /**
+   * Process ModulePrefs/OAuth2
+   */
+  private final class OAuth2Visitor implements ElementVisitor {
+    private OAuth2Spec oauth2Spec = null;
+    private final MutableBoolean oauth2Marker;
+    
+    private OAuth2Visitor(MutableBoolean oauth2Marker) {
+      this.oauth2Marker = oauth2Marker;
+    }
+
+    public boolean visit(String tag, Element element) throws SpecParserException {
+      if (!"OAuth2".equals(tag)) return false;
+
+      if (oauth2Spec != null) {
+        throw new SpecParserException("ModulePrefs/OAuth2 may only occur once.");
+      }
+      oauth2Spec = new OAuth2Spec(element, base);
+      oauth2Marker.setValue(true);
+      return true;
+    }
+
+    public void apply(ModulePrefs moduleprefs) {
+      moduleprefs.oauth2 = oauth2Spec;
+    }
+
+  }
 
   /**
    * Processes ModulePrefs/Require and ModulePrefs/Optional
@@ -797,7 +837,7 @@ public class ModulePrefs {
         globalFeatures.put(Feature.CORE_FEATURE.getName(), Feature.CORE_FEATURE);
       }
       if (oauthMarker.booleanValue()) {
-        // <OAuth> tag found: security token needed.
+        // <OAuth>/<OAuth2> tag found: security token needed.
         features.put(Feature.SECURITY_TOKEN_FEATURE.getName(), Feature.SECURITY_TOKEN_FEATURE);
       }
       moduleprefs.features = ImmutableMap.copyOf(features);

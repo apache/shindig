@@ -173,6 +173,9 @@ gadgets.io = function() {
       'oauthApprovalUrl': data['oauthApprovalUrl'],
       'oauthError': data['oauthError'],
       'oauthErrorText': data['oauthErrorText'],
+      'oauthErrorTrace': data['oauthErrorTrace'],
+      'oauthErrorUri': data['oauthErrorUri'],
+      'oauthErrorExplanation': data['oauthErrorExplanation'],
       'errors': []
     };
 
@@ -305,6 +308,9 @@ gadgets.io = function() {
               'oauthApprovalUrl': preload['oauthApprovalUrl'],
               'oauthError': preload['oauthError'],
               'oauthErrorText': preload['oauthErrorText'],
+              'oauthErrorTrace': preload['oauthErrorTrace'],
+              'oauthErrorUri': preload['oauthErrorUri'],
+              'oauthErrorExplanation': preload['oauthErrorExplanation'],
               'errors': []
             };
             callback(transformResponseData(params, resp));
@@ -407,7 +413,7 @@ gadgets.io = function() {
       };
 
       // OAuth goodies
-      if (auth === 'oauth' || auth === 'signed') {
+      if (auth === 'oauth' || auth === 'signed' || auth === 'oauth2') {
         if (gadgets.io.oauthReceivedCallbackUrl_) {
           paramData['OAUTH_RECEIVED_CALLBACK'] = gadgets.io.oauthReceivedCallbackUrl_;
           gadgets.io.oauthReceivedCallbackUrl_ = null;
@@ -578,5 +584,5 @@ gadgets.io.ContentType = gadgets.util.makeEnum([
  * @const
  */
 gadgets.io.AuthorizationType = gadgets.util.makeEnum([
-  'NONE', 'SIGNED', 'OAUTH'
+  'NONE', 'SIGNED', 'OAUTH', "OAUTH2"
 ]);

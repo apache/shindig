@@ -138,12 +138,12 @@ public class DefaultInvalidationService implements InvalidationService {
     StringBuilder currentInvalidation = new StringBuilder();
 
     Long ownerStamp = null;
-    if (request.getOAuthArguments().getSignOwner()) {
+    if (request.getOAuthArguments() != null && request.getOAuthArguments().getSignOwner()) {
       String ownerKey = getKey(request.getSecurityToken().getOwnerId(), request.getSecurityToken());
       ownerStamp = invalidationEntries.getElement(ownerKey);
     }
     Long viewerStamp = null;
-    if (request.getOAuthArguments().getSignViewer()) {
+    if (request.getOAuthArguments() != null && request.getOAuthArguments().getSignViewer()) {
       if (ownerStamp != null &&
           request.getSecurityToken().getOwnerId().equals(
               request.getSecurityToken().getViewerId())) {

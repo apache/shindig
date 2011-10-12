@@ -26,6 +26,7 @@ import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.RequestPipeline;
 import org.apache.shindig.gadgets.oauth.OAuthArguments;
+import org.apache.shindig.gadgets.oauth2.OAuth2Arguments;
 import org.apache.shindig.gadgets.spec.Preload;
 import org.apache.shindig.gadgets.spec.RequestAuthenticationInfo;
 
@@ -73,6 +74,7 @@ public class HttpPreloader implements Preloader {
     return new HttpRequest(authenticationInfo.getHref())
         .setSecurityToken(context.getToken())
         .setOAuthArguments(new OAuthArguments(authenticationInfo))
+        .setOAuth2Arguments(new OAuth2Arguments(authenticationInfo))
         .setAuthType(authenticationInfo.getAuthType())
         .setContainer(context.getContainer())
         .setGadget(context.getUrl())

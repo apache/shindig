@@ -30,8 +30,8 @@ import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.OAuthService;
 import org.apache.shindig.gadgets.spec.OAuthSpec;
 import org.apache.shindig.gadgets.spec.SpecParserException;
-import org.apache.shindig.gadgets.spec.OAuthService.Location;
-import org.apache.shindig.gadgets.spec.OAuthService.Method;
+import org.apache.shindig.gadgets.spec.BaseOAuthService.Location;
+import org.apache.shindig.gadgets.spec.BaseOAuthService.Method;
 
 import com.google.inject.Inject;
 import com.google.common.base.Joiner;

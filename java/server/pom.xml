@@ -90,6 +90,7 @@
         <directory>${basedir}/../../config</directory>
         <includes>
           <include>oauth.json</include>
+          <include>oauth2.json</include>
         </includes>
       </resource>
       <resource>

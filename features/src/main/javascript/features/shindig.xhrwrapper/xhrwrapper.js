@@ -183,6 +183,9 @@ shindig.xhrwrapper = shindig.xhrwrapper || {};
           if (this.config_['oauthTokenName']) {
             params[gadgets.io.RequestParameters.OAUTH_TOKEN_NAME] = this.config_['oauthTokenName'];
           }
+        } else if (this.config_['authorization'] == 'oauth2') {
+            params[gadgets.io.RequestParameters.AUTHORIZATION] = gadgets.io.AuthorizationType.OAUTH2;
+            params[gadgets.io.RequestParameters.OAUTH_SERVICE_NAME] = this.config_['oauthService'];
         } else if (this.config_['authorization'] == 'signed') {
           params[gadgets.io.RequestParameters.AUTHORIZATION] = gadgets.io.AuthorizationType.SIGNED;
         }

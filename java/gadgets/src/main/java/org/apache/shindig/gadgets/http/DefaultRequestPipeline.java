@@ -28,6 +28,7 @@ import org.apache.shindig.common.util.DateUtil;
 import org.apache.shindig.common.util.Utf8UrlCoder;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.oauth.OAuthRequest;
+import org.apache.shindig.gadgets.oauth2.OAuth2Request;
 import org.apache.shindig.gadgets.rewrite.ResponseRewriterList.RewriteFlow;
 import org.apache.shindig.gadgets.rewrite.ResponseRewriterRegistry;
 import org.apache.shindig.gadgets.rewrite.RewriterRegistry;
@@ -45,6 +46,7 @@ public class DefaultRequestPipeline implements RequestPipeline {
   private final HttpFetcher httpFetcher;
   private final HttpCache httpCache;
   private final Provider<OAuthRequest> oauthRequestProvider;
+  private final Provider<OAuth2Request> oauth2RequestProvider;
   private final ResponseRewriterRegistry responseRewriterRegistry;
   private final InvalidationService invalidationService;
   private final HttpResponseMetadataHelper metadataHelper;
@@ -60,6 +62,7 @@ public class DefaultRequestPipeline implements RequestPipeline {
   public DefaultRequestPipeline(HttpFetcher httpFetcher,
                                 HttpCache httpCache,
                                 Provider<OAuthRequest> oauthRequestProvider,
+                                Provider<OAuth2Request> oauth2RequestProvider,
                                 @RewriterRegistry(rewriteFlow = RewriteFlow.REQUEST_PIPELINE)
                                 ResponseRewriterRegistry responseRewriterRegistry,
                                 InvalidationService invalidationService,
@@ -67,6 +70,7 @@ public class DefaultRequestPipeline implements RequestPipeline {
     this.httpFetcher = httpFetcher;
     this.httpCache = httpCache;
     this.oauthRequestProvider = oauthRequestProvider;
+    this.oauth2RequestProvider = oauth2RequestProvider;
     this.responseRewriterRegistry = responseRewriterRegistry;
     this.invalidationService = invalidationService;
     this.metadataHelper = metadataHelper;
@@ -106,6 +110,9 @@ public class DefaultRequestPipeline implements RequestPipeline {
       case SIGNED:
       case OAUTH:
         fetchedResponse = oauthRequestProvider.get().fetch(request);
+        break;
+      case OAUTH2:
+        fetchedResponse = oauth2RequestProvider.get().fetch(request);
         break;
       default:
         return HttpResponse.error();

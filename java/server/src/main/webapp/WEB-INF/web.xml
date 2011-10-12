@@ -35,6 +35,10 @@
       org.apache.shindig.social.core.config.SocialApiGuiceModule:
       org.apache.shindig.social.sample.SampleModule:
       org.apache.shindig.gadgets.oauth.OAuthModule:
+      org.apache.shindig.gadgets.oauth2.OAuth2Module:
+      org.apache.shindig.gadgets.oauth2.OAuth2MessageModule:
+      org.apache.shindig.gadgets.oauth2.handler.OAuth2HandlerModule: 
+      org.apache.shindig.gadgets.oauth2.persistence.sample.OAuth2PersistenceModule:
       org.apache.shindig.common.cache.ehcache.EhCacheModule:
       org.apache.shindig.sample.shiro.ShiroGuiceModule:
       org.apache.shindig.sample.container.SampleContainerGuiceModule:
@@ -202,6 +206,14 @@
     </servlet-class>
   </servlet>
 
+  <!-- OAuth2 callback -->
+  <servlet>
+    <servlet-name>oauth2callback</servlet-name>
+    <servlet-class>
+      org.apache.shindig.gadgets.servlet.OAuth2CallbackServlet
+    </servlet-class>
+  </servlet>
+  
   <!-- Metadata RPC -->
   <servlet>
     <servlet-name>metadata</servlet-name>
@@ -301,6 +313,11 @@
     <url-pattern>/gadgets/oauthcallback</url-pattern>
   </servlet-mapping>
 
+  <servlet-mapping>
+    <servlet-name>oauth2callback</servlet-name>
+    <url-pattern>/gadgets/oauth2callback</url-pattern>
+  </servlet-mapping>
+  
   <servlet-mapping>
     <servlet-name>xml-to-html</servlet-name>
     <url-pattern>/gadgets/ifr</url-pattern>

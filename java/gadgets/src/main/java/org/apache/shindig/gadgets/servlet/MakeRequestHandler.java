@@ -47,6 +47,7 @@ import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.RequestPipeline;
 import org.apache.shindig.gadgets.oauth.OAuthArguments;
+import org.apache.shindig.gadgets.oauth2.OAuth2Arguments;
 import org.apache.shindig.gadgets.process.ProcessingException;
 import org.apache.shindig.gadgets.process.Processor;
 import org.apache.shindig.gadgets.rewrite.ResponseRewriterList.RewriteFlow;
@@ -62,7 +63,7 @@ import com.google.inject.Singleton;
 
 /**
  * Handles gadgets.io.makeRequest requests.
- *
+ * 
  * Unlike ProxyHandler, this may perform operations such as OAuth or signed fetch.
  */
 @Singleton
@@ -87,13 +88,11 @@ public class MakeRequestHandler {
   private final LockedDomainService lockedDomainService;
 
   @Inject
-  public MakeRequestHandler(RequestPipeline requestPipeline,
-      @RewriterRegistry(rewriteFlow = RewriteFlow.DEFAULT)
-      ResponseRewriterRegistry contentRewriterRegistry,
-      Provider<FeedProcessor> feedProcessorProvider,
-      GadgetAdminStore gadgetAdminStore,
-      Processor processor,
-      LockedDomainService lockedDomainService) {
+  public MakeRequestHandler(
+          RequestPipeline requestPipeline,
+          @RewriterRegistry(rewriteFlow = RewriteFlow.DEFAULT) ResponseRewriterRegistry contentRewriterRegistry,
+          Provider<FeedProcessor> feedProcessorProvider, GadgetAdminStore gadgetAdminStore,
+          Processor processor, LockedDomainService lockedDomainService) {
 
     this.requestPipeline = requestPipeline;
     this.contentRewriterRegistry = contentRewriterRegistry;
@@ -107,14 +106,14 @@ public class MakeRequestHandler {
    * Executes a request, returning the response as JSON to be handled by makeRequest.
    */
   public void fetch(HttpServletRequest request, HttpServletResponse response)
-      throws GadgetException, IOException {
+          throws GadgetException, IOException {
     HttpRequest rcr = buildHttpRequest(request);
     String container = rcr.getContainer();
 
     final Uri gadgetUri = rcr.getGadget();
     if (gadgetUri == null) {
       throw new GadgetException(GadgetException.Code.MISSING_PARAMETER,
-          "Unable to find gadget in request", HttpResponse.SC_FORBIDDEN);
+              "Unable to find gadget in request", HttpResponse.SC_FORBIDDEN);
     }
 
     Gadget gadget = null;
@@ -122,6 +121,7 @@ public class MakeRequestHandler {
       public Uri getUrl() {
         return gadgetUri;
       }
+
       public boolean getIgnoreCache() {
         return getParameter("bypassSpecCache").equals("1");
       }
@@ -129,9 +129,8 @@ public class MakeRequestHandler {
     try {
       gadget = processor.process(context);
     } catch (ProcessingException e) {
-      throw new GadgetException(
-          GadgetException.Code.INTERNAL_SERVER_ERROR, "Error processing gadget",
-          e, HttpResponse.SC_BAD_REQUEST);
+      throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR,
+              "Error processing gadget", e, HttpResponse.SC_BAD_REQUEST);
     }
 
     // Validate gadget is correct for the host.
@@ -139,12 +138,12 @@ public class MakeRequestHandler {
     // another gadget in a locked domain environment.
     if (!lockedDomainService.isGadgetValidForHost(context.getHost(), gadget, container)) {
       throw new GadgetException(GadgetException.Code.GADGET_HOST_MISMATCH,
-          "The gadget is incorrect for this request", HttpResponse.SC_FORBIDDEN);
+              "The gadget is incorrect for this request", HttpResponse.SC_FORBIDDEN);
     }
 
-    if(!gadgetAdminStore.isWhitelisted(container, gadgetUri.toString())) {
+    if (!gadgetAdminStore.isWhitelisted(container, gadgetUri.toString())) {
       throw new GadgetException(GadgetException.Code.NON_WHITELISTED_GADGET,
-          "The requested content is unavailable", HttpResponse.SC_FORBIDDEN);
+              "The requested content is unavailable", HttpResponse.SC_FORBIDDEN);
     }
 
     // Serialize the response
@@ -156,7 +155,7 @@ public class MakeRequestHandler {
         results = contentRewriterRegistry.rewriteHttpResponse(rcr, results);
       } catch (RewritingException e) {
         throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, e,
-            e.getHttpStatusCode());
+                e.getHttpStatusCode());
       }
     }
 
@@ -173,30 +172,29 @@ public class MakeRequestHandler {
   }
 
   /**
-   * Generate a remote content request based on the parameters
-   * sent from the client.
+   * Generate a remote content request based on the parameters sent from the client.
+   * 
    * @throws GadgetException
    */
   protected HttpRequest buildHttpRequest(HttpServletRequest request) throws GadgetException {
     String urlStr = request.getParameter(Param.URL.getKey());
     if (urlStr == null) {
-      throw new GadgetException(GadgetException.Code.INVALID_PARAMETER,
-          Param.URL.getKey() + " parameter is missing.", HttpResponse.SC_BAD_REQUEST);
+      throw new GadgetException(GadgetException.Code.INVALID_PARAMETER, Param.URL.getKey()
+              + " parameter is missing.", HttpResponse.SC_BAD_REQUEST);
     }
 
     Uri url = null;
     try {
       url = ServletUtil.validateUrl(Uri.parse(urlStr));
     } catch (IllegalArgumentException e) {
-      throw new GadgetException(GadgetException.Code.INVALID_PARAMETER,
-          "Invalid " + Param.URL.getKey() + " parameter", HttpResponse.SC_BAD_REQUEST);
+      throw new GadgetException(GadgetException.Code.INVALID_PARAMETER, "Invalid "
+              + Param.URL.getKey() + " parameter", HttpResponse.SC_BAD_REQUEST);
     }
 
-    HttpRequest req = new HttpRequest(url)
-        .setMethod(getParameter(request, METHOD_PARAM, "GET"))
-        .setContainer(getContainer(request));
+    HttpRequest req = new HttpRequest(url).setMethod(getParameter(request, METHOD_PARAM, "GET"))
+            .setContainer(getContainer(request));
 
-    setPostData(request,req);
+    setPostData(request, req);
 
     String headerData = getParameter(request, HEADERS_PARAM, "");
     if (headerData.length() > 0) {
@@ -205,7 +203,7 @@ public class MakeRequestHandler {
         String[] parts = StringUtils.splitPreserveAllTokens(header, '=');
         if (parts.length != 2) {
           throw new GadgetException(GadgetException.Code.INVALID_PARAMETER,
-              "Malformed header param specified:" + header, HttpResponse.SC_BAD_REQUEST);
+                  "Malformed header param specified:" + header, HttpResponse.SC_BAD_REQUEST);
         }
         String headerName = Utf8UrlCoder.decode(parts[0]);
         if (!HttpRequestHandler.BAD_HEADERS.contains(headerName.toUpperCase())) {
@@ -214,8 +212,8 @@ public class MakeRequestHandler {
       }
     }
 
-    // Set the default content type  for post requests when a content type is not specified
-    if ("POST".equals(req.getMethod()) && req.getHeader("Content-Type")==null) {
+    // Set the default content type for post requests when a content type is not specified
+    if ("POST".equals(req.getMethod()) && req.getHeader("Content-Type") == null) {
       req.addHeader("Content-Type", "application/x-www-form-urlencoded");
     }
 
@@ -244,8 +242,13 @@ public class MakeRequestHandler {
     AuthType auth = AuthType.parse(getParameter(request, AUTHZ_PARAM, null));
     req.setAuthType(auth);
     if (auth != AuthType.NONE) {
-      req.setSecurityToken(extractAndValidateToken(request));
-      req.setOAuthArguments(new OAuthArguments(auth, request));
+      if (auth == AuthType.OAUTH2) {
+        req.setSecurityToken(extractAndValidateToken(request));
+        req.setOAuth2Arguments(new OAuth2Arguments(request));
+      } else {
+        req.setSecurityToken(extractAndValidateToken(request));
+        req.setOAuthArguments(new OAuthArguments(auth, request));
+      }
     }
 
     ServletUtil.setXForwardedForHeader(request, req);
@@ -253,19 +256,16 @@ public class MakeRequestHandler {
   }
 
   /**
-   * Set http request post data according to servlet request.
-   * It uses header encoding if available, and defaulted to utf8
-   * Override the function if different behavior is needed.
+   * Set http request post data according to servlet request. It uses header encoding if available,
+   * and defaulted to utf8 Override the function if different behavior is needed.
    */
-  protected void setPostData(HttpServletRequest request, HttpRequest req)
-      throws GadgetException {
+  protected void setPostData(HttpServletRequest request, HttpRequest req) throws GadgetException {
     String encoding = request.getCharacterEncoding();
     if (encoding == null) {
       encoding = "UTF-8";
     }
     try {
-      req.setPostBody(getParameter(request, POST_DATA_PARAM, "")
-          .getBytes(encoding.toUpperCase()));
+      req.setPostBody(getParameter(request, POST_DATA_PARAM, "").getBytes(encoding.toUpperCase()));
     } catch (UnsupportedEncodingException e) {
       // We might consider enumerating at least a small list of encodings
       // that we must always honor. For now, we return SC_BAD_REQUEST since
@@ -275,13 +275,12 @@ public class MakeRequestHandler {
   }
 
   /**
-   * Format a response as JSON, including additional JSON inserted by
-   * chained content fetchers.
+   * Format a response as JSON, including additional JSON inserted by chained content fetchers.
    */
   protected String convertResponseToJson(SecurityToken authToken, HttpServletRequest request,
-      HttpResponse results) throws GadgetException {
-    boolean getFullHeaders =
-        Boolean.parseBoolean(getParameter(request, GET_FULL_HEADERS_PARAM, "false"));
+          HttpResponse results) throws GadgetException {
+    boolean getFullHeaders = Boolean.parseBoolean(getParameter(request, GET_FULL_HEADERS_PARAM,
+            "false"));
     String originalUrl = request.getParameter(Param.URL.getKey());
     String body = results.getResponseAsString();
     if (body.length() > 0) {
@@ -289,8 +288,8 @@ public class MakeRequestHandler {
         body = processFeed(originalUrl, request, body);
       }
     }
-    Map<String, Object> resp =
-        FetchResponseUtils.getResponseAsJson(results, null, body, getFullHeaders);
+    Map<String, Object> resp = FetchResponseUtils.getResponseAsJson(results, null, body,
+            getFullHeaders);
 
     if (authToken != null) {
       String updatedAuthToken = authToken.getUpdatedToken();
@@ -323,15 +322,14 @@ public class MakeRequestHandler {
   /**
    * Processes a feed (RSS or Atom) using FeedProcessor.
    */
-  private String processFeed(String url, HttpServletRequest req, String xml)
-      throws GadgetException {
+  private String processFeed(String url, HttpServletRequest req, String xml) throws GadgetException {
     boolean getSummaries = Boolean.parseBoolean(getParameter(req, GET_SUMMARIES_PARAM, "false"));
     int numEntries;
     try {
       numEntries = Integer.valueOf(getParameter(req, NUM_ENTRIES_PARAM, DEFAULT_NUM_ENTRIES));
     } catch (NumberFormatException e) {
       throw new GadgetException(GadgetException.Code.INVALID_PARAMETER,
-          "numEntries paramater is not a number", HttpResponse.SC_BAD_REQUEST);
+              "numEntries paramater is not a number", HttpResponse.SC_BAD_REQUEST);
     }
     return feedProcessorProvider.get().process(url, xml, getSummaries, numEntries).toString();
   }
@@ -361,19 +359,20 @@ public class MakeRequestHandler {
    */
   @SuppressWarnings("boxing")
   protected static void setResponseHeaders(HttpServletRequest request,
-      HttpServletResponse response, HttpResponse results) throws GadgetException {
+          HttpServletResponse response, HttpResponse results) throws GadgetException {
     int refreshInterval = 0;
-    if (results.isStrictNoCache() || "1".equals(request.getParameter(UriCommon.Param.NO_CACHE.getKey()))) {
+    if (results.isStrictNoCache()
+            || "1".equals(request.getParameter(UriCommon.Param.NO_CACHE.getKey()))) {
       refreshInterval = 0;
     } else if (request.getParameter(UriCommon.Param.REFRESH.getKey()) != null) {
       try {
-        refreshInterval =  Integer.valueOf(request.getParameter(UriCommon.Param.REFRESH.getKey()));
+        refreshInterval = Integer.valueOf(request.getParameter(UriCommon.Param.REFRESH.getKey()));
       } catch (NumberFormatException nfe) {
         throw new GadgetException(GadgetException.Code.INVALID_PARAMETER,
-            "refresh parameter is not a number", HttpResponse.SC_BAD_REQUEST);
+                "refresh parameter is not a number", HttpResponse.SC_BAD_REQUEST);
       }
     } else {
-      refreshInterval = Math.max(60 * 60, (int)(results.getCacheTtl() / 1000L));
+      refreshInterval = Math.max(60 * 60, (int) (results.getCacheTtl() / 1000L));
     }
     HttpUtil.setCachingHeaders(response, refreshInterval, false);
 

@@ -30,6 +30,7 @@ import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.RequestPipeline;
 import org.apache.shindig.gadgets.oauth.OAuthArguments;
+import org.apache.shindig.gadgets.oauth2.OAuth2Arguments;
 import org.apache.shindig.gadgets.preload.PipelineExecutor;
 import org.apache.shindig.gadgets.spec.PipelinedData;
 import org.apache.shindig.gadgets.spec.View;
@@ -89,11 +90,13 @@ public class ProxyRenderer {
     uri.addQueryParameter("country", context.getLocale().getCountry());
 
     OAuthArguments oauthArgs = new OAuthArguments(view);
+    OAuth2Arguments oauth2Args = new OAuth2Arguments(view);
     oauthArgs.setProxiedContentRequest(true);
 
     HttpRequest request = new HttpRequest(uri.toUri())
         .setIgnoreCache(context.getIgnoreCache())
         .setOAuthArguments(oauthArgs)
+        .setOAuth2Arguments(oauth2Args)
         .setAuthType(view.getAuthType())
         .setSecurityToken(context.getToken())
         .setContainer(context.getContainer())
