@@ -103,6 +103,7 @@
                 /login.jsp = authc
 
                 /oauth/authorize/** = authc
+                /oauth2/authorize/** = authc
 
             </param-value>
         </init-param>
@@ -122,6 +123,11 @@
   <filter-mapping>
       <filter-name>ShiroFilter</filter-name>
       <url-pattern>/oauth/authorize</url-pattern>
+  </filter-mapping>
+  
+  <filter-mapping>
+      <filter-name>ShiroFilter</filter-name>
+      <url-pattern>/oauth2/authorize</url-pattern>
   </filter-mapping>
 
   <filter-mapping>
@@ -240,6 +246,14 @@
       org.apache.shindig.social.sample.oauth.SampleOAuthServlet
     </servlet-class>
   </servlet>
+  
+  <!-- Serve OAuth 2 APIs -->
+  <servlet>
+    <servlet-name>OAuth2Servlet</servlet-name>
+    <servlet-class>
+      org.apache.shindig.social.core.oauth2.OAuth2Servlet
+    </servlet-class>
+  </servlet>
 
   <servlet>
     <servlet-name>rpcSwf</servlet-name>
@@ -305,6 +319,11 @@
   <servlet-mapping>
     <servlet-name>sampleOAuth</servlet-name>
     <url-pattern>/oauth/*</url-pattern>
+  </servlet-mapping>
+  
+  <servlet-mapping>
+    <servlet-name>OAuth2Servlet</servlet-name>
+    <url-pattern>/oauth2/*</url-pattern>
   </servlet-mapping>
 
   <servlet-mapping>

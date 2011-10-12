@@ -57,7 +57,7 @@ public class AuthenticationProviderHandlerTest extends Assert {
    */
   public static class ProvidesNoHandlers extends AuthenticationHandlerProvider {
     public ProvidesNoHandlers() {
-      super(null, null, null);
+      super(null, null, null, null);
     }
 
     @Override

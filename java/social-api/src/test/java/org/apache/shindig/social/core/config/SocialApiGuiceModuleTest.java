@@ -26,6 +26,8 @@ import com.google.inject.TypeLiteral;
 import org.apache.shindig.auth.AuthenticationHandler;
 import org.apache.shindig.common.PropertiesModule;
 import org.apache.shindig.social.core.oauth.AuthenticationHandlerProvider;
+import org.apache.shindig.social.core.oauth2.OAuth2Service;
+import org.apache.shindig.social.core.oauth2.OAuth2ServiceImpl;
 import org.apache.shindig.social.opensocial.oauth.OAuthDataStore;
 import org.easymock.EasyMock;
 import org.junit.Assert;
@@ -44,6 +46,7 @@ public class SocialApiGuiceModuleTest extends Assert {
           @Override
           protected void configure() {
             bind(OAuthDataStore.class).toInstance(EasyMock.createMock(OAuthDataStore.class));
+            bind(OAuth2Service.class).toInstance(EasyMock.createMock(OAuth2ServiceImpl.class));
           }
     });
   }
@@ -57,11 +60,11 @@ public class SocialApiGuiceModuleTest extends Assert {
 
     AuthenticationHandlerProvider provider =
         injector.getInstance(AuthenticationHandlerProvider.class);
-    assertEquals(3, provider.get().size());
+    assertEquals(4, provider.get().size());
 
     List<AuthenticationHandler> handlers = injector.getInstance(
         Key.get(new TypeLiteral<List<AuthenticationHandler>>(){}));
 
-    assertEquals(3, handlers.size());
+    assertEquals(4, handlers.size());
   }
 }

@@ -24,6 +24,7 @@ import com.google.inject.Provider;
 import org.apache.shindig.auth.AnonymousAuthenticationHandler;
 import org.apache.shindig.auth.AuthenticationHandler;
 import org.apache.shindig.auth.UrlParameterAuthenticationHandler;
+import org.apache.shindig.social.core.oauth2.OAuth2AuthenticationHandler;
 
 import java.util.List;
 
@@ -34,10 +35,10 @@ public class AuthenticationHandlerProvider implements Provider<List<Authenticati
   protected List<AuthenticationHandler> handlers;
 
   @Inject
-  public AuthenticationHandlerProvider(UrlParameterAuthenticationHandler urlParam,
-      OAuthAuthenticationHandler threeLeggedOAuth,
+  public AuthenticationHandlerProvider(OAuth2AuthenticationHandler oauth2Handler, UrlParameterAuthenticationHandler urlParam,
+      OAuthAuthenticationHandler threeLeggedOAuth, 
       AnonymousAuthenticationHandler anonymous) {
-    handlers = Lists.newArrayList(urlParam, threeLeggedOAuth, anonymous);
+    handlers = Lists.newArrayList(urlParam, threeLeggedOAuth, oauth2Handler, anonymous);
   }
 
   public List<AuthenticationHandler> get() {

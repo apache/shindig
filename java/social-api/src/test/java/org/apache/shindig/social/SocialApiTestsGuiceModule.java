@@ -28,6 +28,10 @@ import org.apache.shindig.protocol.conversion.BeanConverter;
 import org.apache.shindig.protocol.conversion.BeanJsonConverter;
 import org.apache.shindig.protocol.conversion.BeanXStreamConverter;
 import org.apache.shindig.protocol.conversion.xstream.XStreamConfiguration;
+import org.apache.shindig.social.core.oauth2.OAuth2DataService;
+import org.apache.shindig.social.core.oauth2.OAuth2DataServiceImpl;
+import org.apache.shindig.social.core.oauth2.OAuth2Service;
+import org.apache.shindig.social.core.oauth2.OAuth2ServiceImpl;
 import org.apache.shindig.social.core.util.xstream.XStream081Configuration;
 import org.apache.shindig.social.opensocial.service.ActivityHandler;
 import org.apache.shindig.social.opensocial.service.ActivityStreamHandler;
@@ -86,5 +90,7 @@ public class SocialApiTestsGuiceModule extends AbstractModule {
     bind(Integer.class).annotatedWith(
         Names.named("shindig.cache.lru.default.capacity"))
         .toInstance(10);
+    bind(OAuth2Service.class).to(OAuth2ServiceImpl.class);
+    bind(OAuth2DataService.class).to(OAuth2DataServiceImpl.class);
   }
 }

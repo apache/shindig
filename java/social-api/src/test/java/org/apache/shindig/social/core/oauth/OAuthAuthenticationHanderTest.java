@@ -68,9 +68,9 @@ public class OAuthAuthenticationHanderTest extends EasyMockTestCase {
   public void setUp() throws Exception {
     reqHandler = new OAuthAuthenticationHandler(mockStore, validator);
     formEncodedPost = new FakeOAuthRequest("POST", TEST_URL, "a=b&c=d",
-                                           OAuth.FORM_ENCODED);
+        OAuth.FORM_ENCODED);
     nonFormEncodedPost = new FakeOAuthRequest("POST", TEST_URL, "BODY",
-                                              "text/plain");
+        "text/plain");
   }
 
   private void expectTokenEntry() {
@@ -78,9 +78,8 @@ public class OAuthAuthenticationHanderTest extends EasyMockTestCase {
   }
 
   private void expectTokenEntry(OAuthEntry authEntry) {
-    EasyMock.expect(mockStore.getEntry(
-                      EasyMock.eq(TOKEN))).
-      andReturn(authEntry).anyTimes();
+    EasyMock.expect(mockStore.getEntry(EasyMock.eq(TOKEN)))
+        .andReturn(authEntry).anyTimes();
   }
 
   private OAuthEntry createOAuthEntry() {
@@ -100,11 +99,13 @@ public class OAuthAuthenticationHanderTest extends EasyMockTestCase {
 
   private void expectConsumer() {
     try {
-      EasyMock.expect(mockStore.getConsumer(
-                        EasyMock.eq(FakeOAuthRequest.CONSUMER_KEY))).
-        andReturn(new OAuthConsumer(null, FakeOAuthRequest.CONSUMER_KEY,
-                                    FakeOAuthRequest.CONSUMER_SECRET, new OAuthServiceProvider(null, null, null)))
-        .anyTimes();
+      EasyMock
+          .expect(
+              mockStore.getConsumer(EasyMock.eq(FakeOAuthRequest.CONSUMER_KEY)))
+          .andReturn(
+              new OAuthConsumer(null, FakeOAuthRequest.CONSUMER_KEY,
+                  FakeOAuthRequest.CONSUMER_SECRET, new OAuthServiceProvider(
+                      null, null, null))).anyTimes();
     } catch (OAuthProblemException e) {
       // ignore
     }
@@ -112,9 +113,11 @@ public class OAuthAuthenticationHanderTest extends EasyMockTestCase {
 
   private void expectSecurityToken() {
     try {
-      EasyMock.expect(mockStore.getSecurityTokenForConsumerRequest(
-                        EasyMock.eq(FakeOAuthRequest.CONSUMER_KEY), EasyMock.eq(FakeOAuthRequest.REQUESTOR))).
-        andReturn(new AnonymousSecurityToken());
+      EasyMock.expect(
+          mockStore.getSecurityTokenForConsumerRequest(
+              EasyMock.eq(FakeOAuthRequest.CONSUMER_KEY),
+              EasyMock.eq(FakeOAuthRequest.REQUESTOR))).andReturn(
+          new AnonymousSecurityToken());
     } catch (OAuthProblemException e) {
       // ignore
     }
@@ -126,7 +129,8 @@ public class OAuthAuthenticationHanderTest extends EasyMockTestCase {
     expectConsumer();
     replay();
     HttpServletRequest request = formEncodedPost.sign(TOKEN,
-                                                      FakeOAuthRequest.OAuthParamLocation.URI_QUERY, FakeOAuthRequest.BodySigning.NONE);
+        FakeOAuthRequest.OAuthParamLocation.URI_QUERY,
+        FakeOAuthRequest.BodySigning.NONE);
     SecurityToken token = reqHandler.getSecurityTokenFromRequest(request);
     assertEquals(FakeOAuthRequest.REQUESTOR, token.getViewerId());
     assertEquals(APP_ID, token.getAppId());
@@ -142,10 +146,10 @@ public class OAuthAuthenticationHanderTest extends EasyMockTestCase {
     expectTokenEntry();
     expectConsumer();
     replay();
-    FakeOAuthRequest get =
-      new FakeOAuthRequest("GET", TEST_URL, null, null);
+    FakeOAuthRequest get = new FakeOAuthRequest("GET", TEST_URL, null, null);
     FakeHttpServletRequest request = get.sign(TOKEN,
-                                              FakeOAuthRequest.OAuthParamLocation.URI_QUERY, FakeOAuthRequest.BodySigning.NONE);
+        FakeOAuthRequest.OAuthParamLocation.URI_QUERY,
+        FakeOAuthRequest.BodySigning.NONE);
     assertNotNull(reqHandler.getSecurityTokenFromRequest(request));
   }
 
@@ -154,10 +158,10 @@ public class OAuthAuthenticationHanderTest extends EasyMockTestCase {
     expectTokenEntry();
     expectConsumer();
     replay();
-    FakeOAuthRequest get =
-      new FakeOAuthRequest("GET", TEST_URL, null, null);
+    FakeOAuthRequest get = new FakeOAuthRequest("GET", TEST_URL, null, null);
     FakeHttpServletRequest request = get.sign(TOKEN,
-                                              FakeOAuthRequest.OAuthParamLocation.AUTH_HEADER, FakeOAuthRequest.BodySigning.NONE);
+        FakeOAuthRequest.OAuthParamLocation.AUTH_HEADER,
+        FakeOAuthRequest.BodySigning.NONE);
     assertNotNull(reqHandler.getSecurityTokenFromRequest(request));
   }
 
@@ -167,12 +171,12 @@ public class OAuthAuthenticationHanderTest extends EasyMockTestCase {
     expectConsumer();
     replay();
     HttpServletRequest request = formEncodedPost.sign(TOKEN,
-                                                      FakeOAuthRequest.OAuthParamLocation.POST_BODY, FakeOAuthRequest.BodySigning.NONE);
+        FakeOAuthRequest.OAuthParamLocation.POST_BODY,
+        FakeOAuthRequest.BodySigning.NONE);
     SecurityToken token = reqHandler.getSecurityTokenFromRequest(request);
     assertNotNull(token);
     verify();
   }
-
 
   @Test
   public void testVerifyFailNoTokenEntry() throws Exception {
@@ -180,7 +184,8 @@ public class OAuthAuthenticationHanderTest extends EasyMockTestCase {
     expectConsumer();
     replay();
     HttpServletRequest request = formEncodedPost.sign(TOKEN,
-                                                      FakeOAuthRequest.OAuthParamLocation.URI_QUERY, FakeOAuthRequest.BodySigning.NONE);
+        FakeOAuthRequest.OAuthParamLocation.URI_QUERY,
+        FakeOAuthRequest.BodySigning.NONE);
     try {
       reqHandler.getSecurityTokenFromRequest(request);
       fail("Expect failure as no token entry in store");
@@ -198,7 +203,8 @@ public class OAuthAuthenticationHanderTest extends EasyMockTestCase {
     expectConsumer();
     replay();
     HttpServletRequest request = formEncodedPost.sign(TOKEN,
-                                                      FakeOAuthRequest.OAuthParamLocation.URI_QUERY, FakeOAuthRequest.BodySigning.NONE);
+        FakeOAuthRequest.OAuthParamLocation.URI_QUERY,
+        FakeOAuthRequest.BodySigning.NONE);
     try {
       reqHandler.getSecurityTokenFromRequest(request);
       fail("Expect failure as token secrets mismatch");
@@ -216,7 +222,8 @@ public class OAuthAuthenticationHanderTest extends EasyMockTestCase {
     expectConsumer();
     replay();
     HttpServletRequest request = formEncodedPost.sign(TOKEN,
-                                                      FakeOAuthRequest.OAuthParamLocation.URI_QUERY, FakeOAuthRequest.BodySigning.NONE);
+        FakeOAuthRequest.OAuthParamLocation.URI_QUERY,
+        FakeOAuthRequest.BodySigning.NONE);
     try {
       reqHandler.getSecurityTokenFromRequest(request);
       fail("Expect failure as token is a request token not an access token");
@@ -229,13 +236,15 @@ public class OAuthAuthenticationHanderTest extends EasyMockTestCase {
   @Test
   public void testVerifyFailTokenIsExpired() throws Exception {
     OAuthEntry authEntry = createOAuthEntry();
-    authEntry.setIssueTime(new Date(System.currentTimeMillis() - (OAuthEntry.ONE_YEAR + 1)));
+    authEntry.setIssueTime(new Date(System.currentTimeMillis()
+        - (OAuthEntry.ONE_YEAR + 1)));
     authEntry.setType(OAuthEntry.Type.REQUEST);
     expectTokenEntry(authEntry);
     expectConsumer();
     replay();
     HttpServletRequest request = formEncodedPost.sign(TOKEN,
-                                                      FakeOAuthRequest.OAuthParamLocation.URI_QUERY, FakeOAuthRequest.BodySigning.NONE);
+        FakeOAuthRequest.OAuthParamLocation.URI_QUERY,
+        FakeOAuthRequest.BodySigning.NONE);
     try {
       reqHandler.getSecurityTokenFromRequest(request);
       fail("Expect failure as token is expired");
@@ -251,7 +260,8 @@ public class OAuthAuthenticationHanderTest extends EasyMockTestCase {
     expectSecurityToken();
     replay();
     HttpServletRequest request = formEncodedPost.sign(null,
-                                                      FakeOAuthRequest.OAuthParamLocation.URI_QUERY, FakeOAuthRequest.BodySigning.NONE);
+        FakeOAuthRequest.OAuthParamLocation.URI_QUERY,
+        FakeOAuthRequest.BodySigning.NONE);
     SecurityToken token = reqHandler.getSecurityTokenFromRequest(request);
     assertNotNull(token);
     assertFalse(token instanceof OAuthSecurityToken);
@@ -263,10 +273,10 @@ public class OAuthAuthenticationHanderTest extends EasyMockTestCase {
     expectConsumer();
     expectSecurityToken();
     replay();
-    FakeOAuthRequest get =
-      new FakeOAuthRequest("GET", TEST_URL, null, null);
+    FakeOAuthRequest get = new FakeOAuthRequest("GET", TEST_URL, null, null);
     FakeHttpServletRequest request = get.sign(null,
-                                              FakeOAuthRequest.OAuthParamLocation.URI_QUERY, FakeOAuthRequest.BodySigning.NONE);
+        FakeOAuthRequest.OAuthParamLocation.URI_QUERY,
+        FakeOAuthRequest.BodySigning.NONE);
     assertNotNull(reqHandler.getSecurityTokenFromRequest(request));
   }
 
@@ -275,10 +285,10 @@ public class OAuthAuthenticationHanderTest extends EasyMockTestCase {
     expectConsumer();
     expectSecurityToken();
     replay();
-    FakeOAuthRequest get =
-      new FakeOAuthRequest("GET", TEST_URL, null, null);
+    FakeOAuthRequest get = new FakeOAuthRequest("GET", TEST_URL, null, null);
     FakeHttpServletRequest request = get.sign(null,
-                                              FakeOAuthRequest.OAuthParamLocation.AUTH_HEADER, FakeOAuthRequest.BodySigning.NONE);
+        FakeOAuthRequest.OAuthParamLocation.AUTH_HEADER,
+        FakeOAuthRequest.BodySigning.NONE);
     assertNotNull(reqHandler.getSecurityTokenFromRequest(request));
   }
 
@@ -288,7 +298,8 @@ public class OAuthAuthenticationHanderTest extends EasyMockTestCase {
     expectSecurityToken();
     replay();
     HttpServletRequest request = formEncodedPost.sign(null,
-                                                      FakeOAuthRequest.OAuthParamLocation.AUTH_HEADER, FakeOAuthRequest.BodySigning.NONE);
+        FakeOAuthRequest.OAuthParamLocation.AUTH_HEADER,
+        FakeOAuthRequest.BodySigning.NONE);
     reqHandler.getSecurityTokenFromRequest(request);
     verify();
   }
@@ -299,7 +310,8 @@ public class OAuthAuthenticationHanderTest extends EasyMockTestCase {
     expectSecurityToken();
     replay();
     HttpServletRequest request = formEncodedPost.sign(null,
-                                                      FakeOAuthRequest.OAuthParamLocation.POST_BODY, FakeOAuthRequest.BodySigning.NONE);
+        FakeOAuthRequest.OAuthParamLocation.POST_BODY,
+        FakeOAuthRequest.BodySigning.NONE);
     reqHandler.getSecurityTokenFromRequest(request);
     verify();
   }
@@ -308,13 +320,13 @@ public class OAuthAuthenticationHanderTest extends EasyMockTestCase {
   public void testNoSignature() throws Exception {
     replay();
     FakeHttpServletRequest request = formEncodedPost.sign(null,
-                                                          FakeOAuthRequest.OAuthParamLocation.URI_QUERY, FakeOAuthRequest.BodySigning.NONE);
+        FakeOAuthRequest.OAuthParamLocation.URI_QUERY,
+        FakeOAuthRequest.BodySigning.NONE);
     // A request without a signature is not an OAuth request
     request.setParameter(OAuth.OAUTH_SIGNATURE, "");
     SecurityToken st = reqHandler.getSecurityTokenFromRequest(request);
     assertNull(st);
   }
-
 
   @Test
   public void testBodyHashSigning() throws Exception {
@@ -323,19 +335,20 @@ public class OAuthAuthenticationHanderTest extends EasyMockTestCase {
     replay();
 
     FakeHttpServletRequest request = nonFormEncodedPost.sign(null,
-                                                             FakeOAuthRequest.OAuthParamLocation.URI_QUERY, FakeOAuthRequest.BodySigning.HASH);
+        FakeOAuthRequest.OAuthParamLocation.URI_QUERY,
+        FakeOAuthRequest.BodySigning.HASH);
     assertNotNull(reqHandler.getSecurityTokenFromRequest(request));
   }
 
   @Test
-  public void testConsumerFailBodyHashSigningWithFormEncoding() throws Exception {
+  public void testConsumerFailBodyHashSigningWithFormEncoding()
+      throws Exception {
     replay();
-    FakeOAuthRequest bodyHashPost =
-      new FakeOAuthRequest("POST", TEST_URL, "a=b&c=d&oauth_body_hash=hash",
-                           OAuth.FORM_ENCODED);
-    FakeHttpServletRequest request = bodyHashPost
-      .sign(null, FakeOAuthRequest.OAuthParamLocation.URI_QUERY,
-            FakeOAuthRequest.BodySigning.NONE);
+    FakeOAuthRequest bodyHashPost = new FakeOAuthRequest("POST", TEST_URL,
+        "a=b&c=d&oauth_body_hash=hash", OAuth.FORM_ENCODED);
+    FakeHttpServletRequest request = bodyHashPost.sign(null,
+        FakeOAuthRequest.OAuthParamLocation.URI_QUERY,
+        FakeOAuthRequest.BodySigning.NONE);
     try {
       reqHandler.getSecurityTokenFromRequest(request);
       fail("Cant have body signing with form-encoded post bodies");
@@ -360,8 +373,8 @@ public class OAuthAuthenticationHanderTest extends EasyMockTestCase {
     req.setContentType("text/plain");
     String body = "BODY";
     req.setPostData(CharsetUtil.getUtf8Bytes(body));
-    String hash = new String(Base64.encodeBase64(DigestUtils.sha(CharsetUtil.getUtf8Bytes(body))),
-                             "UTF-8");
+    String hash = new String(Base64.encodeBase64(DigestUtils.sha(CharsetUtil
+        .getUtf8Bytes(body))), "UTF-8");
     req.setParameter(OAuthConstants.OAUTH_BODY_HASH, hash);
     OAuthAuthenticationHandler.verifyBodyHash(req, hash);
   }
@@ -372,8 +385,8 @@ public class OAuthAuthenticationHanderTest extends EasyMockTestCase {
     req.setContentType("text/plain");
     String body = "BODY";
     req.setPostData(CharsetUtil.getUtf8Bytes(body));
-    String hash = new String(Base64.encodeBase64(
-                               DigestUtils.sha(CharsetUtil.getUtf8Bytes("NOTBODY"))), "UTF-8");
+    String hash = new String(Base64.encodeBase64(DigestUtils.sha(CharsetUtil
+        .getUtf8Bytes("NOTBODY"))), "UTF-8");
     req.setParameter(OAuthConstants.OAUTH_BODY_HASH, hash);
     try {
       OAuthAuthenticationHandler.verifyBodyHash(req, hash);
@@ -389,8 +402,8 @@ public class OAuthAuthenticationHanderTest extends EasyMockTestCase {
     req.setContentType(OAuth.FORM_ENCODED);
     String body = "BODY";
     req.setPostData(CharsetUtil.getUtf8Bytes(body));
-    String hash = new String(Base64.encodeBase64(DigestUtils.sha(CharsetUtil.getUtf8Bytes(body))),
-                             "UTF-8");
+    String hash = new String(Base64.encodeBase64(DigestUtils.sha(CharsetUtil
+        .getUtf8Bytes(body))), "UTF-8");
     req.setParameter(OAuthConstants.OAUTH_BODY_HASH, hash);
     try {
       OAuthAuthenticationHandler.verifyBodyHash(req, hash);
@@ -399,13 +412,13 @@ public class OAuthAuthenticationHanderTest extends EasyMockTestCase {
       // Pass
     }
   }
-  
+
   @Test
   public void testBodyHashNoContentType() throws Exception {
     FakeHttpServletRequest req = new FakeHttpServletRequest();
     req.setPostData(CharsetUtil.getUtf8Bytes(""));
-    String hash = new String(Base64.encodeBase64(DigestUtils.sha(CharsetUtil.getUtf8Bytes(""))),
-                             "UTF-8");
+    String hash = new String(Base64.encodeBase64(DigestUtils.sha(CharsetUtil
+        .getUtf8Bytes(""))), "UTF-8");
     OAuthAuthenticationHandler.verifyBodyHash(req, hash);
   }
 }

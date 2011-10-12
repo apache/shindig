@@ -633,6 +633,112 @@
           "consumerSecret" : "secret",
           "icon" : "http://localhost:8080%contextroot%/samplecontainer/examples/icon.png"}
  },
+ 
+ // Registry of OAuth 2.0 clients with Shindig's service provider.
+ "oauth2" : {
+  "advancedAuthorizationCodeClient" : {
+    "registration" : {
+      "id" : "advancedAuthorizationCodeClient",
+      "secret": "advancedAuthorizationCodeClient_secret",
+      "title": "Most Advanced Authorization Code Client Ever!",
+      "redirectURI" : "http://localhost:8080/oauthclients/AuthorizationCodeClient/friends",
+      "type" : "confidential",
+      "flow" : "authorization_code"
+    },
+    "authorizationCodes" : {
+      "advancedClient_authcode_1" : {
+        // Authentication code has been consumed since associatedSignature exists
+        "redirectURI" : "http://localhost:8080/oauthclients/AuthorizationCodeClient/friends",
+        //Setting expiration to -1 makes code permanent
+        "expiration" : -1
+      },
+      "advancedClient_authcode_2" : {
+        "redirectURI" : "http://localhost:8080/oauthclients/AuthorizationCodeClient/friends",
+        "expiration" : -1
+      }
+    },
+    "accessTokens" : {
+      "advancedClient_accesstoken_1" : {
+        "redirectURI" : "http://localhost:8080/oauthclients/AuthorizationCodeClient/friends",
+        "expiration" : -1
+      }
+    }
+  },
+  "advancedImplicitClient" : {
+    "registration" : {
+      "id" : "advancedImplicitClient",
+      "title" : "Most Advanced Implicit Client Ever!",
+      "type" : "public",
+      "redirectURI" : "http://localhost:8080/oauthclients/ImplicitClientHelper.html",
+      "flow" : "implicit"
+    }
+  },
+  "testClient" : {
+    "registration" : {
+      "id" : "testClient",
+      "redirectURI" : "http://localhost:8080/oauthclients/AuthorizationCodeClient",
+      "type" : "public",
+      "flow" : "authorization_code"
+    },
+    "authorizationCodes" : {
+      "testClient_authcode_1" : {
+        "redirectURI" : "http://localhost:8080/oauthclients/AuthorizationCodeClient",
+        "expiration" : -1
+      },
+      "testClient_authcode_2" : {
+        "redirectURI" : "http://localhost:8080/oauthclients/AuthorizationCodeClient",
+        "expiration" : -1
+      }
+    },
+    "accessTokens" : {
+      "testClient_accesstoken_1" : {
+        "redirectURI" : "http://localhost:8080/oauthclients/AuthorizationCodeClient",
+        "expiration" : -1
+      }
+    }
+  },
+  "testClientCredentialsClient" : {
+    "registration" : {
+      "id" : "testClientCredentialsClient",
+      "secret": "clientCredentialsClient_secret",
+      "type" : "confidential",
+      "flow" : "client_credentials"
+    },
+      "accessTokens" : {
+        "testClientCredentialsClient_accesstoken_1" : {
+        "expiration" : -1
+      }
+    }
+  },
+  "shindigClient" : {
+    "registration" : {
+      "id" : "shindigClient",
+      "secret": "U78KJM98372AMGL87612993M",
+      "title": "shindig client registered for authorization",
+      "redirectURI" : "http://localhost:8080%contextRoot%/gadgets/oauth2callback",
+      "type" : "confidential",
+      "flow" : "authorization_code"
+  },
+    "authorizationCodes" : {
+      "shindigClient_authcode_1" : {
+        // Authentication code has been consumed since associatedSignature exists
+        "redirectURI" : "http://localhost:8080%contextRoot%/gadgets/oauth2callback",
+        //Setting expiration to -1 makes code permanent
+        "expiration" : -1
+      },
+      "shindigClient_authcode_2" : {
+        "redirectURI" : "http://localhost:8080%contextRoot%/gadgets/oauth2callback",
+        "expiration" : -1
+      }
+    }, 
+    "accessTokens" : {
+      "shindigClient_accesstoken_1" : {
+        "redirectURI" : "http://localhost:8080%contextRoot%/gadgets/oauth2callback",
+        "expiration" : -1
+      }
+    }
+  }
+},
 
  // duplicates userApplications as above..
  "permissions": {

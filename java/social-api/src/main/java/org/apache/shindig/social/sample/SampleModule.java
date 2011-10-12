@@ -17,6 +17,10 @@
  */
 package org.apache.shindig.social.sample;
 
+import org.apache.shindig.social.core.oauth2.OAuth2DataService;
+import org.apache.shindig.social.core.oauth2.OAuth2DataServiceImpl;
+import org.apache.shindig.social.core.oauth2.OAuth2Service;
+import org.apache.shindig.social.core.oauth2.OAuth2ServiceImpl;
 import org.apache.shindig.social.opensocial.oauth.OAuthDataStore;
 import org.apache.shindig.social.opensocial.spi.ActivityService;
 import org.apache.shindig.social.opensocial.spi.ActivityStreamService;
@@ -51,5 +55,7 @@ public class SampleModule extends AbstractModule {
     bind(PersonService.class).to(JsonDbOpensocialService.class);
     bind(MessageService.class).to(JsonDbOpensocialService.class);
     bind(OAuthDataStore.class).to(SampleOAuthDataStore.class);
+    bind(OAuth2Service.class).to(OAuth2ServiceImpl.class);
+    bind(OAuth2DataService.class).to(OAuth2DataServiceImpl.class);
   }
 }

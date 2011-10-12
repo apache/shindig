@@ -67,6 +67,7 @@ public abstract class AbstractLargeRestfulTests extends EasyMockTestCase {
   protected static final String XSDRESOURCE = "opensocial.xsd";
   protected XpathEngine xp;
   private HttpServletResponse res;
+  protected Injector injector = null;
 
   private DataServiceServlet servlet;
 
@@ -90,7 +91,7 @@ public abstract class AbstractLargeRestfulTests extends EasyMockTestCase {
 
   @Before
   public void abstractLargeRestfulBefore() throws Exception {
-    Injector injector = Guice.createInjector(new SocialApiTestsGuiceModule());
+    injector = Guice.createInjector(new SocialApiTestsGuiceModule());
 
     servlet = new DataServiceServlet();
 
