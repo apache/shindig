@@ -69,13 +69,12 @@
                     console.log("dojo initialized");
                     new MediaUI(new SocialWrapper()).init();
                 }
-            
+
                 <!-- Register entry point -->
-                dojo.addOnLoad(init);   // TODO: work-around to tundra.css issue
-                //gadgets.util.registerOnLoadHandler(function() {
-                    //dojo.addOnLoad(init);
-                //});     
-            </script>   
+                gadgets.util.registerOnLoadHandler(function() {
+                    dojo.addOnLoad(init);
+                });
+            </script>
         </head>
         <body class="tundra">
         </body>
