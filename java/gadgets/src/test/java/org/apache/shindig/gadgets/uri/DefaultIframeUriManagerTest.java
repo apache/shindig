@@ -70,7 +70,6 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
       return LD_PREFIX;
     }
 
-    @Override
     public String getLockedDomainPrefix(String token) {
       // TODO Auto-generated method stub
       return LD_PREFIX;

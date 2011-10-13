@@ -68,7 +68,6 @@ public class GadgetAdminModule extends AbstractModule {
       }
     }
 
-    @Override
     public GadgetAdminStore get() {
       return store;
     }

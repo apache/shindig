@@ -96,7 +96,6 @@ public class BasicGadgetAdminStoreTest extends EasyMockTestCase {
   @Before
   public void setUp() throws Exception {
     featureRegistryProvider = new FeatureRegistryProvider() {
-      @Override
       public FeatureRegistry get(String repository) throws GadgetException {
         return mockRegistry;
       }
