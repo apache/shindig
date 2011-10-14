@@ -29,7 +29,8 @@ public interface MessageKeys {
 	public static final String ERROR_PARSING_SECURE_TOKEN = "errorParsingSecureToken";
 	//XmlUtil
 	public static final String ERROR_PARSING_XML="commonErrorParsingXML";
-	public static final String ERROR_PARSING_EXTERNAL_ENTITIES="errorParsingExternalEntities";
+	public static final String ERROR_PARSING_EXTERNAL_GENERAL_ENTITIES="errorParsingExternalGeneralEntities";
+	public static final String ERROR_PARSING_EXTERNAL_PARAMETER_ENTITIES="errorParsingExternalParameterEntities";
 	public static final String ERROR_PARSING_EXTERNAL_DTD="errorParsingExternalDTD";
 	public static final String ERROR_PARSING_SECURE_XML="errorNotUsingSecureXML";
 	public static final String REUSE_DOC_BUILDERS="reuseDocumentBuilders";
@@ -44,7 +45,7 @@ public interface MessageKeys {
 	public static final String LOAD_RESOURCES_FROM="loadResourcesFrom";
 	public static final String LOAD_FILES_FROM="loadFilesFrom";
 	//ApiServlet
-	public static final String API_SERVLET_PROTOCAL_EXCEPTION="apiServletProtocalException";
+	public static final String API_SERVLET_PROTOCOL_EXCEPTION="apiServletProtocolException";
 	public static final String API_SERVLET_EXCEPTION="apiServletException";
 	//RegistryFeature
 	public static final String OVERRIDING_FEATURE="overridingFeature";
@@ -55,7 +56,7 @@ public interface MessageKeys {
 	
 	//FeatureResourceLoader
 	public static final String MISSING_FILE="missingFile";
-	public static final String UNABLE_RETRIVE_LIB="unableRetriveLib";
+	public static final String UNABLE_RETRIEVE_LIB="unableRetrieveLib";
 	//BasicHttpFetcher
 	public static final String TIMEOUT_EXCEPTION="timeoutException";
 	public static final String EXCEPTION_OCCURRED="exceptionOccurred";
@@ -140,7 +141,7 @@ public interface MessageKeys {
 	public static final String UPDATE_SPEC_FAILURE_USE_CACHE_VERSION="updateSpecFailureUseCacheVersion"; 
 	public static final String UPDATE_SPEC_FAILURE_APPLY_NEG_CACHE="updateSpecFailureApplyNegCache";
 	//HashLockedDomainService
-	public static final String NO_LOCKED_DOMAIN_CONFIG="noLocakedDomainConfig";
+	public static final String NO_LOCKED_DOMAIN_CONFIG="noLockedDomainConfig";
 	//Bootstrap
 	public static final String STARTING_CONN_MANAGER_WITH="startingConnManagerWith";
 

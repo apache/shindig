@@ -292,13 +292,13 @@ public class FeatureResourceLoader {
             content = response.getResponseAsString();
           } else {
             if (LOG.isLoggable(Level.WARNING)) {
-              LOG.logp(Level.WARNING, classname, "getContent", MessageKeys.UNABLE_RETRIVE_LIB,
+              LOG.logp(Level.WARNING, classname, "getContent", MessageKeys.UNABLE_RETRIEVE_LIB,
                   new Object[] {uri});
             }
           }
         } catch (GadgetException e) {
           if (LOG.isLoggable(Level.WARNING)) {
-            LOG.logp(Level.WARNING, classname, "getContent", MessageKeys.UNABLE_RETRIVE_LIB,
+            LOG.logp(Level.WARNING, classname, "getContent", MessageKeys.UNABLE_RETRIEVE_LIB,
                 new Object[] {uri});
           }
         }

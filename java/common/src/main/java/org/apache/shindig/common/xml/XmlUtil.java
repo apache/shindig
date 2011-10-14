@@ -95,7 +95,7 @@ public final class XmlUtil {
     } catch (IllegalArgumentException e) {
       // Not supported by some very old parsers.
       if (LOG.isLoggable(Level.INFO)) {
-        LOG.logp(Level.INFO, CLASSNAME, "static block", MessageKeys.ERROR_PARSING_EXTERNAL_ENTITIES);
+        LOG.logp(Level.INFO, CLASSNAME, "static block", MessageKeys.ERROR_PARSING_EXTERNAL_GENERAL_ENTITIES);
       }	
     }
 
@@ -105,7 +105,7 @@ public final class XmlUtil {
     } catch (IllegalArgumentException e) {
       // Not supported by some very old parsers.
       if (LOG.isLoggable(Level.INFO)) {
-        LOG.logp(Level.INFO, CLASSNAME, "static block", MessageKeys.ERROR_PARSING_EXTERNAL_ENTITIES);
+        LOG.logp(Level.INFO, CLASSNAME, "static block", MessageKeys.ERROR_PARSING_EXTERNAL_PARAMETER_ENTITIES);
       }
     }
 

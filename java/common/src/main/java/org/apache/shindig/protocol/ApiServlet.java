@@ -141,7 +141,7 @@ public abstract class ApiServlet extends InjectedServlet {
     if (t instanceof ProtocolException) {
       ProtocolException pe = (ProtocolException) t;
       if (LOG.isLoggable(Level.INFO)) {
-        LOG.logp(Level.INFO, classname, "responseItemFromException", MessageKeys.API_SERVLET_PROTOCAL_EXCEPTION,pe);
+        LOG.logp(Level.INFO, classname, "responseItemFromException", MessageKeys.API_SERVLET_PROTOCOL_EXCEPTION,pe);
       }
       return new ResponseItem(pe.getCode(), pe.getMessage(), pe.getResponse());
     }
