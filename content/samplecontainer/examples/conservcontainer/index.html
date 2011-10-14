@@ -11,12 +11,11 @@
 		<script type="text/javascript" src="layout.js"></script>
 		<script type="text/javascript">
 			var my = {};
-			var urlBase = location.href.substr(0, location.href.indexOf('/samplecontainer/examples/conservcontainer/'));
-			var contextRoot = urlBase.substr(urlBase.indexOf(location.port) + location.port.length);
-			var base = 'http://' + window.location.host + '/'+ contextRoot + '/samplecontainer/examples/conservcontainer/';
-			my.gadgetSpecUrls = [ base + 'sample-selection-listener.xml',
-                                              base + 'sample-actions-runner.xml'];
+			var str = '/conservcontainer/';
+			var base = location.href.substr(0, location.href.indexOf(str)+str.length);
+			my.gadgetSpecUrls = [ base + 'sample-selection-listener.xml', base + 'sample-actions-runner.xml'];
 			my.renderGadgets = function() {
+					$(".gadgetUrl")[0].value = base + "sample-actions-voip.xml";
 				  // uncomment this to render gadgets specified in my.gadgetSpecUrls
 				  for (var i = 0; i < my.gadgetSpecUrls.length; ++i) {
 				    //var gadgetSite = CommonContainer.renderGadget(my.gadgetSpecUrls[i], "gadget-chrome-"+i);
@@ -192,7 +191,7 @@
 		<div id="helloworlds" style="margin: 4px; float: left;">
 		</div>
 		<div style="font-family:Arial">
-		Preload Gadget: <input type="text" class="gadgetUrl" value="http://localhost:8080/samplecontainer/examples/conservcontainer/sample-actions-voip.xml" />
+		Preload Gadget: <input type="text" class="gadgetUrl" />
 	  	<input type="submit" value="Preload" onclick="onPreloadGadget();"/>
 		<input type="submit" value="Add" onclick="onAddGadget();"/>
 		</div>
