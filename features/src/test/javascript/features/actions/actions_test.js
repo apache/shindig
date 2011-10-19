@@ -76,8 +76,8 @@ DeclarativeActionsTest.prototype.testGadgetsRunAction = function() {
   var actionId = "testAction";
   var opt_selection = "testSelection";
   gadgets.actions.runAction(actionId, opt_selection);
-  this.assertRpcCalled('..', 'actions', null,
-    'runAction', {"id":actionId, "selection":opt_selection});
+  this.assertRpcCalled('..', 'run_action', null,
+    {"id":actionId, "selection":opt_selection});
 };
 
 

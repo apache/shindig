@@ -560,21 +560,23 @@
     unloadedCallback;
 
   // Function to handle RPC calls from the gadgets side
+  function router_get_actions_by_type(object) {
+    return container_.actions.getActionsByDataType(object);
+  }
+  function router_get_actions_by_path(object) {
+    return container_.actions.getActionsByPath(object);
+  }
+  function router_run_action(object) {
+    container_.actions.runAction(object.id, object.selection);
+  }
   function router(channel, object) {
     switch (channel) {
     case 'bindAction':
       bindAction(object);
       break;
-    case 'runAction':
-      container_.actions.runAction(object.id, object.selection);
-      break;
     case 'removeAction':
       hideActionHandlerProxy([object]);
       break;
-    case 'getActionsByPath':
-      return container_.actions.getActionsByPath(object);
-    case 'getActionsByDataType':
-      return container_.actions.getActionsByDataType(object);
     case 'addShowActionListener':
       addShowActionListener(object);
       break;
@@ -656,6 +658,9 @@
   osapi.container.Container.addMixin('actions', function(container) {
     container_ = container;
     gadgets.rpc.register('actions', router);
+    gadgets.rpc.register('get_actions_by_type', router_get_actions_by_type);
+    gadgets.rpc.register('get_actions_by_path', router_get_actions_by_path);
+    gadgets.rpc.register('run_action', router_run_action);
 
     if (container.addGadgetLifecycleCallback) {
       container.addGadgetLifecycleCallback('actions',

@@ -150,7 +150,7 @@ gadgets['actions'] = (function() {
      */
     runAction: function(actionId, opt_selection) {
       actionData = {"id" : actionId, "selection" : opt_selection};
-      gadgets.rpc.call('..', 'actions', null, 'runAction', actionData);
+      gadgets.rpc.call('..', 'run_action', null, actionData);
     },
 
     /**
@@ -197,7 +197,7 @@ gadgets['actions'] = (function() {
      * @member gadgets.actions
      */
     getActionsByPath: function(path, callback) {
-      gadgets.rpc.call('..', 'actions', callback, 'getActionsByPath', path);
+      gadgets.rpc.call('..', 'get_actions_by_path', callback, path);
     },
 
     /**
@@ -222,8 +222,7 @@ gadgets['actions'] = (function() {
      * @member gadgets.actions
      */
     getActionsByDataType: function(dataType, callback) {
-      gadgets.rpc.call('..', 'actions', callback, 'getActionsByDataType',
-          dataType);
+      gadgets.rpc.call('..', 'get_actions_by_type', callback, dataType);
     },
 
     /**
