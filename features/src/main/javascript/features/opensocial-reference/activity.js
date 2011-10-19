@@ -333,7 +333,13 @@ opensocial.Activity.Field = {
    * This value can not be set.
    * @member opensocial.Activity.Field
    */
-  POSTED_TIME: 'postedTime'
+  POSTED_TIME: 'postedTime',
+  
+  /**
+   * An array specifing the embed experiences that should be added to the activity
+   * @member opensocial.Activity.Field
+   */
+  EMBEDS: 'embeds'
 };
 
 
