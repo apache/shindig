@@ -77,26 +77,26 @@ $shindigConfig = array(
   'default_js_prefix' => '/gadgets/js/',
   'default_iframe_prefix' => '/gadgets/ifr?',
 
- 'servlet_map' => array( 
+ 'servlet_map' => array(
    '/container' => 'ContentFilesServlet',
    '/samplecontainer' => 'ContentFilesServlet',
    '/gadgets/resources' => 'ResourcesFilesServlet',
-   '/gadgets/js' => 'JsServlet', 
-   '/gadgets/proxy' => 'ProxyServlet', 
-   '/gadgets/makeRequest' => 'MakeRequestServlet', 
-   '/gadgets/ifr' => 'GadgetRenderingServlet', 
-   '/gadgets/metadata' => 'MetadataServlet', 
-   '/gadgets/oauthcallback' => 'OAuthCallbackServlet', 
-   '/gadgets/api/rpc' => 'JsonRpcServlet', 
-   '/gadgets/api/rest' => 'DataServiceServlet', 
+   '/gadgets/js' => 'JsServlet',
+   '/gadgets/proxy' => 'ProxyServlet',
+   '/gadgets/makeRequest' => 'MakeRequestServlet',
+   '/gadgets/ifr' => 'GadgetRenderingServlet',
+   '/gadgets/metadata' => 'MetadataServlet',
+   '/gadgets/oauthcallback' => 'OAuthCallbackServlet',
+   '/gadgets/api/rpc' => 'JsonRpcServlet',
+   '/gadgets/api/rest' => 'DataServiceServlet',
    '/social/rest' => 'DataServiceServlet',
    '/social/rpc' => 'CompatibilityJsonRpcServlet',
-   '/rpc' => 'JsonRpcServlet', 
-   '/public.crt' => 'CertServlet', 
-   '/public.cer' => 'CertServlet', 
-   '/' => 'ContentFilesServlet',  
- ), 
- 
+   '/rpc' => 'JsonRpcServlet',
+   '/public.crt' => 'CertServlet',
+   '/public.cer' => 'CertServlet',
+   '/' => 'ContentFilesServlet',
+ ),
+
   // The X-XRDS-Location value for your implementing container, see http://code.google.com/p/partuza/source/browse/trunk/Library/XRDS.php for an example
   'xrds_location' => '',
 
@@ -156,7 +156,7 @@ $shindigConfig = array(
   // The OAuth Store is used to store the (gadgets/)oauth proxy credentials it obtained on behalf of the user/gadget combo
   'oauth_store' => 'BasicOAuthStore',
   'gadget_oauth_token_store' => 'BasicGadgetOAuthTokenStore',
- 
+
   // handler for ApiServlet
   'service_handler' => array(
     'people' => 'PersonHandler',
@@ -170,7 +170,7 @@ $shindigConfig = array(
     'mediaitems' => 'MediaItemHandler',
     'http' => 'HttpHandler',
   ),
- 
+
   // class is the name of the concrete input converter class
   // targetField is the name of the field where the decoded array will be inserted
   // into the params array or null if you want to overwrite params with the decoded
@@ -184,7 +184,7 @@ $shindigConfig = array(
     'albums' => array('class' => 'InputAlbumsConverter', 'targetField' => 'album'),
     'mediaitems' => array('class' => 'InputMediaItemsConverter', 'targetField' => 'mediaItem'),
   ),
- 
+
   // available gadget renderer with the class as key and the needed attributes in the
   // view's content block to choose this renderer. If constraint's value is a string
   // the attribute value has to match this string, if it's a boolean the attribute
@@ -193,9 +193,8 @@ $shindigConfig = array(
     'GadgetHtmlRenderer' => array('type' => 'HTML', 'href' => false),
     'GadgetHrefRenderer' => array('type' => 'HTML', 'href' => true),
     'GadgetUrlRenderer'  => array('type' => 'URL'),
-    //'GadgetUrlAuthRenderer'  => array('type' => 'URL'),
   ),
- 
+
   'gadget_class' => 'Gadget',
   'gadget_context_class' => 'GadgetContext',
   'gadget_factory_class' => 'GadgetFactory',
