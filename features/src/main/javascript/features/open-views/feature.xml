@@ -39,6 +39,7 @@ A map of view names to view attributes. Examples:
       <exports type="js">gadgets.views.setReturnValue</exports>
       <exports type="js">gadgets.window.getContainerDimensions</exports>
       <uses type="rpc">gadgets.views.openGadget</uses>
+      <uses type="rpc">gadgets.views.openEmbeddedExperience</uses>
       <uses type="rpc">gadgets.views.openUrl</uses>
       <uses type="rpc">gadgets.views.close</uses>
       <uses type="rpc">gadgets.views.setReturnValue</uses>
