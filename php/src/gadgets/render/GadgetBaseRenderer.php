@@ -484,7 +484,9 @@ abstract class GadgetBaseRenderer extends GadgetRenderer {
               'http.head', 'http.get', 'http.put',
               'http.post', 'http.delete'));
     }
-    return "gadgets.config.init(" . json_encode($gadgetConfig) . ");\n";
+    $encodedConfig = json_encode($gadgetConfig);
+    $encodedConfig = str_replace('${CONTEXT_ROOT}', Config::get('web_prefix'), $encodedConfig);
+    return "gadgets.config.init(" . $encodedConfig . ");\n";
   }
 
   /**
