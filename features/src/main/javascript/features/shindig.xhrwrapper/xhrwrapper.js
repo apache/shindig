@@ -177,7 +177,7 @@ shindig.xhrwrapper = shindig.xhrwrapper || {};
       params[gadgets.io.RequestParameters.GET_FULL_HEADERS] = true;
       params[gadgets.io.RequestParameters.POST_DATA] = opt_data;
       if (this.config_['authorization']) {
-        if (this.config_['authorization'] == 'oauth') {
+        if (this.config_['authorization'] == 'oauth' || this.config_['authorization'] == 'oauth2') {
           params[gadgets.io.RequestParameters.AUTHORIZATION] = gadgets.io.AuthorizationType.OAUTH;
           params[gadgets.io.RequestParameters.OAUTH_SERVICE_NAME] = this.config_['oauthService'];
           if (this.config_['oauthTokenName']) {

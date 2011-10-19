@@ -19,10 +19,13 @@
  */
 
 /**
- * The OAuth service located in the gadget xml inside ModulePrefs -> OAuth.
+ * The OAuth service located in the gadget xml inside ModulePrefs -> OAuth or ModulePrefs -> OAuth2.
+ *
+ * Since OAuth and OAuth2 implementation are similar we are using the same OAuthService for both implementations
+ * as well for now. The only difference is, that OAuth2 services don't need an request token endpoint
  **/
 class OAuthService {
-  
+
   private static $URL_ATTR = "url";
   private static $PARAM_LOCATION_ATTR = "param_location";
   private static $METHOD_ATTR = "method";
@@ -31,17 +34,17 @@ class OAuthService {
    * @var string
    */
   private $name;
-  
+
   /**
    * @var string EndPoint
    */
   private $requestUrl;
-  
+
   /**
    * @var string EndPoint
    */
   private $authorizationUrl;
-  
+
   /**
    * @var string EndPoint
    */
@@ -67,15 +70,12 @@ class OAuthService {
           throw new SpecParserException("Multiple OAuth/Service/Authorization elements");
         }
         $this->authorizationUrl = $this->parseEndPoint($element);
-      } else if ($type == 'Access') {
+      } else if ($type == 'Access' || $type == 'Token') {
         if ($this->accessUrl) {
           throw new SpecParserException("Multiple OAuth/Service/Access elements");
         }
         $this->accessUrl = $this->parseEndPoint($element);
       }
-    }
-    if ($this->requestUrl == null) {
-      throw new SpecParserException("/OAuth/Service/Request is required");
     }
     if ($this->accessUrl == null) {
       throw new SpecParserException("/OAuth/Service/Access is required");
@@ -83,15 +83,15 @@ class OAuthService {
     if ($this->authorizationUrl == null) {
       throw new SpecParserException("/OAuth/Service/Authorization is required");
     }
-    if ($this->requestUrl->location != $this->accessUrl->location) {
+    if ($this->requestUrl && $this->requestUrl->location != $this->accessUrl->location) {
       throw new SpecParserException(
           "Access@location must be identical to Request@location");
     }
-    if ($this->requestUrl->method != $this->accessUrl->method) {
+    if ($this->requestUrl && $this->requestUrl->method != $this->accessUrl->method) {
       throw new SpecParserException(
           "Access@method must be identical to Request@method");
     }
-    if ($this->requestUrl->location == Location::$body &&
+    if ($this->requestUrl && $this->requestUrl->location == Location::$body &&
         $this->requestUrl->method == Method::$GET) {
       throw new SpecParserException("Incompatible parameter location, cannot" +
           "use post-body with GET requests");
@@ -198,4 +198,9 @@ class EndPoint {
     $this->method = $method;
     $this->location = $location;
   }
+}
+
+class SpecParserException extends Exception
+{
+
 }

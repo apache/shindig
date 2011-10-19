@@ -21,7 +21,7 @@
 class GadgetRenderingServletTest extends PHPUnit_Framework_TestCase {
     public function testCheckConstraints() {
         $servlet = new GadgetRenderingServlet();
-        ob_end_flush();
+        $servlet->noHeaders = true;
 
         $constraints = array('type' => 'HTML', 'href' => false);
 

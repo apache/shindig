@@ -88,10 +88,19 @@ class OAuthFetcherFactory {
    * @param RemoteContentFetcher $fetcher The fetcher that will fetch real content
    * @param SecurityToken $token The gadget token used to identity the user and gadget
    * @param OAuthRequestParams $params The parsed parameters the gadget requested
+   * @param string $authType the oauth auth type to use, either "oauth" or "oauth2"
    * @return OAuthFetcher
    * @throws GadgetException
    */
-  public function getOAuthFetcher(RemoteContentFetcher $fetcher, SecurityToken $token, OAuthRequestParams $params) {
+  public function getOAuthFetcher(RemoteContentFetcher $fetcher, SecurityToken $token, OAuthRequestParams $params, $authType) {
+    switch ($authType) {
+      case RemoteContentRequest::$AUTH_OAUTH:
     return new OAuthFetcher($this->tokenStore, $this->oauthCrypter, $fetcher, $token, $params);
+        break;
+      case RemoteContentRequest::$AUTH_OAUTH2:
+        return new OAuth2Fetcher($this->tokenStore, $this->oauthCrypter, $fetcher, $token, $params);
+        break;
+    }
+    throw new Exception('invalid oauth authType ' . $authType);
   }
 }

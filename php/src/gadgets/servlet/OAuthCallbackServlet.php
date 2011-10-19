@@ -22,21 +22,22 @@ require_once 'src/gadgets/oauth/OAuthCallbackState.php';
 
 class OAuthCallbackServlet extends HttpServlet {
   public function doGet() {
-    $cs = isset($_GET["cs"]) ? $_GET["cs"] : "";
+    $state = isset($_GET["state"]) ? $_GET["state"] : "";
     $token = isset($_GET["oauth_token"]) ? $_GET["oauth_token"] : "";
     $verifier = isset($_GET["oauth_verifier"]) ? $_GET["oauth_verifier"] : "";
-    if (strlen($cs) > 0) {
+    $code = isset($_GET["code"]) ? $_GET["code"] : "";
+    if (strlen($state) > 0) {
       $BBC = new BasicBlobCrypter();
       $crypter = new BasicBlobCrypter(srand($BBC->MASTER_KEY_MIN_LEN));
-      $clientState = new OAuthCallbackState($crypter, $cs);
+      $clientState = new OAuthCallbackState($crypter, $state);
       $url = $clientState->getRealCallbackUrl();
       $callbackUrl = "http://" . $_SERVER['HTTP_HOST'] . "/gadgets/oauthcallback";
       if ($url = $callbackUrl) {
-        unset($_GET['cs']);
+        unset($_GET['state']);
         header('Location: '.$callbackUrl.'?'.http_build_query($_GET));
         exit;
       }
-    } else if (strlen($token) > 0 && strlen($cs) == 0 ) {
+    } else if ((strlen($token) > 0  || strlen($code) > 0) && strlen($state) == 0 ) {
       $this->setCacheTime(3600);
       echo "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" " .
       "\"http://www.w3.org/TR/html4/loose.dtd\">" .

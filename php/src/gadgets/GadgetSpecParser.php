@@ -46,7 +46,7 @@ class GadgetSpecParser {
     if (! $doc->loadXML($xmlContent, LIBXML_NOCDATA)) {
       throw new GadgetSpecException("Error parsing gadget xml:\n" . XmlError::getErrors($xmlContent));
     }
- 
+
     //TODO: we could do a XSD schema validation here, but both the schema and most of the gadgets seem to have some form of schema
     // violatons, so it's not really practical yet (and slow)
     // $doc->schemaValidate('gadget.xsd');
@@ -194,7 +194,7 @@ class GadgetSpecParser {
         $gadget->specificationVersion = new OpenSocialVersion();
     }
   }
-  
+
   /**
    * Parses the ModulePrefs section of the xml structure. The ModulePrefs
    * section is required, so if it's missing or if there's 2 an GadgetSpecException will be thrown.
@@ -236,7 +236,7 @@ class GadgetSpecParser {
     $this->parseOAuth($modulePrefs, $gadget);
     $this->parseContainerSpecific($modulePrefs, $gadget);
   }
- 
+
  /**
   * Parses optional container specific moduleprefs
   * override if needed
@@ -245,7 +245,7 @@ class GadgetSpecParser {
   * @param GadgetSpec $gadget
   */
   protected function parseContainerSpecific(DOMElement &$modulePrefs, GadgetSpec &$gadget) {
- 
+
   }
 
   /**
@@ -331,7 +331,18 @@ class GadgetSpecParser {
    * @param GadgetSpec $gadget
    */
   private function parseOAuth(DOMElement &$modulePrefs, GadgetSpec &$gadget) {
-    if (($oauthNodes = $modulePrefs->getElementsByTagName('OAuth')) != null) {
+    $this->parseOAuthNodes($modulePrefs->getElementsByTagName('OAuth'), $gadget);
+    $this->parseOAuthNodes($modulePrefs->getElementsByTagName('OAuth2'), $gadget);
+  }
+
+  /**
+   * parses the actual oauth or oauth2 DOM node
+   *
+   * @param DOMNodeList $oauthNodes
+   * @param GadgetSpec $gadget
+   */
+  private function parseOAuthNodes(DOMNodeList $oauthNodes, GadgetSpec &$gadget) {
+    if ($oauthNodes != null) {
       if ($oauthNodes->length > 1) {
         throw new GadgetSpecException("A gadget can only have one OAuth element (though multiple service entries are allowed in that one OAuth element)");
       }

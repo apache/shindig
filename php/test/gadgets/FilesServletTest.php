@@ -20,6 +20,7 @@
 
 class MockResourcesFilesServlet extends ResourcesFilesServlet
 {
+    public $noHeaders = true;
     public $uri;
 
     protected function getRequestUri() {
@@ -29,6 +30,7 @@ class MockResourcesFilesServlet extends ResourcesFilesServlet
 
 class MockContentFilesServlet extends ContentFilesServlet
 {
+    public $noHeaders = true;
     public $uri;
 
     protected function getRequestUri() {
@@ -38,17 +40,12 @@ class MockContentFilesServlet extends ContentFilesServlet
 
 class FilesServletTest extends PHPUnit_Framework_TestCase
 {
-    public function tearDown() {
-        ob_end_clean();
-    }
-    
     public function testResources() {
         $servlet = new MockResourcesFilesServlet();
         $servlet->uri = 'com/google/caja/plugin/domita-minified.js';
         ob_start();
         $servlet->doGet();
-        $servletContent = ob_get_contents();
-        ob_end_clean();
+        $servletContent = ob_get_clean();
         $fileContent = file_get_contents(Config::get('resources_path') . $servlet->uri);
         $this->assertEquals($fileContent, $servletContent);
     }
@@ -58,8 +55,7 @@ class FilesServletTest extends PHPUnit_Framework_TestCase
         $servlet->uri = 'container/rpc_relay.html';
         ob_start();
         $servlet->doGet();
-        $servletContent = ob_get_contents();
-        ob_end_clean();
+        $servletContent = ob_get_clean();
         $fileContent = file_get_contents(Config::get('javascript_path') . $servlet->uri);
         $this->assertEquals($fileContent, $servletContent);
     }
@@ -69,8 +65,7 @@ class FilesServletTest extends PHPUnit_Framework_TestCase
         $servlet->uri = 'container/gadgets.css';
         ob_start();
         $servlet->doGet();
-        $servletContent = ob_get_contents();
-        ob_end_clean();
+        $servletContent = ob_get_clean();
         $fileContent = file_get_contents(Config::get('javascript_path') . $servlet->uri);
         $this->assertEquals($fileContent, $servletContent);
     }
@@ -80,8 +75,7 @@ class FilesServletTest extends PHPUnit_Framework_TestCase
         $servlet->uri = 'container/Bridge.swf';
         ob_start();
         $servlet->doGet();
-        $servletContent = ob_get_contents();
-        ob_end_clean();
+        $servletContent = ob_get_clean();
         $fileContent = file_get_contents(Config::get('javascript_path') . $servlet->uri);
         $this->assertEquals($fileContent, $servletContent);
     }
@@ -91,8 +85,7 @@ class FilesServletTest extends PHPUnit_Framework_TestCase
         $servlet->uri = 'samplecontainer/examples/new.gif';
         ob_start();
         $servlet->doGet();
-        $servletContent = ob_get_contents();
-        ob_end_clean();
+        $servletContent = ob_get_clean();
         $fileContent = file_get_contents(Config::get('javascript_path') . $servlet->uri);
         $this->assertEquals($fileContent, $servletContent);
     }
@@ -102,8 +95,7 @@ class FilesServletTest extends PHPUnit_Framework_TestCase
         $servlet->uri = 'samplecontainer/examples/icon.png';
         ob_start();
         $servlet->doGet();
-        $servletContent = ob_get_contents();
-        ob_end_clean();
+        $servletContent = ob_get_clean();
         $fileContent = file_get_contents(Config::get('javascript_path') . $servlet->uri);
         $this->assertEquals($fileContent, $servletContent);
     }

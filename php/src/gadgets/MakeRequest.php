@@ -94,7 +94,7 @@ class MakeRequest {
   public function fetch(GadgetContext $context, MakeRequestOptions $params) {
 
     $signingFetcherFactory = $gadgetSigner = null;
-    if ($params->getAuthz() == "SIGNED" || $params->getAuthz() == "OAUTH") {
+    if ($params->getAuthz() == "SIGNED" || $params->getAuthz() == "OAUTH" || $params->getAuthz() == "OAUTH2") {
       $gadgetSigner = Config::get('security_token_signer');
       $gadgetSigner = new $gadgetSigner();
       $signingFetcherFactory = new SigningFetcherFactory(Config::get("private_key_file"));
@@ -176,6 +176,10 @@ class MakeRequest {
           break;
         case 'OAUTH':
           $request->setAuthType(RemoteContentRequest::$AUTH_OAUTH);
+          $request->setOAuthRequestParams($params->getOAuthRequestParameters());
+          break;
+        case 'OAUTH2':    
+          $request->setAuthType(RemoteContentRequest::$AUTH_OAUTH2);
           $request->setOAuthRequestParams($params->getOAuthRequestParameters());
           break;
       }

@@ -23,7 +23,7 @@ class JsonRpcServletTest extends PHPUnit_Framework_TestCase {
     public function testParseRPCGetParameters()
     {
         $servlet = new JsonRpcServlet();
-
+        $servlet->noHeaders = true;
         $parameters = 'oauth_token=abcdef&method=people.get&id=req&params.userId=@me&params.groupId=@self&field=1,2,3&fieldtwo(0).nested1=value1&fieldtwo(1).nested2.blub(0)=value2&fieldtwo(1).nested3=value3&f.a.c=foo&f.a.d=bar';
 
         $result = $servlet->parseGetRequest($parameters);
@@ -65,7 +65,7 @@ class JsonRpcServletTest extends PHPUnit_Framework_TestCase {
     public function testParseRPCGetWithEmptyParameters()
     {
         $servlet = new JsonRpcServlet();
-
+        $servlet->noHeaders = true;
         $result = $servlet->parseGetRequest('');
 
         $this->assertEquals(array(), $result);

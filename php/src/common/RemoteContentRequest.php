@@ -58,6 +58,7 @@ class RemoteContentRequest {
   public static $AUTH_NONE = 'none';
   public static $AUTH_SIGNED = 'signed';
   public static $AUTH_OAUTH = 'oauth';
+  public static $AUTH_OAUTH2 = 'oauth2';
 
   /**
    * @var string
@@ -317,7 +318,7 @@ class RemoteContentRequest {
    * - signed, sign the request with an oauth_signature
    * - oauth, logges in to the remote oauth service and uses it as base for signing the requests
    *
-   * @param string $type ('none', 'signed', 'oauth')
+   * @param string $type ('none', 'signed', 'oauth', 'oauth2')
    */
   public function setAuthType($type) {
     $this->authType = $type;

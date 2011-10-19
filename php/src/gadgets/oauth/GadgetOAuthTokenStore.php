@@ -147,7 +147,7 @@ class GadgetOAuthTokenStore {
       $message .= "Spec does not contain OAuth service '";
       $message .= $serviceName;
       $message .= "'.  Known services: ";
-      foreach ($services as $key => $value) {
+      foreach ($oauthSpec as $key => $value) {
         $message .= "'";
         $message .= $key;
         $message .= "'";
@@ -157,25 +157,28 @@ class GadgetOAuthTokenStore {
     }
     $provider = new OAuthServiceProvider($service->getRequestUrl(), $service->getAuthorizationUrl(), $service->getAccessUrl());
     $httpMethod = null;
-    switch ($service->getRequestUrl()->method) {
-      case "GET":
-        $httpMethod = OAuthStoreVars::$HttpMethod['GET'];
-        break;
-      case "POST":
-      default:
-        $httpMethod = OAuthStoreVars::$HttpMethod['POST'];
-        break;
-    }
     $paramLocation = null;
-    switch ($service->getRequestUrl()->location) {
-      case OAuthStoreVars::$OAuthParamLocation['URI_QUERY']:
-      case OAuthStoreVars::$OAuthParamLocation['POST_BODY']:
-      case OAUthStoreVars::$OAuthParamLocation['AUTH_HEADER']:
-        $paramLocation = $service->getRequestUrl()->location;
-        break;
-      default:
-        $paramLocation = OAuthStoreVars::$OAuthParamLocation['AUTH_HEADER'];
-        break;
+    if ($service->getRequestUrl()) {
+      switch ($service->getRequestUrl()->method) {
+        case "GET":
+          $httpMethod = OAuthStoreVars::$HttpMethod['GET'];
+          break;
+        case "POST":
+        default:
+          $httpMethod = OAuthStoreVars::$HttpMethod['POST'];
+          break;
+      }
+    
+      switch ($service->getRequestUrl()->location) {
+        case OAuthStoreVars::$OAuthParamLocation['URI_QUERY']:
+        case OAuthStoreVars::$OAuthParamLocation['POST_BODY']:
+        case OAUthStoreVars::$OAuthParamLocation['AUTH_HEADER']:
+          $paramLocation = $service->getRequestUrl()->location;
+          break;
+        default:
+          $paramLocation = OAuthStoreVars::$OAuthParamLocation['AUTH_HEADER'];
+          break;
+      }
     }
     $provInfo = new ProviderInfo();
     $provInfo->setHttpMethod($httpMethod);

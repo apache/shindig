@@ -422,7 +422,7 @@ gadgets.io = function() {
         // Just copy the OAuth parameters into the req to the server
         for (var opt in params) {
           if (params.hasOwnProperty(opt)) {
-            if (opt.indexOf('OAUTH_') === 0) {
+            if (opt.indexOf('OAUTH_') === 0 || opt === 'code') {
               paramData[opt] = params[opt];
             }
           }

@@ -31,6 +31,13 @@
       "consumer_secret" : "secret",
       "key_type" : "HMAC_SYMMETRIC"
     }
+  },
+  "http://localhost:8080/statusnet_gadget_2nd/statusnet_gadget.xml" : {
+    "statusnet" : {
+      "consumer_key" : "71b454c797a58e8de5df33137e95cb8c",
+      "consumer_secret": "b6fb2e03e7017e25f43010efbb2b9595",
+      "key_type" : "HMAC_SYMETRIC"
+    }
   }
 }
   

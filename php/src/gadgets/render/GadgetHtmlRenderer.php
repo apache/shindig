@@ -39,22 +39,22 @@ class GadgetHtmlRenderer extends GadgetBaseRenderer {
       header("P3P: " . Config::get('P3P'));
     }
     $content = '';
-    
+
     // Set no doctype if quirks mode is requestet because of quirks or doctype attribute
     if ((isset($view['quirks']) && $view['quirks']) || $gadget->useQuirksMode()) {
     } else {
-      // Override & insert DocType if Gadget is written for OpenSocial 2.0 or greater, 
-      // if quirksmode is not set  
-      $version20 = new OpenSocialVersion('2.0.0'); 
+      // Override & insert DocType if Gadget is written for OpenSocial 2.0 or greater,
+      // if quirksmode is not set
+      $version20 = new OpenSocialVersion('2.0.0');
       if ($gadget->getDoctype()) {
-        $content .= "<!DOCTYPE ' . $gadget->getDoctype() . '>\n";  
+        $content .= "<!DOCTYPE " . $gadget->getDoctype() . "\n";
       } else if ($gadget->getSpecificationVersion()->isEqualOrGreaterThan($version20)) {
-        $content .= "<!DOCTYPE HTML>\n";    
+        $content .= "<!DOCTYPE HTML>\n";
       } else { // prior to 2.0 the php version always set this doc type, when no quirks attribute was specified
         $content .= "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\" \"http://www.w3.org/TR/html4/strict.dtd\">\n";
       }
     }
-    
+
     // Rewriting the gadget's content using the libxml library does impose some restrictions to the validity of the input html, so
     // for the time being (until either gadgets are all fixed, or we find a more tolerant html parsing lib), we try to avoid it when we can
     $domRewrite = false;
