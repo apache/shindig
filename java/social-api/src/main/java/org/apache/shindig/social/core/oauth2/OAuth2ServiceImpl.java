@@ -69,8 +69,6 @@ public class OAuth2ServiceImpl implements OAuth2Service {
     this.authCodeExpires = Long.valueOf(props.getProperty("shindig.oauth2.authCodeExpiration"));
     this.accessTokenExpires = Long.valueOf(props.getProperty("shindig.oauth2.accessTokenExpiration"));
     
-    System.out.print("YOUDAMAN: " + this.authCodeExpires);
-    
     // TODO (Matt): validators should be injected
     authCodeValidator = new AuthorizationCodeRequestValidator(store);
     accessTokenValidator = new AccessTokenRequestValidator(store);
