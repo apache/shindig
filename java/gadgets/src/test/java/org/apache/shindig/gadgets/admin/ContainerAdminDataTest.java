@@ -48,8 +48,11 @@ public class ContainerAdminDataTest {
   private static final String EE = "embedded-experiences";
   private static final String SELECTION = "selection";
   private static final String GADGET_URL_1 = "http://sample.com/gadget1.xml";
+  private static final String GADGET_URL_1_WITH_PORT = "http://sample.com:80/gadget1.xml";
   private static final String GADGET_URL_2 = "http://sample.com/gadget2.xml";
   private static final String GADGET_URL_3 = "http://example.com/*";
+  private static final String GADGET_URL_4 = "https://sample.com/gadget1.xml";
+  private static final String GADGET_URL_4_WITH_PORT = "https://sample.com:443/gadget1.xml";
 
   private Set<String> whitelist;
   private Set<String> blacklist;
@@ -78,6 +81,7 @@ public class ContainerAdminDataTest {
     gadgetMap.put(GADGET_URL_2, blacklistData);
     gadgetMap.put(GADGET_URL_3, new GadgetAdminData());
     gadgetMap.put("http://*", blacklistData);
+    gadgetMap.put(GADGET_URL_4_WITH_PORT, whitelistData);
 
     validData = new ContainerAdminData(gadgetMap);
     emptyData = new ContainerAdminData(new HashMap<String, GadgetAdminData>());
@@ -104,12 +108,17 @@ public class ContainerAdminDataTest {
   @Test
   public void testGetGadgetAdminData() {
     assertEquals(whitelistData, validData.getGadgetAdminData(GADGET_URL_1));
+    assertEquals(whitelistData, validData.getGadgetAdminData(GADGET_URL_1_WITH_PORT));
     assertEquals(blacklistData, validData.getGadgetAdminData(GADGET_URL_2));
     assertEquals(new GadgetAdminData(),
             validData.getGadgetAdminData("http://example.com/gadgets/gadget.xml"));
     assertEquals(new GadgetAdminData(),
             validData.getGadgetAdminData("http://example.com/gadget.xml"));
     assertEquals(blacklistData, validData.getGadgetAdminData("http://foo.com/gadget.xml"));
+    assertEquals(blacklistData, validData.getGadgetAdminData("http://foo.com:80/gadget.xml"));
+    assertNull(validData.getGadgetAdminData("https://foo.com:80/gadget.xml"));
+    assertEquals(whitelistData, validData.getGadgetAdminData(GADGET_URL_4));
+    assertEquals(whitelistData, validData.getGadgetAdminData(GADGET_URL_4_WITH_PORT));
     assertNull(emptyData.getGadgetAdminData(GADGET_URL_1));
     assertNull(nullData.getGadgetAdminData(GADGET_URL_1));
     assertNull(defaultData.getGadgetAdminData(GADGET_URL_1));
@@ -181,8 +190,15 @@ public class ContainerAdminDataTest {
   public void testHasGadgetAdminData() {
     assertTrue(validData.hasGadgetAdminData(GADGET_URL_1));
     assertTrue(validData.hasGadgetAdminData(GADGET_URL_2));
+    assertTrue(validData.hasGadgetAdminData(GADGET_URL_1_WITH_PORT));
     assertTrue(validData.hasGadgetAdminData("http://example.com/gadget3.xml"));
+    assertTrue(validData.hasGadgetAdminData("http://example.com:80/gadget3.xml"));
     assertFalse(validData.hasGadgetAdminData("https://example.com/gadget3.xml"));
+    assertTrue(validData.hasGadgetAdminData(GADGET_URL_4));
+    assertTrue(validData.hasGadgetAdminData(GADGET_URL_4_WITH_PORT));
+    assertTrue(validData.hasGadgetAdminData("http://foo.com/gadget.xml"));
+    assertTrue(validData.hasGadgetAdminData("http://foo.com:80/gadget.xml"));
+    assertFalse(validData.hasGadgetAdminData("https://foo.com/gadget.xml"));
     assertFalse(nullData.hasGadgetAdminData(GADGET_URL_1));
     assertFalse(emptyData.hasGadgetAdminData(GADGET_URL_2));
     assertFalse(defaultData.hasGadgetAdminData(GADGET_URL_2));

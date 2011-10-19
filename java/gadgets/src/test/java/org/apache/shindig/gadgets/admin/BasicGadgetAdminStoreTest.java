@@ -53,22 +53,23 @@ import com.google.common.collect.Sets;
 public class BasicGadgetAdminStoreTest extends EasyMockTestCase {
 
   private static final String SAMPLE_STORE = "{" + "\"default\" : {" + "\"gadgets\" : {"
-          + "\"http://www.google.com/ig/modules/horoscope.xml\" : {"
+          + "\"http://www.google.com:80/ig/modules/horoscope.xml\" : {"
           + "\"features\" : [\"views\", \"tabs\", \"setprefs\", \"dynamic-height\", \"settitle\"],"
           + "\"type\" : \"whitelist\"" + "},"
           + "\"http://www.labpixies.com/campaigns/todo/todo.xml\" : {"
           + "\"features\" : [\"setprefs\", \"dynamic-height\", \"views\"],"
           + "\"type\" : \"blacklist\"" + "},"
-          + "\"http://foo.com/*\" : {"
+          + "\"https://foo.com/*\" : {"
           + "\"features\" : []" + "},"
           + "\"http://*\" : {"
           + "\"features\" : []," + "\"type\" : \"whitelist\"" + "},"+ "}" + "}" + "}";
 
   private static final String DEFAULT = "default";
   private static final String HOROSCOPE = "http://www.google.com/ig/modules/horoscope.xml";
+  private static final String HOROSCOPE_WITH_PORT = "http://www.google.com:80/ig/modules/horoscope.xml";
   private static final String TODO = "http://www.labpixies.com/campaigns/todo/todo.xml";
   private static final String TEST_GADGET = "http://www.example.com/gadget.xml";
-  private static final String FOO_GADGET = "http://foo.com/*";
+  private static final String FOO_GADGET = "https://foo.com/*";
   private static final String HTTP_GADGET = "http://*";
   private Set<String> HOROSCOPE_FEATURES = Sets.newHashSet("views", "tabs", "setprefs",
           "dynamic-height", "settitle", "core");
@@ -118,7 +119,7 @@ public class BasicGadgetAdminStoreTest extends EasyMockTestCase {
 
     defaultAdminData = new ContainerAdminData();
     defaultAdminData.addGadgetAdminData(TODO, todoAdminData);
-    defaultAdminData.addGadgetAdminData(HOROSCOPE, horoscopeAdminData);
+    defaultAdminData.addGadgetAdminData(HOROSCOPE_WITH_PORT, horoscopeAdminData);
     defaultAdminData.addGadgetAdminData(FOO_GADGET, fooAdminData);
     defaultAdminData.addGadgetAdminData(HTTP_GADGET, httpAdminData);
 
@@ -182,7 +183,8 @@ public class BasicGadgetAdminStoreTest extends EasyMockTestCase {
   public void testGetGadgetAdminData() {
     assertEquals(horoscopeAdminData, enabledStore.getGadgetAdminData(DEFAULT, HOROSCOPE));
     assertEquals(todoAdminData, enabledStore.getGadgetAdminData(DEFAULT, TODO));
-    assertEquals(fooAdminData, enabledStore.getGadgetAdminData(DEFAULT, "http://foo.com/bar/gadget.xml"));
+    assertEquals(fooAdminData, enabledStore.getGadgetAdminData(DEFAULT, "https://foo.com/bar/gadget.xml"));
+    assertEquals(fooAdminData, enabledStore.getGadgetAdminData(DEFAULT, "https://foo.com:443/bar/gadget.xml"));
     assertNull(enabledStore.getGadgetAdminData("my_container", HOROSCOPE));
     assertEquals(httpAdminData, enabledStore.getGadgetAdminData(DEFAULT, "http://example.com/gadget2.xml"));
   }

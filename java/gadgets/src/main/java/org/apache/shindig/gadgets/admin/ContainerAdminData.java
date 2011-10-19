@@ -18,6 +18,8 @@
  */
 package org.apache.shindig.gadgets.admin;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Map;
 import java.util.Set;
 
@@ -30,6 +32,12 @@ import com.google.common.base.Objects;
  * @version $Id: $
  */
 public class ContainerAdminData {
+  private static final String STAR = "*";
+  private static final String HTTP = "http";
+  private static final String HTTPS = "https";
+  private static final int HTTP_PORT = 80;
+  private static final int HTTPS_PORT = 443;
+
   private Map<String, GadgetAdminData> gadgetAdminMap;
 
   /**
@@ -139,15 +147,51 @@ public class ContainerAdminData {
    */
   private String getGadgetAdminDataKey(String gadgetUrl) {
     Set<String> gadgetUrls = this.gadgetAdminMap.keySet();
+    String normalizedGadgetUrl = createUrlWithPort(gadgetUrl);
     String key = null;
     for (String url : gadgetUrls) {
-      if (url.endsWith("*") && gadgetUrl.startsWith(url.substring(0, url.length() - 1))) {
-        if (key == null || (key != null && key.length() < url.length())) {
+      String normalizedUrl = createUrlWithPort(url);
+      if (normalizedUrl.endsWith(STAR)
+              && normalizedGadgetUrl.startsWith(normalizedUrl.substring(0,
+                      normalizedUrl.length() - 1))) {
+        if (key == null || (key != null && key.length() < normalizedUrl.length())) {
           key = url;
         }
+      } else if (normalizedUrl.equals(normalizedGadgetUrl)) {
+        key = url;
+        break;
       }
     }
     return key;
+  }
+
+  /**
+   * Creates a new URL with the default port if one is not already there.
+   *
+   * @param gadgetUrl
+   *          The gadget URL to add the port to.
+   * @return A new URL with the default port.
+   */
+  private String createUrlWithPort(String gadgetUrl) {
+    try {
+      URL origUrl = new URL(gadgetUrl);
+      URL urlWithPort = null;
+      String origHost = origUrl.getHost();
+      if (origUrl.getPort() <= 0 && origHost != null && origHost.length() != 0
+              && !STAR.equals(origHost)) {
+        if (origUrl.getProtocol().equalsIgnoreCase(HTTP)) {
+          urlWithPort = new URL(origUrl.getProtocol(), origUrl.getHost(), HTTP_PORT, origUrl.getFile());
+        }
+        else if (origUrl.getProtocol().equalsIgnoreCase(HTTPS)) {
+          urlWithPort = new URL(origUrl.getProtocol(), origUrl.getHost(), HTTPS_PORT, origUrl.getFile());
+        }
+        return urlWithPort == null ? origUrl.toString() : urlWithPort.toString();
+      } else {
+        return origUrl.toString();
+      }
+    } catch (MalformedURLException e) {
+      return gadgetUrl;
+    }
   }
 
   @Override
