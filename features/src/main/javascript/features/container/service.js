@@ -30,19 +30,22 @@
 osapi.container.Service = function(opt_config) {
   var config = this.config_ = opt_config || {};
 
+  var injectedEndpoint = ((gadgets.config.get('osapi') || {}).endPoints ||
+          [window.__API_URI.getOrigin() + '/rpc'])[0];
+  var matches = /^([^\/]*\/\/[^\/]+)(.*)$/.exec(injectedEndpoint);
   /**
    * @type {string}
    * @private
    */
   this.apiHost_ = String(osapi.container.util.getSafeJsonValue(config,
-      osapi.container.ServiceConfig.API_HOST, window.__API_URI.getOrigin()));
+      osapi.container.ServiceConfig.API_HOST, matches[1]));
 
   /**
    * @type {string}
    * @private
    */
   this.apiPath_ = String(osapi.container.util.getSafeJsonValue(config,
-      osapi.container.ServiceConfig.API_PATH, '/rpc'));
+      osapi.container.ServiceConfig.API_PATH, matches[2]));
 
   /**
    * Map of gadget URLs to cached gadgetInfo response.
