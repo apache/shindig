@@ -44,8 +44,7 @@ gadgets['actions'] = (function() {
 
     var callback = callbackRegistry.getCallback(actionId);
     if (callback) {
-      var args = selectionObj ? [selectionObj] : null;
-      callback.apply(this, args);
+      callback.apply(this, selectionObj ? [selectionObj] : []);
     }
   };
 

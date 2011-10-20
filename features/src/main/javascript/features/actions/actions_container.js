@@ -486,18 +486,17 @@
                   if (!(actions instanceof Array)) {
                     actions = [actions];
                   }
-                  for (var i in actions) {
+                  for (var i=0; i<actions.length; i++) {
                     var actionObj = actions[i];
+                    var actionObj_new = {};
                     // replace @ for attribute keys;
                     for (itemAttr in actionObj) {
                       var attrStr = itemAttr.substring(1);
-                      var attrVal = actionObj[itemAttr];
-                      actionObj[attrStr] = attrVal;
-                      delete actionObj[itemAttr];
+                      actionObj_new[attrStr] = actionObj[itemAttr];
                     }
                     // check if action already exists
-                    if (!registry.getItemById(actionObj.id)) {
-                      addAction(actionObj, url);
+                    if (!registry.getItemById(actionObj_new.id)) {
+                      addAction(actionObj_new, url);
                     }
                   }
                 }
