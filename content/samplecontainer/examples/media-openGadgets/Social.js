@@ -87,7 +87,7 @@ function SocialWrapper() {
    */
   this.deleteAlbum = function(userId, albumId, callback) {
     var params = {userId: userId, albumId: albumId};
-    osapi.albums.delete(params).execute(callback);
+    osapi.albums['delete'](params).execute(callback);
   }
 
   // ------------------------------- MEDIAITEMS ----------------------------
@@ -153,6 +153,6 @@ function SocialWrapper() {
       albumId: albumId,
       mediaItemId: mediaItemId
     };
-    osapi.mediaItems.delete(params).execute(callback);
+    osapi.mediaItems['delete'](params).execute(callback);
   }
 }

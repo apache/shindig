@@ -139,18 +139,20 @@ function MediaUI(social) {
                 var albumRow = dojo.create('tr', null, tbody);
                 var albumLeft = dojo.create('td', {className: 'albumListThumbnail'}, albumRow);
                 var imgLink = dojo.create('a', {href: 'javascript:;', onclick: dojo.hitch(this, onClickAlbum, viewer.id, albums[i])}, albumLeft);
-                dojo.create('img', {src: albums[i].thumbnailUrl, onerror: "this.src='" + folderUrl + "';", width: '100%'}, imgLink);
+                dojo.create('img', {src: albums[i].thumbnailUrl || folderUrl, onerror: "this.src='" + folderUrl + "';", width: '100', height:'100'}, imgLink);
                 var albumRight = dojo.create('td', {className: 'albumListRight'}, albumRow);
-                var albumTitleRow = dojo.create('tr', null, albumRight);
+                var albumTitleTbody = dojo.create('table', null, albumRight).appendChild(dojo.create('tbody', null));
+                var albumTitleRow = dojo.create('tr', null, albumTitleTbody);
                 var titleTd = dojo.create('td', {className: 'albumListTitle'}, albumTitleRow);
                 dojo.create('a', {innerHTML: albums[i].title, href: 'javascript:;', onclick: dojo.hitch(this, onClickAlbum, viewer.id, albums[i])}, titleTd);
-                var editTd = dojo.create('td', {className: 'actionLinks', style: 'text-align: right'}, albumTitleRow);
+                var editTd = dojo.create('td', {className: 'actionLinks'}, albumTitleRow);
+                editTd.style.textAlign="right";
                 dojo.create('a', {innerHTML: 'edit', href: 'javascript:;', onclick: dojo.hitch(this, editAlbumPopup, albums[i])}, editTd);
                 editTd.appendChild(dojo.doc.createTextNode(' | '));
                 dojo.create('a', {innerHTML: 'delete', href: 'javascript:;', onclick: dojo.hitch(this, deleteAlbumPopup, albums[i])}, editTd);
                 if (albums[i].description) {
-                    var albumDescription = dojo.create('tr', null, albumRight);
-                    dojo.create('td', {innerHTML: albums[i].description, className: 'albumListDescription', colspan: '2'}, albumDescription);
+                    var albumDescription = dojo.create('tr', null, albumTitleTbody);
+                    dojo.create('td', {innerHTML: albums[i].description, className: 'albumListDescription', colSpan: '2'}, albumDescription);
                 }
                 //var albumInfo = dojo.create('tr', null, albumRight);
                 //var infoStr = "ID: " + albums[i].id + " | Owner ID: " + albums[i].ownerId;
@@ -215,16 +217,19 @@ function MediaUI(social) {
                     tr = dojo.create('tr', null, tbody);
                 }
                 var td = dojo.create('td', {className: 'mediaItemBox'}, tr);
-                var imageTd = dojo.create('tr', null, td).appendChild(dojo.create('td', {className: 'mediaItemThumbnail'}));
+                var imageTbody = dojo.create('table', null, td).appendChild(dojo.create('tbody', null));
+                var imageTd = dojo.create('tr', null, imageTbody).appendChild(dojo.create('td', {className: 'mediaItemThumbnail'}));
                 if (mediaItems[i].url) {
                     var imageLink = dojo.create('a', {href: 'javascript:;', onclick: dojo.hitch(this, renderMediaItem, album, mediaItems[i])}, imageTd);
-                    imageLink.appendChild(dojo.create('img', {src: mediaItems[i].thumbnailUrl, onerror: "this.src='" + docUrl + "';", style: 'height:100px;'}));
+                    imageLink.appendChild(dojo.create('img', {src: mediaItems[i].thumbnailUrl, height: '100', width:'100'}));
                 } else {
-                    dojo.create('img', {src: mediaItems[i].thumbnailUrl, onerror: "this.src='" + docUrl + "';", style: 'height:100px;'}, imageTd);
+                    dojo.create('img', {src: mediaItems[i].thumbnailUrl, onerror: "this.src='" + docUrl + "';", height:'100', width:'100'}, imageTd);
                 }
-                var titleTd = dojo.create('tr', null, td).appendChild(dojo.create('td', {style: "text-align:center; font-family:'comic sans ms';white-space:nowrap;"}));
+                var titleTbody = dojo.create('table', null, td).appendChild(dojo.create('tbody', null));
+                var titleTd = dojo.create('tr', null, titleTbody).appendChild(dojo.create('td', {style: "text-align:center; font-family:'comic sans ms';white-space:nowrap;"}));
                 titleTd.appendChild(dojo.doc.createTextNode(mediaItems[i].title));
-                var actionsTd = dojo.create('tr', null, td).appendChild(dojo.create('td', {className: 'actionLinks', style: 'text-align: center;'}));
+                var actionsTbody = dojo.create('table', null, td).appendChild(dojo.create('tbody', null));
+                var actionsTd = dojo.create('tr', null, actionsTbody).appendChild(dojo.create('td', {className: 'actionLinks', style: 'text-align: center;'}));
                 dojo.create('a', {innerHTML: 'edit', href: 'javascript:;', onclick: dojo.hitch(this, editMediaItemPopup, album, mediaItems[i])}, actionsTd);
                 actionsTd.appendChild(dojo.doc.createTextNode(' | '));
                 dojo.create('a', {innerHTML: 'delete', href: 'javascript:;', onclick: dojo.hitch(this, deleteMediaItemPopup, album, mediaItems[i])}, actionsTd);

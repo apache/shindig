@@ -116,18 +116,22 @@ function MediaUI(social) {
         var imgLink = dojo.create('a', {href: 'javascript:;',
           onclick: dojo.hitch(this, onClickAlbum, viewer.id, albums[i])},
         albumLeft);
-        dojo.create('img', {src: albums[i].thumbnailUrl,
-          onerror: "this.src='" + folderUrl + "';", width: '100%'}, imgLink);
+        dojo.create('img', {src: albums[i].thumbnailUrl || folderUrl,
+          onerror: "this.src='" + folderUrl + "';", width:'100', height:'100'},
+          imgLink);
         var albumRight = dojo.create('td', {className: 'albumListRight'},
             albumRow);
-        var albumTitleRow = dojo.create('tr', null, albumRight);
+        var albumTitleTbody = dojo.create('table', null,
+            albumRight).appendChild(dojo.create('tbody', null));
+        var albumTitleRow = dojo.create('tr', null, albumTitleTbody);
         var titleTd = dojo.create('td', {className: 'albumListTitle'},
             albumTitleRow);
         dojo.create('a', {innerHTML: albums[i].title, href: 'javascript:;',
           onclick: dojo.hitch(this, onClickAlbum, viewer.id, albums[i])},
         titleTd);
-        var editTd = dojo.create('td', {className: 'actionLinks',
-          style: 'text-align: right'}, albumTitleRow);
+        var editTd = dojo.create('td', {className: 'actionLinks'},
+            albumTitleRow);
+        editTd.style.textAlign="right";
         dojo.create('a', {innerHTML: 'edit', href: 'javascript:;',
           onclick: dojo.hitch(this, editAlbumPopup, albums[i])}, editTd);
         editTd.appendChild(dojo.doc.createTextNode(' | '));
@@ -139,9 +143,9 @@ function MediaUI(social) {
         editTd.appendChild(openTabButton.domNode);
 
         if (albums[i].description) {
-          var albumDescription = dojo.create('tr', null, albumRight);
+          var albumDescription = dojo.create('tr', null, albumTitleTbody);
           dojo.create('td', {innerHTML: albums[i].description,
-            className: 'albumListDescription', colspan: '2'}, albumDescription);
+            className: 'albumListDescription', colSpan: '2'}, albumDescription);
         }
       }
     } else {
@@ -203,7 +207,10 @@ function MediaUI(social) {
           tr = dojo.create('tr', null, tbody);
         }
         var td = dojo.create('td', {className: 'mediaItemBox'}, tr);
-        var imageTd = dojo.create('tr', null, td).appendChild(dojo.create('td',
+        var imageTbody = dojo.create('table', null,
+            td).appendChild(dojo.create('tbody', null));
+        var imageTd = dojo.create('tr', null,
+            imageTbody).appendChild(dojo.create('td',
             {className: 'mediaItemThumbnail'}));
         if (mediaItems[i].url) {
           var imageLink = dojo.create('a', {href: 'javascript:;',
@@ -212,18 +219,22 @@ function MediaUI(social) {
           imageLink.appendChild(dojo.create('img',
               {src: mediaItems[i].thumbnailUrl,
                 onerror: "this.src='" + docUrl + "';",
-                style: 'height:100px;'}));
+                height:'100', width:'100'}));
         } else {
           dojo.create('img', {src: mediaItems[i].thumbnailUrl,
             onerror: "this.src='" + docUrl + "';",
-            style: 'height:100px;'}, imageTd);
+            height:'100', width:'100'}, imageTd);
         }
-        var titleTd = dojo.create('tr', null, td).appendChild(
+        var titleTbody = dojo.create('table', null,
+            td).appendChild(dojo.create('tbody', null));
+        var titleTd = dojo.create('tr', null, titleTbody).appendChild(
             dojo.create('td', {
               style: 'text-align:center;' +
                   "font-family:'comic sans ms';white-space:nowrap;"}));
         titleTd.appendChild(dojo.doc.createTextNode(mediaItems[i].title));
-        var actionsTd = dojo.create('tr', null, td).appendChild(
+        var actionsTbody = dojo.create('table', null,
+            td).appendChild(dojo.create('tbody', null));
+        var actionsTd = dojo.create('tr', null, actionsTbody).appendChild(
             dojo.create('td', {className: 'actionLinks',
               style: 'text-align: center;'}));
         dojo.create('a', {innerHTML: 'edit', href: 'javascript:;',
@@ -477,7 +488,7 @@ function MediaUI(social) {
 
       var tr = dojo.create('tr', null, tbody);
       dojo.create('td', null, tr).appendChild(dojo.create('label',
-          {innerHTML: 'Title', for: 'title'}));
+          {innerHTML: 'Title', 'for': 'title'}));
       dojo.create('td', null, tr).appendChild(
           new dijit.form.ValidationTextBox({
             name: 'title',
@@ -487,7 +498,7 @@ function MediaUI(social) {
 
       tr = dojo.create('tr', null, tbody);
       dojo.create('td', null, tr).appendChild(dojo.create('label',
-          {innerHTML: 'Thumnail URL', for: 'thumbnail'}));
+          {innerHTML: 'Thumnail URL', 'for': 'thumbnail'}));
       dojo.create('td', null, tr).appendChild(
           new dijit.form.ValidationTextBox({
             name: 'thumbnail',
@@ -497,7 +508,7 @@ function MediaUI(social) {
 
       tr = dojo.create('tr', null, tbody);
       dojo.create('td', null, tr).appendChild(dojo.create('label',
-          {innerHTML: 'Description', for: 'description'}));
+          {innerHTML: 'Description', 'for': 'description'}));
       dojo.create('td', null, tr).appendChild(
           new dijit.form.Textarea({
             name: 'description',
@@ -554,7 +565,7 @@ function MediaUI(social) {
       var tbody = dojo.create('tbody', null, table);
       var tr = dojo.create('tr', null, tbody);
       dojo.create('td', null, tr).appendChild(dojo.create('label',
-          {innerHTML: 'Title', for: 'title'}));
+          {innerHTML: 'Title', 'for': 'title'}));
       dojo.create('td', null, tr).appendChild(
           new dijit.form.ValidationTextBox({
             name: 'title',
@@ -563,7 +574,7 @@ function MediaUI(social) {
       );
       tr = dojo.create('tr', null, tbody);
       dojo.create('td', null, tr).appendChild(dojo.create('label',
-          {innerHTML: 'Description', for: 'description'}));
+          {innerHTML: 'Description', 'for': 'description'}));
       dojo.create('td', null, tr).appendChild(
           new dijit.form.Textarea({
             name: 'description',
@@ -572,7 +583,7 @@ function MediaUI(social) {
       );
       tr = dojo.create('tr', null, tbody);
       dojo.create('td', null, tr).appendChild(dojo.create('label',
-          {innerHTML: 'Type', for: 'type'}));
+          {innerHTML: 'Type', 'for': 'type'}));
       dojo.create('td', null, tr).appendChild(
           new dijit.form.ValidationTextBox({
             name: 'type',
@@ -581,7 +592,7 @@ function MediaUI(social) {
       );
       tr = dojo.create('tr', null, tbody);
       dojo.create('td', null, tr).appendChild(dojo.create('label',
-          {innerHTML: 'Thumnail URL', for: 'thumbnailUrl'}));
+          {innerHTML: 'Thumnail URL', 'for': 'thumbnailUrl'}));
       dojo.create('td', null, tr).appendChild(
           new dijit.form.ValidationTextBox({
             name: 'thumbnailUrl',
@@ -590,7 +601,7 @@ function MediaUI(social) {
       );
       tr = dojo.create('tr', null, tbody);
       dojo.create('td', null, tr).appendChild(dojo.create('label',
-          {innerHTML: 'URL', for: 'url'}));
+          {innerHTML: 'URL', 'for': 'url'}));
       dojo.create('td', null, tr).appendChild(
           new dijit.form.ValidationTextBox({
             name: 'url',
