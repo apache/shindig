@@ -48,14 +48,8 @@ public class BasicBlobCrypter implements BlobCrypter {
   private static final byte CIPHER_KEY_LABEL = 0;
   private static final byte HMAC_KEY_LABEL = 1;
 
-  /** Key used for time stamp (in seconds) of data */
-  public static final String TIMESTAMP_KEY = "t";
-
   /** minimum length of master key */
   public static final int MASTER_KEY_MIN_LEN = 16;
-
-  /** allow three minutes for clock skew */
-  private static final long CLOCK_SKEW_ALLOWANCE = 180;
 
   public TimeSource timeSource = new TimeSource();
   private byte[] cipherKey;
@@ -149,13 +143,9 @@ public class BasicBlobCrypter implements BlobCrypter {
   /* (non-Javadoc)
    * @see org.apache.shindig.util.BlobCrypter#wrap(java.util.Map)
    */
-  public String wrap(Map<String, String> in)
-  throws BlobCrypterException {
-    Preconditions.checkArgument(!in.containsKey(TIMESTAMP_KEY),
-        "No '%s' key allowed for BlobCrypter", TIMESTAMP_KEY);
-
+  public String wrap(Map<String, String> in) throws BlobCrypterException {
     try {
-      byte[] encoded = serializeAndTimestamp(in);
+      byte[] encoded = serialize(in);
       byte[] cipherText = Crypto.aes128cbcEncrypt(cipherKey, encoded);
       byte[] hmac = Crypto.hmacSha1(hmacKey, cipherText);
       byte[] b64 = Base64.encodeBase64URLSafe(Bytes.concat(cipherText, hmac));
@@ -167,10 +157,10 @@ public class BasicBlobCrypter implements BlobCrypter {
 
   /**
    * Encode the input for transfer.  We use something a lot like HTML form
-   * encodings.  The time stamp is in seconds since the epoch.
+   * encodings.
    * @param in map of parameters to encode
    */
-  private byte[] serializeAndTimestamp(Map<String, String> in) {
+  private byte[] serialize(Map<String, String> in) {
     StringBuilder sb = new StringBuilder();
 
     for (Map.Entry<String, String> val : in.entrySet()) {
@@ -179,17 +169,16 @@ public class BasicBlobCrypter implements BlobCrypter {
       sb.append(Utf8UrlCoder.encode(val.getValue()));
       sb.append('&');
     }
-    sb.append(TIMESTAMP_KEY);
-    sb.append('=');
-    sb.append(timeSource.currentTimeMillis()/1000);
+    if (sb.length() > 0) {
+      sb.deleteCharAt(sb.length() - 1);  // Remove the last &
+    }
     return CharsetUtil.getUtf8Bytes(sb.toString());
   }
 
   /* (non-Javadoc)
    * @see org.apache.shindig.util.BlobCrypter#unwrap(java.lang.String, int)
    */
-  public Map<String, String> unwrap(String in, int maxAgeSec)
-  throws BlobCrypterException {
+  public Map<String, String> unwrap(String in) throws BlobCrypterException {
     try {
       byte[] bin = Base64.decodeBase64(CharsetUtil.getUtf8Bytes(in));
       byte[] hmac = new byte[Crypto.HMAC_SHA1_LEN];
@@ -199,7 +188,6 @@ public class BasicBlobCrypter implements BlobCrypter {
       Crypto.hmacSha1Verify(hmacKey, cipherText, hmac);
       byte[] plain = Crypto.aes128cbcDecrypt(cipherKey, cipherText);
       Map<String, String> out = deserialize(plain);
-      checkTimestamp(out, maxAgeSec);
       return out;
     } catch (GeneralSecurityException e) {
       throw new BlobCrypterException("Invalid token signature", e);
@@ -223,20 +211,4 @@ public class BasicBlobCrypter implements BlobCrypter {
     }
     return map;
   }
-
-  /**
-   * We allow a few minutes on either side of the validity window to account
-   * for clock skew.
-   */
-  private void checkTimestamp(Map<String, String> out, int maxAge)
-  throws BlobExpiredException {
-    long origin = Long.parseLong(out.get(TIMESTAMP_KEY));
-    long minTime = origin - CLOCK_SKEW_ALLOWANCE;
-    long maxTime = origin + maxAge + CLOCK_SKEW_ALLOWANCE;
-    long now = timeSource.currentTimeMillis()/1000;
-    if (!(minTime < now && now < maxTime)) {
-      throw new BlobExpiredException(minTime, now, maxTime);
-    }
-  }
-
 }

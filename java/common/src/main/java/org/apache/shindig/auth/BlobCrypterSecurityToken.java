@@ -18,13 +18,8 @@
  */
 package org.apache.shindig.auth;
 
-import org.apache.shindig.common.crypto.BlobCrypter;
-import org.apache.shindig.common.crypto.BlobCrypterException;
-
-import com.google.common.collect.Maps;
-
+import java.util.EnumSet;
 import java.util.Map;
-
 /**
  * Authentication based on a provided BlobCrypter.
  *
@@ -32,161 +27,24 @@ import java.util.Map;
  *
  * Container is included so different containers can use different security tokens if necessary.
  */
-public class BlobCrypterSecurityToken extends AbstractSecurityToken implements SecurityToken {
-
-  protected static final int MAX_TOKEN_LIFETIME_SECS = 3600;
-
-  protected static final String OWNER_KEY = "o";
-  protected static final String VIEWER_KEY = "v";
-  protected static final String GADGET_KEY = "g";
-  protected static final String GADGET_INSTANCE_KEY = "i";
-  protected static final String TRUSTED_JSON_KEY = "j";
-  protected static final String EXPIRES_KEY = "x";
-
-  protected final String container;
-  protected final String domain;
-
-  protected String ownerId;
-  protected String viewerId;
-  protected String appUrl;
-  protected long moduleId;
-  protected Long expiresAt;
-
-  protected String trustedJson;
-  protected String activeUrl;
+public class BlobCrypterSecurityToken extends AbstractSecurityToken {
+  private static final EnumSet<Keys> MAP_KEYS = EnumSet.of(
+    Keys.OWNER, Keys.VIEWER, Keys.APP_URL, Keys.MODULE_ID, Keys.EXPIRES, Keys.TRUSTED_JSON
+  );
 
   /**
    * Create a new security token.
    *
-   * @param crypter used for encryption and signing
    * @param container container that is issuing the token
    * @param domain domain to use for signed fetch with default signed fetch key.
+   * @param activeUrl
+   * @param values Other values to init into the token.
    */
-  public BlobCrypterSecurityToken(String container, String domain) {
-    this.container = container;
-    this.domain = domain;
-  }
-
-  /**
-   * Decrypt and verify a token.  Note that this is a low level API dealing directly with encrypted
-   * data, for a higher level API consider using the BlobCrypterSecurityTokenCodec instead.
-   *
-   * @param crypter crypter to use for decryption
-   * @param container container that minted the token
-   * @param domain oauth_consumer_key to use for signed fetch with default key
-   * @param token the encrypted token (just the portion after the first ":")
-   * @return the decrypted, verified token.
-   *
-   * @throws BlobCrypterException
-   */
-  public static BlobCrypterSecurityToken decrypt(BlobCrypter crypter, String container, String domain,
-        String token, String activeUrl) throws BlobCrypterException {
-    Map<String, String> values = crypter.unwrap(token, MAX_TOKEN_LIFETIME_SECS);
-    BlobCrypterSecurityToken t = new BlobCrypterSecurityToken(container, domain);
-    setTokenValues(t, values);
-    t.setActiveUrl(activeUrl);
-    return t;
-  }
-  
-  protected static void setTokenValues(BlobCrypterSecurityToken token, Map<String, String> values) {
-    token.setOwnerId(values.get(OWNER_KEY));
-    token.setViewerId(values.get(VIEWER_KEY));
-    token.setAppUrl(values.get(GADGET_KEY));
-    String moduleId = values.get(GADGET_INSTANCE_KEY);
-    if (moduleId != null) {
-      token.setModuleId(Long.parseLong(moduleId));
+  public BlobCrypterSecurityToken(String container, String domain, String activeUrl, Map<String, String> values) {
+    if (values != null) {
+      loadFromMap(values);
     }
-    String expiresAt = values.get(EXPIRES_KEY);
-    if (expiresAt != null) {
-      token.setExpiresAt(Long.parseLong(expiresAt));
-    }
-    token.setTrustedJson(values.get(TRUSTED_JSON_KEY));
-  }
-
-  /**
-   * Encrypt and sign the token.  The returned value is *not* web safe, it should be URL
-   * encoded before being used as a form parameter.
-   */
-  public static String encrypt(SecurityToken token, BlobCrypter crypter) throws BlobCrypterException {
-    Map<String, String> values = buildValuesMap(token);
-    return token.getContainer() + ':' + crypter.wrap(values);
-  }
-
-  protected static Map<String, String> buildValuesMap(SecurityToken token) {
-    Map<String, String> values = Maps.newHashMap();
-    if (token.getOwnerId() != null) {
-      values.put(OWNER_KEY, token.getOwnerId());
-    }
-    if (token.getViewerId() != null) {
-      values.put(VIEWER_KEY, token.getViewerId());
-    }
-    if (token.getAppUrl() != null) {
-      values.put(GADGET_KEY, token.getAppUrl());
-    }
-    if (token.getModuleId() != 0) {
-      values.put(GADGET_INSTANCE_KEY, Long.toString(token.getModuleId()));
-    }
-    if (token.getExpiresAt() != null) {
-      values.put(EXPIRES_KEY, Long.toString(token.getExpiresAt()));
-    }
-    if (token.getTrustedJson() != null) {
-      values.put(TRUSTED_JSON_KEY, token.getTrustedJson());
-    }
-    return values;                                                                                           
-   }
-
-  // Legacy value for signed fetch, opensocial 0.8 prefers opensocial_app_url
-  public String getAppId() {
-    return appUrl;
-  }
-
-  public String getAppUrl() {
-    return appUrl;
-  }
-
-  public void setAppUrl(String appUrl) {
-    this.appUrl = appUrl;
-  }
-
-  public String getContainer() {
-    return container;
-  }
-
-  // Used for oauth_consumer_key for signed fetch with default key.  This is a weird spot for this.
-  public String getDomain() {
-    return domain;
-  }
-
-  public long getModuleId() {
-    return moduleId;
-  }
-
-  public void setModuleId(long moduleId) {
-    this.moduleId = moduleId;
-  }
-
-  public Long getExpiresAt() {
-    return expiresAt;
-  }
-
-  public void setExpiresAt(Long expiresAt) {
-    this.expiresAt = expiresAt;
-  }
-
-  public String getOwnerId() {
-    return ownerId;
-  }
-
-  public void setOwnerId(String ownerId) {
-    this.ownerId = ownerId;
-  }
-
-  public String getTrustedJson() {
-    return trustedJson;
-  }
-
-  public void setTrustedJson(String trustedJson) {
-    this.trustedJson = trustedJson;
+    setContainer(container).setDomain(domain).setActiveUrl(activeUrl);
   }
 
   // Our tokens are static, we could change this to periodically update the token.
@@ -198,26 +56,45 @@ public class BlobCrypterSecurityToken extends AbstractSecurityToken implements S
     return AuthenticationMode.SECURITY_TOKEN_URL_PARAMETER.name();
   }
 
-  public String getViewerId() {
-    return viewerId;
-  }
-
-  public void setViewerId(String viewerId) {
-    this.viewerId = viewerId;
-  }
-
   public boolean isAnonymous() {
     return false;
   }
 
-  public void setActiveUrl(String activeUrl) {
-    this.activeUrl = activeUrl;
-  }
-
   public String getActiveUrl() {
+    String activeUrl = super.getActiveUrl();
     if (activeUrl == null) {
       throw new UnsupportedOperationException("No active URL available");
     }
     return activeUrl;
+  }
+
+  // Legacy value for signed fetch, opensocial 0.8 prefers opensocial_app_url
+  @Override
+  public String getAppId() {
+    return getAppUrl();
+  }
+
+  protected EnumSet<Keys> getMapKeys() {
+    return MAP_KEYS;
+  }
+
+  public static BlobCrypterSecurityToken fromToken(SecurityToken token) {
+    String activeUrl = null;
+    try {
+      activeUrl = token.getActiveUrl();
+    } catch (UnsupportedOperationException e) {}
+
+    BlobCrypterSecurityToken interpretedToken = new BlobCrypterSecurityToken(
+        token.getContainer(), token.getDomain(), activeUrl, null);
+    interpretedToken
+        .setAppId(token.getAppId())
+        .setAppUrl(token.getAppUrl())
+        .setExpiresAt(token.getExpiresAt())
+        .setModuleId(token.getModuleId())
+        .setOwnerId(token.getOwnerId())
+        .setTrustedJson(token.getTrustedJson())
+        .setViewerId(token.getViewerId());
+
+    return interpretedToken;
   }
 }

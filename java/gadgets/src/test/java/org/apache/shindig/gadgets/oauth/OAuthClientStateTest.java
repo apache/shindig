@@ -30,23 +30,23 @@ public class OAuthClientStateTest {
 
   private FakeTimeSource timeSource;
   private BasicBlobCrypter crypter;
-  
+
   @Before
   public void setUp() throws Exception {
     crypter = new BasicBlobCrypter("abcdefghijklmnop".getBytes());
     timeSource = new FakeTimeSource();
     crypter.timeSource = timeSource;
   }
-  
+
   private void assertEmpty(OAuthClientState state) {
     assertTrue(state.isEmpty());
     assertNull(state.getRequestToken());
     assertNull(state.getRequestTokenSecret());
     assertNull(state.getAccessToken());
     assertNull(state.getAccessTokenSecret());
-    assertNull(state.getOwner());    
+    assertNull(state.getOwner());
   }
-  
+
   @Test
   public void testEncryptEmpty() throws Exception {
     OAuthClientState state = new OAuthClientState(crypter);
@@ -55,7 +55,7 @@ public class OAuthClientStateTest {
     state = new OAuthClientState(crypter, encrypted);
     assertEmpty(state);
   }
-  
+
   @Test
   public void testValuesSet() throws Exception {
     OAuthClientState state = new OAuthClientState(crypter);
@@ -72,24 +72,24 @@ public class OAuthClientStateTest {
     assertEquals("reqtoken", state.getRequestToken());
     assertEquals("reqtokensecret", state.getRequestTokenSecret());
   }
-  
+
   @Test
   public void testNullConstructorArg() throws Exception {
     OAuthClientState state = new OAuthClientState(crypter, null);
     assertEmpty(state);
   }
-  
+
   @Test
   public void testExpired() throws Exception {
     OAuthClientState state = new OAuthClientState(crypter);
+    timeSource.incrementSeconds(-1 * (3600 + 180 + 1)); // expiry time + skew.
+    state.setTimeSource(timeSource);
     state.setRequestToken("reqtoken");
     String encrypted = state.getEncryptedState();
-    // expiry time + skew.
-    timeSource.incrementSeconds(3600 + 180 + 1);
     state = new OAuthClientState(crypter, encrypted);
-    assertNull(state.getRequestToken());    
+    assertNull(state.getRequestToken());
   }
-  
+
   @Test
   public void testNullValue() throws Exception {
     OAuthClientState state = new OAuthClientState(crypter);
@@ -98,7 +98,7 @@ public class OAuthClientStateTest {
     state.setOwner("owner");
     String encrypted = state.getEncryptedState();
     state = new OAuthClientState(crypter, encrypted);
-    assertNull(state.getRequestToken());   
+    assertNull(state.getRequestToken());
     assertEquals("owner", state.getOwner());
   }
 }

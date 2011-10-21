@@ -25,20 +25,16 @@ import java.util.Date;
  */
 public class BlobExpiredException extends BlobCrypterException {
 
-  public final Date minDate;
   public final Date used;
   public final Date maxDate;
 
-  public BlobExpiredException(long minTime, long now, long maxTime) {
-    this(new Date(minTime*1000), new Date(now*1000), new Date(maxTime*1000));
+  public BlobExpiredException(long now, long maxTime) {
+    this(new Date(now*1000), new Date(maxTime*1000));
   }
 
-  public BlobExpiredException(Date minTime, Date now, Date maxTime) {
-    super("Blob expired, was valid from " + minTime + " to " + maxTime
-        + ", attempted use at " + now);
-    this.minDate = minTime;
+  public BlobExpiredException(Date now, Date maxTime) {
+    super("Blob expired. Was valid until " + maxTime + ", attempted use at " + now);
     this.used = now;
     this.maxDate = maxTime;
   }
-
 }

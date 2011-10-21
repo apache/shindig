@@ -21,16 +21,15 @@ package org.apache.shindig.common.crypto;
 import java.util.Map;
 
 /**
- * Utility interface for managing signed, encrypted, and time stamped blobs.
- * Blobs are made up of name/value pairs.  Time stamps are automatically
- * included and checked.
+ * Utility interface for managing signed and encrypted blobs.
+ * Blobs are made up of name/value pairs.
  *
  * Thread safe.
  */
 public interface BlobCrypter {
 
   /**
-   * Time stamps, encrypts, and signs a blob.
+   * Encrypts and signs a blob.
    *
    * @param in name/value pairs to encrypt
    * @return a base64 encoded blob
@@ -43,12 +42,9 @@ public interface BlobCrypter {
    * Unwraps a blob.
    *
    * @param in blob
-   * @param maxAgeSec maximum age for the blob
-   * @return the name/value pairs, including the origin timestamp.
+   * @return the name/value pairs.
    *
-   * @throws BlobExpiredException if the blob is too old to be accepted.
    * @throws BlobCrypterException if the blob can't be decoded.
    */
-  Map<String, String> unwrap(String in, int maxAgeSec)
-      throws BlobCrypterException;
+  Map<String, String> unwrap(String in) throws BlobCrypterException;
 }

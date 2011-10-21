@@ -59,7 +59,7 @@ public class BlobCrypterTest {
       in.put("a", string);
     }
     String blob = crypter.wrap(in);
-    Map<String, String> out = crypter.unwrap(blob, 0);
+    Map<String, String> out = crypter.unwrap(blob);
     assertEquals(string, out.get("a"));
   }
 
@@ -74,7 +74,7 @@ public class BlobCrypterTest {
 
   private void assertThrowsBlobCrypterException(String in) {
     try {
-      crypter.unwrap(in, 1000);
+      crypter.unwrap(in);
       fail("Should have thrown BlobCrypterException for input " + in);
     } catch (BlobCrypterException e) {
       // Good.
@@ -88,30 +88,9 @@ public class BlobCrypterTest {
       in.put(Integer.toString(i), Integer.toString(i));
     }
     String blob = crypter.wrap(in);
-    Map<String, String> out = crypter.unwrap(blob, 0);
+    Map<String, String> out = crypter.unwrap(blob);
     for (int i=0; i < 1000; i++) {
       assertEquals(out.get(Integer.toString(i)), Integer.toString(i));
-    }
-  }
-
-  @Test
-  public void testTimeStamping() throws Exception {
-    long start = 1201917724000L;
-    long skew = 180000;
-    int maxAge = 300; // 5 minutes
-    int realAge = 600; // 10 minutes
-    try {
-
-      timeSource.setCurrentTimeMillis(start);
-      Map<String, String> in = ImmutableMap.of("a","b");
-      String blob = crypter.wrap(in);
-      timeSource.incrementSeconds(realAge);
-      crypter.unwrap(blob, maxAge);
-      fail("Blob should have expired");
-    } catch (BlobExpiredException e) {
-      assertEquals(start-skew, e.minDate.getTime());
-      assertEquals(start+realAge*1000L, e.used.getTime());
-      assertEquals(start+skew+maxAge*1000L, e.maxDate.getTime());
     }
   }
 
@@ -123,7 +102,7 @@ public class BlobCrypterTest {
     byte[] blobBytes = Base64.decodeBase64(blob.getBytes());
     blobBytes[0] ^= 0x01;
     String tampered = new String(Base64.encodeBase64(blobBytes));
-    crypter.unwrap(tampered, 30);
+    crypter.unwrap(tampered);
   }
 
   @Test(expected=BlobCrypterException.class)
@@ -133,7 +112,7 @@ public class BlobCrypterTest {
     byte[] blobBytes = Base64.decodeBase64(blob.getBytes());
     blobBytes[30] ^= 0x01;
     String tampered = new String(Base64.encodeBase64(blobBytes));
-    crypter.unwrap(tampered, 30);
+    crypter.unwrap(tampered);
   }
 
   @Test(expected=BlobCrypterException.class)
@@ -144,7 +123,7 @@ public class BlobCrypterTest {
     byte[] blobBytes = Base64.decodeBase64(blob.getBytes());
     blobBytes[blobBytes.length-1] ^= 0x01;
     String tampered = new String(Base64.encodeBase64(blobBytes));
-    crypter.unwrap(tampered, 30);
+    crypter.unwrap(tampered);
   }
 
   @Test
@@ -153,7 +132,7 @@ public class BlobCrypterTest {
     Map<String, String> in = ImmutableMap.of("a","b");
 
     String blob = crypter.wrap(in);
-    Map<String, String> out = alt.unwrap(blob, 30);
+    Map<String, String> out = alt.unwrap(blob);
     assertEquals("b", out.get("a"));
   }
 
@@ -163,7 +142,7 @@ public class BlobCrypterTest {
     Map<String, String> in = ImmutableMap.of("a","b");
 
     String blob = crypter.wrap(in);
-    alt.unwrap(blob, 30);
+    alt.unwrap(blob);
   }
 
   @Test(expected=IllegalArgumentException.class)

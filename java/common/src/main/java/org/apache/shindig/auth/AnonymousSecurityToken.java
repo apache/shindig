@@ -18,66 +18,41 @@
  */
 package org.apache.shindig.auth;
 
+import java.util.EnumSet;
+
 import org.apache.shindig.config.ContainerConfig;
 
 /**
  * A special class of Token representing the anonymous viewer/owner
  */
 public class AnonymousSecurityToken extends AbstractSecurityToken implements SecurityToken {
-  private final String container;
-  private final long moduleId;
-  private final String appUrl;
-  private final Long expiresAt;
+  private static final EnumSet<Keys> MAP_KEYS = EnumSet.of(
+    Keys.OWNER, Keys.VIEWER, Keys.APP_URL, Keys.MODULE_ID, Keys.EXPIRES, Keys.TRUSTED_JSON
+  );
 
   public AnonymousSecurityToken() {
     this(ContainerConfig.DEFAULT_CONTAINER);
   }
-  
+
   public AnonymousSecurityToken(String container) {
     this(container, 0L, "", null);
   }
 
-  public AnonymousSecurityToken(String container, long moduleId, String appUrl, Long expiresAt) {
-    this.container = container;
-    this.moduleId = moduleId;
-    this.appUrl = appUrl;
-    this.expiresAt = expiresAt;
+  public AnonymousSecurityToken(String container, Long moduleId, String appUrl, Long expiresAt) {
+    setContainer(container).setModuleId(moduleId).setAppUrl(appUrl).setExpiresAt(expiresAt)
+      .setOwnerId("-1")
+      .setViewerId("-1")
+      .setDomain("*")
+      .setTrustedJson("");
+  }
+
+  @Override
+  public String getAppId() {
+    return getAppUrl();
   }
 
   public boolean isAnonymous() {
     return true;
-  }
-
-  public String getOwnerId() {
-    return "-1";
-  }
-
-  public String getViewerId() {
-    return "-1";
-  }
-
-  public String getAppId() {
-    return appUrl;
-  }
-
-  public String getDomain() {
-    return "*";
-  }
-
-  public String getContainer() {
-    return this.container;
-  }
-
-  public String getAppUrl() {
-    return appUrl;
-  }
-
-  public long getModuleId() {
-    return moduleId;
-  }
-
-  public Long getExpiresAt() {
-    return expiresAt;
   }
 
   public String getUpdatedToken() {
@@ -88,7 +63,11 @@ public class AnonymousSecurityToken extends AbstractSecurityToken implements Sec
     return AuthenticationMode.UNAUTHENTICATED.name();
   }
 
-  public String getTrustedJson() {
-    return "";
+  public String getActiveUrl() {
+    throw new UnsupportedOperationException("No active URL available");
+  }
+
+  protected EnumSet<Keys> getMapKeys() {
+    return MAP_KEYS;
   }
 }

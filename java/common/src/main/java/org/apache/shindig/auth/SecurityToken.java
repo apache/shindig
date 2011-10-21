@@ -60,12 +60,13 @@ public interface SecurityToken {
   long getModuleId();
 
   /**
-   * @return the timestamp that this token expires or null if unknown or indeterminate
+   * @return The time in seconds since epoc that this token expires or
+   *   <code>null</code> if unknown or indeterminate.
    */
   Long getExpiresAt();
 
   /**
-   * @return true if the token is no longer valid
+   * @return true if the token is no longer valid.
    */
   boolean isExpired();
 
@@ -91,14 +92,14 @@ public interface SecurityToken {
    * @return true if the token is for an anonymous viewer/owner
    */
   boolean isAnonymous();
-  
+
   /**
    * @return the URL being used by the current request
-   * 
+   *
    * The returned URL must contain at least protocol, host, and port.
-   * 
+   *
    * The returned URL may contain path or query parameters.
-   * 
+   *
    * @throws UnsupportedOperationException if the URL is not available.
    */
   String getActiveUrl();

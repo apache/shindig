@@ -35,7 +35,7 @@ public class UrlParameterAuthenticationHandlerTest {
   public void setup() throws Exception {
     expectedToken = new BasicSecurityToken(
         "owner", "viewer", "app",
-        "domain", "appUrl", "moduleId", "container", "activeUrl", 1000L);
+        "domain", "appUrl", "0", "container", "activeUrl", 1000L);
     // Mock token codec
     codec = new SecurityTokenCodec() {
       public SecurityToken createToken(Map<String, String> tokenParameters) throws SecurityTokenException {
@@ -44,10 +44,6 @@ public class UrlParameterAuthenticationHandlerTest {
       }
 
       public String encodeToken(SecurityToken token) throws SecurityTokenException {
-        return null;
-      }
-
-      public Long getTokenExpiration(SecurityToken token) throws SecurityTokenException {
         return null;
       }
     };

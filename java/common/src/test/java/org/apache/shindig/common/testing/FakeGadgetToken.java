@@ -18,171 +18,32 @@
  */
 package org.apache.shindig.common.testing;
 
+import java.util.EnumSet;
+import java.util.Map;
+
 import org.apache.shindig.auth.AbstractSecurityToken;
 import org.apache.shindig.auth.AuthenticationMode;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.auth.SecurityTokenCodec;
-
-import com.google.common.collect.Maps;
 import org.apache.shindig.auth.SecurityTokenException;
-
-import java.util.Map;
 
 /**
  * A fake SecurityToken implementation to help testing.
  */
-public class FakeGadgetToken extends AbstractSecurityToken implements SecurityToken {
+public class FakeGadgetToken extends AbstractSecurityToken {
 
-  private String updatedToken = null;
-  private String trustedJson = null;
-
-  private String ownerId = null;
-  private String viewerId = null;
-  private String appId = null;
-  private String domain = null;
-  private String container = null;
-  private String appUrl = null;
-  private String activeUrl = null;
   private String authMode = AuthenticationMode.SECURITY_TOKEN_URL_PARAMETER.name();
-  private int moduleId = 0;
-  private Long expiresAt = null;
-
-  public FakeGadgetToken setUpdatedToken(String updatedToken) {
-    this.updatedToken = updatedToken;
-    return this;
-  }
-
-  public FakeGadgetToken setTrustedJson(String trustedJson) {
-    this.trustedJson = trustedJson;
-    return this;
-  }
-
-  public FakeGadgetToken setOwnerId(String ownerId) {
-    this.ownerId = ownerId;
-    return this;
-  }
-
-  public FakeGadgetToken setViewerId(String viewerId) {
-    this.viewerId = viewerId;
-    return this;
-  }
-
-  public FakeGadgetToken setAppId(String appId) {
-    this.appId = appId;
-    return this;
-  }
-
-  public FakeGadgetToken setDomain(String domain) {
-    this.domain = domain;
-    return this;
-  }
-
-  public FakeGadgetToken setContainer(String container) {
-    this.container = container;
-    return this;
-  }
-
-  public FakeGadgetToken setAppUrl(String appUrl) {
-    this.appUrl = appUrl;
-    return this;
-  }
-
-  public FakeGadgetToken setModuleId(int moduleId) {
-    this.moduleId = moduleId;
-    return this;
-  }
-
-  public FakeGadgetToken setExpiresAt(Long expiresAt) {
-    this.expiresAt = expiresAt;
-    return this;
-  }
-
-  public FakeGadgetToken setActiveUrl(String activeUrl) {
-    this.activeUrl = activeUrl;
-    return this;
-  }
-
-  public void setAuthenticationMode(String authMode) {
-    this.authMode = authMode;
-  }
-
-  public String getOwnerId() {
-    return ownerId;
-  }
-
-  public String getViewerId() {
-    return viewerId;
-  }
-
-  public String getAppId() {
-    return appId;
-  }
-
-  public String getDomain() {
-    return domain;
-  }
-
-  public String getContainer() {
-    return container;
-  }
-
-  public String getAppUrl() {
-    return appUrl;
-  }
-
-  public long getModuleId() {
-    return moduleId;
-  }
-
-  public Long getExpiresAt() {
-    return expiresAt;
-  }
-
-  public String getUpdatedToken() {
-    return updatedToken;
-  }
+  private String updated;
 
   public String getAuthenticationMode() {
     return authMode;
-  }
-
-  public String getTrustedJson() {
-    return trustedJson;
   }
 
   public boolean isAnonymous() {
     return false;
   }
 
-  @Override
-  public String getActiveUrl() {
-    return activeUrl;
-  }
-
-  /**
-   * Create a fake security token parameter string, allows passing around a
-   * security token of format key=value&key2=value2, where key is one of:
-   * ownerId, viewerId, domain, appUrl, appId, trustedJson, module.
-   *
-   * Useful for creating tokens that can be decoded with FakeGadgetToken.Decoder
-   *
-   * @param tokenString the parameter string
-   * @return The fake token
-   */
-  public static SecurityToken createToken(String tokenString)  {
-    String keyValuePairs[] = tokenString.split("&");
-    Map<String, String> paramMap = Maps.newHashMap();
-
-    for (String keyValuePair : keyValuePairs) {
-      String[] keyAndValue = keyValuePair.split("=");
-      if (keyAndValue.length == 2) {
-        paramMap.put(keyAndValue[0], keyAndValue[1]);
-      }
-    }
-
-    return createToken(paramMap);
-  }
-
+  public FakeGadgetToken() {}
   /**
    * Create a fake security token from a map of parameter strings, keys are one of:
    * ownerId, viewerId, domain, appUrl, appId, trustedJson, module
@@ -190,22 +51,29 @@ public class FakeGadgetToken extends AbstractSecurityToken implements SecurityTo
    * @param paramMap
    * @return The fake token
    */
-  public static FakeGadgetToken createToken(Map<String, String> paramMap) {
-    FakeGadgetToken fakeToken = new FakeGadgetToken();
+  public FakeGadgetToken(Map<String, String> paramMap) {
+    this(
+      paramMap.get("appId"),
+      paramMap.get("appUrl"),
+      paramMap.get("domain"),
+      paramMap.get("ownerId"),
+      paramMap.get("trustedJson"),
+      paramMap.get("viewerId"),
+      paramMap.get("module")
+    );
+  }
 
-    fakeToken.setAppId(paramMap.get("appId"));
-    fakeToken.setAppUrl(paramMap.get("appUrl"));
-    fakeToken.setDomain(paramMap.get("domain"));
-    fakeToken.setOwnerId(paramMap.get("ownerId"));
-    fakeToken.setTrustedJson(paramMap.get("trustedJson"));
-    fakeToken.setViewerId(paramMap.get("viewerId"));
+  public FakeGadgetToken(String appId, String appUrl, String domain, String ownerId, String trustedJson, String viewerId, String moduleId) {
+    setAppId(appId);
+    setAppUrl(appUrl);
+    setDomain(domain);
+    setOwnerId(ownerId);
+    setTrustedJson(trustedJson);
+    setViewerId(viewerId);
 
-    String moduleIdStr = paramMap.get("module");
-    if (moduleIdStr != null) {
-      fakeToken.setModuleId(Integer.parseInt(moduleIdStr));
+    if (moduleId != null) {
+      setModuleId(Long.parseLong(moduleId));
     }
-
-    return fakeToken;
   }
 
   /**
@@ -215,15 +83,71 @@ public class FakeGadgetToken extends AbstractSecurityToken implements SecurityTo
    */
   public static class Codec implements SecurityTokenCodec {
     public SecurityToken createToken(Map<String, String> tokenParameters)  {
-      return FakeGadgetToken.createToken(tokenParameters);
+      return new FakeGadgetToken(tokenParameters);
     }
 
     public String encodeToken(SecurityToken token) throws SecurityTokenException {
       return null; // NOT USED
     }
+  }
 
-    public Long getTokenExpiration(SecurityToken token) throws SecurityTokenException {
-      return null; // NOT USED
-    }
+  public FakeGadgetToken setAuthenticationMode(String authMode) {
+    this.authMode = authMode;
+    return this;
+  }
+
+  public FakeGadgetToken setUpdatedToken(String updated) {
+    this.updated = updated;
+    return this;
+  }
+
+  @Override
+  public String getUpdatedToken() {
+    return updated;
+  }
+
+  @Override
+  protected EnumSet<Keys> getMapKeys() {
+    return EnumSet.noneOf(Keys.class);
+  }
+
+  public FakeGadgetToken setAppUrl(String appUrl) {
+    return (FakeGadgetToken)super.setAppUrl(appUrl);
+  }
+
+  public FakeGadgetToken setOwnerId(String ownerId) {
+    return (FakeGadgetToken)super.setOwnerId(ownerId);
+  }
+
+  public FakeGadgetToken setViewerId(String viewerId) {
+    return (FakeGadgetToken)super.setViewerId(viewerId);
+  }
+
+  public FakeGadgetToken setAppId(String appId) {
+    return (FakeGadgetToken)super.setAppId(appId);
+  }
+
+  public FakeGadgetToken setDomain(String domain) {
+    return (FakeGadgetToken)super.setDomain(domain);
+  }
+
+  public FakeGadgetToken setContainer(String container) {
+    return (FakeGadgetToken)super.setContainer(container);
+  }
+
+  public FakeGadgetToken setModuleId(long moduleId) {
+    return (FakeGadgetToken)super.setModuleId(moduleId);
+  }
+
+  public FakeGadgetToken setExpiresAt(Long expiresAt) {
+    return (FakeGadgetToken)super.setExpiresAt(expiresAt);
+  }
+
+  public FakeGadgetToken setTrustedJson(String trustedJson) {
+    return (FakeGadgetToken)super.setTrustedJson(trustedJson);
+  }
+
+  public FakeGadgetToken setActiveUrl(String activeUrl) {
+    return (FakeGadgetToken)super.setActiveUrl(activeUrl);
   }
 }

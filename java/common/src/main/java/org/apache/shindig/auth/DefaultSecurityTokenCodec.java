@@ -74,8 +74,4 @@ public class DefaultSecurityTokenCodec implements SecurityTokenCodec {
     }
     return codec.encodeToken(token);
   }
-
-  public Long getTokenExpiration(SecurityToken token) throws SecurityTokenException {
-    return codec.getTokenExpiration(token);
-  }
 }

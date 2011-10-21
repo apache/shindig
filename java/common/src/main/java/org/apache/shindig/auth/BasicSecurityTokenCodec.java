@@ -43,6 +43,7 @@ public class BasicSecurityTokenCodec implements SecurityTokenCodec {
   private static final int APP_URL_INDEX = 4;
   private static final int MODULE_ID_INDEX = 5;
   private static final int CONTAINER_ID_INDEX = 6;
+  private static final int EXPIRY_INDEX = 7; // for back compat, conditionally check later
   private static final int TOKEN_COUNT = CONTAINER_ID_INDEX + 1;
 
   /**
@@ -51,14 +52,17 @@ public class BasicSecurityTokenCodec implements SecurityTokenCodec {
    * @return token with values separated by colons
    */
   public String encodeToken(SecurityToken token) {
+    BasicSecurityToken basicToken = new BasicSecurityToken();
+    basicToken.setExpires();  // Quick and dirty token expire calculation.
     return Joiner.on(":").join(
         Utf8UrlCoder.encode(token.getOwnerId()),
         Utf8UrlCoder.encode(token.getViewerId()),
         Utf8UrlCoder.encode(token.getAppId()),
         Utf8UrlCoder.encode(token.getDomain()),
         Utf8UrlCoder.encode(token.getAppUrl()),
-        Long.toString(token.getModuleId()),
-        Utf8UrlCoder.encode(token.getContainer()));
+        Long.toString(token.getModuleId(), 10),
+        Utf8UrlCoder.encode(token.getContainer()),
+        Long.toString(basicToken.getExpiresAt(), 10));
   }
 
 
@@ -78,11 +82,16 @@ public class BasicSecurityTokenCodec implements SecurityTokenCodec {
 
     try {
       String[] tokens = StringUtils.split(token, ':');
-      if (tokens.length != TOKEN_COUNT) {
+      if (tokens.length < TOKEN_COUNT) {
         throw new SecurityTokenException("Malformed security token");
       }
 
-      return new BasicSecurityToken(
+      Long expires = null;
+      if (tokens.length > TOKEN_COUNT && !tokens[EXPIRY_INDEX].equals("")) {
+        expires = Long.parseLong(Utf8UrlCoder.decode(tokens[EXPIRY_INDEX]), 10);
+      }
+
+      BasicSecurityToken basicToken = new BasicSecurityToken(
           Utf8UrlCoder.decode(tokens[OWNER_INDEX]),
           Utf8UrlCoder.decode(tokens[VIEWER_INDEX]),
           Utf8UrlCoder.decode(tokens[APP_ID_INDEX]),
@@ -91,17 +100,13 @@ public class BasicSecurityTokenCodec implements SecurityTokenCodec {
           Utf8UrlCoder.decode(tokens[MODULE_ID_INDEX]),
           Utf8UrlCoder.decode(tokens[CONTAINER_ID_INDEX]),
           parameters.get(SecurityTokenCodec.ACTIVE_URL_NAME),
-          null);
+          expires);
+      return basicToken.enforceNotExpired();
     } catch (BlobCrypterException e) {
       throw new SecurityTokenException(e);
     } catch (ArrayIndexOutOfBoundsException e) {
       throw new SecurityTokenException(e);
     }
-  }
-
-  public Long getTokenExpiration(SecurityToken token) {
-    // TODO: Support and/or implement this operation.
-    return null;
   }
 
   /**

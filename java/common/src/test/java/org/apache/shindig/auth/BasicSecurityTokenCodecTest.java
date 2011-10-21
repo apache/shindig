@@ -18,10 +18,7 @@
  */
 package org.apache.shindig.auth;
 
-import static junit.framework.Assert.assertNull;
-
 import org.junit.Before;
-import org.junit.Test;
 
 public class BasicSecurityTokenCodecTest {
 
@@ -30,10 +27,5 @@ public class BasicSecurityTokenCodecTest {
   @Before
   public void setUp() throws Exception {
     codec = new BasicSecurityTokenCodec();
-  }
-
-  @Test
-  public void testGetTokenExpiration() throws Exception {
-    assertNull(codec.getTokenExpiration(null));
   }
 }

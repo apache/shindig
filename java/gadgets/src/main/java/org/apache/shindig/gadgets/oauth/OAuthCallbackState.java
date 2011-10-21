@@ -32,43 +32,44 @@ import java.util.Map;
  */
 public class OAuthCallbackState {
 
-  private static final int CALLBACK_STATE_MAX_AGE_SECS = 600;
-  
-  private static final String REAL_CALLBACK_URL_KEY = "u";
-  
   private final BlobCrypter crypter;
-  private final Map<String, String> state;
-  
+  private OAuthCallbackStateToken state;
+
   public OAuthCallbackState(BlobCrypter crypter) {
     this.crypter = crypter;
-    this.state = Maps.newHashMap();
+    this.state = new OAuthCallbackStateToken();
   }
-  
+
   public OAuthCallbackState(BlobCrypter crypter, String stateBlob) {
     this.crypter = crypter;
-    Map<String, String> state = Maps.newHashMap();
+    Map<String, String> state = null;
     if (stateBlob != null) {
       try {
-        state = crypter.unwrap(stateBlob, CALLBACK_STATE_MAX_AGE_SECS);
+        state = crypter.unwrap(stateBlob);
+        if (state == null) {
+          state = Maps.newHashMap();
+        }
+        this.state = new OAuthCallbackStateToken(state);
+        this.state.enforceNotExpired();
       } catch (BlobCrypterException e) {
         // Too old, or corrupt.  Ignore it.
+        state = null;
       }
     }
     if (state == null) {
-      state = Maps.newHashMap();
+      this.state = new OAuthCallbackStateToken();
     }
-    this.state = state;
   }
-  
+
   public String getEncryptedState() throws BlobCrypterException {
-    return crypter.wrap(state);
+    return crypter.wrap(state.toMap());
   }
-  
+
   public String getRealCallbackUrl() {
-    return state.get(REAL_CALLBACK_URL_KEY);
+    return state.getRealCallbackUrl();
   }
-  
+
   public void setRealCallbackUrl(String realCallbackUrl) {
-    state.put(REAL_CALLBACK_URL_KEY, realCallbackUrl);
+    state.setRealCallbackUrl(realCallbackUrl);
   }
 }

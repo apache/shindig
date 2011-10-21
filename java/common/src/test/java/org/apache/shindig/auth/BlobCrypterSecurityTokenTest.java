@@ -18,16 +18,18 @@
  */
 package org.apache.shindig.auth;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.shindig.common.crypto.BasicBlobCrypter;
-import org.apache.shindig.common.crypto.BlobExpiredException;
-import org.apache.shindig.common.crypto.Crypto;
-import org.apache.shindig.common.util.FakeTimeSource;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.commons.lang.StringUtils;
+import org.apache.shindig.auth.AbstractSecurityToken.Keys;
+import org.apache.shindig.common.crypto.BasicBlobCrypter;
+import org.apache.shindig.common.crypto.Crypto;
+import org.apache.shindig.common.util.FakeTimeSource;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -50,12 +52,12 @@ public class BlobCrypterSecurityTokenTest {
 
   @Test(expected=UnsupportedOperationException.class)
   public void testNullValues() throws Exception {
-    BlobCrypterSecurityToken t = new BlobCrypterSecurityToken(CONTAINER, DOMAIN);
-    String token = BlobCrypterSecurityToken.encrypt(t, crypter);
+    BlobCrypterSecurityToken t = new BlobCrypterSecurityToken(CONTAINER, DOMAIN, null, null);
+    String token = t.getContainer() + ":" + crypter.wrap(t.toMap());
     assertTrue("should start with container: " + token, token.startsWith("container:"));
     String[] fields = StringUtils.split(token, ':');
-    BlobCrypterSecurityToken t2 =
-        BlobCrypterSecurityToken.decrypt(crypter, CONTAINER, DOMAIN, fields[1], null);
+    BlobCrypterSecurityToken t2 = new BlobCrypterSecurityToken(CONTAINER, DOMAIN, null, crypter.unwrap(fields[1]));
+
     assertNull(t2.getAppId(), t2.getAppId());
     assertNull(t2.getAppUrl(), t2.getAppUrl());
     assertEquals(DOMAIN, t2.getDomain());
@@ -72,17 +74,18 @@ public class BlobCrypterSecurityTokenTest {
 
   @Test
   public void testRealValues() throws Exception {
-    BlobCrypterSecurityToken t = new BlobCrypterSecurityToken(CONTAINER, DOMAIN);
-    t.setAppUrl("http://www.example.com/gadget.xml");
-    t.setModuleId(12345L);
-    t.setOwnerId("owner");
-    t.setViewerId("viewer");
-    t.setTrustedJson("trusted");
-    String token = BlobCrypterSecurityToken.encrypt(t, crypter);
+    Map<String, String> values = new HashMap<String, String>();
+    values.put(Keys.APP_URL.getKey(), "http://www.example.com/gadget.xml");
+    values.put(Keys.MODULE_ID.getKey(), Long.toString(12345L, 10));
+    values.put(Keys.OWNER.getKey(), "owner");
+    values.put(Keys.VIEWER.getKey(), "viewer");
+    values.put(Keys.TRUSTED_JSON.getKey(), "trusted");
+
+    BlobCrypterSecurityToken t = new BlobCrypterSecurityToken(CONTAINER, DOMAIN, null, values);
+    String token = t.getContainer() + ":" + crypter.wrap(t.toMap());
     assertTrue("should start with container: " + token, token.startsWith("container:"));
     String[] fields = StringUtils.split(token, ':');
-    BlobCrypterSecurityToken t2 =
-        BlobCrypterSecurityToken.decrypt(crypter, CONTAINER, DOMAIN, fields[1], "active");
+    BlobCrypterSecurityToken t2 = new BlobCrypterSecurityToken(CONTAINER, DOMAIN, "active", crypter.unwrap(fields[1]));
     assertEquals("http://www.example.com/gadget.xml", t2.getAppId());
     assertEquals("http://www.example.com/gadget.xml", t2.getAppUrl());
     assertEquals(DOMAIN, t2.getDomain());
@@ -92,17 +95,5 @@ public class BlobCrypterSecurityTokenTest {
     assertEquals("trusted", t2.getTrustedJson());
     assertEquals(CONTAINER, t2.getContainer());
     assertEquals("active", t2.getActiveUrl());
-  }
-
-  @Test(expected=BlobExpiredException.class)
-  public void testExpired() throws Exception {
-    BlobCrypterSecurityToken t = new BlobCrypterSecurityToken(CONTAINER, DOMAIN);
-    String token = BlobCrypterSecurityToken.encrypt(t, crypter);
-    // one hour plus clock skew
-    timeSource.incrementSeconds(3600 + 181);
-    String[] fields = StringUtils.split(token, ':');
-
-    // expect an exception
-    BlobCrypterSecurityToken.decrypt(crypter, CONTAINER, DOMAIN, fields[1], "active");
   }
 }

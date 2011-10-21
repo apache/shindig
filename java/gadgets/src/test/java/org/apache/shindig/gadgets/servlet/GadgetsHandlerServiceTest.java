@@ -330,7 +330,6 @@ public class GadgetsHandlerServiceTest extends EasyMockTestCase {
             createAuthContext(OWNER, VIEWER), ImmutableList.of("*"));
     replay();
     tokenCodec.encodedToken = TOKEN;
-    tokenCodec.tokenExpiryTimeMs = TOKEN_EXPIRY_TIME_MS;
     GadgetsHandlerApi.TokenResponse response = gadgetHandler.getToken(request);
     assertEquals(TOKEN, response.getToken());
     assertEquals(CURRENT_TIME_MS, response.getResponseTimeMs());
@@ -679,6 +678,7 @@ public class GadgetsHandlerServiceTest extends EasyMockTestCase {
     if (viewerId != null) {
       EasyMock.expect(authContext.getViewerId()).andReturn(viewerId).once();
     }
+    EasyMock.expect(authContext.getExpiresAt()).andReturn(TOKEN_EXPIRY_TIME_MS).anyTimes();
     return authContext;
   }
 
@@ -728,7 +728,6 @@ public class GadgetsHandlerServiceTest extends EasyMockTestCase {
     public SecurityToken authContext = null;
     public SecurityTokenException exc = null;
     public String encodedToken = null;
-    public Long tokenExpiryTimeMs = null;
 
     public String encodeToken(SecurityToken authContext) throws SecurityTokenException {
       this.authContext = authContext;
@@ -744,14 +743,6 @@ public class GadgetsHandlerServiceTest extends EasyMockTestCase {
         throw exc;
       }
       return authContext;
-    }
-
-    public Long getTokenExpiration(SecurityToken authContext) throws SecurityTokenException {
-      this.authContext = authContext;
-      if (exc != null) {
-        throw exc;
-      }
-      return tokenExpiryTimeMs;
     }
   }
 }

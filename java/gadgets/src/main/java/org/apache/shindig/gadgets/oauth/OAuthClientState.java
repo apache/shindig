@@ -16,30 +16,29 @@
  */
 package org.apache.shindig.gadgets.oauth;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Maps;
 
+import org.apache.shindig.auth.AbstractSecurityToken;
 import org.apache.shindig.common.crypto.BlobCrypter;
 import org.apache.shindig.common.crypto.BlobCrypterException;
+import org.apache.shindig.common.util.TimeSource;
 
+import java.util.EnumSet;
 import java.util.Map;
 
 /**
  * Class to handle OAuth fetcher state stored client side.  The state is
  * stored as a signed, encrypted, time stamped blob.
  */
-public class OAuthClientState {
-  /**
-   * Maximum age for our client state; if this is exceeded we start over. One
-   * hour is a fairly arbitrary time limit here.
-   */
-  private static final int CLIENT_STATE_MAX_AGE_SECS = 3600;
+public class OAuthClientState extends AbstractSecurityToken {
+  private static final EnumSet<Keys> MAP_KEYS = EnumSet.of(Keys.EXPIRES, Keys.OWNER);
 
   // Our client state is encrypted key/value pairs.  These are the key names.
   private static final String REQ_TOKEN_KEY = "r";
   private static final String REQ_TOKEN_SECRET_KEY = "rs";
   private static final String ACCESS_TOKEN_KEY = "a";
   private static final String ACCESS_TOKEN_SECRET_KEY = "as";
-  private static final String OWNER_KEY = "o";
   private static final String SESSION_HANDLE_KEY = "sh";
   private static final String ACCESS_TOKEN_EXPIRATION_KEY = "e";
 
@@ -51,7 +50,7 @@ public class OAuthClientState {
 
   /**
    * Create a new, empty client state blob.
-   * 
+   *
    * @param crypter
    */
   public OAuthClientState(BlobCrypter crypter) {
@@ -71,23 +70,32 @@ public class OAuthClientState {
     Map<String, String> state = null;
     if (stateBlob != null) {
       try {
-        state = crypter.unwrap(stateBlob, CLIENT_STATE_MAX_AGE_SECS);
+        state = crypter.unwrap(stateBlob);
+        if (state == null) {
+          state = Maps.newHashMap();
+        }
+        loadFromMap(state);
+        state.remove(Keys.EXPIRES.getKey());
+        state.remove(Keys.OWNER.getKey());
+        enforceNotExpired();
       } catch (BlobCrypterException e) {
         // Probably too old, pretend we never saw it at all.
+        state = null;
       }
     }
     if (state == null) {
       state = Maps.newHashMap();
+      setOwner(null);
+      setExpiresAt(null);
     }
-    this.state = state; 
+    this.state = state;
   }
 
   /**
    * @return true if there is no state to store with the client.
    */
   public boolean isEmpty() {
-    // Might contain just a timestamp
-    return (state.isEmpty() || (state.size() == 1 && state.containsKey("t")));
+    return (state.isEmpty() && getOwnerId() == null);
   }
 
   /**
@@ -95,7 +103,10 @@ public class OAuthClientState {
    * @throws BlobCrypterException
    */
   public String getEncryptedState() throws BlobCrypterException {
-    return crypter.wrap(state);
+    setExpires();
+    Map<String, String> map = this.toMap();
+    map.putAll(state);
+    return crypter.wrap(map);
   }
 
   /**
@@ -173,11 +184,11 @@ public class OAuthClientState {
    * Owner of the OAuth token.
    */
   public String getOwner() {
-    return state.get(OWNER_KEY);
+    return getOwnerId();
   }
 
   public void setOwner(String owner) {
-    setNullCheck(OWNER_KEY, owner);
+    setOwnerId(owner);
   }
 
   private void setNullCheck(String key, String value) {
@@ -186,5 +197,27 @@ public class OAuthClientState {
     } else {
       state.put(key, value);
     }
+  }
+
+  public String getUpdatedToken() {
+    throw new UnsupportedOperationException();
+  }
+
+  public String getAuthenticationMode() {
+    throw new UnsupportedOperationException();
+  }
+
+  public boolean isAnonymous() {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  protected EnumSet<Keys> getMapKeys() {
+    return MAP_KEYS;
+  }
+
+  @VisibleForTesting
+  protected AbstractSecurityToken setTimeSource(TimeSource timeSource) {
+    return super.setTimeSource(timeSource);
   }
 }

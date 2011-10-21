@@ -18,6 +18,12 @@
  */
 package org.apache.shindig.auth;
 
+import java.io.IOException;
+import java.util.Collection;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.crypto.BasicBlobCrypter;
@@ -29,13 +35,6 @@ import org.apache.shindig.config.ContainerConfig;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.Collection;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Provides security token decoding services.  Configuration is via containers.js.  Each container
@@ -103,7 +102,7 @@ public class BlobCrypterSecurityTokenCodec implements SecurityTokenCodec, Contai
     crypters = newCrypters;
     domains = newDomains;
   }
-  
+
   private void loadContainers(ContainerConfig config, Collection<String> containers,
       Map<String, BlobCrypter> crypters, Map<String, String> domains) throws IOException {
     for (String container : containers) {
@@ -153,32 +152,39 @@ public class BlobCrypterSecurityTokenCodec implements SecurityTokenCodec, Contai
     String activeUrl = tokenParameters.get(SecurityTokenCodec.ACTIVE_URL_NAME);
     String crypted = fields[1];
     try {
-      return BlobCrypterSecurityToken.decrypt(crypter, container, domain, crypted, activeUrl);
+      BlobCrypterSecurityToken st = new BlobCrypterSecurityToken(container, domain, activeUrl,
+          crypter.unwrap(crypted));
+      return st.enforceNotExpired();
     } catch (BlobCrypterException e) {
       throw new SecurityTokenException(e);
     }
   }
 
+  /**
+   * Encrypt and sign the token.  The returned value is *not* web safe, it should be URL
+   * encoded before being used as a form parameter.
+   */
   public String encodeToken(SecurityToken token) throws SecurityTokenException {
     if (!token.getAuthenticationMode().equals(
             AuthenticationMode.SECURITY_TOKEN_URL_PARAMETER.name())) {
       throw new SecurityTokenException("Can only encode BlogCrypterSecurityTokens");
     }
 
-    BlobCrypter crypter = crypters.get(token.getContainer());
+    // Test code sends in real AbstractTokens, they have modified time sources in them so
+    // that we can test token expiration, production tokens are proxied via the SecurityToken interface.
+    AbstractSecurityToken aToken = token instanceof AbstractSecurityToken ?
+        (AbstractSecurityToken)token : BlobCrypterSecurityToken.fromToken(token);
+
+    BlobCrypter crypter = crypters.get(aToken.getContainer());
     if (crypter == null) {
-      throw new SecurityTokenException("Unknown container " + token.getContainer());
+      throw new SecurityTokenException("Unknown container " + aToken.getContainer());
     }
-    
+
     try {
-      return BlobCrypterSecurityToken.encrypt(token, crypter);
+      aToken.setExpires();
+      return aToken.getContainer() + ':' + crypter.wrap(aToken.toMap());
     } catch (BlobCrypterException e) {
       throw new SecurityTokenException(e);
     }
-  }
-
-  public Long getTokenExpiration(SecurityToken token) {
-    // TODO: Support and/or implement this operation.
-    return null;
   }
 }

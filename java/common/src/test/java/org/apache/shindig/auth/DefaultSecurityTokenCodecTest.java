@@ -19,20 +19,18 @@
 package org.apache.shindig.auth;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-
-import org.apache.shindig.config.BasicContainerConfig;
-
-import com.google.common.collect.Lists;
-
-import org.junit.Test;
 
 import java.io.FileNotFoundException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
+
+import org.apache.shindig.config.BasicContainerConfig;
+import org.junit.Test;
+
+import com.google.common.collect.Lists;
 
 /**
  * Tests of DefaultSecurityTokenCodec
@@ -68,7 +66,8 @@ public class DefaultSecurityTokenCodecTest {
   public void testBasicDecoder() throws Exception {
     DefaultSecurityTokenCodec codec = new DefaultSecurityTokenCodec(
         new FakeContainerConfig("insecure"));
-    String token = "o:v:app:domain:appurl:12345:container";
+    Long expires = System.currentTimeMillis() / 1000 + 500; // 50 seconds in the future
+    String token = "o:v:app:domain:appurl:12345:container:" +  Long.toString(expires, 10);
     Map<String, String> parameters = Collections.singletonMap(
         SecurityTokenCodec.SECURITY_TOKEN_NAME, token);
     SecurityToken st = codec.createToken(parameters);
@@ -76,7 +75,7 @@ public class DefaultSecurityTokenCodecTest {
     assertEquals("v", st.getViewerId());
     assertEquals("appurl", st.getAppUrl());
     assertEquals("container", st.getContainer());
-    assertNull(codec.getTokenExpiration(st));
+    assertEquals(expires, st.getExpiresAt());
   }
 
   @Test

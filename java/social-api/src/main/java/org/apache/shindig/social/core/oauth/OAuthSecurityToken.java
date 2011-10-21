@@ -17,21 +17,20 @@
  */
 package org.apache.shindig.social.core.oauth;
 
+import java.util.EnumSet;
+
 import org.apache.shindig.auth.AbstractSecurityToken;
 import org.apache.shindig.auth.AuthenticationMode;
-import org.apache.shindig.auth.SecurityToken;
 
 /**
  * A SecurityToken that represents two/three legged OAuth requests
  */
-public class OAuthSecurityToken extends AbstractSecurityToken implements SecurityToken {
-  private final String userId;
-  private final String appUrl;
-  private final String appId;
-  private final String domain;
-  private final String container;
+public class OAuthSecurityToken extends AbstractSecurityToken {
+  private static final EnumSet<Keys> MAPKEYS = EnumSet.of(
+    Keys.VIEWER, Keys.OWNER, Keys.APP_URL, Keys.APP_ID, Keys.DOMAIN, Keys.CONTAINER, Keys.EXPIRES
+  );
+
   private final String authMode;
-  private final Long expiresAt;
 
   public OAuthSecurityToken(String userId, String appUrl, String appId, String domain,
       String container, Long expiresAt) {
@@ -40,45 +39,20 @@ public class OAuthSecurityToken extends AbstractSecurityToken implements Securit
 
   public OAuthSecurityToken(String userId, String appUrl, String appId, String domain,
       String container, Long expiresAt, String authMode) {
-    this.userId = userId;
-    this.appUrl = appUrl;
-    this.appId = appId;
-    this.domain = domain;
-    this.container = container;
+
+    setViewerId(userId);
+    setOwnerId(userId);
+    setAppUrl(appUrl);
+    setAppId(appId);
+    setDomain(domain);
+    setContainer(container);
+    setExpiresAt(expiresAt);
     this.authMode = authMode;
-    this.expiresAt = expiresAt;
-  }
-
-  public String getOwnerId() {
-    return userId;
-  }
-
-  public String getViewerId() {
-    return userId;
-  }
-
-  public String getAppId() {
-    return appId;
-  }
-
-  public String getDomain() {
-    return domain;
-  }
-
-  public String getContainer() {
-    return container;
-  }
-
-  public String getAppUrl() {
-    return appUrl;
-  }
-
-  public Long getExpiresAt() {
-    return expiresAt;
   }
 
   // We don't support this concept yet. We probably don't need to as opensocial calls don't
   // currently depend on the app instance id.
+  @Override
   public long getModuleId() {
     throw new UnsupportedOperationException();
   }
@@ -91,11 +65,17 @@ public class OAuthSecurityToken extends AbstractSecurityToken implements Securit
     return authMode;
   }
 
+  @Override
   public String getTrustedJson() {
     throw new UnsupportedOperationException();
   }
 
   public boolean isAnonymous() {
     return false;
+  }
+
+  @Override
+  protected EnumSet<Keys> getMapKeys() {
+    return MAPKEYS;
   }
 }

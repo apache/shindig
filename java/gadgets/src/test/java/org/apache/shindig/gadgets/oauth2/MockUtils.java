@@ -21,7 +21,9 @@ package org.apache.shindig.gadgets.oauth2;
 import com.google.common.collect.Maps;
 import com.google.inject.Provider;
 
+import org.apache.shindig.auth.AbstractSecurityToken;
 import org.apache.shindig.auth.SecurityToken;
+import org.apache.shindig.common.crypto.BlobExpiredException;
 import org.apache.shindig.common.servlet.Authority;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.AuthType;
@@ -54,6 +56,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 
@@ -146,23 +149,12 @@ public class MockUtils {
     }
   }
 
-  static class DummySecurityToken implements SecurityToken {
-    private final String ownerId;
-    private final String viewerId;
-    private final String appUrl;
+  static class DummySecurityToken extends AbstractSecurityToken {
 
-    public DummySecurityToken(final String ownerId, final String viewerId, final String appUrl) {
-      this.ownerId = ownerId;
-      this.viewerId = viewerId;
-      this.appUrl = appUrl;
-    }
-
-    public String getOwnerId() {
-      return this.ownerId;
-    }
-
-    public String getViewerId() {
-      return this.viewerId;
+    public DummySecurityToken(String ownerId, String viewerId, String appUrl) {
+      setOwnerId(ownerId);
+      setViewerId(viewerId);
+      setAppUrl(appUrl);
     }
 
     public String getAppId() {
@@ -177,10 +169,6 @@ public class MockUtils {
       return "";
     }
 
-    public String getAppUrl() {
-      return this.appUrl;
-    }
-
     public long getModuleId() {
       return 0;
     }
@@ -189,8 +177,12 @@ public class MockUtils {
       return 0L;
     }
 
-    public boolean isExpired() {
+    public boolean isExpired(int maxAge) {
       return false;
+    }
+
+    public AbstractSecurityToken enforceNotExpired(int maxAge) throws BlobExpiredException {
+      return this;
     }
 
     public String getUpdatedToken() {
@@ -210,7 +202,11 @@ public class MockUtils {
     }
 
     public String getActiveUrl() {
-      return this.appUrl;
+      return getAppUrl();
+    }
+
+    protected EnumSet<Keys> getMapKeys() {
+      return EnumSet.noneOf(Keys.class);
     }
   }
 
@@ -504,7 +500,7 @@ public class MockUtils {
     refreshToken.setUser(MockUtils.USER);
     return refreshToken;
   }
-  
+
   protected static String loadFile(String path) throws IOException {
     InputStream is = MockUtils.class.getClassLoader().getResourceAsStream(path);
     return IOUtils.toString(is,"UTF-8");

@@ -466,8 +466,6 @@ public class GadgetsHandlerTest extends EasyMockTestCase {
     Capture<SecurityToken> authContextCapture = new Capture<SecurityToken>();
     EasyMock.expect(codec.encodeToken(EasyMock.capture(authContextCapture))).andReturn(TOKEN)
             .anyTimes();
-    EasyMock.expect(codec.getTokenExpiration(EasyMock.capture(authContextCapture)))
-            .andReturn(EXPIRY_TIME_MS).anyTimes();
     replay(codec);
 
     registerGadgetsHandler(codec);
@@ -548,8 +546,6 @@ public class GadgetsHandlerTest extends EasyMockTestCase {
     EasyMock.expect(codec.encodeToken(EasyMock.isA(SecurityToken.class))).andReturn(TOKEN);
     EasyMock.expect(codec.encodeToken(EasyMock.isA(SecurityToken.class))).andThrow(
             new SecurityTokenException("blah"));
-    EasyMock.expect(codec.getTokenExpiration(EasyMock.isA(SecurityToken.class)))
-            .andReturn(EXPIRY_TIME_MS).anyTimes();
     replay(codec);
 
     registerGadgetsHandler(codec);

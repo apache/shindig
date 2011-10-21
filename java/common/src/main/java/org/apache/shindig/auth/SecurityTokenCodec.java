@@ -53,7 +53,4 @@ public interface SecurityTokenCodec {
       throws SecurityTokenException;
 
   String encodeToken(SecurityToken token) throws SecurityTokenException;
-
-  Long getTokenExpiration(SecurityToken token) throws SecurityTokenException;
-
 }

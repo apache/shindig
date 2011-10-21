@@ -264,7 +264,7 @@ public class GadgetsHandlerService {
     SecurityToken tokenData = convertAuthContext(request.getAuthContext(), request.getContainer(),
         request.getUrl().toString());
     String token = securityTokenCodec.encodeToken(tokenData);
-    Long expiryTimeMs = securityTokenCodec.getTokenExpiration(tokenData);
+    Long expiryTimeMs = tokenData == null ? null : tokenData.getExpiresAt();
     return createTokenResponse(request.getUrl(), token, fields, expiryTimeMs);
   }
 
