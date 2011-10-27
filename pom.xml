@@ -747,6 +747,8 @@
                 <exclude>**/test/misc/*.html</exclude>
                 <exclude>**/test/misc/*.xml</exclude>
                 <exclude>**/test/certs/*</exclude>
+                <exclude>**/site/src/site/resources/**</exclude>
+                <exclude>**/site/src/site/site.vm</exclude>
                 <exclude>phpunit.xml.dist</exclude>
                 <exclude>BUILD-JAVA</exclude>
                 <exclude>COMMITTERS</exclude>
@@ -1256,6 +1258,8 @@
               <exclude>**/test/misc/*.html</exclude>
               <exclude>**/test/misc/*.xml</exclude>
               <exclude>**/test/certs/*</exclude>
+              <exclude>**/site/src/site/resources/**</exclude>
+              <exclude>**/site/src/site/site.vm</exclude>
               <exclude>phpunit.xml.dist</exclude>
               <exclude>BUILD-JAVA</exclude>
               <exclude>COMMITTERS</exclude>
