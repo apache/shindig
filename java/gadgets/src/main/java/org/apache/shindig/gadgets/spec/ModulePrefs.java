@@ -839,6 +839,7 @@ public class ModulePrefs {
       if (oauthMarker.booleanValue()) {
         // <OAuth>/<OAuth2> tag found: security token needed.
         features.put(Feature.SECURITY_TOKEN_FEATURE.getName(), Feature.SECURITY_TOKEN_FEATURE);
+        globalFeatures.put(Feature.SECURITY_TOKEN_FEATURE.getName(), Feature.SECURITY_TOKEN_FEATURE);
       }
       moduleprefs.features = ImmutableMap.copyOf(features);
       moduleprefs.globalFeatures = ImmutableMap.copyOf(globalFeatures);

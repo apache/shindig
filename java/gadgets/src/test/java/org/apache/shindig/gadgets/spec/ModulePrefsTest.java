@@ -134,7 +134,7 @@ public class ModulePrefsTest {
     assertTrue(extra.containsKey("NavigationItem"));
     assertEquals(1, extra.get("NavigationItem").iterator().next().getChildNodes().getLength());
   }
-  
+
   @Test
   public void substitutionsCopyConstructor() throws Exception{
     ModulePrefs basePrefs = new ModulePrefs(XmlUtil.parse(FULL_XML), SPEC_URL);
@@ -182,7 +182,7 @@ public class ModulePrefsTest {
     spec = prefs.getGlobalLocale(new Locale("en", "notexist"));
     assertNull(spec);
   }
-  
+
   @Test
   public void getViewLocale() throws Exception {
     String xml = "<ModulePrefs title='locales'>" +
@@ -220,27 +220,29 @@ public class ModulePrefsTest {
     assertEquals(link1Href, prefs.getLinks().get(link1Rel).getHref());
     assertEquals(SPEC_URL.resolve(link2Href), prefs.getLinks().get(link2Rel).getHref());
   }
-  
+
   @Test
   public void getViewFeatures() throws Exception {
     ModulePrefs prefs = new ModulePrefs(XmlUtil.parse(FULL_XML), SPEC_URL);
     Map<String, Feature> features = prefs.getViewFeatures("default");
-    assertEquals(4, features.size());
+    assertEquals(5, features.size());
     assertTrue(features.containsKey("requiredview1"));
     assertTrue(features.containsKey("require"));
     assertTrue(features.containsKey("optional"));
     assertTrue(features.containsKey("core"));
+    assertTrue(features.containsKey("security-token"));
     assertTrue(!features.containsKey("requiredview2"));
 
     features = prefs.getViewFeatures("view2");
-    assertEquals(4, features.size());
+    assertEquals(5, features.size());
     assertTrue(features.containsKey("requiredview2"));
     assertTrue(features.containsKey("require"));
     assertTrue(features.containsKey("optional"));
     assertTrue(features.containsKey("core"));
+    assertTrue(features.containsKey("security-token"));
     assertTrue(!features.containsKey("requiredview1"));
   }
-  
+
   @Test
   public void getViewFeatureParams() throws Exception {
     ModulePrefs prefs = new ModulePrefs(XmlUtil.parse(FULL_XML), SPEC_URL);
@@ -265,7 +267,7 @@ public class ModulePrefsTest {
     String rel = "foo-bar";
     String linkHref = "http://example.org/link.html";
     String preHref = "http://example.org/preload.html";
-    String testParam = "bar-foo"; 
+    String testParam = "bar-foo";
 
     ModulePrefs prefs = new ModulePrefs(XmlUtil.parse(xml), SPEC_URL);
     Substitutions subst = new Substitutions();
@@ -303,7 +305,7 @@ public class ModulePrefsTest {
     assertNotNull("Empty ModulePrefs Parses", prefs);
     assertEquals("Title is empty string", "", prefs.getTitle());
   }
-  
+
   @Test
   public void coreInjectedAutomatically() throws Exception {
     String xml = "<ModulePrefs title=''><Require feature='foo'/></ModulePrefs>";
@@ -312,7 +314,7 @@ public class ModulePrefsTest {
     assertTrue(prefs.getFeatures().containsKey("foo"));
     assertTrue(prefs.getFeatures().containsKey("core"));
   }
-  
+
   @Test
   public void coreNotInjectedOnSplitCoreInclusion() throws Exception {
     String xml = "<ModulePrefs title=''><Require feature='core.config'/></ModulePrefs>";
@@ -320,11 +322,12 @@ public class ModulePrefsTest {
     assertEquals(1, prefs.getFeatures().size());
     assertTrue(prefs.getFeatures().containsKey("core.config"));
   }
-  
+
   @Test
   public void securityTokenInjectedOnOAuthTag() throws Exception {
+    // Make sure it is injected when it should be
     String xml =
-        "<ModulePrefs title=''>" + 
+        "<ModulePrefs title=''>" +
         "  <OAuth>" +
         "    <Service name='serviceOne'>" +
         "      <Request url='http://www.example.com/request'" +
@@ -336,9 +339,32 @@ public class ModulePrefsTest {
         "  </OAuth>" +
         "</ModulePrefs>";
     ModulePrefs prefs = new ModulePrefs(XmlUtil.parse(xml), SPEC_URL);
-    assertEquals(2, prefs.getFeatures().size());
-    assertTrue(prefs.getFeatures().containsKey("core"));
-    assertTrue(prefs.getFeatures().containsKey("security-token"));
+    Map<String, Feature> features = prefs.getFeatures();
+    assertEquals(2, features.size());
+    assertTrue(features.containsKey("core"));
+    assertTrue(features.containsKey("security-token"));
+
+    Map<String, Feature> viewFeatures = prefs.getViewFeatures("default");
+    assertEquals(2, viewFeatures.size());
+    assertTrue(viewFeatures.containsKey("core"));
+    assertTrue(viewFeatures.containsKey("security-token"));
+  }
+
+  @Test
+  public void securityTokenNotInjectedByDefault() throws Exception {
+    // Make sure the token isn't injected when it shouldn't be, i.e., not required/optional and no
+    // OAuth
+    String xml =
+      "<ModulePrefs title=''>" +
+      "</ModulePrefs>";
+    ModulePrefs prefs = new ModulePrefs(XmlUtil.parse(xml), SPEC_URL);
+    Map<String, Feature> features = prefs.getFeatures();
+    assertEquals(1, features.size());
+    assertTrue(features.containsKey("core"));
+
+    Map<String, Feature> viewFeatures = prefs.getViewFeatures("default");
+    assertEquals(1, viewFeatures.size());
+    assertTrue(viewFeatures.containsKey("core"));
   }
 
   @Test
