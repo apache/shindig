@@ -42,14 +42,19 @@ public class JpaRestfulJsonDataTest extends RestfulJsonDataTest {
    * @throws Exception the exception
    */
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     // Init config
-    Injector injector = JpaRestfulTestConfigHelper.init();
-    this.setServlet(JpaRestfulTestConfigHelper.getDataServiceServlet(injector));
-    
-    // Bootstrap hibernate and associated test db, and setup db with test data
-    this.bootstrap = injector.getInstance(SpiDatabaseBootstrap.class);
-    this.bootstrap.init();
+    try {
+      Injector injector = JpaRestfulTestConfigHelper.init();
+      this.setServlet(JpaRestfulTestConfigHelper.getDataServiceServlet(injector));
+
+      // Bootstrap hibernate and associated test db, and setup db with test data
+      this.bootstrap = injector.getInstance(SpiDatabaseBootstrap.class);
+      this.bootstrap.init();
+    } catch (Exception e) {
+      System.out.println(e);
+      fail();
+    }
   }
   
   @After

@@ -132,7 +132,6 @@ public class EndToEndServer {
               DefaultGuiceModule.class.getName(),
               PropertiesModule.class.getName(), 
               OAuthModule.class.getName(),
-              OAuthModule.class.getName(),
               OAuth2Module.class.getName(),
               OAuth2PersistenceModule.class.getName(), 
               OAuth2MessageModule.class.getName(), 

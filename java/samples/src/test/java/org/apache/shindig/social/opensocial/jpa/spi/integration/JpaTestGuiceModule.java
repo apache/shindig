@@ -27,7 +27,15 @@ import org.apache.shindig.common.PropertiesModule;
 import org.apache.shindig.gadgets.DefaultGuiceModule;
 import org.apache.shindig.gadgets.admin.GadgetAdminModule;
 import org.apache.shindig.gadgets.oauth.OAuthModule;
+import org.apache.shindig.gadgets.oauth2.OAuth2MessageModule;
+import org.apache.shindig.gadgets.oauth2.OAuth2Module;
+import org.apache.shindig.gadgets.oauth2.handler.OAuth2HandlerModule;
+import org.apache.shindig.gadgets.oauth2.persistence.sample.OAuth2PersistenceModule;
 import org.apache.shindig.social.core.config.SocialApiGuiceModule;
+import org.apache.shindig.social.core.oauth2.OAuth2DataService;
+import org.apache.shindig.social.core.oauth2.OAuth2DataServiceImpl;
+import org.apache.shindig.social.core.oauth2.OAuth2Service;
+import org.apache.shindig.social.core.oauth2.OAuth2ServiceImpl;
 import org.apache.shindig.social.opensocial.jpa.AccountDb;
 import org.apache.shindig.social.opensocial.jpa.ActivityDb;
 import org.apache.shindig.social.opensocial.jpa.AddressDb;
@@ -80,10 +88,16 @@ public class JpaTestGuiceModule extends AbstractModule {
     install(new DefaultGuiceModule());
     install(new SocialApiGuiceModule());
     install(new OAuthModule());
+    install(new OAuth2Module());
+    install(new OAuth2PersistenceModule());
+    install(new OAuth2MessageModule());
+    install(new OAuth2HandlerModule());
+
     install(new JPASocialModule(entityManager));
 
     this.bind(OAuthDataStore.class).toInstance(new NullOAuthDataStore());
-
+    bind(OAuth2Service.class).to(OAuth2ServiceImpl.class);
+    bind(OAuth2DataService.class).to(OAuth2DataServiceImpl.class);
     // Entities
     this.bind(Activity.class).to(ActivityDb.class);
     this.bind(Account.class).to(AccountDb.class);

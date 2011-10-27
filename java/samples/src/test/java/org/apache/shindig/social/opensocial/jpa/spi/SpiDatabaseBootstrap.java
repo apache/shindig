@@ -48,6 +48,7 @@ import org.apache.shindig.social.opensocial.model.Person;
 import org.apache.shindig.social.opensocial.model.Smoker;
 import org.apache.shindig.social.opensocial.model.Url;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -81,14 +82,14 @@ public class SpiDatabaseBootstrap {
   /*
    * Init database bootstrap
    */
-  public void init() throws Exception {
+  public void init() throws ParseException {
     this.bootstrapDatabase();    
   }
   
   /*
    * Bootstrap database with some dummy test data
    */
-  protected void bootstrapDatabase() throws Exception {
+  protected void bootstrapDatabase() throws ParseException {
     // Start transaction
     if (!entityManager.getTransaction().isActive()) {
       entityManager.getTransaction().begin();
@@ -325,7 +326,7 @@ public class SpiDatabaseBootstrap {
   }
 
   private Person buildPerson(String id, String displayName, Person.Gender gender, boolean hasApp,
-      String familyName, String givenName, String formatted) throws Exception {
+      String familyName, String givenName, String formatted) throws ParseException {
     Person person = buildPersonTemplate(id);
     person.setDisplayName(displayName);
     person.setGender(gender);
@@ -340,7 +341,7 @@ public class SpiDatabaseBootstrap {
     return person;
   }
   
-  private Person buildCanonicalPerson() throws Exception {
+  private Person buildCanonicalPerson() throws ParseException {
     Person person = buildPersonTemplate("canonical");
     person.setAboutMe("I have an example of every piece of data");    
     person.setActivities(asList("Coding Shindig"));    
@@ -665,7 +666,7 @@ public class SpiDatabaseBootstrap {
     return person;
   }
   
-  private Date buildDate(String dateAsString) throws Exception {    
+  private Date buildDate(String dateAsString) throws ParseException {
     return DATE_FORMATTER.parse(dateAsString);
   }
   
