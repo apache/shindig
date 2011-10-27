@@ -1,4 +1,9 @@
 <?php
+namespace apache\shindig\test\gadgets;
+use apache\shindig\common\RemoteContentRequest;
+use apache\shindig\gadgets\SigningFetcher;
+use apache\shindig\common\sample\BasicSecurityToken;
+
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,9 +23,7 @@
  * under the License.
  */
 
-require_once 'src/common/ShindigOAuth.php';
-
-class MockSignatureMethod extends OAuthSignatureMethod_RSA_SHA1 {
+class MockSignatureMethod extends \OAuthSignatureMethod_RSA_SHA1 {
   protected function fetch_public_cert(&$request) {
     return <<<EOD
 -----BEGIN CERTIFICATE-----
@@ -50,7 +53,7 @@ EOD;
 /**
  * SigningFetcher test case.
  */
-class SigningFetcherTest extends PHPUnit_Framework_TestCase {
+class SigningFetcherTest extends \PHPUnit_Framework_TestCase {
 
   /**
    * @var SigningFetcher
@@ -83,7 +86,7 @@ Cgpm3sdinamuC5b40tVhFhrfZyfUlqmssjU1nOsbnS+EqFgQJimbDg==
 -----END RSA PRIVATE KEY-----
 EOD;
     $rsa_private_key = @openssl_pkey_get_private($private_key, 'shindig');
-    $basicFetcher = $this->getMock('RemoteContentFetcher');
+    $basicFetcher = $this->getMock('apache\shindig\common\RemoteContentFetcher');
     $this->signingFetcher = SigningFetcher::makeFromOpenSslPrivateKey($basicFetcher, 'http://shindig/public.cer', $rsa_private_key);
   }
 
@@ -155,7 +158,7 @@ EOD;
     $this->assertEquals('appUrl', $query['opensocial_app_url']);
     $this->assertEquals('1', $query['opensocial_instance_id']);
     $this->assertEquals($query['xoauth_signature_publickey'], $query['xoauth_public_key']);
-    $oauthRequest = OAuthRequest::from_request($request->getMethod(), $request->getUrl(), array_merge($query, $post));
+    $oauthRequest = \OAuthRequest::from_request($request->getMethod(), $request->getUrl(), array_merge($query, $post));
     $signature_method = new MockSignatureMethod();
     $signature_valid = $signature_method->check_signature($oauthRequest, null, null, $query['oauth_signature']);
     $this->assertTrue($signature_valid);

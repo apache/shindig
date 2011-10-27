@@ -1,4 +1,7 @@
 <?php
+namespace apache\shindig\test\social;
+use apache\shindig\social\model\Email;
+
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -21,7 +24,7 @@
 /**
  * Email test case.
  */
-class EmailTest extends PHPUnit_Framework_TestCase {
+class EmailTest extends \PHPUnit_Framework_TestCase {
   
   /**
    * @var Email

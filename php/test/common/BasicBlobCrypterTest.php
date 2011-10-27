@@ -1,4 +1,7 @@
 <?php
+namespace apache\shindig\test\common;
+use apache\shindig\common\sample\BasicBlobCrypter;
+
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -21,8 +24,8 @@
 /**
  * BasicBlobCrypter test case.
  */
-class BasicBlobCrypterTest extends PHPUnit_Framework_TestCase {
-  
+class BasicBlobCrypterTest extends \PHPUnit_Framework_TestCase {
+
   /**
    * @var BasicBlobCrypter
    */
@@ -76,7 +79,7 @@ class BasicBlobCrypterTest extends PHPUnit_Framework_TestCase {
    * Tests BasicBlobCrypter->wrap() exception
    */
   public function testWrapException() {
-    $this->setExpectedException('BlobExpiredException');
+    $this->setExpectedException('apache\shindig\common\sample\BlobExpiredException');
     $test = array();
     $test['o'] = 'o';
     $test['v'] = 'v';

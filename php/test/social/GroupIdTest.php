@@ -1,4 +1,7 @@
 <?php
+namespace apache\shindig\test\social;
+use apache\shindig\social\spi\GroupId;
+
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -21,7 +24,7 @@
 /**
  * GroupId test case.
  */
-class GroupIdTest extends PHPUnit_Framework_TestCase {
+class GroupIdTest extends \PHPUnit_Framework_TestCase {
   
   /**
    * @var GroupId

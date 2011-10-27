@@ -1,4 +1,11 @@
 <?php
+namespace apache\shindig\test\social;
+use apache\shindig\social\sample\DefaultInvalidateService;
+use apache\shindig\common\RemoteContentRequest;
+use apache\shindig\common\Cache;
+use apache\shindig\common\sample\BasicSecurityToken;
+use apache\shindig\common\AuthenticationMode;
+
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -21,13 +28,13 @@
 /**
  * DefaultInvalidateService test case.
  */
-class DefaultInvalidateServiceTest extends PHPUnit_Framework_TestCase {
+class DefaultInvalidateServiceTest extends \PHPUnit_Framework_TestCase {
 
   /**
    * @var DefaultInvalidateService
    */
   private $service;
-  
+
   /**
    * @var Cache
    */
@@ -38,7 +45,7 @@ class DefaultInvalidateServiceTest extends PHPUnit_Framework_TestCase {
    */
   protected function setUp() {
     parent::setUp();
-    $this->cache = Cache::createCache('CacheStorageFile', 'TestCache');
+    $this->cache = Cache::createCache('apache\shindig\common\sample\CacheStorageFile', 'TestCache');
     $this->service = new DefaultInvalidateService($this->cache);
   }
 
@@ -70,7 +77,7 @@ class DefaultInvalidateServiceTest extends PHPUnit_Framework_TestCase {
     $this->assertFalse($this->cache->get($request1->toHash()));
     $this->assertFalse($this->cache->get($request2->toHash()));
   }
-  
+
   public function testInvalidateUserResources() {
     $token = BasicSecurityToken::createFromValues('owner', 'viewer', 'app', 'domain', 'appUrl', '1', 'default');
     $token->setAuthenticationMode(AuthenticationMode::$OAUTH_CONSUMER_REQUEST);

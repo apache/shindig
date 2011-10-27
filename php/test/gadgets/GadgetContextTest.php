@@ -1,4 +1,7 @@
 <?php
+namespace apache\shindig\test\gadgets;
+use apache\shindig\gadgets\GadgetContext;
+
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -21,7 +24,7 @@
 /**
  * GadgetContext test case.
  */
-class GadgetContextTest extends PHPUnit_Framework_TestCase {
+class GadgetContextTest extends \PHPUnit_Framework_TestCase {
   
   /**
    * @var GadgetContext

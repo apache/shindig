@@ -1,4 +1,12 @@
 <?php
+namespace apache\shindig\test\gadgets;
+use apache\shindig\gadgets\MakeRequest;
+use apache\shindig\gadgets\GadgetContext;
+use apache\shindig\common\RemoteContentRequest;
+use apache\shindig\gadgets\MakeRequestOptions;
+use apache\shindig\common\RemoteContentFetcher;
+use apache\shindig\common\sample\BasicSecurityToken;
+
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -89,7 +97,7 @@ class MockMakeRequestFetcher extends RemoteContentFetcher {
 /**
  * Unit tests for the MakeRequest class.
  */
-class MakeRequestTest extends PHPUnit_Framework_TestCase {
+class MakeRequestTest extends \PHPUnit_Framework_TestCase {
   private $fetcher;
   private $makeRequest;
   private $context;
@@ -139,7 +147,7 @@ class MakeRequestTest extends PHPUnit_Framework_TestCase {
       $params = new MakeRequestOptions('invalidurl');
       $this->makeRequest->fetch($params);
       $this->fail("Calling makeRequest with an invalid url should throw an exception.");
-    } catch (Exception $ex) { }
+    } catch (\Exception $ex) { }
   }
 
   /**

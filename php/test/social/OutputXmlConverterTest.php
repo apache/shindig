@@ -1,4 +1,10 @@
 <?php
+namespace apache\shindig\test\social;
+use apache\shindig\social\converters\OutputXmlConverter;
+use apache\shindig\social\service\ResponseItem;
+use apache\shindig\common\sample\BasicSecurityToken;
+use apache\shindig\social\service\RestRequestItem;
+
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -21,7 +27,7 @@
 /**
  * OutputXmlConverter test case.
  */
-class OutputXmlConverterTest extends PHPUnit_Framework_TestCase {
+class OutputXmlConverterTest extends \PHPUnit_Framework_TestCase {
   
   /**
    * @var OutputXmlConverter

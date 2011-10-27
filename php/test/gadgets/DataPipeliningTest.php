@@ -1,4 +1,7 @@
 <?php
+namespace apache\shindig\test\gadgets;
+use apache\shindig\gadgets\templates\DataPipelining;
+
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -21,7 +24,7 @@
 /**
  * ContainerConfig test case.
  */
-class DataPipeliningTest extends PHPUnit_Framework_TestCase {
+class DataPipeliningTest extends \PHPUnit_Framework_TestCase {
   /**
    * @var Gadget
    */
@@ -39,7 +42,7 @@ class DataPipeliningTest extends PHPUnit_Framework_TestCase {
     ';
 
   public function testParse() {
-      $doc = new DomDocument();
+      $doc = new \DomDocument();
       $doc->loadXml($this->viewNode);
       $contentBlocks = $doc->getElementsByTagName('script');
       $tags = array();

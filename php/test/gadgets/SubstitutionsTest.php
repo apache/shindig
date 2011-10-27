@@ -1,4 +1,7 @@
 <?php
+namespace apache\shindig\test\gadgets;
+use apache\shindig\gadgets\Substitutions;
+
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -21,7 +24,7 @@
 /**
  * Substitutions test case.
  */
-class SubstitutionsTest extends PHPUnit_Framework_TestCase {
+class SubstitutionsTest extends \PHPUnit_Framework_TestCase {
   
   /**
    * @var Substitutions

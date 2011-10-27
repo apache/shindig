@@ -1,4 +1,8 @@
 <?php
+namespace apache\shindig\test\common;
+use apache\shindig\common\sample\GeneralSecurityException;
+use apache\shindig\common\sample\Crypto;
+
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -21,7 +25,7 @@
 /**
  * Crypto test case.
  */
-class CryptoTest extends PHPUnit_Framework_TestCase {
+class CryptoTest extends \PHPUnit_Framework_TestCase {
 
   /**
    * Tests Crypto::aes128cbcEncrypt()
@@ -52,7 +56,7 @@ class CryptoTest extends PHPUnit_Framework_TestCase {
     $string = 'Lorem ipsum dolor sit amet, consectetuer adipiscing elit';
     $key = 'Aliquam erat volutpat';
     $expected = 'foo';
-    $this->setExpectedException('GeneralSecurityException');
+    $this->setExpectedException('apache\shindig\common\sample\GeneralSecurityException');
     Crypto::hmacSha1Verify($key, $string, $expected);
   }
 

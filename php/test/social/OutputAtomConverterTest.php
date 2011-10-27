@@ -1,4 +1,10 @@
 <?php
+namespace apache\shindig\test\social;
+use apache\shindig\social\converters\OutputAtomConverter;
+use apache\shindig\social\service\ResponseItem;
+use apache\shindig\common\sample\BasicSecurityToken;
+use apache\shindig\social\service\RestRequestItem;
+
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -21,7 +27,7 @@
 /**
  * OutputAtomConverter test case.
  */
-class OutputAtomConverterTest extends PHPUnit_Framework_TestCase {
+class OutputAtomConverterTest extends \PHPUnit_Framework_TestCase {
   
   /**
    * @var OutputAtomConverter

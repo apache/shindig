@@ -1,4 +1,7 @@
 <?php
+namespace apache\shindig\test\common;
+use apache\shindig\common\HttpServlet;
+
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -21,7 +24,7 @@
 /**
  * HttpServlet test case.
  */
-class HttpServletTest extends PHPUnit_Framework_TestCase {
+class HttpServletTest extends \PHPUnit_Framework_TestCase {
   
   /**
    * @var HttpServlet

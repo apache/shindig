@@ -1,4 +1,8 @@
 <?php
+namespace apache\shindig\test\gadgets;
+use apache\shindig\gadgets\ContainerConfig;
+use apache\shindig\common\Config;
+
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -21,7 +25,7 @@
 /**
  * ContainerConfig test case.
  */
-class ContainerConfigTest extends PHPUnit_Framework_TestCase {
+class ContainerConfigTest extends \PHPUnit_Framework_TestCase {
 
   /**
    * Prepares the environment before running a test.

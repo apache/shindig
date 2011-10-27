@@ -1,4 +1,7 @@
 <?php
+namespace apache\shindig\test\social;
+use apache\shindig\social\model\Activity;
+
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -21,7 +24,7 @@
 /**
  * Activity test case.
  */
-class ActivityTest extends PHPUnit_Framework_TestCase {
+class ActivityTest extends \PHPUnit_Framework_TestCase {
   
   /**
    * @var Activity

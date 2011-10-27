@@ -1,4 +1,9 @@
 <?php
+namespace apache\shindig\test\gadgets;
+use apache\shindig\gadgets\GadgetContext;
+use apache\shindig\gadgets\rewrite\GadgetRewriter;
+use apache\shindig\gadgets\GadgetFactory;
+
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -45,7 +50,7 @@ EOD;
 /**
  * GadgetRendererTest test case.
  */
-class GadgetRewriterTest extends PHPUnit_Framework_TestCase {
+class GadgetRewriterTest extends \PHPUnit_Framework_TestCase {
 
   /**
    * @var Gadget
@@ -71,6 +76,7 @@ class GadgetRewriterTest extends PHPUnit_Framework_TestCase {
    * Prepares the environment before running a test.
    */
   protected function setUp() {
+    $_SERVER['HTTP_HOST'] = 'localhost';
     parent::setUp();
 
     $this->gadgetContext = new GadgetContext('GADGET');
@@ -85,6 +91,7 @@ class GadgetRewriterTest extends PHPUnit_Framework_TestCase {
    * Cleans up the environment after running a test.
    */
   protected function tearDown() {
+    unset($_SERVER['HTTP_HOST']);
     $this->gadget = null;
     $this->gadgetContext = null;
     $this->gadgetRewriter = null;

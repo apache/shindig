@@ -1,4 +1,6 @@
 <?php
+namespace apache\shindig\test\social;
+
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -21,7 +23,7 @@
 require_once 'RestBase.php';
 
 class AppDataRestTest extends RestBase {
-  
+
   public function testAppDataLifeCycleInJson() {
     $postData = '{
       "pokes" : 4,
@@ -40,9 +42,9 @@ class AppDataRestTest extends RestBase {
         && $retDecoded['entry'][1]['pokes'] == '4', "Unexpected return value: $ret.");
     // Deletes the app data.
     $ret = $this->curlRest('/appdata/1/@self/1?fields=pokes,last_poke', '', 'application/json', 'DELETE');
-    $this->assertTrue(empty($ret), "Delete app data failed. $ret");       
+    $this->assertTrue(empty($ret), "Delete app data failed. $ret");
   }
-  
+
   public function testAppDataLifeCycleInXml() {
     $postData = '<appdata xmlns="http://ns.opensocial.org/2008/opensocial">
         <entry>
@@ -57,7 +59,7 @@ class AppDataRestTest extends RestBase {
     // Creates or update the app data.
     $ret = $this->curlRest('/appdata/1/@self/1', $postData, 'application/xml');
     $this->assertTrue(empty($ret), "Create app data failed. $ret");
-    
+
     // Verifies data was written correctly.
     $ret = $this->curlRest('/appdata/1/@self/1?fields=pokes,last_poke', '', 'application/json', 'GET');
     $retDecoded = json_decode($ret, true);
@@ -66,7 +68,7 @@ class AppDataRestTest extends RestBase {
         && isset($retDecoded['entry'][1]['last_poke']) && isset($retDecoded['entry'][1]['pokes'])
         && $retDecoded['entry'][1]['last_poke'] == '2008-02-13T18:30:02Z'
         && $retDecoded['entry'][1]['pokes'] == '1', "Unexpected return value: $ret.");
-        
+
     // Updates the app data.
     $updateData = '<appdata xmlns="http://ns.opensocial.org/2008/opensocial">
         <entry>
@@ -80,7 +82,7 @@ class AppDataRestTest extends RestBase {
       </appdata>';
     $ret = $this->curlRest('/appdata/1/@self/1', $updateData, 'application/xml');
     $this->assertTrue(empty($ret), "Update app data failed. $ret");
-    
+
     // Verifies data was written correctly.
     $ret = $this->curlRest('/appdata/1/@self/1?fields=pokes,last_poke', '', 'application/json', 'GET');
     $retDecoded = json_decode($ret, true);
@@ -89,16 +91,16 @@ class AppDataRestTest extends RestBase {
         && isset($retDecoded['entry'][1]['last_poke']) && isset($retDecoded['entry'][1]['pokes'])
         && $retDecoded['entry'][1]['last_poke'] == '2009-02-13T18:30:02Z'
         && $retDecoded['entry'][1]['pokes'] == '100', "Unexpected return value: $ret.");
-    
+
     // Deletes the app data.
     $ret = $this->curlRest('/appdata/1/@self/1?fields=pokes,last_poke', '', 'application/json', 'DELETE');
-    $this->assertTrue(empty($ret), "Delete app data failed. $ret");        
+    $this->assertTrue(empty($ret), "Delete app data failed. $ret");
   }
-  
+
   public function testAppDataLifeCycleInAtom() {
     $postData = '<entry xmlns="http://www.w3.org/2005/Atom">
       <content type="text/xml">
-        <appdata xmlns="http://opensocial.org/2008/opensocial">  
+        <appdata xmlns="http://opensocial.org/2008/opensocial">
             <pokes>2</pokes>
             <last_poke>2003-12-14T18:30:02Z</last_poke>
           </appdata>
@@ -121,6 +123,6 @@ class AppDataRestTest extends RestBase {
         && $retDecoded['entry'][1]['pokes'] == '2', "Unexpected return value: $ret\n");
     // Deletes the app data.
     $ret = $this->curlRest('/appdata/1/@self/1?fields=pokes,last_poke', '', 'application/json', 'DELETE');
-    $this->assertTrue(empty($ret), "Delete app data failed. $ret");       
+    $this->assertTrue(empty($ret), "Delete app data failed. $ret");
   }
 }

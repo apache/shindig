@@ -1,4 +1,8 @@
 <?php
+namespace apache\shindig\test;
+
+use apache\shindig\common\Config;
+
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -17,18 +21,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+include "src/apache/shindig/bootstrap.php";
 
-class TestContext extends GadgetContext {
-
-  public function __construct() {
-    // construct a 'fake' context we can use for unit testing
-    $this->setRenderingContext('GADGET');
-    $this->setIgnoreCache(false);
-    $this->setForcedJsLibs('');
-    $this->setUrl('http://www.example.org/foo.xml');
-    $this->setModuleId(1);
-    $this->setView('profile');
-    $this->setContainer('');
-    $this->setRefreshInterval(1);
-  }
-}
+// load the test config instead of the production one
+Config::loadConfig('test');

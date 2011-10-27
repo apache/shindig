@@ -1,4 +1,6 @@
 <?php
+namespace apache\shindig\test\social;
+
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -21,13 +23,13 @@
 require_once 'RestBase.php';
 
 class AlbumRestTest extends RestBase {
-  
+
   private function verifyLifeCycle($postData, $postDataFormat) {
     $url = '/albums/1/@self';
     $ret = $this->curlRest($url, $postData, $postDataFormat);
     $album = json_decode($ret, true);
     $album = $album['entry'];
-    
+
     $ret = $this->curlRest($url . '/' . urlencode($album['id']), '', 'application/json', 'GET');
     $this->assertFalse(empty($ret));
     $fetched = json_decode($ret, true);
@@ -35,7 +37,7 @@ class AlbumRestTest extends RestBase {
     $this->assertEquals('Example Album', $fetched['title'], "Title should be same.");
     $this->assertEquals('This is an example album, and this text is an example description', $fetched['description'], "Description should be same.");
     $this->assertEquals('VIDEO', $fetched['mediaType'], "mediaType should be same.");
-    
+
     $fetched['thumbnailUrl'] = 'http://changed.com/tn.png';
     $ret = $this->curlRest($url . '/' . urlencode($album['id']), json_encode($fetched), 'application/json', 'PUT');
     $ret = $this->curlRest($url . '/' . urlencode($album['id']), '', 'application/json', 'GET');
@@ -46,16 +48,16 @@ class AlbumRestTest extends RestBase {
     $this->assertEquals('Example Album', $fetched['title'], "Title should be same.");
     $this->assertEquals('This is an example album, and this text is an example description', $fetched['description'], "Description should be same.");
     $this->assertEquals('VIDEO', $fetched['mediaType'], "mediaType should be same.");
-        
+
     $ret = $this->curlRest($url . '/' . urlencode($album['id']), '', 'application/json', 'DELETE');
     $this->assertTrue(empty($ret), "Delete the created album failed. Response: $ret");
-    
+
     $ret = $this->curlRest($url . '/' . urlencode($album['id']), '', 'application/json', 'GET');
     $fetched = json_decode($ret, true);
     $fetched = $fetched['entry'];
     $this->assertTrue(empty($fetched));
   }
-  
+
   public function testLifeCycleInJson() {
     $postData = '{ "id" : "44332211",
        "thumbnailUrl" : "http://pages.example.org/albums/4433221-tn.png",
@@ -65,10 +67,10 @@ class AlbumRestTest extends RestBase {
        "ownerId" : "example.org:55443322",
        "mediaType" : "VIDEO"
     }';
-    
+
     $this->verifyLifeCycle($postData, 'application/json');
   }
-  
+
   public function testLifeCycleInXml() {
     $postData = '<album xmlns="http://ns.opensocial.org/2008/opensocial">
                    <id>44332211</id>
@@ -84,7 +86,7 @@ class AlbumRestTest extends RestBase {
                  </album>';
     $this->verifyLifeCycle($postData, 'application/xml');
   }
-  
+
   public function testLifeCycleInAtom() {
     $postData = '<entry xmlns="http://www.w3.org/2005/Atom">
                  <content type="application/xml">

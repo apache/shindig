@@ -1,4 +1,10 @@
 <?php
+namespace apache\shindig\test\social;
+use apache\shindig\social\sample\JsonDbOpensocialService;
+use apache\shindig\social\servlet\DataServiceServlet;
+use apache\shindig\common\sample\BasicSecurityToken;
+use apache\shindig\common\Config;
+
 
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -22,7 +28,7 @@
 /**
  * Base class for the REST api integration tests.
  */
-class RestBase extends PHPUnit_Framework_TestCase {
+class RestBase extends \PHPUnit_Framework_TestCase {
   
   private $securityToken;
   // The server to test against. You may need to add shindig to 127.0.0.1 mapping in /etc/hosts.

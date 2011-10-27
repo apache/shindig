@@ -1,4 +1,9 @@
 <?php
+namespace apache\shindig\test\common;
+use apache\shindig\common\sample\BasicSecurityToken;
+use apache\shindig\common\SecurityToken;
+use apache\shindig\common\Config;
+
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,12 +23,10 @@
  * under the License.
  */
 
-require_once 'src/common/sample/BasicSecurityToken.php';
-
 /**
  * BasicSecurityToken test case.
  */
-class BasicSecurityTokenTest extends PHPUnit_Framework_TestCase {
+class BasicSecurityTokenTest extends \PHPUnit_Framework_TestCase {
   
   /**
    * @var BasicSecurityToken

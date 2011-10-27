@@ -1,4 +1,8 @@
 <?php
+namespace apache\shindig\test\common;
+use apache\shindig\common\RequestTime;
+use apache\shindig\common\Cache;
+
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,19 +22,27 @@
  * under the License.
  */
 
-require_once 'src/common/Cache.php';
-require_once 'test/common/CacheFileTest.php';
+class MockRequestTimeMc extends RequestTime {
+  private $time = 0;
 
+  public function getRequestTime() {
+    return $this->time;
+  }
+
+  public function sleep($second) {
+    $this->time += $second;
+  }
+}
 /**
  * CacheMemcache test case.
  */
-class CacheMemcacheTest extends PHPUnit_Framework_TestCase {
+class CacheMemcacheTest extends \PHPUnit_Framework_TestCase {
 
   /**
    * @var Cache
    */
   private $cache;
-  
+
   /**
    * @var MockRequestTime
    */
@@ -42,19 +54,19 @@ class CacheMemcacheTest extends PHPUnit_Framework_TestCase {
   protected function setUp() {
     if (!extension_loaded('memcache')) {
       $message = 'memcache requires the memcache extention';
-      throw new PHPUnit_Framework_SkippedTestSuiteError($message);
+      throw new \PHPUnit_Framework_SkippedTestSuiteError($message);
     }
     parent::setUp();
-    $this->time = new MockRequestTime();
+    $this->time = new MockRequestTimeMc();
     try {
-      $this->cache = Cache::createCache('CacheStorageMemcache', 'TestCache', $this->time);
-    } catch (Exception $e) {
+      $this->cache = Cache::createCache('apache\shindig\common\sample\CacheStorageMemcache', 'TestCache', $this->time);
+    } catch (\Exception $e) {
       $message = 'memcache server can not connect';
-      throw new PHPUnit_Framework_SkippedTestSuiteError($message);
+      throw new \PHPUnit_Framework_SkippedTestSuiteError($message);
     }
     if (! is_resource($this->cache)) {
       $message = 'memcache server can not connect';
-      throw new PHPUnit_Framework_SkippedTestSuiteError($message);
+      throw new \PHPUnit_Framework_SkippedTestSuiteError($message);
     }
   }
 

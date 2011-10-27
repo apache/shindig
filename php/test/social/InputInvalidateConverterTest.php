@@ -1,4 +1,7 @@
 <?php
+namespace apache\shindig\test\social;
+use apache\shindig\social\converters\InputInvalidateConverter;
+
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -21,7 +24,7 @@
 /**
  * InputAtomConverter test case.
  */
-class InputInvalidateConverterTest extends PHPUnit_Framework_TestCase {
+class InputInvalidateConverterTest extends \PHPUnit_Framework_TestCase {
   /**
    * @var InputInvalidateConverter
    */

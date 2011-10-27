@@ -1,4 +1,7 @@
 <?php
+namespace apache\shindig\test\gadgets;
+use apache\shindig\gadgets\sample\BasicGadgetBlacklist;
+
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -21,7 +24,7 @@
 /**
  * BasicGadgetBlacklist test case.
  */
-class BasicGadgetBlacklistTest extends PHPUnit_Framework_TestCase {
+class BasicGadgetBlacklistTest extends \PHPUnit_Framework_TestCase {
   
   /**
    * @var BasicGadgetBlacklist

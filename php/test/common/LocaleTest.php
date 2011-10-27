@@ -1,4 +1,7 @@
 <?php
+namespace apache\shindig\test\common;
+use apache\shindig\common\Locale;
+
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -21,7 +24,7 @@
 /**
  * Locale test case.
  */
-class LocaleTest extends PHPUnit_Framework_TestCase {
+class LocaleTest extends \PHPUnit_Framework_TestCase {
   
   /**
    * @var Locale

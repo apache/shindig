@@ -1,4 +1,8 @@
 <?php
+namespace apache\shindig\test\gadgets;
+use apache\shindig\gadgets\templates\Token;
+use apache\shindig\gadgets\templates\ExpType;
+
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -21,7 +25,7 @@
 /**
  * ExpType test case.
  */
-class ExpTypeTest extends PHPUnit_Framework_TestCase {
+class ExpTypeTest extends \PHPUnit_Framework_TestCase {
 
   private $tokens;
 
