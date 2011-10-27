@@ -36,6 +36,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.IOUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.shindig.common.logging.i18n.MessageKeys;
@@ -246,8 +247,8 @@ public class OAuth2NormalizedRequest extends HashMap<String, Object> {
       return "";
     InputStream is = null;
     try {
-      String line = null;
-      StringBuffer sb = new StringBuffer();
+      String line;
+      StringBuilder sb = new StringBuilder();
       is = request.getInputStream();
       BufferedReader reader = new BufferedReader(new InputStreamReader(is));
       while ((line = reader.readLine()) != null) {
@@ -259,7 +260,7 @@ public class OAuth2NormalizedRequest extends HashMap<String, Object> {
       LOG.logp(Level.WARNING, classname, "getBodyAsString", MessageKeys.INVALID_OAUTH, ioe);
       return null;
     } finally {
-      try { is.close(); } catch (IOException ignore) { }
+      IOUtils.closeQuietly(is);
     }
   }
 

@@ -18,7 +18,6 @@
  */
 package org.apache.shindig.gadgets.parse.nekohtml;
 
-import com.google.common.collect.ImmutableMap;
 import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.xml.DomUtil;
 import org.apache.shindig.gadgets.GadgetException;
@@ -54,7 +53,6 @@ import org.w3c.dom.NodeList;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.Map;
 import java.util.Stack;
 
 /**

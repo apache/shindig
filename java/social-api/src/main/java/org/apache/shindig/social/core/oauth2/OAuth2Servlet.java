@@ -28,6 +28,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.shindig.common.logging.i18n.MessageKeys;
 import org.apache.shindig.common.servlet.HttpUtil;
 import org.apache.shindig.common.servlet.InjectedServlet;
@@ -104,7 +105,7 @@ public class OAuth2Servlet extends InjectedServlet {
         LOG.logp(Level.WARNING, classname, "getBodyAsString", MessageKeys.INVALID_OAUTH, e);
         throw new RuntimeException(e);
       } finally {
-        out.close();
+        IOUtils.closeQuietly(out);
       }
     }
 

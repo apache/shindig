@@ -98,16 +98,16 @@ public class ExportJsProcessor extends BaseSurfaceJsProcessor implements JsProce
       result.append("],{");
       for (int i = 0; i < input.properties.size(); i++) {
         String prop = input.properties.get(i);
-        if (i > 0) result.append(",");
-        result.append(prop).append(":'").append(prop).append("'");
+        if (i > 0) result.append(',');
+        result.append(prop).append(":'").append(prop).append('\'');
       }
       result.append("});");
 
     // Global/window namespace.
     } else {
       for (String prop : input.properties) {
-        result.append(FUNCTION_NAME).append("(");
-        result.append("'").append(prop).append("',[");
+        result.append(FUNCTION_NAME).append('(');
+        result.append('\'').append(prop).append("',[");
         result.append(prop);
         result.append("]);");
       }

@@ -60,7 +60,7 @@ public class BasicAuthenticationHandler implements ClientAuthenticationHandler {
 
       final String secret = new String(secretBytes, "UTF-8");
 
-      final String authString = clientId + ":" + secret;
+      final String authString = clientId + ':' + secret;
       final byte[] authBytes = Base64.encodeBase64(authString.getBytes());
       request.setHeader(OAuth2Message.AUTHORIZATION_HEADER, "Basic: " + new String(authBytes));
 

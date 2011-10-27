@@ -895,9 +895,8 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
         jsonAlbum.put(Album.Field.ID.toString(), albumId);
 
         // Iterate through albums to identify album to update
-        JSONObject curAlbum = null;
         for (int i = 0; i < userAlbums.length(); i++) {
-          curAlbum = userAlbums.getJSONObject(i);
+          JSONObject curAlbum = userAlbums.getJSONObject(i);
           if (curAlbum.getString(Album.Field.ID.toString()).equals(albumId)) {
             userAlbums.put(i, jsonAlbum);
             return ImmediateFuture.newInstance(null);
@@ -939,7 +938,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
       }
 
       // MediaItem wasn't found
-      throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST, "MediaItem ID '" + mediaItemId + "' does not exist within Album '" + albumId + "'");
+      throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST, "MediaItem ID '" + mediaItemId + "' does not exist within Album '" + albumId + '\'');
     } catch (JSONException je) {
       throw new ProtocolException(
           HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
@@ -1159,9 +1158,8 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
         jsonMediaItem.put(MediaItem.Field.ALBUM_ID.toString(), albumId);
 
         // Iterate through MediaItems to identify item to update
-        JSONObject curMediaItem = null;
         for (int i = 0; i < userMediaItems.length(); i++) {
-          curMediaItem = userMediaItems.getJSONObject(i);
+          JSONObject curMediaItem = userMediaItems.getJSONObject(i);
           if (curMediaItem.getString(MediaItem.Field.ID.toString()).equals(mediaItemId) &&
               curMediaItem.getString(MediaItem.Field.ALBUM_ID.toString()).equals(albumId)) {
             userMediaItems.put(i, jsonMediaItem);

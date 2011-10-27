@@ -26,6 +26,7 @@ import java.util.TreeSet;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.message.BasicNameValuePair;
@@ -46,7 +47,7 @@ public class OAuth2Utils {
    * Normalizes a URL and parameters. If the URL already contains parameters,
    * new parameters will be added properly.
    * 
-   * @param URL
+   * @param url2
    *          is the base URL to normalize
    * @param queryParams
    *          query parameters to add to the URL
@@ -91,7 +92,7 @@ public class OAuth2Utils {
       fragmentParams2.putAll(fragmentParams);
     }
 
-    final StringBuffer buff = new StringBuffer(urlNoParams);
+    final StringBuilder buff = new StringBuilder(urlNoParams);
     if ((queryParams != null) && !queryParams.isEmpty()) {
       if (urlNoParams.contains("?")) {
         buff.append('&');
@@ -135,8 +136,7 @@ public class OAuth2Utils {
   /**
    * Fetch bearer token from http request
    * 
-   * @param request
-   *          httpServletRequest
+   * @param req httpServletRequest
    * 
    * @return String bearer token from the request
    */
@@ -155,7 +155,7 @@ public class OAuth2Utils {
   /**
    * Fetch client secret from http request for a given client.
    * 
-   * @param request
+   * @param req
    *          httpServletRequest
    * @param clientId
    *          id of the client
@@ -168,12 +168,10 @@ public class OAuth2Utils {
     if ((secret == null) || secret.equals("")) {
       final String header = req.getHeader("Authorization");
       if ((header != null) && header.contains("Basic")) {
-        String[] parts = header.split("\\s+");
-        String temp = parts[parts.length - 1];
         final byte[] decodedSecret = Base64.decodeBase64(secret);
         try {
-          temp = new String(decodedSecret, "UTF-8");
-          parts = temp.split(":");
+          String temp = new String(decodedSecret, "UTF-8");
+          String[] parts = StringUtils.split(temp, ':');
           if ((parts != null) && (parts.length == 2) && (parts[0].equals(clientId))) {
             secret = parts[1];
           }

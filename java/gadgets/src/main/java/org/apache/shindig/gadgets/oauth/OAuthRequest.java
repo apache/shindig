@@ -192,7 +192,7 @@ public class OAuthRequest {
    * unchecked exception occurs, well, then the client is out of luck.
    */
   private HttpResponse fetchNoThrow() {
-    HttpResponseBuilder response = null;
+    HttpResponseBuilder response;
     try {
       accessorInfo = fetcherConfig.getTokenStore().getOAuthAccessor(
           realRequest.getSecurityToken(), realRequest.getOAuthArguments(), clientState,
@@ -835,7 +835,7 @@ public class OAuthRequest {
    * related error instead of user data.
    */
   private HttpResponseBuilder fetchData() throws OAuthRequestException, OAuthProtocolException {
-    HttpResponseBuilder builder = null;
+    HttpResponseBuilder builder;
     if (accessTokenData != null) {
       // This is a request for access token data, return it.
       builder = formatAccessTokenData();

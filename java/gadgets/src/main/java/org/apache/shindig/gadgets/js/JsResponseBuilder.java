@@ -18,6 +18,7 @@
 
 package org.apache.shindig.gadgets.js;
 
+import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
@@ -232,7 +233,7 @@ public class JsResponseBuilder {
    */
   public JsResponse build() {
     return new JsResponse(jsCode, statusCode, cacheTtlSecs, proxyCacheable,
-        errors, rawExterns.toString() + buildExternString());
+        errors, rawExterns + buildExternString());
   }
 
   private String buildExternString() {
@@ -254,7 +255,7 @@ public class JsResponseBuilder {
   private List<String> expand(String value) {
     List<String> result = Lists.newArrayList();
     StringBuilder cur = new StringBuilder();
-    for (String part : value.split("\\.")) {
+    for (String part : Splitter.on('.').split(value)) {
       cur.append(cur.length() > 0 ? "." : "").append(part);
       result.add(cur.toString());
     }

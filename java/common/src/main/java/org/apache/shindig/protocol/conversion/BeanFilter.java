@@ -128,7 +128,7 @@ public class BeanFilter {
 
     public Object invoke(Object data, Method method, Object[] args) {
       String fieldName = null;
-      Object result = null;
+      Object result;
       if (method.getName().startsWith("get")
           // Do not filter out primitive types, it will result in NPE
           && !method.getReturnType().isPrimitive()) {

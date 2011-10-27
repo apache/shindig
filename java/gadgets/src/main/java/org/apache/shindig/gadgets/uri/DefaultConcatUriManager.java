@@ -182,12 +182,14 @@ public class DefaultConcatUriManager implements ConcatUriManager {
     }
 
     if (versioner != null) {
-      List<String> versions = null;
       List<List<Uri>> batches = Lists.newArrayList();
       List<String> resourceTags = Lists.newArrayList();
+
       batches.add(batchUris);
       resourceTags.add(type.getTagName().toLowerCase());
-      versions = versioner.version(batches, container, resourceTags);
+
+      List<String> versions = versioner.version(batches, container, resourceTags);
+
       if (versions != null && versions.size() == 1) {
         String version = versions.get(0);
         if (version != null) {
@@ -202,7 +204,7 @@ public class DefaultConcatUriManager implements ConcatUriManager {
     for (Uri uri : uris) {
       Integer i = START_INDEX;
       String splitParam = uri.getQueryParameter(Param.JSON.getKey());
-      String resourceUri = null;
+      String resourceUri;
       while ((resourceUri = uri.getQueryParameter(i.toString())) != null) {
         Uri resource = Uri.parse(resourceUri);
         snippets.put(resource, getJsSnippet(splitParam, resource));
@@ -267,7 +269,7 @@ public class DefaultConcatUriManager implements ConcatUriManager {
     String splitParam = type == Type.JS ? uri.getQueryParameter(Param.JSON.getKey()) : null;
 
     Integer i = START_INDEX;
-    String uriStr = null;
+    String uriStr;
     while ((uriStr = uri.getQueryParameter(i.toString())) != null) {
       try {
         Uri concatUri = Uri.parse(uriStr);

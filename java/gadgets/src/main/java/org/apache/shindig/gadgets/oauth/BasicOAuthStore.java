@@ -19,7 +19,6 @@ package org.apache.shindig.gadgets.oauth;
 
 import com.google.common.collect.Maps;
 
-import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
 import net.oauth.OAuth;
@@ -184,7 +183,7 @@ public class BasicOAuthStore implements OAuthStore {
       throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR,
           "No key for gadget " + securityToken.getAppUrl() + " and service " + serviceName);
     }
-    OAuthConsumer consumer = null;
+    OAuthConsumer consumer;
     if (cks.getKeyType() == KeyType.RSA_PRIVATE) {
       consumer = new OAuthConsumer(null, cks.getConsumerKey(), null, provider);
       // The oauth.net java code has lots of magic.  By setting this property here, code thousands

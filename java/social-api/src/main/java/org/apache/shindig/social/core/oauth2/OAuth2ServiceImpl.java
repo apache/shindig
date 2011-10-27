@@ -40,7 +40,6 @@ import org.apache.shindig.social.core.oauth2.validators.OAuth2RequestValidator;
 import com.google.inject.CreationException;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.inject.name.Named;
 import com.google.inject.spi.Message;
 
 /**

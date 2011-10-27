@@ -75,7 +75,7 @@ public class OAuth2GadgetBinding {
   @Override
   public int hashCode() {
     if ((this.gadgetUri != null) && (this.gadgetServiceName != null)) {
-      return (this.gadgetUri + ":" + this.gadgetServiceName).hashCode();
+      return (this.gadgetUri + ':' + this.gadgetServiceName).hashCode();
     }
 
     return 0;

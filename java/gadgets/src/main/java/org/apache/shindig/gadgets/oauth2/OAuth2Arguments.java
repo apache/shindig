@@ -23,6 +23,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.shindig.common.Nullable;
 import org.apache.shindig.gadgets.AuthType;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.spec.RequestAuthenticationInfo;
@@ -137,7 +138,7 @@ public class OAuth2Arguments {
   }
 
   private static String getAuthInfoParam(final Map<String, String> attrs, final String name,
-      final String def) {
+      @Nullable final String def) {
     String val = attrs.get(name);
     if (val == null) {
       val = def;

@@ -74,7 +74,7 @@ public class ContainerConfigELResolver extends ELResolver {
   public Object getValue(ELContext context, Object base, Object property) {    
     // Handle all requests off the base, and anything that is a reference to
     // a container
-    String container = null;
+    String container;
     if (base == null) {
       container = currentContainer;
     } else if (base instanceof ContainerReference) {

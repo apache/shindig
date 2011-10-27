@@ -62,6 +62,7 @@ public class DefaultResourceRequestValidator implements
     }
   }
 
+  // TODO(plindner): change this into a constructor or .create() on OAuth2Exception
   private void throwAccessDenied(String msg) throws OAuth2Exception {
     OAuth2NormalizedResponse resp = new OAuth2NormalizedResponse();
     resp.setError(ErrorType.ACCESS_DENIED.toString());

@@ -810,7 +810,7 @@ public class ModulePrefs {
         return false;
 
       Feature feature = new Feature(element);
-      if (feature.getViews().size() == 0) {
+      if (feature.getViews().isEmpty()) {
         coreIncluded = coreIncluded || feature.getName().startsWith("core");
         features.put(feature.getName(), feature);
         globalFeatures.put(feature.getName(), feature);

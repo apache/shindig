@@ -46,8 +46,6 @@ package org.apache.shindig.protocol.conversion.xstream;
  *    ...
  * &lt;/person&gt;
  * </pre>
- * For a more compact mapping {@link ItemFieldMapping}.
- *
  *
  */
 public class ClassFieldMapping {

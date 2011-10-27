@@ -114,7 +114,7 @@ public class DefaultServiceFetcher {
     for (String endpoint : endpoints) {
       String endpointVal = endpoint;
       if ( endpoint.startsWith("//") && authority != null ){
-        endpointVal = authority.getScheme() + ":" + endpoint;
+        endpointVal = authority.getScheme() + ':' + endpoint;
       }
       endpointServices.putAll(endpoint, retrieveServices(endpointVal.replace("%host%", host)));
     }

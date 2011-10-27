@@ -52,18 +52,16 @@ public class RpcSwfServlet extends HttpServlet {
   }
   
   public RpcSwfServlet(String swfResource) {
-    byte[] bytes = null;
-    try {    
+    try {
       InputStream is = ResourceLoader.openResource(swfResource);
       if (is == null) {
         throw new RuntimeException("Failed to locate Flash SWF");
       }
-      bytes = IOUtils.toByteArray(is);
+      this.swfBytes = IOUtils.toByteArray(is);
+      this.hash = HashUtil.checksum(swfBytes);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
-    this.swfBytes = bytes;
-    this.hash = HashUtil.checksum(swfBytes);
   }
   
   @Inject(optional = true)

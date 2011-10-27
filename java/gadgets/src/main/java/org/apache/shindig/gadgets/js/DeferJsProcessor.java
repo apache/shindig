@@ -91,8 +91,8 @@ public class DeferJsProcessor extends BaseSurfaceJsProcessor implements JsProces
       result.append(FUNCTION_NAME).append("('").append(input.namespace).append("',[");
       for (int i = 0; i < input.properties.size(); i++) {
         String prop = input.properties.get(i);
-        if (i > 0) result.append(",");
-        result.append("'").append(prop).append("'");
+        if (i > 0) result.append(',');
+        result.append('\'').append(prop).append('\'');
       }
       result.append("]);");
 

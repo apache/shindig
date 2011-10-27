@@ -19,6 +19,7 @@
 package org.apache.shindig.gadgets.oauth;
 
 import com.google.common.base.Objects;
+import org.apache.shindig.common.Nullable;
 import org.apache.shindig.gadgets.AuthType;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpResponse;
@@ -177,7 +178,7 @@ public class OAuthArguments {
   /**
    * @return the named parameter from the request, or default if the named parameter is not present.
    */
-  private static String getRequestParam(HttpServletRequest request, String name, String def) {
+  private static String getRequestParam(HttpServletRequest request, String name, @Nullable String def) {
     String val = request.getParameter(name);
     if (val == null) {
       val = def;

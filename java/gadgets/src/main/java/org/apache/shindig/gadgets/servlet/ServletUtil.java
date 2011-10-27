@@ -224,9 +224,10 @@ public final class ServletUtil {
     // Ctor args indicate to encode w/o line breaks.
     Base64InputStream b64input = new Base64InputStream(response.getResponse(), true, 0, null);
     byte[] buf = new byte[1024];
-    int read = -1;
+
     try {
-      while ((read = b64input.read(buf, 0, 1024)) > 0) {
+      int read;
+      while (( read = b64input.read(buf, 0, 1024)) > 0) {
         os.write(buf, 0, read);
       }
     } finally {

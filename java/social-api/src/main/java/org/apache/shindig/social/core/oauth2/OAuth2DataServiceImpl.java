@@ -82,7 +82,7 @@ public class OAuth2DataServiceImpl implements OAuth2DataService {
 
   public void registerAuthorizationCode(String clientId, OAuth2Code authCode) {
     if (authCodes.containsKey(clientId)) {
-      ((List<OAuth2Code>) authCodes.get(clientId)).add(authCode);
+      authCodes.get(clientId).add(authCode);
     } else {
       List<OAuth2Code> list = Lists.newArrayList();
       list.add(authCode);
@@ -117,7 +117,7 @@ public class OAuth2DataServiceImpl implements OAuth2DataService {
 
   public void registerAccessToken(String clientId, OAuth2Code accessToken) {
     if (accessTokens.containsKey(clientId)) {
-      ((List<OAuth2Code>) accessTokens.get(clientId)).add(accessToken);
+      accessTokens.get(clientId).add(accessToken);
     } else {
       List<OAuth2Code> list = Lists.newArrayList();
       list.add(accessToken);

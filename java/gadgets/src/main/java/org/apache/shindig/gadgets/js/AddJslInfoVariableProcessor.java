@@ -86,7 +86,7 @@ public class AddJslInfoVariableProcessor implements JsProcessor {
     Collection<String> libs = jsUri.getLibs();
     List<Object> features = Lists.newArrayList();
     for (String lib : libs) {
-      features.add("'" + StringEscapeUtils.escapeJavaScript(lib) + "'");
+      features.add('\'' + StringEscapeUtils.escapeJavaScript(lib) + '\'');
     }
     return StringUtils.join(features, ",");
   }

@@ -161,7 +161,7 @@ public class ConcatProxyServlet extends InjectedServlet {
   private boolean doFetchConcatResources(HttpServletResponse response,
       ConcatUriManager.ConcatUri concatUri, Uri uri) throws IOException {
     // Check for json concat and set output stream.
-    ConcatOutputStream cos = null;
+    ConcatOutputStream cos;
     Long minCacheTtl = Long.MAX_VALUE;
     boolean isMinCacheTtlSet = false;
 
@@ -200,7 +200,7 @@ public class ConcatProxyServlet extends InjectedServlet {
       List<Pair<Uri, FutureTask<RequestContext>>> futureTasks = parallelFetcher.fetchAll(requests);
 
       for (Pair<Uri, FutureTask<RequestContext>> futureTask : futureTasks) {
-        RequestContext requestCxt = null;
+        RequestContext requestCxt;
         try {
           try {
             requestCxt = futureTask.two.get();

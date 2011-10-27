@@ -337,13 +337,11 @@ public class ProxyUriBase {
   }
 
   protected static Integer getIntegerValue(String str) {
-    Integer val = null;
     try {
-      val = NumberUtils.createInteger(str);
+      return NumberUtils.createInteger(str);
     } catch (NumberFormatException e) {
       // -1 is sentinel for invalid value.
-      val = -1;
+      return -1;
     }
-    return val;
   }
 }

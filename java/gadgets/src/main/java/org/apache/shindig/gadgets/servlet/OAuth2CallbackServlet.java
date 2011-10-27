@@ -160,7 +160,6 @@ public class OAuth2CallbackServlet extends InjectedServlet {
       if (IOException.class.isInstance(e)) {
         throw (IOException) e;
       }
-      return;
     } finally {
       if (accessor != null) {
         accessor.setRedirecting(false);
@@ -188,7 +187,6 @@ public class OAuth2CallbackServlet extends InjectedServlet {
     }
 
     resp.getWriter().write(OAuth2CallbackServlet.RESP_BODY);
-    return;
   }
 
   @Inject

@@ -483,7 +483,7 @@ public class BasicOAuth2Request implements OAuth2Request {
       BasicOAuth2Request.LOG.entering(BasicOAuth2Request.LOG_CLASS, "fetchData", accessor);
     }
 
-    HttpResponseBuilder ret = null;
+    HttpResponseBuilder ret;
 
     try {
       final HttpResponse response = this.fetchFromServer(accessor, this.realRequest);
@@ -511,7 +511,7 @@ public class BasicOAuth2Request implements OAuth2Request {
           new Object[] { accessor, "only log request once" });
     }
 
-    HttpResponse ret = null;
+    HttpResponse ret;
 
     final OAuth2Token accessToken = accessor.getAccessToken();
     final OAuth2Token refreshToken = accessor.getRefreshToken();
@@ -597,9 +597,7 @@ public class BasicOAuth2Request implements OAuth2Request {
   }
 
   private static String getCompleteRefreshUrl(final String refreshUrl) {
-    final String ret = OAuth2Utils.buildUrl(refreshUrl, null, null);
-
-    return ret;
+    return OAuth2Utils.buildUrl(refreshUrl, null, null);
   }
 
   private HttpResponseBuilder getErrorResponseBuilder(final Throwable t, final OAuth2Error error,
@@ -714,7 +712,7 @@ public class BasicOAuth2Request implements OAuth2Request {
 
     OAuth2HandlerError ret = null;
 
-    String refershTokenUrl = null;
+    String refershTokenUrl;
 
     refershTokenUrl = BasicOAuth2Request.buildRefreshTokenUrl(accessor);
 
@@ -766,12 +764,11 @@ public class BasicOAuth2Request implements OAuth2Request {
         }
 
         if (ret == null) {
-          if (response != null) {
-            final int statusCode = response.getHttpStatusCode();
-            if (statusCode != HttpResponse.SC_OK) {
-              ret = new OAuth2HandlerError(OAuth2Error.REFRESH_TOKEN_PROBLEM,
-                  "bad response from server : " + statusCode, null);
-            }
+          // response is not null..
+          final int statusCode = response.getHttpStatusCode();
+          if (statusCode != HttpResponse.SC_OK) {
+            ret = new OAuth2HandlerError(OAuth2Error.REFRESH_TOKEN_PROBLEM,
+                "bad response from server : " + statusCode, null);
           }
 
           if (ret == null) {
@@ -846,18 +843,10 @@ public class BasicOAuth2Request implements OAuth2Request {
   }
 
   private static boolean validateAccessToken(final OAuth2Token accessToken) {
-    if (accessToken != null) {
-      return true;
-    }
-
-    return false;
+    return accessToken != null;
   }
 
   private static boolean validateRefreshToken(final OAuth2Token refreshToken) {
-    if (refreshToken != null) {
-      return true;
-    }
-
-    return false;
+    return refreshToken != null;
   }
 }

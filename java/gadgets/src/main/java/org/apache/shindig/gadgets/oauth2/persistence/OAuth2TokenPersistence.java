@@ -171,7 +171,7 @@ public class OAuth2TokenPersistence implements OAuth2Token {
   @Override
   public int hashCode() {
     if ((this.serviceName != null) && (this.gadgetUri != null)) {
-      return (this.serviceName + ":" + this.gadgetUri + ":" + this.user + ":" + this.scope + ":" + this.type)
+      return (this.serviceName + ':' + this.gadgetUri + ':' + this.user + ':' + this.scope + ':' + this.type)
           .hashCode();
     }
 

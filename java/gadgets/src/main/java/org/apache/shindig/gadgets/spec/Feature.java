@@ -116,7 +116,7 @@ public class Feature {
     buf.append(required ? "<Require" : "<Optional")
        .append(" feature=\"")
        .append(name);
-    if (views.size() > 0) {
+    if (!views.isEmpty()) {
       buf.append("\" views=\"").append(StringUtils.join(views, ','));
     }
     buf.append("\">");

@@ -109,7 +109,7 @@ final class ModuleCacheKey implements JobCache.Key {
     }
 
     private void hash(Node node) {
-      hash((short) node.getNodeType());
+      hash(node.getNodeType());
       switch (node.getNodeType()) {
         case Node.ATTRIBUTE_NODE:
         case Node.ELEMENT_NODE:

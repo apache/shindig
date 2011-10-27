@@ -147,8 +147,7 @@ public class JpegImageUtils {
         stdTotal += stdTable[i];
       }
 
-      float scaleFactor = 0;
-      scaleFactor = (total - 32F)/stdTotal;
+      float scaleFactor = (total - 32F)/stdTotal;
 
       float approxChannelQuality;
       if (scaleFactor > 1.0) {

@@ -23,6 +23,7 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.config.ContainerConfig;
@@ -83,7 +84,7 @@ public class DefaultJsUriManager implements JsUriManager {
 
     // Add the list of already-loaded libs
     if (!ctx.getLoadedLibs().isEmpty()) {
-      jsPath.append("!").append(addJsLibs(ctx.getLoadedLibs()));
+      jsPath.append('!').append(addJsLibs(ctx.getLoadedLibs()));
     }
 
     jsPath.append(JS_SUFFIX);
@@ -171,7 +172,7 @@ public class DefaultJsUriManager implements JsUriManager {
       return INVALID_URI;
     }
 
-    int lastSlash = path.lastIndexOf("/");
+    int lastSlash = path.lastIndexOf('/');
     if (lastSlash != -1) {
       path = path.substring(lastSlash + 1);
     }
@@ -185,7 +186,7 @@ public class DefaultJsUriManager implements JsUriManager {
       path = path.substring(1);
     }
 
-    String[] splits = path.split("!");
+    String[] splits = StringUtils.split(path, '!');
     Collection<String> libs = getJsLibs(splits.length >= 1 ? splits[0] : "");
 
     String haveString = (splits.length >= 2 ? splits[1] : "");

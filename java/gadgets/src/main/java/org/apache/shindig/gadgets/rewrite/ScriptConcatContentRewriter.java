@@ -61,7 +61,7 @@ public class ScriptConcatContentRewriter extends DomWalker.Rewriter {
   @Override
   protected List<Visitor> makeVisitors(Gadget context, Uri gadgetUri) {
     ContentRewriterFeature.Config config = featureConfigFactory.get(gadgetUri);
-    return Arrays.<Visitor>asList(
+    return Arrays.asList(
         new CacheEnforcementVisitor(config, executor, cache, requestPipeline,
             CacheEnforcementVisitor.Tags.SCRIPT),
         new ConcatVisitor.Js(config, concatUriManager));

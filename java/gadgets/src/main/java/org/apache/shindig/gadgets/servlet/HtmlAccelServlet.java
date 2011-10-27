@@ -58,7 +58,7 @@ public class HtmlAccelServlet extends InjectedServlet {
 
     HttpRequest req = ServletUtil.fromHttpServletRequest(request);
     req.setContainer(AccelUriManager.CONTAINER);
-    HttpResponse response = null;
+    HttpResponse response;
     try {
       response = accelHandler.fetch(req);
     } catch (GadgetException e) {

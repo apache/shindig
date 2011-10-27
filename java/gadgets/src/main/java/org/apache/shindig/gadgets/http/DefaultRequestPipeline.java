@@ -102,7 +102,7 @@ public class DefaultRequestPipeline implements RequestPipeline {
       }
     }
 
-    HttpResponse fetchedResponse = null;
+    HttpResponse fetchedResponse;
     switch (request.getAuthType()) {
       case NONE:
         fetchedResponse = httpFetcher.fetch(request);

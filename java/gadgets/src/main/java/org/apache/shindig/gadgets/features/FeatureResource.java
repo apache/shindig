@@ -69,7 +69,7 @@ public interface FeatureResource {
     }
     
     public Map<String, String> getAttribs() {
-      return ImmutableMap.<String, String>of();
+      return ImmutableMap.of();
     }
   }
   

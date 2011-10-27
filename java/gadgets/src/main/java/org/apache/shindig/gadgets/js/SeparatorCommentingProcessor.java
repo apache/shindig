@@ -58,7 +58,7 @@ public class SeparatorCommentingProcessor implements JsProcessor {
     String tag = start ? "start" : "end";
     return JsContent.fromFeature(
         "\n/* [" + tag + "] feature=" + bundle.getName() + " */\n",
-        "[comment-marker-" + tag + "]", bundle, null);
+        "[comment-marker-" + tag + ']', bundle, null);
   }
 
 }

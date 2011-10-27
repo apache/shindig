@@ -257,7 +257,7 @@ public abstract class GadgetHtmlParser {
       }
     }
 
-    DocumentFragment fragment = null;
+    DocumentFragment fragment;
     try {
       fragment = parseFragmentImpl(source);
     } catch (DOMException e) {
@@ -356,7 +356,7 @@ public abstract class GadgetHtmlParser {
               next.removeChild(next.getFirstChild());
             }
 
-            sb.append("</").append(osType).append(">");
+            sb.append("</").append(osType).append('>');
             DocumentFragment osFragment = parseFragmentImpl(sb.toString());
             while (osFragment.hasChildNodes()) {
               Node osKid = osFragment.removeChild(osFragment.getFirstChild());

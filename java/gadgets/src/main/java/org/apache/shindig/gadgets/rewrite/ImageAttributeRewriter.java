@@ -99,7 +99,7 @@ public class ImageAttributeRewriter extends DomWalker.Rewriter {
     }
 
     public boolean revisit(Gadget gadget, List<Node> nodes) throws RewritingException {
-      if (nodes.size() == 0) {
+      if (nodes.isEmpty()) {
         return false;
       }
       Node head = DomUtil.getFirstNamedChildNode(
@@ -149,7 +149,7 @@ public class ImageAttributeRewriter extends DomWalker.Rewriter {
      */
     private String processAllImgResources(List<Node> nodes,
                                           Map<Uri, FutureTask<RequestContext>> futureTasks) {
-      String cssContent = "";
+      StringBuilder cssContent = new StringBuilder("");
 
       for (int i = 0; i < nodes.size(); i++) {
         Element imageElement = (Element) nodes.get(i);
@@ -197,10 +197,10 @@ public class ImageAttributeRewriter extends DomWalker.Rewriter {
 
           if (imageHeight > 0 && imageWidth > 0 && imageHeight * imageWidth > 1) {
             imageElement.setAttribute("class", IMG_ATTR_CLASS_NAME_PREFIX + i);
-            cssContent += "." + IMG_ATTR_CLASS_NAME_PREFIX + i + " {\n" +
-                       "  height: " + imageHeight + "px" + ";\n" +
-                       "  width: " + imageWidth + "px" + ";\n" +
-                       "}\n";
+            cssContent.append('.').append(IMG_ATTR_CLASS_NAME_PREFIX).append(i).append(" {\n")
+              .append("  height: ").append(imageHeight).append("px;\n")
+              .append("  width: ").append(imageWidth).append("px;\n")
+              .append("}\n");
           }
         } catch (ImageReadException e) {
           if (LOG.isLoggable(Level.WARNING)) {
@@ -217,7 +217,7 @@ public class ImageAttributeRewriter extends DomWalker.Rewriter {
         }
       }
 
-      return cssContent;
+      return cssContent.toString();
     }
 
     // TODO(satya): Need to pass the request parameters as well ?

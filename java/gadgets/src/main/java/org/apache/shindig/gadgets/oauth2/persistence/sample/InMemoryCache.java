@@ -62,14 +62,11 @@ public class InMemoryCache implements OAuth2Cache {
   }
 
   public OAuth2Client getClient(final Integer index) {
-    final OAuth2Client ret = this.clients.get(index);
-    return ret;
+    return this.clients.get(index);
   }
 
   public Integer getClientIndex(final String gadgetUri, final String serviceName) {
-    return Integer
-        .valueOf((InMemoryCache.OAUTH2_CLIENT_PREFIX + ":" + gadgetUri + ":" + serviceName)
-            .hashCode());
+    return (InMemoryCache.OAUTH2_CLIENT_PREFIX + ':' + gadgetUri + ':' + serviceName).hashCode();
   }
 
   public OAuth2Accessor getOAuth2Accessor(final Integer index) {
@@ -83,7 +80,7 @@ public class InMemoryCache implements OAuth2Cache {
 
   public Integer getOAuth2AccessorIndex(final String gadgetUri, final String serviceName,
       final String user, final String scope) {
-    return Integer.valueOf((gadgetUri + ":" + serviceName + ":" + ":" + user + ":" + scope)
+    return Integer.valueOf((gadgetUri + ':' + serviceName + ':' + ':' + user + ':' + scope)
         .hashCode());
   }
 
@@ -103,8 +100,8 @@ public class InMemoryCache implements OAuth2Cache {
   public Integer getTokenIndex(final String gadgetUri, final String serviceName, final String user,
       final String scope, final OAuth2Token.Type type) {
 
-    return Integer.valueOf((InMemoryCache.OAUTH2_TOKEN_PREFIX + ":" + gadgetUri + ":" + serviceName
-        + ":" + user + ":" + scope + ":" + type.name()).hashCode());
+    return Integer.valueOf((InMemoryCache.OAUTH2_TOKEN_PREFIX + ':' + gadgetUri + ':' + serviceName
+        + ':' + user + ':' + scope + ':' + type.name()).hashCode());
   }
 
   public OAuth2Client removeClient(final Integer index) throws OAuth2CacheException {

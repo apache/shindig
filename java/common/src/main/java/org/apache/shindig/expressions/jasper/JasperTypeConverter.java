@@ -29,11 +29,8 @@ public class JasperTypeConverter extends ShindigTypeConverter {
 
   @Override
   public boolean isPostConvertible(Class<?> type) {
-    if (type == Boolean.class || type == Boolean.TYPE
-        || type == JSONArray.class || type == Iterable.class) {
-      return true;
-    }
-    return false;
+    return type == Boolean.class || type == Boolean.TYPE
+        || type == JSONArray.class || type == Iterable.class;
   }
 
 }

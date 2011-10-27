@@ -111,7 +111,7 @@ public class FeedProcessorImpl implements FeedProcessor {
         String link = e.getLink();
         if (link == null) {
           List<SyndLink> links = e.getLinks();
-          if (links != null && links.size() > 0) {
+          if (links != null && !links.isEmpty()) {
             link = links.get(0).getHref();
           }
         }

@@ -101,7 +101,7 @@ public class TokenAuthorizationResponseHandler implements TokenEndpointResponseH
 
           if (contentType.startsWith("text/plain")) {
             // Facebook does this
-            msg.parseQuery("?" + responseString);
+            msg.parseQuery('?' + responseString);
           } else if (contentType.startsWith("application/json")) {
             // Google does this
             final JSONObject responseJson = new JSONObject(responseString);
@@ -194,11 +194,7 @@ public class TokenAuthorizationResponseHandler implements TokenEndpointResponseH
       return false;
     }
 
-    if (response == null) {
-      return false;
-    }
-
-    return true;
+    return response != null;
   }
 
   private static OAuth2HandlerError getError(final String contextMessage) {

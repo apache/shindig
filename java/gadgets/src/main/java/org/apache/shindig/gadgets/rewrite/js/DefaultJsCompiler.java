@@ -41,7 +41,7 @@ public class DefaultJsCompiler implements JsCompiler {
       if (resource.isExternal()) {
         // Support external/type=url feature serving through document.write()
         jsContent.add(JsContent.fromFeature("document.write('<script src=\"" + content + "\"></script>')",
-            "[external:" + content + "]", bundle, resource));
+            "[external:" + content + ']', bundle, resource));
       } else {
         jsContent.add(JsContent.fromFeature(content, resource.getName(), bundle, resource));
       }

@@ -134,7 +134,6 @@ public class JsonRpcServlet extends ApiServlet {
         JSONObject request = new JSONObject(content);
         dispatch(request, formData, servletRequest, servletResponse, token, callback);
       }
-      return;
     } catch (JSONException je) {
       sendJsonParseError(je, servletResponse);
     } catch (IllegalArgumentException e) {

@@ -218,7 +218,7 @@ public class DefaultIframeUriManager implements IframeUriManager {
     UriBuilder uri = new UriBuilder(inUri);
 
     String gadgetStr = uri.getQueryParameter(Param.URL.getKey());
-    Uri gadgetUri = null;
+    Uri gadgetUri;
     try {
       gadgetUri = Uri.parse(gadgetStr);
     } catch (Exception e) {

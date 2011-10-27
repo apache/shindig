@@ -191,13 +191,9 @@ public class Gadget {
    * @return a map of ModuleSpec/Require and ModuleSpec/Optional elements to Feature
    */
   public Map<String, Feature> getViewFeatures() {    
-    String name = null;
-    View view = getCurrentView();   
-    if (view == null) { // Use default view name if current view is not set
-      name = GadgetSpec.DEFAULT_VIEW;
-    } else {
-      name = view.getName();
-    }
+    View view = getCurrentView();
+    String name = (view == null) ? GadgetSpec.DEFAULT_VIEW : view.getName();
+
     return spec.getModulePrefs().getViewFeatures(name);
   }
 

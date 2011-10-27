@@ -129,7 +129,7 @@ public class BeanDelegator {
                                Map<String, Object> extraFields) {
 
     extraFields = normalizeFields(extraFields);
-    if (source == null && extraFields.size() > 0) {
+    if (source == null && !extraFields.isEmpty()) {
       // Create delegator that is based only on fields, so use dummy object
       source = new NullClass();
     }
@@ -235,7 +235,7 @@ public class BeanDelegator {
           return (data == NULL ? null : data);
         }
       }
-      Exception exc = null;
+      Exception exc;
       try {
         Method sourceMethod = sourceClass.getMethod(
             method.getName(), method.getParameterTypes());
@@ -392,7 +392,7 @@ public class BeanDelegator {
    for (Enum<?> val2 : targetEnum.getEnumConstants()) {
      values2Map.put(val2.name(), val2);
    }
-   Enum<?>[] values1 = sourceEnum.getEnumConstants();
+
    ImmutableMap.Builder<Enum<?>, Enum<?>> mapBuilder = ImmutableMap.builder();
    for (Enum<?> val1 : sourceEnum.getEnumConstants()) {
      if (values2Map.containsKey(val1.name())) {

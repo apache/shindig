@@ -20,6 +20,7 @@ package org.apache.shindig.auth;
 
 import java.util.EnumSet;
 
+import org.apache.shindig.common.Nullable;
 import org.apache.shindig.config.ContainerConfig;
 
 /**

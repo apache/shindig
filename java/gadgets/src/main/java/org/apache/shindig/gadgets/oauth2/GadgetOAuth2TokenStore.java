@@ -89,7 +89,7 @@ public class GadgetOAuth2TokenStore {
           new Object[] { arguments, gadgetUri });
     }
 
-    GadgetSpec ret = null;
+    GadgetSpec ret;
 
     try {
       final GadgetContext context = new OAuth2GadgetContext(securityToken, arguments, gadgetUri);
@@ -166,7 +166,7 @@ public class GadgetOAuth2TokenStore {
             + " , serviceName = " + serviceName, "");
       }
 
-      if ((ret == null) && (arguments != null) && (specInfo != null)) {
+      if (ret == null && arguments != null) {
         String scope = arguments.getScope();
         if ((scope == null) || (scope.length() == 0)) {
           // no scope on request, default to module prefs scope

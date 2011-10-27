@@ -100,9 +100,7 @@ public class JsRequest {
       allFeatures = registry.getFeatures(jsUri.getLibs());
       loadedFeatures = registry.getFeatures(jsUri.getLoadedLibs());
       newFeatures = Lists.newLinkedList();
-      Iterator<String> allIt = allFeatures.iterator();
-      while (allIt.hasNext()) {
-        String candidate = allIt.next();
+      for (String candidate : allFeatures) {
         if (!loadedFeatures.contains(candidate)) {
           newFeatures.add(candidate);
         }

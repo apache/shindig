@@ -153,7 +153,7 @@ public class SanitizingGadgetRewriter extends DomWalker.Rewriter {
     protected abstract boolean removeAttr(Gadget gadget, Attr attr, Uri ctx);
     
     public VisitStatus visit(Gadget gadget, Node node) throws RewritingException {
-      Element elem = null;
+      Element elem;
       
       switch (node.getNodeType()) {
       case Node.CDATA_SECTION_NODE:

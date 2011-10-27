@@ -98,7 +98,7 @@ public class ImageResizeRewriter extends DomWalker.Rewriter {
       // We want to append image resize params only to urls that are proxied through us.
       String uriStr = imgElement.getAttribute("src").trim();
       Uri uri = Uri.parse(uriStr);
-      ProxyUriManager.ProxyUri proxied = null;
+      ProxyUriManager.ProxyUri proxied;
 
       // Try parsing this uri as a ProxyUri.
       try {

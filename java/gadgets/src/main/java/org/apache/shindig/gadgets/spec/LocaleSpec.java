@@ -130,7 +130,7 @@ public class LocaleSpec {
     buf.append("<Locale").append(" lang='").append(getLanguage()).append('\'')
         .append(" country='").append(getCountry()).append('\'')
         .append(" language_direction='").append(languageDirection).append('\'');
-    if (views.size() > 0) {
+    if (!views.isEmpty()) {
       buf.append(" views=\'").append(StringUtils.join(views, ',')).append('\'');
     }
     buf.append(" messages='").append(messages).append("'>\n");

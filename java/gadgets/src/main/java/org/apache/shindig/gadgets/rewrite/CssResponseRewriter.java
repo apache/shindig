@@ -203,7 +203,7 @@ public class CssResponseRewriter implements ResponseRewriter {
 
   private static String rewriteUri(UriMaker uriMaker, String input, Uri context,
       GadgetContext gadgetContext) {
-    Uri inboundUri = null;
+    Uri inboundUri;
     try {
       inboundUri = Uri.parse(input);
     } catch (IllegalArgumentException e) {

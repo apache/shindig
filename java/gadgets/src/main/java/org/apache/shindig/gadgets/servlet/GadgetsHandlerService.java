@@ -33,6 +33,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.auth.SecurityTokenCodec;
 import org.apache.shindig.auth.SecurityTokenException;
+import org.apache.shindig.common.Nullable;
 import org.apache.shindig.common.servlet.HttpUtil;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.util.TimeSource;
@@ -279,7 +280,7 @@ public class GadgetsHandlerService {
     String content = null;
     Long expireMs = null;
     if (isFieldIncluded(fields, "jsContent")) {
-      JsResponse response = null;
+      JsResponse response;
       try {
         response = jsPipeline.execute(jsRequestBuilder.build(jsUri, servedUri.getAuthority()));
       } catch (JsException e) {
@@ -405,17 +406,14 @@ public class GadgetsHandlerService {
     }
   }
 
-  protected Long getProxyExpireMs(ProxyUri proxyUri, HttpResponse httpResponse) {
-    Long expireMs = null;
+  protected Long getProxyExpireMs(ProxyUri proxyUri, @Nullable HttpResponse httpResponse) {
     if (httpResponse != null) {
-      expireMs = httpResponse.getCacheExpiration();
+      return httpResponse.getCacheExpiration();
     } else if (proxyUri.getRefresh() != null) {
-      expireMs = timeSource.currentTimeMillis() + proxyUri.getRefresh() * 1000;
-    } else {
-      // Use default ttl:
-      return getDefaultExpiration();
+      return timeSource.currentTimeMillis() + proxyUri.getRefresh() * 1000;
     }
-    return expireMs;
+
+    return getDefaultExpiration();
   }
 
   protected long getDefaultExpiration() {

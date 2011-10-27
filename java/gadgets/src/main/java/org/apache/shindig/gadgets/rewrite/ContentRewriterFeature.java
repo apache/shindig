@@ -247,7 +247,7 @@ public class ContentRewriterFeature {
       this.excludes = getMatchBundle(excludeRegex, excludeUrls);
 
       // Spec-specified include tags.
-      Set<String> tagsVal = null;
+      Set<String> tagsVal;
       if (f != null && f.getParams().containsKey(INCLUDE_TAGS)) {
         tagsVal = Sets.newTreeSet();
         for (String tag : Splitter.on(',').trimResults().omitEmptyStrings().split(f.getParam(INCLUDE_TAGS))) {

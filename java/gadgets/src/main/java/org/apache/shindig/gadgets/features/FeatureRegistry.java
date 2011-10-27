@@ -306,13 +306,9 @@ public class FeatureRegistry {
   // res://-prefixed URIs are actually scheme = res, host = "", path = "/stuff". We want res:path.
   // Package-private for use by FeatureParser as well.
   static Uri getComponentUri(String str) {
-    Uri uri = null;
-    if (str.startsWith("res://")) {
-      uri = new UriBuilder().setScheme(RESOURCE_SCHEME).setPath(str.substring(6)).toUri();
-    } else {
-      uri = Uri.parse(str);
-    }
-    return uri;
+    return (str.startsWith("res://")) ?
+      new UriBuilder().setScheme(RESOURCE_SCHEME).setPath(str.substring(6)).toUri() :
+      Uri.parse(str);
   }
 
   private List<FeatureNode> getTransitiveDeps(
@@ -501,10 +497,10 @@ public class FeatureRegistry {
     List<String> neededList = Lists.newArrayList(needed);
     Collections.sort(neededList);
     return new StringBuilder().append(StringUtils.join(neededList, ":"))
-        .append("|").append(ctx.getRenderingContext())
-        .append("|").append(ctx.getContainer())
-        .append("|").append(unsupported != null)
-        .append("|").append(Strings.nullToEmpty(repository))
+        .append('|').append(ctx.getRenderingContext())
+        .append('|').append(ctx.getContainer())
+        .append('|').append(unsupported != null)
+        .append('|').append(Strings.nullToEmpty(repository))
         .toString();
   }
 

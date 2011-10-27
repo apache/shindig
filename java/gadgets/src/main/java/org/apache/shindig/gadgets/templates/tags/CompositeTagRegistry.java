@@ -33,7 +33,7 @@ public class CompositeTagRegistry extends AbstractTagRegistry {
   }
     
   public TagHandler getHandlerFor(NSName name) {
-    TagHandler handler = null;
+    TagHandler handler;
     for (TagRegistry registry : registries) {
       handler = registry.getHandlerFor(name);
       if (handler != null) {

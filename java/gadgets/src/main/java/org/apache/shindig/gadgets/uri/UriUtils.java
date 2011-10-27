@@ -204,7 +204,7 @@ public final class UriUtils {
       String header = inHeader.getKey();
       List<String> headerValues = inHeader.getValue();
       
-      if (headerValues != null && headerValues.size() > 0 &&
+      if (headerValues != null && !headerValues.isEmpty() &&
           isValidHeaderName(header) &&
           !allDisallowedHeaders.contains(header.toLowerCase())) {
         // Remove existing values of this header.

@@ -78,9 +78,7 @@ public class CodeGrantTypeHandler implements GrantRequestHandler {
       queryParams.put(OAuth2Message.SCOPE, scope);
     }
 
-    final String ret = OAuth2Utils.buildUrl(accessor.getAuthorizationUrl(), queryParams, null);
-
-    return ret;
+    return OAuth2Utils.buildUrl(accessor.getAuthorizationUrl(), queryParams, null);
   }
 
   public String getGrantType() {

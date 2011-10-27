@@ -156,7 +156,7 @@ public class OAuth2Client implements Serializable {
   @Override
   public int hashCode() {
     if ((this.serviceName != null) && (this.gadgetUri != null)) {
-      return (this.serviceName + ":" + this.gadgetUri).hashCode();
+      return (this.serviceName + ':' + this.gadgetUri).hashCode();
     }
 
     return 0;

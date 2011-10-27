@@ -56,8 +56,8 @@ public class AddOnloadFunctionProcessor implements JsProcessor {
       "if(j['c']&&--j['o']<=0){"+
       "j['c']();" +
       "delete j['c'];" +
-      "delete j['o'];" +      
-      "}" +
+      "delete j['o'];" +
+      '}' +
       "})();";
 
   private static final Pattern ONLOAD_FN_PATTERN = Pattern.compile("[a-zA-Z0-9_]+");

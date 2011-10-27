@@ -55,9 +55,9 @@ public class RewritePath implements ResponseRewriterList {
   }
 
   public String toString() {
-    return "@" + ResponseRewriterList.class.getName()
-           + "(rewriteFlow=" + rewriteFlow + ","
-           + "container=" + container + ")";
+    return '@' + ResponseRewriterList.class.getName()
+           + "(rewriteFlow=" + rewriteFlow + ','
+           + "container=" + container + ')';
   }
 
   public Class<? extends Annotation> annotationType() {

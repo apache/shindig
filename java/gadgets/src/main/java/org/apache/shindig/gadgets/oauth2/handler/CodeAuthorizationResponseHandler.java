@@ -117,9 +117,7 @@ public class CodeAuthorizationResponseHandler implements AuthorizationEndpointRe
   }
 
   private static String getCompleteTokenUrl(final String accessTokenUrl) {
-    final String ret = OAuth2Utils.buildUrl(accessTokenUrl, null, null);
-
-    return ret;
+    return OAuth2Utils.buildUrl(accessTokenUrl, null, null);
   }
 
   public OAuth2HandlerError handleRequest(final OAuth2Accessor accessor,

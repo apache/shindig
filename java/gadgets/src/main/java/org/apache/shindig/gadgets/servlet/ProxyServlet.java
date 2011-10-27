@@ -18,6 +18,7 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.shindig.common.logging.i18n.MessageKeys;
 import org.apache.shindig.common.servlet.InjectedServlet;
 import org.apache.shindig.common.uri.Uri;
@@ -140,10 +141,7 @@ public class ProxyServlet extends InjectedServlet {
       LOG.logp(Level.WARNING, classname, "getPOSTContent", "Caught exception while reading POST body:"
           + e.getMessage());
     } finally {
-      if (reader != null) {
-        reader.close();
-        reader = null;
-      }
+      IOUtils.closeQuietly(reader);
     }
     return buffer;
   }

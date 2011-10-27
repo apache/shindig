@@ -116,7 +116,7 @@ public class MakeRequestHandler {
               "Unable to find gadget in request", HttpResponse.SC_FORBIDDEN);
     }
 
-    Gadget gadget = null;
+    Gadget gadget;
     GadgetContext context = new HttpGadgetContext(request) {
       public Uri getUrl() {
         return gadgetUri;
@@ -183,7 +183,7 @@ public class MakeRequestHandler {
               + " parameter is missing.", HttpResponse.SC_BAD_REQUEST);
     }
 
-    Uri url = null;
+    Uri url;
     try {
       url = ServletUtil.validateUrl(Uri.parse(urlStr));
     } catch (IllegalArgumentException e) {

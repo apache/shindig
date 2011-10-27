@@ -159,9 +159,6 @@ public class DefaultProxyUriManager implements ProxyUriManager {
 
   @SuppressWarnings("deprecation")
   public ProxyUri process(Uri uriIn) throws GadgetException {
-    UriStatus status = UriStatus.BAD_URI;
-    Uri uri = null;
-
     // First determine if the URI is chained-syntax or query-style.
     String container = uriIn.getQueryParameter(Param.CONTAINER.getKey());
     if (container == null) {
@@ -213,7 +210,7 @@ public class DefaultProxyUriManager implements ProxyUriManager {
             }
             if (!endToken.endsWith("/")) {
               // add suffix '/' that was added by the creator
-              endToken = endToken + "/";
+              endToken = endToken + '/';
             }
 
             // Pull URI out of original inUri's full representation.
@@ -256,6 +253,8 @@ public class DefaultProxyUriManager implements ProxyUriManager {
       }
     }
 
+
+    Uri uri;
     try {
       uri = Uri.parse(uriStr);
       if (uri.getScheme() == null) {
@@ -269,7 +268,7 @@ public class DefaultProxyUriManager implements ProxyUriManager {
     }
 
     // URI is valid.
-    status = UriStatus.VALID_UNVERSIONED;
+    UriStatus status = UriStatus.VALID_UNVERSIONED;
 
     String version = queryUri.getQueryParameter(Param.VERSION.getKey());
     if (versioner != null && version != null) {

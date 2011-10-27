@@ -251,7 +251,7 @@ public class JSONOAuth2Persister implements OAuth2Persister {
           final OAuth2GadgetBinding gadgetBinding = new OAuth2GadgetBinding(gadgetUri,
               gadgetServiceName, clientName, allowOverride);
 
-          ret.put(gadgetBinding.getGadgetUri() + ":" + gadgetBinding.getGadgetServiceName(),
+          ret.put(gadgetBinding.getGadgetUri() + ':' + gadgetBinding.getGadgetServiceName(),
               gadgetBinding);
         }
       }

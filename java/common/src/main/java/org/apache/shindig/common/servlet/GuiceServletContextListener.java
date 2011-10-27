@@ -102,16 +102,15 @@ public class GuiceServletContextListener implements ServletContextListener {
     String contextRoot = context.getContextPath();
     System.setProperty("shindig.contextroot", contextRoot);
     String systemProperties = context.getInitParameter(SYSTEM_PROPERTIES);
-    String key=null;
-    String value=null;
-    if(systemProperties!=null && systemProperties.trim().length()>0){
+
+    if (systemProperties!=null && systemProperties.trim().length() > 0){
       for (String prop : Splitter.on('\n').trimResults().split(systemProperties)){
         String[] keyAndvalue = StringUtils.split(prop, "=", 2);
-        if(keyAndvalue.length==2){
-          key=keyAndvalue[0];
-          value=keyAndvalue[1];
+        if (keyAndvalue.length == 2) {
+          String key = keyAndvalue[0];
+          String value = keyAndvalue[1];
           //set the system property if they are not empty
-          if (key!=null && key.trim().length()>0 && value!=null && value.trim().length()>0){
+          if (key!=null && key.trim().length() > 0 && value!=null && value.trim().length() > 0){
             System.setProperty(key,value);
           }
         }

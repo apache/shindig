@@ -435,7 +435,7 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
     Map<String, Object> config =
         configProcessor.getConfig(gadget.getContext().getContainer(), reqs, null, gadget);
 
-    if (config.size() > 0) {
+    if (!config.isEmpty()) {
       return "gadgets.config.init(" + JsonSerializer.serialize(config) + ");\n";
     }
 

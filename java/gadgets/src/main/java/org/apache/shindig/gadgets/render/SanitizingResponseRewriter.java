@@ -109,7 +109,6 @@ public class SanitizingResponseRewriter implements ResponseRewriter {
           }
           imageIsSafe = true;
           // Return false to indicate that no rewriting occurred
-          return;
         } catch (IOException ioe) {
           throw new RuntimeException(ioe);
         } catch (ImageReadException ire) {
@@ -118,10 +117,7 @@ public class SanitizingResponseRewriter implements ResponseRewriter {
             LOG.logp(Level.INFO, classname, "rewriteProxiedImage", MessageKeys.UNABLE_DETECT_IMG_TYPE,new Object[] {request.getUri().toString()});
             LOG.log(Level.INFO, ire.getMessage(), ire);
           }
-          return;
         }
-      } else {
-        return;
       }
     } finally {
       if (!imageIsSafe) {
@@ -147,7 +143,6 @@ public class SanitizingResponseRewriter implements ResponseRewriter {
         sanitized = cssSanitizer.sanitize(resp.getContent(), request.getUri(),
             gadgetContext, cssImportRewriter, cssImageRewriter);
       }
-      return;
     } finally {
       // Set sanitized content in finally to ensure it is always cleared in
       // the case of errors

@@ -287,7 +287,7 @@ public class ClosureJsCompiler implements JsCompiler {
   }
 
   private static String getRootSrc(String source) {
-    int colIx = source.lastIndexOf(":");
+    int colIx = source.lastIndexOf(':');
     if (colIx == -1) {
       return source;
     }
@@ -391,11 +391,11 @@ public class ClosureJsCompiler implements JsCompiler {
      * @return {@link JsContent} entries for code fragments belonging to a single source
      */
     public Iterable<JsContent> mapCompiled(String compiled) {
-      int row = 1, column = 1; // current row-col being parsed
+      int row = 1, column; // current row-col being parsed
       StringBuilder codeFragment = new StringBuilder(); // code fragment for a single mapping
 
       OriginalMapping previousMapping = null, // the row-col mapping at the previous valid position
-          currentMapping = null; // the row-col mapping at the current valid position
+          currentMapping; // the row-col mapping at the current valid position
 
       ImmutableList.Builder<JsContent> contentEntries = ImmutableList.builder();
       Iterable<String> compiledLines = Splitter.on("\n").split(compiled);

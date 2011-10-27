@@ -105,10 +105,9 @@ public class PropertiesModule extends AbstractModule {
       is = ResourceLoader.openResource(propertyFile);
       properties.load(is);
       
-      String value = null;
       for (Object key : properties.keySet()) {
-        value = (String)properties.get((String)key);
-        if (value != null && value.indexOf("%contextRoot%") >=0 ){
+        String value = (String)properties.get((String)key);
+        if (value != null && value.contains("%contextRoot%")){
           properties.put(key, value.replace(("%contextRoot%"),contextRoot));
         }
       }

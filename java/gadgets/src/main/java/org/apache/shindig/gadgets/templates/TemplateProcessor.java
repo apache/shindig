@@ -18,6 +18,7 @@
  */
 package org.apache.shindig.gadgets.templates;
 
+import org.apache.shindig.common.Nullable;
 import org.w3c.dom.DocumentFragment;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -64,5 +65,5 @@ public interface TemplateProcessor {
    *  @param type Expected result type
    *  @param defaultValue Default value to return 
    */
-  <T> T evaluate(String expression, Class<T> type, T defaultValue);
+  <T> T evaluate(String expression, Class<T> type, @Nullable T defaultValue);
 }
