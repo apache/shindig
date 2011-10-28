@@ -32,9 +32,9 @@
 
   function notifySelection(selection) {
     _selection = selection;
-    listeners.forEach(function(listener) {
-      listener(selection);
-    });
+    for(var i=0, currentListener; currentListener=listeners[i]; i++) {
+      listeners[i](selection);
+    }
   }
 
   function addSelectionListener(listener) {
@@ -44,9 +44,11 @@
   }
 
   function removeSelectionListener(listener) {
-    var index = listeners.indexOf(listener);
-    if (index != -1) {
-      listeners.splice(index, 1);
+    for (var i = 0, currentListener; currentListener=listeners[i]; i++) {
+      if (currentListener === listener) {
+        listeners.splice(i, 1);
+        break;
+      }
     }
   }
 

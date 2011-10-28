@@ -62,9 +62,9 @@ gadgets['selection'] = function() {
         if (selectionChangedFunc == null) {
           selectionChangedFunc = function(selection) {
             currentSelection = selection;
-            listeners.forEach(function(listener) {
-              listener(selection);
-            });
+            for (var i=0, currentListener; currentListener=listeners[i]; i++) {
+              listeners[i](selection);
+            }
           };
           gadgets.rpc.call('..', 'gadgets.selection', null, 'add',
               selectionChangedFunc);
@@ -77,9 +77,11 @@ gadgets['selection'] = function() {
      * @param {function} listener The listener to remove.
      */
     removeListener: function(listener) {
-      var index = listeners.indexOf(listener);
-      if (index != -1) {
-        listeners.splice(index, 1);
+      for (var i = 0, currentListener; currentListener=listeners[i]; i++) {
+        if (currentListener === listener) {
+          listeners.splice(i, 1);
+          break;
+        }
       }
     }
   };
