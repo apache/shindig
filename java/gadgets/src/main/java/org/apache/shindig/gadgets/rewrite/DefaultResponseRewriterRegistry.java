@@ -38,8 +38,7 @@ public class DefaultResponseRewriterRegistry implements ResponseRewriterRegistry
   protected final GadgetHtmlParser htmlParser;
 
   @Inject
-  public DefaultResponseRewriterRegistry(
-      List<ResponseRewriter> rewriters,
+  public DefaultResponseRewriterRegistry(List<ResponseRewriter> rewriters,
       GadgetHtmlParser htmlParser) {
     if (rewriters == null) {
       rewriters = Collections.emptyList();

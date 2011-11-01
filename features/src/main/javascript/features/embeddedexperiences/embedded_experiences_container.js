@@ -32,8 +32,7 @@
      * @param {Object} renderParams params to augment the rendering.
      * @param {Function} opt_callback called once the gadget has been navigated to.
      */
-    function navigateGadget_(element, dataModel, 
-            renderParams, opt_callback) {
+    function navigateGadget_(element, dataModel, renderParams, opt_callback) {
       var viewParams = renderParams[osapi.container.ee.RenderParam.GADGET_VIEW_PARAMS] || {};
       var localRenderParams =
         renderParams[osapi.container.ee.RenderParam.GADGET_RENDER_PARAMS] || {};
