@@ -22,7 +22,7 @@
   <parent>
     <groupId>org.apache.shindig</groupId>
     <artifactId>shindig-project</artifactId>
-    <version>3.0.0-SNAPSHOT</version>
+    <version>3.0.0-beta3</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
 
@@ -33,9 +33,9 @@
   <description>Default server war containing both the gadget rendering code and the social api code.</description>
 
   <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/shindig/trunk/java/server</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/shindig/trunk/java/server</developerConnection>
-    <url>http://svn.apache.org/viewvc/shindig/trunk/java/server</url>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/shindig/tags/shindig-project-3.0.0-beta3/java/server</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/shindig/tags/shindig-project-3.0.0-beta3/java/server</developerConnection>
+    <url>http://svn.apache.org/viewvc/shindig/tags/shindig-project-3.0.0-beta3/java/server</url>
   </scm>
 
   <build>
