@@ -96,10 +96,14 @@
 // substituted with the current host.
 "gadgets.osDataUri" : "http://%host%${CONTEXT_ROOT}/rpc",
 
-// Uncomment these to switch to a secure version
+// Uncomment these to switch to a secure version. If both a key file and key are provided, the key
+// will take precedence; thus, to use a key file, you must explicitly not provide a key. The
+// best way to generate a key is to do something like this:
+// dd if=/dev/random bs=32 count=1 | openssl base64
 //
-//"gadgets.securityTokenType" : "secure",
-//"gadgets.securityTokenKeyFile" : "/path/to/key/file.txt",
+// "gadgets.securityTokenType" : "secure",
+// "gadgets.securityTokenKeyFile" : "/path/to/key/file.txt",
+// "gadgets.securityTokenKey" : "",
 
 // OS 2.0 Gadget DOCTYPE: used in Gadgets with @specificationVersion 2.0 or greater and
 // quirksmode on Gadget has not been set.

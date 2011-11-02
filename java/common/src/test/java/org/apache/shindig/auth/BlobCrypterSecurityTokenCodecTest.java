@@ -56,18 +56,34 @@ public class BlobCrypterSecurityTokenCodecTest {
         .addContainer(makeContainer("default"))
         .addContainer(makeContainer("container"))
         .addContainer(makeContainer("example"))
+        .addContainer(makeContainer("keyOnlyNoFile", true))
         .commit();
     codec = new CodecWithLoadStubbedOut(config);
     timeSource = new FakeTimeSource();
   }
 
   protected Map<String, Object> makeContainer(String container) {
-    return ImmutableMap.<String, Object>of(ContainerConfig.CONTAINER_KEY,
-        ImmutableList.of(container),
-        BlobCrypterSecurityTokenCodec.SECURITY_TOKEN_KEY_FILE,
-        getContainerKey(container),
-        BlobCrypterSecurityTokenCodec.SIGNED_FETCH_DOMAIN,
-        container + ".com");
+    return makeContainer(container, false);
+  }
+
+  protected Map<String, Object> makeContainer(String container, boolean insertKey) {
+    if (insertKey) {
+      return ImmutableMap.<String, Object>of(ContainerConfig.CONTAINER_KEY,
+          ImmutableList.of(container),
+          BlobCrypterSecurityTokenCodec.SECURITY_TOKEN_KEY_FILE,
+          container,
+          BlobCrypterSecurityTokenCodec.SECURITY_TOKEN_KEY,
+          getContainerKey(container),
+          BlobCrypterSecurityTokenCodec.SIGNED_FETCH_DOMAIN,
+          container + ".com");
+    } else {
+      return ImmutableMap.<String, Object>of(ContainerConfig.CONTAINER_KEY,
+              ImmutableList.of(container),
+              BlobCrypterSecurityTokenCodec.SECURITY_TOKEN_KEY_FILE,
+              container,
+              BlobCrypterSecurityTokenCodec.SIGNED_FETCH_DOMAIN,
+              container + ".com");
+    }
   }
 
   protected String getContainerKey(String container) {
@@ -95,16 +111,16 @@ public class BlobCrypterSecurityTokenCodecTest {
      * @throws IOException when passed a filename with 'fail' in it.
      */
     @Override
-    protected BlobCrypter loadCrypter(String file) throws IOException {
+    protected String getKeyFromFile(String file) throws IOException {
       if (file.contains("fail")) {
         throw new IOException("Load failed: " + file);
       }
-      return getBlobCrypter(file);
+      return getContainerKey(file);
     }
   }
 
   @Test
-  public void testCreateToken() throws Exception {
+  public void testCreateTokenUsingKeyFile() throws Exception {
     Map<String, String> values = new HashMap<String, String>();
     values.put(Keys.APP_URL.getKey(), "http://www.example.com/gadget.xml");
     values.put(Keys.MODULE_ID.getKey(), Long.toString(12345L, 10));
@@ -253,5 +269,28 @@ public class BlobCrypterSecurityTokenCodecTest {
     } catch (SecurityTokenException e) {
       // pass
     }
+  }
+
+  @Test
+  public void testCreateTokenUsingKey() throws Exception {
+    Map<String, String> values = new HashMap<String, String>();
+    values.put(Keys.APP_URL.getKey(), "http://www.example.com/gadget.xml");
+    values.put(Keys.MODULE_ID.getKey(), Long.toString(12345L, 10));
+    values.put(Keys.OWNER.getKey(), "owner");
+    values.put(Keys.VIEWER.getKey(), "viewer");
+    values.put(Keys.TRUSTED_JSON.getKey(), "trusted");
+
+    BlobCrypterSecurityToken t = new BlobCrypterSecurityToken("keyOnlyNoFile", null, null, values);
+    String encrypted = t.getContainer() + ":" + getBlobCrypter(getContainerKey("keyOnlyNoFile")).wrap(t.toMap());
+
+    SecurityToken t2 = codec.createToken(ImmutableMap.of(SecurityTokenCodec.SECURITY_TOKEN_NAME, encrypted));
+
+    assertEquals("http://www.example.com/gadget.xml", t2.getAppId());
+    assertEquals("http://www.example.com/gadget.xml", t2.getAppUrl());
+    assertEquals("keyOnlyNoFile.com", t2.getDomain());
+    assertEquals(12345L, t2.getModuleId());
+    assertEquals("owner", t2.getOwnerId());
+    assertEquals("viewer", t2.getViewerId());
+    assertEquals("trusted", t2.getTrustedJson());
   }
 }
