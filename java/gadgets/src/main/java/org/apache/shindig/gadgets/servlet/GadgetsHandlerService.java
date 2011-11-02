@@ -212,8 +212,12 @@ public class GadgetsHandlerService {
             gadget.getAllFeatures().contains("auth-refresh") : null;
 
     Set<String> rpcServiceIds = getRpcServiceIds(gadget);
+
+    Integer tokenTTL = isFieldIncluded(fields, "tokenTTL") ?
+        securityTokenCodec.getTokenTimeToLive() : null;
+
     return createMetadataResponse(context.getUrl(), gadget.getSpec(), iframeUrl,
-        needsTokenRefresh, fields, timeSource.currentTimeMillis() + specRefreshInterval,
+        needsTokenRefresh, fields, timeSource.currentTimeMillis() + specRefreshInterval, tokenTTL,
         rpcServiceIds);
   }
 
@@ -524,7 +528,7 @@ public class GadgetsHandlerService {
   @VisibleForTesting
   GadgetsHandlerApi.MetadataResponse createMetadataResponse(
       Uri url, GadgetSpec spec, String iframeUrl, Boolean needsTokenRefresh,
-      Set<String> fields, Long expireTime, Set<String> rpcServiceIds) {
+      Set<String> fields, Long expireTime, Integer tokenTTL, Set<String> rpcServiceIds) {
     return (GadgetsHandlerApi.MetadataResponse) beanFilter.createFilteredBean(
         beanDelegator.createDelegator(spec, GadgetsHandlerApi.MetadataResponse.class,
             ImmutableMap.<String, Object>builder()
@@ -534,7 +538,8 @@ public class GadgetsHandlerService {
                 .put("needstokenrefresh", BeanDelegator.nullable(needsTokenRefresh))
                 .put("responsetimems", timeSource.currentTimeMillis())
                 .put("expiretimems", BeanDelegator.nullable(expireTime))
-                .put("rpcserviceids", BeanDelegator.nullable(rpcServiceIds)).build()),
+                .put("rpcserviceids", BeanDelegator.nullable(rpcServiceIds))
+                .put("tokenttl", BeanDelegator.nullable(tokenTTL)).build()),
         fields);
   }
 

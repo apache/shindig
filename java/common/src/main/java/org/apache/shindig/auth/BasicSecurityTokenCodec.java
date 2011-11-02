@@ -18,14 +18,14 @@
  */
 package org.apache.shindig.auth;
 
+import java.util.Map;
+
+import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.crypto.BlobCrypterException;
 import org.apache.shindig.common.util.Utf8UrlCoder;
-import org.apache.commons.lang.StringUtils;
 
 import com.google.common.base.Joiner;
 import com.google.inject.Singleton;
-
-import java.util.Map;
 
 /**
  * A SecurityTokenCodec implementation that just provides dummy data to satisfy
@@ -109,9 +109,12 @@ public class BasicSecurityTokenCodec implements SecurityTokenCodec {
     }
   }
 
-  /**
-   * Creates a signer with 24 hour token expiry
-   */
-  public BasicSecurityTokenCodec() {
+  public int getTokenTimeToLive() {
+    return AbstractSecurityToken.MAX_TOKEN_TTL;
   }
+
+  /**
+   * Creates a basic signer
+   */
+  public BasicSecurityTokenCodec() {}
 }

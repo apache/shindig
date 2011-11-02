@@ -30,6 +30,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.shindig.auth.BasicSecurityTokenCodec;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.auth.SecurityTokenCodec;
 import org.apache.shindig.auth.SecurityTokenException;
@@ -437,6 +438,36 @@ public class GadgetsHandlerTest extends EasyMockTestCase {
     assertEquals("foo", orderedEnums.getJSONObject(3).getString("value"));
 
     verify();
+  }
+
+  @Test
+  public void testMetadataOneGadgetRequestTokenTTLParam() throws Exception {
+    SecurityTokenCodec codec = createMock(SecurityTokenCodec.class);
+    expect(codec.getTokenTimeToLive()).andReturn(42).anyTimes();
+    replay(codec);
+
+    registerGadgetsHandler(codec);
+    setupGadgetAdminStore();
+    setupMockRegistry(Lists.newArrayList("core"));
+    JSONObject request = makeMetadataRequest(null, null, new String[]{"tokenTTL", "iframeurl"}, GADGET1_URL);
+    RpcHandler operation = registry.getRpcHandler(request);
+    Object responseObj = operation.execute(emptyFormItems, authContext, converter).get();
+    JSONObject response = new JSONObject(converter.convertToString(responseObj));
+
+    assertEquals(42, response.getJSONObject(FakeProcessor.SPEC_URL.toString()).getInt("tokenTTL"));
+  }
+
+  @Test
+  public void testMetadataOneGadgetNoRequestTokenTTLParam() throws Exception {
+    registerGadgetsHandler(null);
+    setupGadgetAdminStore();
+    setupMockRegistry(Lists.newArrayList("core"));
+    JSONObject request = makeMetadataRequest(null, null, null, GADGET1_URL);
+    RpcHandler operation = registry.getRpcHandler(request);
+    Object responseObj = operation.execute(emptyFormItems, authContext, converter).get();
+    JSONObject response = new JSONObject(converter.convertToString(responseObj));
+
+    assertFalse(response.getJSONObject(FakeProcessor.SPEC_URL.toString()).has("tokenTTL"));
   }
 
   @Test

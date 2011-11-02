@@ -103,13 +103,24 @@ osapi.container.Container = function(opt_config) {
       osapi.container.ContainerConfig.RENDER_TEST, false));
 
   /**
-   * Security token refresh interval (in ms) for debugging.
+   * Security token refresh interval (in ms). Set to < 0 in config to disable
+   * token refresh.
+   *
+   * Provided this number is >= 0, the smallest encountered token ttl or this
+   * number will be used as the refresh interval, whichever is smaller.
+   *
    * @type {number}
    * @private
    */
   this.tokenRefreshInterval_ = Number(osapi.container.util.getSafeJsonValue(
-      config, osapi.container.ContainerConfig.TOKEN_REFRESH_INTERVAL,
-      30 * 60 * 1000));
+      config, osapi.container.ContainerConfig.TOKEN_REFRESH_INTERVAL, 0));
+
+  /**
+   * The time of the last token refresh.
+   * @type {number}
+   * @private
+   */
+  this.lastRefresh_ = 0;
 
   /**
    * @type {number}
@@ -211,7 +222,7 @@ osapi.container.Container.prototype.navigateGadget = function(
           gadgets.warn(['Failed to possibly schedule token refresh for gadget ',
               gadgetUrl, '.'].join(''));
         } else if (gadgetInfo[osapi.container.MetadataResponse.NEEDS_TOKEN_REFRESH]) {
-          self.scheduleRefreshTokens_();
+          self.scheduleRefreshTokens_(gadgetInfo[osapi.container.MetadataResponse.TOKEN_TTL]);
         }
 
         self.applyLifecycleCallbacks_(osapi.container.CallbackType.ON_NAVIGATED,
@@ -527,7 +538,7 @@ osapi.container.Container.prototype.addPreloadGadgets_ = function(response) {
       this.addPreloadedGadgetUrl_(id);
       if (response[id][osapi.container.MetadataResponse.NEEDS_TOKEN_REFRESH]) {
         // Safe to re-schedule many times.
-        this.scheduleRefreshTokens_();
+        this.scheduleRefreshTokens_(response[id][osapi.container.MetadataResponse.TOKEN_TTL]);
       }
     }
   }
@@ -584,24 +595,49 @@ osapi.container.Container.prototype.getGadgetSiteByIframeId_ = function(iframeId
   return null;
 };
 
-
 /**
  * Start to schedule refreshing of tokens.
+ * @param {number} Encountered token time to live in seconds.
  * @private
  */
-osapi.container.Container.prototype.scheduleRefreshTokens_ = function() {
-  // TODO: Obtain the interval time by taking the minimum of expiry time of
-  // token in all preloaded- and navigated-to- gadgets. This should be obtained
-  // from the server. For now, constant on 50% of long-lived tokens (1 hour),
-  // which is 30 minutes.
-  if (this.isRefreshTokensEnabled_() && !this.tokenRefreshTimer_) {
-    var self = this;
-    this.tokenRefreshTimer_ = window.setInterval(function() {
-      self.refreshTokens_();
-    }, this.tokenRefreshInterval_);
+osapi.container.Container.prototype.scheduleRefreshTokens_ = function(tokenTTL) {
+  var self = this,
+      oldInterval = this.tokenRefreshInterval_,
+      newInterval = tokenTTL ? this.setRefreshTokenInterval_(tokenTTL * 1000) : oldInterval,
+      refresh = function() {
+        self.lastRefresh_ = osapi.container.util.getCurrentTimeMs();
+        // Schedule the next refresh.
+        self.tokenRefreshTimer_ = setTimeout(refresh, newInterval);
+
+        // Do this last so that if it ever errors, we maintain the refresh schedule.
+        self.refreshTokens_();
+      };
+
+  // If enabled, check to see if we no schedule or if the two intervals are different and update the schedule.
+  if (this.isRefreshTokensEnabled_() && (!this.tokenRefreshTimer_ || newInterval != oldInterval)) {
+    var now = osapi.container.util.getCurrentTimeMs();
+    if (!this.tokenRefreshTimer_) {
+      this.lastRefresh_ = now;
+      this.tokenRefreshTimer_ = setTimeout(refresh, newInterval);
+    }
+    else {
+      var futureRefresh = (this.lastRefresh_ || 0) + oldInterval;
+      if (futureRefresh < now) {
+        // This really shouldn't happen, but if for some reason we missed a
+        // refresh, make sure we cancel any timer we have and schedule
+        // a new one.
+        futureRefresh = now + newInterval;
+        newInterval = 1;
+      }
+      if (futureRefresh > now + newInterval) {
+        // Cancel the old timer and create a new one if the next refresh is
+        // too far away.
+        clearTimeout(this.tokenRefreshTimer_);
+        this.tokenRefreshTimer_ = setTimeout(refresh, newInterval);
+      }
+    }
   }
 };
-
 
 /**
  * Stop already-scheduled refreshing of tokens.
@@ -619,15 +655,37 @@ osapi.container.Container.prototype.unscheduleRefreshTokens_ = function() {
 
 
 /**
- * Provides a manual override to disable token refresh to avoid gadgets.rpc
- * warning of service not found. We can do better to detect if token refresh is
- * even necessary, by inspecting the gadget transitively depend on
- * feature=security-token.
+ * Token refresh gets enabled if the value of refresh interval is > 0;
+ *
  * @return {Boolean} if token refresh interval is of valid value.
  * @private
  */
 osapi.container.Container.prototype.isRefreshTokensEnabled_ = function() {
   return this.tokenRefreshInterval_ > 0;
+};
+
+/**
+ * If the refresh interval is < 0, does nothing.  Otherwise updates the tokenTTL
+ * to the smallest value encountered.
+ *
+ * @param {number} Encountered token time to live in milliseconds.
+ * @return {Boolean} The ttl if the set succeeded, otherwise false.
+ * @private
+ */
+osapi.container.Container.prototype.setRefreshTokenInterval_ = function(tokenTTL) {
+  // TODO: Handle the case where we've closed the gadget responsible for the
+  // shortest refresh time, and can now safely extend this.tokenRefreshInterval_
+  if (tokenTTL) {
+    tokenTTL *= .8; // 80% of the TTL value, for buffer.
+    var refresh = this.tokenRefreshInterval_;
+    if (refresh < 0) {
+      return refresh;
+    }
+    else {
+      return this.tokenRefreshInterval_ =
+        refresh == 0 ? tokenTTL : Math.min(refresh, tokenTTL);
+    }
+  }
 };
 
 

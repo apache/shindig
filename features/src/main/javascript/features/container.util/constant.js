@@ -56,7 +56,8 @@ osapi.container.MetadataResponse = {
   PREFERRED_HEIGHT: 'preferredHeight',
   PREFERRED_WIDTH: 'preferredWidth',
   RESPONSE_TIME_MS: 'responseTimeMs',
-  WIDTH: 'width'
+  WIDTH: 'width',
+  TOKEN_TTL: 'tokenTTL'
 };
 
 

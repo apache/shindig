@@ -38,8 +38,8 @@ public abstract class AbstractSecurityToken implements SecurityToken {
   /** allow three minutes for clock skew */
   private static final long CLOCK_SKEW_ALLOWANCE = 180;
 
-  // TODO: Make configurable by ContainerConfig
-  private static final int MAX_TOKEN_TTL = 3600;
+  // TODO: Make configurable.
+  public static final int MAX_TOKEN_TTL = 3600; // 1 hour
 
   private static final TimeSource TIME_SOURCE = new TimeSource();
 

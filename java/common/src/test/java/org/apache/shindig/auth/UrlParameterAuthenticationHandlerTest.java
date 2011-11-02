@@ -46,6 +46,10 @@ public class UrlParameterAuthenticationHandlerTest {
       public String encodeToken(SecurityToken token) throws SecurityTokenException {
         return null;
       }
+
+      public int getTokenTimeToLive() {
+        return 0; // Not used.
+      }
     };
 
     authHandler = new UrlParameterAuthenticationHandler(codec, true);

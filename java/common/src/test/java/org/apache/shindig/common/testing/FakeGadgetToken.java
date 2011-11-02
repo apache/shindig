@@ -89,6 +89,10 @@ public class FakeGadgetToken extends AbstractSecurityToken {
     public String encodeToken(SecurityToken token) throws SecurityTokenException {
       return null; // NOT USED
     }
+
+    public int getTokenTimeToLive() {
+      return 0; // Not used.
+    }
   }
 
   public FakeGadgetToken setAuthenticationMode(String authMode) {

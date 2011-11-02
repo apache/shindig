@@ -187,4 +187,8 @@ public class BlobCrypterSecurityTokenCodec implements SecurityTokenCodec, Contai
       throw new SecurityTokenException(e);
     }
   }
+
+  public int getTokenTimeToLive() {
+    return AbstractSecurityToken.MAX_TOKEN_TTL;
+  }
 }

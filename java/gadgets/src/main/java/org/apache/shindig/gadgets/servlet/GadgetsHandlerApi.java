@@ -97,6 +97,7 @@ public class GadgetsHandlerApi {
     public Map<String, View> getViews();
     public Boolean getNeedsTokenRefresh();
     public Set<String> getRpcServiceIds();
+    public Integer getTokenTTL();
   }
 
   public enum ViewContentType {

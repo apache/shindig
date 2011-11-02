@@ -44,7 +44,6 @@ import java.util.Map;
  */
 @Singleton
 public class DefaultSecurityTokenCodec implements SecurityTokenCodec {
-
   private static final String SECURITY_TOKEN_TYPE = "gadgets.securityTokenType";
 
   private final SecurityTokenCodec codec;
@@ -52,6 +51,7 @@ public class DefaultSecurityTokenCodec implements SecurityTokenCodec {
   @Inject
   public DefaultSecurityTokenCodec(ContainerConfig config) {
     String tokenType = config.getString(ContainerConfig.DEFAULT_CONTAINER, SECURITY_TOKEN_TYPE);
+
     if ("insecure".equals(tokenType)) {
       codec = new BasicSecurityTokenCodec();
     } else if ("secure".equals(tokenType)) {
@@ -73,5 +73,9 @@ public class DefaultSecurityTokenCodec implements SecurityTokenCodec {
       return null;
     }
     return codec.encodeToken(token);
+  }
+
+  public int getTokenTimeToLive() {
+    return codec.getTokenTimeToLive();
   }
 }

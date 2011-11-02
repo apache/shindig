@@ -744,5 +744,9 @@ public class GadgetsHandlerServiceTest extends EasyMockTestCase {
       }
       return authContext;
     }
+
+    public int getTokenTimeToLive() {
+      return 0;  // Not used.
+    }
   }
 }

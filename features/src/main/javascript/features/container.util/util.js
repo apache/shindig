@@ -81,7 +81,8 @@ osapi.container.util.newMetadataRequest = function(gadgetUrls) {
       'views.preferredWidth',
       'expireTimeMs',
       'responseTimeMs',
-      'rpcServiceIds'
+      'rpcServiceIds',
+      'tokenTTL'
     ]
   };
 };
