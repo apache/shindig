@@ -37,6 +37,7 @@
       <exports type="js">osapi.container.actions.OptParam.VIEW</exports>
       <exports type="js">osapi.container.actions.OptParam.VIEW_TARGET</exports>
       <exports type="rpc">actions</exports>
+      <uses type="rpc">actions</uses>
       <uses type="rpc">bindAction</uses>
       <uses type="rpc">runAction</uses>
       <uses type="rpc">removeAction</uses>
