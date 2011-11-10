@@ -395,6 +395,24 @@
         <role>PMC Member</role>
       </roles>
     </developer>
+    <developer>
+      <id>woodser</id>
+      <name>Eric Woods</name>
+      <email>woodser@apache.org</email>
+      <organization>ASF</organization>
+      <roles>
+        <role>PMC Member</role>
+      </roles>
+    </developer>
+    <developer>
+      <id>lixu</id>
+      <name>Li Xu</name>
+      <email>lixu@apache.org</email>
+      <organization>ASF</organization>
+      <roles>
+        <role>PMC Member</role>
+      </roles>
+    </developer>
 
     <!-- Mentors -->
     <developer>
