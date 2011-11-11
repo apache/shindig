@@ -59,7 +59,7 @@ public class StyleConcatContentRewriter extends DomWalker.Rewriter {
 
   @Override
   protected List<Visitor> makeVisitors(Gadget context, Uri gadgetUri) {
-    ContentRewriterFeature.Config config = featureConfigFactory.get(gadgetUri);
+    ContentRewriterFeature.Config config = featureConfigFactory.get(context.getSpec());
     return Arrays.asList(
         new CacheEnforcementVisitor(config, executor, cache, requestPipeline,
             CacheEnforcementVisitor.Tags.STYLESHEET),

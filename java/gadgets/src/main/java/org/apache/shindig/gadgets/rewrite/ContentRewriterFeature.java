@@ -83,17 +83,20 @@ public class ContentRewriterFeature {
     }
 
     public Config get(HttpRequest request) {
-      return get(request.getGadget());
-    }
-
-    public Config get(final Uri gadgetUri) {
       GadgetSpec spec;
-      if (gadgetUri != null) {
+      final Uri gadgetUrl = request.getGadget();
+      final boolean isIgnoreCache = request.getIgnoreCache();
+      if (gadgetUrl != null) {
         try {
           GadgetContext context = new GadgetContext() {
             @Override
             public Uri getUrl() {
-              return gadgetUri;
+              return gadgetUrl;
+            }
+
+            @Override
+            public boolean getIgnoreCache() {
+              return isIgnoreCache;
             }
           };
 

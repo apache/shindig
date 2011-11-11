@@ -54,7 +54,7 @@ public class ImageResizeRewriter extends DomWalker.Rewriter {
 
   @Override
   protected List<DomWalker.Visitor> makeVisitors(Gadget context, Uri gadgetUri) {
-    ContentRewriterFeature.Config config = featureConfigFactory.get(gadgetUri);
+    ContentRewriterFeature.Config config = featureConfigFactory.get(context.getSpec());
     return Arrays.<DomWalker.Visitor>asList(new ImageResizeVisitor(proxyUriManager, config));
   }
   

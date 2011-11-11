@@ -18,6 +18,7 @@
 
 package org.apache.shindig.gadgets.rewrite;
 
+import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.junit.Test;
 import org.junit.Before;
 import static org.junit.Assert.assertEquals;
@@ -57,7 +58,8 @@ public class ImageResizeRewriterTest {
     rewriter = new ImageResizeRewriter(proxyUriManager, factory);
     domImpl = new ParseModule.DOMImplementationProvider();
     parser = new CajaHtmlParser(domImpl.get());
-    EasyMock.expect(factory.get(EasyMock.isA(Uri.class))).andReturn(featureConfig).anyTimes();
+    EasyMock.expect(factory.get(EasyMock.isA(HttpRequest.class))).andReturn(featureConfig).anyTimes();
+    EasyMock.expect(factory.get(EasyMock.isA(GadgetSpec.class))).andReturn(featureConfig).anyTimes();
     EasyMock.expect(config.getString(CONTAINER, DefaultProxyUriManager.PROXY_HOST_PARAM))
         .andReturn("shindig.com").anyTimes();
     EasyMock.expect(config.getString(CONTAINER, DefaultProxyUriManager.PROXY_PATH_PARAM))
