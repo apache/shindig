@@ -77,7 +77,7 @@ public class HtmlRenderer {
       String content;
 
       if (view.getHref() == null) {
-        content = getViewContent(gadget, view);
+        content = getViewContent(gadget);
       } else {
         content = proxyRenderer.render(gadget);
       }
@@ -96,7 +96,8 @@ public class HtmlRenderer {
     }
   }
   
-  protected String getViewContent(Gadget gadget, View view) {
-    return view.getContent();
+  protected String getViewContent(Gadget gadget) {
+    View currentView = gadget.getCurrentView();
+    return currentView.getContent();
   }
 }
