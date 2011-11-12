@@ -23,7 +23,15 @@ use apache\shindig\common\Config;
  */
 class FrontController {
 
+    private $localConfig;
+
+    public function setLocalConfig($localConfig) {
+        $this->localConfig = $localConfig;
+    }
+
     public function run() {
+        Config::loadConfig($this->localConfig);
+
         $this->checkServerConfig();
 
         //get servlet map and prefix the servlet paths

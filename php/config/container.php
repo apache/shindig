@@ -44,7 +44,7 @@
  * );
  *
  */
-$shindigConfig = array(
+return array(
   // Show debug backtrace's. Disable this on a production site
   'debug' => true,
   // do real file_exist checks? Turning this off can be a big performance gain on prod servers but also risky & less verbose errors

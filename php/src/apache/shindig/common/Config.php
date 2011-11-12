@@ -27,7 +27,7 @@ namespace apache\shindig\common;
 class Config {
   /**
    *
-   * @var boolean
+   * @var array
    */
   private static $config = false;
 
@@ -36,19 +36,16 @@ class Config {
    * @global array $shindigConfig
    * @param string $local
    */
-  static public function loadConfig($local = 'local') {
-    global $shindigConfig;
+  public static function loadConfig($localConfigPath = null) {
     if (! self::$config) {
       // load default configuration
-      require realpath(dirname(__FILE__) . "/../../../../config") . '/container.php';
-      self::$config = $shindigConfig;
-      if ($local) {
-        $localConfigPath = realpath(dirname(__FILE__) . "/../../../../config") . '/' . $local . '.php';
+      self::$config = require realpath(dirname(__FILE__) . "/../../../../config") . '/container.php';
+      if ($localConfigPath) {
         if (file_exists($localConfigPath)) {
           // include local.php if it exists and merge the config arrays.
           // the second array values overwrites the first one's
-          require $localConfigPath;
-          self::$config = array_merge(self::$config, $shindigConfig);
+          $localConfig = require $localConfigPath;
+          self::$config = array_merge(self::$config, $localConfig);
         }
       }
     }
@@ -59,10 +56,7 @@ class Config {
    *
    * @param array $tconfig
    */
-  static function setConfig($tconfig) {
-    if (!is_array(self::$config))
-      self::loadConfig();
-
+  public static function setConfig($tconfig) {
     self::$config = array_merge(self::$config, $tconfig);
   }
 
@@ -72,10 +66,7 @@ class Config {
    * @return array
    * @throws ConfigException
    */
-  static function get($key) {
-    if (! self::$config) {
-      self::loadConfig();
-    }
+  public static function get($key) {
     if (isset(self::$config[$key])) {
       return self::$config[$key];
     } else {
@@ -92,10 +83,7 @@ class Config {
    * @param $key string Configuration key to set the value of.
    * @param $value string Value to assign to the specified key.
    */
-  static function set($key, $value) {
-    if (! self::$config) {
-      self::loadConfig();
-    }
+  public static function set($key, $value) {
     self::$config[$key] = $value;
   }
 }

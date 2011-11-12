@@ -21,4 +21,5 @@
 include 'src/apache/shindig/bootstrap.php';
 
 $frontController = new \apache\shindig\FrontController();
+$frontController->setLocalConfig(__DIR__ . '/config/local.php');
 $frontController->run();

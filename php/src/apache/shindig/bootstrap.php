@@ -57,10 +57,10 @@ $mapperLoader = new \Symfony\Component\ClassLoader\MapClassLoader(array(
 
 $mapperLoader->register();
 
-$extensionClassPaths = \apache\shindig\common\Config::get('extension_class_paths');
-
-if (! is_array($extensionClassPaths)) {
-    $extensionClassPaths = array($extensionClassPaths);
-}
-
-$loader->registerPrefixFallbacks($extensionClassPaths);
+//$extensionClassPaths = \apache\shindig\common\Config::get('extension_class_paths');
+//
+//if (! is_array($extensionClassPaths)) {
+//    $extensionClassPaths = array($extensionClassPaths);
+//}
+//
+//$loader->registerPrefixFallbacks($extensionClassPaths);
