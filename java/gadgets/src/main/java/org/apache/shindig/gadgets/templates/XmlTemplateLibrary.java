@@ -76,8 +76,8 @@ public class XmlTemplateLibrary implements TemplateLibrary {
       throws GadgetException {
     this.libraryUri = uri;
     this.source = source;
-    this.registry = new DefaultTagRegistry(parseLibraryDocument(root));
     this.safe = safe;
+    this.registry = new DefaultTagRegistry(parseLibraryDocument(root));
     ImmutableSet.Builder<TemplateResource> resources = ImmutableSet.builder();
     if (style != null) {
       resources.add(TemplateResource.newStyleResource(style, this));
