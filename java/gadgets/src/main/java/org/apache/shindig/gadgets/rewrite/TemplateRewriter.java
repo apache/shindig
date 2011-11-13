@@ -101,19 +101,19 @@ public class TemplateRewriter implements GadgetRewriter {
   private final Expressions expressions;
   private final TagRegistry baseTagRegistry;
   private final TemplateLibraryFactory libraryFactory;
-  private final ContainerTagLibraryFactory containerTags;
+  private final ContainerTagLibraryFactory containerTagLibraryFactory;
 
   @Inject
   public TemplateRewriter(Provider<TemplateProcessor> processor,
       MessageBundleFactory messageBundleFactory, Expressions expressions, 
       TagRegistry baseTagRegistry, TemplateLibraryFactory libraryFactory,
-      ContainerTagLibraryFactory containerTags) {
+      ContainerTagLibraryFactory containerTagLibraryFactory) {
     this.processor = processor;
     this.messageBundleFactory = messageBundleFactory;
     this.expressions = expressions;
     this.baseTagRegistry = baseTagRegistry;
     this.libraryFactory = libraryFactory;
-    this.containerTags = containerTags;
+    this.containerTagLibraryFactory = containerTagLibraryFactory;
   }
 
   public void rewrite(Gadget gadget, MutableContent content) throws RewritingException {
@@ -153,7 +153,7 @@ public class TemplateRewriter implements GadgetRewriter {
     // Built-in Java-based tags - Priority 1
     registries.add(baseTagRegistry);
     
-    TemplateLibrary osmlLibrary = containerTags.getLibrary(gadget.getContext().getContainer());    
+    TemplateLibrary osmlLibrary = containerTagLibraryFactory.getLibrary(gadget.getContext().getContainer());
     
     // OSML Built-in tags - Priority 2
     registries.add(osmlLibrary.getTagRegistry());
