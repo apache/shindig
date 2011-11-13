@@ -59,7 +59,7 @@ public class RewriteModule extends AbstractModule {
 
   @Override
   protected void configure() {
-    configureRewriters();
+    configureGadgetRewriters();
     provideResponseRewriters();
   }
 
@@ -132,7 +132,7 @@ public class RewriteModule extends AbstractModule {
                                     rewritePathToRewriterList);
   }
 
-  private void configureRewriters() {
+  protected void configureGadgetRewriters() {
     Multibinder<GadgetRewriter> multibinder = Multibinder.newSetBinder(binder(),
         GadgetRewriter.class, Names.named("shindig.rewriters.gadget.set"));
     multibinder.addBinding().to(PipelineDataGadgetRewriter.class);
