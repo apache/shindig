@@ -61,11 +61,13 @@
   Make sure you escape all HTML values for the web.xml to be parsed correctly.
   -->
    <context-param>
-  	<param-name>system.properties</param-name>
+     <param-name>system.properties</param-name>
      <param-value>
+     <![CDATA[
         shindig.host=
         shindig.port=
-    	aKey=/shindig/gadgets/proxy?container=default&amp;url=    	
+        aKey=/shindig/gadgets/proxy?container=default&url=
+     ]]>
      </param-value>
   </context-param>
 
@@ -90,6 +92,7 @@
         <init-param>
             <param-name>config</param-name>
             <param-value>
+            <![CDATA[
                 # The ShiroFilter configuration is very powerful and flexible, while still remaining succinct.
                 # Please read the comprehensive example, with full comments and explanations, in the JavaDoc:
                 #
@@ -108,7 +111,7 @@
 
                 /oauth/authorize/** = authc
                 /oauth2/authorize/** = authc
-
+            ]]>
             </param-value>
         </init-param>
     </filter>
