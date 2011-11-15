@@ -413,6 +413,15 @@
         <role>PMC Member</role>
       </roles>
     </developer>
+    <developer>
+      <id>ddumont</id>
+      <name>Dan Dumont</name>
+      <email>ddumont@apache.org</email>
+      <organization>ASF</organization>
+      <roles>
+        <role>PMC Member</role>
+      </roles>
+    </developer>
 
     <!-- Mentors -->
     <developer>
