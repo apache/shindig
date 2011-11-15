@@ -25,6 +25,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 
 import com.google.common.collect.Maps;
+import org.apache.commons.io.IOUtils;
 import org.apache.shindig.common.logging.i18n.MessageKeys;
 import org.apache.shindig.common.util.ResourceLoader;
 import org.apache.shindig.config.ContainerConfig.Transaction;
@@ -273,6 +274,20 @@ public class JsonContainerConfigLoader {
     Map<String, Object> values = new HashMap<String, Object>(json.length(), 1);
     for (String key : keys) {
       Object val = jsonToConfig(json.opt(key));
+      //If this is a string see if its a pointer to an external resource, and if so, load the resource
+      if (val instanceof String) {
+        String stringVal = (String) val;
+        if (stringVal.startsWith(ResourceLoader.RESOURCE_PREFIX) ||
+            stringVal.startsWith(ResourceLoader.FILE_PREFIX)) {
+          try {
+            val = IOUtils.toString(ResourceLoader.open(stringVal), "UTF-8");
+          } catch (IOException e) {
+            if (LOG.isLoggable(Level.WARNING)) {
+              LOG.logp(Level.WARNING, classname, "jsonToMap", MessageKeys.READING_CONFIG, e);
+            }
+          }
+        }
+      }
       values.put(key, val);
     }
     return Collections.unmodifiableMap(values);

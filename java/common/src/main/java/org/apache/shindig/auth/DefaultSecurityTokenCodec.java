@@ -18,6 +18,7 @@
  */
 package org.apache.shindig.auth;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -73,6 +74,11 @@ public class DefaultSecurityTokenCodec implements SecurityTokenCodec {
       return null;
     }
     return codec.encodeToken(token);
+  }
+
+  @VisibleForTesting
+  protected SecurityTokenCodec getCodec() {
+    return codec;
   }
 
   public int getTokenTimeToLive() {

@@ -44,6 +44,9 @@
 
 // Container must be an array; this allows multiple containers
 // to share configuration.
+
+// Note that you can embed values directly or you can choose to have values read from a file on disk
+// or read from the classpath ("foo-key" : "file:///foo-file.txt" || "foo-key" : "res://foo-file.txt")
 // TODO: Move out accel container config into a separate accel.js file.
 {"gadgets.container" : ["default", "accel"],
 
@@ -88,22 +91,23 @@
 // Callback URL.  Scheme relative URL for easy switch between https/http.
 "gadgets.uri.oauth.callbackTemplate" : "//%host%${CONTEXT_ROOT}/gadgets/oauthcallback",
 
-// Use an insecure security token by default
-"gadgets.securityTokenType" : "insecure",
-
 // Config param to load Opensocial data for social
 // preloads in data pipelining.  %host% will be
 // substituted with the current host.
 "gadgets.osDataUri" : "http://%host%${CONTEXT_ROOT}/rpc",
 
-// Uncomment these to switch to a secure version. If both a key file and key are provided, the key
-// will take precedence; thus, to use a key file, you must explicitly not provide a key. The
-// best way to generate a key is to do something like this:
+// Use an insecure security token by default
+"gadgets.securityTokenType" : "insecure",
+
+// Uncomment the securityTokenType and one of the securityTokenKey's to switch to a secure version.
+// Note that you can choose to use an embedded key, a filesystem reference or a classpath reference.
+// The best way to generate a key is to do something like this:
 // dd if=/dev/random bs=32 count=1 | openssl base64
 //
-// "gadgets.securityTokenType" : "secure",
-// "gadgets.securityTokenKeyFile" : "/path/to/key/file.txt",
-// "gadgets.securityTokenKey" : "",
+//"gadgets.securityTokenType" : "secure",
+//"gadgets.securityTokenKey" : "default-insecure-embedded-key",
+//"gadgets.securityTokenKey" : "file:///path/to/key/file.txt",
+//"gadgets.securityTokenKey" : "res://some-file-on-the-classpath.txt",
 
 // OS 2.0 Gadget DOCTYPE: used in Gadgets with @specificationVersion 2.0 or greater and
 // quirksmode on Gadget has not been set.

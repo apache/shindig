@@ -22,7 +22,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.io.FileNotFoundException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
@@ -50,7 +49,7 @@ public class DefaultSecurityTokenCodecTest {
         if ("default".equals(container)) {
           return tokenType;
         }
-      } else if ("gadgets.securityTokenKeyFile".equals(parameter)) {
+      } else if ("gadgets.securityTokenKey".equals(parameter)) {
         return "container key file: " + container;
       }
       return null;
@@ -101,12 +100,7 @@ public class DefaultSecurityTokenCodecTest {
   @Test
   public void testRealDecoder() throws Exception {
     // Just verifies that "secure" tokens get routed to the right decoder class.
-    try {
-      new DefaultSecurityTokenCodec(new FakeContainerConfig("secure"));
-      fail("Should have thrown");
-    } catch (RuntimeException e) {
-      assertTrue("root cause should have been FileNotFoundException: " + e,
-          e.getCause() instanceof FileNotFoundException);
-    }
+    DefaultSecurityTokenCodec securityTokenCodec = new DefaultSecurityTokenCodec(new FakeContainerConfig("secure"));
+    assertTrue(securityTokenCodec.getCodec() instanceof BlobCrypterSecurityTokenCodec);
   }
 }

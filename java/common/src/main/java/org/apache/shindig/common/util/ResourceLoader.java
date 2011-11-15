@@ -31,19 +31,24 @@ import java.io.InputStream;
  * Handles loading contents from resource and file system files.
  */
 public final class ResourceLoader {
+  public static final String RESOURCE_PREFIX = "res://";
+  public static final String FILE_PREFIX = "file://";
+
   private ResourceLoader() {}
   /**
    * Opens a given path as either a resource or a file, depending on the path
    * name.
    *
    * If path starts with res://, we interpret it as a resource.
-   * Otherwise we attempt to load it as a file.
+   * If path starts with file://, or path has no prefix, we interpret it as a file.
    * @param path
    * @return The opened input stream
    */
   public static InputStream open(String path) throws IOException {
-    if (path.startsWith("res://")) {
-      return openResource(path.substring(6));
+    if (path.startsWith(RESOURCE_PREFIX)) {
+      return openResource(path.substring(RESOURCE_PREFIX.length()));
+    } else if (path.startsWith(FILE_PREFIX)) {
+      path = path.substring(FILE_PREFIX.length());
     }
     File file = new File(path);
     return new FileInputStream(file);

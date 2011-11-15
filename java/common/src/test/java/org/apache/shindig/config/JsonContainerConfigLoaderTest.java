@@ -23,7 +23,9 @@ import static org.apache.shindig.config.ContainerConfig.DEFAULT_CONTAINER;
 import static org.apache.shindig.config.ContainerConfig.CONTAINER_KEY;
 import static org.apache.shindig.config.ContainerConfig.PARENT_KEY;
 import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
+import org.apache.shindig.common.util.ResourceLoader;
 import org.apache.shindig.expressions.Expressions;
 import org.json.JSONObject;
 import org.junit.Before;
@@ -55,13 +57,15 @@ public class JsonContainerConfigLoaderTest {
   private static final String[] ARRAY_VALUE = {"Hello", "World"};
   private static final String ARRAY_ALT_VALUE = "Not an array";
 
+  public static final String DYNAMICALLY_LOADED_VALUE_KEY = "dynamicallyLoadedValueKey";
+
   private ExpressionContainerConfig config;
 
-  private File createContainer(JSONObject json) throws Exception {
-    File file = File.createTempFile(getClass().getName(), ".json");
+  private File createTemporaryFile(Object content, String extension) throws Exception {
+    File file = File.createTempFile(getClass().getName(), extension);
     file.deleteOnExit();
     BufferedWriter out = new BufferedWriter(new FileWriter(file));
-    out.write(json.toString());
+    out.write(content.toString());
     out.close();
     return file;
   }
@@ -79,7 +83,7 @@ public class JsonContainerConfigLoaderTest {
     nested.put(NESTED_NAME, NESTED_VALUE);
 
     json.put(NESTED_KEY, nested);
-    return createContainer(json);
+    return createTemporaryFile(json, ".json");
   }
 
   private void createConfigForTest(String containers) throws ContainerConfigException {
@@ -117,7 +121,7 @@ public class JsonContainerConfigLoaderTest {
         .put(NESTED_KEY, NESTED_VALUE);
 
     File parentFile = createDefaultContainer();
-    File childFile = createContainer(json);
+    File childFile = createTemporaryFile(json, ".json");
 
     createConfigForTest(childFile.getAbsolutePath() +
         JsonContainerConfigLoader.FILE_SEPARATOR + parentFile.getAbsolutePath());
@@ -139,7 +143,7 @@ public class JsonContainerConfigLoaderTest {
 
     json.put(NESTED_KEY, nested);
 
-    File childFile = createContainer(json);
+    File childFile = createTemporaryFile(json, ".json");
     File parentFile = createDefaultContainer();
     createConfigForTest(childFile.getAbsolutePath() +
         JsonContainerConfigLoader.FILE_SEPARATOR + parentFile.getAbsolutePath());
@@ -179,7 +183,7 @@ public class JsonContainerConfigLoaderTest {
     json.put(PARENT_KEY, "bad bad bad parent!");
     json.put(ARRAY_NAME, ARRAY_ALT_VALUE);
 
-    createConfigForTest(createContainer(json).getAbsolutePath());
+    createConfigForTest(createTemporaryFile(json, ".json").getAbsolutePath());
   }
 
   @Test
@@ -198,7 +202,7 @@ public class JsonContainerConfigLoaderTest {
     json.put("expression", "Hello, ${world}!");
     json.put("world", "Earth");
 
-    createConfigForTest(createContainer(json).getAbsolutePath());
+    createConfigForTest(createTemporaryFile(json, ".json").getAbsolutePath());
 
     assertEquals("Hello, Earth!", config.getString(DEFAULT_CONTAINER, "expression"));
   }
@@ -210,7 +214,7 @@ public class JsonContainerConfigLoaderTest {
     json.put(CONTAINER_KEY, new String[]{DEFAULT_CONTAINER});
     json.put("expression", "port=${SERVER_PORT}");
 
-    createConfigForTest(createContainer(json).getAbsolutePath());
+    createConfigForTest(createTemporaryFile(json, ".json").getAbsolutePath());
 
     assertEquals("port=8080", config.getString(DEFAULT_CONTAINER, "expression"));
   }
@@ -223,7 +227,7 @@ public class JsonContainerConfigLoaderTest {
     json.put("port", "${SERVER_PORT}");
     json.put("host", "${SERVER_HOST}");
 
-    createConfigForTest(createContainer(json).getAbsolutePath());
+    createConfigForTest(createTemporaryFile(json, ".json").getAbsolutePath());
 
     assertEquals("8080", config.getString(DEFAULT_CONTAINER, "port"));
     assertEquals("8080", config.getString("testContainer", "port"));
@@ -239,7 +243,7 @@ public class JsonContainerConfigLoaderTest {
     json.put(PARENT_KEY, DEFAULT_CONTAINER);
     json.put("parentExpression", "${parent['" + TOP_LEVEL_NAME + "']}");
 
-    File childFile = createContainer(json);
+    File childFile = createTemporaryFile(json, ".json");
     File parentFile = createDefaultContainer();
     createConfigForTest(childFile.getAbsolutePath() +
         JsonContainerConfigLoader.FILE_SEPARATOR + parentFile.getAbsolutePath());
@@ -251,7 +255,7 @@ public class JsonContainerConfigLoaderTest {
   public void nullEntryEvaluation() throws Exception {
     // We use a JSON Object here to guarantee that we're well formed up front.
     JSONObject json = new JSONObject("{ 'gadgets.container' : ['default'], features : { osapi : null }}");
-    createConfigForTest(createContainer(json).getAbsolutePath());
+    createConfigForTest(createTemporaryFile(json, ".json").getAbsolutePath());
     assertNull(config.getMap("default", "features").get("osapi"));
   }
   
@@ -261,11 +265,74 @@ public class JsonContainerConfigLoaderTest {
     JSONObject parent = new JSONObject("{ 'gadgets.container' : ['default'], features : { osapi : 'foo' }}");    
     JSONObject child = new JSONObject("{ 'gadgets.container' : ['child'], features : null}");    
     JSONObject grand = new JSONObject("{ 'gadgets.container' : ['grand'], parent : 'child'}");    
-    createConfigForTest(createContainer(parent).getAbsolutePath());
-    createConfigForTest(createContainer(child).getAbsolutePath());
-    createConfigForTest(createContainer(grand).getAbsolutePath());
+    createConfigForTest(createTemporaryFile(parent, ".json").getAbsolutePath());
+    createConfigForTest(createTemporaryFile(child, ".json").getAbsolutePath());
+    createConfigForTest(createTemporaryFile(grand, ".json").getAbsolutePath());
     assertEquals("foo", config.getMap("default", "features").get("osapi"));
     assertNull(config.getProperty("child", "features"));
     assertNull(config.getProperty("grand", "features"));
+  }
+
+  @Test
+  public void resourceLoaderClasspathTest() throws Exception {
+    // Pointer to a file that we'll load from the classpath
+    String testFile = "classpath-accessible-test-file.txt";
+
+    // We use a JSON Object here to guarantee that we're well formed up front.
+    JSONObject json = new JSONObject();
+    json.put(CONTAINER_KEY, new String[]{DEFAULT_CONTAINER});
+    json.put(DYNAMICALLY_LOADED_VALUE_KEY, ResourceLoader.RESOURCE_PREFIX + testFile);
+
+    createConfigForTest(createTemporaryFile(json, ".json").getAbsolutePath());
+
+    assertEquals(testFile, config.getString(DEFAULT_CONTAINER, DYNAMICALLY_LOADED_VALUE_KEY).trim());
+  }
+
+  @Test
+  public void resourceLoaderFileTest() throws Exception {
+    // Create a temporary file that we can load from
+    String dynamicValue = "dynamic value";
+    File temporaryFile = createTemporaryFile(dynamicValue, ".txt");
+
+    // We use a JSON Object here to guarantee that we're well formed up front.
+    JSONObject json = new JSONObject();
+    json.put(CONTAINER_KEY, new String[]{DEFAULT_CONTAINER});
+    json.put(DYNAMICALLY_LOADED_VALUE_KEY, ResourceLoader.FILE_PREFIX + temporaryFile.getAbsolutePath());
+
+    createConfigForTest(createTemporaryFile(json, ".json").getAbsolutePath());
+
+    assertEquals(dynamicValue, config.getString(DEFAULT_CONTAINER, DYNAMICALLY_LOADED_VALUE_KEY).trim());
+  }
+
+  @Test
+  public void resourceLoaderClasspathFailureTest() throws Exception {
+    // Pointer to an invalid resource reference
+    String invalidResource = ResourceLoader.RESOURCE_PREFIX + "does-not-exist";
+
+    // We use a JSON Object here to guarantee that we're well formed up front.
+    JSONObject json = new JSONObject();
+    json.put(CONTAINER_KEY, new String[]{DEFAULT_CONTAINER});
+    json.put(DYNAMICALLY_LOADED_VALUE_KEY, invalidResource);
+
+    createConfigForTest(createTemporaryFile(json, ".json").getAbsolutePath());
+
+    // If we fail to load a resource a warning is logged and we just end up with the raw value back
+    assertEquals(invalidResource, config.getString(DEFAULT_CONTAINER, DYNAMICALLY_LOADED_VALUE_KEY));
+  }
+
+  @Test
+  public void resourceLoaderFileFailureTest() throws Exception {
+    // Pointer to an invalid resource reference
+    String invalidResource = ResourceLoader.FILE_PREFIX + "does-not-exist";
+
+    // We use a JSON Object here to guarantee that we're well formed up front.
+    JSONObject json = new JSONObject();
+    json.put(CONTAINER_KEY, new String[]{DEFAULT_CONTAINER});
+    json.put(DYNAMICALLY_LOADED_VALUE_KEY, invalidResource);
+
+    createConfigForTest(createTemporaryFile(json, ".json").getAbsolutePath());
+
+    // If we fail to load a resource a warning is logged and we just end up with the raw value back
+    assertEquals(invalidResource, config.getString(DEFAULT_CONTAINER, DYNAMICALLY_LOADED_VALUE_KEY));
   }
 }
