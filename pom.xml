@@ -759,7 +759,7 @@
           <plugin>
             <groupId>org.apache.rat</groupId>
             <artifactId>apache-rat-plugin</artifactId>
-            <version>0.7</version>
+            <version>0.8</version>
             <configuration>
               <excludeSubProjects>false</excludeSubProjects>
               <excludes>
@@ -1271,7 +1271,7 @@
         <plugin>
           <groupId>org.apache.rat</groupId>
           <artifactId>apache-rat-plugin</artifactId>
-          <version>0.7</version>
+          <version>0.8</version>
           <configuration>
             <excludeSubProjects>false</excludeSubProjects>
             <excludes>
