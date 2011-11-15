@@ -422,6 +422,15 @@
         <role>PMC Member</role>
       </roles>
     </developer>
+    <developer>
+      <id>jcian</id>
+      <name>Jesse Ciancetta</name>
+      <email>jcian@apache.org</email>
+      <organization>ASF</organization>
+      <roles>
+        <role>PMC Member</role>
+      </roles>
+    </developer>
 
     <!-- Mentors -->
     <developer>
