@@ -21,7 +21,7 @@ package org.apache.shindig.gadgets.parse;
 import com.google.common.collect.ImmutableSortedSet;
 
 import org.w3c.dom.Node;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 

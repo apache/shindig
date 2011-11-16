@@ -32,7 +32,7 @@ import org.apache.shindig.gadgets.uri.UriCommon.Param;
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
 
 import java.io.IOException;
 import java.util.logging.Level;
@@ -162,7 +162,7 @@ public class GadgetRenderingServlet extends InjectedServlet {
       throws IOException {
     HttpServletResponse resp = params.getResponse();
     resp.setStatus(params.getResults().getHttpStatusCode());
-    resp.getWriter().print(StringEscapeUtils.escapeHtml(params.getResults().getErrorMessage()));
+    resp.getWriter().print(StringEscapeUtils.escapeHtml4(params.getResults().getErrorMessage()));
   }
 
   protected void onMustRedirectRenderingResultsStatus(PostGadgetRenderingParams params)

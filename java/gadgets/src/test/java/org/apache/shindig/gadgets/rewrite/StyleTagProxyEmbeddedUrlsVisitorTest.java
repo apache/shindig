@@ -20,7 +20,7 @@ package org.apache.shindig.gadgets.rewrite;
 
 import static org.junit.Assert.assertEquals;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.shindig.common.PropertiesModule;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.config.ContainerConfig;

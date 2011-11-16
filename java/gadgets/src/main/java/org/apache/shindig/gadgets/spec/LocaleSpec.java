@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations under the License.
  */
 package org.apache.shindig.gadgets.spec;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.xml.XmlUtil;
 import org.w3c.dom.Element;

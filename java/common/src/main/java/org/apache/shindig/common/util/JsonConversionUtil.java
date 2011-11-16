@@ -20,7 +20,7 @@ package org.apache.shindig.common.util;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;

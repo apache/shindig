@@ -29,8 +29,8 @@ import name.fraser.neil.plaintext.diff_match_patch.Diff;
 import name.fraser.neil.plaintext.diff_match_patch.Operation;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.w3c.dom.Document;
 
 /**
@@ -103,8 +103,8 @@ public abstract class AbstractParsingTestBase {
     if (!prev.endsWith(";") && !cur.endsWith(";")) {
       return false;
     }
-    String prevEnt = StringEscapeUtils.unescapeHtml(prev);
-    String curEnt = StringEscapeUtils.unescapeHtml(cur);
+    String prevEnt = StringEscapeUtils.unescapeHtml4(prev);
+    String curEnt = StringEscapeUtils.unescapeHtml4(cur);
     return prevEnt.equals(curEnt);
   }
 }

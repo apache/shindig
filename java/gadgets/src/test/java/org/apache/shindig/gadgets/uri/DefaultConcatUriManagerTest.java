@@ -29,8 +29,8 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableList;
-import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.commons.lang.RandomStringUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
@@ -187,7 +187,7 @@ public class DefaultConcatUriManagerTest extends UriManagerTestBase {
 
   @Test
   public void jsEvalSnippet() {
-    assertEquals("eval(_js['" + StringEscapeUtils.escapeJavaScript(RESOURCE_1.toString()) + "']);",
+    assertEquals("eval(_js['" + StringEscapeUtils.escapeEcmaScript(RESOURCE_1.toString()) + "']);",
         DefaultConcatUriManager.getJsSnippet("_js", RESOURCE_1));
   }
 

@@ -17,7 +17,7 @@
  */
 package org.apache.shindig.gadgets.variables;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.UserPrefs;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
@@ -41,7 +41,7 @@ public class UserPrefSubstituter implements Substituter {
         }
       }
       substituter.addSubstitution(Substitutions.Type.USER_PREF, name, StringEscapeUtils
-            .escapeHtml(value));
+            .escapeHtml4(value));
     }
   }
 }

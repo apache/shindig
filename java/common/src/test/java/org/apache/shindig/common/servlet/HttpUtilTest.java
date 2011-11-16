@@ -23,7 +23,7 @@ import static junitx.framework.ComparableAssert.assertLesser;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.shindig.common.servlet.HttpUtil;
 import org.apache.shindig.common.util.DateUtil;
 import org.apache.shindig.common.util.FakeTimeSource;

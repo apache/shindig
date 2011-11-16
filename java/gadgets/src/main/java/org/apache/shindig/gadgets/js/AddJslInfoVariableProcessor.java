@@ -22,8 +22,8 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 
-import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.uri.JsUriManager;
 import org.apache.shindig.gadgets.uri.JsUriManager.JsUri;
@@ -58,7 +58,7 @@ public class AddJslInfoVariableProcessor implements JsProcessor {
   public boolean process(JsRequest jsRequest, JsResponseBuilder builder) {
     JsUri jsUri = jsRequest.getJsUri();
     if (!jsUri.isNohint()) {
-      String uri = StringEscapeUtils.escapeJavaScript(getUri(jsUri));
+      String uri = StringEscapeUtils.escapeEcmaScript(getUri(jsUri));
       String features = getFeatures(jsUri);
       builder.prependJs(String.format(FEATURES_HINT_TEMPLATE, features), CODE_ID);
       if (uri != null && !"".equals(uri)) {
@@ -86,7 +86,7 @@ public class AddJslInfoVariableProcessor implements JsProcessor {
     Collection<String> libs = jsUri.getLibs();
     List<Object> features = Lists.newArrayList();
     for (String lib : libs) {
-      features.add('\'' + StringEscapeUtils.escapeJavaScript(lib) + '\'');
+      features.add('\'' + StringEscapeUtils.escapeEcmaScript(lib) + '\'');
     }
     return StringUtils.join(features, ",");
   }

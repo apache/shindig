@@ -21,7 +21,7 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Objects;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.shindig.common.Nullable;
 
 /**

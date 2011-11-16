@@ -17,7 +17,7 @@
  */
 package org.apache.shindig.social.opensocial.util;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.shindig.common.xml.XmlException;
 import org.apache.shindig.common.xml.XmlUtil;
 import org.apache.shindig.protocol.conversion.BeanXStreamConverter;

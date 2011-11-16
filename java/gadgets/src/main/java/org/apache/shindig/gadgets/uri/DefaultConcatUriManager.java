@@ -23,7 +23,7 @@ import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.shindig.common.servlet.Authority;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
@@ -224,7 +224,7 @@ public class DefaultConcatUriManager implements ConcatUriManager {
 
   static String getJsSnippet(String splitParam, Uri resource) {
     return String.format(CONCAT_JS_EVAL_TPL, splitParam,
-        StringEscapeUtils.escapeJavaScript(resource.toString()));
+        StringEscapeUtils.escapeEcmaScript(resource.toString()));
   }
 
   private String getReqVal(String container, String key) {

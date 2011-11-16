@@ -20,7 +20,7 @@ package org.apache.shindig.auth;
 
 import java.util.Map;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.shindig.common.crypto.BlobCrypterException;
 import org.apache.shindig.common.util.Utf8UrlCoder;
 

@@ -18,7 +18,7 @@
  */
 package org.apache.shindig.gadgets.preload;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.shindig.common.JsonSerializer;
 import org.apache.shindig.common.JsonUtil;
 import org.apache.shindig.common.uri.Uri;

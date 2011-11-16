@@ -23,13 +23,13 @@ import com.google.inject.Inject;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.uri.ProxyUriManager;
 import org.apache.shindig.gadgets.uri.UriStatus;
 import org.apache.shindig.common.uri.Uri;
-import org.apache.commons.lang.math.NumberUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.w3c.dom.Node;
 import org.w3c.dom.Element;
 

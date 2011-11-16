@@ -23,7 +23,7 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import com.google.common.collect.Lists;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.shindig.common.logging.i18n.MessageKeys;
 import org.apache.shindig.common.servlet.HttpUtil;
 import org.apache.shindig.common.servlet.InjectedServlet;
@@ -380,7 +380,7 @@ public class ConcatProxyServlet extends InjectedServlet {
       print("\"");
       print(uri.toString());
       print("\":\"");
-      print(StringEscapeUtils.escapeJavaScript(data));
+      print(StringEscapeUtils.escapeEcmaScript(data));
       print("\"");
     }
 

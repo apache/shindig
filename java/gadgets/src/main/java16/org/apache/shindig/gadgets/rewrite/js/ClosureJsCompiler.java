@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.shindig.common.cache.Cache;
 import org.apache.shindig.common.cache.CacheProvider;
 import org.apache.shindig.common.logging.i18n.MessageKeys;
@@ -312,7 +312,7 @@ public class ClosureJsCompiler implements JsCompiler {
       for (String export : exports) {
         if (!export.equals(prevExport)) {
           builder.add(JsContent.fromText(
-              "goog.exportSymbol('" + StringEscapeUtils.escapeJavaScript(export) +
+              "goog.exportSymbol('" + StringEscapeUtils.escapeEcmaScript(export) +
               "', " + export + ");\n", "[export-symbol]"));
           prevExport = export;
         }

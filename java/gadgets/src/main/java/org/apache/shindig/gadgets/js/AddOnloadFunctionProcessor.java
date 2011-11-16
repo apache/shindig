@@ -20,7 +20,7 @@ package org.apache.shindig.gadgets.js;
 
 import com.google.common.annotations.VisibleForTesting;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.shindig.gadgets.uri.JsUriManager.JsUri;
 
 import java.util.regex.Pattern;
@@ -83,7 +83,7 @@ public class AddOnloadFunctionProcessor implements JsProcessor {
   
   @VisibleForTesting
   protected String createOnloadScript(String function) {
-    return String.format(ONLOAD_JS_TPL, StringEscapeUtils.escapeJavaScript(function));
+    return String.format(ONLOAD_JS_TPL, StringEscapeUtils.escapeEcmaScript(function));
   }
 
 }

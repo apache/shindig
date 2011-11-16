@@ -21,7 +21,7 @@ package org.apache.shindig.gadgets.js;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.uri.JsUriManager.JsUri;
 
@@ -63,7 +63,7 @@ public class AddJslLoadedVariableProcessor implements JsProcessor {
     StringBuilder builder = new StringBuilder();
     for (String bundle : bundles) {
       if (builder.length() > 0) builder.append(',');
-      builder.append('\'').append(StringEscapeUtils.escapeJavaScript(bundle)).append('\'');
+      builder.append('\'').append(StringEscapeUtils.escapeEcmaScript(bundle)).append('\'');
     }
     return '[' + builder.toString() + ']';
   }

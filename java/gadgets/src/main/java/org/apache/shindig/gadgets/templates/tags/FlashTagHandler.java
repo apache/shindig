@@ -24,7 +24,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.xml.DomUtil;
 import org.apache.shindig.common.util.Utf8UrlCoder;
@@ -81,7 +81,7 @@ public class FlashTagHandler extends AbstractTagHandler {
       // Record the processing error into the output
       Element err = result.getOwnerDocument().createElement("span");
       err.setTextContent("Failed to process os:Flash tag: " +
-          StringEscapeUtils.escapeHtml(re.getMessage()));
+          StringEscapeUtils.escapeHtml4(re.getMessage()));
       result.appendChild(err);
       return;
     }

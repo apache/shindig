@@ -23,7 +23,7 @@ import com.google.common.collect.Maps;
 import com.google.common.base.Preconditions;
 
 import com.google.common.primitives.Bytes;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.shindig.common.util.CharsetUtil;
 import org.apache.shindig.common.util.TimeSource;
 

@@ -17,7 +17,7 @@
  */
 package org.apache.shindig.protocol;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.Nullable;
 import org.apache.shindig.common.servlet.HttpUtil;

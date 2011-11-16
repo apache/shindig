@@ -20,7 +20,7 @@
 package org.apache.shindig.common.util;
 
 import com.google.common.base.Charsets;
-import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang3.ArrayUtils;
 
 import java.nio.ByteBuffer;
 

@@ -20,7 +20,7 @@ package org.apache.shindig.gadgets.uri;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.shindig.common.logging.i18n.MessageKeys;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpRequest;

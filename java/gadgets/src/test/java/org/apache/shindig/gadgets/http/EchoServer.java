@@ -18,7 +18,7 @@
  */
 package org.apache.shindig.gadgets.http;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.mortbay.jetty.servlet.ServletHolder;
 
 import javax.servlet.ServletException;

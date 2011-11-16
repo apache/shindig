@@ -19,7 +19,7 @@
 package org.apache.shindig.expressions;
 
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.shindig.common.util.CharsetUtil;
 import org.apache.shindig.common.util.Utf8UrlCoder;
 
@@ -105,7 +105,7 @@ public final class OpensocialFunctions {
       return null;
     }
 
-    return StringEscapeUtils.escapeHtml(text);
+    return StringEscapeUtils.escapeHtml4(text);
   }
 
   /**
@@ -119,6 +119,6 @@ public final class OpensocialFunctions {
       return null;
     }
 
-    return StringEscapeUtils.unescapeHtml(text);
+    return StringEscapeUtils.unescapeHtml4(text);
   }
 }

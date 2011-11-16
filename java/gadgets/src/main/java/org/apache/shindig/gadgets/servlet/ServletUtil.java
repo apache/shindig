@@ -21,8 +21,8 @@ package org.apache.shindig.gadgets.servlet;
 import com.google.common.base.Strings;
 import org.apache.commons.codec.binary.Base64InputStream;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.shindig.common.Pair;
 import org.apache.shindig.common.servlet.HttpUtil;
 import org.apache.shindig.common.uri.Uri;
@@ -244,9 +244,9 @@ public final class ServletUtil {
       }
       first = false;
       pw.write("'");
-      pw.write(StringEscapeUtils.escapeJavaScript(metaEntry.getKey()).replace("'", "\'"));
+      pw.write(StringEscapeUtils.escapeEcmaScript(metaEntry.getKey()).replace("'", "\'"));
       pw.write("':'");
-      pw.write(StringEscapeUtils.escapeJavaScript(metaEntry.getValue()).replace("'", "\'"));
+      pw.write(StringEscapeUtils.escapeEcmaScript(metaEntry.getValue()).replace("'", "\'"));
       pw.write("'");
     }
     pw.write("\n}");
