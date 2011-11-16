@@ -126,8 +126,8 @@ public class DefaultGuiceModule extends AbstractModule {
   protected List<String> defaultFeatures(@Named("shindig.features.default")String features,
                                          @Named("org.apache.shindig.features-extended")Set<String> extended) {
     return ImmutableList.<String>builder()
-        .addAll(extended)
         .addAll(Splitter.on(',').split(features))
+        .addAll(extended)
         .build();
   }
 
