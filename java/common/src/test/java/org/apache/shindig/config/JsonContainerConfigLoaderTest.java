@@ -285,7 +285,11 @@ public class JsonContainerConfigLoaderTest {
 
     createConfigForTest(createTemporaryFile(json, ".json").getAbsolutePath());
 
-    assertEquals(testFile, config.getString(DEFAULT_CONTAINER, DYNAMICALLY_LOADED_VALUE_KEY).trim());
+    //Make sure that the file was properly loaded from the classpath...  If it doesnt start with the
+    //resource prefix and it does contain the expected text then it was loaded properly.
+    assertFalse(config.getString(DEFAULT_CONTAINER, DYNAMICALLY_LOADED_VALUE_KEY).
+        startsWith(ResourceLoader.RESOURCE_PREFIX));
+    assertTrue(config.getString(DEFAULT_CONTAINER, DYNAMICALLY_LOADED_VALUE_KEY).contains(testFile));
   }
 
   @Test
