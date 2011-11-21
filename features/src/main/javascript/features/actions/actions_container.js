@@ -553,7 +553,7 @@
     preloadCallback;
   actionsLifecycleCallback[osapi.container.CallbackType.ON_NAVIGATED] =
     navigatedCallback;
-  actionsLifecycleCallback[osapi.container.CallbackType.ON_CLOSED] =
+  actionsLifecycleCallback[osapi.container.CallbackType.ON_BEFORE_CLOSE] =
     closedCallback;
   actionsLifecycleCallback[osapi.container.CallbackType.ON_UNLOADED] =
     unloadedCallback;

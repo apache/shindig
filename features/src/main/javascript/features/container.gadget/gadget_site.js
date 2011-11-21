@@ -64,6 +64,12 @@ osapi.container.GadgetSite = function(args) {
   this.loadingGadgetEl_ = args['bufferEl'];
 
   /**
+   * @type {string}
+   * @private
+   */
+  this.gadgetOnLoad_ = args['gadgetOnLoad']
+
+  /**
    * Unique ID of this site.  Uses the ID of the gadgetEl, if set, or an auto-generated number.
    * @type {string}
    * @private
@@ -210,7 +216,8 @@ osapi.container.GadgetSite.prototype.navigateTo = function(
       var message = ['Failed to navigate for gadget ', gadgetUrl, '.'].join('');
       osapi.container.util.warn(message);
     } else {
-      self.container_.applyLifecycleCallbacks_(osapi.container.CallbackType.ON_RENDER, gadgetInfo);
+      self.container_.applyLifecycleCallbacks_(osapi.container.CallbackType.ON_BEFORE_RENDER,
+              gadgetInfo);
       self.render(gadgetInfo, viewParams, renderParams);
     }
 
@@ -311,7 +318,8 @@ osapi.container.GadgetSite.prototype.render = function(
 
   // Load into the double-buffer if there is one.
   var el = this.loadingGadgetEl_ || this.currentGadgetEl_;
-  this.loadingGadgetHolder_ = new osapi.container.GadgetHolder(this.id_, el);
+  this.loadingGadgetHolder_ = new osapi.container.GadgetHolder(this.id_, el,
+          this.gadgetOnLoad_);
 
   var localRenderParams = {};
   for (var key in renderParams) {

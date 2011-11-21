@@ -75,18 +75,21 @@ $(function() {
 
     //handle gadget collapse, expand, and remove gadget actions
     handleNavigateAction = function(portlet,gadgetSite,gadgetURL,actionId) {
-		 //remove button was click, remove the portlet/gadget
-		 if (actionId === 'remove') {
-			if (confirm('This gadget will be removed, ok?')) {
-			  portlet.remove();
-			  delete siteToTitleMap[gadgetSite.getId()];
-		    }
-		 }else if (actionId === 'expand') {
-			//navigate to currentView prior to colapse gadget
-			CommonContainer.navigateView(gadgetSite, gadgetURL, currentView);
-	     }else if (actionId === 'collapse') {
-	    	CommonContainer.colapseGadget(gadgetSite);
-		 }
+      //remove button was click, remove the portlet/gadget
+      if(typeof gadgetSite !== 'undefined'){
+        if (actionId === 'remove') {
+          if (confirm('This gadget will be removed, ok?')) {
+            CommonContainer.closeGadget(gadgetSite);
+            portlet.remove();
+            delete siteToTitleMap[gadgetSite.getId()];
+          }
+        }else if (actionId === 'expand') {
+          //navigate to currentView prior to colapse gadget
+          CommonContainer.navigateView(gadgetSite, gadgetURL, currentView);
+        }else if (actionId === 'collapse') {
+          CommonContainer.colapseGadget(gadgetSite);
+        }
+      }
     };
 
     //RPC handler for the set-title feature

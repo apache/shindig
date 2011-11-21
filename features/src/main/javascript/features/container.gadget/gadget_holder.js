@@ -25,9 +25,10 @@
 /**
  * @param {number} siteId The id of site containing this holder.
  * @param {Element} el The element to render gadgets in.
+ * @param {string} onGadgetLoad The name of the on load function
  * @constructor
  */
-osapi.container.GadgetHolder = function(siteId, el) {
+osapi.container.GadgetHolder = function(siteId, el, onGadgetLoad) {
   /**
    * Unique numeric gadget ID.
    * @type {number}
@@ -78,6 +79,13 @@ osapi.container.GadgetHolder = function(siteId, el) {
    * @private
    */
   this.securityToken_ = null;
+
+  /**
+   * On load function for gadget iFrames.
+   * @type {string}
+   * @private
+   */
+  this.onGadgetLoad_ = onGadgetLoad;
 
   this.onConstructed();
 };
@@ -259,7 +267,8 @@ osapi.container.GadgetHolder.prototype.doOaaIframeHtml_ = function() {
           //tunnelURI: shindig.uri('/test1/gadgets/' + '../container/rpc_relay.html')
           //   .resolve(shindig.uri(window.location.href)),
           tunnelURI: shindig.uri(this.relayPath_).resolve(shindig.uri(window.location.href)),
-          iframeAttrs: iframeParams
+          iframeAttrs: iframeParams,
+          onGadgetLoad: this.onGadgetLoad_
         }
       }
   );
@@ -304,7 +313,7 @@ osapi.container.GadgetHolder.prototype.getIframeHtml_ = function() {
     'height': this.renderParams_[osapi.container.RenderParam.HEIGHT],
     'width': this.renderParams_[osapi.container.RenderParam.WIDTH]
   };
-
+  this.addOnLoad_(iframeParams);
   return osapi.container.util.createIframeHtml(iframeParams);
 };
 
@@ -370,6 +379,17 @@ osapi.container.GadgetHolder.prototype.updateUserPrefParams_ = function(uri) {
       uri.setExistingP(upKey, upValue);
     }
   }
+};
+
+/**
+ * Adds an onload attribute if a callback is available.
+ * @param {Object} iframeParams The iFrames parameters.
+ * @private
+ */
+osapi.container.GadgetHolder.prototype.addOnLoad_ = function(iframeParams) {
+  iframeParams['onload'] = 'window.' + this.onGadgetLoad_ +
+  "('" + this.getUrl() + "');";
+
 };
 
 function init(config) {

@@ -59,6 +59,7 @@ CommonContainer.init = function() {
   });
 
   CommonContainer.rpcRegister('set_title', setTitleHandler);
+  CommonContainer.addGadgetLifecycleCallback('com.example.commoncontainer', lifecycle());
 
   try {
 
@@ -114,5 +115,47 @@ CommonContainer.colapseGadget = function(gadgetSite) {
 //display the pubsub 2 event details
 function log(message) {
   document.getElementById('output').innerHTML = gadgets.util.escapeString(message) + '<br/>' + document.getElementById('output').innerHTML;
+}
+
+var lifecycle = function() {
+  var preloadStart;
+  var navigateStart;
+  var closeStart;
+  var unloadStart;
+  var renderStart;
+  var listeners = {};
+  listeners[osapi.container.CallbackType.ON_BEFORE_PRELOAD] = function(gadgetUrls) {
+    preloadStart = osapi.container.util.getCurrentTimeMs();
+  };
+  listeners[osapi.container.CallbackType.ON_PRELOADED] = function(response) {
+    var urls = [];
+    for(url in response) {
+      urls[urls.length] = url;
+    }
+    var dif = osapi.container.util.getCurrentTimeMs() - preloadStart;
+    log('It took ' + dif + 'ms to preload the URL(s) ' + urls + '.');
+  };
+  listeners[osapi.container.CallbackType.ON_BEFORE_NAVIGATE] = function(gadgetUrl) {
+    navigateStart = osapi.container.util.getCurrentTimeMs();
+  };
+  listeners[osapi.container.CallbackType.ON_NAVIGATED] = function(site) {
+   log('It took ' + (osapi.container.util.getCurrentTimeMs() - navigateStart) + ' ms' +
+           ' for the site ' + site.getId() + ' to navigate.');
+  };
+  listeners[osapi.container.CallbackType.ON_BEFORE_CLOSE] = function(site) {
+    closeStart = osapi.container.util.getCurrentTimeMs();
+  };
+  listeners[osapi.container.CallbackType.ON_CLOSED] = function(site) {
+    log('It took ' + (osapi.container.util.getCurrentTimeMs() - closeStart) +
+            ' ms to close the gadget in the site with id ' + site.getId());
+  };
+  listeners[osapi.container.CallbackType.ON_BEFORE_RENDER] = function(gadgetUrl) {
+    renderStart = osapi.container.util.getCurrentTimeMs();
+  };
+  listeners[osapi.container.CallbackType.ON_RENDER] = function(gadgetUrl) {
+    log('It took ' + (osapi.container.util.getCurrentTimeMs() - renderStart) +
+            ' ms to render the gadget at the URL ' + gadgetUrl);
+  };
+  return listeners;
 }
 

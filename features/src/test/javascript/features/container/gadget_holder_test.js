@@ -52,16 +52,18 @@ GadgetHolderTest.prototype.testNew = function() {
 GadgetHolderTest.prototype.testRenderWithoutRenderParams = function() {
   var element = {};
   var gadgetInfo = {
-      'iframeUrl' : 'http://shindig/gadgets/ifr?url=gadget.xml'
+      'iframeUrl' : 'http://shindig/gadgets/ifr?url=gadget.xml',
+      'url' : 'gadget.xml'
   };
   this.setupGadgetsRpcSetupReceiver();
-  var holder = new osapi.container.GadgetHolder(123, element);
+  var holder = new osapi.container.GadgetHolder(123, element, '__gadgetOnLoad');
   holder.render(gadgetInfo, {}, {});
   this.assertEquals('<iframe' +
       ' marginwidth="0"' +
       ' hspace="0"' +
       ' frameborder="0"' +
       ' scrolling="no"' +
+      ' onload="window.__gadgetOnLoad(\'gadget.xml\');"' +
       ' marginheight="0"' +
       ' vspace="0"' +
       ' id="__gadget_123"' +
@@ -75,7 +77,8 @@ GadgetHolderTest.prototype.testRenderWithoutRenderParams = function() {
 GadgetHolderTest.prototype.testRenderWithRenderRequests = function() {
   var element = {};
   var gadgetInfo = {
-      'iframeUrl' : 'http://shindig/gadgets/ifr?url=gadget.xml'
+      'iframeUrl' : 'http://shindig/gadgets/ifr?url=gadget.xml',
+      'url' : 'gadget.xml'
   };
   var renderParams = {
       'cajole' : true,
@@ -87,7 +90,7 @@ GadgetHolderTest.prototype.testRenderWithRenderRequests = function() {
       'width' : 222
   };
   this.setupGadgetsRpcSetupReceiver();
-  var holder = new osapi.container.GadgetHolder(123, element);
+  var holder = new osapi.container.GadgetHolder(123, element, '__gadgetOnLoad');
   holder.render(gadgetInfo, {}, renderParams);
   this.assertEquals('<iframe' +
       ' marginwidth="0"' +
@@ -95,6 +98,7 @@ GadgetHolderTest.prototype.testRenderWithRenderRequests = function() {
       ' height="111"' +
       ' frameborder="0"' +
       ' scrolling="no"' +
+      ' onload="window.__gadgetOnLoad(\'gadget.xml\');"' +
       ' class="xyz"' +
       ' marginheight="0"' +
       ' vspace="0"' +

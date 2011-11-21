@@ -388,10 +388,20 @@ OpenAjax.hub.IframeContainer = function( hub, clientID, params )
         if ( internalID !== clientID ) {
             idText = "&oahId=" + internalID.substring( internalID.lastIndexOf('_') + 1 );
         }
-        document.getElementById( internalID ).src = params.IframeContainer.uri +
+
+        var iframe = document.getElementById( internalID );
+        if(iframe.attachEvent) {
+          //Works for IE
+          iframe.attachEvent('onload', function(){
+            window[params.IframeContainer.onGadgetLoad]();
+          });
+        } else {
+          iframe.onload = function(){window[params.IframeContainer.onGadgetLoad]();};
+        }
+        iframe.src = params.IframeContainer.uri +
                 "#rpctoken=" + securityToken + tunnelText + idText;
     }
-    
+
     // If the relay iframe used by RPC has not been loaded yet, then we won't have unload protection
     // at this point.  Since we can't detect when the relay iframe has loaded, we use a two stage
     // connection process.  First, the child sends a connection msg and the container sends an ack.

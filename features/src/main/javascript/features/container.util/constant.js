@@ -146,9 +146,36 @@ osapi.container.ViewParam = {
  * @enum {string}
  */
 osapi.container.CallbackType = {
+    /** Called before a gadget(s) is preloaded. */
+    ON_BEFORE_PRELOAD: 'onBeforePreload',
+
+    /** Called after a gadget(s) has finished preloading. */
     ON_PRELOADED: 'onPreloaded',
+
+    /** Called before navigate is called. */
+    ON_BEFORE_NAVIGATE: 'onBeforeNavigate',
+
+    /** Called after navigation has completed. */
     ON_NAVIGATED: 'onNavigated',
+
+    /** Called before a gadget is closed. */
+    ON_BEFORE_CLOSE: 'onBeforeClose',
+
+    /** Called after a gadget has been closed. */
     ON_CLOSED: 'onClosed',
+
+    /** Called before a gadget has been unloaded. */
+    ON_BEFORE_UNLOAD: 'onBeforeUnload',
+
+    /** Called after a gadget has been unloaded. */
     ON_UNLOADED: 'onUnloaded',
-    ON_RENDER: 'onRender'
+
+    /** Called before render is called. */
+    ON_BEFORE_RENDER: 'onBeforeRender',
+
+    /** Called after a gadget has rendered. */
+    ON_RENDER: 'onRender',
+
+    /** Name of the global function all gadgets will call when they are loaded. */
+    GADGET_ON_LOAD: '__gadgetOnLoad'
 };

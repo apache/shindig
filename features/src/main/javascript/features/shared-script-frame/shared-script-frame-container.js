@@ -122,12 +122,12 @@ osapi.container.Container.addMixin('SharedScriptFrame', function(container) {
   var lifeCycleHandlers = {};
 
   /**
-   * Respond to the ON_RENDER event by creating a script frame for the
+   * Respond to the ON_BEFORE_RENDER event by creating a script frame for the
    * loading gadget, but only if we need one.
    *
    * @param {!Object} metadata The gadget metadata
    */
-  lifeCycleHandlers[osapi.container.CallbackType.ON_RENDER] = function(metadata) {
+  lifeCycleHandlers[osapi.container.CallbackType.ON_BEFORE_RENDER] = function(metadata) {
     var url = metadata.url;
     try {
       var feature = metadata.modulePrefs.features['shared-script-frame'];

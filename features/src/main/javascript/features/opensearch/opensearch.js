@@ -231,7 +231,7 @@
   var containerCallback = new Object();
   containerCallback[osapi.container.CallbackType.ON_PRELOADED] =
       preloaded;
-  containerCallback[osapi.container.CallbackType.ON_CLOSED] =
+  containerCallback[osapi.container.CallbackType.ON_BEFORE_CLOSE] =
       closed;
   containerCallback[osapi.container.CallbackType.ON_NAVIGATED] =
       navigated;
