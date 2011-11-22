@@ -23,7 +23,7 @@
   <parent>
     <groupId>org.apache.shindig</groupId>
     <artifactId>shindig-project</artifactId>
-    <version>3.0.0-SNAPSHOT</version>
+    <version>3.0.0-beta4</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
@@ -36,9 +36,9 @@
   </description>
 
   <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/shindig/trunk/features</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/shindig/trunk/features</developerConnection>
-    <url>http://svn.apache.org/viewvc/shindig/trunk/features</url>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/shindig/tags/shindig-project-3.0.0-beta4/features</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/shindig/tags/shindig-project-3.0.0-beta4/features</developerConnection>
+    <url>http://svn.apache.org/viewvc/shindig/tags/shindig-project-3.0.0-beta4/features</url>
   </scm>
 
   <pluginRepositories>
