@@ -1,6 +1,13 @@
 FROM 2.0.x TO 3.0.x
 ===================
 
+== container.js config changes ==
+
+* The "gadgets.securityTokenKeyFile" property has been replaced with "gadgets.securityTokenKey".
+The new property allows for embedding the key directly or referencing a classpath or filesystem
+resource.  Please see the comments at the top of container.js and around the new property for more
+details.
+
 == Java Dependency Changes ==
 
 * guava r09->10.0.1
