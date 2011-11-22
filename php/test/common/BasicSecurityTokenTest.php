@@ -84,7 +84,7 @@ class BasicSecurityTokenTest extends PHPUnit_Framework_TestCase {
    */
   public function testGetAppId() {
     $this->assertEquals('app', $this->BasicSecurityToken->getAppId());
-    $this->setExpectedException('Exception');
+    $this->setExpectedException('BasicSecurityTokenException');
     $this->anonymousToken->getAppId();
   }
 
@@ -93,7 +93,7 @@ class BasicSecurityTokenTest extends PHPUnit_Framework_TestCase {
    */
   public function testGetAppUrl() {
     $this->assertEquals('appUrl', $this->BasicSecurityToken->getAppUrl());
-    $this->setExpectedException('Exception');
+    $this->setExpectedException('BasicSecurityTokenException');
     $this->anonymousToken->getAppUrl();
   }
 
@@ -102,7 +102,7 @@ class BasicSecurityTokenTest extends PHPUnit_Framework_TestCase {
    */
   public function testGetDomain() {
     $this->assertEquals('domain', $this->BasicSecurityToken->getDomain());
-    $this->setExpectedException('Exception');
+    $this->setExpectedException('BasicSecurityTokenException');
     $this->anonymousToken->getDomain();
   }
 
@@ -111,7 +111,7 @@ class BasicSecurityTokenTest extends PHPUnit_Framework_TestCase {
    */
   public function testGetModuleId() {
     $this->assertEquals(1, $this->BasicSecurityToken->getModuleId());
-    $this->setExpectedException('Exception');
+    $this->setExpectedException('BasicSecurityTokenException');
     $this->anonymousToken->getModuleId();
   }
 
@@ -120,7 +120,7 @@ class BasicSecurityTokenTest extends PHPUnit_Framework_TestCase {
    */
   public function testGetOwnerId() {
     $this->assertEquals('owner', $this->BasicSecurityToken->getOwnerId());
-    $this->setExpectedException('Exception');
+    $this->setExpectedException('BasicSecurityTokenException');
     $this->anonymousToken->getOwnerId();
   }
 
@@ -129,7 +129,7 @@ class BasicSecurityTokenTest extends PHPUnit_Framework_TestCase {
    */
   public function testGetViewerId() {
     $this->assertEquals('viewer', $this->BasicSecurityToken->getViewerId());
-    $this->setExpectedException('Exception');
+    $this->setExpectedException('BasicSecurityTokenException');
     $this->anonymousToken->getViewerId();
   }
 

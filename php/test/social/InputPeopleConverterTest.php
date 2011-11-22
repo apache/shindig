@@ -45,17 +45,17 @@ class InputPeopleConverterTest extends PHPUnit_Framework_TestCase {
   }
 
   public function testConvertAtom() {
-    $this->setExpectedException('Exception');
+    $this->setExpectedException('SocialSpiException');
     $this->inputConverter->convertAtom('');
   }
 
   public function testConvertJson() {
-    $this->setExpectedException('Exception');
-    $this->inputConverter->convertJson();
+    $this->setExpectedException('SocialSpiException');
+    $this->inputConverter->convertJson('');
   }
 
   public function testConvertXml() {
-    $this->setExpectedException('Exception');
+    $this->setExpectedException('SocialSpiException');
     $this->inputConverter->convertXml('');
   }
 }

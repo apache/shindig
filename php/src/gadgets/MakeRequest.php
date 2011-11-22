@@ -260,7 +260,7 @@ class MakeRequest {
    * @return response string, either a json encoded feed structure or an error message
    */
   private function parseFeed($result, $url, $numEntries = 3, $getSummaries = false) {
-    require 'external/Zend/Feed.php';
+    require_once 'external/Zend/Feed.php';
     $channel = array();
     if ((int)$result->getHttpCode() == 200) {
       $content = $result->getResponseContent();
