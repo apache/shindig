@@ -65,7 +65,6 @@ class ContainerConfigTest extends PHPUnit_Framework_TestCase {
 "gadgets.parent" : null,
 "gadgets.uri.iframe.lockedDomainSuffix" : "-a.example.com:8080",
 "gadgets.iframeBaseUri" : "/gadgets/ifr",
-"gadgets.jsUriTemplate" : "http://%host%/gadgets/js/%js%",
 "gadgets.uri.oauth.callbackTemplate" : "//%host%/gadgets/oauthcallback"
 }
 EOD;
@@ -77,7 +76,6 @@ EOD;
     $this->assertEquals(null, $jsonObj["gadgets.parent"]);
     $this->assertEquals("-a.example.com:8080", $jsonObj["gadgets.uri.iframe.lockedDomainSuffix"]);
     $this->assertEquals("/gadgets/ifr", $jsonObj["gadgets.iframeBaseUri"]);
-    $this->assertEquals("http://%host%/gadgets/js/%js%", $jsonObj["gadgets.jsUriTemplate"]);
     $this->assertEquals("//%host%/gadgets/oauthcallback", $jsonObj["gadgets.uri.oauth.callbackTemplate"]);
   }
 }

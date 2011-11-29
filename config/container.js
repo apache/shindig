@@ -58,17 +58,6 @@
 // value matching this set will return a 404 error.
 "gadgets.parent" : null,
 
-// Should all gadgets be forced on to a locked domain?
-"gadgets.uri.iframe.lockedDomainRequired" : false,
-
-// DNS domain on which gadgets should render.
-// Default Uri config: these must be overridden - specified here for testing purposes
-"gadgets.uri.iframe.unlockedDomain": "${Cur['defaultShindigTestAuthority']}",
-// When setting up the server to enable locked domains, you should set this to something that does not
-// attempt to use the authority at all.  Ideally it would be another hostname that points to this server.
-// Example: unlockedDomain="shindig.example.com" lockedDomainSuffix="-locked.gadgets.example.com"
-"gadgets.uri.iframe.lockedDomainSuffix": "${Cur['defaultShindigTestAuthority']}",
-
 // Origins for CORS requests and/or Referer validation
 // Indicate a set of origins or an entry with * to indicate that all origins are allowed
 "gadgets.parentOrigins" : ["*"],
@@ -79,14 +68,6 @@
 // query parameters will be added.
 "gadgets.iframeBaseUri" : "${CONTEXT_ROOT}/gadgets/ifr",
 "gadgets.uri.iframe.basePath" : "${CONTEXT_ROOT}/gadgets/ifr",
-
-// jsUriTemplate will have %host% and %js% substituted.
-// No locked domain special cases, but jsUriTemplate must
-// never conflict with a lockedDomainSuffix.
-"gadgets.jsUriTemplate" : "http://%host%${CONTEXT_ROOT}/gadgets/js/%js%",
-
-"gadgets.uri.js.host" : "http://www.example.com/",
-"gadgets.uri.js.path" : "${CONTEXT_ROOT}/gadgets/js",
 
 // Callback URL.  Scheme relative URL for easy switch between https/http.
 "gadgets.uri.oauth.callbackTemplate" : "//%host%${CONTEXT_ROOT}/gadgets/oauthcallback",
@@ -115,30 +96,48 @@
 "gadgets.doctype_pubid" : "",
 "gadgets.doctype_sysid" : "",
 
+// In a locked domain config, these can remain as-is in order to have requests encountered use the
+// host they came in on (locked host).
+"default.domain.locked.client" : "%host%",
+"default.domain.locked.server" : "%authority%",
 
-// Authority (host:port without scheme) for the default shindig test instance.
-"defaultShindigTestAuthority":"%authority%",
+// IMPORTANT: EDITME: In a locked domain configuration, these should be changed to explicit values of
+// your unlocked host. You should not use %host% or %authority% replacements or these defaults in a
+// locked domain deployment.
+// Both of these values will likely be identical in a real locked domain deployment.
+"default.domain.unlocked.client" : "${Cur['default.domain.locked.client']}",
+"default.domain.unlocked.server" : "${Cur['default.domain.locked.server']}",
 
-// Authority (host:port without scheme) for the proxy and concat servlets.
-"defaultShindigProxyConcatAuthority":"%authority%",
+// You can change this if you wish unlocked gadgets to render on a different domain from the default.
+"gadgets.uri.iframe.unlockedDomain" : "${Cur['default.domain.unlocked.server']}", // DNS domain on which *unlocked* gadgets should render.
+
+// IMPORTANT: EDITME: In a locked domain configuration, this suffix should be provided explicitly.
+// It is recommended that it be a separate top-level-domain (TLD) than the unlocked TLD.
+// You should not use replacement here (avoid %authority%)
+// Example: unlockedDomain="shindig.example.com" lockedDomainSuffix="-locked.example-gadgets.com"
+"gadgets.uri.iframe.lockedDomainSuffix" : "${Cur['default.domain.locked.server']}", // DNS domain on which *locked* gadgets should render.
+
+// Should all gadgets be forced on to a locked domain?
+"gadgets.uri.iframe.lockedDomainRequired" : false,
 
 // Default Js Uri config: also must be overridden.
-"gadgets.uri.js.host": "//${Cur['defaultShindigTestAuthority']}",
-"gadgets.uri.js.path": "${CONTEXT_ROOT}/gadgets/js",
+// gadgets.uri.js.host should be protocol relative.
+"gadgets.uri.js.host" : "//${Cur['default.domain.unlocked.server']}", // Use unlocked host for better caching.
+"gadgets.uri.js.path" : "${CONTEXT_ROOT}/gadgets/js",
 
 // Default concat Uri config; used for testing.
-"gadgets.uri.concat.host" : "${Cur['defaultShindigProxyConcatAuthority']}",
+"gadgets.uri.concat.host" : "${Cur['default.domain.unlocked.server']}", // Use unlocked host for better caching.
 "gadgets.uri.concat.path" : "${CONTEXT_ROOT}/gadgets/concat",
 "gadgets.uri.concat.js.splitToken" : "false",
 
 // Default proxy Uri config; used for testing.
-"gadgets.uri.proxy.host" : "${Cur['defaultShindigProxyConcatAuthority']}",
+"gadgets.uri.proxy.host" : "${Cur['default.domain.unlocked.server']}", // Use unlocked host for better caching.
 "gadgets.uri.proxy.path" : "${CONTEXT_ROOT}/gadgets/proxy",
 
-//Enables/Disables feature administration
+// Enables/Disables feature administration
 "gadgets.admin.enableFeatureAdministration" : "false",
 
-//Enables whitelist checks
+// Enables whitelist checks
 "gadgets.admin.enableGadgetWhitelist" : "false",
 
 // This config data will be passed down to javascript. Please
@@ -149,11 +148,10 @@
 // See individual feature.xml files for configuration details.
 "gadgets.features" : {
   "core.io" : {
-    // Note: /proxy is an open proxy. Be careful how you expose this!
-    // Note: Here // is replaced with the current protocol http/https
-   //"proxyUrl" : "//%host%${CONTEXT_ROOT}/gadgets/proxy?container=%container%%rewriteMime%&refresh=%refresh%&gadget=%gadget%/%rawurl%",
-    "proxyUrl" : "//%host%${CONTEXT_ROOT}/gadgets/proxy?container=%container%&refresh=%refresh%&url=%url%%rewriteMime%",
-    "jsonProxyUrl" : "//%host%${CONTEXT_ROOT}/gadgets/makeRequest"
+    // Note: ${Cur['gadgets.uri.proxy.path']} is an open proxy. Be careful how you expose this!
+    // Note: These urls should be protocol relative (start with //)
+    "proxyUrl" : "//${Cur['default.domain.unlocked.client']}${Cur['gadgets.uri.proxy.path']}?container=%container%&refresh=%refresh%&url=%url%%rewriteMime%",
+    "jsonProxyUrl" : "//${Cur['default.domain.locked.client']}${CONTEXT_ROOT}/gadgets/makeRequest"
   },
   "views" : {
     "profile" : {
@@ -276,7 +274,7 @@
     "enableCaja" : false,
     "supportedFields" : {
        "person" : ["id", {"name" : ["familyName", "givenName", "unstructured"]}, "thumbnailUrl", "profileUrl"],
-       "activity" : ["appId", "body", "bodyId", "externalId", "id", "mediaItems", "postedTime", "priority", 
+       "activity" : ["appId", "body", "bodyId", "externalId", "id", "mediaItems", "postedTime", "priority",
                      "streamFaviconUrl", "streamSourceUrl", "streamTitle", "streamUrl", "templateParams", "title",
                      "url", "userId"],
        "activityEntry" : ["actor", "content", "generator", "icon", "id", "object", "published", "provider", "target",
