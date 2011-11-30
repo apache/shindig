@@ -107,6 +107,13 @@ public class GadgetSpec {
           viewElements.add(element);
         }
       }
+      if("ExternalServices".equals(name)) {
+        // There could be only one ExternalServices tag
+        if(externalServices != null) {
+          throw new SpecParserException("Only 1 ExternalServices is allowed.");
+        }
+        externalServices = new ExternalServices(element);
+      }
     }
 
     if (modulePrefs == null) {
@@ -200,6 +207,14 @@ public class GadgetSpec {
   protected Map<String, View> views;
   public Map<String, View> getViews() {
     return views;
+  }
+
+  /**
+   * ExternalServices
+   */
+  protected ExternalServices externalServices;
+  public ExternalServices getExternalServices() {
+    return externalServices;
   }
 
   /**
