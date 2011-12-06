@@ -23,6 +23,7 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import com.google.common.collect.Lists;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.shindig.common.logging.i18n.MessageKeys;
 import org.apache.shindig.common.servlet.HttpUtil;
@@ -145,41 +146,60 @@ public class ConcatProxyServlet extends InjectedServlet {
     response.setHeader("Content-Type", concatType.getMimeType() + "; charset=UTF8");
     response.setHeader("Content-Disposition", "attachment;filename=p.txt");
 
-    if (doFetchConcatResources(response, concatUri, uri)) {
-      response.setStatus(HttpResponse.SC_OK);
-    } else {
+    ConcatOutputStream cos = createConcatOutputStream(response, concatUri);
+    if(cos == null) {
       response.setStatus(HttpResponse.SC_BAD_REQUEST);
+      response.getOutputStream().println(
+              formatHttpError(HttpServletResponse.SC_BAD_REQUEST,
+                  "Bad json variable name " + concatUri.getSplitParam(), null));
+    } else {
+      if (doFetchConcatResources(response, concatUri, uri, cos)) {
+        response.setStatus(HttpResponse.SC_OK);
+      } else {
+        response.setStatus(HttpResponse.SC_BAD_REQUEST);
+      }
+      IOUtils.closeQuietly(cos);
     }
   }
 
   /**
-   * @param response HttpservletResponse.
-   * @param concatUri URI representing the concatenated list of resources requested.
-   * @return false for cases where concat resources could not be fetched, true for success cases.
-   * @throws IOException
+   * Creates the correct ConcatOutputStream to use.  Will return null if there
+   * is a bad JSON varibale name.
+   * @param response HTTP response object.
+   * @param concatUri The concat URI.
+   * @return The correct ConcatOutputStream to use.
+   * @throws IOException thrown when the ConcatOutputStream cannot be created.
    */
-  private boolean doFetchConcatResources(HttpServletResponse response,
-      ConcatUriManager.ConcatUri concatUri, Uri uri) throws IOException {
-    // Check for json concat and set output stream.
+  private ConcatOutputStream createConcatOutputStream(HttpServletResponse response,
+          ConcatUriManager.ConcatUri concatUri) throws IOException {
     ConcatOutputStream cos;
-    Long minCacheTtl = Long.MAX_VALUE;
-    boolean isMinCacheTtlSet = false;
-
     String jsonVar = concatUri.getSplitParam();
     if (jsonVar != null) {
       // JSON-concat mode.
       if (JSON_PARAM_PATTERN.matcher(jsonVar).matches()) {
         cos = new JsonConcatOutputStream(response.getOutputStream(), jsonVar);
       } else {
-        response.getOutputStream().println(
-            formatHttpError(HttpServletResponse.SC_BAD_REQUEST,
-                "Bad json variable name " + jsonVar, null));
-        return false;
+        return null;
       }
     } else {
       // Standard concat output mode.
       cos = new VerbatimConcatOutputStream(response.getOutputStream());
     }
+    return cos;
+  }
+
+  /**
+   * @param response HttpservletResponse.
+   * @param concatUri URI representing the concatenated list of resources requested.
+   * @param cos The ConcatOutputStream to write the response to.
+   * @return false for cases where concat resources could not be fetched, true for success cases.
+   * @throws IOException
+   */
+  private boolean doFetchConcatResources(HttpServletResponse response,
+      ConcatUriManager.ConcatUri concatUri, Uri uri, ConcatOutputStream cos) throws IOException {
+    // Check for json concat and set output stream.
+    Long minCacheTtl = Long.MAX_VALUE;
+    boolean isMinCacheTtlSet = false;
 
     List<HttpRequest> requests = Lists.newArrayList();
 
@@ -241,16 +261,7 @@ public class ConcatProxyServlet extends InjectedServlet {
           concatUri.translateStatusRefresh(longLivedRefreshSec, minCacheTtl.intValue()), false);
     } catch (GadgetException gex) {
       cos.outputError(uri, gex);
-    } finally {
-      if (cos != null) {
-        try {
-          cos.close();
-        } catch (IOException ioe) {
-          // Ignore
-        }
-      }
     }
-
     return true;
   }
 
