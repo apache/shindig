@@ -43,15 +43,14 @@
       var gadgetUrl = dataModel.gadget;
 
       context.preloadGadget(gadgetUrl, function(result) {
-        if (result[gadgetUrl] == null ||
-                (result[gadgetUrl] != null && result[gadgetUrl].error)) {
+        if (!result[gadgetUrl] || result[gadgetUrl].error) {
           //There was an error preloading the gadget URL lets try and render the
           //URL EE if there is one
           if (dataModel.url != null) {
             navigateUrl_(element, dataModel, renderParams, opt_callback);
           }
           else if (opt_callback != null) {
-            opt_callback(site, result[gadgetUrl]);
+            opt_callback(site, result[gadgetUrl] || {"error" : result});
           }
         }
         else {
