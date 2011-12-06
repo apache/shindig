@@ -34,19 +34,19 @@ GadgetSiteTest.prototype.GADGET_URL = 'http://gadget/abc.xml';
 
 GadgetSiteTest.prototype.setUp = function() {
   var self = this;
-  
+
   this.util_getCurrentTimeMs_value = 100;
   this.util_getCurrentTimeMs_func = osapi.container.util.getCurrentTimeMs;
   osapi.container.util.getCurrentTimeMs = function() {
     return self.util_getCurrentTimeMs_value++;
   };
-  
+
   this.util_warn_value = null;
   this.util_warn_func = osapi.container.util.warn;
   osapi.container.util.warn = function(value) {
     self.util_warn_value = value;
   };
-  
+
   window[this.NAVIGATE_CALLBACK] = function(timingInfo) {
     self.window_navigateCallback_timingInfo = timingInfo;
   };
@@ -61,9 +61,9 @@ GadgetSiteTest.prototype.tearDown = function() {
 GadgetSiteTest.prototype.testGetId = function() {
   var site;
   site = new osapi.container.GadgetSite({});
-  this.assertEquals(0, site.getId());
+  this.assertEquals(osapi.container.Container.prototype.nextUniqueSiteId_ - 1, site.getId());
   site = new osapi.container.GadgetSite({});
-  this.assertEquals(1, site.getId());
+  this.assertEquals(osapi.container.Container.prototype.nextUniqueSiteId_ - 1, site.getId());
 };
 
 GadgetSiteTest.prototype.testNavigateToWithUncachedError = function() {

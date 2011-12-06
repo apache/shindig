@@ -28,7 +28,7 @@ function DeclarativeActionsTest(name) {
 DeclarativeActionsTest.inherits(TestCase);
 
 (function() {
-  
+
 DeclarativeActionsTest.prototype.setUp = function() {
     this.apiUri = window.__API_URI;
     window.__API_URI = shindig.uri('http://shindig.com');
@@ -47,9 +47,9 @@ DeclarativeActionsTest.prototype.setUp = function() {
 DeclarativeActionsTest.prototype.tearDown = function() {
     window.__API_URI = this.apiUri;
     window.__CONTAINER_URI = this.containerUri;
-    
+
     gadgets.rpc = this.gadgetsRpc;
-    this.rpcArguments = undefined; 
+    this.rpcArguments = undefined;
 };
 
 DeclarativeActionsTest.prototype.testGadgetsAddAction = function() {
@@ -62,22 +62,22 @@ DeclarativeActionsTest.prototype.testGadgetsAddAction = function() {
       callback: callbackFn
     };
   gadgets.actions.addAction(_actionObj);
-  this.assertRpcCalled('..', 'actions', null, 'bindAction', _actionObj);
+  this.assertRpcCalled('..', 'actions.bindAction', null, _actionObj);
 };
 
 DeclarativeActionsTest.prototype.testGadgetsRemoveAction = function() {
   var actionId = "testAction";
   gadgets.actions.removeAction(actionId);
-  this.assertRpcCalled('..', 'actions', null,
-      'removeAction', actionId);
+  this.assertRpcCalled('..', 'actions.removeAction', null, actionId);
 };
 
 DeclarativeActionsTest.prototype.testGadgetsRunAction = function() {
   var actionId = "testAction";
   var opt_selection = "testSelection";
   gadgets.actions.runAction(actionId, opt_selection);
-  this.assertRpcCalled('..', 'run_action', null,
-    {"id":actionId, "selection":opt_selection});
+  this.assertRpcCalled('..', 'actions.runAction', null,
+    actionId, opt_selection
+  );
 };
 
 
@@ -99,7 +99,7 @@ DeclarativeActionsTest.prototype.testContainerGetActionsByPath = function() {
   this.assertEquals(actionsArray, []);
 };
 
-DeclarativeActionsTest.prototype.testContainerGetActionsByDataType = 
+DeclarativeActionsTest.prototype.testContainerGetActionsByDataType =
   function(){
     var container = new osapi.container.Container();
     var actionId = "testAction";
@@ -110,7 +110,7 @@ DeclarativeActionsTest.prototype.testContainerGetActionsByDataType =
   };
 
 /**
- * Uncomment following _Full tests once addAction() and removeAction() 
+ * Uncomment following _Full tests once addAction() and removeAction()
  * functions in actions_container.js are uncommented
  */
 /* FULL TESTS
@@ -125,7 +125,7 @@ DeclarativeActionsTest.prototype.testContainerGetAction_Full = function() {
   container.actions.addAction(actionObj_);
   var actionObj = container.actions.getAction(actionId);
   this.assertEquals(actionObj_, actionObj);
-  
+
   container.actions.removeAction(actionId);
   actionObj = container.actions.getAction(actionId);
   this.assertUndefined(actionObj);
@@ -134,44 +134,45 @@ DeclarativeActionsTest.prototype.testContainerGetAction_Full = function() {
 
 DeclarativeActionsTest.prototype.testContainerGetActions_Full = function() {
   var container = new osapi.container.Container({});
-  var actionId = "testAction";
-  var actions = [{
-    id: "test1",
-    label: "Test Action1",
-    path: "container/navigationLinks"
-  },
-  {
-    id: "test2",
-    label: "Test Action2",
-    path: "container/navigationLinks"
-  },
-  {
-    id: "test3",
-    label: "Test Action3",
-    dataType: "opensocial.Person"
-  },
-  {
-    id: "test4",
-    label: "Test Action4",
-    dataType: "opensocial.Person"
-  }
-  ];
+  var actionId = "testAction",
+      actions = [
+        {
+          id: "test1",
+          label: "Test Action1",
+          path: "container/navigationLinks"
+        },
+        {
+          id: "test2",
+          label: "Test Action2",
+          path: "container/navigationLinks"
+        },
+        {
+          id: "test3",
+          label: "Test Action3",
+          dataType: "opensocial.Person"
+        },
+        {
+          id: "test4",
+          label: "Test Action4",
+          dataType: "opensocial.Person"
+        }
+      ];
   for (actionIndex in actions) {
     container.actions.addAction(actions[actionIndex]);
   }
-  
+
   var allActions = container.actions.getAllActions();
   this.assertEquals(actions, allActions);
-  
+
   for (actionIndex in actions) {
     container.actions.removeAction(actions[actionIndex].id);
   }
-  
+
   allActions = container.actions.getAllActions();
   this.assertEquals([], allActions);
 
 };
-DeclarativeActionsTest.prototype.testContainerGetActionsByPath_Full = 
+DeclarativeActionsTest.prototype.testContainerGetActionsByPath_Full =
   function(){
     var container = new osapi.container.Container();
     var actionId = "testAction";
@@ -184,14 +185,14 @@ DeclarativeActionsTest.prototype.testContainerGetActionsByPath_Full =
     var actionsArray = container.actions
       .getActionsByPath("container/navigationLinks");
     this.assertEquals(actionsArray, [ actionObj_ ]);
-    
+
     container.actions.removeAction(actionId);
     actionsArray = container.actions
       .getActionsByPath("container/navigationLinks");
     this.assertEquals(actionsArray, []);
   };
 
-DeclarativeActionsTest.prototype.testContainerGetActionsByDataType_Full = 
+DeclarativeActionsTest.prototype.testContainerGetActionsByDataType_Full =
   function() {
     var container = new osapi.container.Container();
     var actionId = "testAction";
@@ -200,17 +201,17 @@ DeclarativeActionsTest.prototype.testContainerGetActionsByDataType_Full =
             label: "Test Action",
             dataType: "opensocial.Person"
     };
-    
+
     container.actions.addAction(actionObj_);
     var actionsArray = container.actions
       .getActionsByDataType("opensocial.Person");
     this.assertEquals([ actionObj_ ], actionsArray);
-    
+
     container.actions.removeAction(actionId);
     actionsArray = container.actions
       .getActionsByDataType("opensocial.Person");
     this.assertEquals([], actionsArray);
-  
+
   };
 
  FULL TESTS */

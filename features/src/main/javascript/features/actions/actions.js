@@ -24,31 +24,6 @@
 gadgets['actions'] = (function() {
 
   /**
-   * Runs the callback function associated with the specified action id.
-   *
-   * Example:
-   *
-   * <pre>
-   * gadgets.actions.runAction(action);
-   * </pre>
-   *
-   * @param {Object}
-   *          action The action object.
-   *
-   * @member gadgets.actions
-   */
-  function runAction(actionData) {
-    var actionId = actionData.actionId;
-    // optional
-    var selectionObj = actionData.selectionObj;
-
-    var callback = callbackRegistry.getCallback(actionId);
-    if (callback) {
-      callback.apply(this, selectionObj ? [selectionObj] : []);
-    }
-  };
-
-  /**
    * @constructor Object that maps action ids to callback functions.
    */
   function ActionCallbackRegistry() {
@@ -64,24 +39,20 @@ gadgets['actions'] = (function() {
     };
   };
 
-  // router function called to run actions
-  function router(channel, object) {
-    var actionData = object;
-    if (channel == 'runAction') {
-      runAction(actionData);
-    }
-  };
+  // create the callback registry
+  var callbackRegistry = new ActionCallbackRegistry(),
+      showListeners,
+      hideListeners;
 
-  // create the callback registry and
-  // initialize the rpc router
-  var callbackRegistry = new ActionCallbackRegistry();
-  var _init;
-  var init = function() {
-    if (!_init) {
-      gadgets.rpc.register('actions', router);
-      _init = true;
-    }
-  };
+  gadgets.util.registerOnLoadHandler(function() {
+    // register rpc endpoint
+    gadgets.rpc.register('actions.runAction', function(id, selection) {
+      var callback = callbackRegistry.getCallback(id);
+      if (callback) {
+        callback.call(this, selection);
+      }
+    });
+  });
 
   return /** @scope gadgets.actions */ {
     /**
@@ -99,13 +70,16 @@ gadgets['actions'] = (function() {
      * @member gadgets.actions
      */
     addAction: function(actionObj) {
-      init();
-      var actionId = actionObj.id;
-      var actionCallback = actionObj.callback;
-      callbackRegistry.addAction(actionId, actionCallback);
+      var actionId = actionObj.id,
+          callback = actionObj.callback;
+      delete actionObj.callback;
+
+      callbackRegistry.addAction(actionId, callback);
 
       // notify the container that an action has been added.
-      gadgets.rpc.call('..', 'actions', null, 'bindAction', actionObj);
+      gadgets.rpc.call('..', 'actions.bindAction', null,
+        actionObj
+      );
     },
 
     /**
@@ -126,13 +100,17 @@ gadgets['actions'] = (function() {
       // TODO for now we only support updating the callback
       // to support the declaratively contributed actions,
       // we need to support updating the label as well.
-      init();
-      var actionId = actionObj.id;
-      var actionCallback = actionObj.callback;
-      callbackRegistry.addAction(actionId, actionCallback);
+
+      var actionId = actionObj.id,
+          callback = actionObj.callback;
+      delete actionObj.callback;
+
+      callbackRegistry.addAction(actionId, callback);
 
       // notify the container that an action has been added.
-      gadgets.rpc.call('..', 'actions', null, 'bindAction', actionObj);
+      gadgets.rpc.call('..', 'actions.bindAction', null,
+        actionObj
+      );
     },
 
     /**
@@ -148,8 +126,9 @@ gadgets['actions'] = (function() {
      * @member gadgets.actions
      */
     runAction: function(actionId, opt_selection) {
-      actionData = {"id" : actionId, "selection" : opt_selection};
-      gadgets.rpc.call('..', 'run_action', null, actionData);
+      gadgets.rpc.call('..', 'actions.runAction', null,
+        actionId, opt_selection
+      );
     },
 
     /**
@@ -167,11 +146,12 @@ gadgets['actions'] = (function() {
      * @member gadgets.actions
      */
     removeAction: function(actionId) {
-      init();
       callbackRegistry.removeAction(actionId);
 
       // notify the container to remove action from its UI
-      gadgets.rpc.call('..', 'actions', null, 'removeAction', actionId);
+      gadgets.rpc.call('..', 'actions.removeAction', null,
+        actionId
+      );
     },
 
     /**
@@ -196,7 +176,9 @@ gadgets['actions'] = (function() {
      * @member gadgets.actions
      */
     getActionsByPath: function(path, callback) {
-      gadgets.rpc.call('..', 'get_actions_by_path', callback, path);
+      gadgets.rpc.call('..', 'actions.get_actions_by_path', callback,
+        path
+      );
     },
 
     /**
@@ -221,7 +203,9 @@ gadgets['actions'] = (function() {
      * @member gadgets.actions
      */
     getActionsByDataType: function(dataType, callback) {
-      gadgets.rpc.call('..', 'get_actions_by_type', callback, dataType);
+      gadgets.rpc.call('..', 'actions.get_actions_by_type', callback,
+        dataType
+      );
     },
 
     /**
@@ -234,7 +218,16 @@ gadgets['actions'] = (function() {
      */
     registerShowActionsListener: function(listener) {
       if (typeof listener === 'function') {
-        gadgets.rpc.call('..', 'actions', null, 'addShowActionListener', listener);
+        if (!showListeners) {
+          showListeners = [];
+          gadgets.rpc.register('actions.onActionShow', function(actions) {
+            for (var i = 0, listener; listener = showListeners[i]; i++) {
+              listener(actions);
+            }
+          });
+          gadgets.rpc.call('..', 'actions.registerShowCallback');
+        }
+        showListeners.push(listener);
       }
     },
 
@@ -248,7 +241,16 @@ gadgets['actions'] = (function() {
      */
     registerHideActionsListener: function(listener) {
       if (typeof listener === 'function') {
-	gadgets.rpc.call('..', 'actions', null, 'addHideActionListener', listener);
+        if (!hideListeners) {
+          hideListeners = [];
+          gadgets.rpc.register('actions.onActionHide', function(actions) {
+            for (var i = 0, listener; listener = hideListeners[i]; i++) {
+              listener(actions);
+            }
+          });
+          gadgets.rpc.call('..', 'actions.registerHideCallback');
+        }
+        hideListeners.push(listener);
       }
     }
   };

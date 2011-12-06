@@ -36,23 +36,31 @@
       <exports type="js">gadgets.actions.registerHideActionsListener</exports>
       <exports type="js">osapi.container.actions.OptParam.VIEW</exports>
       <exports type="js">osapi.container.actions.OptParam.VIEW_TARGET</exports>
-      <exports type="rpc">actions</exports>
-      <uses type="rpc">actions</uses>
-      <uses type="rpc">bindAction</uses>
-      <uses type="rpc">runAction</uses>
-      <uses type="rpc">removeAction</uses>
-      <uses type="rpc">getActionsByPath</uses>
-      <uses type="rpc">getActionsByDataType</uses>
-      <uses type="rpc">addShowActionListener</uses>
-      <uses type="rpc">addHideActionListener</uses>
+      <exports type="rpc">actions.onActionShow</exports>
+      <exports type="rpc">actions.onActionHide</exports>
+      <exports type="rpc">actions.runAction</exports>
+      <uses type="rpc">actions.registerHideCallback</uses>
+      <uses type="rpc">actions.registerShowCallback</uses>
+      <uses type="rpc">actions.bindAction</uses>
+      <uses type="rpc">actions.get_actions_by_type</uses>
+      <uses type="rpc">actions.get_actions_by_path</uses>
+      <uses type="rpc">actions.runAction</uses>
     </api>
   </gadget>
   <container>
     <script src="constants.js"/>
     <script src="actions_container.js"/>
     <api>
-      <exports type="rpc">actions</exports>
-      <uses type="rpc">runAction</uses>
+      <exports type="rpc">actions.registerHideCallback</exports>
+      <exports type="rpc">actions.registerShowCallback</exports>
+      <exports type="rpc">actions.bindAction</exports>
+      <exports type="rpc">actions.get_actions_by_type</exports>
+      <exports type="rpc">actions.get_actions_by_path</exports>
+      <exports type="rpc">actions.removeAction</exports>
+      <exports type="rpc">actions.runAction</exports>
+      <uses type="rpc">actions.onActionShow</uses>
+      <uses type="rpc">actions.onActionHide</uses>
+      <uses type="rpc">actions.runAction</uses>
     </api>
   </container>
 </feature>

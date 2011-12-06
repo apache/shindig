@@ -40,10 +40,10 @@ UrlSiteTest.prototype.testNew = function() {
     "urlEl" : {}
   };
   var site = new osapi.container.UrlSite(args);
-  this.assertEquals(0, site.getId());
+  this.assertEquals(osapi.container.Container.prototype.nextUniqueSiteId_ - 1, site.getId());
   this.assertNull(site.getActiveUrlHolder());
   var site2 = new osapi.container.UrlSite(args);
-  this.assertEquals(1, site2.getId());
+  this.assertEquals(osapi.container.Container.prototype.nextUniqueSiteId_ - 1, site2.getId());
   this.assertNull(site.getActiveUrlHolder());
 };
 
@@ -57,8 +57,8 @@ UrlSiteTest.prototype.testRenderNoParams = function() {
   site.render(url, {});
   this.assertNotNull(site.getActiveUrlHolder());
   this.assertEquals('<iframe' + ' marginwidth="0"' + ' hspace="0"' + ' frameborder="0"'
-          + ' scrolling="auto"' + ' marginheight="0"' + ' vspace="0"' + ' id="__url_0"'
-          + ' name="__url_0"' + ' src="http://example.com"' + ' ></iframe>', el.innerHTML);
+          + ' scrolling="auto"' + ' marginheight="0"' + ' vspace="0"' + ' id="__url_' + (osapi.container.Container.prototype.nextUniqueSiteId_ - 1) + '"'
+          + ' name="__url_' + (osapi.container.Container.prototype.nextUniqueSiteId_ - 1) + '"' + ' src="http://example.com"' + ' ></iframe>', el.innerHTML);
 };
 
 UrlSiteTest.prototype.testRenderWithParams = function() {
@@ -76,7 +76,7 @@ UrlSiteTest.prototype.testRenderWithParams = function() {
   this.assertNotNull(site.getActiveUrlHolder());
   this.assertEquals('<iframe' + ' marginwidth="0"' + ' hspace="0"' + ' height="104"'
           + ' frameborder="0"' + ' scrolling="auto"' + ' class="myClass"' + ' marginheight="0"'
-          + ' vspace="0"' + ' id="__url_0"' + ' width="54"' + ' name="__url_0"'
+          + ' vspace="0"' + ' id="__url_' + (osapi.container.Container.prototype.nextUniqueSiteId_ - 1) + '"' + ' width="54"' + ' name="__url_' + (osapi.container.Container.prototype.nextUniqueSiteId_ - 1) + '"'
           + ' src="http://example.com"' + ' ></iframe>', el.innerHTML);
 };
 

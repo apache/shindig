@@ -50,13 +50,12 @@ ViewEnhancementsTest.inherits(TestCase);
 
     this.assertEquals('..', rpcs[0][0]);
     this.assertEquals('gadgets.views.openGadget', rpcs[0][1]);
-    this.assertNull('Assert null error', rpcs[0][2]);
-    this.assertEquals(resultCallback, rpcs[0][3]);
-    this.assertEquals(navigateCallback, rpcs[0][4]);
-    this.assertUndefined('Assert undefined error', rpcs[0][5]);
+    this.assertNotNull('Assert not null error', rpcs[0][2]);
+    this.assertNotNull('Assert not null error', rpcs[0][3]);
+    this.assertUndefined('Assert undefined error', rpcs[0][4]);
 
     gadgets.views.openGadget(resultCallback, navigateCallback, params);
-    this.assertEquals(params, rpcs[0][5]);
+    this.assertEquals(params, rpcs[0][4]);
   };
 
   ViewEnhancementsTest.prototype.testOpenEmbeddedExperience = function() {
@@ -70,11 +69,10 @@ ViewEnhancementsTest.inherits(TestCase);
 
     this.assertEquals('..', rpcs[0][0]);
     this.assertEquals('gadgets.views.openEmbeddedExperience', rpcs[0][1]);
-    this.assertNull('Assert null error', rpcs[0][2]);
-    this.assertEquals(resultCallback, rpcs[0][3]);
-    this.assertEquals(navigateCallback, rpcs[0][4]);
-    this.assertEquals('http://www.example.com', rpcs[0][5]['url']);
-    this.assertEquals(params, rpcs[0][6]);
+    this.assertNotNull('Assert not null error', rpcs[0][2]);
+    this.assertNotNull('Assert not null error', rpcs[0][3]);
+    this.assertEquals('http://www.example.com', rpcs[0][4]['url']);
+    this.assertEquals(params, rpcs[0][5]);
   };
 
   ViewEnhancementsTest.prototype.testOpenUrl = function() {
@@ -86,13 +84,12 @@ ViewEnhancementsTest.inherits(TestCase);
 
     this.assertEquals('..', rpcs[0][0]);
     this.assertEquals('gadgets.views.openUrl', rpcs[0][1]);
-    this.assertNull('Assert null error', rpcs[0][2]);
+    this.assertNotNull('Assert not null error', rpcs[0][2]);
     this.assertEquals(url, rpcs[0][3]);
-    this.assertEquals(navigateCallback, rpcs[0][4]);
-    this.assertUndefined('Assert undefined error', rpcs[0][5]);
+    this.assertUndefined('Assert undefined error', rpcs[0][4]);
 
     gadgets.views.openUrl(url, navigateCallback, viewTarget);
-    this.assertEquals(viewTarget, rpcs[0][5]);
+    this.assertEquals(viewTarget, rpcs[0][4]);
   };
 
   ViewEnhancementsTest.prototype.testClose = function() {
@@ -123,15 +120,13 @@ ViewEnhancementsTest.inherits(TestCase);
   };
 
   ViewEnhancementsTest.prototype.testGetContainerDimensions = function() {
-
     var resultCallback = function() {};
 
     gadgets.window.getContainerDimensions(resultCallback);
 
     this.assertEquals('..', rpcs[0][0]);
     this.assertEquals('gadgets.window.getContainerDimensions', rpcs[0][1]);
-    this.assertNull('Assert null error', rpcs[0][2]);
-    this.assertEquals(resultCallback, rpcs[0][3]);
+    this.assertEquals(resultCallback, rpcs[0][2]);
   };
 
 })();

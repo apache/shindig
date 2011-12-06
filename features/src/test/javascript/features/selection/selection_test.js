@@ -66,7 +66,7 @@ SelectionTest.inherits(TestCase);
     var container = new osapi.container.Container({});
     var token = "hello";
     gadgets.selection.setSelection(token);
-    this.assertRpcCalled("..", "gadgets.selection", null, "set", token);
+    this.assertRpcCalled("..", "gadgets.selection.set", null, token);
   };
 
   SelectionTest.prototype.testGadgetGetSelection = function() {
@@ -82,7 +82,7 @@ SelectionTest.inherits(TestCase);
     var callback = function() {
     };
     gadgets.selection.addListener(callback);
-    this.assertRpcCalled("..", "gadgets.selection", null, "add", callback);
+    this.assertRpcCalled("..", "gadgets.selection.register");
   };
 
   /**

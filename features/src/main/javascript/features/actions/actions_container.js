@@ -387,8 +387,21 @@
    */
   function addAction(actionObj, url) {
     registry.addAction(actionObj, url);
-    // notify the container to display the action
-    showActionHandlerProxy([actionObj]);
+
+    // Comply with spec by passing an array of the object
+    // TODO: Update spec, since there will never be more than 1 element in the array
+    showActionHandler([actionObj]);  // notify the container to display the action
+
+    for (var to in showActionSiteIds) {
+      if (!container_.getGadgetSiteByIframeId_(to)) {
+        delete showActionSiteIds[to];
+      }
+      else {
+        // Comply with spec by passing an array of the object
+        // TODO: Update spec, since there will never be more than 1 element in the array
+        gadgets.rpc.call(to, 'actions.onActionShow', null, [actionObj]);
+      }
+    }
   };
 
   /**
@@ -402,8 +415,21 @@
   function removeAction(id) {
     var actionObj = registry.getItemById(id);
     registry.removeAction(id);
-    // notify the container to hide the action
-    hideActionHandlerProxy([actionObj]);
+
+    // Comply with spec by passing an array of the object
+    // TODO: Update spec, since there will never be more than 1 element in the array
+    hideActionHandler([actionObj]);  // notify the container to hide the action
+
+    for (var to in hideActionSiteIds) {
+      if (!container_.getGadgetSiteByIframeId_(to)) {
+        delete hideActionSiteIds[to];
+      }
+      else {
+        // Comply with spec by passing an array of the object
+        // TODO: Update spec, since there will never be more than 1 element in the array
+        gadgets.rpc.call(to, 'actions.onActionHide', null, [actionObj]);
+      }
+    }
   };
 
   /**
@@ -424,37 +450,37 @@
    * Runs the action associated with the specified actionId. If the gadget has
    * not yet been rendered, renders the gadget first, then runs the action.
    *
-   * @param {String}
-   *          The unique identifier for the action.
+   * @param {string}
+   *         id The unique identifier for the action.
+   * @param {?Array.<Object>=}
+   *         selection The selection to pass to the action.
    *
    */
-  function runAction(actionId, selection) {
-    var actionData = {};
-    actionData.actionId = actionId;
-    actionData.selectionObj = selection;
+  function runAction(id, selection) {
     if (!selection && container_ && container_.selection) {
-      actionData.selectionObj = container_.selection.getSelection();
+      selection = container_.selection.getSelection();
     }
 
     // call all container listeners, if any, for this actionId
-    var list = actionListenerMap[actionId];
+    var list = actionListenerMap[id];
     if (list) {
       for (var i = 0, listener; listener = list[i]; i++) {
-        listener.call(null, actionId, actionData.selectionObj);
+        listener.call(null, id, selection);
       }
     }
     for (var i = 0, listener; listener = actionListeners[i]; i++) {
-      listener.call(null, actionId, actionData.selectionObj);
+      listener.call(null, id, selection);
     }
 
     // make rpc call to get gadgets to run callback based on action id
-    var gadgetSites = registry.getGadgetSites(actionId);
+    var gadgetSites = registry.getGadgetSites(id);
     if (gadgetSites) {
       for (var i = 0, site; site = gadgetSites[i]; i++) {
         var holder = site.getActiveGadgetHolder();
         if (holder) {
-          var frameId = holder.getIframeId();
-          gadgets.rpc.call(frameId, 'actions', null, 'runAction', actionData);
+          gadgets.rpc.call(holder.getIframeId(), 'actions.runAction', null,
+            id, selection
+          );
         }
       }
     }
@@ -470,39 +496,37 @@
   var preloadCallback = function(response) {
     for (var url in response) {
       var metadata = response[url];
-      if (!metadata.error) {
-        if (metadata.modulePrefs) {
-          var feature = metadata.modulePrefs.features['actions'];
-          if (feature && feature.params) {
-            var desc = feature.params['action-contributions'];
-            if (desc) {
-              var domResponse = createDom(desc);
-              if (domResponse && !domResponse['errors']) {
-                var jsonDesc = gadgets.json.xml
-                  .convertXmlToJson(domResponse['data']);
-                var actionsJson = jsonDesc['actions'];
-                if (actionsJson) {
-                  var actions = actionsJson['action'];
-                  if (!(actions instanceof Array)) {
-                    actions = [actions];
-                  }
-                  for (var i=0; i<actions.length; i++) {
-                    var actionObj = actions[i];
-                    var actionObj_new = {};
-                    // replace @ for attribute keys;
-                    for (itemAttr in actionObj) {
-                      var attrStr = itemAttr.substring(1);
-                      actionObj_new[attrStr] = actionObj[itemAttr];
-                    }
-                    // check if action already exists
-                    if (!registry.getItemById(actionObj_new.id)) {
-                      addAction(actionObj_new, url);
-                    }
-                  }
-                }
-              }
-            }
-          }
+      if (metadata.error || !metadata.modulePrefs) {
+        continue; // bail
+      }
+
+      var feature = metadata.modulePrefs.features['actions'],
+          desc = feature && feature.params ? feature.params['action-contributions'] : null;
+      if (!desc) {
+        continue; // bail
+      }
+
+      var domResponse = createDom(desc);
+      if (!domResponse || domResponse['errors']) {
+        continue; // bail
+      }
+
+      var jsonDesc = gadgets.json.xml.convertXmlToJson(domResponse['data']),
+          actionsJson = jsonDesc['actions'];
+      if (!actionsJson) {
+        continue; // bail
+      }
+
+      var actions = [].concat(actionsJson['action']);
+      for (var i = 0, actionObj; actionObj = actions[i]; i++) {
+        var actionClone = {};
+        // replace @ for attribute keys;
+        for (var key in actionObj) {
+          actionClone[key.substring(1)] = actionObj[key];
+        }
+        // check if action already exists
+        if (!registry.getItemById(actionClone.id)) {
+          addAction(actionClone, url);
         }
       }
     }
@@ -558,33 +582,6 @@
   actionsLifecycleCallback[osapi.container.CallbackType.ON_UNLOADED] =
     unloadedCallback;
 
-  // Function to handle RPC calls from the gadgets side
-  function router_get_actions_by_type(object) {
-    return container_.actions.getActionsByDataType(object);
-  }
-  function router_get_actions_by_path(object) {
-    return container_.actions.getActionsByPath(object);
-  }
-  function router_run_action(object) {
-    container_.actions.runAction(object.id, object.selection);
-  }
-  function router(channel, object) {
-    switch (channel) {
-    case 'bindAction':
-      bindAction(object);
-      break;
-    case 'removeAction':
-      hideActionHandlerProxy([object]);
-      break;
-    case 'addShowActionListener':
-      addShowActionListener(object);
-      break;
-    case 'addHideActionListener':
-      addHideActionListener(object);
-      break;
-    }
-  };
-
   /**
    * Function that renders actions in the container's UI
    *
@@ -592,21 +589,8 @@
    *          actionObj The object with id, label, tooltip, icon and any other
    *          information for the container to use to render the action.
    */
-  var showActionHandler = function(actions) {};
-  var showActionListeners = [];
-  var showActionHandlerProxy = function(actions) {
-    showActionHandler(actions);
-    for (var i in showActionListeners)
-      showActionListeners[i](actions);
-  };
-
-  /**
-   * Function that adds a listener to the list of listeners that will
-   * be notified of show action events.
-   */
-  function addShowActionListener(listener) {
-    showActionListeners.push(listener);
-  };
+  var showActionHandler = function(actions) {},
+      showActionSiteIds = {};
 
   /**
    * Function that hides actions from the container's UI
@@ -615,21 +599,8 @@
    *          actionObj The object with id, label, tooltip, icon and any other
    *          information for the container to use to render the action.
    */
-  var hideActionHandler = function(actions) {};
-  var hideActionListeners = [];
-  var hideActionHandlerProxy = function(actions) {
-    hideActionHandler(actions);
-    for (var i in hideActionListeners)
-      hideActionListeners[i](actions);
-  };
-
-  /**
-   * Function that adds a listener to the list of listeners that will
-   * be notified of hide action events.
-   */
-  function addHideActionListener(listener) {
-    hideActionListeners.push(listener);
-  };
+  var hideActionHandler = function(actions) {},
+      hideActionSiteIds = {};
 
   /**
    * Function that renders gadgets in container's UI
@@ -656,14 +627,31 @@
    */
   osapi.container.Container.addMixin('actions', function(container) {
     container_ = container;
-    gadgets.rpc.register('actions', router);
-    gadgets.rpc.register('get_actions_by_type', router_get_actions_by_type);
-    gadgets.rpc.register('get_actions_by_path', router_get_actions_by_path);
-    gadgets.rpc.register('run_action', router_run_action);
+
+    gadgets.rpc.register('actions.registerHideCallback', function() {
+      hideActionSiteIds[this.f] = 1;
+    });
+    gadgets.rpc.register('actions.registerShowCallback', function() {
+      showActionSiteIds[this.f] = 1;
+    });
+
+    function getActionsByDataType(dataType) {
+      return [].concat(registry.getActionsByDataType(dataType));
+    }
+    function getActionsByPath(path) {
+      return [].concat(registry.getActionsByPath(path));
+    }
+
+    gadgets.rpc.register('actions.bindAction', bindAction);
+    gadgets.rpc.register('actions.get_actions_by_type', getActionsByDataType);
+    gadgets.rpc.register('actions.get_actions_by_path', getActionsByPath);
+    gadgets.rpc.register('actions.removeAction', removeAction);
+    gadgets.rpc.register('actions.runAction', function(id, selection) {
+      container.actions.runAction(id, selection);
+    });
 
     if (container.addGadgetLifecycleCallback) {
-      container.addGadgetLifecycleCallback('actions',
-          actionsLifecycleCallback);
+      container.addGadgetLifecycleCallback('actions', actionsLifecycleCallback);
     }
 
     return /** @scope osapi.container.actions */ {
@@ -712,8 +700,8 @@
       /*
        * Uncomment the below two functions to run full jsunit tests.
        */
-      //addAction : function(actionObj) { addAction(actionObj); },
-      //removeAction : function(actionId) { removeAction(actionId); },
+      // addAction : function(actionObj) { addAction(actionObj); },
+      // removeAction : function(actionId) { removeAction(actionId); },
 
       /**
        * Executes the action associated with the action id.
@@ -780,11 +768,7 @@
        * @return {Array} An array with any action objects in the
        *         specified path.
        */
-      getActionsByPath: function(path) {
-        var actions = [];
-        actions = actions.concat(registry.getActionsByPath(path));
-        return actions;
-      },
+      getActionsByPath: getActionsByPath,
 
       /**
        * Gets action object from registry based on the dataType.
@@ -794,11 +778,7 @@
        * @return {Array} An array of action objects bound to the specified
        *         data type.
        */
-      getActionsByDataType: function(dataType) {
-        var actions = [];
-        actions = actions.concat(registry.getActionsByDataType(dataType));
-        return actions;
-      },
+      getActionsByDataType: getActionsByDataType,
 
       /**
        * Adds a listener to be notified when an action is invoked.

@@ -38,6 +38,7 @@ A map of view names to view attributes. Examples:
       <exports type="js">gadgets.views.close</exports>
       <exports type="js">gadgets.views.setReturnValue</exports>
       <exports type="js">gadgets.window.getContainerDimensions</exports>
+      <exports type="rpc">gadgets.views.deliverResult</exports>
       <uses type="rpc">gadgets.views.openGadget</uses>
       <uses type="rpc">gadgets.views.openEmbeddedExperience</uses>
       <uses type="rpc">gadgets.views.openUrl</uses>
@@ -55,6 +56,7 @@ A map of view names to view attributes. Examples:
       <exports type="rpc">gadgets.views.close</exports>
       <exports type="rpc">gadgets.views.setReturnValue</exports>
       <exports type="rpc">gadgets.window.getContainerDimensions</exports>
+      <uses type="rpc">gadgets.views.deliverResult</uses>
     </api>
   </container>
 </feature>

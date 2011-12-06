@@ -159,6 +159,13 @@ osapi.container.Container = function(opt_config) {
   this.onConstructed(config);
 };
 
+/**
+ * Unique counter for gadget and url sites.  Used if no explicit ID was provided in their creation.
+ * @type {number}
+ * @private
+ */
+osapi.container.Container.prototype.nextUniqueSiteId_ = 0;
+
 
 /**
  * Create a new gadget site.
@@ -258,7 +265,9 @@ osapi.container.Container.prototype.closeGadget = function(site) {
   site.close();
   this.applyLifecycleCallbacks_(osapi.container.CallbackType.ON_CLOSED, site);
   delete this.sites_[id];
-  this.unscheduleRefreshTokens_();
+  if (site instanceof osapi.container.GadgetSite) {
+    this.unscheduleRefreshTokens_();
+  }
 };
 
 
@@ -598,12 +607,20 @@ osapi.container.Container.prototype.getGadgetSiteByIframeId_ = function(iframeId
   // TODO: Support getting only the loading/active gadget in 2x buffers.
   for (var siteId in this.sites_) {
     var site = this.sites_[siteId];
-    var holder = site.getActiveGadgetHolder();
+    var holder = (site.getActiveGadgetHolder || site.getActiveUrlHolder).call(site);
     if (holder && holder.getIframeId() === iframeId) {
       return site;
     }
   }
   return null;
+};
+
+/**
+ * @param {string} siteId ID of gadget site to get.
+ * @return {osapi.container.GadgetSite|osapi.container.UrlSite} The gadget site.
+ */
+osapi.container.Container.prototype.getSiteById = function(siteId) {
+  return this.sites_[siteId];
 };
 
 /**
@@ -824,7 +841,8 @@ osapi.container.Container.prototype.getActiveGadgetUrls_ = function() {
 osapi.container.Container.prototype.getNavigatedGadgetUrls_ = function() {
   var result = {};
   for (var siteId in this.sites_) {
-    var holder = this.sites_[siteId].getActiveGadgetHolder();
+    var site = this.sites_[siteId],
+        holder = (site.getActiveGadgetHolder || site.getActiveUrlHolder).call(site);
     if (holder) {
       result[holder.getUrl()] = null;
     }
@@ -848,16 +866,18 @@ osapi.container.Container.prototype.refreshTokens_ = function() {
     // update pre-loaded gadgets, since new tokens will take effect when they
     // are navigated to, from cache.
     for (var siteId in self.sites_) {
-      var holder = self.sites_[siteId].getActiveGadgetHolder();
-      var gadgetInfo = self.service_.getCachedGadgetMetadata(holder.getUrl());
-      if (gadgetInfo[osapi.container.MetadataResponse.NEEDS_TOKEN_REFRESH]) {
-        var tokenInfo = response[holder.getUrl()];
-        if (tokenInfo.error) {
-          gadgets.warn(['Failed to get token for gadget ',
-              holder.getUrl(), '.'].join(''));
-        } else {
-          gadgets.rpc.call(holder.getIframeId(), 'update_security_token', null,
-              tokenInfo[osapi.container.TokenResponse.TOKEN]);
+      if (self.sites_[siteId] instanceof osapi.container.GadgetSite) {
+        var holder = self.sites_[siteId].getActiveGadgetHolder();
+        var gadgetInfo = self.service_.getCachedGadgetMetadata(holder.getUrl());
+        if (gadgetInfo[osapi.container.MetadataResponse.NEEDS_TOKEN_REFRESH]) {
+          var tokenInfo = response[holder.getUrl()];
+          if (tokenInfo.error) {
+            gadgets.warn(['Failed to get token for gadget ',
+                holder.getUrl(), '.'].join(''));
+          } else {
+            gadgets.rpc.call(holder.getIframeId(), 'update_security_token', null,
+                tokenInfo[osapi.container.TokenResponse.TOKEN]);
+          }
         }
       }
     }
@@ -890,7 +910,9 @@ osapi.container.Container.prototype.applyLifecycleCallbacks_ = function(
 osapi.container.Container.prototype.newUrlSite = function(element) {
   var args = {};
   args[osapi.container.UrlSite.URL_ELEMENT] = element;
-  return new osapi.container.UrlSite(args);
+  var site = new osapi.container.UrlSite(args);
+  this.sites_[site.getId()] = site;
+  return site;
 };
 
 

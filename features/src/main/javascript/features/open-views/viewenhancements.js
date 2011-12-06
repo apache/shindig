@@ -24,6 +24,19 @@ gadgets['window'] = gadgets['window'] || {};
 
 (function() {
 
+  var resultCallbackMap = {},
+      rcbnum = 0;
+
+  gadgets.util.registerOnLoadHandler(function() {
+    gadgets.rpc.register('gadgets.views.deliverResult', function(rcbnum, result) {
+      var resultCallback;
+      if (resultCallback = resultCallbackMap[rcbnum]) {
+        delete resultCallbackMap[rcbnum];
+        resultCallback(result);
+      }
+    });
+  });
+
   /**
    * Opens a gadget in the container UI. The location of the gadget site in the
    * container will be determined by the view target passed in. The container
@@ -50,8 +63,12 @@ gadgets['window'] = gadgets['window'] || {};
 
   gadgets.views.openGadget = function(resultCallback, navigateCallback,
           opt_params) {
-    gadgets.rpc.call('..', 'gadgets.views.openGadget', null, resultCallback,
-        navigateCallback, opt_params);
+
+    resultCallbackMap[rcbnum] = resultCallback;
+    gadgets.rpc.call('..', 'gadgets.views.openGadget', function(result) {
+        navigateCallback.apply(this, result);
+      }, rcbnum++, opt_params
+    );
   };
 
   /**
@@ -78,9 +95,12 @@ gadgets['window'] = gadgets['window'] || {};
    */
   gadgets.views.openEmbeddedExperience = function(resultCallback,
           navigateCallback, dataModel, opt_params) {
-    gadgets.rpc
-    .call('..', 'gadgets.views.openEmbeddedExperience', null, resultCallback,
-            navigateCallback, dataModel, opt_params);
+
+    resultCallbackMap[rcbnum] = resultCallback;
+    gadgets.rpc.call('..', 'gadgets.views.openEmbeddedExperience', function(result) {
+        navigateCallback.apply(this, result);
+      }, rcbnum++, dataModel, opt_params
+    );
   };
 
   /**
@@ -100,8 +120,10 @@ gadgets['window'] = gadgets['window'] || {};
    *          to open the URL.
    */
   gadgets.views.openUrl = function(url, navigateCallback, opt_viewTarget) {
-    gadgets.rpc.call('..', 'gadgets.views.openUrl', null, url, navigateCallback,
-        opt_viewTarget);
+    gadgets.rpc.call('..', 'gadgets.views.openUrl', function(result) {
+        navigateCallback.apply(this, result);
+      }, url, opt_viewTarget
+    );
   }
 
   /**
@@ -113,7 +135,9 @@ gadgets['window'] = gadgets['window'] || {};
    *          If null it will close the current gadget site.
    */
   gadgets.views.close = function(opt_site) {
-    gadgets.rpc.call('..', 'gadgets.views.close', null, opt_site);
+    gadgets.rpc.call('..', 'gadgets.views.close', null,
+      opt_site
+    );
   };
 
   /**
@@ -125,7 +149,9 @@ gadgets['window'] = gadgets['window'] || {};
    *          returnValue: Return value for this window.
    */
   gadgets.views.setReturnValue = function(returnValue) {
-    gadgets.rpc.call('..', 'gadgets.views.setReturnValue', null, returnValue);
+    gadgets.rpc.call('..', 'gadgets.views.setReturnValue', null,
+      returnValue
+    );
   };
 
   /**
@@ -138,8 +164,7 @@ gadgets['window'] = gadgets['window'] || {};
    *          value as a parameter.
    */
   gadgets.window.getContainerDimensions = function(resultCallback) {
-    gadgets.rpc.call('..', 'gadgets.window.getContainerDimensions',
-        null, resultCallback);
+    gadgets.rpc.call('..', 'gadgets.window.getContainerDimensions', resultCallback);
   }
 
 }());

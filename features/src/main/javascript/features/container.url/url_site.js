@@ -43,7 +43,7 @@ osapi.container.UrlSite = function(args) {
    * @type {number}
    * @private
    */
-  this.id_ = osapi.container.UrlSite.nextUniqueId_++;
+  this.id_ = osapi.container.Container.prototype.nextUniqueSiteId_++;
 
   /**
    * @type {Element}
@@ -56,6 +56,14 @@ osapi.container.UrlSite = function(args) {
    * @private
    */
   this.url_ = null;
+
+  /**
+   * Used primarily by open-views feature.
+   * @type {string} ownerId_ The rpc targetId of the gadget that requested this site's creation.
+   *
+   * @private
+   */
+  this.ownerId_ = null;
 
   this.onConstructed();
 };

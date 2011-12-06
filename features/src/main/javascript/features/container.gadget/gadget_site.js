@@ -75,7 +75,7 @@ osapi.container.GadgetSite = function(args) {
    * @private
    */
   this.id_ = (this.currentGadgetEl_ && this.currentGadgetEl_.id) ? this.currentGadgetEl_.id :
-    osapi.container.GadgetSite.nextUniqueId_++;
+    osapi.container.Container.prototype.nextUniqueSiteId_++;
 
   /**
    * ID of parent gadget.
@@ -97,6 +97,14 @@ osapi.container.GadgetSite = function(args) {
    * @private
    */
   this.loadingGadgetHolder_ = null;
+
+  /**
+   * Used primarily by open-views feature.
+   * @type {string} ownerId_ The rpc targetId of the gadget that requested this site's creation.
+   *
+   * @private
+   */
+  this.ownerId_ = null;
 
   this.onConstructed();
 };

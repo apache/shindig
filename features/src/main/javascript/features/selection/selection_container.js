@@ -27,15 +27,9 @@
  */
 (function() {
 
-  var listeners = new Array();
-  var _selection;
-
-  function notifySelection(selection) {
-    _selection = selection;
-    for(var i=0, currentListener; currentListener=listeners[i]; i++) {
-      listeners[i](selection);
-    }
-  }
+  var _selection,
+      listeners = [],
+      listeningGadgets = {};
 
   function addSelectionListener(listener) {
     if (typeof listener === 'function') {
@@ -52,29 +46,37 @@
     }
   }
 
-  function router(command, param) {
-    switch (command) {
-    case 'set':
-      notifySelection(param);
-      break;
-    case 'add':
-      addSelectionListener(param);
-      break;
-    default:
-      throw new Error('Unknown selection command');
-    }
-  }
-
   osapi.container.Container.addMixin('selection', function(context) {
-    gadgets.rpc.register('gadgets.selection', router);
+
+    function notifySelection(selection) {
+      _selection = selection;
+      for(var i=0, currentListener; currentListener=listeners[i]; i++) {
+        listeners[i](selection);
+      }
+
+      // Call rpc endpoint in all gadgets that have registered
+      for (var to in listeningGadgets) {
+        if (!context.getGadgetSiteByIframeId_(to)) {
+          delete listeningGadgets[to];  // Remove sites that are no longer with us
+        }
+        else {
+          gadgets.rpc.call(to, 'gadgets.selection.selectionChanged', null, selection);
+        }
+      }
+    }
+
+    gadgets.rpc.register('gadgets.selection.set', notifySelection);
+    gadgets.rpc.register('gadgets.selection.register', function() {
+      listeningGadgets[this.f] = 1;
+    });
+
     return /** @scope gadgets.selection */ {
       /**
        * Sets the current selection.
        * @param {string} selection Selected object.
        */
-      setSelection: function(selection) {
-        notifySelection(selection);
-      },
+      setSelection: notifySelection,
+
       /**
        * Gets the current selection.
        * @return {Object} the current selection.
@@ -87,17 +89,13 @@
        * Registers a listener for selection.
        * @param {function} listener The listener to remove.
        */
-      addListener: function(listener) {
-        addSelectionListener(listener);
-      },
+      addListener: addSelectionListener,
 
       /**
        * Removes a listener for selection.
        * @param {function} listener The listener to remove.
        */
-      removeListener: function(listener) {
-        removeSelectionListener(listener);
-      }
+      removeListener: removeSelectionListener
     };
   });
 

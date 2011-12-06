@@ -45,6 +45,7 @@ under the License.
       <exports type="js">osapi.container.Container.prototype.getGadgetMetadata</exports>
       <exports type="js">osapi.container.Container.prototype.rpcRegister</exports>
       <exports type="js">osapi.container.Container.prototype.onConstructed</exports>
+      <exports type="js">osapi.container.Container.prototype.getGadgetSiteById</exports>
       <exports type="js">osapi.container.ContainerConfig.ALLOW_DEFAULT_VIEW</exports>
       <exports type="js">osapi.container.ContainerConfig.RENDER_CAJOLE</exports>
       <exports type="js">osapi.container.ContainerConfig.RENDER_DEBUG</exports>

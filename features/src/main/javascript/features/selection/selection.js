@@ -27,10 +27,17 @@
  * @name gadgets.selection
  */
 gadgets['selection'] = function() {
+  var listeners,
+      currentSelection;
 
-  var listeners = new Array();
-  var currentSelection = null;
-  var selectionChangedFunc = null;
+  gadgets.util.registerOnLoadHandler(function() {
+    gadgets.rpc.register('gadgets.selection.selectionChanged', function(selection) {
+      currentSelection = selection;
+      for (var i=0, currentListener; currentListener=listeners[i]; i++) {
+        listeners[i](selection);
+      }
+    });
+  });
 
   return /** @scope gadgets.selection */ {
     /**
@@ -39,7 +46,7 @@ gadgets['selection'] = function() {
      */
     setSelection: function(selection) {
       currentSelection = selection;
-      gadgets.rpc.call('..', 'gadgets.selection', null, 'set', selection);
+      gadgets.rpc.call('..', 'gadgets.selection.set', null, selection);
     },
 
     /**
@@ -55,20 +62,12 @@ gadgets['selection'] = function() {
      * @param {function} listener The listener to remove.
      */
     addListener: function(listener) {
+      if (!listeners) {
+        listeners  = [];
+        gadgets.rpc.call('..', 'gadgets.selection.register');
+      }
       if (typeof listener === 'function') {
-        // add the listener to the list
-        listeners.push(listener);
-        // lazily create and add the callback
-        if (selectionChangedFunc == null) {
-          selectionChangedFunc = function(selection) {
-            currentSelection = selection;
-            for (var i=0, currentListener; currentListener=listeners[i]; i++) {
-              listeners[i](selection);
-            }
-          };
-          gadgets.rpc.call('..', 'gadgets.selection', null, 'add',
-              selectionChangedFunc);
-        }
+        listeners.push(listener); // add the listener to the list
       }
     },
 

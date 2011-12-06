@@ -34,7 +34,8 @@
 <Content type="html">
 <![CDATA[
 <script>
-var chat = function(selectedObj) {
+var chat = function(selection) {
+	var selectedObj = (selection || [])[0];
 	var msgStr = 'Starting Chat';
 	if (selectedObj) {
 		msgStr += ' with '+ selectedObj["name"]["formatted"];
@@ -43,7 +44,8 @@ var chat = function(selectedObj) {
 	
 	document.getElementById("output").innerHTML = msgStr;
 };
-var call = function(selectedObj) {
+var call = function(selection) {
+	var selectedObj = (selection || [])[0];
 	var msgStr = 'Dialing number';
 	if (selectedObj) {
 		msgStr += ' for '+ selectedObj["name"]["formatted"];
