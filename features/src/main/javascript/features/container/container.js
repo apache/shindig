@@ -841,10 +841,12 @@ osapi.container.Container.prototype.getActiveGadgetUrls_ = function() {
 osapi.container.Container.prototype.getNavigatedGadgetUrls_ = function() {
   var result = {};
   for (var siteId in this.sites_) {
-    var site = this.sites_[siteId],
-        holder = (site.getActiveGadgetHolder || site.getActiveUrlHolder).call(site);
-    if (holder) {
-      result[holder.getUrl()] = null;
+    var site = this.sites_[siteId];
+    if (site instanceof osapi.container.GadgetSite) {
+      var holder = (site.getActiveGadgetHolder || site.getActiveUrlHolder).call(site);
+      if(holder) {
+        result[holder.getUrl()] = null;
+      }
     }
   }
   return result;
