@@ -545,7 +545,7 @@ function MediaUI(social) {
       }
 
       function destroyDialog() {
-        gadgets.views.close('');
+        gadgets.views.close();
       }
     },
 
@@ -660,7 +660,7 @@ function MediaUI(social) {
       }
 
       function destroyDialog() {
-        gadgets.views.close('');
+        gadgets.views.close();
       }
     }
   };
