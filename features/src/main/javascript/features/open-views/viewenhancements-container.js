@@ -253,12 +253,13 @@
    *
    * @param {Object=}
    *          opt_site: Optional parameter which specifies what site to close.
-   *          If null it will close the current gadget site.
+   *          If not provided or null, it will close the current gadget site.
    */
   function close(opt_site) {
     // opt_site may be 0, do not do a truthy test on the value.
     var orig_site = context.getGadgetSiteByIframeId_(this.f),
-        site = typeof(opt_site) != 'undefined' ? context.getSiteById(opt_site) : orig_site;
+        site = typeof(opt_site) != 'undefined' && opt_site != null ? 
+          context.getSiteById(opt_site) : orig_site;
 
     if (!site) {
       return;
