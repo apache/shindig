@@ -121,7 +121,7 @@ gadgets['window'] = gadgets['window'] || {};
    */
   gadgets.views.openUrl = function(url, navigateCallback, opt_viewTarget) {
     gadgets.rpc.call('..', 'gadgets.views.openUrl', function(result) {
-        navigateCallback.apply(this, result);
+        navigateCallback.call(this, result);
       }, url, opt_viewTarget
     );
   }
