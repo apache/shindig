@@ -1,4 +1,8 @@
 <?php
+namespace apache\shindig\test\gadgets;
+use apache\shindig\gadgets\GadgetFeatureRegistry;
+use apache\shindig\common\Config;
+
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -21,8 +25,8 @@
 /**
  * GadgetFeatureRegistry test case.
  */
-class GadgetFeatureRegistryTest extends PHPUnit_Framework_TestCase {
-  
+class GadgetFeatureRegistryTest extends \PHPUnit_Framework_TestCase {
+
   /**
    * @var GadgetFeatureRegistry
    */
@@ -32,6 +36,7 @@ class GadgetFeatureRegistryTest extends PHPUnit_Framework_TestCase {
    * Prepares the environment before running a test.
    */
   protected function setUp() {
+    $_SERVER['HTTP_HOST'] = 'localhost';
     parent::setUp();
     $this->GadgetFeatureRegistry = new TestGadgetFeatureRegistry(Config::get('features_path'));
   }
@@ -40,6 +45,7 @@ class GadgetFeatureRegistryTest extends PHPUnit_Framework_TestCase {
    * Cleans up the environment after running a test.
    */
   protected function tearDown() {
+    unset($_SERVER['HTTP_HOST']);
     $this->GadgetFeatureRegistry = null;
     parent::tearDown();
   }

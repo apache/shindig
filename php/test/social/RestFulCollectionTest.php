@@ -1,4 +1,7 @@
 <?php
+namespace apache\shindig\test\social;
+use apache\shindig\social\spi\RestfulCollection;
+
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -19,14 +22,14 @@
  */
 
 /**
- * RestFulCollection test case.
+ * RestfulCollection test case.
  */
-class RestFulCollectionTest extends PHPUnit_Framework_TestCase {
-  
+class RestfulCollectionTest extends \PHPUnit_Framework_TestCase {
+
   /**
-   * @var RestFulCollection
+   * @var RestfulCollection
    */
-  private $RestFulCollection;
+  private $RestfulCollection;
 
   /**
    * Prepares the environment before running a test.
@@ -34,14 +37,14 @@ class RestFulCollectionTest extends PHPUnit_Framework_TestCase {
   protected function setUp() {
     parent::setUp();
     $entry = array('Entry');
-    $this->RestFulCollection = new RestfulCollection($entry, 1, 1);
+    $this->restfulCollection = new RestfulCollection($entry, 1, 1);
   }
 
   /**
    * Cleans up the environment after running a test.
    */
   protected function tearDown() {
-    $this->RestFulCollection = null;
+    $this->restfulCollection = null;
     parent::tearDown();
   }
 
@@ -51,46 +54,46 @@ class RestFulCollectionTest extends PHPUnit_Framework_TestCase {
   public function __construct() {}
 
   /**
-   * Tests RestFulCollection->__construct()
+   * Tests RestfulCollection->__construct()
    */
   public function test__construct() {
     $entry = array('Entry');
-    $this->RestFulCollection->__construct($entry, 1, 1);
+    $this->restfulCollection->__construct($entry, 1, 1);
   }
 
   /**
-   * Tests RestFulCollection->getEntry()
+   * Tests RestfulCollection->getEntry()
    */
   public function testGetEntry() {
     $entry = array('Entry');
-    $this->RestFulCollection->setEntry($entry);
-    $this->assertEquals($entry, $this->RestFulCollection->getEntry());
+    $this->restfulCollection->setEntry($entry);
+    $this->assertEquals($entry, $this->restfulCollection->getEntry());
   }
 
   /**
-   * Tests RestFulCollection->getStartIndex()
+   * Tests RestfulCollection->getStartIndex()
    */
   public function testGetStartIndex() {
-    $this->RestFulCollection->setStartIndex(1);
-    $this->assertEquals(1, $this->RestFulCollection->getStartIndex());
+    $this->restfulCollection->setStartIndex(1);
+    $this->assertEquals(1, $this->restfulCollection->getStartIndex());
   }
 
   /**
-   * Tests RestFulCollection->getTotalResults()
+   * Tests RestfulCollection->getTotalResults()
    */
   public function testGetTotalResults() {
-    $this->RestFulCollection->setTotalResults(1);
-    $this->assertEquals(1, $this->RestFulCollection->getTotalResults());
+    $this->restfulCollection->setTotalResults(1);
+    $this->assertEquals(1, $this->restfulCollection->getTotalResults());
   }
 
   /**
-   * Tests RestFulCollection->createFromEntry()
+   * Tests RestfulCollection->createFromEntry()
    */
   public function testCreateFromEntry() {
     $entry = array('Entry');
-    $restFulCollection = RestFulCollection::createFromEntry($entry);
-    $this->assertEquals(1, $restFulCollection->getTotalResults());
-    $this->assertEquals($entry, $restFulCollection->getEntry());
-    $this->assertEquals(0, $restFulCollection->getStartIndex());
+    $restfulCollection = RestfulCollection::createFromEntry($entry);
+    $this->assertEquals(1, $restfulCollection->getTotalResults());
+    $this->assertEquals($entry, $restfulCollection->getEntry());
+    $this->assertEquals(0, $restfulCollection->getStartIndex());
   }
 }

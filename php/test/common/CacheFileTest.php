@@ -1,4 +1,8 @@
 <?php
+namespace apache\shindig\test\common;
+use apache\shindig\common\RequestTime;
+use apache\shindig\common\Cache;
+
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,15 +22,13 @@
  * under the License.
  */
 
-require_once 'src/common/Cache.php';
-
 class MockRequestTime extends RequestTime {
   private $time = 0;
-  
+
   public function getRequestTime() {
     return $this->time;
   }
-  
+
   public function sleep($second) {
     $this->time += $second;
   }
@@ -35,13 +37,13 @@ class MockRequestTime extends RequestTime {
 /**
  * CacheFile test case.
  */
-class CacheFileTest extends PHPUnit_Framework_TestCase {
+class CacheFileTest extends \PHPUnit_Framework_TestCase {
 
   /**
    * @var Cache
    */
   private $cache;
-  
+
   /**
    * @var MockRequestTime
    */
@@ -53,7 +55,7 @@ class CacheFileTest extends PHPUnit_Framework_TestCase {
   protected function setUp() {
     parent::setUp();
     $this->time = new MockRequestTime();
-    $this->cache = Cache::createCache('CacheStorageFile', 'TestCache', $this->time);
+    $this->cache = Cache::createCache('apache\shindig\common\sample\CacheStorageFile', 'TestCache', $this->time);
   }
 
   /**
@@ -69,9 +71,9 @@ class CacheFileTest extends PHPUnit_Framework_TestCase {
    * Tests Cache::createCache()
    */
   public function testCreateCache() {
-    $cache = Cache::createCache('CacheStorageFile', 'TestCache');
+    $cache = Cache::createCache('apache\shindig\common\sample\CacheStorageFile', 'TestCache');
   }
-  
+
   /**
    * Tests cache->delete()
    */
@@ -87,7 +89,7 @@ class CacheFileTest extends PHPUnit_Framework_TestCase {
    * Tests cache->delete()
    */
   public function testDeleteException() {
-    $this->setExpectedException("CacheException");
+    $this->setExpectedException("apache\shindig\common\CacheException");
     $this->cache->delete("test");
   }
 
@@ -136,10 +138,10 @@ class CacheFileTest extends PHPUnit_Framework_TestCase {
   public function testSetException() {
     @rmdir(sys_get_temp_dir() . "/shindig/TestCache/te");
     $this->assertTrue(touch(sys_get_temp_dir() . "/shindig/TestCache/te"));
-    $this->setExpectedException("CacheException");
+    $this->setExpectedException("apache\shindig\common\CacheException");
     try {
       $this->cache->set("test", "testing");
-    } catch (Exception $e) {
+    } catch (\Exception $e) {
       $this->assertTrue(unlink(sys_get_temp_dir() . "/shindig/TestCache/te"));
       throw $e;
     }

@@ -1,4 +1,11 @@
 <?php
+namespace apache\shindig\test\gadgets;
+use apache\shindig\gadgets\templates\Token;
+use apache\shindig\gadgets\templates\ExpType;
+use apache\shindig\gadgets\templates\ExpLexer;
+use apache\shindig\gadgets\templates\ExpParser;
+use apache\shindig\gadgets\templates\ExpressionParser;
+
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -25,7 +32,7 @@ class ObjEe {
 /**
  * ExpressionParser test case.
  */
-class ExpressionParserTest extends PHPUnit_Framework_TestCase {
+class ExpressionParserTest extends \PHPUnit_Framework_TestCase {
 
   private $input;
   private $tokenStream;

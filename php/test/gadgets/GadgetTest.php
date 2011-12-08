@@ -1,4 +1,8 @@
 <?php
+namespace apache\shindig\test\gadgets;
+use apache\shindig\gadgets\GadgetContext;
+use apache\shindig\gadgets\GadgetFactory;
+
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -56,7 +60,7 @@ class MockGadgetFactory extends GadgetFactory {
 /**
  * Gadget test case.
  */
-class GadgetTest extends PHPUnit_Framework_TestCase {
+class GadgetTest extends \PHPUnit_Framework_TestCase {
   
   /**
    * @var Gadget

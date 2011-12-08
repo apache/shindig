@@ -1,4 +1,6 @@
 <?php
+namespace apache\shindig\test\social;
+
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -21,7 +23,7 @@
 require_once 'RestBase.php';
 
 class MediaItemRestTest extends RestBase {
-  
+
   protected function setUp() {
     $postData = '{ "id" : "44332211",
        "thumbnailUrl" : "http://www.libpng.org/pub/png/img_png/pngnow.png",
@@ -31,26 +33,26 @@ class MediaItemRestTest extends RestBase {
        "ownerId" : "example.org:55443322",
        "mediaType" : "VIDEO"
     }';
-    
+
     $url = '/albums/1/@self';
     $ret = $this->curlRest($url, $postData, 'application/json');
     $this->assertFalse(empty($ret));
     $album = json_decode($ret, true);
     $this->album = $album['entry'];
   }
-  
+
   protected function tearDown() {
 //    $url = '/albums/1/@self';
 //    $ret = $this->curlRest($url . '/' . urlencode($this->album['id']), '', 'application/json', 'DELETE');
 //    $this->assertTrue(empty($ret), "Delete the created album failed. Response: $ret");
   }
-  
+
   private function verifyLifeCycle($postData, $postDataFormat) {
     $url = '/mediaitems/1/@self/' . $this->album['id'];
     $ret = $this->curlRest($url, $postData, $postDataFormat);
     $mediaItem = json_decode($ret, true);
     $mediaItem = $mediaItem['entry'];
-    
+
     $ret = $this->curlRest($url . '/' . urlencode($mediaItem['id']), '', 'application/json', 'GET');
     $this->assertFalse(empty($ret));
     $fetched = json_decode($ret, true);
@@ -67,16 +69,16 @@ class MediaItemRestTest extends RestBase {
     $this->assertEquals('http://changed.com/tn.png', $fetched['thumbnailUrl'], "thumbnailUrl should be same.");
     $this->assertEquals('image/png', $fetched['mimeType'], "mimeType should be same.");
     $this->assertEquals('IMAGE', $fetched['type'], "type should be same.");
-    
+
     $ret = $this->curlRest($url . '/' . urlencode($mediaItem['id']), '', 'application/json', 'DELETE');
     $this->assertTrue(empty($ret), "Delete the created mediaItem failed. Response: $ret");
-    
+
     $ret = $this->curlRest($url . '/' . urlencode($mediaItem['id']), '', 'application/json', 'GET');
     $fetched = json_decode($ret, true);
     $fetched = $fetched['entry'];
     $this->assertTrue(empty($fetched));
   }
-  
+
   public function testLifeCycleInJson() {
     $postData = '{ "id" : "11223344",
                    "thumbnailUrl" : "http://www.libpng.org/pub/png/img_png/pngnow.png",
@@ -87,7 +89,7 @@ class MediaItemRestTest extends RestBase {
                  }';
     $this->verifyLifeCycle($postData, 'application/json');
   }
-  
+
   public function testLifeCycleInXml() {
     $postData = '<?xml version="1.0" encoding="UTF-8"?>
                  <mediaItem xmlns="http://ns.opensocial.org/2008/opensocial">
@@ -100,7 +102,7 @@ class MediaItemRestTest extends RestBase {
                  </mediaItem>';
     $this->verifyLifeCycle($postData, 'application/xml');
   }
-  
+
   public function testLifeCycleInAtom() {
     $postData = '<entry xmlns="http://www.w3.org/2005/Atom">
                    <content type="application/xml">
@@ -120,7 +122,7 @@ class MediaItemRestTest extends RestBase {
                  </entry>';
     $this->verifyLifeCycle($postData, 'application/atom+xml');
   }
-  
+
   public function testLifeCycleWithActivity() {
     // Creates the media item.
     $postData = '{ "id" : "11223344",
@@ -167,10 +169,10 @@ class MediaItemRestTest extends RestBase {
     }
     $this->assertNotNull($activityId, "Couldn't find created activity.");
 
-    
+
     $ret = $this->curlRest($activityUrl . "/@app/$activityId", '', 'application/json', 'DELETE');
     $this->assertTrue(empty($ret), "Delete activity failed. Repsonse: $ret");
-    
+
     $ret = $this->curlRest($url . '/' . urlencode($mediaItem['id']), '', 'application/json', 'DELETE');
     $this->assertTrue(empty($ret), "Delete the created mediaItem failed. Response: $ret");
   }

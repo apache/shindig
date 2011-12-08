@@ -1,4 +1,7 @@
 <?php
+namespace apache\shindig\test\gadgets;
+use apache\shindig\gadgets\servlet\GadgetRenderingServlet;
+
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,7 +21,7 @@
  * under the License.
  */
 
-class GadgetRenderingServletTest extends PHPUnit_Framework_TestCase {
+class GadgetRenderingServletTest extends \PHPUnit_Framework_TestCase {
     public function testCheckConstraints() {
         $servlet = new GadgetRenderingServlet();
         $servlet->noHeaders = true;

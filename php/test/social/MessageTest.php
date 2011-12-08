@@ -1,4 +1,7 @@
 <?php
+namespace apache\shindig\test\social;
+use apache\shindig\social\model\Message;
+
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -21,7 +24,7 @@
 /**
  * Message test case.
  */
-class MessageTest extends PHPUnit_Framework_TestCase {
+class MessageTest extends \PHPUnit_Framework_TestCase {
   
   /**
    * @var Message

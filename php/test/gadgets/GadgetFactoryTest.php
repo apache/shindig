@@ -1,4 +1,9 @@
 <?php
+namespace apache\shindig\test\gadgets;
+use apache\shindig\gadgets\GadgetContext;
+use apache\shindig\gadgets\GadgetFactory;
+use apache\shindig\common\sample\BasicSecurityToken;
+
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,12 +23,13 @@
  * under the License.
  */
 
-class GadgetFactoryTest extends PHPUnit_Framework_TestCase {
+class GadgetFactoryTest extends \PHPUnit_Framework_TestCase {
     private $oldGet;
     private $oldPost;
     private $token;
     public function setUp()
     {
+        $_SERVER['HTTP_HOST'] = 'localhost';
         $this->oldGet = $_GET;
         $this->oldPost = $_POST;
         $this->token = BasicSecurityToken::createFromValues(1, 1, 1, 'example.com', 'http://example.com/gadget', 1, 1);
@@ -31,10 +37,11 @@ class GadgetFactoryTest extends PHPUnit_Framework_TestCase {
 
     public function tearDown()
     {
+        unset($_SERVER['HTTP_HOST']);
         $_GET = $this->oldGet;
         $_POST = $this->oldPost;
     }
-    
+
     public function testCreateGadgetFromRawXml()
     {
         $_GET = array(
@@ -111,7 +118,7 @@ class GadgetFactoryTest extends PHPUnit_Framework_TestCase {
         $context->setView('profile');
         $gadgetFactory = new GadgetFactory($context, $this->token);
         $gadget = $gadgetFactory->createGadget();
-        
+
         $this->assertTrue(in_array('opensocial-0.8', $gadget->features));
         $this->assertTrue(in_array('flash', $gadget->features));
         $this->assertTrue(in_array('minimessage', $gadget->features));
@@ -122,7 +129,7 @@ class GadgetFactoryTest extends PHPUnit_Framework_TestCase {
     }
 
     public function testRequiringInvalidFeatureThrowsException() {
-        $this->setExpectedException('GadgetException', 'Unknown features: invalid');
+        $this->setExpectedException('apache\shindig\gadgets\GadgetException', 'Unknown features: invalid');
         $_POST = array(
             'rawxml' => '<?xml version="1.0" encoding="UTF-8" ?>
 <Module>
@@ -213,7 +220,7 @@ class TestGadgetFactory extends GadgetFactory
     );
     /**
      * mock request sending
-     * 
+     *
      * @param array $unsignedRequests
      * @param array $signedRequests
      * @return array

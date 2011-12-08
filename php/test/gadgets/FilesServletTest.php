@@ -1,4 +1,9 @@
 <?php
+namespace apache\shindig\test\gadgets;
+use apache\shindig\gadgets\servlet\ResourcesFilesServlet;
+use apache\shindig\gadgets\servlet\ContentFilesServlet;
+use apache\shindig\common\Config;
+
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -38,7 +43,7 @@ class MockContentFilesServlet extends ContentFilesServlet
     }
 }
 
-class FilesServletTest extends PHPUnit_Framework_TestCase
+class FilesServletTest extends \PHPUnit_Framework_TestCase
 {
     public function testResources() {
         $servlet = new MockResourcesFilesServlet();

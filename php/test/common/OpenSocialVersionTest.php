@@ -1,4 +1,7 @@
 <?php
+namespace apache\shindig\test\common;
+use apache\shindig\common\OpenSocialVersion;
+
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -21,7 +24,7 @@
 /**
  * OpenSocialVersion test case.
  */
-class OpenSocialVersionTest extends PHPUnit_Framework_TestCase {
+class OpenSocialVersionTest extends \PHPUnit_Framework_TestCase {
     
     public function testTwoVersionsAreEqual() {
         $version1 = new OpenSocialVersion('1.1.0');

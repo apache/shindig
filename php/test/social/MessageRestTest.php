@@ -1,4 +1,6 @@
 <?php
+namespace apache\shindig\test\social;
+
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -22,7 +24,7 @@ require_once 'RestBase.php';
 
 /**
  * It is an integration test. Since it's may be used by the specified container implementation.
- * It'd better not to depends on the data in the json DB sample.  
+ * It'd better not to depends on the data in the json DB sample.
  */
 class MessageRestTest extends RestBase {
 
@@ -40,13 +42,13 @@ class MessageRestTest extends RestBase {
    */
   private function verifyLifeCycle($postData, $postDataFormat, $randomTitle) {
     $url = '/messages/1/@outbox';
-    
+
     $cnt = count($this->getAllEntities($url));
-    
+
     // Creates the message.
     $ret = $this->curlRest($url, $postData, $postDataFormat, 'POST');
     $this->assertTrue(empty($ret), "Create message failed. Response: $ret");
-    
+
     // Gets the message.
     $messages = $this->getAllEntities($url);
     $this->assertEquals($cnt + 1, count($messages), "Size of the messages is not right.");
@@ -57,15 +59,15 @@ class MessageRestTest extends RestBase {
       }
     }
     $this->assertNotNull($fetchedMessage, "Couldn't find the created message with title $randomTitle");
-    
+
     // Deletes the message.
     $ret = $this->curlRest($url . '/' . urlencode($fetchedMessage['id']), '', 'application/json', 'DELETE');
     $this->assertTrue(empty($ret), "Delete the created message failed. Response: $ret");
-    
+
     $messages = $this->getAllEntities($url, $randomTitle);
     $this->assertEquals($cnt, count($messages), "Size of the messages is not right after deletion.");
   }
-  
+
   public function testLifeCycleInJson() {
     $randomTitle = "[" . rand(0, 2048) . "] message test title.";
     $postData = '{
@@ -92,7 +94,7 @@ class MessageRestTest extends RestBase {
     </message>';
     $this->verifyLifeCycle($postData, 'application/xml', $randomTitle);
   }
-  
+
   public function testLifeCycleInAtom() {
     $randomTitle = "[" . rand(0, 2048) . "] message test title.";
     $postData = '<entry xmlns="http://www.w3.org/2005/Atom"
@@ -106,23 +108,23 @@ class MessageRestTest extends RestBase {
     </entry>';
     $this->verifyLifeCycle($postData, 'application/atom+xml', $randomTitle);
   }
-  
+
   public function testMessageCollectionLifeCycle() {
     $url = '/messages/1';
     // Gets number of message collections in the repository.
     $cnt = count($this->getAllEntities($url));
-    
+
     // Creates a message collection.
     $createData = array();
     $createData['title'] = "[" . rand(0, 2048) . "] message collection test title.";
     $createData['urls'] = array("http://abc.com/abc", "http://xyz.com/xyz");
     $ret = $this->curlRest($url, json_encode($createData), 'application/json', 'POST');
-    
+
     // Verifies that whether the message collection is created.
     $retDecoded = json_decode($ret, true);
     $id = $retDecoded['entry']['id'];
     $this->assertEquals($cnt + 1, count($this->getAllEntities($url)), "Wrong size of the collections. $ret");
-    
+
     // Updates the created message collection.
     $newUrls = array("http://123.com/123");
     $newTitle = 'new title';
@@ -130,7 +132,7 @@ class MessageRestTest extends RestBase {
     $updateData['id'] = $id;
     $updateData['title'] = $newTitle;
     $updateData['urls'] = $newUrls;
-    
+
     $ret = $this->curlRest($url . "/$id", json_encode($updateData), 'application/json', 'PUT');
     $this->assertTrue(empty($ret), "Update should return empty. $ret <$id>");
 
@@ -145,10 +147,10 @@ class MessageRestTest extends RestBase {
       }
     }
     $this->assertTrue($found, "Created message not found.");
-    
+
     // Deletes the message collection.
     $ret = $this->curlRest($url . "/$id", '', 'application/json', 'DELETE');
-    
+
     // Verifies that the message collection is deleted.
     $this->assertEquals($cnt, count($this->getAllEntities($url)), "Wrong size of the collections. $ret");
   }

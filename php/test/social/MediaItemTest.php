@@ -1,4 +1,7 @@
 <?php
+namespace apache\shindig\test\social;
+use apache\shindig\social\model\MediaItem;
+
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -21,7 +24,7 @@
 /**
  * MediaItem test case.
  */
-class MediaItemTest extends PHPUnit_Framework_TestCase {
+class MediaItemTest extends \PHPUnit_Framework_TestCase {
   
   /**
    * @var MediaItem

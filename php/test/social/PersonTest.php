@@ -1,4 +1,11 @@
 <?php
+namespace apache\shindig\test\social;
+use apache\shindig\social\model\Person;
+use apache\shindig\social\model\EnumLookingFor;
+use apache\shindig\social\model\EnumDrinker;
+use apache\shindig\social\model\EnumPresence;
+use apache\shindig\social\model\EnumSmoker;
+
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -21,7 +28,7 @@
 /**
  * Person test case.
  */
-class PersonTest extends PHPUnit_Framework_TestCase {
+class PersonTest extends \PHPUnit_Framework_TestCase {
   
   /**
    * @var Person

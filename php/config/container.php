@@ -44,7 +44,7 @@
  * );
  *
  */
-$shindigConfig = array(
+return array(
   // Show debug backtrace's. Disable this on a production site
   'debug' => true,
   // do real file_exist checks? Turning this off can be a big performance gain on prod servers but also risky & less verbose errors
@@ -78,23 +78,23 @@ $shindigConfig = array(
   'default_iframe_prefix' => '/gadgets/ifr?',
 
  'servlet_map' => array(
-   '/container' => 'ContentFilesServlet',
-   '/samplecontainer' => 'ContentFilesServlet',
-   '/gadgets/resources' => 'ResourcesFilesServlet',
-   '/gadgets/js' => 'JsServlet',
-   '/gadgets/proxy' => 'ProxyServlet',
-   '/gadgets/makeRequest' => 'MakeRequestServlet',
-   '/gadgets/ifr' => 'GadgetRenderingServlet',
-   '/gadgets/metadata' => 'MetadataServlet',
-   '/gadgets/oauthcallback' => 'OAuthCallbackServlet',
-   '/gadgets/api/rpc' => 'JsonRpcServlet',
-   '/gadgets/api/rest' => 'DataServiceServlet',
-   '/social/rest' => 'DataServiceServlet',
-   '/social/rpc' => 'CompatibilityJsonRpcServlet',
-   '/rpc' => 'JsonRpcServlet',
-   '/public.crt' => 'CertServlet',
-   '/public.cer' => 'CertServlet',
-   '/' => 'ContentFilesServlet',
+   '/container' => 'apache\shindig\gadgets\servlet\ContentFilesServlet',
+   '/samplecontainer' => 'apache\shindig\gadgets\servlet\ContentFilesServlet',
+   '/gadgets/resources' => 'apache\shindig\gadgets\servlet\ResourcesFilesServlet',
+   '/gadgets/js' => 'apache\shindig\gadgets\servlet\JsServlet',
+   '/gadgets/proxy' => 'apache\shindig\gadgets\servlet\ProxyServlet',
+   '/gadgets/makeRequest' => 'apache\shindig\gadgets\servlet\MakeRequestServlet',
+   '/gadgets/ifr' => 'apache\shindig\gadgets\servlet\GadgetRenderingServlet',
+   '/gadgets/metadata' => 'apache\shindig\gadgets\servlet\MetadataServlet',
+   '/gadgets/oauthcallback' => 'apache\shindig\gadgets\servlet\OAuthCallbackServlet',
+   '/gadgets/api/rpc' => 'apache\shindig\social\servlet\JsonRpcServlet',
+   '/gadgets/api/rest' => 'apache\shindig\social\servlet\DataServiceServlet',
+   '/social/rest' => 'apache\shindig\social\servlet\DataServiceServlet',
+   '/social/rpc' => 'apache\shindig\social\servlet\CompatibilityJsonRpcServlet',
+   '/rpc' => 'apache\shindig\social\servlet\JsonRpcServlet',
+   '/public.crt' => 'apache\shindig\gadgets\servlet\CertServlet',
+   '/public.cer' => 'apache\shindig\gadgets\servlet\CertServlet',
+   '/' => 'apache\shindig\gadgets\servlet\ContentFilesServlet',
  ),
 
   // The X-XRDS-Location value for your implementing container, see http://code.google.com/p/partuza/source/browse/trunk/Library/XRDS.php for an example
@@ -147,28 +147,28 @@ $shindigConfig = array(
   'extension_autoloader' => false,
 
   // Configurable classes. Change these to the class name to use, and make sure the auto-loader can find them
-  'blacklist_class' => 'BasicGadgetBlacklist',
-  'remote_content' => 'BasicRemoteContent',
-  'remote_content_fetcher' => 'BasicRemoteContentFetcher',
-  'security_token_signer' => 'BasicSecurityTokenDecoder',
-  'security_token' => 'BasicSecurityToken',
-  'oauth_lookup_service' => 'BasicOAuthLookupService',
+  'blacklist_class' => 'apache\shindig\gadgets\sample\BasicGadgetBlacklist',
+  'remote_content' => 'apache\shindig\common\sample\BasicRemoteContent',
+  'remote_content_fetcher' => 'apache\shindig\common\sample\BasicRemoteContentFetcher',
+  'security_token_signer' => 'apache\shindig\common\sample\BasicSecurityTokenDecoder',
+  'security_token' => 'apache\shindig\common\sample\BasicSecurityToken',
+  'oauth_lookup_service' => 'apache\shindig\common\sample\BasicOAuthLookupService',
   // The OAuth Store is used to store the (gadgets/)oauth proxy credentials it obtained on behalf of the user/gadget combo
-  'oauth_store' => 'BasicOAuthStore',
-  'gadget_oauth_token_store' => 'BasicGadgetOAuthTokenStore',
+  'oauth_store' => 'apache\shindig\gadgets\oauth\BasicOAuthStore',
+  'gadget_oauth_token_store' => 'apache\shindig\gadgets\oauth\BasicGadgetOAuthTokenStore',
 
   // handler for ApiServlet
   'service_handler' => array(
-    'people' => 'PersonHandler',
-    'activities' => 'ActivityHandler',
-    'appdata' => 'AppDataHandler',
-    'groups' => 'GroupHandler',
-    'messages' => 'MessagesHandler',
-    'cache'  => 'InvalidateHandler',
-    'system' => 'SystemHandler',
-    'albums' => 'AlbumHandler',
-    'mediaitems' => 'MediaItemHandler',
-    'http' => 'HttpHandler',
+    'people' => 'apache\shindig\social\service\PersonHandler',
+    'activities' => 'apache\shindig\social\service\ActivityHandler',
+    'appdata' => 'apache\shindig\social\service\AppDataHandler',
+    'groups' => 'apache\shindig\social\service\GroupHandler',
+    'messages' => 'apache\shindig\social\service\MessagesHandler',
+    'cache'  => 'apache\shindig\social\service\InvalidateHandler',
+    'system' => 'apache\shindig\social\service\SystemHandler',
+    'albums' => 'apache\shindig\social\service\AlbumHandler',
+    'mediaitems' => 'apache\shindig\social\service\MediaItemHandler',
+    'http' => 'apache\shindig\social\service\HttpHandler',
   ),
 
   // class is the name of the concrete input converter class
@@ -176,13 +176,13 @@ $shindigConfig = array(
   // into the params array or null if you want to overwrite params with the decoded
   // array or false if you do not want to add the decoded params
   'service_input_converter' => array(
-    'people' => array('class' => 'InputPeopleConverter', 'targetField' => false),
-    'activities' => array('class' => 'InputActivitiesConverter', 'targetField' => 'activity'),
-    'appdata' => array('class' => 'InputAppDataConverter', 'targetField' => 'data'),
-    'messages' => array('class' => 'InputMessagesConverter', 'targetField' => 'entity'),
-    'cache'  => array('class' => 'InputInvalidateConverter', 'targetField' => null),
-    'albums' => array('class' => 'InputAlbumsConverter', 'targetField' => 'album'),
-    'mediaitems' => array('class' => 'InputMediaItemsConverter', 'targetField' => 'mediaItem'),
+    'people' => array('class' => 'apache\shindig\social\converters\InputPeopleConverter', 'targetField' => false),
+    'activities' => array('class' => 'apache\shindig\social\converters\InputActivitiesConverter', 'targetField' => 'activity'),
+    'appdata' => array('class' => 'apache\shindig\social\converters\InputAppDataConverter', 'targetField' => 'data'),
+    'messages' => array('class' => 'apache\shindig\social\converters\InputMessagesConverter', 'targetField' => 'entity'),
+    'cache'  => array('class' => 'apache\shindig\social\converters\InputInvalidateConverter', 'targetField' => null),
+    'albums' => array('class' => 'apache\shindig\social\converters\InputAlbumsConverter', 'targetField' => 'album'),
+    'mediaitems' => array('class' => 'apache\shindig\social\converters\InputMediaItemsConverter', 'targetField' => 'mediaItem'),
   ),
 
   // available gadget renderer with the class as key and the needed attributes in the
@@ -190,39 +190,39 @@ $shindigConfig = array(
   // the attribute value has to match this string, if it's a boolean the attribute
   // just has to be available or not available
   'gadget_renderer' => array(
-    'GadgetHtmlRenderer' => array('type' => 'HTML', 'href' => false),
-    'GadgetHrefRenderer' => array('type' => 'HTML', 'href' => true),
-    'GadgetUrlRenderer'  => array('type' => 'URL'),
+    'apache\shindig\gadgets\render\GadgetHtmlRenderer' => array('type' => 'HTML', 'href' => false),
+    'apache\shindig\gadgets\render\GadgetHrefRenderer' => array('type' => 'HTML', 'href' => true),
+    'apache\shindig\gadgets\render\GadgetUrlRenderer'  => array('type' => 'URL'),
   ),
 
-  'gadget_class' => 'Gadget',
-  'gadget_context_class' => 'GadgetContext',
-  'gadget_factory_class' => 'GadgetFactory',
-  'gadget_spec_parser' => 'GadgetSpecParser',
-  'gadget_spec_class' => 'GadgetSpec',
-  'substitution_class' => 'Substitutions',
-  'proxy_handler' => 'ProxyHandler',
-  'makerequest_handler' => 'MakeRequestHandler',
-  'makerequest_class' => 'MakeRequest',
-  'container_config_class' => 'ContainerConfig',
+  'gadget_class' => 'apache\shindig\gadgets\Gadget',
+  'gadget_context_class' => 'apache\shindig\gadgets\GadgetContext',
+  'gadget_factory_class' => 'apache\shindig\gadgets\GadgetFactory',
+  'gadget_spec_parser' => 'apache\shindig\gadgets\GadgetSpecParser',
+  'gadget_spec_class' => 'apache\shindig\gadgets\GadgetSpec',
+  'substitution_class' => 'apache\shindig\gadgets\Substitutions',
+  'proxy_handler' => 'apache\shindig\gadgets\ProxyHandler',
+  'makerequest_handler' => 'apache\shindig\gadgets\MakeRequestHandler',
+  'makerequest_class' => 'apache\shindig\gadgets\MakeRequest',
+  'container_config_class' => 'apache\shindig\gadgets\ContainerConfig',
 
   // Caching back-end's to use. Shindig ships with CacheStorageFile, CacheStorageApc and CacheStorageMemcache support
   // The data cache is primarily used for remote content (proxied files, gadget spec, etc)
   // and the feature_cache is used to cache the parsed features xml structure and javascript
   // On a production system you probably want to use CacheStorageApc for features, and CacheStorageMemcache for the data cache
-  'data_cache' => 'CacheStorageFile',
-  'feature_cache' => 'CacheStorageFile',
+  'data_cache' => 'apache\shindig\common\sample\CacheStorageFile',
+  'feature_cache' => 'apache\shindig\common\sample\CacheStorageFile',
 
   // RESTful API data service classes to use
   // See http://code.google.com/p/partuza/source/browse/#svn/trunk/Shindig for a MySql powered example
-  'person_service' => 'JsonDbOpensocialService',
-  'activity_service' => 'JsonDbOpensocialService',
-  'app_data_service' => 'JsonDbOpensocialService',
-  'group_service' => 'JsonDbOpensocialService',
-  'messages_service' => 'JsonDbOpensocialService',
-  'invalidate_service' => 'DefaultInvalidateService',
-  'album_service' => 'JsonDbOpensocialService',
-  'media_item_service' => 'JsonDbOpensocialService',
+  'person_service' => 'apache\shindig\social\sample\JsonDbOpensocialService',
+  'activity_service' => 'apache\shindig\social\sample\JsonDbOpensocialService',
+  'app_data_service' => 'apache\shindig\social\sample\JsonDbOpensocialService',
+  'group_service' => 'apache\shindig\social\sample\JsonDbOpensocialService',
+  'messages_service' => 'apache\shindig\social\sample\JsonDbOpensocialService',
+  'invalidate_service' => 'apache\shindig\social\sample\DefaultInvalidateService',
+  'album_service' => 'apache\shindig\social\sample\JsonDbOpensocialService',
+  'media_item_service' => 'apache\shindig\social\sample\JsonDbOpensocialService',
 
   // Also scan these directories when looking for <Class>.php files. You can include multiple paths by seperating them with a ,
   // To enable classes in the extras package you have to add this class path

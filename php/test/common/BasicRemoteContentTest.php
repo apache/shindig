@@ -1,4 +1,15 @@
 <?php
+namespace apache\shindig\test\common;
+use apache\shindig\common\sample\BasicRemoteContent;
+use apache\shindig\common\sample\BasicSecurityTokenDecoder;
+use apache\shindig\common\sample\BasicRemoteContentFetcher;
+use apache\shindig\gadgets\SigningFetcherFactory;
+use apache\shindig\common\RemoteContentRequest;
+use apache\shindig\common\RemoteContentFetcher;
+use apache\shindig\gadgets\SigningFetcher;
+use apache\shindig\common\Config;
+use apache\shindig\common\sample\BasicSecurityToken;
+
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -17,9 +28,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-require_once 'src/common/sample/BasicRemoteContent.php';
-
 
 class MockSigningFetcherFactory {
   private $keyName;
@@ -47,7 +55,7 @@ class MockSigningFetcherFactory {
     openssl_pkey_export($privkey, $rsa_private_key, $phrase);
     
     if (! $rsa_private_key = @openssl_pkey_get_private($rsa_private_key, $phrase)) {
-      throw new Exception("Could not create the key");
+      throw new \Exception("Could not create the key");
     }
     $this->privateKey = $rsa_private_key;
     $this->keyName = 'http://' . $_SERVER["HTTP_HOST"] . Config::get('web_prefix') . '/public.cer';
@@ -136,7 +144,7 @@ class MockRemoteContentFetcher extends RemoteContentFetcher {
 /**
  * BasicRemoteContent test case.
  */
-class BasicRemoteContentTest extends PHPUnit_Framework_TestCase {
+class BasicRemoteContentTest extends \PHPUnit_Framework_TestCase {
 
   /**
    * @var BasicRemoteContent

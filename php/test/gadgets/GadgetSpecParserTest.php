@@ -1,4 +1,8 @@
 <?php
+namespace apache\shindig\test\gadgets;
+use apache\shindig\gadgets\GadgetSpecParser;
+use apache\shindig\gadgets\GadgetContext;
+
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -21,13 +25,13 @@
 /**
  * GadgetSpecParser test case.
  */
-class GadgetSpecParserTest extends PHPUnit_Framework_TestCase {
-  
+class GadgetSpecParserTest extends \PHPUnit_Framework_TestCase {
+
   /**
    * @var GadgetSpecParser
    */
   private $GadgetSpecParser;
-  
+
   /**
    * @var Gadget
    */
@@ -40,7 +44,7 @@ class GadgetSpecParserTest extends PHPUnit_Framework_TestCase {
   ]]>
   </Content>
 </Module>';
-  
+
   /**
    * @var Context
    */
@@ -51,7 +55,7 @@ class GadgetSpecParserTest extends PHPUnit_Framework_TestCase {
    */
   protected function setUp() {
     parent::setUp();
-    
+
     $this->GadgetSpecParser = new GadgetSpecParser();
     $this->Context = new GadgetContext('GADGET');
   }
@@ -61,7 +65,7 @@ class GadgetSpecParserTest extends PHPUnit_Framework_TestCase {
    */
   protected function tearDown() {
     $this->GadgetSpecParser = null;
-    
+
     parent::tearDown();
   }
 
@@ -69,7 +73,7 @@ class GadgetSpecParserTest extends PHPUnit_Framework_TestCase {
    * Tests GadgetSpecParser->parse() exception
    */
   public function testParseExeption() {
-    $this->setExpectedException('GadgetSpecException');
+    $this->setExpectedException('apache\shindig\gadgets\GadgetSpecException');
     $this->assertTrue($this->GadgetSpecParser->parse('<', $this->Context));
   }
 

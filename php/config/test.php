@@ -22,7 +22,7 @@
  * this configuration overrides some values for unit testing purposes
  * you should not use these settings in production
  */
-$shindigConfig = array(
+return array(
   'compress_javascript' => false,
   'private_key_file' => realpath(dirname(__FILE__) . '/../test/certs') . '/private.key',
   'public_key_file' => realpath(dirname(__FILE__) . '/../test/certs') . '/public.crt',

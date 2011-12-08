@@ -1,4 +1,6 @@
 <?php
+namespace apache\shindig\test\social;
+
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -26,7 +28,7 @@ class ActivityRestTest extends RestBase {
     $url = '/activities/1/@self';
     $ret = $this->curlRest($url, $postData, $postDataFormat);
     $this->assertTrue(empty($ret), "Create activity failed. Response: $ret");
-    
+
     // Verifyies data was written correctly
     $ret = $this->curlRest($url . '?count=20', '', 'application/json', 'GET');
     $retDecoded = json_decode($ret, true);
@@ -43,7 +45,7 @@ class ActivityRestTest extends RestBase {
     $ret = $this->curlRest($url . "/@app/$activityId", '', 'application/json', 'DELETE');
     $this->assertTrue(empty($ret), "Delete activity failed. Repsonse: $ret");
   }
-  
+
   public function testLifeCycleInJson() {
     $randomTitle = "[" . rand(0, 2048) . "] test activity";
     $postData = '{
@@ -57,7 +59,7 @@ class ActivityRestTest extends RestBase {
     }';
     $this->verifyLifeCycle($postData, 'application/json', $randomTitle);
   }
-  
+
   public function testLifeCycleInAtom() {
     $randomTitle = "[" . rand(0, 2048) . "] test activity";
     $postData = '<entry xmlns="http://www.w3.org/2005/Atom">
@@ -76,7 +78,7 @@ class ActivityRestTest extends RestBase {
       </entry>';
     $this->verifyLifeCycle($postData, 'application/atom+xml', $randomTitle);
   }
-  
+
   public function testLifeCycleInXml() {
     $randomTitle = "[" . rand(0, 2048) . "] test activity";
     $postData = '<activity xmlns="http://ns.opensocial.org/2008/opensocial">

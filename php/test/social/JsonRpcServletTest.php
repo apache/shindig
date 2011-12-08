@@ -1,4 +1,7 @@
 <?php
+namespace apache\shindig\test\social;
+use apache\shindig\social\servlet\JsonRpcServlet;
+
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,7 +21,7 @@
  * under the License.
  */
 
-class JsonRpcServletTest extends PHPUnit_Framework_TestCase {
+class JsonRpcServletTest extends \PHPUnit_Framework_TestCase {
 
     public function testParseRPCGetParameters()
     {

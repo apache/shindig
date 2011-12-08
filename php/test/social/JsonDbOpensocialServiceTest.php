@@ -1,4 +1,13 @@
 <?php
+namespace apache\shindig\test\social;
+use apache\shindig\social\sample\JsonDbOpensocialService;
+use apache\shindig\social\spi\UserId;
+use apache\shindig\social\spi\GroupId;
+use apache\shindig\social\spi\CollectionOptions;
+use apache\shindig\common\sample\BasicSecurityToken;
+use apache\shindig\social\model\Message;
+use apache\shindig\social\model\MessageCollection;
+
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -21,7 +30,7 @@
 /**
  * JsonDbOpensocialService test case.
  */
-class JsonDbOpensocialServiceTest extends PHPUnit_Framework_TestCase {
+class JsonDbOpensocialServiceTest extends \PHPUnit_Framework_TestCase {
   
   /**
    * @var JsonDbOpensocialService

@@ -1,4 +1,9 @@
 <?php
+namespace apache\shindig\test\social;
+use apache\shindig\social\converters\OutputJsonConverter;
+use apache\shindig\common\sample\BasicSecurityToken;
+use apache\shindig\social\service\RestRequestItem;
+
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -21,7 +26,7 @@
 /**
  * RestRequestItem test case.
  */
-class RestRequestItemTest extends PHPUnit_Framework_TestCase {
+class RestRequestItemTest extends \PHPUnit_Framework_TestCase {
 
   /**
    * Prepares the environment before running a test.

@@ -1,4 +1,9 @@
 <?php
+namespace apache\shindig\test\gadgets;
+use apache\shindig\gadgets\templates\TemplateLibrary;
+use apache\shindig\gadgets\GadgetContext;
+use apache\shindig\gadgets\templates\TemplateParser;
+
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,7 +23,7 @@
  * under the License.
  */
 
-class TemplateParserTest extends PHPUnit_Framework_TestCase {
+class TemplateParserTest extends \PHPUnit_Framework_TestCase {
   public function testOsVar() {
     $viewNode = '<?xml version="1.0" encoding="UTF-8" ?>
         <script xmlns:os="http://ns.opensocial.org/2008/markup" type="text/os-template">
@@ -31,7 +36,7 @@ class TemplateParserTest extends PHPUnit_Framework_TestCase {
         </script>';
 
     $dataContext = array();
-    $doc = new DomDocument();
+    $doc = new \DomDocument();
     $doc->loadXml($viewNode);
     $contentBlocks = $doc->getElementsByTagName('script');
     $library = new TemplateLibrary(new GadgetContext('GADGET'));

@@ -1,4 +1,6 @@
 <?php
+namespace apache\shindig\test\social;
+
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -22,14 +24,14 @@ require_once 'RestBase.php';
 
 class GroupsRestTest extends RestBase {
 
-  
-  public function testGroupsLifeCycleInJson() {	
+
+  public function testGroupsLifeCycleInJson() {
     // Get the groups for the user.
     $ret = $this->curlRest('/groups/john.doe', '', 'application/json', 'GET');
     $retDecoded = json_decode($ret, true);
     $this->assertTrue($ret != $retDecoded && $ret != null, "Invalid json string in return: $ret.");
     $this->assertTrue(isset($retDecoded['entry']) && isset($retDecoded['entry']["john.doe"])
-        && isset($retDecoded['entry']["john.doe"][0]) 
-        && $retDecoded['entry']["john.doe"][0] == '1', "Unexpected return value: $ret.");     
+        && isset($retDecoded['entry']["john.doe"][0])
+        && $retDecoded['entry']["john.doe"][0] == '1', "Unexpected return value: $ret.");
   }
 }
