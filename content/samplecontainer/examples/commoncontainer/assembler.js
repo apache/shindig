@@ -87,10 +87,10 @@ CommonContainer.init = function() {
 CommonContainer.renderGadget = function(gadgetURL, gadgetId) {
 	//going to hardcode these values for width.
     var el = document.getElementById('gadget-site-' + gadgetId);
-    var parms = {};
-    parms[osapi.container.RenderParam.WIDTH] = '100%';
+    var params = {};
+    params[osapi.container.RenderParam.WIDTH] = '100%';
 	var gadgetSite = CommonContainer.newGadgetSite(el);
-	CommonContainer.navigateGadget(gadgetSite, gadgetURL, {}, parms);
+	CommonContainer.navigateGadget(gadgetSite, gadgetURL, {}, params);
 	return gadgetSite;
 
 };
