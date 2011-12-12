@@ -112,9 +112,9 @@
       }
 
       var renderParams = {},
-          site = context.newGadgetSite(
-            context.views.createElementForGadget(metadata, view, viewTarget)
-          );
+      site = context.newGadgetSite(
+              context.views.createElementForGadget(metadata, view, viewTarget)
+      );
       site.ownerId_ = siteOwnerId;
 
       if (view !== undefined && view !== '') {
@@ -157,22 +157,7 @@
     var navigateCallback = this.callback,
         siteOwnerId = this.f,
         gadgetUrl = dataModel.gadget;
-
-    //Check to make sure we can actually reach the gadget we are going to try
-    //to render before we do anything else
-    context.preloadGadget(gadgetUrl, function(result) {
-      if (result[gadgetUrl] == null ||
-              (result[gadgetUrl] != null && result[gadgetUrl].error)) {
-        //There was an error, check to see if there is still the option to
-        //render the url, else just call the navigateCallback
-        if (!dataModel.url) {
-          if (navigateCallback != null) {
-            navigateCallback([null, result[gadgetUrl]]);
-          }
-          return;
-        }
-      }
-
+    var navigateEE = function() {
       var viewTarget = '';
       var viewParams = {};
       if (opt_params != undefined) {
@@ -203,16 +188,36 @@
       eeRenderParams[osapi.container.ee.RenderParam.GADGET_VIEW_PARAMS] =
           viewParams;
 
-      context.ee.navigate(element, dataModel, eeRenderParams, function(site, metadata) {
+      context.ee.navigate(element, dataModel, eeRenderParams, function(site, result) {
         site.ownerId_ = siteOwnerId;
-        if (metadata) {
+        if (result) {
           resultCallbackMap[site.getId()] = resultCallback;
         }
         if (navigateCallback) {
-          navigateCallback([site.getId(), metadata]);
+          navigateCallback([site.getId(), result]);
         }
       });
-    });
+    };
+
+    if(gadgetUrl) {
+      //Check to make sure we can actually reach the gadget we are going to try
+      //to render before we do anything else
+      context.preloadGadget(gadgetUrl, function(result) {
+        if (!result[gadgetUrl] || result[gadgetUrl].error) {
+          //There was an error, check to see if there is still the option to
+          //render the url, else just call the navigateCallback
+          if (!dataModel.url) {
+            if (navigateCallback != null) {
+              navigateCallback([null, result[gadgetUrl] || {"error" : result}]);
+            }
+            return;
+          }
+        }
+        navigateEE();
+      });
+    } else {
+      navigateEE();
+    }
   }
 
 

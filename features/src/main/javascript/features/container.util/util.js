@@ -87,6 +87,18 @@ osapi.container.util.newMetadataRequest = function(gadgetUrls) {
   };
 };
 
+/**
+ * Creates a new head request to be made to the given URL.
+ * @param {String} url The URL to make the head request to.
+ * @return {osapi.Request} The request object.
+ */
+osapi.container.util.newHeadRequest = function(url) {
+  return osapi.http.head({
+    "href": url,
+    "refreshInterval": 0
+    });
+}
+
 
 /**
  * Construct a JSON request to get gadget token.

@@ -33,6 +33,7 @@ UrlContainerTest.prototype.setUp = function() {
   window.__CONTAINER_URI = shindig.uri('http://container.com');
   this.shindigContainerGadgetSite = osapi.container.GadgetSite;
   this.shindigContainerUrlSite = osapi.container.UrlSite;
+  this.shindigHttp = osapi.http;
   this.gadgetsRpc = gadgets.rpc;
 };
 
@@ -41,6 +42,7 @@ UrlContainerTest.prototype.tearDown = function() {
   window.__CONTAINER_URI = this.containerUri;
   osapi.container.GadgetSite = this.shindigContainerGadgetSite;
   osapi.container.UrlSite = this.shindigContainerUrlSite;
+  osapi.http = this.shindigHttp;
   gadgets.rpc = this.gadgetsRpc;
 };
 
@@ -54,6 +56,7 @@ UrlContainerTest.prototype.testNewUrlSite = function() {
 
 UrlContainerTest.prototype.testNavigateUrl = function() {
   this.setupGadgetsRpcRegister();
+  this.setupOsapiHttp();
   var container = new osapi.container.Container({
     'allowDefaultView' : true,
     'renderCajole' : true,
@@ -84,5 +87,17 @@ UrlContainerTest.prototype.setupUrlSite = function(id, url, urlHolder) {
         self.urlsite_render_renderParams = renderParams;
       }
     };
+  };
+};
+
+UrlContainerTest.prototype.setupOsapiHttp = function() {
+  osapi.http = {
+    "head" : function(params) {
+      return {
+        "execute" : function(callback) {
+          callback({"status" : 200});
+        }
+      };
+    }
   };
 };
