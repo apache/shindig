@@ -944,7 +944,7 @@ osapi.container.Container.prototype.navigateUrl = function(site, url, renderPara
       if(!response.error && (response.status >= 200 && response.status < 300)) {
         site.render(url, renderParams);
       }
-      callback(response);
+      opt_callback(response);
     });
   } else {
     site.render(url, renderParams);
