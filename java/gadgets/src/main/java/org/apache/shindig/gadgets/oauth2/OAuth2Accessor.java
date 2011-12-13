@@ -17,18 +17,18 @@
 package org.apache.shindig.gadgets.oauth2;
 
 import java.io.Serializable;
+import java.util.Map;
 
 import org.apache.shindig.gadgets.oauth2.handler.ClientAuthenticationHandler;
 
 /**
  * OAuth2 related data accessor.
  * 
- * Every {@link OAuth2Request} will create an accessor and store it in the
- * OAuth2Store while the request is being issued. It will be removed when the
- * request is done (success or failure.)
+ * Every {@link OAuth2Request} will create an accessor and store it in the OAuth2Store while the
+ * request is being issued. It will be removed when the request is done (success or failure.)
  * 
- * OAuth2Accessor implementations should be {@link Serializable} to facilitate
- * cluster storage and caching across the various phases of OAuth 2.0 flows.
+ * OAuth2Accessor implementations should be {@link Serializable} to facilitate cluster storage and
+ * caching across the various phases of OAuth 2.0 flows.
  */
 
 public interface OAuth2Accessor extends Serializable {
@@ -85,8 +85,7 @@ public interface OAuth2Accessor extends Serializable {
 
   /**
    * 
-   * @return the error exception, if this is an error, otherwise
-   *         <code>null</code>
+   * @return the error exception, if this is an error, otherwise <code>null</code>
    */
   public Throwable getErrorException();
 
@@ -119,6 +118,12 @@ public interface OAuth2Accessor extends Serializable {
    * @return the refresh {@link OAuth2Token} or <code>null</code>
    */
   public OAuth2Token getRefreshToken();
+
+  /**
+   * 
+   * @return the additional oauth2 request params (never <code>null</code>)
+   */
+  public Map<String, String> getAdditionalRequestParams();
 
   /**
    * if the gadget request or gadget spec specifies a scope it will be set here
@@ -167,14 +172,13 @@ public interface OAuth2Accessor extends Serializable {
 
   /**
    * 
-   * @return <code>true</code> if the gadget's <ModulePrefs> can override
-   *         accessor settings
+   * @return <code>true</code> if the gadget's <ModulePrefs> can override accessor settings
    */
   public boolean isAllowModuleOverrides();
 
   /**
-   * Indicates the service provider wants the access token in an
-   * "Authorization:" header, per the spec.
+   * Indicates the service provider wants the access token in an "Authorization:" header, per the
+   * spec.
    * 
    * @return
    */
@@ -194,9 +198,8 @@ public interface OAuth2Accessor extends Serializable {
   public boolean isRedirecting();
 
   /**
-   * Indicates the service provider wants the access token in an URL Parameter.
-   * This goes against the spec but Google, Facebook and Microsoft all expect
-   * it.
+   * Indicates the service provider wants the access token in an URL Parameter. This goes against
+   * the spec but Google, Facebook and Microsoft all expect it.
    * 
    * @return
    */
@@ -205,8 +208,7 @@ public interface OAuth2Accessor extends Serializable {
   public boolean isValid();
 
   /**
-   * updates the access token for the request (does not add it to
-   * {@link OAuth2Store})
+   * updates the access token for the request (does not add it to {@link OAuth2Store})
    * 
    * @param accessToken
    */
@@ -227,23 +229,29 @@ public interface OAuth2Accessor extends Serializable {
    * @param errorUri
    */
   public void setErrorResponse(Throwable exception, OAuth2Error error, String contextMessage,
-      String errorUri);
+          String errorUri);
 
   /**
-   * Used to communicate that we are in a redirect authorization flow and the
-   * accessor should be preserved.
+   * Used to communicate that we are in a redirect authorization flow and the accessor should be
+   * preserved.
    * 
    * @param redirecting
    */
   public void setRedirecting(boolean redirecting);
 
   /**
-   * updates the refresh token for the request (does not add it to
-   * {@link OAuth2Store})
+   * updates the refresh token for the request (does not add it to {@link OAuth2Store})
    * 
    * @param accessToken
    */
   public void setRefreshToken(OAuth2Token refreshToken);
+
+  /**
+   * set the oauth2 request parameters
+   * 
+   * @param requestParams
+   */
+  public void setAdditionalRequestParams(Map<String, String> requestParams);
 
   /**
    * updates the token endpoint url

@@ -16,6 +16,10 @@
  */
 package org.apache.shindig.gadgets.oauth2;
 
+import com.google.common.collect.Maps;
+
+import java.util.Map;
+
 /**
  * 
  * see {@link OAuth2Accessor}
@@ -48,9 +52,10 @@ public class BasicOAuth2Accessor implements OAuth2Accessor {
   private Type type;
   private boolean urlParameter;
   private final String user;
+  private Map<String, String> additionalRequestParams;
 
   BasicOAuth2Accessor(final Throwable exception, final OAuth2Error error,
-      final String contextMessage, final String errorUri) {
+          final String contextMessage, final String errorUri) {
     this.serviceName = null;
     this.scope = null;
     this.state = null;
@@ -60,6 +65,7 @@ public class BasicOAuth2Accessor implements OAuth2Accessor {
     this.gadgetUri = null;
     this.globalRedirectUri = null;
     this.allowModuleOverrides = false;
+    this.additionalRequestParams = Maps.newHashMap();
     this.setErrorResponse(exception, error, contextMessage, errorUri);
   }
 
@@ -89,11 +95,12 @@ public class BasicOAuth2Accessor implements OAuth2Accessor {
     this.errorContextMessage = accessor.getErrorContextMessage();
     this.errorException = accessor.getErrorException();
     this.errorUri = accessor.getErrorUri();
+    this.additionalRequestParams = Maps.newHashMap();
   }
 
   public BasicOAuth2Accessor(final String gadgetUri, final String serviceName, final String user,
-      final String scope, final boolean allowModuleOverrides, final OAuth2Store store,
-      final String globalRedirectUri) {
+          final String scope, final boolean allowModuleOverrides, final OAuth2Store store,
+          final String globalRedirectUri) {
     this.gadgetUri = gadgetUri;
     this.serviceName = serviceName;
     this.user = user;
@@ -103,6 +110,7 @@ public class BasicOAuth2Accessor implements OAuth2Accessor {
     this.state = store.getOAuth2AccessorIndex(gadgetUri, serviceName, user, scope).toString();
     this.errorResponse = false;
     this.redirecting = false;
+    this.additionalRequestParams = Maps.newHashMap();
   }
 
   public OAuth2Token getAccessToken() {
@@ -158,6 +166,10 @@ public class BasicOAuth2Accessor implements OAuth2Accessor {
 
   public OAuth2Token getRefreshToken() {
     return this.refreshToken;
+  }
+
+  public Map<String, String> getAdditionalRequestParams() {
+    return this.additionalRequestParams;
   }
 
   public String getScope() {
@@ -249,7 +261,7 @@ public class BasicOAuth2Accessor implements OAuth2Accessor {
   }
 
   public void setErrorResponse(Throwable exception, OAuth2Error error, String contextMessage,
-      String errorUri) {
+          String errorUri) {
     this.errorResponse = true;
     this.errorException = exception;
     if (error != null) {
@@ -277,6 +289,10 @@ public class BasicOAuth2Accessor implements OAuth2Accessor {
 
   public void setRefreshToken(final OAuth2Token refreshToken) {
     this.refreshToken = refreshToken;
+  }
+
+  public void setAdditionalRequestParams(Map<String, String> additionalRequestParams) {
+    this.additionalRequestParams = additionalRequestParams;
   }
 
   public void setTokenUrl(final String tokenUrl) {

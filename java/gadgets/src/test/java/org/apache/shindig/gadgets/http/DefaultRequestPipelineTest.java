@@ -50,8 +50,9 @@ public class DefaultRequestPipelineTest {
       return resp.getResponseAsString();
     }
   };
-  private final RequestPipeline pipeline = new DefaultRequestPipeline(fetcher, cache, oauth, oauth2,
-      new DefaultResponseRewriterRegistry(null, null), new NoOpInvalidationService(), helper);
+  private final RequestPipeline pipeline = new DefaultRequestPipeline(fetcher, cache, oauth,
+          oauth2, new DefaultResponseRewriterRegistry(null, null), new NoOpInvalidationService(),
+          helper);
 
   @Before
   public void setUp() {
@@ -60,8 +61,7 @@ public class DefaultRequestPipelineTest {
 
   @Test
   public void authTypeNoneNotCached() throws Exception {
-    HttpRequest request = new HttpRequest(DEFAULT_URI)
-        .setAuthType(AuthType.NONE);
+    HttpRequest request = new HttpRequest(DEFAULT_URI).setAuthType(AuthType.NONE);
 
     fetcher.response = new HttpResponse("response");
 
@@ -74,64 +74,57 @@ public class DefaultRequestPipelineTest {
     assertEquals(1, cache.writeCount);
     assertEquals(1, fetcher.fetchCount);
     assertEquals(1, response.getMetadata().size());
-    assertEquals("response",
-        response.getMetadata().get(HttpResponseMetadataHelper.DATA_HASH));
+    assertEquals("response", response.getMetadata().get(HttpResponseMetadataHelper.DATA_HASH));
   }
 
   @Test
   public void verifyHashCode() throws Exception {
-    HttpRequest request = new HttpRequest(DEFAULT_URI)
-        .setAuthType(AuthType.NONE);
+    HttpRequest request = new HttpRequest(DEFAULT_URI).setAuthType(AuthType.NONE);
 
     int time = roundToSeconds(HttpResponseTest.timeSource.currentTimeMillis()) - 10;
     String date = DateUtil.formatRfc1123Date(1000L * time);
-    HttpResponseBuilder builder = new HttpResponseBuilder()
-        .setCacheTtl(100)
-        .addHeader("Date", date);
+    HttpResponseBuilder builder = new HttpResponseBuilder().setCacheTtl(100)
+            .addHeader("Date", date);
     builder.setContent("response");
 
     fetcher.response = builder.create();
 
     RequestPipeline pipeline = new DefaultRequestPipeline(fetcher, cache, oauth, oauth2,
-        new DefaultResponseRewriterRegistry(null, null), new NoOpInvalidationService(),
-        new HttpResponseMetadataHelper());
+            new DefaultResponseRewriterRegistry(null, null), new NoOpInvalidationService(),
+            new HttpResponseMetadataHelper());
     HttpResponse response = pipeline.execute(request);
     assertEquals(1, response.getMetadata().size());
     assertEquals("q7u8tbpmidtu1gtqhjv0kb0rvo",
-        response.getMetadata().get(HttpResponseMetadataHelper.DATA_HASH));
+            response.getMetadata().get(HttpResponseMetadataHelper.DATA_HASH));
     assertEquals(date, response.getHeader("Date"));
     assertEquals(roundToSeconds(90000 - 1), roundToSeconds(response.getCacheTtl() - 1));
   }
 
   @Test
   public void verifyFixedDate() throws Exception {
-    HttpRequest request = new HttpRequest(DEFAULT_URI)
-        .setAuthType(AuthType.NONE);
+    HttpRequest request = new HttpRequest(DEFAULT_URI).setAuthType(AuthType.NONE);
 
     int time = roundToSeconds(HttpResponseTest.timeSource.currentTimeMillis());
-    String date = DateUtil.formatRfc1123Date(1000L * time
-        - 1000 - DefaultRequestPipeline.DEFAULT_DRIFT_LIMIT_MS);
-    HttpResponseBuilder builder = new HttpResponseBuilder()
-        .setCacheTtl(100)
-        .addHeader("Date", date);
+    String date = DateUtil.formatRfc1123Date(1000L * time - 1000
+            - DefaultRequestPipeline.DEFAULT_DRIFT_LIMIT_MS);
+    HttpResponseBuilder builder = new HttpResponseBuilder().setCacheTtl(100)
+            .addHeader("Date", date);
     builder.setContent("response");
 
     fetcher.response = builder.create();
 
     RequestPipeline pipeline = new DefaultRequestPipeline(fetcher, cache, oauth, oauth2,
-        new DefaultResponseRewriterRegistry(null, null), new NoOpInvalidationService(),
-        new HttpResponseMetadataHelper());
+            new DefaultResponseRewriterRegistry(null, null), new NoOpInvalidationService(),
+            new HttpResponseMetadataHelper());
     HttpResponse response = pipeline.execute(request);
     // Verify time is current time instead of expired
     assertEquals(DateUtil.formatRfc1123Date(1000L * time), response.getHeader("Date"));
     assertEquals(roundToSeconds(100000 - 1), roundToSeconds(response.getCacheTtl() - 1));
   }
 
-
   @Test
   public void authTypeNoneWasCached() throws Exception {
-    HttpRequest request = new HttpRequest(DEFAULT_URI)
-        .setAuthType(AuthType.NONE);
+    HttpRequest request = new HttpRequest(DEFAULT_URI).setAuthType(AuthType.NONE);
 
     HttpResponse cached = new HttpResponse("cached");
     cache.data.put(DEFAULT_URI, cached);
@@ -146,8 +139,7 @@ public class DefaultRequestPipelineTest {
 
   @Test
   public void authTypeNoneWasCachedButStale() throws Exception {
-    HttpRequest request = new HttpRequest(DEFAULT_URI)
-        .setAuthType(AuthType.NONE);
+    HttpRequest request = new HttpRequest(DEFAULT_URI).setAuthType(AuthType.NONE);
 
     HttpResponse cached = new HttpResponseBuilder().setStrictNoCache().create();
     cache.data.put(DEFAULT_URI, cached);
@@ -164,15 +156,13 @@ public class DefaultRequestPipelineTest {
     assertEquals(1, cache.writeCount);
     assertEquals(1, fetcher.fetchCount);
     assertEquals(1, response.getMetadata().size());
-    assertEquals("fetched",
-        response.getMetadata().get(HttpResponseMetadataHelper.DATA_HASH));
+    assertEquals("fetched", response.getMetadata().get(HttpResponseMetadataHelper.DATA_HASH));
 
   }
 
   @Test
   public void authTypeNoneStaleCachedServed() throws Exception {
-    HttpRequest request = new HttpRequest(DEFAULT_URI)
-        .setAuthType(AuthType.NONE);
+    HttpRequest request = new HttpRequest(DEFAULT_URI).setAuthType(AuthType.NONE);
 
     HttpResponse cached = new HttpResponseBuilder().setCacheTtl(-1).create();
     cache.data.put(DEFAULT_URI, cached);
@@ -190,13 +180,9 @@ public class DefaultRequestPipelineTest {
 
   @Test
   public void authTypeNoneWasCachedErrorStale() throws Exception {
-    HttpRequest request = new HttpRequest(DEFAULT_URI)
-        .setAuthType(AuthType.NONE);
+    HttpRequest request = new HttpRequest(DEFAULT_URI).setAuthType(AuthType.NONE);
 
-    HttpResponse cached = new HttpResponseBuilder()
-        .setCacheTtl(-1)
-        .setHttpStatusCode(401)
-        .create();
+    HttpResponse cached = new HttpResponseBuilder().setCacheTtl(-1).setHttpStatusCode(401).create();
     cache.data.put(DEFAULT_URI, cached);
 
     HttpResponse fetched = HttpResponse.error();
@@ -214,9 +200,8 @@ public class DefaultRequestPipelineTest {
 
   @Test
   public void authTypeNoneIgnoreCache() throws Exception {
-    HttpRequest request = new HttpRequest(DEFAULT_URI)
-        .setAuthType(AuthType.NONE)
-        .setIgnoreCache(true);
+    HttpRequest request = new HttpRequest(DEFAULT_URI).setAuthType(AuthType.NONE).setIgnoreCache(
+            true);
 
     HttpResponse fetched = new HttpResponse("fetched");
     fetcher.response = fetched;
@@ -232,8 +217,7 @@ public class DefaultRequestPipelineTest {
 
   @Test
   public void authTypeOAuthNotCached() throws Exception {
-    HttpRequest request = new HttpRequest(DEFAULT_URI)
-        .setAuthType(AuthType.OAUTH);
+    HttpRequest request = new HttpRequest(DEFAULT_URI).setAuthType(AuthType.OAUTH);
 
     oauth.httpResponse = new HttpResponse("oauth result");
 
@@ -250,8 +234,7 @@ public class DefaultRequestPipelineTest {
 
   @Test
   public void authTypeOAuthWasCached() throws Exception {
-    HttpRequest request = new HttpRequest(DEFAULT_URI)
-        .setAuthType(AuthType.OAUTH);
+    HttpRequest request = new HttpRequest(DEFAULT_URI).setAuthType(AuthType.OAUTH);
 
     HttpResponse cached = new HttpResponse("cached");
     cache.data.put(DEFAULT_URI, cached);
@@ -266,17 +249,18 @@ public class DefaultRequestPipelineTest {
   }
 
   private static int roundToSeconds(long ts) {
-    return (int)(ts / 1000);
+    return (int) (ts / 1000);
   }
 
   @Test
   public void testFixedDateOk() throws Exception {
     int time = roundToSeconds(HttpResponseTest.timeSource.currentTimeMillis());
     HttpResponse response = new HttpResponseBuilder()
-        .addHeader("Date", DateUtil.formatRfc1123Date(1000L * time
-            + 1000 - DefaultRequestPipeline.DEFAULT_DRIFT_LIMIT_MS))
-        .setCacheTtl(100)
-        .create();
+            .addHeader(
+                    "Date",
+                    DateUtil.formatRfc1123Date(1000L * time + 1000
+                            - DefaultRequestPipeline.DEFAULT_DRIFT_LIMIT_MS)).setCacheTtl(100)
+            .create();
 
     HttpResponse newResponse = DefaultRequestPipeline.maybeFixDriftTime(response);
     assertSame(response, newResponse);
@@ -286,32 +270,34 @@ public class DefaultRequestPipelineTest {
   public void testFixedDateOld() throws Exception {
     int time = roundToSeconds(HttpResponseTest.timeSource.currentTimeMillis());
     HttpResponse response = new HttpResponseBuilder()
-        .addHeader("Date", DateUtil.formatRfc1123Date(1000L * time
-            - 1000 - DefaultRequestPipeline.DEFAULT_DRIFT_LIMIT_MS))
-        .setCacheTtl(100)
-        .create();
+            .addHeader(
+                    "Date",
+                    DateUtil.formatRfc1123Date(1000L * time - 1000
+                            - DefaultRequestPipeline.DEFAULT_DRIFT_LIMIT_MS)).setCacheTtl(100)
+            .create();
 
     response = DefaultRequestPipeline.maybeFixDriftTime(response);
     // Verify that the old time is ignored:
     assertEquals(time + 100, roundToSeconds(response.getCacheExpiration()));
     assertEquals(DateUtil.formatRfc1123Date(HttpResponseTest.timeSource.currentTimeMillis()),
-        response.getHeader("Date"));
+            response.getHeader("Date"));
   }
 
   @Test
   public void testFixedDateNew() throws Exception {
     int time = roundToSeconds(HttpResponseTest.timeSource.currentTimeMillis());
     HttpResponse response = new HttpResponseBuilder()
-        .addHeader("Date", DateUtil.formatRfc1123Date(1000L * time
-            + 1000 + DefaultRequestPipeline.DEFAULT_DRIFT_LIMIT_MS))
-        .setCacheTtl(100)
-        .create();
+            .addHeader(
+                    "Date",
+                    DateUtil.formatRfc1123Date(1000L * time + 1000
+                            + DefaultRequestPipeline.DEFAULT_DRIFT_LIMIT_MS)).setCacheTtl(100)
+            .create();
 
     response = DefaultRequestPipeline.maybeFixDriftTime(response);
     // Verify that the old time is ignored:
     assertEquals(time + 100, roundToSeconds(response.getCacheExpiration()));
     assertEquals(DateUtil.formatRfc1123Date(HttpResponseTest.timeSource.currentTimeMillis()),
-        response.getHeader("Date"));
+            response.getHeader("Date"));
   }
 
   public static class FakeHttpFetcher implements HttpFetcher {
@@ -319,8 +305,7 @@ public class DefaultRequestPipelineTest {
     protected HttpResponse response;
     protected int fetchCount = 0;
 
-    protected FakeHttpFetcher() {
-    }
+    protected FakeHttpFetcher() {}
 
     public HttpResponse fetch(HttpRequest request) throws GadgetException {
       fetchCount++;
@@ -337,8 +322,7 @@ public class DefaultRequestPipelineTest {
     protected int writeCount = 0;
     protected int readCount = 0;
 
-    protected FakeHttpCache() {
-    }
+    protected FakeHttpCache() {}
 
     public boolean addResponse(HttpRequest request, HttpResponse response) {
       writeCount++;
@@ -365,9 +349,7 @@ public class DefaultRequestPipelineTest {
     protected HttpRequest httpRequest;
     protected HttpResponse httpResponse;
 
-    protected FakeOAuthRequestProvider() {
-    }
-
+    protected FakeOAuthRequestProvider() {}
 
     private final OAuthRequest oauthRequest = new OAuthRequest(null, null) {
       @Override
@@ -383,17 +365,16 @@ public class DefaultRequestPipelineTest {
     }
 
   }
-  
+
   public static class FakeOAuth2RequestProvider implements Provider<OAuth2Request> {
     protected int fetchCount = 0;
     protected HttpRequest httpRequest;
     protected HttpResponse httpResponse;
 
-    protected FakeOAuth2RequestProvider() {
-    }
+    protected FakeOAuth2RequestProvider() {}
 
-
-    private final OAuth2Request oauth2Request = new BasicOAuth2Request(null, null, null, null, null, null, null, false) {
+    private final OAuth2Request oauth2Request = new BasicOAuth2Request(null, null, null, null,
+            null, null, null, false, null) {
       @Override
       public HttpResponse fetch(HttpRequest request) {
         fetchCount++;

@@ -44,7 +44,7 @@ public class ClientCredentialsGrantTypeHandler implements GrantRequestHandler {
 
   @Inject
   public ClientCredentialsGrantTypeHandler(
-      final List<ClientAuthenticationHandler> clientAuthenticationHandlers) {
+          final List<ClientAuthenticationHandler> clientAuthenticationHandlers) {
     this.clientAuthenticationHandlers = clientAuthenticationHandlers;
   }
 
@@ -61,7 +61,7 @@ public class ClientCredentialsGrantTypeHandler implements GrantRequestHandler {
       secret = new String(secretBytes, "UTF-8");
     } catch (final UnsupportedEncodingException e) {
       throw new OAuth2RequestException(OAuth2Error.CLIENT_CREDENTIALS_PROBLEM,
-          "error getting authorization body", e);
+              "error getting authorization body", e);
     }
     queryParams.put(OAuth2Message.CLIENT_ID, clientId);
     queryParams.put(OAuth2Message.CLIENT_SECRET, secret);
@@ -77,11 +77,11 @@ public class ClientCredentialsGrantTypeHandler implements GrantRequestHandler {
   }
 
   public HttpRequest getAuthorizationRequest(final OAuth2Accessor accessor,
-      final String completeAuthorizationUrl) throws OAuth2RequestException {
+          final String completeAuthorizationUrl) throws OAuth2RequestException {
 
     if ((completeAuthorizationUrl == null) || (completeAuthorizationUrl.length() == 0)) {
       throw new OAuth2RequestException(ClientCredentialsGrantTypeHandler.ERROR,
-          "completeAuthorizationUrl is null", null);
+              "completeAuthorizationUrl is null", null);
     }
 
     final HttpRequest request = new HttpRequest(Uri.parse(completeAuthorizationUrl));
@@ -90,27 +90,27 @@ public class ClientCredentialsGrantTypeHandler implements GrantRequestHandler {
 
     if (accessor == null) {
       throw new OAuth2RequestException(ClientCredentialsGrantTypeHandler.ERROR, "accessor is null",
-          null);
+              null);
     }
 
     if (!accessor.isValid() || accessor.isErrorResponse() || accessor.isRedirecting()) {
       throw new OAuth2RequestException(ClientCredentialsGrantTypeHandler.ERROR,
-          "accessor is invalid", null);
+              "accessor is invalid", null);
     }
 
     if (!accessor.getGrantType().equalsIgnoreCase(OAuth2Message.CLIENT_CREDENTIALS)) {
       throw new OAuth2RequestException(ClientCredentialsGrantTypeHandler.ERROR,
-          "grant type is not client_credentials", null);
+              "grant type is not client_credentials", null);
     }
 
     for (final ClientAuthenticationHandler clientAuthenticationHandler : this.clientAuthenticationHandlers) {
       if (clientAuthenticationHandler.geClientAuthenticationType().equalsIgnoreCase(
-          accessor.getClientAuthenticationType())) {
+              accessor.getClientAuthenticationType())) {
         final OAuth2HandlerError error = clientAuthenticationHandler.addOAuth2Authentication(
-            request, accessor);
+                request, accessor);
         if (error != null) {
           throw new OAuth2RequestException(error.getError(), error.getContextMessage(),
-              error.getCause());
+                  error.getCause());
         }
       }
     }
@@ -119,7 +119,7 @@ public class ClientCredentialsGrantTypeHandler implements GrantRequestHandler {
       request.setPostBody(this.getAuthorizationBody(accessor).getBytes("UTF-8"));
     } catch (final UnsupportedEncodingException e) {
       throw new OAuth2RequestException(OAuth2Error.CLIENT_CREDENTIALS_PROBLEM,
-          "ClientCredentialsGrantTypeHandler - exception setting post body", e);
+              "ClientCredentialsGrantTypeHandler - exception setting post body", e);
     }
 
     return request;
@@ -129,17 +129,17 @@ public class ClientCredentialsGrantTypeHandler implements GrantRequestHandler {
 
     if (accessor == null) {
       throw new OAuth2RequestException(ClientCredentialsGrantTypeHandler.ERROR, "accessor is null",
-          null);
+              null);
     }
 
     if (!accessor.isValid() || accessor.isErrorResponse() || accessor.isRedirecting()) {
       throw new OAuth2RequestException(ClientCredentialsGrantTypeHandler.ERROR,
-          "accessor is invalid", null);
+              "accessor is invalid", null);
     }
 
     if (!accessor.getGrantType().equalsIgnoreCase(OAuth2Message.CLIENT_CREDENTIALS)) {
       throw new OAuth2RequestException(ClientCredentialsGrantTypeHandler.ERROR,
-          "grant type is not client_credentials", null);
+              "grant type is not client_credentials", null);
     }
 
     String ret;
@@ -158,10 +158,15 @@ public class ClientCredentialsGrantTypeHandler implements GrantRequestHandler {
         queryParams.put(OAuth2Message.SCOPE, scope);
       }
 
+      // add any additional parameters
+      for (Map.Entry<String, String> entry : accessor.getAdditionalRequestParams().entrySet()) {
+        queryParams.put(entry.getKey(), entry.getValue());
+      }
+
       ret = OAuth2Utils.buildUrl(accessor.getTokenUrl(), queryParams, null);
     } catch (final UnsupportedEncodingException e) {
       throw new OAuth2RequestException(OAuth2Error.CLIENT_CREDENTIALS_PROBLEM,
-          "problem getting complete url", e);
+              "problem getting complete url", e);
     }
 
     return ret;

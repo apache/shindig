@@ -21,6 +21,8 @@ import org.apache.shindig.gadgets.oauth2.OAuth2Accessor;
 import org.apache.shindig.gadgets.oauth2.OAuth2Error;
 import org.apache.shindig.gadgets.oauth2.OAuth2Message;
 
+import java.util.Map;
+
 /**
  * 
  * See {@link ClientAuthenticationHandler}
@@ -31,11 +33,10 @@ import org.apache.shindig.gadgets.oauth2.OAuth2Message;
 public class StandardAuthenticationHandler implements ClientAuthenticationHandler {
   private static final OAuth2Error ERROR = OAuth2Error.AUTHENTICATION_PROBLEM;
 
-  public StandardAuthenticationHandler() {
-  }
+  public StandardAuthenticationHandler() {}
 
   public OAuth2HandlerError addOAuth2Authentication(final HttpRequest request,
-      final OAuth2Accessor accessor) {
+          final OAuth2Accessor accessor) {
     try {
       if (request == null) {
         return StandardAuthenticationHandler.getError("request is null");
@@ -67,6 +68,11 @@ public class StandardAuthenticationHandler implements ClientAuthenticationHandle
       request.setParam(OAuth2Message.CLIENT_ID, clientId);
       request.setHeader(OAuth2Message.CLIENT_SECRET, secret);
       request.setParam(OAuth2Message.CLIENT_SECRET, secret);
+
+      // add any additional parameters
+      for (Map.Entry<String, String> entry : accessor.getAdditionalRequestParams().entrySet()) {
+        request.setParam(entry.getKey(), entry.getValue());
+      }
 
       return null;
     } catch (final Exception e) {

@@ -48,8 +48,7 @@ import com.google.inject.name.Named;
  */
 public class OAuth2Module extends AbstractModule {
   private static final String CLASS_NAME = OAuth2Module.class.getName();
-  static final FilteredLogger LOG = FilteredLogger
-      .getFilteredLogger(OAuth2Module.CLASS_NAME);
+  static final FilteredLogger LOG = FilteredLogger.getFilteredLogger(OAuth2Module.CLASS_NAME);
 
   private static final String OAUTH2_IMPORT = "shindig.oauth2.import";
   private static final String OAUTH2_IMPORT_CLEAN = "shindig.oauth2.import.clean";
@@ -65,15 +64,17 @@ public class OAuth2Module extends AbstractModule {
     private final List<ResourceRequestHandler> resourceRequestHandlers;
     private final List<TokenEndpointResponseHandler> tokenEndpointResponseHandlers;
     private final boolean sendTraceToClient;
+    private final OAuth2RequestParameterGenerator requestParameterGenerator;
 
     @Inject
     public OAuth2RequestProvider(final OAuth2FetcherConfig config, final HttpFetcher fetcher,
-        final List<AuthorizationEndpointResponseHandler> authorizationEndpointResponseHandlers,
-        final List<ClientAuthenticationHandler> clientAuthenticationHandlers,
-        final List<GrantRequestHandler> grantRequestHandlers,
-        final List<ResourceRequestHandler> resourceRequestHandlers,
-        final List<TokenEndpointResponseHandler> tokenEndpointResponseHandlers,
-        @Named(OAuth2Module.SEND_TRACE_TO_CLIENT) final boolean sendTraceToClient) {
+            final List<AuthorizationEndpointResponseHandler> authorizationEndpointResponseHandlers,
+            final List<ClientAuthenticationHandler> clientAuthenticationHandlers,
+            final List<GrantRequestHandler> grantRequestHandlers,
+            final List<ResourceRequestHandler> resourceRequestHandlers,
+            final List<TokenEndpointResponseHandler> tokenEndpointResponseHandlers,
+            @Named(OAuth2Module.SEND_TRACE_TO_CLIENT) final boolean sendTraceToClient,
+            final OAuth2RequestParameterGenerator requestParameterGenerator) {
       this.config = config;
       this.fetcher = fetcher;
       this.authorizationEndpointResponseHandlers = authorizationEndpointResponseHandlers;
@@ -82,13 +83,15 @@ public class OAuth2Module extends AbstractModule {
       this.resourceRequestHandlers = resourceRequestHandlers;
       this.tokenEndpointResponseHandlers = tokenEndpointResponseHandlers;
       this.sendTraceToClient = sendTraceToClient;
+      this.requestParameterGenerator = requestParameterGenerator;
     }
 
     public OAuth2Request get() {
       return new BasicOAuth2Request(this.config, this.fetcher,
-          this.authorizationEndpointResponseHandlers, this.clientAuthenticationHandlers,
-          this.grantRequestHandlers, this.resourceRequestHandlers,
-          this.tokenEndpointResponseHandlers, this.sendTraceToClient);
+              this.authorizationEndpointResponseHandlers, this.clientAuthenticationHandlers,
+              this.grantRequestHandlers, this.resourceRequestHandlers,
+              this.tokenEndpointResponseHandlers, this.sendTraceToClient,
+              this.requestParameterGenerator);
     }
   }
 
@@ -99,12 +102,12 @@ public class OAuth2Module extends AbstractModule {
 
     @Inject
     public OAuth2StoreProvider(
-        @Named(OAuth2Module.OAUTH2_REDIRECT_URI) final String globalRedirectUri,
-        @Named(OAuth2Module.OAUTH2_IMPORT) final boolean importFromConfig,
-        @Named(OAuth2Module.OAUTH2_IMPORT_CLEAN) final boolean importClean,
-        final Authority authority, final OAuth2Cache cache, final OAuth2Persister persister,
-        final OAuth2Encrypter encrypter,
-        @Nullable @Named("shindig.contextroot") final String contextRoot) {
+            @Named(OAuth2Module.OAUTH2_REDIRECT_URI) final String globalRedirectUri,
+            @Named(OAuth2Module.OAUTH2_IMPORT) final boolean importFromConfig,
+            @Named(OAuth2Module.OAUTH2_IMPORT_CLEAN) final boolean importClean,
+            final Authority authority, final OAuth2Cache cache, final OAuth2Persister persister,
+            final OAuth2Encrypter encrypter,
+            @Nullable @Named("shindig.contextroot") final String contextRoot) {
 
       String redirectUri = globalRedirectUri;
       if (authority != null) {
@@ -118,7 +121,7 @@ public class OAuth2Module extends AbstractModule {
       if (importFromConfig) {
         try {
           final OAuth2Persister source = new JSONOAuth2Persister(encrypter, authority,
-              globalRedirectUri, contextRoot);
+                  globalRedirectUri, contextRoot);
           BasicOAuth2Store.runImport(source, persister, importClean);
         } catch (final OAuth2PersistenceException e) {
           if (OAuth2Module.LOG.isLoggable()) {
@@ -145,5 +148,6 @@ public class OAuth2Module extends AbstractModule {
   protected void configure() {
     this.bind(OAuth2Store.class).toProvider(OAuth2StoreProvider.class);
     this.bind(OAuth2Request.class).toProvider(OAuth2RequestProvider.class);
+    this.bind(OAuth2RequestParameterGenerator.class).to(BasicOAuth2RequestParameterGenerator.class);
   }
 }

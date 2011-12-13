@@ -38,13 +38,12 @@ public class CodeGrantTypeHandler implements GrantRequestHandler {
   private static final OAuth2Error ERROR = OAuth2Error.CODE_GRANT_PROBLEM;
 
   @Inject
-  public CodeGrantTypeHandler() {
-  }
+  public CodeGrantTypeHandler() {}
 
   public HttpRequest getAuthorizationRequest(final OAuth2Accessor accessor,
-      final String completeAuthorizationUrl) throws OAuth2RequestException {
+          final String completeAuthorizationUrl) throws OAuth2RequestException {
     throw new OAuth2RequestException(CodeGrantTypeHandler.ERROR,
-        "inappropriate call to CodeGrantTypeHandler.getAuthorizationRequest()", null);
+            "inappropriate call to CodeGrantTypeHandler.getAuthorizationRequest()", null);
   }
 
   public String getCompleteUrl(final OAuth2Accessor accessor) throws OAuth2RequestException {
@@ -76,6 +75,11 @@ public class CodeGrantTypeHandler implements GrantRequestHandler {
     final String scope = accessor.getScope();
     if ((scope != null) && (scope.length() > 0)) {
       queryParams.put(OAuth2Message.SCOPE, scope);
+    }
+
+    // add any additional parameters
+    for (Map.Entry<String, String> entry : accessor.getAdditionalRequestParams().entrySet()) {
+      queryParams.put(entry.getKey(), entry.getValue());
     }
 
     return OAuth2Utils.buildUrl(accessor.getAuthorizationUrl(), queryParams, null);
