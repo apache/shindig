@@ -1,9 +1,7 @@
 <?php
-namespace apache\shindig\test;
+namespace apache\shindig\common\sample;
 
-use apache\shindig\common\Config;
-
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -21,7 +19,6 @@ use apache\shindig\common\Config;
  * specific language governing permissions and limitations
  * under the License.
  */
-include __DIR__ . "/../src/apache/shindig/bootstrap.php";
 
-// load the test config instead of the production one
-Config::loadConfig(__DIR__. '/../config/test.php');
+class BasicSecurityTokenException extends \Exception {
+}

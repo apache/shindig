@@ -24,7 +24,7 @@
          verbose="true">
   <testsuites>
     <testsuite name="shindig-php">
-      <directory>test/gadgets</directory>
+      <directory>test</directory>
     </testsuite>
   </testsuites>
 

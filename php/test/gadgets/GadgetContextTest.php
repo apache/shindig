@@ -58,6 +58,9 @@ class GadgetContextTest extends \PHPUnit_Framework_TestCase {
     $this->orgServer = $_SERVER;
     
     $_GET = $this->testData;
+    
+    $_SERVER['HTTP_HOST'] = 'localhost';
+    
     $this->GadgetContext = new GadgetContext($this->gadgetRenderingContext);
   
   }
@@ -71,6 +74,8 @@ class GadgetContextTest extends \PHPUnit_Framework_TestCase {
     $_GET = $this->orgGet;
     $_POST = $this->orgPost;
     $_SERVER = $this->orgServer;
+    
+    unset($_SERVER['HTTP_HOST']);
     
     parent::tearDown();
   }

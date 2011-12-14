@@ -143,7 +143,7 @@ class BasicSecurityToken extends SecurityToken {
    */
   public function getAppId() {
     if ($this->isAnonymous()) {
-      throw new \Exception("Can't get appId from an anonymous token");
+      throw new BasicSecurityTokenException("Can't get appId from an anonymous token");
     }
     return $this->tokenData[$this->APP_KEY];
   }
@@ -153,7 +153,7 @@ class BasicSecurityToken extends SecurityToken {
    */
   public function getDomain() {
     if ($this->isAnonymous()) {
-      throw new \Exception("Can't get domain from an anonymous token");
+      throw new BasicSecurityTokenException("Can't get domain from an anonymous token");
     }
     return $this->tokenData[$this->DOMAIN_KEY];
   }
@@ -163,7 +163,7 @@ class BasicSecurityToken extends SecurityToken {
    */
   public function getOwnerId() {
     if ($this->isAnonymous()) {
-      throw new \Exception("Can't get ownerId from an anonymous token");
+      throw new BasicSecurityTokenException("Can't get ownerId from an anonymous token");
     }
     return $this->tokenData[$this->OWNER_KEY];
   }
@@ -173,7 +173,7 @@ class BasicSecurityToken extends SecurityToken {
    */
   public function getViewerId() {
     if ($this->isAnonymous()) {
-      throw new \Exception("Can't get viewerId from an anonymous token");
+      throw new BasicSecurityTokenException("Can't get viewerId from an anonymous token");
     }
     return $this->tokenData[$this->VIEWER_KEY];
   }
@@ -183,7 +183,7 @@ class BasicSecurityToken extends SecurityToken {
    */
   public function getAppUrl() {
     if ($this->isAnonymous()) {
-      throw new \Exception("Can't get appUrl from an anonymous token");
+      throw new BasicSecurityTokenException("Can't get appUrl from an anonymous token");
     }
     return urldecode($this->tokenData[$this->APPURL_KEY]);
   }
@@ -193,10 +193,10 @@ class BasicSecurityToken extends SecurityToken {
    */
   public function getModuleId() {
     if ($this->isAnonymous()) {
-      throw new \Exception("Can't get moduleId from an anonymous token");
+      throw new BasicSecurityTokenException("Can't get moduleId from an anonymous token");
     }
     if (! is_numeric($this->tokenData[$this->MODULE_KEY])) {
-      throw new \Exception("Module ID should be an integer");
+      throw new BasicSecurityTokenException("Module ID should be an integer");
     }
     return $this->tokenData[$this->MODULE_KEY];
   }
@@ -206,7 +206,7 @@ class BasicSecurityToken extends SecurityToken {
    */
   public function getContainer() {
     if ($this->isAnonymous()) {
-      throw new \Exception("Can't get container from an anonymous token");
+      throw new BasicSecurityTokenException("Can't get container from an anonymous token");
     }
     return $this->tokenData[$this->CONTAINER_KEY];
   }

@@ -87,7 +87,7 @@ class BasicSecurityTokenTest extends \PHPUnit_Framework_TestCase {
    */
   public function testGetAppId() {
     $this->assertEquals('app', $this->BasicSecurityToken->getAppId());
-    $this->setExpectedException('BasicSecurityTokenException');
+    $this->setExpectedException('apache\shindig\common\sample\BasicSecurityTokenException');
     $this->anonymousToken->getAppId();
   }
 
@@ -96,7 +96,7 @@ class BasicSecurityTokenTest extends \PHPUnit_Framework_TestCase {
    */
   public function testGetAppUrl() {
     $this->assertEquals('appUrl', $this->BasicSecurityToken->getAppUrl());
-    $this->setExpectedException('BasicSecurityTokenException');
+    $this->setExpectedException('apache\shindig\common\sample\BasicSecurityTokenException');
     $this->anonymousToken->getAppUrl();
   }
 
@@ -105,7 +105,7 @@ class BasicSecurityTokenTest extends \PHPUnit_Framework_TestCase {
    */
   public function testGetDomain() {
     $this->assertEquals('domain', $this->BasicSecurityToken->getDomain());
-    $this->setExpectedException('BasicSecurityTokenException');
+    $this->setExpectedException('apache\shindig\common\sample\BasicSecurityTokenException');
     $this->anonymousToken->getDomain();
   }
 
@@ -114,7 +114,7 @@ class BasicSecurityTokenTest extends \PHPUnit_Framework_TestCase {
    */
   public function testGetModuleId() {
     $this->assertEquals(1, $this->BasicSecurityToken->getModuleId());
-    $this->setExpectedException('BasicSecurityTokenException');
+    $this->setExpectedException('apache\shindig\common\sample\BasicSecurityTokenException');
     $this->anonymousToken->getModuleId();
   }
 
@@ -123,7 +123,7 @@ class BasicSecurityTokenTest extends \PHPUnit_Framework_TestCase {
    */
   public function testGetOwnerId() {
     $this->assertEquals('owner', $this->BasicSecurityToken->getOwnerId());
-    $this->setExpectedException('BasicSecurityTokenException');
+    $this->setExpectedException('apache\shindig\common\sample\BasicSecurityTokenException');
     $this->anonymousToken->getOwnerId();
   }
 
@@ -132,7 +132,7 @@ class BasicSecurityTokenTest extends \PHPUnit_Framework_TestCase {
    */
   public function testGetViewerId() {
     $this->assertEquals('viewer', $this->BasicSecurityToken->getViewerId());
-    $this->setExpectedException('BasicSecurityTokenException');
+    $this->setExpectedException('apache\shindig\common\sample\BasicSecurityTokenException');
     $this->anonymousToken->getViewerId();
   }
 

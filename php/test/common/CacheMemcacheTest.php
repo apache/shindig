@@ -54,7 +54,7 @@ class CacheMemcacheTest extends \PHPUnit_Framework_TestCase {
   protected function setUp() {
     if (!extension_loaded('memcache')) {
       $message = 'memcache requires the memcache extention';
-      throw new \PHPUnit_Framework_SkippedTestSuiteError($message);
+      $this->markTestSkipped($message);
     }
     parent::setUp();
     $this->time = new MockRequestTimeMc();
@@ -62,11 +62,11 @@ class CacheMemcacheTest extends \PHPUnit_Framework_TestCase {
       $this->cache = Cache::createCache('apache\shindig\common\sample\CacheStorageMemcache', 'TestCache', $this->time);
     } catch (\Exception $e) {
       $message = 'memcache server can not connect';
-      throw new \PHPUnit_Framework_SkippedTestSuiteError($message);
+      $this->markTestSkipped($message);
     }
     if (! is_resource($this->cache)) {
       $message = 'memcache server can not connect';
-      throw new \PHPUnit_Framework_SkippedTestSuiteError($message);
+      $this->markTestSkipped($message);
     }
   }
 
