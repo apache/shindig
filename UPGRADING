@@ -18,6 +18,7 @@ details.
 * commons-lang to commons-lang3 3.1
 * ehcache  2.3.2 -> 2.5.0
 * closure-compiler (new) r1592
+* commons-codec 1.5 -> 1.6
 
 FROM 1.0.x TO 2.0.x
 ===================

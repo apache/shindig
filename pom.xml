@@ -221,7 +221,7 @@
       <email>ieb@apache.org</email>
       <organization>ASF</organization>
       <roles>
-        <role>PMC Member</role>
+        <role>Emeritus Mentor</role>
       </roles>
     </developer>
     <developer>
@@ -1550,7 +1550,7 @@
       <dependency>
         <groupId>commons-codec</groupId>
         <artifactId>commons-codec</artifactId>
-        <version>1.5</version>
+        <version>1.6</version>
       </dependency>
       <dependency>
         <groupId>commons-fileupload</groupId>
