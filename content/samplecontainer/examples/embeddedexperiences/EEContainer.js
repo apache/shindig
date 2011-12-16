@@ -29,13 +29,30 @@ $(document).ready(function() {
 var CommonContainer = new osapi.container.Container({});
 CommonContainer.init = new function() {
 
-	CommonContainer.views.createElementForEmbeddedExperience = function(opt_viewTarget) {
-	  return document.getElementById('preview');
-	};
+  CommonContainer.views.createElementForEmbeddedExperience = function(opt_viewTarget, opt_coordinates, opt_rel) {
+    if(opt_viewTarget == 'FLOAT' && opt_coordinates && opt_rel) {
+      var offset = $(opt_rel).offset();
 
-	CommonContainer.views.destroyElement = function(site) {
-	  CommonContainer.ee.close(site);
-	};
+      $('#preview').css({
+        top: (offset.top + opt_coordinates.top) +'px',
+        left: (offset.left + opt_coordinates.left) + 'px',
+        position: 'absolute'
+      });
+    }
+    else {
+      $('#preview').css({
+        top: 'auto',
+        left: 'auto',
+        position: 'static'
+      });
+    }
+
+    return $('#preview').get(0);
+  };
+
+  CommonContainer.views.destroyElement = function(site) {
+    CommonContainer.ee.close(site);
+  };
 }
 
 /**
@@ -44,16 +61,16 @@ CommonContainer.init = new function() {
  * @return void.
  */
 function renderAS(stream) {
-	jQuery.each(stream.list, createAccordianEntry);
-	$('#accordion').accordion({
-		clearStyle: true,
-		active: false,
-		change: function(event, ui) {
-			closeCurrentGadget();
-			onAccordionChange(stream, event, ui);
-		}
+  jQuery.each(stream.list, createAccordianEntry);
+  $('#accordion').accordion({
+    clearStyle: true,
+    active: false,
+    change: function(event, ui) {
+      closeCurrentGadget();
+      onAccordionChange(stream, event, ui);
+    }
 
-	});
+  });
 }
 
 /**
@@ -61,17 +78,17 @@ function renderAS(stream) {
  */
 var currentEESite;
 function closeCurrentGadget() {
-	if (currentEESite)
-		CommonContainer.ee.close(currentEESite);
+  if (currentEESite)
+    CommonContainer.ee.close(currentEESite);
 
-	var preview = document.getElementById('preview');
-	var previewChildren = preview.childNodes;
-	if (previewChildren.length > 0) {
-	  var iframe = previewChildren[0];
-	  var iframeId = iframe.getAttribute('id');
-	  var site = CommonContainer.getGadgetSiteByIframeId_(iframeId);
-	  CommonContainer.ee.close(site);
-	}
+  var preview = $('#preview').get(0);
+  var previewChildren = preview.childNodes;
+  if (previewChildren.length > 0) {
+    var iframe = previewChildren[0];
+    var iframeId = iframe.getAttribute('id');
+    var site = CommonContainer.getGadgetSiteByIframeId_(iframeId);
+    CommonContainer.ee.close(site);
+  }
 }
 
 /**
@@ -83,25 +100,27 @@ function closeCurrentGadget() {
  */
 
 function onAccordionChange(stream, event, ui) {
-	var id = ui.newHeader.context.id;
-	var localStream = stream;
-	var entry = localStream.list[id];
-	var extensions = entry.openSocial;
-	if (extensions) {
-		var embed = extensions.embed;
-		if (embed) {
-			var eeElement = document.getElementById('ee' + id);
-			var urlRenderingParams = {
-					'height' : 400,
-					'width' : 650
-			};
-			currentEESite = CommonContainer.ee.navigate(eeElement, embed,
-					{'urlRenderParams' : urlRenderingParams}, function(site, metaData) {
-					  console.log('Embedded Experiences callback called');
-					  console.log(gadgets.json.stringify(metaData));
-					});
-		}
-	}
+  var id = ui.newHeader.context.id;
+  var localStream = stream;
+  var entry = localStream.list[id];
+  var extensions = entry.openSocial;
+  if (extensions) {
+    var embed = extensions.embed;
+    if (embed) {
+      var eeElement = $('#ee' + id).get(0);
+      var urlRenderingParams = {
+          'height' : 400,
+          'width' : 650
+      };
+      CommonContainer.ee.navigate(eeElement, embed,
+        {'urlRenderParams' : urlRenderingParams}, function(site, metaData) {
+          console.log('Embedded Experiences callback called');
+          console.log(gadgets.json.stringify(metaData));
+          currentEESite = site;
+        }
+      );
+    }
+  }
 
 
 }
@@ -113,10 +132,10 @@ function onAccordionChange(stream, event, ui) {
  * @return void.
  */
 function createAccordianEntry(i, entry) {
-	var result = '<h3 id=' + i + '><a href="#">' + entry.title + '</a></h3><div>';
-	if (entry.body)
-		result = result + '<p>' + entry.body + '</p>';
-	result = result + '<div id="ee' + i + '"></div></div>';
+  var result = '<h3 id=' + i + '><a href="#">' + entry.title + '</a></h3><div>';
+  if (entry.body)
+    result = result + '<p>' + entry.body + '</p>';
+  result = result + '<div id="ee' + i + '"></div></div>';
 
-	$('#accordion').append(result);
+  $('#accordion').append(result);
 }

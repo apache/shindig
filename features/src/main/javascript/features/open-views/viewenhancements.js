@@ -53,12 +53,21 @@ gadgets['window'] = gadgets['window'] || {};
    * @param {Object}
    *          opt_params: These are optional parameters which can be used to
    *          open gadgets. The following parameters may be included in this
-   *          object. {string} view: The view to render. Should be one of the
-   *          views returned by calling gadgets.views.getSupportedViews. If the
-   *          view is not included the default view will be rendered. {string}
-   *          viewTarget: The view that indicates where to open the gadget. For
-   *          example, tab, dialog or modaldialog {Object} viewParams: View
-   *          parameters for the view being rendered.
+   *          object.
+   *            {string} view: The view to render. Should be one of the views
+   *              returned by calling gadgets.views.getSupportedViews. If the
+   *              view is not included the default view will be rendered.
+   *            {string} viewTarget: The view that indicates where to open the
+   *              gadget. For example, tab, dialog or modaldialog
+   *            {Object} viewParams: View parameters for the view being
+   *              rendered.
+   *            {Object} coordinates: Object containing the desired absolute
+   *              positioning css parameters (top|bottom|left|right) with
+   *              appropriate values. All values are relative to the calling
+   *              gadget.
+   *              Do not specify top AND bottom or left AND right parameters to
+   *              indirectly define height and width. Use viewParams for that.
+   *              The result of doing so here is undefined.
    */
 
   gadgets.views.openGadget = function(resultCallback, navigateCallback,
@@ -88,10 +97,19 @@ gadgets['window'] = gadgets['window'] || {};
    *          dataModel: The embedded experiences data model.
    * @param {Object}
    *          opt_params: These are optional parameters which can be used to
-   *          open gadgets. The following parameters may be included in this
-   *          object. {string} viewTarget: The view that indicates where to open
-   *          the gadget. For example, tab, dialog or modaldialog {Object}
-   *          viewParams: View parameters for the view being rendered.
+   *            open gadgets. The following parameters may be included in this
+   *            object.
+   *            {string} viewTarget: The view that indicates where to open the
+   *              gadget. For example, tab, dialog or modaldialog
+   *            {Object} viewParams: View parameters for the view being
+   *              rendered.
+   *            {Object} coordinates: Object containing the desired absolute
+   *              positioning css parameters (top|bottom|left|right) with
+   *              appropriate values. All values are relative to the calling
+   *              gadget.
+   *              Do not specify top AND bottom or left AND right parameters to
+   *              indirectly define height and width. Use viewParams for that.
+   *              The result of doing so here is undefined.
    */
   gadgets.views.openEmbeddedExperience = function(resultCallback,
           navigateCallback, dataModel, opt_params) {
@@ -116,13 +134,19 @@ gadgets['window'] = gadgets['window'] || {};
    *          navigateCallback: Callback function to be called with the
    *          site which has been opened.
    * @param {string=}
-   *          opt_viewTarget: Optional parameter,the view that indicates where
+   *          opt_viewTarget: Optional parameter, the view that indicates where
    *          to open the URL.
+   * @param {Object=} opt_coordinates: Object containing the desired absolute
+   *          positioning css parameters (top|bottom|left|right) with
+   *          appropriate values. All values are relative to the calling
+   *          gadget.
+   *          You may specify top AND bottom or left AND right parameters to
+   *          indirectly define height and width
    */
-  gadgets.views.openUrl = function(url, navigateCallback, opt_viewTarget) {
+   gadgets.views.openUrl = function(url, navigateCallback, opt_viewTarget, opt_coordinates) {
     gadgets.rpc.call('..', 'gadgets.views.openUrl', function(result) {
         navigateCallback.call(this, result);
-      }, url, opt_viewTarget
+      }, url, opt_viewTarget, opt_coordinates
     );
   }
 

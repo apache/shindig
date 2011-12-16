@@ -50,7 +50,7 @@
         }
      </style>
 
-
+	 <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
      <script type="text/javascript">
 
          var currentSite;
@@ -67,10 +67,10 @@
              var result = "";
              for(var i = 0; i < photos.length; i++){
                  count = i+1;
-                 result = result + '<li style="text-decoration: underline; color: blue; cursor: pointer" onclick="showPreviewPhoto(\''+i+'\',\''+context.eeGadget+'\')">Photo '+count+'</li></br>';
+                 result = result + '<li id="photo' + i + '" style="text-decoration: underline; color: blue; cursor: pointer; display:inline-block" onclick="showPreviewPhoto(\''+i+'\',\''+context.eeGadget+'\')">Photo '+count+'</li></br>';
              }
-             document.getElementById('header').innerHTML = context.albumName;
-             document.getElementById("album").innerHTML = result;
+             $('#header').html(context.albumName);
+             $('#album').html(result);
          };
 
          gadgets.util.registerOnLoadHandler(initAlbum);
@@ -95,9 +95,16 @@
                 }
               };
             }
+
+            var coordinates = $('#photo' + index).offset();
+            coordinates.left = coordinates.left + $('#photo' + index).width();
+
             var navigateCallback = function(site, result){currentSite = site; console.log("Nagivate callback");};
             var returnCallback = function(returnValue){console.log("Return Value: " + returnValue);};
-            gadgets.views.openEmbeddedExperience(returnCallback, navigateCallback, eeDataModel, {'viewTarget' : 'preview'});
+            gadgets.views.openEmbeddedExperience(returnCallback, navigateCallback, eeDataModel, {
+              'viewTarget' : index == 0 ? 'preview' : 'FLOAT',
+              'coordinates' : coordinates
+            });
          };
 
          function closePreview(){

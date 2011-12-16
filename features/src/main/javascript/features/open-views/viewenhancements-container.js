@@ -62,13 +62,26 @@
    *          parameter.
    * @param {Object.<string, string|Object>=}
    *          opt_params: These are optional parameters which can be used to
-   *          open gadgets. The following parameters may be included in this
-   *          object. {string} view: The view to render. Should be one of the
-   *          views returned by calling gadgets.views.getSupportedViews. If the
-   *          view is not included the default view will be rendered. {string}
-   *          viewTarget: The view that indicates where to open the gadget. For
-   *          example, tab, dialog or modaldialog {Object} viewParams: View
-   *          parameters for the view being rendered.
+   *            open gadgets. The following parameters may be included in this
+   *            object.
+   *            {string} view: The view to render. Should be one of the
+   *              views returned by calling gadgets.views.getSupportedViews. If
+   *              the view is not included the default view will be rendered.
+   *            {string} viewTarget: The view that indicates where to open the
+   *              gadget. For example, tab, dialog or modaldialog
+   *            {Object} viewParams: View parameters for the view being
+   *              rendered.
+   *            {Object} coordinates: Object containing the desired absolute
+   *              positioning css parameters (top|bottom|left|right) with
+   *              appropriate values. All values are relative to the calling
+   *              gadget.
+   *              Do not specify top AND bottom or left AND right parameters to
+   *              indirectly define height and width, use viewParams for that.
+   *              The result of doing so here is undefined.
+   *              It is expected that coordinates will only be used with
+   *              viewTargets of FLOAT. Containers may implement the behavior
+   *              for other viewTargets, and custom viewTargets at their
+   *              discretion.
    */
   function openGadget(resultCallback, opt_params) {
 
@@ -83,16 +96,23 @@
       gadgetUrl = orig_site.getActiveGadgetHolder().getUrl();
     }
 
-    var view = '';
-    var viewTarget = '';
-    var viewParams = {};
-    if (opt_params !== undefined) {
-      if (opt_params.view !== undefined)
+    var view = '',
+        viewTarget = '',
+        viewParams = {},
+        coordinates,
+        rel;
+    if (opt_params) {
+      if (opt_params.view)
         view = opt_params.view;
-      if (opt_params.viewTarget !== undefined)
+      if (opt_params.viewTarget)
         viewTarget = opt_params.viewTarget;
-      if (opt_params.viewParams !== undefined)
+      if (opt_params.viewParams)
         viewParams = opt_params.viewParams;
+      if(opt_params.coordinates) {
+        coordinates = opt_params.coordinates;
+        rel = context.getGadgetSiteByIframeId_(this.f).getActiveGadgetHolder()
+          .getIframeElement();
+      }
     }
     context.preloadGadget(gadgetUrl, function(result) {
       /*
@@ -112,9 +132,12 @@
       }
 
       var renderParams = {},
-      site = context.newGadgetSite(
-              context.views.createElementForGadget(metadata, view, viewTarget)
-      );
+           site = context.newGadgetSite(
+	     context.views.createElementForGadget(
+               metadata, view, viewTarget, coordinates, rel
+             )
+           );
+
       site.ownerId_ = siteOwnerId;
 
       if (view !== undefined && view !== '') {
@@ -148,27 +171,48 @@
    *          dataModel: The embedded experiences data model.
    * @param {Object}
    *          opt_params: These are optional parameters which can be used to
-   *          open gadgets. The following parameters may be included in this
-   *          object. {string} viewTarget: The view that indicates where to open
-   *          the gadget. For example, tab, dialog or modaldialog {Object}
-   *          viewParams: View parameters for the view being rendered.
+   *            open gadgets. The following parameters may be included in this
+   *            object.
+   *            {string} viewTarget: The view that indicates where to open
+   *              the gadget. For example, tab, dialog or modaldialog
+   *            {Object} viewParams: View parameters for the view being
+   *              rendered.
+   *            {Object} coordinates: Object containing the desired absolute
+   *              positioning css parameters (top|bottom|left|right) with
+   *              appropriate values.  All values are relative to the calling
+   *              gadget.
+   *              Do not specify top AND bottom or left AND right parameters to
+   *              indirectly define height and width. Use viewParams for that.
+   *              The result of doing so here is undefined.
+   *              It is expected that coordinates will only be used with
+   *              viewTargets of FLOAT. Containers may implement the behavior
+   *              for other viewTargets, and custom viewTargets at their
+   *              discretion.
    */
   function openEE(resultCallback, dataModel, opt_params) {
     var navigateCallback = this.callback,
         siteOwnerId = this.f,
         gadgetUrl = dataModel.gadget;
     var navigateEE = function() {
-      var viewTarget = '';
-      var viewParams = {};
-      if (opt_params != undefined) {
-        if (opt_params.viewTarget != undefined)
-          viewTarget = opt_params.viewTarget;
-        if (opt_params.viewParams != undefined)
+      var viewTarget = '',
+          viewParams = {},
+          coordinates,
+          rel;
+      if (opt_params) {
+        if (opt_params.viewTarget)
+	        viewTarget = opt_params.viewTarget;
+        if (opt_params.viewParams)
           viewParams = opt_params.viewParams;
+        if (opt_params.coordinates) {
+          coordinates = opt_params.coordinates;
+          rel = context.getGadgetSiteByIframeId_(siteOwnerId).getActiveGadgetHolder()
+            .getIframeElement();
+        }
       }
 
       var element = context.views.createElementForEmbeddedExperience(
-          viewTarget);
+        viewTarget, coordinates, rel
+      );
 
       var gadgetRenderParams = {};
       gadgetRenderParams[osapi.container.RenderParam.VIEW] =
@@ -231,12 +275,29 @@
    *          url: URL to a web page to open in a URL site in the container.
    *          (Note this should not be a URL to a gadget definition.).
    * @param {string=}
-   *          opt_viewTarget: Optional parameter,the view that indicates where
+   *          opt_viewTarget: Optional parameter, the view that indicates where
    *          to open the URL.
+   * @param {Object=} opt_coordinates: Object containing the desired absolute
+   *          positioning css parameters (top|bottom|left|right) with
+   *          appropriate values.  All values are relative to the calling
+   *          gadget.
+   *          You may specify top AND bottom or left AND right parameters to
+   *          indirectly define height and width.
+   *          It is expected that coordinates will only be used with
+   *          viewTargets of FLOAT. Containers may implement the behavior
+   *          for other viewTargets, and custom viewTargets at their
+   *          discretion.
    * @returns {string} The ID of the site created, if a callback was registered.
    */
-  function openUrl(url, opt_viewTarget) {
-    var content_div = context.views.createElementForUrl(opt_viewTarget);
+  function openUrl(url, opt_viewTarget, opt_coordinates) {
+    var rel;
+    if (opt_coordinates) {
+      rel = context.getGadgetSiteByIframeId_(this.f).getActiveGadgetHolder()
+        .getIframeElement();
+    }
+    var content_div = context.views.createElementForUrl(
+      opt_viewTarget, opt_coordinates, rel
+    );
 
     var site = context.newUrlSite(content_div);
 
@@ -337,9 +398,18 @@
        * @param {string=}
        *          opt_viewTarget: Optional parameter, the view target indicates
        *          where to open the gadget.
+       * @param {Object=}
+       *          opt_coordinates: Object containing the desired absolute
+       *          positioning css parameters (top|bottom|left|right) with
+       *          appropriate values. All values are relative to the calling
+       *          gadget.
+       * @param {Element=}
+       *          opt_rel: The element to which opt_coordinates values are
+       *          relative.
        * @return {Object} The DOM element to place the GadgetSite in.
        */
-      'createElementForGadget' : function(metadata, opt_view, opt_viewTarget) {
+      'createElementForGadget' : function(metadata, opt_view, opt_viewTarget,
+          opt_coordinates, opt_rel) {
         console.log('container need to define createElementForGadget function');
       },
 
@@ -350,12 +420,22 @@
        * @param {string=}
        *          opt_viewTarget:  Optional parameter, the view target indicates
        *          where to open.
+       *
+       * @param {Object=}
+       *          opt_coordinates: Object containing the desired absolute
+       *          positioning css parameters (top|bottom|left|right) with
+       *          appropriate values. All values are relative to the calling
+       *          gadget.
+       * @param {Element=}
+       *          opt_rel: The element to which opt_coordinates values are
+       *          relative.
        * @return {Object} The DOM element to place the embedded experience in.
        */
 
-      'createElementForEmbeddedExperience' : function(opt_viewTarget) {
+      'createElementForEmbeddedExperience' : function(opt_viewTarget,
+          opt_coordinates, opt_rel) {
         console.log('container need to define ' +
-                'createElementForEmbeddedExperience function');
+            'createElementForEmbeddedExperience function');
       },
 
       /**
@@ -365,10 +445,19 @@
        * @param {string=}
        *          opt_view: Optional parameter, the view to open. If not
        *          included the container should use its default view.
+       * @param {Object=}
+       *          opt_coordinates: Object containing the desired absolute
+       *          positioning css parameters (top|bottom|left|right) with
+       *          appropriate values. All values are relative to the calling
+       *          gadget.
+       * @param {Element=}
+       *          opt_rel: The element to which opt_coordinates values are
+       *          relative.
        * @return {Object} The DOM element to place the UrlSite object in.
        */
 
-      'createElementForUrl' : function(opt_viewTarget) {
+      'createElementForUrl' : function(opt_viewTarget, opt_coordinates,
+          opt_rel) {
         console.log('container need to define createElementForUrl function');
       },
 

@@ -44,7 +44,7 @@ ViewEnhancementsTest.inherits(TestCase);
   ViewEnhancementsTest.prototype.testOpenGadget = function() {
     var resultCallback = function() {};
     var navigateCallback = function() {};
-    var params = {};
+    var params = {coordinates: {top: 100, left: 100}};
 
     gadgets.views.openGadget(resultCallback, navigateCallback);
 
@@ -62,7 +62,7 @@ ViewEnhancementsTest.inherits(TestCase);
     var resultCallback = function() {};
     var navigateCallback = function() {};
     var dataModel = {'url': 'http://www.example.com'};
-    var params = {};
+    var params = {coordinates: {top: 100, left: 100}};
 
     gadgets.views.openEmbeddedExperience(resultCallback, navigateCallback,
         dataModel, params);
@@ -90,6 +90,10 @@ ViewEnhancementsTest.inherits(TestCase);
 
     gadgets.views.openUrl(url, navigateCallback, viewTarget);
     this.assertEquals(viewTarget, rpcs[0][4]);
+
+    var coordinates = {coordinates: {top: 100, left: 100}};
+    gadgets.views.openUrl(url, navigateCallback, viewTarget, coordinates);
+    this.assertEquals(coordinates, rpcs[0][5]);
   };
 
   ViewEnhancementsTest.prototype.testClose = function() {
