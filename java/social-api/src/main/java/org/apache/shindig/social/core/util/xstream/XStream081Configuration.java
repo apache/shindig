@@ -23,6 +23,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.thoughtworks.xstream.converters.Converter;
+import com.thoughtworks.xstream.converters.ConverterLookup;
+import com.thoughtworks.xstream.converters.reflection.PureJavaReflectionProvider;
+import com.thoughtworks.xstream.core.DefaultConverterLookup;
 import org.apache.shindig.protocol.DataCollection;
 import org.apache.shindig.protocol.RestfulCollection;
 import org.apache.shindig.protocol.conversion.xstream.ClassFieldMapping;
@@ -339,9 +343,9 @@ public class XStream081Configuration implements XStreamConfiguration {
         getOmitMap(c),
         elementClassMap.get(c));
 
-    AttributeMapper amapper = new AttributeMapper(fmapper);
+    AttributeMapper amapper = new AttributeMapper(fmapper, new DefaultConverterLookup(), rp);
 
-    XStream xstream = new XStream(rp, amapper, driver);
+    XStream xstream = new XStream(rp, driver, getClass().getClassLoader(), amapper);
 
     xstream.registerConverter(new MapConverter(fmapper));
     xstream.registerConverter(new RestfullCollectionConverter(fmapper));

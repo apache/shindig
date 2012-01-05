@@ -21,10 +21,12 @@ import com.thoughtworks.xstream.io.HierarchicalStreamDriver;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 
+import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
+import java.net.URL;
 import java.util.Map;
 
 /**
@@ -88,7 +90,7 @@ public class StackDriver implements HierarchicalStreamDriver {
 
   /**
    * Create a {@link HierarchicalStreamWriter} that tracks the path to the
-   * current element based on a {@link Writer}.
+   * current element based on a {@link java.io.Writer}.
    *
    * @param writer
    *          the underlying writer that will perform the writes.
@@ -114,4 +116,13 @@ public class StackDriver implements HierarchicalStreamDriver {
     return new StackWriterWrapper(parentWriter, writerStack, namespaces);
   }
 
+  @Override
+  public HierarchicalStreamReader createReader(URL url) {
+    return parent.createReader(url);
+  }
+
+  @Override
+  public HierarchicalStreamReader createReader(File file) {
+    return parent.createReader(file);
+  }
 }

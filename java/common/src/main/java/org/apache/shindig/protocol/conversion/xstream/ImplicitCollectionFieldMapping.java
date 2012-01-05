@@ -23,7 +23,7 @@ import com.thoughtworks.xstream.mapper.Mapper.ImplicitCollectionMapping;
  * <p>
  * ItemFieldMapping defines a mapping of a class within a class to an element
  * name. Where classes are tested, the must implement or extend the specified
- * classes, unlike the standard behaviour of XStream they dont need to be the
+ * classes, unlike the standard behaviour of XStream they don't need to be the
  * classes in question.
  * </p>
  * <p>
@@ -113,11 +113,11 @@ public class ImplicitCollectionFieldMapping implements ImplicitCollectionMapping
    * Does this ItemFieldMapping match the supplied classes.
    *
    * @param definedIn
-   *          the class that the target test class is defiend in, this is a real
+   *          the class that the target test class is defined in, this is a real
    *          class
    * @param itemType
    *          the target class, the real class
-   * @return true if the defiendIn class implements the defiendIn class of this
+   * @return true if the definedIn class implements the definedIn class of this
    *         ItemFieldMapping and the itemType class implements the itemType
    *         class of this ItemFieldMapping.
    */
@@ -152,4 +152,8 @@ public class ImplicitCollectionFieldMapping implements ImplicitCollectionMapping
     return itemType;
   }
 
+  @Override
+  public String getKeyFieldName() {
+    return null;
+  }
 }
