@@ -77,17 +77,10 @@
       var urlRenderParams =
         renderParams[osapi.container.ee.RenderParam.URL_RENDER_PARAMS] || {};
       var site = context.newUrlSite(element);
-      context.navigateUrl(site, dataModel.url, urlRenderParams, function(response) {
-        if (opt_callback) {
-          if(response.status >= 400) {
-            //Format the response in a way that is similar to if we were navigating
-            //to a gadget, at least for error handling.  Makes things slightly easier
-            //for callers.
-            response.error = {"code": response.status};
-          }
-          opt_callback(site, response);
-        }
-      });
+      var toReturn = context.navigateUrl(site, dataModel.url, urlRenderParams);
+      if (opt_callback) {
+        opt_callback(toReturn, null);
+      }
     };
 
     /**

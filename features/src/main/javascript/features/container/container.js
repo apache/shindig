@@ -919,34 +919,16 @@ osapi.container.Container.prototype.newUrlSite = function(element) {
 
 
 /**
- * Navigates to a URL.  If an optional callback parameter is supplied the
- * container will first make a HEAD request to the URL and return the result to
- * the callback.  If the callback is undefined than the container will try to
- * render the URL in a site with out making any additional requests to the server.
- * There are several consiquences of supply a callback,
- * but the two most important ones are that there will be extra load on the server and
- * that if the URL requires authentication the HEAD request will fail causing the URL
- * not to render.  As a result you should only supply a callback if you really need
- * to know whether the URL is accessible or not.
+ * Navigates to a URL.
  * @param {osapi.container.UrlSite} site the URL site to render the URL in.
  * @param {string} url the URL to render.
- * @param {Object} renderParams params to augment the rendering. Valid rendering parameters 
+ * @param {Object} renderParams params to augment the rendering. Valid rendering parameters
  * include osapi.container.RenderParam.CLASS, osapi.container.RenderParam.HEIGHT,
  * and osapi.container.RenderParam.WIDTH.
- * @param {function{Object}=} opt_callback optional callback called with the result of making a
- * head request to the URL.
+ * @return {osapi.container.UrlSite} the site you passed in.
  *
  */
-osapi.container.Container.prototype.navigateUrl = function(site, url, renderParams,
-        opt_callback) {
-  if(opt_callback) {
-    osapi.container.util.newHeadRequest(url).execute(function(response) {
-      if(!response.error && (response.status >= 200 && response.status < 300)) {
-        site.render(url, renderParams);
-      }
-      opt_callback(response);
-    });
-  } else {
-    site.render(url, renderParams);
-  }
+osapi.container.Container.prototype.navigateUrl = function(site, url, renderParams) {
+  site.render(url, renderParams);
+  return site;
 };
