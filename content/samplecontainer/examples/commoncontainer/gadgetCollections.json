@@ -79,6 +79,11 @@
              "apps" : [
                       {"name": "oauth2_client_credentials_s", "url": "/samplecontainer/examples/oauth2/shindig_client_credentials.xml"}
                       ]
+             },
+             {
+             "name" : "Test Gadget and Container Domain Configuration",
+             "Description" : "Tests Gadget and Container domain configuration by trying to access container page information from within a gadget",
+             "apps" : [ {"name" : "Domain Test", "url" : "/samplecontainer/examples/ContainerGadgetDomainTest.xml"} ]
              }
          ]
 }
