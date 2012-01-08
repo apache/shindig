@@ -27,12 +27,12 @@
 gadgets.json.flatten = function(obj) {
   var flat = {};
 
-  if (obj === null || obj === undefined) return flat;
+  if (obj === null || typeof obj == 'undefined') return flat;
 
   for (var k in obj) {
     if (obj.hasOwnProperty(k)) {
       var value = obj[k];
-      if (null === value || undefined === value) {
+      if (null === value || typeof value == 'undefined') {
         continue;
       }
       flat[k] = (typeof value === 'string') ? value : gadgets.json.stringify(value);

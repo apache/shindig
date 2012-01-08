@@ -76,7 +76,7 @@ shindig.uri = (function() {
       for (var i = 0, j = params.length; i < j; ++i) {
         var key = params[i][0];
         var val = params[i][1];
-        if (val === undefined) {
+        if (typeof val == 'undefined') {
           continue;
         }
         str.push(esc(key) + (val !== null ? '=' + esc(val) : ''));
@@ -233,10 +233,10 @@ shindig.uri = (function() {
       setQP: setQP,
       setFP: setFP,
       setExistingP: function(key, val) {
-        if (getQP(key, val) !== undefined) {
+        if (typeof(getQP(key, val)) != 'undefined') {
           setQP(key, val);
         }
-        if (getFP(key, val) !== undefined) {
+        if (typeof(getFP(key, val)) != 'undefined') {
           setFP(key, val);
         }
         return bundle;

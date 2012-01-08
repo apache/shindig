@@ -35,7 +35,7 @@ osapi.container.util = {};
  * @return {*} value of json at key, if valid. Otherwise, return defaultValue.
  */
 osapi.container.util.getSafeJsonValue = function(json, key, defaultValue) {
-  return (json[key] != undefined && json[key] != null) ?
+  return (typeof(json[key]) != 'undefined' && json[key] != null) ?
       json[key] : defaultValue;
 };
 

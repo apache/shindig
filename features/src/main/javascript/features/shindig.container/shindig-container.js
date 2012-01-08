@@ -617,7 +617,7 @@ shindig.BaseIfrGadget.prototype.buildUserPrefsDialog = function(content) {
 
 shindig.BaseIfrGadget.prototype.showUserPrefsDialog = function(opt_show) {
   var userPrefsDialog = document.getElementById(this.getUserPrefsDialogId());
-  userPrefsDialog.style.display = (opt_show || opt_show === undefined)
+  userPrefsDialog.style.display = (opt_show || typeof opt_show == 'undefined')
       ? '' : 'none';
 };
 

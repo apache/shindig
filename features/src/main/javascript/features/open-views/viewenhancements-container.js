@@ -90,8 +90,8 @@
         gadgetUrl = '',
         orig_site = context.getGadgetSiteByIframeId_(this.f);
 
-    if (orig_site !== undefined &&
-            orig_site.getActiveGadgetHolder() !== undefined) {
+    if ((typeof orig_site != 'undefined') &&
+            (typeof orig_site.getActiveGadgetHolder() != 'undefined')) {
       // get url through gadget holder
       gadgetUrl = orig_site.getActiveGadgetHolder().getUrl();
     }
@@ -119,7 +119,7 @@
        * result[gadgetUrl] : metadata
        */
       var metadata = {};
-      if (result !== undefined && result[gadgetUrl] !== undefined) {
+      if ((typeof result != 'undefined') && (typeof result[gadgetUrl] != 'undefined')) {
         if (result[gadgetUrl].error) {
           gadgets.error('Failed to preload gadget : ' + gadgetUrl);
           if (navigateCallback != null) {
@@ -140,7 +140,7 @@
 
       site.ownerId_ = siteOwnerId;
 
-      if (view !== undefined && view !== '') {
+      if ((typeof view != 'undefined') && view !== '') {
         renderParams[osapi.container.RenderParam.VIEW] = view;
       }
       renderParams[osapi.container.RenderParam.WIDTH] = '100%';

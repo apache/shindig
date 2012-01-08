@@ -369,7 +369,7 @@ gadgets.io = function() {
         st = shindig.auth.getSecurityToken();
       } else {
         // Unauthenticated GET requests are cacheable
-        if (httpMethod === 'GET' && refreshInterval === undefined) {
+        if (httpMethod === 'GET' && typeof refreshInterval == 'undefined') {
           refreshInterval = 3600;
         }
       }
@@ -522,7 +522,7 @@ gadgets.io = function() {
       }
       var params = opt_params || {};
       var refresh = params['REFRESH_INTERVAL'];
-      if (refresh === undefined) {
+      if (typeof refresh == 'undefined') {
         refresh = '3600';
       }
 

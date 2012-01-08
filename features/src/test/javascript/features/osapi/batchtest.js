@@ -105,7 +105,7 @@ BatchTest.prototype.testEmptyBatch = function() {
   var that = this;
   batch.execute(function(data) {
     that.assertTrue("Data should be returned", data);
-    that.assertTrue("Data should be empty", data.length === undefined);
+    that.assertTrue("Data should be empty", typeof data.length == 'undefined');
   });
 };
 
@@ -115,7 +115,7 @@ BatchTest.prototype.testEmptyBatch = function() {
  * @param fn (Function) The function which should have these properties
  */
 BatchTest.prototype.assertBatchMembers = function(fn) {
-  this.assertTrue('Should have produced a batch', fn !== undefined);
+  this.assertTrue('Should have produced a batch', typeof fn != 'undefined');
   this.assertTrue('Should have an execute method', fn.execute);
   this.assertTrue('Should have an add method', fn.add);
 };

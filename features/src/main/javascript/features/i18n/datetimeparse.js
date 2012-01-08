@@ -890,12 +890,12 @@ gadgets.i18n.DateTimeParse.MyDate_.prototype.setTwoDigitYear_ = function(year)
 gadgets.i18n.DateTimeParse.MyDate_.prototype.calcDate_ =
     function(date, validation) {
   // year 0 is 1 BC, and so on.
-  if (this.era != undefined && this.year != undefined &&
+  if ((typeof this.era != 'undefined') && (typeof this.year != 'undefined') &&
       this.era == 0 && this.year > 0) {
     this.year = -(this.year - 1);
   }
 
-  if (this.year != undefined) {
+  if (typeof this.year != 'undefined') {
     date.setFullYear(this.year);
   }
 
@@ -908,37 +908,37 @@ gadgets.i18n.DateTimeParse.MyDate_.prototype.calcDate_ =
   date.setDate(1); // every month has a 1st day, this can actually be anything
   // less than 29.
 
-  if (this.month != undefined) {
+  if (typeof this.month != 'undefined') {
     date.setMonth(this.month);
   }
 
-  if (this.day != undefined) {
+  if (typeof this.day != 'undefined') {
     date.setDate(this.day);
   } else {
     date.setDate(org_date);
   }
 
-  if (this.hours == undefined) {
+  if (typeof this.hours == 'undefined') {
     this.hours = date.getHours();
   }
 
   // adjust ampm
-  if (this.ampm != undefined && this.ampm > 0) {
+  if ((typeof this.ampm != 'undefined') && this.ampm > 0) {
     if (this.hours < 12) {
       this.hours += 12;
     }
   }
   date.setHours(this.hours);
 
-  if (this.minutes != undefined) {
+  if (typeof this.minutes != 'undefined') {
     date.setMinutes(this.minutes);
   }
 
-  if (this.seconds != undefined) {
+  if (typeof this.seconds != 'undefined') {
     date.setSeconds(this.seconds);
   }
 
-  if (this.milliseconds != undefined) {
+  if (typeof this.milliseconds != 'undefined') {
     date.setMilliseconds(this.milliseconds);
   }
 
@@ -949,16 +949,16 @@ gadgets.i18n.DateTimeParse.MyDate_.prototype.calcDate_ =
   // Don't need to check the day of week as it is guaranteed to be
   // correct or return false below.
   if (validation &&
-      (this.year != undefined && this.year != date.getFullYear() ||
-      this.month != undefined && this.month != date.getMonth() ||
-      this.dayOfMonth != undefined && this.dayOfMonth != date.getDate() ||
+      ((typeof this.year != 'undefined') && this.year != date.getFullYear() ||
+      (typeof this.month != 'undefined') && this.month != date.getMonth() ||
+      (typeof this.dayOfMonth != 'undefined') && this.dayOfMonth != date.getDate() ||
       this.hours >= 24 || this.minutes >= 60 || this.seconds >= 60 ||
       this.milliseconds >= 1000)) {
     return false;
   }
 
   // adjust time zone
-  if (this.tzOffset != undefined) {
+  if (typeof this.tzOffset != 'undefined') {
     var offset = date.getTimezoneOffset();
     date.setTime(date.getTime() + (this.tzOffset - offset) * 60 * 1000);
   }
@@ -975,8 +975,8 @@ gadgets.i18n.DateTimeParse.MyDate_.prototype.calcDate_ =
   }
 
   // dayOfWeek, validation only
-  if (this.dayOfWeek != undefined) {
-    if (this.day == undefined) {
+  if (typeof this.dayOfWeek != 'undefined') {
+    if (typeof this.day == 'undefined') {
       // adjust to the nearest day of the week
       var adjustment = (7 + this.dayOfWeek - date.getDay()) % 7;
       if (adjustment > 3) {

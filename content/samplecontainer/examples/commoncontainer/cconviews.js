@@ -43,10 +43,10 @@ CommonContainer.views.createElementForGadget = function(gadgetMetadata,
   var surfaceView = 'default';
   var viewTarget = 'default';
 
-  if (opt_view !== undefined) {
+  if (typeof opt_view != 'undefined') {
     surfaceView = opt_view;
   }
-  if (opt_viewTarget !== undefined) {
+  if (typeof opt_viewTarget != 'undefined') {
     viewTarget = opt_viewTarget;
   }
 
@@ -77,7 +77,7 @@ CommonContainer.views.createElementForGadget = function(gadgetMetadata,
 CommonContainer.views.createElementForUrl = function(opt_viewTarget) {
   var viewTarget = 'dialog';
 
-  if (opt_viewTarget !== undefined) {
+  if (typeof opt_viewTarget != 'undefined') {
     viewTarget = opt_viewTarget;
   }
 
@@ -138,7 +138,7 @@ function openInDialog(modaldialog, view, isGadget, opt_gadgetMetadata) {
   var dialog = document.createElement('div');
   dialog.id = 'dialog_' + dialog_counter;
 
-  if (opt_gadgetMetadata !== undefined) {
+  if (typeof opt_gadgetMetadata != 'undefined') {
     // open gadget, get the title from gadgetMetadata
     dialog.title = opt_gadgetMetadata['modulePrefs'].title;
   }
@@ -246,7 +246,7 @@ function openInNewTab(gadgetMetadata) {
             // If there is gadget inside, close the gadget
             var iframes = $(this).parent().get(0)
             .getElementsByTagName('iframe');
-            if (iframes.lenth > 0 && iframes[0].id !== undefined) {
+            if (iframes.lenth > 0 && (typeof iframes[0].id != 'undefined')) {
               var site = CommonContainer
               .getGadgetSiteByIframeId_(iframes[0].id);
               CommonContainer.closeGadget(site);
@@ -292,8 +292,8 @@ function openInNewTab(gadgetMetadata) {
 
   // add new tab with new id and new title
   var tab_title = 'new tab ';
-  if (gadgetMetadata !== undefined &&
-          gadgetMetadata['modulePrefs'].title !== undefined) {
+  if ((typeof gadgetMetadata != 'undefined') &&
+          (typeof gadgetMetadata['modulePrefs'].title != 'undefined')) {
     // open gadget, get the title from gadgetMetadata
     tab_title = gadgetMetadata['modulePrefs'].title;
     if (tab_title.length > 7) {
@@ -302,7 +302,7 @@ function openInNewTab(gadgetMetadata) {
   }
   $tabs.tabs('add', '#tabs-' + tab_counter, tab_title);
 
-  if (gadgetMetadata !== undefined) {
+  if (typeof gadgetMetadata != 'undefined') {
     // rendering gadget's header
     var gadgetSiteId = 'gadget-site-' + newTabId;
     var gadgetTemplate = '<div class="portlet">' +
@@ -321,7 +321,7 @@ function openInNewTab(gadgetMetadata) {
   tab_counter++;
 
   // return the div
-  if (gadgetMetadata !== undefined) {
+  if (typeof gadgetMetadata != 'undefined') {
     return document.getElementById('gadget-site-' + newTabId);
   } else {
     return document.getElementById(tab_content_id);
@@ -343,7 +343,7 @@ function closeDialog(site) {
   if (site && site.getActiveGadgetHolder()) {
     // get iframe id
     iframeId = site.getActiveGadgetHolder().getIframeId();
-    if (iframeId !== undefined) {
+    if (typeof iframeId != 'undefined') {
       var iframeNode = document.getElementById(iframeId);
       // get dialog widget id
       widgetId = iframeNode.parentNode.id;
