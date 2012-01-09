@@ -40,6 +40,7 @@ CommonContainer['views'] = CommonContainer['views'] || {};
 
 CommonContainer.views.createElementForGadget = function(gadgetMetadata,
         opt_view, opt_viewTarget) {
+
   var surfaceView = 'default';
   var viewTarget = 'default';
 
@@ -64,6 +65,7 @@ CommonContainer.views.createElementForGadget = function(gadgetMetadata,
       return openInDialog(false, surfaceView, true, gadgetMetadata);
   }
 };
+
 
 
 /**

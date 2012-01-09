@@ -19,22 +19,23 @@
 -->
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-US" lang="en-US">
 <head>
-
+  <title>OpenSocial Common Container Test Environment</title>
   <!-- My OpenSocial Beginnings -->
-  <link rel="stylesheet" href="../../../container/gadgets.css">
+  <link rel="stylesheet" href="../../../container/gadgets.css"/>
+
   <script type="text/javascript" src="../../../gadgets/js/container:open-views:opensearch:rpc:pubsub-2.js?c=1&debug=1&container=default"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.3/jquery.min.js"></script>
-  <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.5/jquery-ui.min.js"></script>
   <link rel="stylesheet"
         href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/themes/cupertino/jquery-ui.css"
         type="text/css" media="all"/>
+  <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.5/jquery-ui.min.js"></script>
   <script type="text/javascript" src="./assembler.js"></script>
   <script type="text/javascript" src="./viewController.js"></script>
   <script type="text/javascript" src="./layout.js"></script>
   <script type="text/javascript" src="./cconviews.js"></script>
   <script type="text/javascript" src="./search.js"></script>
 
-  <style>
+  <style type="text/css">
     .portlet-header .ui-icon { float: right; }
     #content {
     display: table;
@@ -88,17 +89,25 @@
     border: 1px solid blue;
     }
 
+    .widerInput {
+      width: 270px;
+    }
+
   </style>
 </head>
 
-<body onLoad="CommonContainer.init();">
+<body onload="CommonContainer.init();">
+
+
+
+
   <!--  Need to add in an improved header with links to specification -->
   <a href="http://www.opensocial.org/">
-    <img alt="OpenSocial" src="http://api.ning.com/files/chwE7fbkJ5D1q8NSzNCYJzzCqOiuo3xYyToZCsYuY0SViOKQ7EG-3UUv4KFSxOMACbIzs3oWtD076*cbEL-*ABd9hCO0p7Al/opensocialsitelogo1.png?width=288&amp;height=70&amp;xn_auth=no&amp;type=png">
+    <img alt="OpenSocial" src="http://api.ning.com/files/chwE7fbkJ5D1q8NSzNCYJzzCqOiuo3xYyToZCsYuY0SViOKQ7EG-3UUv4KFSxOMACbIzs3oWtD076*cbEL-*ABd9hCO0p7Al/opensocialsitelogo1.png?width=288&amp;height=70&amp;xn_auth=no&amp;type=png"/>
   </a>
   <span style="float:right">
     <input type="text" id="query"/>
-    <button name="search" id="searchButton" onClick="updateSearchURLs()">Search</button>
+    <button name="search" id="searchButton" onclick="updateSearchURLs()">Search</button>
     <br/><span id="engineList"></span>
   </span>
 
@@ -115,40 +124,70 @@
 
           <div>
 
-            Enter the gadget url (ex.
+            <p>Enter the gadget url (ex.
             http://localhost:8080/samplecontainer/examples/SocialHelloWorld.xml) and select 'Add' to
-            render the gadget
-            <br/>
-            <input type="text" name="gadgetUrl" id="gadgetUrl"
-                   class="text ui-widget-content ui-corner-all"/>
+            render the gadget</p>
 
-            <button id="addGadget">Add</button>
-            <br/>
-            <br/>
-            -OR-
-            <br/>
-            <br/>
+            <div style='display: block;'>
+	            <input type="text" name="gadgetUrl" id="gadgetUrl"
+	                   class="text ui-widget-content ui-corner-all"/>
+	            <button id="addGadget">Add</button>
+            </div>
+           <p>-OR-</p>
 
+            <p>
             Pick from one of the collections and select Add Gadgets to render the associated gadgets
-            <br/>
-            <select id="gadgetCollection"> </select>
-            <button id="addGadgets">Add Gadgets</button>
+            </p>
+            <div style='display: block;'>
+	            <select id="gadgetCollection"> </select>
+	            <button id="addGadgets">Add Gadgets</button>
+            </div>
 
           </div>
           <h3><a href="#">Container Events</a></h3>
 
           <div>
+            <p>
             Enter the event topic (ex. org.opensocial.container.event.sampleevent)
-            <br/>
+            </p>
+
             <input type="text" name="eventTopic" id="eventTopic"
                    class="text ui-widget-content ui-corner-all"/>
-            <br/>
+            <p>
             Enter the event payload
-            <br/>
-            <textarea type="text" name="eventPayload" id="eventPayload"
-                      class="text ui-widget-content ui-corner-all"> </textarea>
-            <br/>
-            <button id="pubEvent">Publish</button>
+            </p>
+            <div style='display: block;'>
+	            <textarea name="eventPayload" id="eventPayload"
+	                      class="text ui-widget-content ui-corner-all"> </textarea>
+	            <button id="pubEvent">Publish</button>
+            </div>
+          </div>
+          <h3><a href="#">Embedded Experience Gadgets</a></h3>
+
+          <div>
+            <div style='display: block; padding-bottom: 5px'>
+              Enter the embedded experience gadget URL
+            </div>
+            <div style='display: block; padding-bottom: 10px'>
+	            <input type="text" name="eeUrl" id="eeUrl"
+	                   class="text ui-widget-content ui-corner-all widerInput"/>
+            </div>
+
+            <div style='display: block; padding-bottom: 5px;'>
+	            <label style='display: inline-block; width: 75px;' for="eeHeight">Height: </label>
+	            <input type="text" name="eeHeight" id="eeHeight" class="text ui-widget-content ui-corner-all" value="400"></input>
+            </div>
+            <div style='display: block; padding-bottom: 10px;'>
+	            <label style='display: inline-block; width: 75px;' for="eeWidth">Width: </label>
+	            <input type="text" name="eeWidth" id="eeWidth" class="text ui-widget-content ui-corner-all" value="640"></input>
+            </div>
+
+            <p>
+            Enter the context as a JSON String, and select 'Add' to render the embedded experience gadget
+            </p>
+            <textarea name="eecontextPayload" id="eecontextPayload"
+                      class="text ui-widget-content ui-corner-all widerInput"> </textarea>
+            <p><button id="addEmbeddedExperience">Add</button></p>
           </div>
         </div>
         <span class="ui-icon ui-icon-grip-dotted-horizontal" style="margin: 2px auto;"></span>

@@ -21,6 +21,12 @@ $(function() {
 	// Input field that contains gadget urls added by the user manually
 	var newGadgetUrl = $('#gadgetUrl');
 
+	// Input fields that contains EE gadget URL and EE context
+	var eeUrl = $('#eeUrl');
+	var eecontextPayload = $('#eecontextPayload');
+	var eeHeight = $('#eeHeight');
+	var eeWidth = $('#eeWidth');
+
 	//  Input fields for container event testing
 	var newEventTopic = $('#eventTopic');
 	var newEventPayload = $('#eventPayload');
@@ -29,7 +35,7 @@ $(function() {
 	var gadgetTemplate = '<div class="portlet">' +
 				                '<div class="portlet-header">sample to replace</div>' +
 				                '<div id="gadget-site" class="portlet-content"></div>' +
-	                            '</div>';
+	                     '</div>';
 
 	//variable to keep track of gadget current view for collapse and expand gadget actions.
 	var currentView = 'default';
@@ -87,7 +93,7 @@ $(function() {
           //navigate to currentView prior to colapse gadget
           CommonContainer.navigateView(gadgetSite, gadgetURL, currentView);
         }else if (actionId === 'collapse') {
-          CommonContainer.colapseGadget(gadgetSite);
+          CommonContainer.collapseGadget(gadgetSite);
         }
       }
     };
@@ -98,14 +104,13 @@ $(function() {
       $('#' + titleId).text(title);
     };
 
-    //create a gadget with navigation tool bar header enabling gadget collapse, expand, remove, navigate to view actions.
-    buildGadget = function(result,gadgetURL) {
+    getNewGadgetElement = function(result, gadgetURL){
       var gadgetSiteString = "$(this).closest(\'.portlet\').find(\'.portlet-content\').data(\'gadgetSite\')";
       var viewItems = '';
       var gadgetViews = result[gadgetURL].views;
       for (var aView in gadgetViews) {
-	      viewItems = viewItems + '<li><a href="#" onclick="navigateView(' + gadgetSiteString + ',' + '\'' + gadgetURL + '\'' + ',' + '\'' + aView + '\'' + '); return false;">' + aView + '</a></li>';
-	    }
+        viewItems = viewItems + '<li><a href="#" onclick="navigateView(' + gadgetSiteString + ',' + '\'' + gadgetURL + '\'' + ',' + '\'' + aView + '\'' + '); return false;">' + aView + '</a></li>';
+      }
       var newGadgetSite = gadgetTemplate;
       newGadgetSite = newGadgetSite.replace(/(gadget-site)/g, '$1-' + curId);
       siteToTitleMap['gadget-site-' + curId] = 'gadget-title-' + curId;
@@ -124,15 +129,20 @@ $(function() {
                '</ul>')
       .append('<span id="remove" class="ui-icon ui-icon-closethick"></span>')
       .append('<span id="expand" class="ui-icon ui-icon-plusthick"></span>')
-      .append('<span id="collapse" class="ui-icon ui-icon-minusthick"></span>')
-      .end()
-      .find('.portlet-content')
-      .data('gadgetSite', CommonContainer.renderGadget(gadgetURL, curId));
+      .append('<span id="collapse" class="ui-icon ui-icon-minusthick"></span>');
+
+      return $('#gadget-site-'+curId).get([0]);
+    }
+
+    //create a gadget with navigation tool bar header enabling gadget collapse, expand, remove, navigate to view actions.
+    buildGadget = function(result,gadgetURL){
+      var element =  getNewGadgetElement(result, gadgetURL);
+      $(element).data('gadgetSite', CommonContainer.renderGadget(gadgetURL, curId));
 
        //determine which button was click and handle the appropriate event.
       $('.portlet-header .ui-icon').click(function() {
         handleNavigateAction($(this).closest('.portlet'), $(this).closest('.portlet').find('.portlet-content').data('gadgetSite'), gadgetURL, this.id);
-        });
+      });
     };
 
 	//  Publish the container event
@@ -184,6 +194,31 @@ $(function() {
 		});
 		return true;
 
+	});
+
+	$('#addEmbeddedExperience').click(function(){
+	  CommonContainer.preloadGadgets(eeUrl.val(), function(result) {
+	    for (var gadgetURL in result) {
+	      if(!result[gadgetURL].error) {
+	        var eeElement = getNewGadgetElement(result, gadgetURL);
+
+	        var model = new Object();
+
+	        model.context = gadgets.json.parse(eecontextPayload.val());
+	        model.gadget = gadgetURL;
+
+	        var params = [];
+	        params[osapi.container.ee.RenderParam.GADGET_RENDER_PARAMS] = {
+	            'height' : eeHeight.val(),
+	            'width' : eeWidth.val(),
+	        };
+	        var currentEESite = CommonContainer.ee.navigate(eeElement, model, params, null);
+	        curId++;
+	      }
+	    }
+	  });
+
+	  return true;
 	});
 
 

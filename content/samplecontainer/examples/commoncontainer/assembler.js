@@ -37,6 +37,7 @@ shindig.auth.updateSecurityToken('john.doe:john.doe:appid:cont:url:0:default');
 
 // Need to pull these from values supplied in the dialog
 CommonContainer.init = function() {
+
   //Create my new managed hub
   CommonContainer.managedHub = new OpenAjax.hub.ManagedHub({
     onSubscribe: function(topic, container) {
@@ -94,6 +95,7 @@ CommonContainer.renderGadget = function(gadgetURL, gadgetId) {
 	return gadgetSite;
 
 };
+
 //TODO:  To be implemented. Identify where to hook this into the page (in the gadget title bar/gadget management, etc)
 CommonContainer.navigateView = function(gadgetSite, gadgetURL, view) {
 	var renderParms = {};
@@ -108,7 +110,7 @@ CommonContainer.navigateView = function(gadgetSite, gadgetURL, view) {
 };
 
 //TODO:  Add in UI controls in portlet header to remove gadget from the canvas
-CommonContainer.colapseGadget = function(gadgetSite) {
+CommonContainer.collapseGadget = function(gadgetSite) {
 	CommonContainer.closeGadget(gadgetSite);
 };
 
