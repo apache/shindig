@@ -23,6 +23,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.protocol.conversion.BeanFilter.Unfiltered;
 
@@ -198,12 +199,13 @@ public class GadgetsHandlerApi {
 
   public interface TokenRequest extends BaseRequest {
     public AuthContext getAuthContext();
-    // TODO: Consider support container controlled token duration
-    // public Long getDurationSeconds();
+    public Long getModuleId();
   }
 
   public interface TokenResponse extends BaseResponse {
     public String getToken();
+    public Integer getTokenTTL();
+    public Long getModuleId();
   }
 
   // TODO(jasvir): Support getRefresh and noCache

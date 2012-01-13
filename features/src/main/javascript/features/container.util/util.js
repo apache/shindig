@@ -101,7 +101,9 @@ osapi.container.util.newTokenRequest = function(gadgetUrls) {
     'container': window.__CONTAINER,
     'ids': gadgetUrls,
     'fields': [
-      'token'
+      'token',
+      'tokenTTL',
+      'moduleId'
     ]
   };
 };
@@ -162,7 +164,7 @@ osapi.container.util.getCurrentTimeMs = function() {
 };
 
 /**
- * Crates the HTML for the iFrame
+ * Creates the HTML for the iFrame
  * @param {Object.<string,string>} iframeParams iframe Params.
  * @return {string} the HTML for the iFrame.
  */
@@ -186,4 +188,19 @@ osapi.container.util.createIframeHtml = function(iframeParams) {
   out.push('></iframe>');
 
   return out.join('');
+};
+
+/**
+ * Constructs a url for token refresh given a gadgetUrl and moduleId.
+ *
+ * @param {string} url The gadget's url
+ * @param {number} moduleId A moduleId.
+ * @return {string} A url to use in a TokenRequest for a security token.
+ */
+osapi.container.util.buildTokenRequestUrl = function(url, moduleId) {
+  url = shindig.uri(url);
+  if (moduleId) {
+    url.setFragment(moduleId);
+  }
+  return url.toString();
 };

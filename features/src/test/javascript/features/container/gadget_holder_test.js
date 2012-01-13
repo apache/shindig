@@ -41,8 +41,14 @@ GadgetHolderTest.prototype.tearDown = function() {
 };
 
 GadgetHolderTest.prototype.testNew = function() {
-  var element = {};
-  var holder = new osapi.container.GadgetHolder(123, element);
+  var element = {
+    getAttribute: function() {
+      return '0';
+    },
+    id: '123'
+  };
+  var site = new osapi.container.GadgetSite({gadgetEl: element});
+  var holder = new osapi.container.GadgetHolder(site, element);
   this.assertEquals(element, holder.getElement());
   this.assertNull(holder.getIframeId());
   this.assertNull(holder.getGadgetInfo());
@@ -56,7 +62,11 @@ GadgetHolderTest.prototype.testRenderWithoutRenderParams = function() {
       'url' : 'gadget.xml'
   };
   this.setupGadgetsRpcSetupReceiver();
-  var holder = new osapi.container.GadgetHolder(123, element, '__gadgetOnLoad');
+  var element = {
+    id: '123'
+  };
+  var site = new osapi.container.GadgetSite({gadgetEl: element});
+  var holder = new osapi.container.GadgetHolder(site, element, '__gadgetOnLoad');
   holder.render(gadgetInfo, {}, {});
   this.assertEquals('<iframe' +
       ' marginwidth="0"' +
@@ -69,13 +79,12 @@ GadgetHolderTest.prototype.testRenderWithoutRenderParams = function() {
       ' id="__gadget_123"' +
       ' name="__gadget_123"' +
       ' src="http://shindig/gadgets/ifr?url=gadget.xml&debug=0&nocache=0&testmode=0' +
-          '&parent=http%3A//container.com&mid=123"' +
+          '&parent=http%3A//container.com&mid=0"' +
       ' ></iframe>',
       element.innerHTML);
 };
 
 GadgetHolderTest.prototype.testRenderWithRenderRequests = function() {
-  var element = {};
   var gadgetInfo = {
       'iframeUrl' : 'http://shindig/gadgets/ifr?url=gadget.xml',
       'url' : 'gadget.xml'
@@ -90,7 +99,11 @@ GadgetHolderTest.prototype.testRenderWithRenderRequests = function() {
       'width' : 222
   };
   this.setupGadgetsRpcSetupReceiver();
-  var holder = new osapi.container.GadgetHolder(123, element, '__gadgetOnLoad');
+  var element = {
+    id: '123'
+  };
+  var site = new osapi.container.GadgetSite({gadgetEl: element, moduleId: 123});
+  var holder = new osapi.container.GadgetHolder(site, element, '__gadgetOnLoad');
   holder.render(gadgetInfo, {}, renderParams);
   this.assertEquals('<iframe' +
       ' marginwidth="0"' +
@@ -106,7 +119,7 @@ GadgetHolderTest.prototype.testRenderWithRenderRequests = function() {
       ' width="222"' +
       ' name="__gadget_123"' +
       ' src="http://shindig/gadgets/ifr?url=gadget.xml&debug=1&nocache=1&testmode=1' +
-          '&libs=caja&caja=1&parent=http%3A//container.com&mid=123"' +
+          '&libs=caja&caja=1&parent=http%3A//container.com&mid=0"' +
       ' ></iframe>',
       element.innerHTML);
 };

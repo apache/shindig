@@ -32,9 +32,15 @@ ServiceTest.inherits(TestCase);
 ServiceTest.prototype.setUp = function() {
   this.apiUri = window.__API_URI;
   window.__API_URI = shindig.uri('http://shindig.com');
-  this.container = window.__CONTAINER;
-  window.__CONTAINER = "best_container";
+  this.containerUri = window.__CONTAINER_URI;
+  window.__CONTAINER_URI = shindig.uri('http://container.com');
   this.osapiGadgets = osapi.gadgets;
+  this.shindigContainerGadgetSite = osapi.container.GadgetSite;
+  this.gadgetsRpc = gadgets.rpc;
+  gadgets.rpc = {
+    register: function() {
+    }
+  };
   
   this.self = {};
   var response = {};
@@ -43,7 +49,9 @@ ServiceTest.prototype.setUp = function() {
 
 ServiceTest.prototype.tearDown = function() {
   window.__API_URI = this.apiUri;
-  window.__CONTAINER = this.container;
+  window.__CONTAINER_URI = this.containerUri;
+  osapi.container.GadgetSite = this.shindigContainerGadgetSite;
+  gadgets.rpc = this.gadgetsRpc;
   osapi.gadgets = this.osapiGadgets;
 };
 
@@ -65,14 +73,14 @@ ServiceTest.prototype.setupUtilCurrentTimeMs = function(time) {
 };
 
 ServiceTest.prototype.testGetGadgetMetadata = function() {
-  var service = new osapi.container.Service({
+  var service = new osapi.container.Service(new osapi.container.Container({
     GET_LANGUAGE: function() {
       return 'pt'; 
     },
     GET_COUNTRY: function() {
       return 'BR';
     }
-  });
+  }));
   service.cachedMetadatas_ = {
     'cached1.xml' : {
       'url' : 'cached1.xml',
@@ -143,7 +151,7 @@ ServiceTest.prototype.testGetGadgetMetadata = function() {
 };
 
 ServiceTest.prototype.testUncacheStaleGadgetMetadataExcept = function() {
-  var service = new osapi.container.Service();
+  var service = new osapi.container.Service(new osapi.container.Container());
   service.cachedMetadatas_ = {
       'cached1.xml' : { 'localExpireTimeMs' : 100 },
       'cached2.xml' : { 'localExpireTimeMs' : 200 },
@@ -162,7 +170,7 @@ ServiceTest.prototype.testUncacheStaleGadgetMetadataExcept = function() {
 };
 
 ServiceTest.prototype.testUpdateResponse = function() {
-  var service = new osapi.container.Service();
+  var service = new osapi.container.Service(new osapi.container.Container());
   this.setupUtilCurrentTimeMs(120);
 
   var data = {responseTimeMs : 100, expireTimeMs : 105};
@@ -177,7 +185,7 @@ ServiceTest.prototype.testUpdateResponse = function() {
 };
 
 ServiceTest.prototype.testAddToCache = function() {
-  var service = new osapi.container.Service();
+  var service = new osapi.container.Service(new osapi.container.Container());
   this.setupUtilCurrentTimeMs(120);
 
   var cache = {};

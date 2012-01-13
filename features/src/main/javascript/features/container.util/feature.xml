@@ -39,6 +39,30 @@ specific language governing permissions and limitations under the License.
       <exports type="js">osapi.container.RenderParam.USER_PREFS</exports>
       <exports type="js">osapi.container.RenderParam.VIEW</exports>
       <exports type="js">osapi.container.RenderParam.WIDTH</exports>
+      <exports type="js">osapi.container.RenderParam.MODULE_ID</exports>
+
+      <exports type="js">osapi.container.ViewParam.VIEW</exports>
+
+      <exports type="js">osapi.container.ContainerConfig.ALLOW_DEFAULT_VIEW</exports>
+      <exports type="js">osapi.container.ContainerConfig.RENDER_CAJOLE</exports>
+      <exports type="js">osapi.container.ContainerConfig.RENDER_DEBUG</exports>
+      <exports type="js">osapi.container.ContainerConfig.RENDER_DEBUG_PARAM</exports>
+      <exports type="js">osapi.container.ContainerConfig.RENDER_TEST</exports>
+      <exports type="js">osapi.container.ContainerConfig.TOKEN_REFRESH_INTERVAL</exports>
+      <exports type="js">osapi.container.ContainerConfig.NAVIGATE_CALLBACK</exports>
+      <exports type="js">osapi.container.ContainerConfig.PRELOAD_REF_TIME</exports>
+      <exports type="js">osapi.container.ContainerConfig.PRELOAD_METADATAS</exports>
+      <exports type="js">osapi.container.ContainerConfig.PRELOAD_TOKENS</exports>
+      <exports type="js">osapi.container.ContainerConfig.GET_LANGUAGE</exports>
+      <exports type="js">osapi.container.ContainerConfig.GET_COUNTRY</exports>
+      <exports type="js">osapi.container.ContainerConfig.GET_PREFERENCES</exports>
+      <exports type="js">osapi.container.ContainerConfig.SET_PREFERENCES</exports>
+      <exports type="js">osapi.container.ContainerConfig.RPC_ARBITRATOR</exports>
+      <exports type="js">osapi.container.ContainerConfig.GET_GADGET_TOKEN</exports>
+      <exports type="js">osapi.container.ContainerConfig.GET_CONTAINER_TOKEN</exports>
+
+      <exports type="js">osapi.container.ServiceConfig.API_HOST</exports>
+      <exports type="js">osapi.container.ServiceConfig.API_PATH</exports>
     </api>
   </container>
 </feature>

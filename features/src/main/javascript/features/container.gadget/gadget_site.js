@@ -78,6 +78,15 @@ osapi.container.GadgetSite = function(args) {
     osapi.container.Container.prototype.nextUniqueSiteId_++;
 
   /**
+   * Unique numeric module ID for this gadget instance.  A module id is used to
+   * identify persisted instances of gadgets.
+   *
+   * @type {number}
+   * @private
+   */
+  this.moduleId_ = 0;
+
+  /**
    * ID of parent gadget.
    * @type {string?}
    * @private
@@ -168,6 +177,52 @@ osapi.container.GadgetSite.prototype.getId = function() {
   return this.id_;
 };
 
+/**
+ * @return {undefined|null|number} The numerical moduleId of this gadget, if
+ *   set.  May return null or undefined if not set.
+ */
+osapi.container.GadgetSite.prototype.getModuleId = function() {
+  return this.moduleId_;
+};
+
+/**
+ * If you want to change the moduleId after a gadget has rendered, re-navigate the site.
+ *
+ * @param {string} url This gadget's url (may not yet be accessible in all cases from the holder).
+ * @param {number} mid The numerical moduleId for this gadget to use.
+ * @param {function} opt_callback Optional callback to run when the moduleId is set.
+ * @private
+ */
+osapi.container.GadgetSite.prototype.setModuleId_ = function(url, mid, opt_callback) {
+  if (mid && this.moduleId_ != mid) {
+    var self = this,
+        url = osapi.container.util.buildTokenRequestUrl(url, mid);
+
+    if (!self.service_.getCachedGadgetToken(url)) {
+      // We need to request a security token for this gadget instance.
+      var request = osapi.container.util.newTokenRequest([url]);
+      self.service_.getGadgetToken(request, function(response) {
+        var ttl, mid;
+        if (response && response[url]) {
+          if (ttl = response[url][osapi.container.TokenResponse.TOKEN_TTL]) {
+            self.container_.scheduleRefreshTokens_(ttl);
+          }
+          var mid = response[url][osapi.container.TokenResponse.MODULE_ID];
+          if (mid || mid == 0) {
+            self.moduleId_ = mid;
+          }
+        }
+        if (opt_callback) {
+          opt_callback();
+        }
+      });
+      return;
+    }
+  }
+  if (opt_callback) {
+    opt_callback();
+  }
+};
 
 /**
  * Returns the currently-active gadget, the loading gadget if a gadget is
@@ -224,9 +279,12 @@ osapi.container.GadgetSite.prototype.navigateTo = function(
       var message = ['Failed to navigate for gadget ', gadgetUrl, '.'].join('');
       osapi.container.util.warn(message);
     } else {
-      self.container_.applyLifecycleCallbacks_(osapi.container.CallbackType.ON_BEFORE_RENDER,
-              gadgetInfo);
-      self.render(gadgetInfo, viewParams, renderParams);
+      var moduleId = renderParams[osapi.container.RenderParam.MODULE_ID] || 0;
+      self.setModuleId_(gadgetUrl, moduleId, function() {
+        self.container_.applyLifecycleCallbacks_(osapi.container.CallbackType.ON_BEFORE_RENDER,
+                gadgetInfo);
+        self.render(gadgetInfo, viewParams, renderParams);
+      });
     }
 
     // Return metadata server response time.
@@ -326,7 +384,7 @@ osapi.container.GadgetSite.prototype.render = function(
 
   // Load into the double-buffer if there is one.
   var el = this.loadingGadgetEl_ || this.currentGadgetEl_;
-  this.loadingGadgetHolder_ = new osapi.container.GadgetHolder(this.id_, el,
+  this.loadingGadgetHolder_ = new osapi.container.GadgetHolder(this, el,
           this.gadgetOnLoad_);
 
   var localRenderParams = {};
@@ -396,8 +454,10 @@ osapi.container.GadgetSite.prototype.rpcCall = function(
  * @private
  */
 osapi.container.GadgetSite.prototype.updateSecurityToken_ =
-      function(gadgetInfo, renderParams) {
-  var tokenInfo = this.service_.getCachedGadgetToken(gadgetInfo['url']);
+    function(gadgetInfo, renderParams) {
+  var url = osapi.container.util.buildTokenRequestUrl(gadgetInfo['url'], this.moduleId_),
+      tokenInfo = this.service_.getCachedGadgetToken(url);
+
   if (tokenInfo) {
     var token = tokenInfo[osapi.container.TokenResponse.TOKEN];
     this.loadingGadgetHolder_.setSecurityToken(token);

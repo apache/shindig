@@ -66,7 +66,9 @@ osapi.container.MetadataResponse = {
  * @enum {string}
  */
 osapi.container.TokenResponse = {
-  TOKEN: 'token'
+  TOKEN: 'token',
+  TOKEN_TTL: 'tokenTTL',
+  MODULE_ID: 'moduleId'
 };
 
 
@@ -130,7 +132,13 @@ osapi.container.RenderParam = {
     VIEW: 'view',
 
     /** The starting gadget iframe width (in pixels). */
-    WIDTH: 'width'
+    WIDTH: 'width',
+
+    /**
+     * The modduleId of this gadget.  Used to identify saved instances of gadgets.
+     * Defaults to 0, which means the instance of the gadget is not saved.
+     */
+    MODULE_ID: 'moduleid'
 };
 
 /**
@@ -179,3 +187,179 @@ osapi.container.CallbackType = {
     /** Name of the global function all gadgets will call when they are loaded. */
     GADGET_ON_LOAD: '__gadgetOnLoad'
 };
+
+/**
+ * Enumeration of configuration keys for a osapi.container.Container. This is specified in
+ * JSON to provide extensible configuration. These enum values are for
+ * documentation purposes only, it is expected that clients use the string
+ * values.
+ * @enum {string}
+ */
+osapi.container.ContainerConfig = {
+  /**
+   * Allow gadgets to render in unspecified view.
+   * @type {string}
+   * @const
+   */
+  ALLOW_DEFAULT_VIEW: 'allowDefaultView',
+
+  /**
+   * Whether cajole mode is turned on.
+   * @type {string}
+   * @const
+   */
+  RENDER_CAJOLE: 'renderCajole',
+
+  /**
+   * Whether debug mode is turned on.
+   * @type {string}
+   * @const
+   */
+  RENDER_DEBUG: 'renderDebug',
+
+  /**
+   * The debug param name to look for in container URL for per-request debugging.
+   * @type {string}
+   * @const
+   */
+  RENDER_DEBUG_PARAM: 'renderDebugParam',
+
+  /**
+   * Whether test mode is turned on.
+   * @type {string}
+   * @const
+   */
+  RENDER_TEST: 'renderTest',
+
+  /**
+   * Security token refresh interval (in ms). Set to 0 in config to disable
+   * token refresh.
+   *
+   * This number should always be >= 0. The smallest encountered token ttl or this
+   * number will be used as the refresh interval, whichever is smaller.
+   *
+   * @type {string}
+   * @const
+   */
+  TOKEN_REFRESH_INTERVAL: 'tokenRefreshInterval',
+
+  /**
+   * Globally-defined callback function upon gadget navigation. Useful to
+   * broadcast timing and stat information back to container.
+   * @type {string}
+   * @const
+   */
+  NAVIGATE_CALLBACK: 'navigateCallback',
+
+  /**
+   * Provide server reference time for preloaded data.
+   * This time is used instead of each response time in order to support server
+   * caching of results.
+   * @type {number}
+   * @const
+   */
+  PRELOAD_REF_TIME: 'preloadRefTime',
+
+  /**
+   * Preloaded hash of gadgets metadata
+   * @type {Object}
+   * @const
+   */
+  PRELOAD_METADATAS: 'preloadMetadatas',
+
+  /**
+   * Preloaded hash of gadgets tokens
+   * @type {Object}
+   * @const
+   */
+  PRELOAD_TOKENS: 'preloadTokens',
+
+  /**
+   * Used to query the language locale part of the container page.
+   * @type {function}
+   */
+  GET_LANGUAGE: 'GET_LANGUAGE',
+
+  /**
+   * Used to query the country locale part of the container page.
+   * @type {function}
+   */
+  GET_COUNTRY: 'GET_COUNTRY',
+
+  /**
+   * Used to retrieve the persisted preferences for a gadget.
+   * @type {function}
+   */
+  GET_PREFERENCES: 'GET_PREFERENCES',
+
+  /**
+   * Used to persist preferences for a gadget.
+   * @type {function}
+   */
+  SET_PREFERENCES: 'SET_PREFERENCES',
+
+  /**
+   * Used to arbitrate RPC calls.
+   * @type {function}
+   */
+  RPC_ARBITRATOR: 'rpcArbitrator',
+
+  /**
+   * Used to retrieve security tokens for gadgets.
+   * @type {function}
+   */
+  GET_GADGET_TOKEN: 'GET_GADGET_TOKEN',
+
+  /**
+   * Used to retrieve a security token for the container.
+   * Containers who specify this config value can call
+   * CommonContainer.updateContainerSecurityToken after the creation of the
+   * common container to start the scheduling of container token refreshes.
+   *
+   * @type {function(function)=}
+   * @param {function(String, number)} callback The function to call to report
+   *   the updated token and the token's new time-to-live in seconds. This
+   *   callback function must be called with unspecified values in the event of
+   *   an error.
+   *
+   *   The first and second arguments to this callback function are the same as
+   *   the second and third arguments to:
+   *     osapi.container.Container.prototype.updateContainerSecurityToken
+   *   Example:
+   *   <code>
+   *     var config = {};
+   *     config[osapi.container.ContainerConfig.GET_CONTAINER_TOKEN] = function(result) {
+   *       var token, ttl, error = false;
+   *       // Do work to set token and ttl values
+   *       if (error) {
+   *         result();
+   *       } else {
+   *         result(token, ttl);
+   *       }
+   *     };
+   *   </code>
+   * @see osapi.container.Container.prototype.updateContainerSecurityToken
+   */
+  GET_CONTAINER_TOKEN: 'GET_CONTAINER_TOKEN'
+};
+
+/**
+ * Enumeration of configuration keys for a osapi.container.Service. This is specified in
+ * JSON to provide extensible configuration.
+ * @enum {string}
+ */
+osapi.container.ServiceConfig = {
+  /**
+   * Host to fetch gadget information, via XHR.
+   * @type {string}
+   * @const
+   */
+  API_HOST: 'apiHost',
+
+  /**
+   * Path to fetch gadget information, via XHR.
+   * @type {string}
+   * @const
+   */
+  API_PATH: 'apiPath'
+}

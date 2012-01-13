@@ -24,11 +24,18 @@
 
 
 /**
- * @param {Object=} opt_config Configuration JSON.
+ * @param {osapi.container.Container} The container that this service services.
  * @constructor
  */
-osapi.container.Service = function(opt_config) {
-  var config = this.config_ = opt_config || {};
+osapi.container.Service = function(container) {
+  /**
+   * The container that this service services.
+   * @type {osapi.container.Container}
+   * @private
+   */
+  this.container_ = container;
+
+  var config = this.config_ = container.config_ || {};
 
   var injectedEndpoint = ((gadgets.config.get('osapi') || {}).endPoints ||
           [window.__API_URI.getOrigin() + '/rpc'])[0];
@@ -118,30 +125,30 @@ osapi.container.Service.prototype.getGadgetMetadata = function(request, opt_call
     request['ids'] = uncachedUrls;
     request['language'] = this.getLanguage();
     request['country'] = this.getCountry();
-    osapi['gadgets']['metadata'](request).execute(function(response) {
+    this.updateContainerSecurityToken(function() {
+      osapi['gadgets']['metadata'](request).execute(function(response) {
+        // If response entirely fails, augment individual errors.
+        if (response['error']) {
+          for (var i = 0; i < request['ids'].length; i++) {
+            finalResponse[id] = { 'error' : response['error'] };
+          }
 
-      // If response entirely fails, augment individual errors.
-      if (response['error']) {
-        for (var i = 0; i < request['ids'].length; i++) {
-          finalResponse[id] = { 'error' : response['error'] };
+        // Otherwise, cache response. Augment final response with server response.
+        } else {
+          var currentTimeMs = osapi.container.util.getCurrentTimeMs();
+          for (var id in response) {
+            var resp = response[id];
+            self.updateResponse_(resp, id, currentTimeMs);
+            self.cachedMetadatas_[id] = resp;
+            finalResponse[id] = resp;
+          }
         }
 
-      // Otherwise, cache response. Augment final response with server response.
-      } else {
-        var currentTimeMs = osapi.container.util.getCurrentTimeMs();
-        for (var id in response) {
-          var resp = response[id];
-          self.updateResponse_(resp, id, currentTimeMs);
-          self.cachedMetadatas_[id] = resp;
-          finalResponse[id] = resp;
-        }
-      }
-
-      callback(finalResponse);
+        callback(finalResponse);
+      });
     });
   }
 };
-
 
 /**
  * Add preloaded gadgets to cache
@@ -222,8 +229,11 @@ osapi.container.Service.prototype.getGadgetToken = function(request, opt_callbac
     // Otherwise, cache response. Augment final response with server response.
     } else {
       for (var id in response) {
-        response[id]['url'] = id; // make sure url is set
-        self.cachedTokens_[id] = response[id];
+        var mid = response[osapi.container.TokenResponse.MODULE_ID],
+            url = osapi.container.util.buildTokenRequestUrl(id, mid);
+
+        //response[id]['url'] = id; // make sure url is set
+        self.cachedTokens_[url] = response[id];
         finalResponse[id] = response[id];
       }
     }
@@ -232,11 +242,13 @@ osapi.container.Service.prototype.getGadgetToken = function(request, opt_callbac
   };
 
   // If we have a custom token fetch function, call it -- otherwise use the default
-  if (this.config_[osapi.container.ContainerConfig.GET_GADGET_TOKEN]) {
-    this.config_[osapi.container.ContainerConfig.GET_GADGET_TOKEN](request, tokenResponseCallback);
-  } else {
-    osapi['gadgets']['token'](request).execute(tokenResponseCallback);
-  }
+  self.updateContainerSecurityToken(function() {
+    if (self.config_[osapi.container.ContainerConfig.GET_GADGET_TOKEN]) {
+      self.config_[osapi.container.ContainerConfig.GET_GADGET_TOKEN](request, tokenResponseCallback);
+    } else {
+      osapi['gadgets']['token'](request).execute(tokenResponseCallback);
+    }
+  });
 };
 
 
@@ -388,29 +400,89 @@ osapi.container.Service.prototype.getCountry = function() {
   }
 };
 
-
-// -----------------------------------------------------------------------------
-// Configuration
-// -----------------------------------------------------------------------------
-
-
 /**
- * Enumeration of configuration keys for this service. This is specified in
- * JSON to provide extensible configuration.
- * @enum {string}
+ * Container Token Refresh
  */
-osapi.container.ServiceConfig = {};
+(function() {
+  var containerTimeout, lastRefresh, fetching,
+      containerTokenTTL = 1800000 * 0.8, // 30 min default token ttl
+      callbacks = [];
 
-/**
- * Host to fetch gadget information, via XHR.
- * @type {string}
- * @const
- */
-osapi.container.ServiceConfig.API_HOST = 'apiHost';
 
-/**
- * Path to fetch gadget information, via XHR.
- * @type {string}
- * @const
- */
-osapi.container.ServiceConfig.API_PATH = 'apiPath';
+  function runCallbacks(callbacks) {
+    while (callbacks.length) {
+      callbacks.shift().call(null); // Window context
+    }
+  }
+
+  function refresh(fetch_once) {
+    fetching = true;
+    if (containerTimeout) {
+      clearTimeout(containerTimeout);
+      containerTimeout = 0;
+    }
+
+    var fetch = fetch_once || this.config_[osapi.container.ContainerConfig.GET_CONTAINER_TOKEN];
+    if (fetch) {
+      var self = this;
+      fetch(function(token, ttl) { // token and ttl may be undefined in the case of an error
+        fetching = false;
+
+        // Use last known ttl if there was an error
+        containerTokenTTL = token ? (ttl * 1000 * 0.8) : containerTokenTTL;
+        if (containerTokenTTL) {
+          // Refresh again in 80% of the reported ttl
+          containerTimeout = setTimeout(gadgets.util.makeClosure(this, refresh), containerTokenTTL);
+        }
+
+        if (token) {
+          // Looks like everything worked out...  let's update the token.
+          shindig.auth.updateSecurityToken(token);
+          lastRefresh =  osapi.container.util.getCurrentTimeMs();
+          // And then run all the callbacks waiting for this.
+          runCallbacks(callbacks);
+        }
+      });
+    } else {
+      fetching = false;
+      // Fail gracefully, container supplied no fetch function. Do not hold on to callbacks.
+      runCallbacks(callbacks);
+    }
+  }
+
+  /**
+   * @see osapi.container.Container.prototype.updateContainerSecurityToken
+   */
+  osapi.container.Service.prototype.updateContainerSecurityToken = function(callback, token, ttl) {
+    var now = osapi.container.util.getCurrentTimeMs(),
+        needsRefresh = containerTokenTTL &&
+            (fetching || token || !lastRefresh || now > lastRefresh + containerTokenTTL);
+    if (needsRefresh) {
+      // Hard expire in 95% of originial ttl.
+      var expired = !lastRefresh || now > lastRefresh + (containerTokenTTL * 95 / 80);
+      if (!expired && callback) {
+        // Token not expired, but needs refresh.  Don't block operations that need a valid token.
+        callback();
+      } else if (callback) {
+        // We have a callback, there's either a fetch happening, or we otherwise need to refresh the
+        // token.  Place it in the callbacks queue to be run after the fetch (currently running or
+        // soon to be launched) completes.
+        callbacks.push(callback);
+      }
+
+      if (token) {
+        // We are trying to set a token initially.  Run refresh with a fetch_once function that simply
+        // returns the canned values.  Then schedule the refresh using the function in the config
+        refresh.call(this, function(result) {
+          result(token, ttl);
+        });
+      } else if (!fetching) {
+        // There's no fetch going on right now. We need to start one because the token needs a refresh
+        refresh.call(this);
+      }
+    } else if (callback) {
+      // No refresh needed, run the callback because the token is fine.
+      callback();
+    }
+  };
+})();

@@ -18,12 +18,19 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
-import com.google.inject.Inject;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletionService;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorCompletionService;
+import java.util.concurrent.ExecutorService;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.Uri.UriException;
@@ -40,20 +47,12 @@ import org.apache.shindig.protocol.Service;
 import org.apache.shindig.protocol.conversion.BeanDelegator;
 import org.apache.shindig.protocol.conversion.BeanFilter;
 
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.CompletionService;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorCompletionService;
-import java.util.concurrent.ExecutorService;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import javax.servlet.http.HttpServletResponse;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import com.google.inject.Inject;
 
 /**
  * Provides endpoints for gadget metadata lookup and more.
@@ -129,7 +128,8 @@ public class GadgetsHandler {
   protected final BeanDelegator beanDelegator;
 
   @Inject
-  public GadgetsHandler(ExecutorService executor, GadgetsHandlerService handlerService,
+  public GadgetsHandler(ExecutorService executor,
+                        GadgetsHandlerService handlerService,
                         BeanFilter beanFilter) {
     this.executor = executor;
     this.handlerService = handlerService;
@@ -317,7 +317,7 @@ public class GadgetsHandler {
   protected Callable<CallableData> createTokenJob(final String url,
       BaseRequestItem request) throws ProcessingException {
     // TODO: Get token duration from requests
-    final TokenRequestData tokenRequest = new TokenRequestData(url, request, null);
+    final TokenRequestData tokenRequest = new TokenRequestData(url, request);
     return new Callable<CallableData>() {
       public CallableData call() throws Exception {
         try {
@@ -563,14 +563,26 @@ public class GadgetsHandler {
   protected class TokenRequestData extends AbstractRequest
       implements GadgetsHandlerApi.TokenRequest {
 
-    public TokenRequestData(String url, BaseRequestItem request, Long durationSeconds)
+    private Long moduleId;
+
+    public TokenRequestData(String url, BaseRequestItem request)
         throws ProcessingException {
       super(url, request, DEFAULT_TOKEN_FIELDS);
+
+      // The moduleId for the gadget (if it exists) is the fragment of the URI:
+      //  ex: http://example.com/gadget.xml#1 or http://example.com/gadget.xml
+      // zero is implied if missing.
+      String moduleId = this.uri.getFragmentParameter("moduleId");
+      this.moduleId = moduleId == null ? 0 : Long.valueOf(moduleId);
     }
 
     public GadgetsHandlerApi.AuthContext getAuthContext() {
       return beanDelegator.createDelegator(
           request.getToken(), GadgetsHandlerApi.AuthContext.class);
+    }
+
+    public Long getModuleId() {
+      return moduleId;
     }
   }
 

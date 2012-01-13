@@ -129,11 +129,11 @@ public class GadgetsHandlerServiceTest extends EasyMockTestCase {
     gadgetHandler = new GadgetsHandlerService(timeSource, processor, urlGenerator, tokenCodec,
             proxyUriManager, jsUriManager, proxyHandler, jsPipeline, jsRequestBuilder,
             SPEC_REFRESH_INTERVAL_MS, new BeanFilter(), cajaContentRewriter, gadgetAdminStore,
-            featureRegistryProvider);
+            featureRegistryProvider, new ModuleIdManagerImpl());
     gadgetHandlerWithAdmin = new GadgetsHandlerService(timeSource, processor, urlGenerator,
             tokenCodec, proxyUriManager, jsUriManager, proxyHandler, jsPipeline, jsRequestBuilder,
             SPEC_REFRESH_INTERVAL_MS, new BeanFilter(), cajaContentRewriter, gadgetAdminStore,
-            featureRegistryProvider);
+            featureRegistryProvider, new ModuleIdManagerImpl());
   }
 
   // Next test verify that the API data classes are configured correctly.

@@ -55,6 +55,7 @@ import org.apache.shindig.gadgets.js.JsServingPipeline;
 import org.apache.shindig.gadgets.process.ProcessingException;
 import org.apache.shindig.gadgets.process.Processor;
 import org.apache.shindig.gadgets.servlet.CajaContentRewriter.CajoledResult;
+import org.apache.shindig.gadgets.servlet.GadgetsHandlerApi.AuthContext;
 import org.apache.shindig.gadgets.spec.Feature;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.LinkSpec;
@@ -152,6 +153,7 @@ public class GadgetsHandlerService {
   protected final CajaContentRewriter cajaContentRewriter;
   protected final GadgetAdminStore gadgetAdminStore;
   protected final FeatureRegistryProvider featureRegistryProvider;
+  protected final ModuleIdManager moduleIdManager;
 
   @Inject
   public GadgetsHandlerService(TimeSource timeSource, Processor processor,
@@ -161,7 +163,8 @@ public class GadgetsHandlerService {
       @Named("shindig.cache.xml.refreshInterval") long specRefreshInterval,
       BeanFilter beanFilter, CajaContentRewriter cajaContentRewriter,
       GadgetAdminStore gadgetAdminStore,
-      FeatureRegistryProvider featureRegistryProvider) {
+      FeatureRegistryProvider featureRegistryProvider,
+      ModuleIdManager moduleIdManager) {
     this.timeSource = timeSource;
     this.processor = processor;
     this.iframeUriManager = iframeUriManager;
@@ -176,6 +179,7 @@ public class GadgetsHandlerService {
     this.cajaContentRewriter = cajaContentRewriter;
     this.gadgetAdminStore = gadgetAdminStore;
     this.featureRegistryProvider = featureRegistryProvider;
+    this.moduleIdManager = moduleIdManager;
 
     this.beanDelegator = new BeanDelegator(API_CLASSES, ENUM_CONVERSION_MAP);
   }
@@ -265,12 +269,36 @@ public class GadgetsHandlerService {
       throws SecurityTokenException, ProcessingException {
     verifyBaseParams(request, true);
     Set<String> fields = beanFilter.processBeanFields(request.getFields());
+    AuthContext authContext = request.getAuthContext();
 
-    SecurityToken tokenData = convertAuthContext(request.getAuthContext(), request.getContainer(),
-        request.getUrl().toString());
-    String token = securityTokenCodec.encodeToken(tokenData);
+    SecurityToken tokenData = null;
+    String token = null;
+
+    Long moduleId = request.getModuleId();
+    if (moduleId == null) {
+      // Zero means there's no persisted module instance and the container doesn't care to persist it.
+      moduleId = 0L;
+    } else if (moduleId < 0) {
+      // Please generate a module Id for me
+      moduleId = moduleIdManager.generate(request.getUrl(), authContext);
+    }
+    if (moduleId > 0) {
+      moduleId = moduleIdManager.validate(request.getUrl(), authContext, moduleId);
+    }
+
+    if (moduleId != null) {
+      tokenData = convertAuthContext(authContext, request.getContainer(),
+          request.getUrl().toString(), moduleId);
+      token = securityTokenCodec.encodeToken(tokenData);
+    }
+
     Long expiryTimeMs = tokenData == null ? null : tokenData.getExpiresAt();
-    return createTokenResponse(request.getUrl(), token, fields, expiryTimeMs);
+
+    Integer tokenTTL = isFieldIncluded(fields, "tokenTTL") ?
+        securityTokenCodec.getTokenTimeToLive() : null;
+    moduleId = isFieldIncluded(fields, "moduleId") ? moduleId : null;
+
+    return createTokenResponse(request.getUrl(), token, fields, expiryTimeMs, tokenTTL, moduleId);
   }
 
   public GadgetsHandlerApi.JsResponse getJs(GadgetsHandlerApi.JsRequest request)
@@ -495,13 +523,18 @@ public class GadgetsHandlerService {
   }
 
   private SecurityToken convertAuthContext(GadgetsHandlerApi.AuthContext authContext,
-      String container, String url) {
+    String container, String url) {
+    return convertAuthContext(authContext, container, url, 0);
+  }
+
+  private SecurityToken convertAuthContext(GadgetsHandlerApi.AuthContext authContext,
+    String container, String url, long moduleId) {
     if (authContext == null) {
       return null;
     }
     return beanDelegator.createDelegator(authContext, SecurityToken.class,
         ImmutableMap.<String, Object>of("container", container,
-            "appid", url, "appurl", url));
+            "appid", url, "appurl", url, "moduleId", moduleId));
   }
 
   public GadgetsHandlerApi.BaseResponse createErrorResponse(
@@ -545,16 +578,21 @@ public class GadgetsHandlerService {
 
   @VisibleForTesting
   GadgetsHandlerApi.TokenResponse createTokenResponse(
-      Uri url, String token, Set<String> fields, Long tokenExpire) {
+      Uri url, String token, Set<String> fields, Long tokenExpire, Integer tokenTTL, Long moduleId) {
     return (GadgetsHandlerApi.TokenResponse) beanFilter.createFilteredBean(
         beanDelegator.createDelegator(null, GadgetsHandlerApi.TokenResponse.class,
-            ImmutableMap.<String, Object>of(
-                "url", url,
-                "error", BeanDelegator.NULL,
-                "token", BeanDelegator.nullable(token),
-                "responsetimems", timeSource.currentTimeMillis(),
-                "expiretimems", BeanDelegator.nullable(tokenExpire))),
-        fields);
+            ImmutableMap.<String, Object>builder()
+                .put("url", url)
+                .put("error", BeanDelegator.NULL)
+                .put("token", BeanDelegator.nullable(token))
+                .put("responsetimems", timeSource.currentTimeMillis())
+                .put("expiretimems", BeanDelegator.nullable(tokenExpire))
+                .put("tokenttl", BeanDelegator.nullable(tokenTTL))
+                .put("moduleid", BeanDelegator.nullable(moduleId))
+            .build()
+        ),
+        fields
+    );
   }
 
   protected JsUri createJsUri(GadgetsHandlerApi.JsRequest request) {

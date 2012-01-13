@@ -23,18 +23,19 @@
 
 
 /**
- * @param {number} siteId The id of site containing this holder.
+ * @param {osapi.container.GadgetSite} site The site containing this holder.
  * @param {Element} el The element to render gadgets in.
  * @param {string} onGadgetLoad The name of the on load function
  * @constructor
  */
-osapi.container.GadgetHolder = function(siteId, el, onGadgetLoad) {
+osapi.container.GadgetHolder = function(site, el, onGadgetLoad) {
+
   /**
-   * Unique numeric gadget ID.
-   * @type {number}
+   * The gadget site that holds this holder
+   * @type {osapi.container.GadgetSite}
    * @private
    */
-  this.siteId_ = siteId;
+  this.site_ = site;
 
   /**
    * The element into which the gadget is rendered.
@@ -183,7 +184,7 @@ osapi.container.GadgetHolder.prototype.setSecurityToken = function(value) {
 osapi.container.GadgetHolder.prototype.render = function(
     gadgetInfo, viewParams, renderParams) {
   this.iframeId_ = osapi.container.GadgetHolder.IFRAME_ID_PREFIX_ +
-      this.siteId_;
+      this.site_.getId();
   this.gadgetInfo_ = gadgetInfo;
   this.viewParams_ = viewParams;
   this.renderParams_ = renderParams;
@@ -348,7 +349,7 @@ osapi.container.GadgetHolder.prototype.getIframeUrl_ = function() {
   }
 
   // Uniquely identify possibly-same gadgets on a page.
-  uri.setQP('mid', String(this.siteId_));
+  uri.setQP('mid', String(this.site_.getModuleId()));
 
   if (!osapi.container.util.isEmptyJson(this.viewParams_)) {
     var gadgetParamText = gadgets.json.stringify(this.viewParams_);

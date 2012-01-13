@@ -138,7 +138,7 @@ public class GadgetsHandlerTest extends EasyMockTestCase {
     GadgetsHandlerService service = new GadgetsHandlerService(timeSource, processor, urlGenerator,
             codec, proxyUriManager, jsUriManager, proxyHandler, jsPipeline, jsRequestBuilder,
             SPEC_REFRESH_INTERVAL, beanFilter, cajaContentRewriter, gadgetAdminStore,
-            featureRegistryProvider);
+            featureRegistryProvider, new ModuleIdManagerImpl());
     GadgetsHandler handler = new GadgetsHandler(new ImmediateExecutorService(), service, beanFilter);
     registry = new DefaultHandlerRegistry(injector, converter,
             new HandlerExecutionListener.NoOpHandler());

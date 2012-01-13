@@ -46,16 +46,7 @@ under the License.
       <exports type="js">osapi.container.Container.prototype.rpcRegister</exports>
       <exports type="js">osapi.container.Container.prototype.onConstructed</exports>
       <exports type="js">osapi.container.Container.prototype.getGadgetSiteById</exports>
-      <exports type="js">osapi.container.ContainerConfig.ALLOW_DEFAULT_VIEW</exports>
-      <exports type="js">osapi.container.ContainerConfig.RENDER_CAJOLE</exports>
-      <exports type="js">osapi.container.ContainerConfig.RENDER_DEBUG</exports>
-      <exports type="js">osapi.container.ContainerConfig.RENDER_DEBUG_PARAM</exports>
-      <exports type="js">osapi.container.ContainerConfig.RENDER_TEST</exports>
-      <exports type="js">osapi.container.ContainerConfig.TOKEN_REFRESH_INTERVAL</exports>
-      <exports type="js">osapi.container.ContainerConfig.NAVIGATE_CALLBACK</exports>
-      <exports type="js">osapi.container.ContainerConfig.PRELOAD_REF_TIME</exports>
-      <exports type="js">osapi.container.ContainerConfig.PRELOAD_METADATAS</exports>
-      <exports type="js">osapi.container.ContainerConfig.PRELOAD_TOKENS</exports>
+      <exports type="js">osapi.container.Container.prototype.updateContainerSecurityToken</exports>
       <exports type="rpc">resize_iframe</exports>
       <exports type="rpc">resize_iframe_width</exports>
       <exports type="rpc">set_pref</exports>

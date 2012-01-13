@@ -103,12 +103,7 @@ osapi.container.Container = function(opt_config) {
       osapi.container.ContainerConfig.RENDER_TEST, false));
 
   /**
-   * Security token refresh interval (in ms). Set to < 0 in config to disable
-   * token refresh.
-   *
-   * Provided this number is >= 0, the smallest encountered token ttl or this
-   * number will be used as the refresh interval, whichever is smaller.
-   *
+   * @see osapi.container.ContainerConfig.TOKEN_REFRESH_INTERVAL
    * @type {number}
    * @private
    */
@@ -134,10 +129,10 @@ osapi.container.Container = function(opt_config) {
    * @type {osapi.container.Service}
    * @private
    */
-  this.service_ = new osapi.container.Service(config);
+  this.service_ = new osapi.container.Service(this);
 
   /**
-   * result from calling window.setInterval()
+   * result from calling window.setTimeout()
    * @type {?number}
    * @private
    */
@@ -222,7 +217,6 @@ osapi.container.Container.prototype.navigateGadget = function(
 
   var
     self = this,
-    selfSite = site,
     finishNavigate = function(preferences) {
       renderParams[RenderParam.USER_PREFS] = preferences;
       self.applyLifecycleCallbacks_(osapi.container.CallbackType.ON_BEFORE_NAVIGATE,
@@ -239,8 +233,7 @@ osapi.container.Container.prototype.navigateGadget = function(
           self.scheduleRefreshTokens_(gadgetInfo[osapi.container.MetadataResponse.TOKEN_TTL]);
         }
 
-        self.applyLifecycleCallbacks_(osapi.container.CallbackType.ON_NAVIGATED,
-            selfSite);
+        self.applyLifecycleCallbacks_(osapi.container.CallbackType.ON_NAVIGATED, site);
         callback(gadgetInfo);
       });
     };
@@ -413,114 +406,6 @@ osapi.container.Container.addMixin = function(namespace, func) {
 
 
 // -----------------------------------------------------------------------------
-// Valid JSON keys.
-// -----------------------------------------------------------------------------
-
-/**
- * Enumeration of configuration keys for this container. This is specified in
- * JSON to provide extensible configuration. These enum values are for
- * documentation purposes only, it is expected that clients use the string
- * values.
- * @enum {string}
- */
-osapi.container.ContainerConfig = {};
-/**
- * Allow gadgets to render in unspecified view.
- * @type {string}
- * @const
- */
-osapi.container.ContainerConfig.ALLOW_DEFAULT_VIEW = 'allowDefaultView';
-/**
- * Whether cajole mode is turned on.
- * @type {string}
- * @const
- */
-osapi.container.ContainerConfig.RENDER_CAJOLE = 'renderCajole';
-/**
- * Whether debug mode is turned on.
- * @type {string}
- * @const
- */
-osapi.container.ContainerConfig.RENDER_DEBUG = 'renderDebug';
-/**
- * The debug param name to look for in container URL for per-request debugging.
- * @type {string}
- * @const
- */
-osapi.container.ContainerConfig.RENDER_DEBUG_PARAM = 'renderDebugParam';
-/**
- * Whether test mode is turned on.
- * @type {string}
- * @const
- */
-osapi.container.ContainerConfig.RENDER_TEST = 'renderTest';
-/**
- * Security token refresh interval (in ms) for debugging.
- * @type {string}
- * @const
- */
-osapi.container.ContainerConfig.TOKEN_REFRESH_INTERVAL = 'tokenRefreshInterval';
-/**
- * Globally-defined callback function upon gadget navigation. Useful to
- * broadcast timing and stat information back to container.
- * @type {string}
- * @const
- */
-osapi.container.ContainerConfig.NAVIGATE_CALLBACK = 'navigateCallback';
-
-/**
- * Provide server reference time for preloaded data.
- * This time is used instead of each response time in order to support server
- * caching of results.
- * @type {number}
- * @const
- */
-osapi.container.ContainerConfig.PRELOAD_REF_TIME = 'preloadRefTime';
-/**
- * Preloaded hash of gadgets metadata
- * @type {Object}
- * @const
- */
-osapi.container.ContainerConfig.PRELOAD_METADATAS = 'preloadMetadatas';
-/**
- * Preloaded hash of gadgets tokens
- * @type {Object}
- * @const
- */
-osapi.container.ContainerConfig.PRELOAD_TOKENS = 'preloadTokens';
-/**
- * Used to query the language locale part of the container page.
- * @type {function}
- */
-osapi.container.ContainerConfig.GET_LANGUAGE = 'GET_LANGUAGE';
-/**
- * Used to query the country locale part of the container page.
- * @type {function}
- */
-osapi.container.ContainerConfig.GET_COUNTRY = 'GET_COUNTRY';
-/**
- * Used to retrieve the persisted preferences for a gadget.
- * @type {function}
- */
-osapi.container.ContainerConfig.GET_PREFERENCES = 'GET_PREFERENCES';
-/**
- * Used to persist preferences for a gadget.
- * @type {function}
- */
-osapi.container.ContainerConfig.SET_PREFERENCES = 'SET_PREFERENCES';
-/**
- * Used to arbitrate RPC calls.
- * @type {function}
- */
-osapi.container.ContainerConfig.RPC_ARBITRATOR = 'rpcArbitrator';
-/**
- * Used to retrieve security tokens for gadgets.
- * @type {function}
- */
-osapi.container.ContainerConfig.GET_GADGET_TOKEN = 'GET_GADGET_TOKEN';
-
-
-// -----------------------------------------------------------------------------
 // Private variables and methods.
 // -----------------------------------------------------------------------------
 
@@ -624,6 +509,22 @@ osapi.container.Container.prototype.getSiteById = function(siteId) {
 };
 
 /**
+ * Update and schedule refreshing of container token.  This function will use the config function
+ * osapi.container.ContainerConfig.GET_CONTAINER_TOKEN to fetch a container token, if needed,
+ * unless the token is specified in the optional parameter, in which case the token will be
+ * updated with the provided value immediately.
+ *
+ * @param {function=} callback Function to run when container token is valid.
+ * @param {String=} token The containers new security token.
+ * @param {number=} ttl The token's ttl in seconds. If token is specified and ttl is 0,
+ *   token refresh will be disabled.
+ * @see osapi.container.ContainerConfig.GET_CONTAINER_TOKEN (constants.js)
+ */
+osapi.container.Container.prototype.updateContainerSecurityToken = function(callback, token, ttl) {
+  this.service_.updateContainerSecurityToken(callback, token, ttl);
+}
+
+/**
  * Start to schedule refreshing of tokens.
  * @param {number} Encountered token time to live in seconds.
  * @private
@@ -633,12 +534,14 @@ osapi.container.Container.prototype.scheduleRefreshTokens_ = function(tokenTTL) 
       oldInterval = this.tokenRefreshInterval_,
       newInterval = tokenTTL ? this.setRefreshTokenInterval_(tokenTTL * 1000) : oldInterval,
       refresh = function() {
-        self.lastRefresh_ = osapi.container.util.getCurrentTimeMs();
-        // Schedule the next refresh.
-        self.tokenRefreshTimer_ = setTimeout(refresh, newInterval);
+        self.updateContainerSecurityToken(function() {
+          self.lastRefresh_ = osapi.container.util.getCurrentTimeMs();
+          // Schedule the next refresh.
+          self.tokenRefreshTimer_ = setTimeout(refresh, newInterval);
 
-        // Do this last so that if it ever errors, we maintain the refresh schedule.
-        self.refreshTokens_();
+          // Do this last so that if it ever errors, we maintain the refresh schedule.
+          self.refreshTokens_();
+        });
       };
 
   // If enabled, check to see if we no schedule or if the two intervals are different and update the schedule.
@@ -675,7 +578,7 @@ osapi.container.Container.prototype.unscheduleRefreshTokens_ = function() {
   if (this.tokenRefreshTimer_) {
     var urls = this.getTokenRefreshableGadgetUrls_();
     if (urls.length <= 0) {
-      window.clearInterval(this.tokenRefreshTimer_);
+      clearTimeout(this.tokenRefreshTimer_);
       this.tokenRefreshTimer_ = null;
     }
   }
@@ -809,14 +712,47 @@ osapi.container.Container.prototype.addPreloadedGadgetUrl_ = function(gadgetUrl)
  * @return {Array} An array of URLs of gadgets.
  * @private
  */
+// TODO: this function needs to be renamed, perhaps: getTokenRequestUrls_
 osapi.container.Container.prototype.getTokenRefreshableGadgetUrls_ = function() {
   var result = {};
+
   for (var url in this.getActiveGadgetUrls_()) {
     var metadata = this.service_.getCachedGadgetMetadata(url);
     if (metadata[osapi.container.MetadataResponse.NEEDS_TOKEN_REFRESH]) {
-      result[url] = null;
+      result[url] = 1;
     }
   }
+
+  /* Now add all gadget site urls that have moduleIds
+   *
+   * We're basically refreshing a security token for any given
+   * non-persisted (no moduleId) navigated or preloaded gadget instance, as
+   * well as each persisted instance (each moduleId) for any given gadgetUrl.
+   *
+   * In other words, if we've got a gadget preloaded or navigated:
+   *   http://foo.com/gadget.xml
+   * We will refresh a token for non-persisted (no moduleId) instances of that
+   * gadget.
+   * If we've got a navigated persisted gadget on the page, we'll refresh that
+   * security token as well.
+   */
+  for (var siteId in this.sites_) {
+    var site = this.sites_[siteId];
+    if (site instanceof osapi.container.GadgetSite) {
+      var holder = site.getActiveGadgetHolder();
+      if (holder) {
+        var url = holder.getUrl();
+            mid = site.getModuleId();
+
+        // If this gadget token does not require refresh
+        // (baseurl is not already in result), don't add it.
+        if (result[url]) {
+          result[osapi.container.util.buildTokenRequestUrl(url, mid)] = 1;
+        }
+      }
+    }
+  }
+
   return osapi.container.util.toArrayOfJsonKeys(result);
 };
 
@@ -843,9 +779,9 @@ osapi.container.Container.prototype.getNavigatedGadgetUrls_ = function() {
   for (var siteId in this.sites_) {
     var site = this.sites_[siteId];
     if (site instanceof osapi.container.GadgetSite) {
-      var holder = (site.getActiveGadgetHolder || site.getActiveUrlHolder).call(site);
+      var holder = site.getActiveGadgetHolder(site);
       if(holder) {
-        result[holder.getUrl()] = null;
+        result[holder.getUrl()] = 1;
       }
     }
   }
@@ -868,14 +804,18 @@ osapi.container.Container.prototype.refreshTokens_ = function() {
     // update pre-loaded gadgets, since new tokens will take effect when they
     // are navigated to, from cache.
     for (var siteId in self.sites_) {
-      if (self.sites_[siteId] instanceof osapi.container.GadgetSite) {
-        var holder = self.sites_[siteId].getActiveGadgetHolder();
+      var site = self.sites_[siteId];
+      if (site instanceof osapi.container.GadgetSite) {
+        var holder = site.getActiveGadgetHolder();
         var gadgetInfo = self.service_.getCachedGadgetMetadata(holder.getUrl());
         if (gadgetInfo[osapi.container.MetadataResponse.NEEDS_TOKEN_REFRESH]) {
-          var tokenInfo = response[holder.getUrl()];
+          var mid = site.getModuleId(),
+              url = osapi.container.util.buildTokenRequestUrl(holder.getUrl(), mid),
+              tokenInfo = response[url];
+
           if (tokenInfo.error) {
             gadgets.warn(['Failed to get token for gadget ',
-                holder.getUrl(), '.'].join(''));
+                url, '.'].join(''));
           } else {
             gadgets.rpc.call(holder.getIframeId(), 'update_security_token', null,
                 tokenInfo[osapi.container.TokenResponse.TOKEN]);
