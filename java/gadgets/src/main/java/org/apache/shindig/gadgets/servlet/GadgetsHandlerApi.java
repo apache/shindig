@@ -23,7 +23,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.protocol.conversion.BeanFilter.Unfiltered;
 
@@ -164,6 +163,7 @@ public class GadgetsHandlerApi {
     public Map<String, Feature> getFeatures();
     public Map<String, LinkSpec> getLinks();
     public OAuthSpec getOAuthSpec();
+    public OAuth2Spec getOAuth2Spec();
     // TODO: Provide better interface for locale if needed
     // public Map<Locale, LocaleSpec> getLocales();
   }
@@ -184,6 +184,10 @@ public class GadgetsHandlerApi {
     public Map<String, OAuthService> getServices();
   }
 
+  public interface OAuth2Spec {
+	    public Map<String, OAuth2Service> getServices();
+  }
+  
   public interface OAuthService {
     public EndPoint getRequestUrl();
     public EndPoint getAccessUrl();
@@ -197,6 +201,12 @@ public class GadgetsHandlerApi {
     public Location getLocation();
   }
 
+  public interface OAuth2Service {
+	  public EndPoint getAuthorizationUrl();
+	  public EndPoint getTokenUrl();
+	  public String getScope();
+	  public String getName();
+  }
   public interface TokenRequest extends BaseRequest {
     public AuthContext getAuthContext();
     public Long getModuleId();

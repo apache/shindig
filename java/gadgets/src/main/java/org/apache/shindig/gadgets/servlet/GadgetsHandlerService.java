@@ -60,6 +60,8 @@ import org.apache.shindig.gadgets.spec.Feature;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.LinkSpec;
 import org.apache.shindig.gadgets.spec.ModulePrefs;
+import org.apache.shindig.gadgets.spec.OAuth2Service;
+import org.apache.shindig.gadgets.spec.OAuth2Spec;
 import org.apache.shindig.gadgets.spec.OAuthService;
 import org.apache.shindig.gadgets.spec.OAuthSpec;
 import org.apache.shindig.gadgets.spec.UserPref;
@@ -112,6 +114,8 @@ public class GadgetsHandlerService {
           .put(OAuthSpec.class, GadgetsHandlerApi.OAuthSpec.class)
           .put(OAuthService.class, GadgetsHandlerApi.OAuthService.class)
           .put(OAuthService.EndPoint.class, GadgetsHandlerApi.EndPoint.class)
+          .put(OAuth2Spec.class, GadgetsHandlerApi.OAuth2Spec.class)
+          .put(OAuth2Service.class, GadgetsHandlerApi.OAuth2Service.class)
           // Enums
           .put(View.ContentType.class, GadgetsHandlerApi.ViewContentType.class)
           .put(UserPref.DataType.class, GadgetsHandlerApi.UserPrefDataType.class)
