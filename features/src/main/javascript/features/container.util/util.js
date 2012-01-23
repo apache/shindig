@@ -178,7 +178,7 @@ osapi.container.util.createIframeHtml = function(iframeParams) {
   out.push('<iframe ');
   for (var key in iframeParams) {
       var value = iframeParams[key];
-      if (value) {
+      if (typeof(value) != 'undefined') {
           out.push(key);
           out.push('="');
           out.push(value);

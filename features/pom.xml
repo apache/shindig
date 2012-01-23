@@ -125,10 +125,12 @@
                 <source>core.io/io.js</source>
                 <source>container.util/constant.js</source>
                 <source>container.util/util.js</source>
-                <source>container.gadget/gadget_holder.js</source>
-                <source>container.gadget/gadget_site.js</source>
-                <source>container.url/url_holder.js</source>
-                <source>container.url/url_site.js</source>
+                <source>container.site/site.js</source>
+                <source>container.site/site_holder.js</source>
+                <source>container.site.gadget/gadget_holder.js</source>
+                <source>container.site.gadget/gadget_site.js</source>
+                <source>container.site.url/url_holder.js</source>
+                <source>container.site.url/url_site.js</source>
                 <source>container/service.js</source>
                 <source>container/container.js</source>
                 <source>i18n/currencycodemap.js</source>

@@ -289,7 +289,7 @@
         // Return subset of matching sites (gadget view matches declared action view,
         // if the action declared a view) Do not modify existing array.
         for (var i = 0, site; site = candidates[i]; i++) {
-          var holder = site.getActiveGadgetHolder();
+          var holder = site.getActiveSiteHolder();
           if (!action.view || (holder && holder.getView() === action.view)) {
             (sites = sites || []).push(site);
           }
@@ -476,7 +476,7 @@
     var gadgetSites = registry.getGadgetSites(id);
     if (gadgetSites) {
       for (var i = 0, site; site = gadgetSites[i]; i++) {
-        var holder = site.getActiveGadgetHolder();
+        var holder = site.getActiveSiteHolder();
         if (holder) {
           gadgets.rpc.call(holder.getIframeId(), 'actions.runAction', null,
             id, selection
@@ -539,9 +539,9 @@
    *          Gadget site that has been navigated.
    */
   var navigatedCallback = function(site) {
-    var gadgetHolder = site.getActiveGadgetHolder();
-    if (gadgetHolder) {
-      var url = gadgetHolder.getUrl();
+    var holder = site.getActiveSiteHolder();
+    if (holder) {
+      var url = holder.getUrl();
       registry.addGadgetSite(url, site);
     }
   };

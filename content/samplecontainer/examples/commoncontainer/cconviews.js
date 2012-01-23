@@ -342,9 +342,9 @@ function closeDialog(site) {
   var iframeId;
   var widgetId = 'dialog_' + dialog_counter; //default
 
-  if (site && site.getActiveGadgetHolder()) {
+  if (site && site.getActiveSiteHolder()) {
     // get iframe id
-    iframeId = site.getActiveGadgetHolder().getIframeId();
+    iframeId = site.getActiveSiteHolder().getIframeId();
     if (typeof iframeId != 'undefined') {
       var iframeNode = document.getElementById(iframeId);
       // get dialog widget id

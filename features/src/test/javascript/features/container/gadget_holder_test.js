@@ -47,12 +47,12 @@ GadgetHolderTest.prototype.testNew = function() {
     },
     id: '123'
   };
-  var site = new osapi.container.GadgetSite({gadgetEl: element});
+  var site = new osapi.container.GadgetSite(null, null, {gadgetEl: element});
   var holder = new osapi.container.GadgetHolder(site, element);
   this.assertEquals(element, holder.getElement());
-  this.assertNull(holder.getIframeId());
-  this.assertNull(holder.getGadgetInfo());
-  this.assertNull(holder.getUrl());
+  this.assertUndefined(holder.getIframeId());
+  this.assertUndefined(holder.getGadgetInfo());
+  this.assertUndefined(holder.getUrl());
 };
 
 GadgetHolderTest.prototype.testRenderWithoutRenderParams = function() {
@@ -65,7 +65,7 @@ GadgetHolderTest.prototype.testRenderWithoutRenderParams = function() {
   var element = {
     id: '123'
   };
-  var site = new osapi.container.GadgetSite({gadgetEl: element});
+  var site = new osapi.container.GadgetSite(null, null, {gadgetEl: element});
   var holder = new osapi.container.GadgetHolder(site, element, '__gadgetOnLoad');
   holder.render(gadgetInfo, {}, {});
   this.assertEquals('<iframe' +
@@ -102,7 +102,7 @@ GadgetHolderTest.prototype.testRenderWithRenderRequests = function() {
   var element = {
     id: '123'
   };
-  var site = new osapi.container.GadgetSite({gadgetEl: element, moduleId: 123});
+  var site = new osapi.container.GadgetSite(null, null, {gadgetEl: element, moduleId: 123});
   var holder = new osapi.container.GadgetHolder(site, element, '__gadgetOnLoad');
   holder.render(gadgetInfo, {}, renderParams);
   this.assertEquals('<iframe' +

@@ -178,7 +178,7 @@ ContainerTest.prototype.setupGadgetSite = function(id, gadgetInfo, gadgetHolder)
         self.site_navigateTo_renderParams = renderParams;
         func(gadgetInfo);
       },
-      'getActiveGadgetHolder' : function() {
+      'getActiveSiteHolder' : function() {
         return gadgetHolder;
       }
     };

@@ -166,10 +166,10 @@
    */
   function navigated(gadgetSite) {
     if (gadgetSite != null) {
-      if (gadgetSite.getActiveGadgetHolder() != null) {
-        url = gadgetSite.getActiveGadgetHolder().getUrl();
+      if (gadgetSite.getActiveSiteHolder() != null) {
+        url = gadgetSite.getActiveSiteHolder().getUrl();
         if (descriptions[url] == null) {
-          preloaded([gadgetSite.getActiveGadgetHolder().getGadgetInfo()]);
+          preloaded([gadgetSite.getActiveSiteHolder().getGadgetInfo()]);
         }
         ids[gadgetSite.getId()] = url;
       }

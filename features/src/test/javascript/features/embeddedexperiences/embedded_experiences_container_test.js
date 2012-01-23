@@ -93,7 +93,7 @@ EEContainerTest.prototype.setupGadgetSite = function(id, gadgetInfo, gadgetHolde
                 self.site_navigateTo_renderParams = renderParams;
                 func(gadgetInfo);
             },
-            'getActiveGadgetHolder' : function() {
+            'getActiveSiteHolder' : function() {
                 return gadgetHolder;
             }
         };

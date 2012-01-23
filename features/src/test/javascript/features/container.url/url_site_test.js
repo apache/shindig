@@ -32,19 +32,19 @@ UrlSiteTest.prototype.setUp = function() {
 };
 
 UrlSiteTest.prototype.tearDown = function() {
-  osapi.container.UrlSite.nextUniqueId_ = 0;
+  
 };
 
 UrlSiteTest.prototype.testNew = function() {
   var args = {
     "urlEl" : {}
   };
-  var site = new osapi.container.UrlSite(args);
-  this.assertEquals(osapi.container.Container.prototype.nextUniqueSiteId_ - 1, site.getId());
-  this.assertNull(site.getActiveUrlHolder());
-  var site2 = new osapi.container.UrlSite(args);
-  this.assertEquals(osapi.container.Container.prototype.nextUniqueSiteId_ - 1, site2.getId());
-  this.assertNull(site.getActiveUrlHolder());
+  var site = new osapi.container.UrlSite(null, null, args);
+  this.assertEquals(osapi.container.Site.prototype.nextUniqueSiteId_ - 1, site.getId());
+  this.assertTrue(!site.getActiveSiteHolder());
+  var site2 = new osapi.container.UrlSite(null, null, args);
+  this.assertEquals(osapi.container.Site.prototype.nextUniqueSiteId_ - 1, site2.getId());
+  this.assertTrue(!site.getActiveSiteHolder());
 };
 
 UrlSiteTest.prototype.testRenderNoParams = function() {
@@ -53,12 +53,12 @@ UrlSiteTest.prototype.testRenderNoParams = function() {
     "urlEl" : el
   };
   var url = "http://example.com";
-  var site = new osapi.container.UrlSite(args);
+  var site = new osapi.container.UrlSite(null, null, args);
   site.render(url, {});
-  this.assertNotNull(site.getActiveUrlHolder());
+  this.assertNotNull(site.getActiveSiteHolder());
   this.assertEquals('<iframe' + ' marginwidth="0"' + ' hspace="0"' + ' frameborder="0"'
-          + ' scrolling="auto"' + ' marginheight="0"' + ' vspace="0"' + ' id="__url_' + (osapi.container.Container.prototype.nextUniqueSiteId_ - 1) + '"'
-          + ' name="__url_' + (osapi.container.Container.prototype.nextUniqueSiteId_ - 1) + '"' + ' src="http://example.com"' + ' ></iframe>', el.innerHTML);
+          + ' scrolling="auto"' + ' marginheight="0"' + ' vspace="0"' + ' id="__url_' + site.getId() + '"'
+          + ' name="__url_' + site.getId() + '"' + ' src="http://example.com"' + ' ></iframe>', el.innerHTML);
 };
 
 UrlSiteTest.prototype.testRenderWithParams = function() {
@@ -67,16 +67,16 @@ UrlSiteTest.prototype.testRenderWithParams = function() {
     "urlEl" : el
   };
   var url = "http://example.com";
-  var site = new osapi.container.UrlSite(args);
+  var site = new osapi.container.UrlSite(null, null, args);
   site.render(url, {
           "class" : "myClass",
           "width" : 54,
           "height" : 104
   });
-  this.assertNotNull(site.getActiveUrlHolder());
+  this.assertNotNull(site.getActiveSiteHolder());
   this.assertEquals('<iframe' + ' marginwidth="0"' + ' hspace="0"' + ' height="104"'
           + ' frameborder="0"' + ' scrolling="auto"' + ' class="myClass"' + ' marginheight="0"'
-          + ' vspace="0"' + ' id="__url_' + (osapi.container.Container.prototype.nextUniqueSiteId_ - 1) + '"' + ' width="54"' + ' name="__url_' + (osapi.container.Container.prototype.nextUniqueSiteId_ - 1) + '"'
+          + ' vspace="0"' + ' id="__url_' + site.getId() + '"' + ' width="54"' + ' name="__url_' + site.getId() + '"'
           + ' src="http://example.com"' + ' ></iframe>', el.innerHTML);
 };
 
@@ -90,7 +90,7 @@ UrlSiteTest.prototype.testClose = function() {
   var args = {
     "urlEl" : el
   };
-  var site = new osapi.container.UrlSite(args);
+  var site = new osapi.container.UrlSite(null, null, args);
   site.close();
   this.assertEquals("removedFirstChild", el.firstChild);
 }
@@ -100,7 +100,7 @@ UrlSiteTest.prototype.testParentId = function() {
   var args = {
     "urlEl" : el
   };
-  var site = new osapi.container.UrlSite(args);
+  var site = new osapi.container.UrlSite(null, null, args);
   site.setParentId(1);
   this.assertEquals(1, site.getParentId());
 }
@@ -110,12 +110,12 @@ UrlSiteTest.prototype.testSetWidth = function() {
   var args = {
     "urlEl" : el
   };
-  var site = new osapi.container.UrlSite(args);
+  var site = new osapi.container.UrlSite(null, null, args);
   this.assertEquals(site, site.setWidth(50));
 
   el = {};
   args.urlEl = el;
-  site = new osapi.container.UrlSite(args);
+  site = new osapi.container.UrlSite(null, null, args);
   site.render("http://example.com", {});
   this.assertEquals(site, site.setWidth(50));
 
@@ -123,7 +123,7 @@ UrlSiteTest.prototype.testSetWidth = function() {
     "firstChild" : null
   };
   args.urlEl = el;
-  site = new osapi.container.UrlSite(args);
+  site = new osapi.container.UrlSite(null, null, args);
   site.render("http://example.com", {});
   this.assertEquals(site, site.setWidth(50));
 
@@ -135,7 +135,7 @@ UrlSiteTest.prototype.testSetWidth = function() {
     }
   };
   args.urlEl = el;
-  site = new osapi.container.UrlSite(args);
+  site = new osapi.container.UrlSite(null, null, args);
   site.render("http://example.com", {});
   site.setWidth(50);
   this.assertEquals("50px", el.firstChild.style.width);
@@ -146,12 +146,12 @@ UrlSiteTest.prototype.testSetHeight = function() {
   var args = {
     "urlEl" : el
   };
-  var site = new osapi.container.UrlSite(args);
+  var site = new osapi.container.UrlSite(null, null, args);
   this.assertEquals(site, site.setHeight(50));
 
   el = {};
   args.urlEl = el;
-  site = new osapi.container.UrlSite(args);
+  site = new osapi.container.UrlSite(null, null, args);
   site.render("http://example.com", {});
   this.assertEquals(site, site.setHeight(50));
 
@@ -159,7 +159,7 @@ UrlSiteTest.prototype.testSetHeight = function() {
     "firstChild" : null
   };
   args.urlEl = el;
-  site = new osapi.container.UrlSite(args);
+  site = new osapi.container.UrlSite(null, null, args);
   site.render("http://example.com", {});
   this.assertEquals(site, site.setHeight(50));
 
@@ -171,7 +171,7 @@ UrlSiteTest.prototype.testSetHeight = function() {
     }
   };
   args.urlEl = el;
-  site = new osapi.container.UrlSite(args);
+  site = new osapi.container.UrlSite(null, null, args);
   site.render("http://example.com", {});
   site.setHeight(50);
   this.assertEquals("50px", el.firstChild.style.height);

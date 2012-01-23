@@ -91,9 +91,9 @@
         orig_site = context.getGadgetSiteByIframeId_(this.f);
 
     if ((typeof orig_site != 'undefined') &&
-            (typeof orig_site.getActiveGadgetHolder() != 'undefined')) {
+            (typeof orig_site.getActiveSiteHolder() != 'undefined')) {
       // get url through gadget holder
-      gadgetUrl = orig_site.getActiveGadgetHolder().getUrl();
+      gadgetUrl = orig_site.getActiveSiteHolder().getUrl();
     }
 
     var view = '',
@@ -110,7 +110,7 @@
         viewParams = opt_params.viewParams;
       if(opt_params.coordinates) {
         coordinates = opt_params.coordinates;
-        rel = context.getGadgetSiteByIframeId_(this.f).getActiveGadgetHolder()
+        rel = context.getGadgetSiteByIframeId_(this.f).getActiveSiteHolder()
           .getIframeElement();
       }
     }
@@ -205,7 +205,7 @@
           viewParams = opt_params.viewParams;
         if (opt_params.coordinates) {
           coordinates = opt_params.coordinates;
-          rel = context.getGadgetSiteByIframeId_(siteOwnerId).getActiveGadgetHolder()
+          rel = context.getGadgetSiteByIframeId_(siteOwnerId).getActiveSiteHolder()
             .getIframeElement();
         }
       }
@@ -292,7 +292,7 @@
   function openUrl(url, opt_viewTarget, opt_coordinates) {
     var rel;
     if (opt_coordinates) {
-      rel = context.getGadgetSiteByIframeId_(this.f).getActiveGadgetHolder()
+      rel = context.getGadgetSiteByIframeId_(this.f).getActiveSiteHolder()
         .getIframeElement();
     }
     var content_div = context.views.createElementForUrl(

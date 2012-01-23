@@ -36,18 +36,18 @@ UrlHolderTest.prototype.tearDown = function() {
 
 UrlHolderTest.prototype.testNew = function() {
   var element = {};
-  var holder = new osapi.container.UrlHolder(123, element);
+  var holder = new osapi.container.UrlHolder({getId: function(){return 123;}}, element);
   this.assertEquals(element, holder.getElement());
-  this.assertNull(holder.getIframeId());
-  this.assertNull(holder.getUrl());
+  this.assertUndefined(holder.getIframeId());
+  this.assertUndefined(holder.getUrl());
 };
 
 UrlHolderTest.prototype.testRenderWithoutParams = function() {
   var element = {};
   var url = "http://example.com";
-  var holder = new osapi.container.UrlHolder(123, element);
-  this.assertNull(holder.getUrl());
-  this.assertNull(holder.getIframeId());
+  var holder = new osapi.container.UrlHolder({getId: function(){return 123;}}, element);
+  this.assertUndefined(holder.getUrl());
+  this.assertUndefined(holder.getIframeId());
   holder.render(url, {});
   this.assertEquals('<iframe' + ' marginwidth="0"' + ' hspace="0"' + ' frameborder="0"'
           + ' scrolling="auto"' + ' marginheight="0"' + ' vspace="0"' + ' id="__url_123"'
@@ -59,9 +59,9 @@ UrlHolderTest.prototype.testRenderWithoutParams = function() {
 UrlHolderTest.prototype.testRenderWithParams = function() {
   var element = {};
   var url = "http://example.com";
-  var holder = new osapi.container.UrlHolder(123, element);
-  this.assertNull(holder.getUrl());
-  this.assertNull(holder.getIframeId());
+  var holder = new osapi.container.UrlHolder({getId: function(){return 123;}}, element);
+  this.assertUndefined(holder.getUrl());
+  this.assertUndefined(holder.getIframeId());
   holder.render(url, {
           "class" : "myClass",
           "width" : 54,

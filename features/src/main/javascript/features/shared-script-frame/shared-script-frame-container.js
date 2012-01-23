@@ -103,12 +103,12 @@ osapi.container.Container.addMixin('SharedScriptFrame', function(container) {
    * @returns {?string} The name of the script frame
    */
   var getScriptFrameName = function(rpcArgs) {
-    var info = rpcArgs.gs.getActiveGadgetHolder().getGadgetInfo(),
+    var info = rpcArgs.gs.getActiveSiteHolder().getGadgetInfo(),
         key = getFrameKey(info.url, info.modulePrefs.features['locked-domain']);
 
     var name, scriptSite = siteMap[key];
     if (scriptSite) {
-      name = scriptSite.getActiveGadgetHolder().getIframeId();
+      name = scriptSite.getActiveSiteHolder().getIframeId();
     }
     return name;
   };

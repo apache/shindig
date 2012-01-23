@@ -26,7 +26,8 @@ A map of view names to view attributes. Examples:
   <name>open-views</name>
   <dependency>globals</dependency>
   <dependency>rpc</dependency>
-  <dependency>container.url</dependency>
+  <dependency>container.site.url</dependency>
+  <dependency>container.site.gadget</dependency>
   <dependency>views</dependency>
   <dependency>embedded-experiences</dependency>
   <gadget>

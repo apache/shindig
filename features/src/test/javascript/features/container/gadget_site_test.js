@@ -60,10 +60,10 @@ GadgetSiteTest.prototype.tearDown = function() {
 
 GadgetSiteTest.prototype.testGetId = function() {
   var site;
-  site = new osapi.container.GadgetSite({});
-  this.assertEquals(osapi.container.Container.prototype.nextUniqueSiteId_ - 1, site.getId());
-  site = new osapi.container.GadgetSite({});
-  this.assertEquals(osapi.container.Container.prototype.nextUniqueSiteId_ - 1, site.getId());
+  site = new osapi.container.GadgetSite(null, null, {});
+  this.assertEquals(osapi.container.Site.prototype.nextUniqueSiteId_ - 1, site.getId());
+  site = new osapi.container.GadgetSite(null, null, {});
+  this.assertEquals(osapi.container.Site.prototype.nextUniqueSiteId_ - 1, site.getId());
 };
 
 GadgetSiteTest.prototype.testNavigateToWithUncachedError = function() {
@@ -130,8 +130,7 @@ GadgetSiteTest.prototype.newMetadataError = function(url, message) {
 };
 
 GadgetSiteTest.prototype.newGadgetSite = function(service, navigateCallback) {
-  return new osapi.container.GadgetSite({
-    'service' : service,
+  return new osapi.container.GadgetSite(null, service, {
     'navigateCallback' : navigateCallback
   });
 };

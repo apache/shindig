@@ -154,13 +154,6 @@ osapi.container.Container = function(opt_config) {
   this.onConstructed(config);
 };
 
-/**
- * Unique counter for gadget and url sites.  Used if no explicit ID was provided in their creation.
- * @type {number}
- * @private
- */
-osapi.container.Container.prototype.nextUniqueSiteId_ = 0;
-
 
 /**
  * Create a new gadget site.
@@ -171,9 +164,7 @@ osapi.container.Container.prototype.nextUniqueSiteId_ = 0;
 osapi.container.Container.prototype.newGadgetSite = function(
     gadgetEl, opt_bufferEl) {
   var bufferEl = opt_bufferEl || null;
-  var site = new osapi.container.GadgetSite({
-      'container': this,
-      'service' : this.service_,
+  var site = new osapi.container.GadgetSite(this, this.service_, {
       'navigateCallback' : this.navigateCallback_,
       'gadgetEl' : gadgetEl,
       'bufferEl' : bufferEl,
@@ -492,7 +483,7 @@ osapi.container.Container.prototype.getGadgetSiteByIframeId_ = function(iframeId
   // TODO: Support getting only the loading/active gadget in 2x buffers.
   for (var siteId in this.sites_) {
     var site = this.sites_[siteId];
-    var holder = (site.getActiveGadgetHolder || site.getActiveUrlHolder).call(site);
+    var holder = site.getActiveSiteHolder();
     if (holder && holder.getIframeId() === iframeId) {
       return site;
     }
@@ -653,7 +644,7 @@ osapi.container.Container.prototype.registerRpcServices_ = function() {
       for (var i = 2, j = arguments.length; i < j; i += 2) {
         data[arguments[i]] = arguments[i + 1];
       }
-      setPrefs(site.getId(), site.getActiveGadgetHolder().getUrl(), data);
+      setPrefs(site.getId(), site.getActiveSiteHolder().getUrl(), data);
     }
   });
 };
@@ -675,9 +666,9 @@ osapi.container.Container.prototype.setupRpcArbitrator_ = function(config) {
       //This implementation uses the metadata cache to check to allowed rpc service ids
       arbitrate = function(serviceId, from) {
         var site = self.getGadgetSiteByIframeId_(from);
-        if(site && site.getActiveGadgetHolder()) {
+        if(site && site.getActiveSiteHolder()) {
           var cachedResponse = self.service_.getCachedGadgetMetadata(
-                  site.getActiveGadgetHolder().getUrl());
+                  site.getActiveSiteHolder().getUrl());
           if(!cachedResponse.error && cachedResponse.rpcServiceIds) {
             for(var i = 0, rpcServiceId; rpcServiceId = cachedResponse.rpcServiceIds[i]; i++) {
               if(rpcServiceId == serviceId) {
@@ -739,7 +730,7 @@ osapi.container.Container.prototype.getTokenRefreshableGadgetUrls_ = function() 
   for (var siteId in this.sites_) {
     var site = this.sites_[siteId];
     if (site instanceof osapi.container.GadgetSite) {
-      var holder = site.getActiveGadgetHolder();
+      var holder = site.getActiveSiteHolder();
       if (holder) {
         var url = holder.getUrl();
             mid = site.getModuleId();
@@ -779,7 +770,7 @@ osapi.container.Container.prototype.getNavigatedGadgetUrls_ = function() {
   for (var siteId in this.sites_) {
     var site = this.sites_[siteId];
     if (site instanceof osapi.container.GadgetSite) {
-      var holder = site.getActiveGadgetHolder(site);
+      var holder = site.getActiveSiteHolder();
       if(holder) {
         result[holder.getUrl()] = 1;
       }
@@ -806,7 +797,7 @@ osapi.container.Container.prototype.refreshTokens_ = function() {
     for (var siteId in self.sites_) {
       var site = self.sites_[siteId];
       if (site instanceof osapi.container.GadgetSite) {
-        var holder = site.getActiveGadgetHolder();
+        var holder = site.getActiveSiteHolder();
         var gadgetInfo = self.service_.getCachedGadgetMetadata(holder.getUrl());
         if (gadgetInfo[osapi.container.MetadataResponse.NEEDS_TOKEN_REFRESH]) {
           var mid = site.getModuleId(),
@@ -852,7 +843,7 @@ osapi.container.Container.prototype.applyLifecycleCallbacks_ = function(
 osapi.container.Container.prototype.newUrlSite = function(element) {
   var args = {};
   args[osapi.container.UrlSite.URL_ELEMENT] = element;
-  var site = new osapi.container.UrlSite(args);
+  var site = new osapi.container.UrlSite(this, this.service_, args);
   this.sites_[site.getId()] = site;
   return site;
 };

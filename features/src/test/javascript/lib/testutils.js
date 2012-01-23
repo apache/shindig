@@ -137,6 +137,10 @@ var getSourceMessage = function(operand) {
  * @private
  */
 function deepEquals(expected, actual) {
+  if (expected === actual) {
+    return true;
+  }
+
   // Undefined/null can be treated as equal here, I believe
   if (expected == null) {
     return actual == null;

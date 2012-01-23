@@ -1,0 +1,71 @@
+<?xml version="1.0"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements. See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership. The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License. You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied. See the License for the
+specific language governing permissions and limitations under the License.
+-->
+<feature>
+  <name>container.site.gadget</name>
+  <dependency>osapi</dependency>
+  <dependency>globals</dependency>
+  <dependency>core.log</dependency>
+  <dependency>shindig.auth</dependency>
+  <dependency>shindig.uri.ext</dependency>
+  <dependency>core.util</dependency>
+  <dependency>rpc</dependency>
+  <dependency>container.util</dependency>
+  <dependency>container.site</dependency>
+  container.site
+  <container>
+    <script src="gadget_holder.js" />
+    <script src="gadget_site.js" />
+    <api>
+      <!-- inherited -->
+      <exports type="js">osapi.container.GadgetSite</exports>
+      <exports type="js">osapi.container.GadgetSite.prototype.onConstructed</exports>
+      <exports type="js">osapi.container.GadgetSite.prototype.close</exports>
+      <exports type="js">osapi.container.GadgetSite.prototype.setParentId</exports>
+      <exports type="js">osapi.container.GadgetSite.prototype.getParentId</exports>
+      <exports type="js">osapi.container.GadgetSite.prototype.getActiveSiteHolder</exports>
+      <exports type="js">osapi.container.GadgetSite.prototype.getId</exports>
+      <exports type="js">osapi.container.GadgetSite.prototype.render</exports>
+      <exports type="js">osapi.container.GadgetSite.prototype.setHeight</exports>
+      <exports type="js">osapi.container.GadgetSite.prototype.setWidth</exports>
+
+      <exports type="js">osapi.container.GadgetSite.prototype.rpcCall</exports>
+      <exports type="js">osapi.container.GadgetSite.prototype.getFeature</exports>
+      <exports type="js">osapi.container.GadgetSite.prototype.getModuleId</exports>
+      <exports type="js">osapi.container.GadgetSite.prototype.navigateTo</exports>
+      <exports type="js">osapi.container.GadgetSite.prototype.onNavigateTo</exports>
+      <exports type="js">osapi.container.GadgetSite.prototype.onRender</exports>
+
+      <!-- inherited -->
+      <exports type="js">osapi.container.GadgetHolder</exports>
+      <exports type="js">osapi.container.GadgetHolder.prototype.onConstructed</exports>
+      <exports type="js">osapi.container.GadgetHolder.prototype.createIframeAttributeMap</exports>
+      <exports type="js">osapi.container.GadgetHolder.prototype.createIframeHtml</exports>
+      <exports type="js">osapi.container.GadgetHolder.prototype.dispose</exports>
+      <exports type="js">osapi.container.GadgetHolder.prototype.getElement</exports>
+      <exports type="js">osapi.container.GadgetHolder.prototype.getIframeElement</exports>
+      <exports type="js">osapi.container.GadgetHolder.prototype.getIframeId</exports>
+      <exports type="js">osapi.container.GadgetHolder.prototype.getUrl</exports>
+      <exports type="js">osapi.container.GadgetHolder.prototype.render</exports>
+
+      <exports type="js">osapi.container.GadgetHolder.prototype.getGadgetInfo</exports>
+      <exports type="js">osapi.container.GadgetHolder.prototype.getView</exports>
+      <exports type="js">osapi.container.GadgetHolder.prototype.setSecurityToken</exports>
+    </api>
+  </container>
+</feature>
