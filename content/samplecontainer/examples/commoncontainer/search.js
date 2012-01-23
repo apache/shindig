@@ -138,9 +138,10 @@ function getSearchResults(urls, query) {
     var resultDiv = document.createElement('div');
     su.appendChild(resultDiv);
     // if there are no errors, parse the results
-    if (obj.errors.length == 0) {
+    if (obj.status == 200) {
       resultDiv.className = 'searchEngine';
-      var domdata = obj.data;
+      var stringDom = obj.content;
+      var domdata=opensocial.xmlutil.parseXML(stringDom);
       if (domdata != null) {
         var entries = domdata.getElementsByTagName('entry');
         resultDiv.innerHTML = resultDiv.innerHTML + engineTitle + ':<br/>';
@@ -191,7 +192,7 @@ function getSearchResults(urls, query) {
       }
     } else { // errors occured, notify the user.
       resultDiv.innerHTML = resultDiv.innerHTML + engineTitle
-          + '<br/> An error has occured:' + obj.errors[0];
+          + '<br/> An error has occured:' + obj.status;
     }
   }
   var params = {};
@@ -212,9 +213,10 @@ function getSearchResults(urls, query) {
         };
       }();
       // go fetch the results.
-      params[gadgets.io.RequestParameters.CONTENT_TYPE] = gadgets.io.ContentType.DOM;
-      gadgets.io.makeRequest(url, callback, params);
-
+      osapi.http.get({
+                  'href' : url,
+                  'format' : 'text'
+                }).execute(callback)
     }
   }
 

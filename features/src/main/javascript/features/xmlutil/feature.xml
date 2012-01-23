@@ -20,7 +20,7 @@
 <feature>
   <name>xmlutil</name>
   <dependency>globals</dependency>
-  <gadget>    
+  <all>
     <script src="xmlutil.js"></script>
     <api>
       <exports type="js">opensocial.xmlutil.parseXML</exports>
@@ -29,5 +29,5 @@
       <exports type="js">opensocial.xmlutil.ENTITIES</exports>
       <exports type="js">opensocial.xmlutil.prepareXML</exports>
     </api>
-  </gadget>
+  </all>
 </feature>
