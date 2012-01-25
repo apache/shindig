@@ -41,7 +41,11 @@ if (!gadgets.rpctx.flash) {  // make lib resilient to double-inclusion
 
     var LOADER_TIMEOUT_MS = 100;
     var MAX_LOADER_RETRIES = 50;
+
     var pendingHandshakes = [];
+    var flushHandshakesHandle = null;
+    var FLUSH_HANDSHAKES_TIMEOUT_MS = 500;
+
     var setupHandle = null;
     var setupAttempts = 0;
 
@@ -148,6 +152,12 @@ if (!gadgets.rpctx.flash) {  // make lib resilient to double-inclusion
           var targetId = shake.targetId;
           relayHandle['setup'](shake.token, getChannelId(targetId), getRoleId(targetId));
         }
+        if (flushHandshakesHandle !== null) {
+          window.clearTimeout(flushHandshakesHandle);
+          flushHandshakesHandle = null;
+        }
+      } else if (flushHandshakesHandle === null && pendingHandshakes.length > 0) {
+        flushHandshakesHandle = window.setTimeout(flushHandshakes, FLUSH_HANDSHAKES_TIMEOUT_MS);
       }
     }
 
@@ -238,6 +248,8 @@ if (!gadgets.rpctx.flash) {  // make lib resilient to double-inclusion
         if (relayHandle === null && setupHandle === null) {
           setupHandle = window.setTimeout(relayLoader, LOADER_TIMEOUT_MS);
         }
+        // Lets try to flush any registered handshakes
+        flushHandshakes();
         return true;
       },
 
