@@ -432,7 +432,8 @@ osapi.container.Service.prototype.getCountry = function() {
         containerTokenTTL = token ? (ttl * 1000 * 0.8) : containerTokenTTL;
         if (containerTokenTTL) {
           // Refresh again in 80% of the reported ttl
-          containerTimeout = setTimeout(gadgets.util.makeClosure(self, refresh), containerTokenTTL);
+          // Pass null in to closure because FF behaves un-expectedly when that param is not explicitly provided.
+          containerTimeout = setTimeout(gadgets.util.makeClosure(self, refresh, null), containerTokenTTL);
         }
 
         if (token) {
