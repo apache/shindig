@@ -119,7 +119,21 @@ gadgets.views = function() {
     if (urlParams['view-params']) {
       params = gadgets.json.parse(urlParams['view-params']) || params;
     }
-    currentView = supportedViews[urlParams['view']] || supportedViews['default'];
+
+    var viewName = urlParams['view'] || "";
+    // check for subview
+    var viewNameArray = viewName.split(".");
+    if(viewNameArray.length > 1) {
+      var viewNameMajor = viewNameArray[0];
+      if (supportedViews.hasOwnProperty(viewNameMajor)) {
+        var viewMajor = supportedViews[viewNameMajor];
+        currentView = new gadgets.views.View(viewName, viewMajor.isOnlyVisibleGadget());
+      } else {
+        currentView = supportedViews['default'];
+      }
+    } else {
+      currentView = supportedViews[viewName] || supportedViews['default'];
+    }
 
     if (conf.rewriteLinks) {
       gadgets.util.attachBrowserEvent(document, 'click', forceNavigate, false);

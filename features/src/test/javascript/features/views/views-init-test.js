@@ -96,6 +96,19 @@ ViewsInitTest.prototype.testRewriteLinksIe = function() {
   this.assertTrue(typeof gadgets.views.getSupportedViews().rewriteLinks === "undefined");
 };
 
+ViewsInitTest.prototype.testCurrentSubView = function() {
+  var viewName = "home.default";
+  gadgets.util.getUrlParameters = function() {
+    return {"view": viewName};
+  };
+
+  document.scripts = [];
+  gadgets.config.init({"views":{"home":{"isOnlyVisible": false},"default":{"isOnlyVisible": false}}});
+
+  this.assertTrue(gadgets.views.getCurrentView());
+  this.assertEquals(viewName, gadgets.views.getCurrentView().getName());
+};
+
 // TODO: Verify behavior of onclick.
 
 })();
