@@ -46,7 +46,7 @@ osapi.container.MetadataParam = {
  */
 
 osapi.container.MetadataResponse = {
-  IFRAME_URL: 'iframeUrl',
+  IFRAME_URLS: 'iframeUrls',
   NEEDS_TOKEN_REFRESH: 'needsTokenRefresh',
   VIEWS: 'views',
   EXPIRE_TIME_MS: 'expireTimeMs',

@@ -18,6 +18,7 @@
  */
 package org.apache.shindig.gadgets.uri;
 
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
@@ -37,6 +38,7 @@ import org.apache.shindig.gadgets.spec.UserPref;
 import org.apache.shindig.gadgets.spec.View;
 import org.apache.shindig.gadgets.uri.UriCommon.Param;
 
+import com.google.caja.util.Maps;
 import com.google.inject.ImplementedBy;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
@@ -87,12 +89,14 @@ public class DefaultIframeUriManager implements IframeUriManager {
   }
 
   public Uri makeRenderingUri(Gadget gadget) {
-    UriBuilder uri;
     View view = gadget.getCurrentView();
+    return buildUri(view, gadget);
+  }
 
+  protected Uri buildUri(View view, Gadget gadget) {
+    UriBuilder uri;
     GadgetContext context = gadget.getContext();
     String container = context.getContainer();
-
     if (View.ContentType.URL.equals(view.getType())) {
       // A. type=url. Initializes all except standard parameters.
       uri = new UriBuilder(view.getHref());
@@ -304,5 +308,21 @@ public class DefaultIframeUriManager implements IframeUriManager {
     public boolean useTemplates() {
       return useTemplates;
     }
+  }
+
+  /**
+   * Returns a list of all URIs for rendering this gadget.  The map is
+   * keyed by the view name.
+   * @param gadget The gadget to generate the URIs for.
+   * @return A map of URIs indexed by the view name.
+   */
+  public Map<String, Uri> makeAllRenderingUris(Gadget gadget) {
+    Map<String, Uri> uris = Maps.newHashMap();
+    Map<String, View> views = gadget.getSpec().getViews();
+    for(String key : views.keySet()) {
+      View view = views.get(key);
+      uris.put(key, buildUri(view, gadget));
+    }
+    return uris;
   }
 }

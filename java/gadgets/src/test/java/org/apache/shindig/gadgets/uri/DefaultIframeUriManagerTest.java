@@ -33,6 +33,7 @@ import static org.easymock.EasyMock.replay;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.List;
@@ -126,6 +127,45 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
     assertEquals(TYPE_HTML_NUM_BASE_PARAMS, uri.getQueryParameters().size());
     assertEquals(1, uri.getFragmentParameters().size());
 
+    Map<String, Uri> uris = manager.makeAllRenderingUris(gadget);
+    assertNotNull(uris);
+
+    UriBuilder htmlGadgetUri = new UriBuilder(uris.get(VIEW));
+    assertEquals("", htmlGadgetUri.getScheme());
+    assertEquals(UNLOCKED_DOMAIN, htmlGadgetUri.getAuthority());
+    assertEquals(IFRAME_PATH, htmlGadgetUri.getPath());
+    assertEquals(SPEC_URI.toString(), htmlGadgetUri.getQueryParameter(Param.URL.getKey()));
+    assertEquals(CONTAINER, htmlGadgetUri.getQueryParameter(Param.CONTAINER.getKey()));
+    assertEquals(VIEW, htmlGadgetUri.getQueryParameter(Param.VIEW.getKey()));
+    assertEquals(LANG, htmlGadgetUri.getQueryParameter(Param.LANG.getKey()));
+    assertEquals(COUNTRY, htmlGadgetUri.getQueryParameter(Param.COUNTRY.getKey()));
+    assertEquals("0", htmlGadgetUri.getQueryParameter(Param.DEBUG.getKey()));
+    assertEquals("0", htmlGadgetUri.getQueryParameter(Param.NO_CACHE.getKey()));
+    assertEquals("0", htmlGadgetUri.getQueryParameter(Param.SANITIZE.getKey()));
+    assertEquals(prefVal, htmlGadgetUri.getFragmentParameter("up_" + prefKey));
+
+    // Only the params that are needed.
+    assertEquals(TYPE_HTML_NUM_BASE_PARAMS, htmlGadgetUri.getQueryParameters().size());
+    assertEquals(1, htmlGadgetUri.getFragmentParameters().size());
+
+    UriBuilder urlGadgetUri = new UriBuilder(uris.get(ANOTHER_VIEW));
+    assertEquals("http", urlGadgetUri.getScheme());
+    assertEquals("example.com", urlGadgetUri.getAuthority());
+    assertEquals("/gadget.xml", urlGadgetUri.getPath());
+    assertNull(urlGadgetUri.getQueryParameter(Param.URL.getKey()));
+    assertEquals(CONTAINER, urlGadgetUri.getQueryParameter(Param.CONTAINER.getKey()));
+    assertEquals(ANOTHER_VIEW, urlGadgetUri.getQueryParameter(Param.VIEW.getKey()));
+    assertEquals(LANG, urlGadgetUri.getQueryParameter(Param.LANG.getKey()));
+    assertEquals(COUNTRY, urlGadgetUri.getQueryParameter(Param.COUNTRY.getKey()));
+    assertEquals("0", urlGadgetUri.getQueryParameter(Param.DEBUG.getKey()));
+    assertEquals("0", urlGadgetUri.getQueryParameter(Param.NO_CACHE.getKey()));
+    assertEquals("0", urlGadgetUri.getQueryParameter(Param.SANITIZE.getKey()));
+    assertEquals(prefVal, urlGadgetUri.getQueryParameter("up_" + prefKey));
+
+    // Only the params that are needed.
+    assertEquals(TYPE_URL_NUM_BASE_PARAMS + 1, urlGadgetUri.getQueryParameters().size());
+    assertEquals(0, urlGadgetUri.getFragmentParameters().size());
+
     assertFalse(manager.tokenForRenderingCalled());
     assertTrue(manager.schemeCalled());
     assertTrue(manager.addExtrasCalled());
@@ -169,6 +209,27 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
     // Cajoled is and added param
     assertEquals(TYPE_HTML_NUM_BASE_PARAMS + 1, uri.getQueryParameters().size());
     assertEquals(1, uri.getFragmentParameters().size());
+
+    Map<String, Uri> uris = manager.makeAllRenderingUris(gadget);
+    assertNotNull(uris);
+
+    UriBuilder htmlGadgetUri = new UriBuilder(uris.get(VIEW));
+    assertEquals("0", htmlGadgetUri.getQueryParameter(Param.SANITIZE.getKey()));
+    assertEquals("1", htmlGadgetUri.getQueryParameter(Param.CAJOLE.getKey()));
+    assertEquals(prefVal, htmlGadgetUri.getFragmentParameter("up_" + prefKey));
+
+    // Cajoled is and added param
+    assertEquals(TYPE_HTML_NUM_BASE_PARAMS + 1, htmlGadgetUri.getQueryParameters().size());
+    assertEquals(1, htmlGadgetUri.getFragmentParameters().size());
+
+    UriBuilder urlGadgetUri = new UriBuilder(uris.get(ANOTHER_VIEW));
+    assertEquals("0", urlGadgetUri.getQueryParameter(Param.SANITIZE.getKey()));
+    assertEquals("1", urlGadgetUri.getQueryParameter(Param.CAJOLE.getKey()));
+    assertEquals(prefVal, urlGadgetUri.getQueryParameter("up_" + prefKey));
+
+    // Cajoled is and added param
+    assertEquals(TYPE_URL_NUM_BASE_PARAMS + 2, urlGadgetUri.getQueryParameters().size());
+    assertEquals(0, urlGadgetUri.getFragmentParameters().size());
 
     assertFalse(manager.tokenForRenderingCalled());
     assertTrue(manager.schemeCalled());
@@ -225,6 +286,49 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
     // Only the params that are needed.
     assertEquals(TYPE_HTML_NUM_BASE_PARAMS, uriTpl.getQueryParameters().size());
     assertEquals(1, uriTpl.getFragmentParameters().size());
+
+    Map<String, Uri> uris = managerTpl.makeAllRenderingUris(gadget);
+    assertNotNull(uris);
+
+    UriBuilder htmlGadgetUri = new UriBuilder(uris.get(VIEW));
+    assertEquals("", htmlGadgetUri.getScheme());
+    assertEquals(UNLOCKED_DOMAIN, htmlGadgetUri.getAuthority());
+    assertEquals(IFRAME_PATH, htmlGadgetUri.getPath());
+    assertEquals(SPEC_URI.toString(), htmlGadgetUri.getQueryParameter(Param.URL.getKey()));
+    assertEquals(CONTAINER, htmlGadgetUri.getQueryParameter(Param.CONTAINER.getKey()));
+    assertEquals(tplKey(Param.VIEW.getKey()), htmlGadgetUri.getQueryParameter(Param.VIEW.getKey()));
+    assertEquals(tplKey(Param.LANG.getKey()), htmlGadgetUri.getQueryParameter(Param.LANG.getKey()));
+    assertEquals(tplKey(Param.COUNTRY.getKey()), htmlGadgetUri.getQueryParameter(Param.COUNTRY.getKey()));
+    assertEquals(tplKey(Param.DEBUG.getKey()), htmlGadgetUri.getQueryParameter(Param.DEBUG.getKey()));
+    assertEquals(tplKey(Param.NO_CACHE.getKey()),
+            htmlGadgetUri.getQueryParameter(Param.NO_CACHE.getKey()));
+    assertEquals(tplKey(Param.SANITIZE.getKey()),
+            htmlGadgetUri.getQueryParameter(Param.SANITIZE.getKey()));
+    assertEquals(tplKey("up_" + prefKey), htmlGadgetUri.getFragmentParameter("up_" + prefKey));
+
+    // Only the params that are needed.
+    assertEquals(TYPE_HTML_NUM_BASE_PARAMS, htmlGadgetUri.getQueryParameters().size());
+    assertEquals(1, htmlGadgetUri.getFragmentParameters().size());
+
+    UriBuilder urlGadgetUri = new UriBuilder(uris.get(ANOTHER_VIEW));
+    assertEquals("http", urlGadgetUri.getScheme());
+    assertEquals("example.com", urlGadgetUri.getAuthority());
+    assertEquals("/gadget.xml", urlGadgetUri.getPath());
+    assertNull(urlGadgetUri.getQueryParameter(Param.URL.getKey()));
+    assertEquals(CONTAINER, urlGadgetUri.getQueryParameter(Param.CONTAINER.getKey()));
+    assertEquals(tplKey(Param.VIEW.getKey()), urlGadgetUri.getQueryParameter(Param.VIEW.getKey()));
+    assertEquals(tplKey(Param.LANG.getKey()), urlGadgetUri.getQueryParameter(Param.LANG.getKey()));
+    assertEquals(tplKey(Param.COUNTRY.getKey()), urlGadgetUri.getQueryParameter(Param.COUNTRY.getKey()));
+    assertEquals(tplKey(Param.DEBUG.getKey()), urlGadgetUri.getQueryParameter(Param.DEBUG.getKey()));
+    assertEquals(tplKey(Param.NO_CACHE.getKey()),
+            urlGadgetUri.getQueryParameter(Param.NO_CACHE.getKey()));
+    assertEquals(tplKey(Param.SANITIZE.getKey()),
+            urlGadgetUri.getQueryParameter(Param.SANITIZE.getKey()));
+    assertEquals(tplKey("up_" + prefKey), urlGadgetUri.getQueryParameter("up_" + prefKey));
+
+    // Only the params that are needed.
+    assertEquals(TYPE_URL_NUM_BASE_PARAMS + 1, urlGadgetUri.getQueryParameters().size());
+    assertEquals(0, urlGadgetUri.getFragmentParameters().size());
 
     assertFalse(managerTpl.tokenForRenderingCalled());
     assertTrue(managerTpl.schemeCalled());
@@ -283,6 +387,49 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
     assertFalse(manager.tokenForRenderingCalled());
     assertFalse(manager.schemeCalled());
     assertTrue(manager.addExtrasCalled());
+
+    Map<String, Uri> uris = manager.makeAllRenderingUris(gadget);
+    assertNotNull(uris);
+
+    UriBuilder urlGadgetUri = new UriBuilder(uris.get(VIEW));
+    assertEquals("http", urlGadgetUri.getScheme());
+    assertEquals("example.com", urlGadgetUri.getAuthority());
+    assertEquals("/gadget", urlGadgetUri.getPath());
+    assertEquals(CONTAINER, urlGadgetUri.getQueryParameter(Param.CONTAINER.getKey()));
+    assertEquals(VIEW, urlGadgetUri.getQueryParameter(Param.VIEW.getKey()));
+    assertEquals(LANG, urlGadgetUri.getQueryParameter(Param.LANG.getKey()));
+    assertEquals(COUNTRY, urlGadgetUri.getQueryParameter(Param.COUNTRY.getKey()));
+    assertEquals("rpc:setprefs", urlGadgetUri.getQueryParameter(Param.LIBS.getKey()));
+    assertEquals("1", urlGadgetUri.getQueryParameter(Param.DEBUG.getKey()));
+    assertEquals("1", urlGadgetUri.getQueryParameter(Param.NO_CACHE.getKey()));
+    assertEquals("1", urlGadgetUri.getQueryParameter(Param.SANITIZE.getKey()));
+    assertEquals(prefVal, urlGadgetUri.getFragmentParameter("up_" + prefKey));
+
+    // Only the params that are needed.
+    assertEquals(TYPE_URL_NUM_BASE_PARAMS, urlGadgetUri.getQueryParameters().size());
+    assertEquals(1, urlGadgetUri.getFragmentParameters().size());
+
+    UriBuilder htmlGadgetUri = new UriBuilder(uris.get(ANOTHER_VIEW));
+    assertEquals("", htmlGadgetUri.getScheme());
+    assertEquals(UNLOCKED_DOMAIN, htmlGadgetUri.getAuthority());
+    assertEquals(IFRAME_PATH, htmlGadgetUri.getPath());
+    assertEquals(CONTAINER, htmlGadgetUri.getQueryParameter(Param.CONTAINER.getKey()));
+    assertEquals(ANOTHER_VIEW, htmlGadgetUri.getQueryParameter(Param.VIEW.getKey()));
+    assertEquals(LANG, htmlGadgetUri.getQueryParameter(Param.LANG.getKey()));
+    assertEquals(COUNTRY, htmlGadgetUri.getQueryParameter(Param.COUNTRY.getKey()));
+    assertNull(htmlGadgetUri.getQueryParameter(Param.LIBS.getKey()));
+    assertEquals("1", htmlGadgetUri.getQueryParameter(Param.DEBUG.getKey()));
+    assertEquals("1", htmlGadgetUri.getQueryParameter(Param.NO_CACHE.getKey()));
+    assertEquals("1", htmlGadgetUri.getQueryParameter(Param.SANITIZE.getKey()));
+    assertEquals(prefVal, htmlGadgetUri.getQueryParameter("up_" + prefKey));
+
+    // Only the params that are needed.
+    assertEquals(TYPE_HTML_NUM_BASE_PARAMS + 1, htmlGadgetUri.getQueryParameters().size());
+    assertEquals(0, htmlGadgetUri.getFragmentParameters().size());
+
+    assertFalse(manager.tokenForRenderingCalled());
+    assertTrue(manager.schemeCalled());
+    assertTrue(manager.addExtrasCalled());
   }
 
   @Test
@@ -338,6 +485,49 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
     assertFalse(managerTpl.tokenForRenderingCalled());
     assertFalse(managerTpl.schemeCalled());
     assertTrue(managerTpl.addExtrasCalled());
+
+    Map<String, Uri> uris = managerTpl.makeAllRenderingUris(gadget);
+    assertNotNull(uris);
+
+    UriBuilder urlGadgetUri = new UriBuilder(uris.get(VIEW));
+    assertEquals("http", urlGadgetUri.getScheme());
+    assertEquals("example.com", urlGadgetUri.getAuthority());
+    assertEquals("/gadget", urlGadgetUri.getPath());
+    assertEquals(CONTAINER, urlGadgetUri.getQueryParameter(Param.CONTAINER.getKey()));
+    assertEquals("", urlGadgetUri.getQueryParameter(Param.LIBS.getKey()));
+    assertEquals(tplKey(Param.VIEW.getKey()), urlGadgetUri.getQueryParameter(Param.VIEW.getKey()));
+    assertEquals(tplKey(Param.LANG.getKey()), urlGadgetUri.getQueryParameter(Param.LANG.getKey()));
+    assertEquals(tplKey(Param.COUNTRY.getKey()), urlGadgetUri.getQueryParameter(Param.COUNTRY.getKey()));
+    assertEquals(tplKey(Param.DEBUG.getKey()), urlGadgetUri.getQueryParameter(Param.DEBUG.getKey()));
+    assertEquals(tplKey(Param.NO_CACHE.getKey()),
+            urlGadgetUri.getQueryParameter(Param.NO_CACHE.getKey()));
+    assertEquals(tplKey("up_" + prefKey), urlGadgetUri.getFragmentParameter("up_" + prefKey));
+
+    // Only the params that are needed.
+    assertEquals(TYPE_URL_NUM_BASE_PARAMS, urlGadgetUri.getQueryParameters().size());
+    assertEquals(1, urlGadgetUri.getFragmentParameters().size());
+
+    UriBuilder htmlGadgetUri = new UriBuilder(uris.get(ANOTHER_VIEW));
+    assertEquals("", htmlGadgetUri.getScheme());
+    assertEquals(UNLOCKED_DOMAIN, htmlGadgetUri.getAuthority());
+    assertEquals(IFRAME_PATH, htmlGadgetUri.getPath());
+    assertEquals(CONTAINER, htmlGadgetUri.getQueryParameter(Param.CONTAINER.getKey()));
+    assertNull(htmlGadgetUri.getQueryParameter(Param.LIBS.getKey()));
+    assertEquals(tplKey(Param.VIEW.getKey()), htmlGadgetUri.getQueryParameter(Param.VIEW.getKey()));
+    assertEquals(tplKey(Param.LANG.getKey()), htmlGadgetUri.getQueryParameter(Param.LANG.getKey()));
+    assertEquals(tplKey(Param.COUNTRY.getKey()), htmlGadgetUri.getQueryParameter(Param.COUNTRY.getKey()));
+    assertEquals(tplKey(Param.DEBUG.getKey()), htmlGadgetUri.getQueryParameter(Param.DEBUG.getKey()));
+    assertEquals(tplKey(Param.NO_CACHE.getKey()),
+            htmlGadgetUri.getQueryParameter(Param.NO_CACHE.getKey()));
+    assertEquals(tplKey("up_" + prefKey), htmlGadgetUri.getQueryParameter("up_" + prefKey));
+
+    // Only the params that are needed.
+    assertEquals(TYPE_HTML_NUM_BASE_PARAMS + 1, htmlGadgetUri.getQueryParameters().size());
+    assertEquals(0, htmlGadgetUri.getFragmentParameters().size());
+
+    assertFalse(managerTpl.tokenForRenderingCalled());
+    assertTrue(managerTpl.schemeCalled());
+    assertTrue(managerTpl.addExtrasCalled());
   }
 
   @Test
@@ -352,6 +542,23 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
     assertEquals(1, uri.getFragmentParameters().size());
     assertEquals(tplKey(Param.SECURITY_TOKEN.getKey()),
         uri.getFragmentParameter(Param.SECURITY_TOKEN.getKey()));
+    assertTrue(manager.tokenForRenderingCalled());
+
+    Map<String, Uri> uris = manager.makeAllRenderingUris(gadget);
+    assertNotNull(uris);
+
+    UriBuilder htmlGadgetUri = new UriBuilder(uris.get(VIEW));
+    assertEquals(TYPE_HTML_NUM_BASE_PARAMS, htmlGadgetUri.getQueryParameters().size());
+    assertEquals(1, htmlGadgetUri.getFragmentParameters().size());
+    assertEquals(tplKey(Param.SECURITY_TOKEN.getKey()),
+            htmlGadgetUri.getFragmentParameter(Param.SECURITY_TOKEN.getKey()));
+
+    UriBuilder urlGadgetUri = new UriBuilder(uris.get(ANOTHER_VIEW));
+    assertEquals(TYPE_URL_NUM_BASE_PARAMS, urlGadgetUri.getQueryParameters().size());
+    assertEquals(1, urlGadgetUri.getFragmentParameters().size());
+    assertEquals(tplKey(Param.SECURITY_TOKEN.getKey()),
+            urlGadgetUri.getFragmentParameter(Param.SECURITY_TOKEN.getKey()));
+
     assertTrue(manager.tokenForRenderingCalled());
   }
 
@@ -368,6 +575,23 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
     assertEquals(tplKey(Param.SECURITY_TOKEN.getKey()),
         uri.getQueryParameter(Param.SECURITY_TOKEN.getKey()));
     assertTrue(manager.tokenForRenderingCalled());
+
+    Map<String, Uri> uris = manager.makeAllRenderingUris(gadget);
+    assertNotNull(uris);
+
+    UriBuilder htmlGadgetUri = new UriBuilder(uris.get(VIEW));
+    assertEquals(TYPE_HTML_NUM_BASE_PARAMS + 1, htmlGadgetUri.getQueryParameters().size());
+    assertEquals(0, htmlGadgetUri.getFragmentParameters().size());
+    assertEquals(tplKey(Param.SECURITY_TOKEN.getKey()),
+            htmlGadgetUri.getQueryParameter(Param.SECURITY_TOKEN.getKey()));
+
+    UriBuilder urlGadgetUri = new UriBuilder(uris.get(ANOTHER_VIEW));
+    assertEquals(TYPE_URL_NUM_BASE_PARAMS + 1, urlGadgetUri.getQueryParameters().size());
+    assertEquals(0, urlGadgetUri.getFragmentParameters().size());
+    assertEquals(tplKey(Param.SECURITY_TOKEN.getKey()),
+            urlGadgetUri.getQueryParameter(Param.SECURITY_TOKEN.getKey()));
+
+    assertTrue(manager.tokenForRenderingCalled());
   }
 
   @Test
@@ -383,6 +607,25 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
     assertEquals(tplKey(Param.SECURITY_TOKEN.getKey()),
         uri.getFragmentParameter(Param.SECURITY_TOKEN.getKey()));
     assertTrue(manager.tokenForRenderingCalled());
+
+    manager.setTokenForRendering(false);
+    Map<String, Uri> uris = manager.makeAllRenderingUris(gadget);
+    assertNotNull(uris);
+
+    UriBuilder htmlGadgetUri = new UriBuilder(uris.get(VIEW));
+    assertEquals(TYPE_HTML_NUM_BASE_PARAMS, htmlGadgetUri.getQueryParameters().size());
+    assertEquals(1, htmlGadgetUri.getFragmentParameters().size());
+    assertEquals(tplKey(Param.SECURITY_TOKEN.getKey()),
+            htmlGadgetUri.getFragmentParameter(Param.SECURITY_TOKEN.getKey()));
+
+    UriBuilder urlGadgetUri = new UriBuilder(uris.get(ANOTHER_VIEW));
+    assertEquals(TYPE_URL_NUM_BASE_PARAMS, urlGadgetUri.getQueryParameters().size());
+    assertEquals(1, urlGadgetUri.getFragmentParameters().size());
+    assertEquals(tplKey(Param.SECURITY_TOKEN.getKey()),
+            urlGadgetUri.getFragmentParameter(Param.SECURITY_TOKEN.getKey()));
+
+    assertTrue(manager.tokenForRenderingCalled());
+
   }
 
   @Test
@@ -405,6 +648,27 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
     // Basic sanity checks on params
     assertEquals(TYPE_HTML_NUM_BASE_PARAMS, uri.getQueryParameters().size());
     assertEquals(0, uri.getFragmentParameters().size());
+
+    Map<String, Uri> uris = manager.makeAllRenderingUris(gadget);
+    assertNotNull(uris);
+
+    UriBuilder htmlGadgetUri = new UriBuilder(uris.get(VIEW));
+    assertEquals("", htmlGadgetUri.getScheme());
+    assertEquals(LD_PREFIX + LD_SUFFIX, htmlGadgetUri.getAuthority());
+    assertEquals(IFRAME_PATH, htmlGadgetUri.getPath());
+
+    // Basic sanity checks on params
+    assertEquals(TYPE_HTML_NUM_BASE_PARAMS, htmlGadgetUri.getQueryParameters().size());
+    assertEquals(0, htmlGadgetUri.getFragmentParameters().size());
+
+    UriBuilder urlGadgetUri = new UriBuilder(uris.get(ANOTHER_VIEW));
+    assertEquals("http", urlGadgetUri.getScheme());
+    assertEquals("example.com", urlGadgetUri.getAuthority());
+    assertEquals("/gadget.xml", urlGadgetUri.getPath());
+
+    // Basic sanity checks on params
+    assertEquals(TYPE_URL_NUM_BASE_PARAMS, urlGadgetUri.getQueryParameters().size());
+    assertEquals(0, urlGadgetUri.getFragmentParameters().size());
   }
 
   @Test
@@ -426,6 +690,27 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
     // Basic sanity checks on params
     assertEquals(TYPE_HTML_NUM_BASE_PARAMS, uri.getQueryParameters().size());
     assertEquals(0, uri.getFragmentParameters().size());
+
+    Map<String, Uri> uris = manager.makeAllRenderingUris(gadget);
+    assertNotNull(uris);
+
+    UriBuilder htmlGadgetUri = new UriBuilder(uris.get(VIEW));
+    assertEquals("", htmlGadgetUri.getScheme());
+    assertEquals(LD_PREFIX + LD_SUFFIX, htmlGadgetUri.getAuthority());
+    assertEquals(IFRAME_PATH, htmlGadgetUri.getPath());
+
+    // Basic sanity checks on params
+    assertEquals(TYPE_HTML_NUM_BASE_PARAMS, htmlGadgetUri.getQueryParameters().size());
+    assertEquals(0, htmlGadgetUri.getFragmentParameters().size());
+
+    UriBuilder urlGadgetUri = new UriBuilder(uris.get(ANOTHER_VIEW));
+    assertEquals("http", urlGadgetUri.getScheme());
+    assertEquals("example.com", urlGadgetUri.getAuthority());
+    assertEquals("/gadget.xml", urlGadgetUri.getPath());
+
+    // Basic sanity checks on params
+    assertEquals(TYPE_URL_NUM_BASE_PARAMS, urlGadgetUri.getQueryParameters().size());
+    assertEquals(0, urlGadgetUri.getFragmentParameters().size());
   }
 
   @Test
@@ -447,6 +732,27 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
     // Basic sanity checks on params
     assertEquals(TYPE_HTML_NUM_BASE_PARAMS, uri.getQueryParameters().size());
     assertEquals(0, uri.getFragmentParameters().size());
+
+    Map<String, Uri> uris = manager.makeAllRenderingUris(gadget);
+    assertNotNull(uris);
+
+    UriBuilder htmlGadgetUri = new UriBuilder(uris.get(VIEW));
+    assertEquals("", htmlGadgetUri.getScheme());
+    assertEquals(UNLOCKED_DOMAIN, htmlGadgetUri.getAuthority());
+    assertEquals(IFRAME_PATH, htmlGadgetUri.getPath());
+
+    // Basic sanity checks on params
+    assertEquals(TYPE_HTML_NUM_BASE_PARAMS, htmlGadgetUri.getQueryParameters().size());
+    assertEquals(0, htmlGadgetUri.getFragmentParameters().size());
+
+    UriBuilder urlGadgetUri = new UriBuilder(uris.get(ANOTHER_VIEW));
+    assertEquals("http", urlGadgetUri.getScheme());
+    assertEquals("example.com", urlGadgetUri.getAuthority());
+    assertEquals("/gadget.xml", urlGadgetUri.getPath());
+
+    // Basic sanity checks on params
+    assertEquals(TYPE_URL_NUM_BASE_PARAMS, urlGadgetUri.getQueryParameters().size());
+    assertEquals(0, urlGadgetUri.getFragmentParameters().size());
   }
 
   @Test
@@ -460,6 +766,17 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
     UriBuilder uri = new UriBuilder(result);
     assertEquals(TYPE_HTML_NUM_BASE_PARAMS + 1, uri.getQueryParameters().size());
     assertEquals(version, uri.getQueryParameter(Param.VERSION.getKey()));
+
+    Map<String, Uri> uris = manager.makeAllRenderingUris(gadget);
+    assertNotNull(uris);
+
+    UriBuilder htmlGadgetUri = new UriBuilder(uris.get(VIEW));
+    assertEquals(TYPE_HTML_NUM_BASE_PARAMS + 1, htmlGadgetUri.getQueryParameters().size());
+    assertEquals(version, htmlGadgetUri.getQueryParameter(Param.VERSION.getKey()));
+
+    UriBuilder urlGadgetUri = new UriBuilder(uris.get(ANOTHER_VIEW));
+    assertEquals(TYPE_URL_NUM_BASE_PARAMS + 1, urlGadgetUri.getQueryParameters().size());
+    assertEquals(version, urlGadgetUri.getQueryParameter(Param.VERSION.getKey()));
   }
 
   @Test
@@ -483,6 +800,21 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
     assertEquals(0, uri.getFragmentParameters().size());
     assertEquals("inVal1", uri.getQueryParameter("up_specKey1"));
     assertEquals("specDefault2", uri.getQueryParameter("up_specKey2"));
+
+    Map<String, Uri> uris = manager.makeAllRenderingUris(gadget);
+    assertNotNull(uris);
+
+    UriBuilder htmlGadgetUri = new UriBuilder(uris.get(VIEW));
+    assertEquals(TYPE_HTML_NUM_BASE_PARAMS + 2, htmlGadgetUri.getQueryParameters().size());
+    assertEquals(0, htmlGadgetUri.getFragmentParameters().size());
+    assertEquals("inVal1", htmlGadgetUri.getQueryParameter("up_specKey1"));
+    assertEquals("specDefault2", htmlGadgetUri.getQueryParameter("up_specKey2"));
+
+    UriBuilder urlGadgetUri = new UriBuilder(uris.get(ANOTHER_VIEW));
+    assertEquals(TYPE_URL_NUM_BASE_PARAMS, urlGadgetUri.getQueryParameters().size());
+    assertEquals(2, urlGadgetUri.getFragmentParameters().size());
+    assertEquals("inVal1", urlGadgetUri.getFragmentParameter("up_specKey1"));
+    assertEquals("specDefault2", urlGadgetUri.getFragmentParameter("up_specKey2"));
   }
 
   @Test
@@ -506,6 +838,21 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
     assertEquals(2, uri.getFragmentParameters().size());
     assertEquals("inVal1", uri.getFragmentParameter("up_specKey1"));
     assertEquals("specDefault2", uri.getFragmentParameter("up_specKey2"));
+
+    Map<String, Uri> uris = manager.makeAllRenderingUris(gadget);
+    assertNotNull(uris);
+
+    UriBuilder htmlGadgetUri = new UriBuilder(uris.get(VIEW));
+    assertEquals(TYPE_HTML_NUM_BASE_PARAMS, htmlGadgetUri.getQueryParameters().size());
+    assertEquals(2, htmlGadgetUri.getFragmentParameters().size());
+    assertEquals("inVal1", htmlGadgetUri.getFragmentParameter("up_specKey1"));
+    assertEquals("specDefault2", htmlGadgetUri.getFragmentParameter("up_specKey2"));
+
+    UriBuilder urlGadgetUri = new UriBuilder(uris.get(ANOTHER_VIEW));
+    assertEquals(TYPE_URL_NUM_BASE_PARAMS + 2, urlGadgetUri.getQueryParameters().size());
+    assertEquals(0, urlGadgetUri.getFragmentParameters().size());
+    assertEquals("inVal1", urlGadgetUri.getQueryParameter("up_specKey1"));
+    assertEquals("specDefault2", urlGadgetUri.getQueryParameter("up_specKey2"));
   }
 
   @Test
@@ -518,6 +865,11 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
     assertNotNull(result);
     UriBuilder uri = new UriBuilder(result);
     assertEquals(scheme, uri.getScheme());
+
+    Map<String, Uri> uris = manager.makeAllRenderingUris(gadget);
+    assertNotNull(uris);
+    assertEquals(scheme, new UriBuilder(uris.get(VIEW)).getScheme());
+    assertFalse(scheme.equalsIgnoreCase(new UriBuilder(uris.get(ANOTHER_VIEW)).getScheme()));
   }
 
   @Test
@@ -617,6 +969,27 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
     // Basic sanity checks on params
     assertEquals(TYPE_HTML_NUM_BASE_PARAMS, uri.getQueryParameters().size());
     assertEquals(0, uri.getFragmentParameters().size());
+
+    Map<String, Uri> uris = manager.makeAllRenderingUris(gadget);
+    assertNotNull(uris);
+
+    UriBuilder htmlGadgetUri = new UriBuilder(uris.get(VIEW));
+    assertEquals("", htmlGadgetUri.getScheme());
+    assertEquals(UNLOCKED_DOMAIN, htmlGadgetUri.getAuthority());
+    assertEquals(IFRAME_PATH, htmlGadgetUri.getPath());
+
+    // Basic sanity checks on params
+    assertEquals(TYPE_HTML_NUM_BASE_PARAMS, htmlGadgetUri.getQueryParameters().size());
+    assertEquals(0, htmlGadgetUri.getFragmentParameters().size());
+
+    UriBuilder urlGadgetUri = new UriBuilder(uris.get(ANOTHER_VIEW));
+    assertEquals("http", urlGadgetUri.getScheme());
+    assertEquals("example.com", urlGadgetUri.getAuthority());
+    assertEquals("/gadget.xml", urlGadgetUri.getPath());
+
+    // Basic sanity checks on params
+    assertEquals(TYPE_URL_NUM_BASE_PARAMS, urlGadgetUri.getQueryParameters().size());
+    assertEquals(0, urlGadgetUri.getFragmentParameters().size());
   }
 
   private Uri makeValidationTestUri(String domain, String version) {

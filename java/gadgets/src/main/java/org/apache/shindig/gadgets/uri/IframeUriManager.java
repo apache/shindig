@@ -18,6 +18,8 @@
  */
 package org.apache.shindig.gadgets.uri;
 
+import java.util.Map;
+
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
 
@@ -32,15 +34,23 @@ public interface IframeUriManager {
    * @return The generated iframe url.
    */
   Uri makeRenderingUri(Gadget gadget);
-  
+
+  /**
+   * Generates iframe uris for all views in the gadget.
+   * @param gadget The gadget to generate the URI for.
+   *
+   * @return A map of views to iframe uris.
+   */
+  Map<String, Uri> makeAllRenderingUris (Gadget gadget);
+
   /**
    * Validates the provided rendering Uri. May include
    * locked-domain, version param, and/or other checks.
-   * 
+   *
    * @Return Validation status of the Uri.
    */
   UriStatus validateRenderingUri(Uri uri);
-  
+
   public interface Versioner {
     /**
      * @param gadgetUri Gadget whose content to version.

@@ -19,15 +19,23 @@
 
 package org.apache.shindig.gadgets.servlet;
 
+import java.util.Map;
+
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.uri.IframeUriManager;
 import org.apache.shindig.gadgets.uri.UriStatus;
 
+import com.google.caja.util.Maps;
+
 public class FakeIframeUriManager implements IframeUriManager {
   protected boolean throwRandomFault = false;
   public static final Uri DEFAULT_IFRAME_URI = Uri.parse("http://example.org/gadgets/foo-does-not-matter");
   protected Uri iframeUrl = DEFAULT_IFRAME_URI;
+  public static Map<String, Uri> IFRAME_URIS = Maps.newHashMap();
+  static {
+    IFRAME_URIS.put("default", DEFAULT_IFRAME_URI);
+  }
 
   FakeIframeUriManager() { }
 
@@ -40,5 +48,9 @@ public class FakeIframeUriManager implements IframeUriManager {
 
   public UriStatus validateRenderingUri(Uri uri) {
     throw new UnsupportedOperationException();
+  }
+
+  public Map<String, Uri> makeAllRenderingUris(Gadget gadget) {
+    return IFRAME_URIS;
   }
 }

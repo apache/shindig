@@ -58,7 +58,7 @@ GadgetHolderTest.prototype.testNew = function() {
 GadgetHolderTest.prototype.testRenderWithoutRenderParams = function() {
   var element = {};
   var gadgetInfo = {
-      'iframeUrl' : 'http://shindig/gadgets/ifr?url=gadget.xml',
+      'iframeUrls' : {'default' : 'http://shindig/gadgets/ifr?url=gadget.xml'},
       'url' : 'gadget.xml'
   };
   this.setupGadgetsRpcSetupReceiver();
@@ -67,7 +67,7 @@ GadgetHolderTest.prototype.testRenderWithoutRenderParams = function() {
   };
   var site = new osapi.container.GadgetSite(null, null, {gadgetEl: element});
   var holder = new osapi.container.GadgetHolder(site, element, '__gadgetOnLoad');
-  holder.render(gadgetInfo, {}, {});
+  holder.render(gadgetInfo, {}, {'view' : 'default'});
   this.assertEquals('<iframe' +
       ' marginwidth="0"' +
       ' hspace="0"' +
@@ -79,14 +79,14 @@ GadgetHolderTest.prototype.testRenderWithoutRenderParams = function() {
       ' id="__gadget_123"' +
       ' name="__gadget_123"' +
       ' src="http://shindig/gadgets/ifr?url=gadget.xml&debug=0&nocache=0&testmode=0' +
-          '&parent=http%3A//container.com&mid=0"' +
+          '&view=default&parent=http%3A//container.com&mid=0"' +
       ' ></iframe>',
       element.innerHTML);
 };
 
 GadgetHolderTest.prototype.testRenderWithRenderRequests = function() {
   var gadgetInfo = {
-      'iframeUrl' : 'http://shindig/gadgets/ifr?url=gadget.xml',
+      'iframeUrls' : {'default' : 'http://shindig/gadgets/ifr?url=gadget.xml'},
       'url' : 'gadget.xml'
   };
   var renderParams = {
@@ -96,7 +96,8 @@ GadgetHolderTest.prototype.testRenderWithRenderRequests = function() {
       'height' : 111,
       'nocache' : true,
       'testmode' : true,
-      'width' : 222
+      'width' : 222,
+      'view' : 'default'
   };
   this.setupGadgetsRpcSetupReceiver();
   var element = {
@@ -119,7 +120,7 @@ GadgetHolderTest.prototype.testRenderWithRenderRequests = function() {
       ' width="222"' +
       ' name="__gadget_123"' +
       ' src="http://shindig/gadgets/ifr?url=gadget.xml&debug=1&nocache=1&testmode=1' +
-          '&libs=caja&caja=1&parent=http%3A//container.com&mid=0"' +
+          '&view=default&libs=caja&caja=1&parent=http%3A//container.com&mid=0"' +
       ' ></iframe>',
       element.innerHTML);
 };

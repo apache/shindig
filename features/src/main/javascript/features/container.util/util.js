@@ -73,7 +73,7 @@ osapi.container.util.newMetadataRequest = function(gadgetUrls) {
     'container': window.__CONTAINER,
     'ids': gadgetUrls,
     'fields': [
-      'iframeUrl',
+      'iframeUrls',
       'modulePrefs.*',
       'needsTokenRefresh',
       'userPrefs.*',

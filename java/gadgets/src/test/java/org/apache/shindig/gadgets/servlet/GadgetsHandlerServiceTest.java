@@ -185,7 +185,7 @@ public class GadgetsHandlerServiceTest extends EasyMockTestCase {
     setupMockGadgetAdminStore(true);
     setupMockRegistry(ImmutableList.<String> of("auth-refresh"));
     GadgetsHandlerApi.MetadataResponse response = gadgetHandler.getMetadata(request);
-    assertEquals(FakeIframeUriManager.DEFAULT_IFRAME_URI.toString(), response.getIframeUrl());
+    assertEquals(FakeIframeUriManager.IFRAME_URIS, response.getIframeUrls());
     assertTrue(response.getNeedsTokenRefresh());
     assertEquals(1, response.getViews().size());
     assertEquals(FakeProcessor.SPEC_TITLE, response.getModulePrefs().getTitle());
@@ -210,7 +210,7 @@ public class GadgetsHandlerServiceTest extends EasyMockTestCase {
     setupMockRegistry(Lists.newArrayList("example-feature", "example-feature2"));
 
     GadgetsHandlerApi.MetadataResponse response = gadgetHandlerWithAdmin.getMetadata(request);
-    assertEquals(FakeIframeUriManager.DEFAULT_IFRAME_URI.toString(), response.getIframeUrl());
+    assertEquals(FakeIframeUriManager.IFRAME_URIS, response.getIframeUrls());
     assertEquals(1, response.getViews().size());
     assertEquals(FakeProcessor.SPEC_TITLE, response.getModulePrefs().getTitle());
     assertEquals(FakeProcessor.LINK_HREF,
@@ -241,7 +241,7 @@ public class GadgetsHandlerServiceTest extends EasyMockTestCase {
             CONTAINER, null, createAuthContext(null, null), ImmutableList.of("views.*"));
     setupMockRegistry(new ArrayList<String>());
     GadgetsHandlerApi.MetadataResponse response = gadgetHandler.getMetadata(request);
-    assertNull(response.getIframeUrl());
+    assertNull(response.getIframeUrls());
     assertNull(response.getUserPrefs());
     assertNull(response.getModulePrefs());
     assertNull(response.getUrl());
@@ -296,7 +296,7 @@ public class GadgetsHandlerServiceTest extends EasyMockTestCase {
     setupMockGadgetAdminStore(true);
     setupMockRegistry(Lists.newArrayList("auth-refresh"));
     GadgetsHandlerApi.MetadataResponse response = gadgetHandler.getMetadata(request);
-    assertEquals(FakeIframeUriManager.DEFAULT_IFRAME_URI.toString(), response.getIframeUrl());
+    assertEquals(FakeIframeUriManager.IFRAME_URIS, response.getIframeUrls());
     verify();
   }
 

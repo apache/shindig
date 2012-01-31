@@ -191,7 +191,7 @@ public class GadgetsHandlerService {
   /**
    * Get gadget metadata information and iframe url. Support filtering of fields
    * @param request request parameters
-   * @return gadget metadata nd iframe url
+   * @return gadget metadata and iframe urls
    * @throws ProcessingException
    */
   public GadgetsHandlerApi.MetadataResponse getMetadata(GadgetsHandlerApi.MetadataRequest request)
@@ -202,19 +202,15 @@ public class GadgetsHandlerService {
     GadgetContext context = new MetadataGadgetContext(request);
     Gadget gadget = processor.process(context);
 
-    boolean needIfrUrl = isFieldIncluded(fields, "iframeurl");
-    if (needIfrUrl) {
+    boolean needIfrUrls = isFieldIncluded(fields, "iframeurls");
+    if (needIfrUrls) {
       if(!gadgetAdminStore.checkFeatureAdminInfo(gadget)) {
         throw new ProcessingException("Gadget is not trusted to render in this container.",
               HttpResponse.SC_BAD_REQUEST);
       }
-
-      if(gadget.getCurrentView() == null) {
-        throw new ProcessingException("View " + request.getView() + " does not exist",
-                HttpResponse.SC_BAD_REQUEST);
-      }
     }
-    String iframeUrl = needIfrUrl ? iframeUriManager.makeRenderingUri(gadget).toString() : null;
+    Map<String, Uri> uris = needIfrUrls ?
+            iframeUriManager.makeAllRenderingUris(gadget) : null;
     Boolean needsTokenRefresh =
         isFieldIncluded(fields, "needstokenrefresh") ?
             gadget.getAllFeatures().contains("auth-refresh") : null;
@@ -224,7 +220,7 @@ public class GadgetsHandlerService {
     Integer tokenTTL = isFieldIncluded(fields, "tokenTTL") ?
         securityTokenCodec.getTokenTimeToLive() : null;
 
-    return createMetadataResponse(context.getUrl(), gadget.getSpec(), iframeUrl,
+    return createMetadataResponse(context.getUrl(), gadget.getSpec(), uris,
         needsTokenRefresh, fields, timeSource.currentTimeMillis() + specRefreshInterval, tokenTTL,
         rpcServiceIds);
   }
@@ -564,14 +560,14 @@ public class GadgetsHandlerService {
 
   @VisibleForTesting
   GadgetsHandlerApi.MetadataResponse createMetadataResponse(
-      Uri url, GadgetSpec spec, String iframeUrl, Boolean needsTokenRefresh,
+      Uri url, GadgetSpec spec, Map<String, Uri> iframeUris, Boolean needsTokenRefresh,
       Set<String> fields, Long expireTime, Integer tokenTTL, Set<String> rpcServiceIds) {
     return (GadgetsHandlerApi.MetadataResponse) beanFilter.createFilteredBean(
         beanDelegator.createDelegator(spec, GadgetsHandlerApi.MetadataResponse.class,
             ImmutableMap.<String, Object>builder()
                 .put("url", url)
                 .put("error", BeanDelegator.NULL)
-                .put("iframeurl", BeanDelegator.nullable(iframeUrl))
+                .put("iframeurls", BeanDelegator.nullable(iframeUris))
                 .put("needstokenrefresh", BeanDelegator.nullable(needsTokenRefresh))
                 .put("responsetimems", timeSource.currentTimeMillis())
                 .put("expiretimems", BeanDelegator.nullable(expireTime))

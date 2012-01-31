@@ -73,7 +73,7 @@ public class GadgetsHandler {
   static final String FAILURE_JS = "Failed to get js data.";
 
   private static final List<String> DEFAULT_METADATA_FIELDS =
-      ImmutableList.of("iframeUrl", "userPrefs.*", "modulePrefs.*", "views.*");
+      ImmutableList.of("iframeUrls", "userPrefs.*", "modulePrefs.*", "views.*");
 
   private static final List<String> DEFAULT_TOKEN_FIELDS = ImmutableList.of("token");
 

@@ -45,6 +45,7 @@ public class UriManagerTestBase {
   protected static final String CONTAINER = "container";
   protected static final Uri SPEC_URI = Uri.parse("http://example.com/gadget.xml");
   protected static final String VIEW = "theview";
+  protected static final String ANOTHER_VIEW = "anotherview";
   protected static final String LANG = "en";
   protected static final String COUNTRY = "US";
 
@@ -78,10 +79,11 @@ public class UriManagerTestBase {
   }
 
   // Actually generates the mock gadget. Used for error (null value) tests.
-  protected Gadget mockGadget(String targetUrl, boolean isTypeUrl, String viewStr, String lang,
+  protected Gadget mockGadget(String targetUrl, boolean isTypeUrl, String currentViewStr, String lang,
       String country, boolean isDebug, boolean ignoreCache, boolean sanitize, boolean cajoled,
       Map<String, String> specPrefs, Map<String, String> inPrefs, boolean needsPrefSubst, List<String> features) {
-    View view = createMock(View.class);
+    View currentView = createMock(View.class);
+    View secondView = createMock(View.class);
     ModulePrefs modulePrefs = createMock(ModulePrefs.class);
     GadgetSpec spec = createMock(GadgetSpec.class);
     GadgetContext context = createMock(GadgetContext.class);
@@ -90,13 +92,18 @@ public class UriManagerTestBase {
     // Base URL/view.
     Uri targetUri = Uri.parse(targetUrl);
     if (isTypeUrl) {
-      expect(view.getType()).andReturn(ContentType.URL).anyTimes();
-      expect(view.getHref()).andReturn(targetUri).anyTimes();
-    } else {
-      expect(view.getType()).andReturn(ContentType.HTML).anyTimes();
+      expect(currentView.getType()).andReturn(ContentType.URL).anyTimes();
+      expect(currentView.getHref()).andReturn(targetUri).anyTimes();
+      expect(secondView.getType()).andReturn(ContentType.HTML).anyTimes();
       expect(spec.getUrl()).andReturn(targetUri).anyTimes();
+    } else {
+      expect(currentView.getType()).andReturn(ContentType.HTML).anyTimes();
+      expect(spec.getUrl()).andReturn(targetUri).anyTimes();
+      expect(secondView.getType()).andReturn(ContentType.URL).anyTimes();
+      expect(secondView.getHref()).andReturn(targetUri).anyTimes();
     }
-    expect(view.getName()).andReturn(viewStr).anyTimes();
+    expect(currentView.getName()).andReturn(currentViewStr).anyTimes();
+    expect(secondView.getName()).andReturn(ANOTHER_VIEW).anyTimes();
 
     // Basic context info
     Locale locale = new Locale(lang, country);
@@ -131,16 +138,22 @@ public class UriManagerTestBase {
     UserPrefs ctxPrefs = new UserPrefs(inPrefs);
     expect(context.getUserPrefs()).andReturn(ctxPrefs).anyTimes();
     expect(context.getParameter(Param.REFRESH.getKey())).andReturn(null).anyTimes();
-    expect(view.needsUserPrefSubstitution()).andReturn(needsPrefSubst).anyTimes();
+    expect(currentView.needsUserPrefSubstitution()).andReturn(needsPrefSubst).anyTimes();
+    expect(secondView.needsUserPrefSubstitution()).andReturn(!needsPrefSubst).anyTimes();
+
+    Map<String, View> views = Maps.newHashMap();
+    views.put(VIEW, currentView);
+    views.put(ANOTHER_VIEW, secondView);
 
     // Link all the mocks together
+    expect(spec.getViews()).andReturn(views).anyTimes();
     expect(spec.getModulePrefs()).andReturn(modulePrefs).anyTimes();
-    expect(gadget.getCurrentView()).andReturn(view).anyTimes();
+    expect(gadget.getCurrentView()).andReturn(currentView).anyTimes();
     expect(gadget.getSpec()).andReturn(spec).anyTimes();
     expect(gadget.getContext()).andReturn(context).anyTimes();
 
     // Replay all
-    replay(view, modulePrefs, spec, context, gadget);
+    replay(currentView, secondView, modulePrefs, spec, context, gadget);
 
     // Return the gadget
     return gadget;

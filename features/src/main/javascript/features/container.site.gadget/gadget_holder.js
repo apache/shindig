@@ -161,12 +161,12 @@ osapi.container.GadgetHolder.IFRAME_ID_PREFIX_ = '__gadget_';
  * @private
  */
 osapi.container.GadgetHolder.prototype.doNormalIframeHtml_ = function() {
-  this.el_.innerHTML = this.createIframeHtml(this.getIframeUrl_());
+  var uri = this.getIframeUrl_();
+  this.el_.innerHTML = this.createIframeHtml(uri);
 
   // Set up RPC channel. RPC relay url is on gmodules, relative to base of the
   // container. Assumes container has set up forwarding to gmodules at /gadgets.
-  var iframeUri = shindig.uri(
-      this.gadgetInfo_[osapi.container.MetadataResponse.IFRAME_URL]);
+  var iframeUri = shindig.uri(uri);
   var relayUri = shindig.uri()
       .setSchema(iframeUri.getSchema())
       .setAuthority(iframeUri.getAuthority())
@@ -232,7 +232,7 @@ osapi.container.GadgetHolder.prototype.hasFeature_ = function(gadgetInfo, featur
  * @return {string} the rendering iframe URL.
  */
 osapi.container.GadgetHolder.prototype.getIframeUrl_ = function() {
-  var uri = shindig.uri(this.gadgetInfo_[osapi.container.MetadataResponse.IFRAME_URL]);
+  var uri = shindig.uri(this.gadgetInfo_[osapi.container.MetadataResponse.IFRAME_URLS][this.getView()]);
   uri.setQP('debug', this.renderParams_[osapi.container.RenderParam.DEBUG] ? '1' : '0');
   uri.setQP('nocache', this.renderParams_[osapi.container.RenderParam.NO_CACHE] ? '1' : '0');
   uri.setQP('testmode', this.renderParams_[osapi.container.RenderParam.TEST_MODE] ? '1' : '0');

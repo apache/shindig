@@ -90,7 +90,7 @@ public class GadgetsHandlerApi {
   }
 
   public interface MetadataResponse extends BaseResponse {
-    public String getIframeUrl();
+    public Map<String, String> getIframeUrls();
     public String getChecksum();
     public ModulePrefs getModulePrefs();
     public Map<String, UserPref> getUserPrefs();

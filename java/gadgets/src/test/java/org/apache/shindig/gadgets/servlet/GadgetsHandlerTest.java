@@ -409,7 +409,9 @@ public class GadgetsHandlerTest extends EasyMockTestCase {
     JSONObject response = new JSONObject(converter.convertToString(responseObj));
 
     JSONObject gadget = response.getJSONObject(GADGET1_URL);
-    assertEquals(FakeIframeUriManager.DEFAULT_IFRAME_URI.toString(), gadget.getString("iframeUrl"));
+    JSONObject iframeUrls = gadget.getJSONObject("iframeUrls");
+    assertEquals(FakeIframeUriManager.DEFAULT_IFRAME_URI.toString(),
+            iframeUrls.getString("default"));
     assertEquals(FakeProcessor.SPEC_TITLE, gadget.getJSONObject("modulePrefs").getString("title"));
     assertFalse(gadget.has("error"));
     assertFalse(gadget.has("url")); // filtered out
