@@ -50,13 +50,15 @@ gadgets.window = gadgets.window || {};
       viewportWidth++; // Adjust for 1px inaccuracy in Webkit browsers
     }
     var callback = null;
+
     if (isNaN(opt_width) && viewportWidth >= newWidth) {
       // Due to quirks in the width property, the auto-calculated width will
       // never be smaller than the size of the viewport. In order to decrease
       // the width to a fit size, we must first make the viewport too small (1px),
       // then callback a function that increases the frame to the right width.
+      var savedWidth = newWidth;
       callback = function() {
-        gadgets.window.adjustWidth();
+        gadgets.window.adjustWidth(savedWidth);
       };
       newWidth = 1;
     }
