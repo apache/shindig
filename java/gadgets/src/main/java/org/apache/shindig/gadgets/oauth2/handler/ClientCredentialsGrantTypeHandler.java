@@ -158,11 +158,6 @@ public class ClientCredentialsGrantTypeHandler implements GrantRequestHandler {
         queryParams.put(OAuth2Message.SCOPE, scope);
       }
 
-      // add any additional parameters
-      for (Map.Entry<String, String> entry : accessor.getAdditionalRequestParams().entrySet()) {
-        queryParams.put(entry.getKey(), entry.getValue());
-      }
-
       ret = OAuth2Utils.buildUrl(accessor.getTokenUrl(), queryParams, null);
     } catch (final UnsupportedEncodingException e) {
       throw new OAuth2RequestException(OAuth2Error.CLIENT_CREDENTIALS_PROBLEM,

@@ -65,11 +65,6 @@ public class BasicAuthenticationHandler implements ClientAuthenticationHandler {
       final byte[] authBytes = Base64.encodeBase64(authString.getBytes());
       request.setHeader(OAuth2Message.AUTHORIZATION_HEADER, "Basic: " + new String(authBytes));
 
-      // add any additional parameters
-      for (Map.Entry<String, String> entry : accessor.getAdditionalRequestParams().entrySet()) {
-        request.setParam(entry.getKey(), entry.getValue());
-      }
-
       return null;
     } catch (final Exception e) {
       return BasicAuthenticationHandler.getError("Exception adding basic auth headers", e);

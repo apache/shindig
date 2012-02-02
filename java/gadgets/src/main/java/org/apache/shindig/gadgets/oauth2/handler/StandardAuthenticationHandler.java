@@ -69,11 +69,6 @@ public class StandardAuthenticationHandler implements ClientAuthenticationHandle
       request.setHeader(OAuth2Message.CLIENT_SECRET, secret);
       request.setParam(OAuth2Message.CLIENT_SECRET, secret);
 
-      // add any additional parameters
-      for (Map.Entry<String, String> entry : accessor.getAdditionalRequestParams().entrySet()) {
-        request.setParam(entry.getKey(), entry.getValue());
-      }
-
       return null;
     } catch (final Exception e) {
       return StandardAuthenticationHandler.getError("Exception adding standard auth headers", e);

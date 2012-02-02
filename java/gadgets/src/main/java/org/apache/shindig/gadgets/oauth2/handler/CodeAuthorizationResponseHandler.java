@@ -102,6 +102,11 @@ public class CodeAuthorizationResponseHandler implements AuthorizationEndpointRe
     queryParams.put(OAuth2Message.CLIENT_ID, clientId);
     queryParams.put(OAuth2Message.CLIENT_SECRET, secret);
 
+    // add any additional parameters
+    for (Map.Entry<String, String> entry : accessor.getAdditionalRequestParams().entrySet()) {
+      queryParams.put(entry.getKey(), entry.getValue());
+    }
+
     ret = OAuth2Utils.buildUrl(ret, queryParams, null);
 
     final char firstChar = ret.charAt(0);
