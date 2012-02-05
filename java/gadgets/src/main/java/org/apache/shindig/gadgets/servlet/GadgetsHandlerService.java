@@ -244,8 +244,8 @@ public class GadgetsHandlerService {
     }
     try {
       FeatureRegistry featureRegistry = featureRegistryProvider.get(context.getRepository());
-      LookupResult result = featureRegistry.getFeatureResources(context, featureRegistry.getFeatures(featureNames),
-              null);
+      LookupResult result = featureRegistry.getFeatureResources(context,
+          featureRegistry.getFeatures(featureNames), null);
       List<FeatureBundle> bundles = result.getBundles();
       for (FeatureBundle bundle : bundles) {
         rpcEndpoints.addAll(bundle.getApis(ApiDirective.Type.RPC, false));
@@ -377,8 +377,7 @@ public class GadgetsHandlerService {
    * Convert messages from Caja's internal message type to Shindig's serializable message type
    */
   private List<GadgetsHandlerApi.Message> convertMessages(
-      List<com.google.caja.reporting.Message> msgs,
-      final MessageContext mc) {
+      List<com.google.caja.reporting.Message> msgs, final MessageContext mc) {
     List<GadgetsHandlerApi.Message> result = Lists.newArrayListWithExpectedSize(msgs.size());
     for (final com.google.caja.reporting.Message m : msgs) {
       MessageImpl msg = new MessageImpl(m.getMessageType().name(),
@@ -523,12 +522,12 @@ public class GadgetsHandlerService {
   }
 
   private SecurityToken convertAuthContext(GadgetsHandlerApi.AuthContext authContext,
-    String container, String url) {
+      String container, String url) {
     return convertAuthContext(authContext, container, url, 0);
   }
 
   private SecurityToken convertAuthContext(GadgetsHandlerApi.AuthContext authContext,
-    String container, String url, long moduleId) {
+      String container, String url, long moduleId) {
     if (authContext == null) {
       return null;
     }
@@ -537,8 +536,8 @@ public class GadgetsHandlerService {
             "appid", url, "appurl", url, "moduleId", moduleId));
   }
 
-  public GadgetsHandlerApi.BaseResponse createErrorResponse(
-    Uri uri, Exception e, String defaultMsg) {
+  public GadgetsHandlerApi.BaseResponse createErrorResponse(Uri uri, Exception e,
+      String defaultMsg) {
     if (e instanceof ProcessingException) {
       ProcessingException processingExc = (ProcessingException) e;
       return createErrorResponse(uri, processingExc.getHttpStatusCode(),
@@ -559,9 +558,9 @@ public class GadgetsHandlerService {
   }
 
   @VisibleForTesting
-  GadgetsHandlerApi.MetadataResponse createMetadataResponse(
-      Uri url, GadgetSpec spec, Map<String, Uri> iframeUris, Boolean needsTokenRefresh,
-      Set<String> fields, Long expireTime, Integer tokenTTL, Set<String> rpcServiceIds) {
+  GadgetsHandlerApi.MetadataResponse createMetadataResponse(Uri url, GadgetSpec spec, Map<String,
+        Uri> iframeUris, Boolean needsTokenRefresh, Set<String> fields, Long expireTime,
+        Integer tokenTTL, Set<String> rpcServiceIds) {
     return (GadgetsHandlerApi.MetadataResponse) beanFilter.createFilteredBean(
         beanDelegator.createDelegator(spec, GadgetsHandlerApi.MetadataResponse.class,
             ImmutableMap.<String, Object>builder()
@@ -577,8 +576,8 @@ public class GadgetsHandlerService {
   }
 
   @VisibleForTesting
-  GadgetsHandlerApi.TokenResponse createTokenResponse(
-      Uri url, String token, Set<String> fields, Long tokenExpire, Integer tokenTTL, Long moduleId) {
+  GadgetsHandlerApi.TokenResponse createTokenResponse(Uri url, String token, Set<String> fields,
+      Long tokenExpire, Integer tokenTTL, Long moduleId) {
     return (GadgetsHandlerApi.TokenResponse) beanFilter.createFilteredBean(
         beanDelegator.createDelegator(null, GadgetsHandlerApi.TokenResponse.class,
             ImmutableMap.<String, Object>builder()
@@ -609,8 +608,8 @@ public class GadgetsHandlerService {
   }
 
   @VisibleForTesting
-  GadgetsHandlerApi.JsResponse createJsResponse(
-      Uri url, Uri jsUri, String content, Set<String> fields, Long expireMs) {
+  GadgetsHandlerApi.JsResponse createJsResponse(Uri url, Uri jsUri, String content,
+      Set<String> fields, Long expireMs) {
     return (GadgetsHandlerApi.JsResponse) beanFilter.createFilteredBean(
         beanDelegator.createDelegator(null, GadgetsHandlerApi.JsResponse.class,
             ImmutableMap.<String, Object>builder()
@@ -686,9 +685,8 @@ public class GadgetsHandlerService {
   }
 
   @VisibleForTesting
-  GadgetsHandlerApi.CajaResponse createCajaResponse(Uri uri,
-      String html, String js, List<GadgetsHandlerApi.Message> messages,
-      Set<String> fields, Long expireMs) {
+  GadgetsHandlerApi.CajaResponse createCajaResponse(Uri uri, String html, String js,
+      List<GadgetsHandlerApi.Message> messages, Set<String> fields, Long expireMs) {
     ImmutableList.Builder<GadgetsHandlerApi.Message> msgBuilder =
       ImmutableList.builder();
     for (final GadgetsHandlerApi.Message m : messages) {

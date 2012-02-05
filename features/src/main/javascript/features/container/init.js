@@ -23,22 +23,6 @@
  * variables.
  */
 (function() {
-
-  function initializeConfig() {
-    gadgets.config.init({
-      'rpc': {
-        'parentRelayUrl': ''
-      },
-      'core.io': {
-        'jsonProxyUrl': 'http://%host%/gadgets/makeRequest',
-        'proxyUrl': 'http://%host%/gadgets/proxy' +
-            '?refresh=%refresh%' +
-            '&container=%container%%rewriteMime%' +
-            '&gadget=%gadget%/%rawurl%'
-      }
-    });
-  }
-
   function initializeGlobalVars() {
     window.__CONTAINER_URI = shindig.uri(window.location.href);
 
@@ -59,10 +43,8 @@
       window.__API_URI.resolve(window.__CONTAINER_URI);
     }
 
-    window.__CONTAINER = window.__API_URI ?
-        window.__API_URI.getQP('container') : 'default';
+    window.__CONTAINER = window.__API_URI ? window.__API_URI.getQP('container') : 'default';
   }
 
-  initializeConfig();
   initializeGlobalVars();
 })();
