@@ -257,13 +257,18 @@
      */
     this.removeGadgetSite = function(siteId) {
       for (var url in this.urlToSite) {
-        var sites = this.urlToSite[url];
-        for (var i in sites) {
-          var site = sites[i];
-          if (site && site.getId() == siteId) {
-            sites.splice(i, 1);
-            if (sites.length == 0) {
-              delete this.urlToSite[url];
+        if(this.urlToSite.hasOwnProperty(url)) {
+          var sites = this.urlToSite[url];
+          if(!sites) {
+           continue;
+          }
+          for (var i = 0; i < sites.length; i++) {
+            var site = sites[i];
+            if (site && site.getId() == siteId) {
+              sites.splice(i, 1);
+              if (sites.length == 0) {
+                delete this.urlToSite[url];
+              }
             }
           }
         }
