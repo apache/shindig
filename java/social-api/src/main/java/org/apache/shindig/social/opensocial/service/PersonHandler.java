@@ -37,6 +37,7 @@ import org.apache.shindig.social.opensocial.spi.UserId;
 
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
 import com.google.inject.Inject;
 
 /**
@@ -109,6 +110,27 @@ public class PersonHandler {
 
     // Every other case is a collection response.
     return personService.getPeople(userIds, groupId, options, fields, request.getToken());
+  }
+
+  /**
+   * Allowed end-points /people/{userId}/{groupId}
+   *
+   * examples: /people/john.doe/@all /people/john.doe/@friends /people/john.doe/@self
+   */
+  @Operation(httpMethods = "PUT", bodyParam = "person")
+  public Future<?> update(SocialRequestItem request) throws ProtocolException {
+    Set<UserId> userIds = request.getUsers();
+
+    // Enforce preconditions - exactly one user is specified
+    HandlerPreconditions.requireNotEmpty(userIds, "No userId specified");
+    HandlerPreconditions.requireSingular(userIds, "Multiple userIds not supported");
+
+    UserId userId = userIds.iterator().next();
+
+    // Update person and return it
+    return personService.updatePerson(Iterables.getOnlyElement(userIds),
+        request.getTypedParameter("person", Person.class),
+        request.getToken());
   }
 
   @Operation(httpMethods = "GET", path="/@supportedFields")

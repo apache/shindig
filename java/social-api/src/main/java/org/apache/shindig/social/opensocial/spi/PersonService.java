@@ -80,4 +80,16 @@ public interface PersonService {
    */
   Future<Person> getPerson(UserId id, Set<String> fields, SecurityToken token)
       throws ProtocolException;
+
+  /**
+   * Updates person that corresponds to the passed in person id and updates him
+   *
+   * @param id The id of the person to fetch.
+   * @param request The request object
+   * @param fields The fields to fetch.
+   * @param token The gadget token
+   * @return a list of people.
+   */
+  Future<Person> updatePerson(UserId id, Person person, SecurityToken token)
+      throws ProtocolException;
 }

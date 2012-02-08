@@ -51,6 +51,7 @@ import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.StringReader;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -66,7 +67,7 @@ public class PersonHandlerTest extends EasyMockTestCase {
       Person.Field.NAME.toString(),
       Person.Field.THUMBNAIL_URL.toString());
 
-  private static final Set<UserId> JOHN_DOE = 
+  private static final Set<UserId> JOHN_DOE =
       ImmutableSet.of(new UserId(UserId.Type.userId, "john.doe"));
 
   private static CollectionOptions DEFAULT_OPTIONS = new CollectionOptions();
@@ -235,6 +236,27 @@ public class PersonHandlerTest extends EasyMockTestCase {
     replay();
     assertEquals(data, operation.execute(Maps.<String, String[]>newHashMap(),
         null, token, converter).get());
+    verify();
+  }
+
+  @Test
+  public void testHandlePut() throws Exception {
+    String jsonPerson = "{person: {aboutMe: 'A person'}}";
+
+    String path = "/people/john.doe/@self";
+    RestHandler operation = registry.getRestHandler(path, "PUT");
+
+    Person person = new PersonImpl();
+    expect(converter.convertToObject(eq(jsonPerson), eq(Person.class)))
+        .andReturn(person);
+
+    expect(personService.updatePerson(eq(JOHN_DOE.iterator().next()),
+        eq(person),
+        eq(token))).andReturn(ImmediateFuture.newInstance(person));
+
+    replay();
+    assertEquals(person, operation.execute(Maps.<String, String[]>newHashMap(),
+        new StringReader(jsonPerson), token, converter).get());
     verify();
   }
 

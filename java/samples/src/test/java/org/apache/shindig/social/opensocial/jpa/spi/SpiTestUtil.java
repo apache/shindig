@@ -60,26 +60,29 @@ import com.google.common.collect.Sets;
 
 
 /**
- * 
+ *
  * Convenient build and assert methods used by spi unit tests
  *
  */
 public class SpiTestUtil {
-  
+
   public final static SecurityToken DEFAULT_TEST_SECURITY_TOKEN = (SecurityToken) new FakeGadgetToken();
+  // (String appId, String appUrl, String domain, String ownerId, String trustedJson, String viewerId, String moduleId)
+  public final static SecurityToken CANONICAL_PERSON_SECURITY_TOKEN = (SecurityToken) new FakeGadgetToken("appId", "appUrl", "domain", "canonical", "trustedJson", "canonical", "20");
+  public final static SecurityToken JOHN_DOE_SECURITY_TOKEN = (SecurityToken) new FakeGadgetToken("appId", "appUrl", "domain", "john.doe", "trustedJson", "john.doe", "20");
   public final static SimpleDateFormat DATE_FORMATTER = new SimpleDateFormat("yyyy-MM-dd");
-  
+
   /*
    * Build canonical test person instance
    */
-  public static Person buildCanonicalPerson() {    
+  public static Person buildCanonicalPerson() {
     NameImpl name = new NameImpl("Sir Shin H. Digg Social Butterfly");
     name.setAdditionalName("H");
     name.setFamilyName("Digg");
     name.setGivenName("Shin");
     name.setHonorificPrefix("Sir");
     name.setHonorificSuffix("Social Butterfly");
-    
+
     Person canonical = new PersonImpl("canonical", "Shin Digg", name);
 
     canonical.setAboutMe("I have an example of every piece of data");
@@ -200,10 +203,10 @@ public class SpiTestUtil {
     canonical.setUrls(Lists.<Url>newArrayList(
         new UrlImpl("http://www.example.org/?id=1", "my profile", "Profile"),
         new UrlImpl("http://www.example.org/pic/?id=1", "my awesome picture", "Thumbnail")));
-    
+
     return canonical;
   }
-  
+
   /*
    * Build userId set
    */
@@ -215,10 +218,10 @@ public class SpiTestUtil {
     }
     return userIdSet;
   }
-  
+
   /*
    * Asserts actual person instance has the expected person id and (formatted) name.
-   * 
+   *
    */
   public static void assertPersonEquals(Person actual, String expectedId, String expectedName) {
     assertEquals(actual.getId(), expectedId);
@@ -228,31 +231,31 @@ public class SpiTestUtil {
 
   /*
    * Asserts actual person instance equals expected person instance
-   * 
+   *
    * Verified each individual variable so to know which variable is causing it to fail.
    * Note that person.updated isn't verified as we can't expect this to be equal.
-   * 
+   *
    */
   public static void assertPersonEquals(Person actual, Person expected) {
-    
+
     assertEquals(actual.getAboutMe(), expected.getAboutMe());
-    assertEquals(actual.getActivities(), expected.getActivities());    
+    assertEquals(actual.getActivities(), expected.getActivities());
     assertCollectionSizeEquals(actual.getAddresses(), expected.getAddresses());
     for (int i = 0; i < actual.getAddresses().size(); i++) {
       assertAddressEquals(actual.getAddresses().get(i), expected.getAddresses().get(i));
-    }    
-    assertEquals(actual.getAge(), expected.getAge());    
+    }
+    assertEquals(actual.getAge(), expected.getAge());
     assertBodyTypeEquals(actual.getBodyType(), expected.getBodyType());
     assertEquals(actual.getBooks(), expected.getBooks());
     assertEquals(actual.getCars(), expected.getCars());
-    assertEquals(actual.getChildren(), expected.getChildren());    
-    assertAddressEquals(actual.getCurrentLocation(), expected.getCurrentLocation());    
+    assertEquals(actual.getChildren(), expected.getChildren());
+    assertAddressEquals(actual.getCurrentLocation(), expected.getCurrentLocation());
     assertEquals(actual.getDisplayName(), expected.getDisplayName());
-    assertEquals(actual.getBirthday(), expected.getBirthday());    
+    assertEquals(actual.getBirthday(), expected.getBirthday());
     assertCollectionSizeEquals(actual.getEmails(), expected.getEmails());
     for (int i = 0; i < actual.getEmails().size(); i++) {
       assertListFieldEquals(actual.getEmails().get(i), expected.getEmails().get(i));
-    }    
+    }
     assertEquals(actual.getEthnicity(), expected.getEthnicity());
     assertEquals(actual.getFashion(), expected.getFashion());
     assertEquals(actual.getFood(), expected.getFood());
@@ -263,29 +266,29 @@ public class SpiTestUtil {
     assertEquals(actual.getHumor(), expected.getHumor());
     assertEquals(actual.getId(), expected.getId());
     assertEquals(actual.getInterests(), expected.getInterests());
-    assertEquals(actual.getJobInterests(), expected.getJobInterests());    
+    assertEquals(actual.getJobInterests(), expected.getJobInterests());
     assertCollectionSizeEquals(actual.getOrganizations(), expected.getOrganizations());
     for (int i = 0; i < actual.getOrganizations().size(); i++) {
       assertOrganizationEquals(actual.getOrganizations().get(i), expected.getOrganizations().get(i));
-    }    
+    }
     assertEquals(actual.getLanguagesSpoken(), expected.getLanguagesSpoken());
-    assertEquals(actual.getLivingArrangement(), expected.getLivingArrangement());    
+    assertEquals(actual.getLivingArrangement(), expected.getLivingArrangement());
     assertCollectionSizeEquals(actual.getLookingFor(), expected.getLookingFor());
     for (int i = 0; i < actual.getLookingFor().size(); i++) {
       assertEquals(actual.getLookingFor().get(i).getValue(), expected.getLookingFor().get(i).getValue());
-    }    
+    }
     assertEquals(actual.getMovies(), expected.getMovies());
-    assertEquals(actual.getMusic(), expected.getMusic());    
+    assertEquals(actual.getMusic(), expected.getMusic());
     assertNameEquals(actual.getName(), expected.getName());
     assertEquals(actual.getNetworkPresence().getValue(), expected.getNetworkPresence().getValue());
     assertEquals(actual.getNickname(), expected.getNickname());
-    assertEquals(actual.getPets(), expected.getPets());    
+    assertEquals(actual.getPets(), expected.getPets());
     assertCollectionSizeEquals(actual.getPhoneNumbers(), expected.getPhoneNumbers());
     for (int i = 0; i < actual.getPhoneNumbers().size(); i++) {
       assertListFieldEquals(actual.getPhoneNumbers().get(i), expected.getPhoneNumbers().get(i));
-    }    
-    assertEquals(actual.getPoliticalViews(), expected.getPoliticalViews());    
-    assertUrlEquals(actual.getProfileSong(), expected.getProfileSong());    
+    }
+    assertEquals(actual.getPoliticalViews(), expected.getPoliticalViews());
+    assertUrlEquals(actual.getProfileSong(), expected.getProfileSong());
     assertEquals(actual.getProfileUrl(), expected.getProfileUrl());
     assertUrlEquals(actual.getProfileVideo(), expected.getProfileVideo());
     assertEquals(actual.getQuotes(), expected.getQuotes());
@@ -302,14 +305,14 @@ public class SpiTestUtil {
     assertEquals(actual.getUtcOffset(), expected.getUtcOffset());
     assertEquals(actual.getTurnOffs(), expected.getTurnOffs());
     assertEquals(actual.getTurnOns(), expected.getTurnOns());
-    assertEquals(actual.getTvShows(), expected.getTvShows());    
+    assertEquals(actual.getTvShows(), expected.getTvShows());
   }
-  
+
   private static void assertUrlEquals(Url actual, Url expected) {
     assertEquals(actual.getLinkText(), expected.getLinkText());
     assertEquals(actual.getPrimary(), expected.getPrimary());
     assertEquals(actual.getType(), expected.getType());
-    assertEquals(actual.getValue(), expected.getValue());    
+    assertEquals(actual.getValue(), expected.getValue());
   }
 
   private static void assertNameEquals(Name actual, Name expected) {
@@ -318,7 +321,7 @@ public class SpiTestUtil {
     assertEquals(actual.getGivenName(), expected.getGivenName());
     assertEquals(actual.getHonorificPrefix(), expected.getHonorificPrefix());
     assertEquals(actual.getHonorificSuffix(), expected.getHonorificSuffix());
-    assertEquals(actual.getFormatted(), expected.getFormatted());    
+    assertEquals(actual.getFormatted(), expected.getFormatted());
   }
 
   private static void assertOrganizationEquals(Organization actual, Organization expected) {
@@ -333,15 +336,15 @@ public class SpiTestUtil {
     assertEquals(actual.getSubField(), expected.getSubField());
     assertEquals(actual.getTitle(), expected.getTitle());
     assertEquals(actual.getType(), expected.getType());
-    assertEquals(actual.getWebpage(), expected.getWebpage());    
+    assertEquals(actual.getWebpage(), expected.getWebpage());
   }
 
   private static void assertCollectionSizeEquals(Collection<?> actual, Collection<?> expected) {
     assertTrue(actual != null && expected != null);
     assertEquals(actual.size(), expected.size());
   }
-  
-  private static void assertAddressEquals(Address actual, Address expected) {    
+
+  private static void assertAddressEquals(Address actual, Address expected) {
     assertEquals(actual.getCountry(), expected.getCountry());
     assertEquals(actual.getLatitude(), expected.getLatitude());
     assertEquals(actual.getLocality(), expected.getLocality());
@@ -350,7 +353,7 @@ public class SpiTestUtil {
     assertEquals(actual.getRegion(), expected.getRegion());
     assertEquals(actual.getStreetAddress(), expected.getStreetAddress());
     assertEquals(actual.getType(), expected.getType());
-    assertEquals(actual.getFormatted(), expected.getFormatted());    
+    assertEquals(actual.getFormatted(), expected.getFormatted());
   }
 
   private static void assertBodyTypeEquals(BodyType actual, BodyType expected) {
@@ -360,37 +363,37 @@ public class SpiTestUtil {
     assertEquals(actual.getHeight(), expected.getHeight());
     assertEquals(actual.getWeight(), expected.getWeight());
   }
-  
+
   private static void assertListFieldEquals(ListField actual, ListField expected) {
     assertEquals(actual.getPrimary(), expected.getPrimary());
     assertEquals(actual.getType(), expected.getType());
     assertEquals(actual.getValue(), expected.getValue());
   }
-  
+
   public static void assertActivityEquals(Activity actual, Activity expected) {
     assertEquals(actual.getId(), expected.getId());
     assertEquals(actual.getUserId(), expected.getUserId());
     assertEquals(actual.getTitle(), expected.getTitle());
     assertEquals(actual.getBody(), expected.getBody());
   }
-  
+
   public static Activity buildTestActivity(String id, String userId, String title, String body) {
-    Activity activity = new ActivityImpl(id, userId); 
+    Activity activity = new ActivityImpl(id, userId);
     activity.setTitle(title);
     activity.setBody(body);
     return activity;
   }
-  
-  public static Date buildDate(String dateAsString) {    
+
+  public static Date buildDate(String dateAsString) {
     try {
       return DATE_FORMATTER.parse(dateAsString);
     } catch (Exception e) {
       throw new RuntimeException("Failed to parse date - " + dateAsString, e);
     }
   }
-  
+
   public static Set<String> asSet(String... items) {
     return Sets.newHashSet(Arrays.asList(items));
   }
-  
+
 }

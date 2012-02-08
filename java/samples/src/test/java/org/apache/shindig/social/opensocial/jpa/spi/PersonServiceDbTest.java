@@ -20,6 +20,9 @@ package org.apache.shindig.social.opensocial.jpa.spi;
 
 import static org.junit.Assert.assertEquals;
 
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.shindig.protocol.ProtocolException;
 import org.apache.shindig.protocol.RestfulCollection;
 import org.apache.shindig.protocol.model.SortOrder;
 import org.apache.shindig.social.opensocial.model.Person;
@@ -37,41 +40,46 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+
 /**
- * 
+ *
  * Test the PersonServiceDb implementation.
  *
  */
 public class PersonServiceDbTest {
 
   private final Person canonical = SpiTestUtil.buildCanonicalPerson();
-  
+
   private PersonServiceDb personServiceDb;
-  
+
   /** The bootstrap. */
   private SpiDatabaseBootstrap bootstrap;
-  
+
   @Before
   public void setup() throws Exception {
     EntityManager entityManager = SpiEntityManagerFactory.getEntityManager();
     this.personServiceDb = new PersonServiceDb(entityManager);
-    
+
     // Bootstrap hibernate and associated test db, and setup db with test data
     this.bootstrap = new SpiDatabaseBootstrap(entityManager);
     this.bootstrap.init();
   }
-  
+
   @After
   public void tearDown() throws Exception {
     bootstrap.tearDown();
   }
-  
+
   @Test
   public void getCanonicalPerson() throws Exception {
      Future<Person> person = this.personServiceDb.getPerson(new UserId(Type.userId, "canonical"), Person.Field.ALL_FIELDS, SpiTestUtil.DEFAULT_TEST_SECURITY_TOKEN);
      SpiTestUtil.assertPersonEquals(person.get(), canonical);
   }
-  
+
   @Test
   public void getJohnDoeFriendsOrderedByName() throws Exception {
     // Set collection options
@@ -79,46 +87,70 @@ public class PersonServiceDbTest {
     collectionOptions.setSortBy("name");
     collectionOptions.setSortOrder(SortOrder.ascending);
     collectionOptions.setMax(20);
-    
+
     // Get all friends of john.doe
     Future<RestfulCollection<Person>> result = this.personServiceDb.getPeople(SpiTestUtil.buildUserIds("john.doe"), new GroupId(GroupId.Type.friends, "@friends"), collectionOptions, Person.Field.ALL_FIELDS, SpiTestUtil.DEFAULT_TEST_SECURITY_TOKEN);
-    
+
     RestfulCollection<Person> peopleCollection = result.get();
     assertEquals(3, peopleCollection.getTotalResults());
-    assertEquals(0, peopleCollection.getStartIndex());    
-    List<Person> people = peopleCollection.getEntry();    
+    assertEquals(0, peopleCollection.getStartIndex());
+    List<Person> people = peopleCollection.getEntry();
     // The users should be in alphabetical order
     SpiTestUtil.assertPersonEquals(people.get(0), "george.doe", "George Doe");
-    SpiTestUtil.assertPersonEquals(people.get(1), "jane.doe", "Jane Doe");     
+    SpiTestUtil.assertPersonEquals(people.get(1), "jane.doe", "Jane Doe");
   }
-  
-  
+
+
   @Test
-  public void getJohnDoeFriendsOrderedByNameWithPagination() throws Exception {    
+  public void getJohnDoeFriendsOrderedByNameWithPagination() throws Exception {
     // Set collection options
     CollectionOptions collectionOptions = new CollectionOptions();
     collectionOptions.setSortBy("name");
     collectionOptions.setSortOrder(SortOrder.ascending);
     collectionOptions.setFirst(0);
     collectionOptions.setMax(1);
-    
+
     // Get first friend of john.doe
-    Future<RestfulCollection<Person>> result = this.personServiceDb.getPeople(SpiTestUtil.buildUserIds("john.doe"), new GroupId(GroupId.Type.friends, "@friends"), collectionOptions, Person.Field.ALL_FIELDS, SpiTestUtil.DEFAULT_TEST_SECURITY_TOKEN);    
+    Future<RestfulCollection<Person>> result = this.personServiceDb.getPeople(SpiTestUtil.buildUserIds("john.doe"), new GroupId(GroupId.Type.friends, "@friends"), collectionOptions, Person.Field.ALL_FIELDS, SpiTestUtil.DEFAULT_TEST_SECURITY_TOKEN);
     RestfulCollection<Person> peopleCollection = result.get();
     assertEquals(3, peopleCollection.getTotalResults());
-    assertEquals(0, peopleCollection.getStartIndex());    
-    List<Person> people = peopleCollection.getEntry();    
+    assertEquals(0, peopleCollection.getStartIndex());
+    List<Person> people = peopleCollection.getEntry();
     SpiTestUtil.assertPersonEquals(people.get(0), "george.doe", "George Doe");
-    
+
     // Get second friend of john.doe
     collectionOptions.setFirst(1);
     result = this.personServiceDb.getPeople(SpiTestUtil.buildUserIds("john.doe"), new GroupId(GroupId.Type.friends, "@friends"), collectionOptions, Person.Field.ALL_FIELDS, SpiTestUtil.DEFAULT_TEST_SECURITY_TOKEN);
     peopleCollection = result.get();
     assertEquals(3, peopleCollection.getTotalResults());
-    assertEquals(1, peopleCollection.getStartIndex());    
-    people = peopleCollection.getEntry();    
-    SpiTestUtil.assertPersonEquals(people.get(0), "jane.doe", "Jane Doe");    
+    assertEquals(1, peopleCollection.getStartIndex());
+    people = peopleCollection.getEntry();
+    SpiTestUtil.assertPersonEquals(people.get(0), "jane.doe", "Jane Doe");
   }
-  
-  
+
+  @Test
+  public void testViewerCanUpdatePerson() throws Exception {
+    Person p = SpiTestUtil.buildCanonicalPerson();
+    p.setThumbnailUrl("http://newthumbnail.url");
+    this.personServiceDb.updatePerson(new UserId(Type.userId, "canonical"),
+        p, SpiTestUtil.CANONICAL_PERSON_SECURITY_TOKEN);
+
+    Future<Person> person = this.personServiceDb.getPerson(new UserId(Type.userId, "canonical"), ImmutableSet.of("id","displayName","thumbnailUrl"), SpiTestUtil.DEFAULT_TEST_SECURITY_TOKEN);
+    assertEquals("http://newthumbnail.url", person.get().getThumbnailUrl());
+  }
+
+  @Test
+  public void testViewerNotAllowedUpdatePerson() throws Exception {
+    Person p = SpiTestUtil.buildCanonicalPerson();
+    p.setThumbnailUrl("http://newthumbnail.url");
+
+    try {
+      this.personServiceDb.updatePerson(new UserId(Type.userId, "canonical"),
+          p, SpiTestUtil.JOHN_DOE_SECURITY_TOKEN);
+      org.junit.Assert.fail();
+    } catch (ProtocolException sse) {
+      assertEquals(HttpServletResponse.SC_FORBIDDEN, sse.getCode());
+    }
+  }
+
 }

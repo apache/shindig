@@ -171,7 +171,74 @@ public class PersonServiceDb implements PersonService {
     return ImmediateFuture.newInstance(person);
   }
 
+  /**
+   * {@inheritDoc}
+   */
+  public Future<Person> updatePerson(UserId id, Person person, SecurityToken token)
+      throws ProtocolException {
+    String viewer = token.getViewerId(); // viewer
+    String uid = id.getUserId(token); // person to update
 
+    if (!viewerCanUpdatePerson(viewer,uid)) {
+      throw new ProtocolException(HttpServletResponse.SC_FORBIDDEN, "User '" + viewer + "' does not have enough privileges to update person '"+uid+"'");
+    }
+
+    Query q = null;
+    // Get the person object from db
+    q = entiyManager.createNamedQuery(PersonDb.FINDBY_PERSONID);
+    q.setParameter(PersonDb.PARAM_PERSONID, uid);
+    q.setFirstResult(0);
+    q.setMaxResults(1);
+
+    List<?> plist = q.getResultList();
+    PersonDb personDb = null;
+    if (plist != null && !plist.isEmpty()) {
+      personDb = (PersonDb) plist.get(0);
+      // update person's fields: displayName, aboutMe, age
+      // add fields that has to be updated
+      personDb.setThumbnailUrl(person.getThumbnailUrl());
+    }
+
+    // TODO How should transactions be managed? Should samples be using warp-persist instead?
+    if (!entiyManager.getTransaction().isActive()) {
+      entiyManager.getTransaction().begin();
+    }
+    // update person's names object (in another db table)
+    // if (person.getName() != null) {
+    //   if (personDb.getName() != null) {
+    //     entiyManager.remove(personDb.getName());
+    //   }
+    //   personDb.setName(person.getName());
+    // }
+    // update person's emails object (in another db table)
+    // if (person.getEmails() != null) {
+    //   for (Object e : personDb.getEmails()) {
+    //     entiyManager.remove(e);
+    //   }
+    //   List<ListField> emails = Lists.newArrayList();
+    //   for (ListField c : person.getEmails()) {
+    //     c.setPerson(personDb);
+    //     emails.add(c);
+    //   }
+    //   personDb.setEmails(emails);
+    // }
+    // provide other person's data updates similarily to name and emails
+
+    entiyManager.persist(personDb);
+
+    entiyManager.getTransaction().commit();
+
+    // send personDb data back
+    return ImmediateFuture.newInstance((Person) personDb);
+  }
+
+  /** Check if a viewer is allowed to update the given person record. **/
+  protected boolean viewerCanUpdatePerson(String viewer, String person) {
+    // A person can only update his own personal data (by default)
+    // if you wish to allow other people to update the personal data of the user
+    // you should change the current function
+    return viewer.equals(person) ? true : false;
+  }
 
   /**
    * Add a filter clause specified by the collection options.

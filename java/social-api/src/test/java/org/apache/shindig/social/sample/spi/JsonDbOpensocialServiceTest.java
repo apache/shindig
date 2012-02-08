@@ -41,6 +41,10 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Guice;
@@ -275,7 +279,7 @@ public class JsonDbOpensocialServiceTest extends Assert {
     assertTrue(responseItem.getEntry().get(CANONICAL_USER_ID).containsKey("newvalue"));
     assertEquals("20", responseItem.getEntry().get(CANONICAL_USER_ID).get("newvalue"));
   }
-  
+
   @Test
   public void testGetExpectedActivityEntries() throws Exception {
     RestfulCollection<ActivityEntry> responseItem = db.getActivityEntries(
@@ -317,4 +321,58 @@ public class JsonDbOpensocialServiceTest extends Assert {
       assertEquals(HttpServletResponse.SC_BAD_REQUEST, sse.getCode());
     }
   }
+
+  @Test
+  public void testViewerCanUpdatePerson() throws Exception {
+    // Create new user
+    JSONArray people = db.getDb().getJSONArray("people");
+    JSONObject jsonPerson = new JSONObject();
+    jsonPerson.put("id", "updatePerson");
+    people.put(people.length(),jsonPerson);
+
+    SecurityToken updateToken = new FakeGadgetToken("appId", "appUrl", "domain", "updatePerson", "trustedJson", "updatePerson", "20");
+
+    // Get user
+    UserId userId = new UserId(UserId.Type.userId, "updatePerson");
+    Person person = db
+        .getPerson(userId, Person.Field.ALL_FIELDS, token).get();
+    assertNotNull("User 'updatePerson' not found", person);
+
+    // update a field in user object
+    person.setThumbnailUrl("http://newthumbnail.url");
+    // Save user to db
+    db.updatePerson(userId, person, updateToken);
+    // Get user again from db and check if the fields were properly updated
+    person = db.getPerson(userId, Person.Field.ALL_FIELDS, token).get();
+    assertNotNull("User 'updatePerson' not found", person);
+
+    assertEquals("http://newthumbnail.url", person.getThumbnailUrl());
+  }
+
+  @Test
+  public void testViewerNotAllowedUpdatePerson() throws Exception {
+    // Create new user
+    JSONArray people = db.getDb().getJSONArray("people");
+    JSONObject jsonPerson = new JSONObject();
+    jsonPerson.put("id", "updatePerson");
+    people.put(people.length(),jsonPerson);
+
+    SecurityToken updateToken = new FakeGadgetToken("appId", "appUrl", "domain", "viewer", "trustedJson", "viewer", "20");
+
+    // Get user
+    UserId userId = new UserId(UserId.Type.userId, "updatePerson");
+    Person person = db
+        .getPerson(userId, Person.Field.ALL_FIELDS, token).get();
+
+    // update a field in user object
+    person.setThumbnailUrl("http://newthumbnail.url");
+    // Save user to db, should throw an exception
+    try {
+      db.updatePerson(userId, person, updateToken);
+      fail();
+    } catch (ProtocolException sse) {
+      assertEquals(HttpServletResponse.SC_FORBIDDEN, sse.getCode());
+    }
+  }
+
 }

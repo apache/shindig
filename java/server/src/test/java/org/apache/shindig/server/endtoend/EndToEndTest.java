@@ -70,8 +70,8 @@ public class EndToEndTest {
     "jsonTest.xml",
     "viewLevelElementsTest.xml",
     "cajaTest.xml",
-    "failCajaTest.xml",      
-    "failCajaUrlTest.xml",      
+    "failCajaTest.xml",
+    "failCajaUrlTest.xml",
     "osapi/personTest.xml",
     "osapi/peopleTest.xml",
     "osapi/activitiesTest.xml",
@@ -120,7 +120,7 @@ public class EndToEndTest {
   public void viewLevelElements() throws Exception {
     executeAllPageTests("viewLevelElementsTest");
   }
-  
+
   @Test
   @Ignore("Issues with passing the neko dom to caja") // FIXME
   public void cajaJsonParse() throws Exception {
@@ -191,7 +191,7 @@ public class EndToEndTest {
   public void testFailCaja() throws Exception {
     HtmlPage page = executePageTest("failCajaTest", null);
     NodeList bodyList = page.getElementsByTagName("body");
-    
+
     // Result should contain just one body
     assertEquals(1, bodyList.getLength());
     DomNode body = (DomNode) bodyList.item(0);
@@ -219,17 +219,17 @@ public class EndToEndTest {
     for (int i = 0; i < array.length(); i++) {
       JSONObject jsonObj = array.getJSONObject(i);
       assertTrue(jsonObj.has("id"));
-      
+
       jsonObjects.put(jsonObj.getString("id"), jsonObj);
     }
-    
+
     JSONObject me = jsonObjects.get("me").getJSONObject("result");
     assertEquals("Digg", me.getJSONObject("name").getString("familyName"));
-    
+
     JSONObject json = jsonObjects.get("json").getJSONObject("result");
     JSONObject expected = new JSONObject("{content: {key: 'value'}, status: 200}");
     JsonAssert.assertJsonObjectEquals(expected, json);
-    
+
     JsonAssert.assertObjectEquals("{id: 'var', result: 'value'}", jsonObjects.get("var"));
   }
 
@@ -277,16 +277,16 @@ public class EndToEndTest {
   public void testCajaOsapiBatch() throws Exception {
     executeAllPageTests("osapi/batchTest", true /* caja */);
   }
-  
+
   @Test
   public void testTemplateRewrite() throws Exception {
     HtmlPage page = executePageTest("templateRewriter", null);
-    
+
     // Verify that iteration attributes were processed
     HtmlElement attrs = page.getElementById("attrs");
     List<HtmlElement> attrsList = attrs.getElementsByTagName("li");
     assertEquals(3, attrsList.size());
-    
+
     Element element = page.getElementById("id0");
     assertNotNull(element);
     assertEquals("Jane", element.getTextContent().trim());
@@ -294,20 +294,20 @@ public class EndToEndTest {
     element = page.getElementById("id2");
     assertNotNull(element);
     assertEquals("Maija", element.getTextContent().trim());
-    
+
     // Verify that the repeatTag was processed
     HtmlElement repeat = page.getElementById("repeatTag");
     List<HtmlElement> repeatList = repeat.getElementsByTagName("li");
     assertEquals(1, repeatList.size());
     assertEquals("George", repeatList.get(0).getTextContent().trim());
-    
+
     // Verify that the ifTag was processed
     HtmlElement ifTag = page.getElementById("ifTag");
     List<HtmlElement> ifList = ifTag.getElementsByTagName("li");
     assertEquals(3, ifList.size());
     assertEquals(1, page.getElementsByTagName("b").getLength());
     assertEquals(1, ifList.get(2).getElementsByTagName("b").size());
-    
+
     Element jsonPipeline = page.getElementById("json");
     assertEquals("value", jsonPipeline.getTextContent().trim());
 
@@ -317,7 +317,7 @@ public class EndToEndTest {
     // Test of oncreate
     Element oncreateSpan = page.getElementById("mutate");
     assertEquals("mutated", oncreateSpan.getTextContent().trim());
-    
+
     assertEquals("45", page.getElementById("sum").getTextContent().trim());
     assertEquals("25", page.getElementById("max").getTextContent().trim());
   }
@@ -327,11 +327,11 @@ public class EndToEndTest {
     HtmlPage page = executeAllPageTests("templateLibrary");
     String pageXml = page.asXml();
     assertTrue(pageXml.replaceAll("[\n\r ]", "").contains("p{color:red}"));
-    
+
     Node paragraph = page.getElementsByTagName("p").item(0);
     assertEquals("Hello world", paragraph.getTextContent().trim());
   }
-  
+
   @BeforeClass
   public static void setUpOnce() throws Exception {
     server = new EndToEndServer();
@@ -417,13 +417,15 @@ public class EndToEndTest {
     if (caja) {
       url += "&caja=1&libs=caja";
     }
-    
+
     url += "&nocache=1";
     if (language != null) {
       url += "&lang=" + language;
     }
 
     Page page = webClient.getPage(url);
+    // wait for window.setTimeout, window.setInterval or asynchronous XMLHttpRequest
+    webClient.waitForBackgroundJavaScript(10000);
     if (!(page instanceof HtmlPage)) {
       fail("Got wrong page type. Was: " + page.getWebResponse().getContentType());
     }

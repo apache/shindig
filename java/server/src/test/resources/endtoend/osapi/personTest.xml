@@ -80,7 +80,35 @@
             }
 
             osapi.people.get({ userId : "not.a.real.id", fields : ["id", "displayName"]}).execute(receivedData);
-          }
+          },
+
+          /** Test updating a person */
+          updatePersonWhenViewerAllowed: function() {
+            function receivedData(response) {
+              var data = gadgets.json.stringify(response);
+              assertFalse('Data error', response.error);
+              assertEquals("Ids don't match - " + data, "john.doe", response.id);
+              assertEquals("Thumbnails URLs don't match - " + data, "http://url.com", response.thumbnailUrl);
+              finished();
+            }
+
+            // viewer is "john.doe" from security token
+            osapi.people.update({person : {thumbnailUrl: "http://url.com"}}).execute(receivedData);
+          },
+
+          /** Test updating a person */
+          updatePersonWhenViewerNotAllowed: function() {
+            function receivedData(response) {
+              var data = gadgets.json.stringify(response);
+              assertTrue('Should have error - ' + data, response.error);
+              assertEquals("Forbidden " + data, "403", response.error.code);
+              finished();
+            }
+
+            // viewer is "john.doe" from security token
+            osapi.people.update({userId: "canonical", person : {thumbnailUrl: "http://url.com"}}).execute(receivedData);
+          },
+
         };
 
       </script>

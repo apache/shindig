@@ -151,7 +151,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
   String jsonLocation, @Named("shindig.bean.converter.json")
   BeanConverter converter,
   @Named("shindig.contextroot") String contextroot) throws Exception {
-    String content = IOUtils.toString(ResourceLoader.openResource(jsonLocation), "UTF-8");    
+    String content = IOUtils.toString(ResourceLoader.openResource(jsonLocation), "UTF-8");
     this.db = new JSONObject(content.replace("%contextroot%", contextroot));
     this.converter = converter;
   }
@@ -306,7 +306,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
           je);
     }
   }
-  
+
   /** {@inheritDoc} */
   public Future<RestfulCollection<Person>> getPeople(Set<UserId> userIds, GroupId groupId,
       CollectionOptions options, Set<String> fields, SecurityToken token) throws ProtocolException {
@@ -380,6 +380,54 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
       throw new ProtocolException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, je.getMessage(),
           je);
     }
+  }
+
+  /** {@inheritDoc} */
+  public Future<Person> updatePerson(UserId id, Person person, SecurityToken token)
+      throws ProtocolException {
+    try {
+      String viewer = token.getViewerId(); // viewer
+      String user = id.getUserId(token); // person to update
+
+      if (!viewerCanUpdatePerson(viewer,user)) {
+        throw new ProtocolException(HttpServletResponse.SC_FORBIDDEN, "User '" + viewer + "' does not have enough privileges to update person '"+user+"'");
+      }
+
+      JSONArray people = db.getJSONArray(PEOPLE_TABLE);
+
+      for (int i = 0; i < people.length(); i++) {
+        JSONObject curPerson = people.getJSONObject(i);
+
+        if (user != null && curPerson.getString(Person.Field.ID.toString()).equals(user)) {
+          // Convert user to JSON and set ID
+          JSONObject jsonPerson = convertToJson(person);
+          // go through all properties to update in the submitted person object
+          // and change them in the current person object
+          for (String key : JSONObject.getNames(jsonPerson)) {
+            curPerson.put(key,jsonPerson.get(key));
+          }
+
+          people.put(i,curPerson);
+          return ImmediateFuture.newInstance(converter.convertToObject(curPerson.toString(), Person.class));
+        }
+      }
+
+      // Error - no album found to update with given ID
+      throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST, "User ID " + user + " does not exist");
+    } catch (JSONException je) {
+      throw new ProtocolException(
+          HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+          je.getMessage(), je);
+    }
+
+  }
+
+  /** Check if a viewer is allowed to update the given person record. **/
+  protected boolean viewerCanUpdatePerson(String viewer, String person) {
+    // A person can only update his own personal data (by default)
+    // if you wish to allow other people to update the personal data of the user
+    // you should change the current function
+    return viewer.equals(person) ? true : false;
   }
 
   private Map<String, Object> getPersonAppData(String id, Set<String> fields) {
@@ -1176,7 +1224,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
           je.getMessage(), je);
     }
   }
-  
+
   // Are fields really needed here?
   /** {@inheritDoc} */
   public Future<ActivityEntry> updateActivityEntry(UserId userId, GroupId groupId, String appId,
@@ -1199,7 +1247,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
         jsonArray = new JSONArray();
         db.getJSONObject(ACTIVITYSTREAMS_TABLE).put(userId.getUserId(token), jsonArray);
       }
-      
+
       // Find & replace activity
       for (int i = 0; i < jsonArray.length(); i++) {
         JSONObject entry = jsonArray.getJSONObject(i);
@@ -1213,7 +1261,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
       throw new ProtocolException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, je.getMessage(), je);
     }
   }
-  
+
   // Are fields really needed here?
   /** {@inheritDoc} */
   public Future<ActivityEntry> createActivityEntry(UserId userId, GroupId groupId, String appId,
@@ -1232,7 +1280,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
         jsonArray = new JSONArray();
         db.getJSONObject(ACTIVITYSTREAMS_TABLE).put(userId.getUserId(token), jsonArray);
       }
-      
+
       // Ensure activity does not already exist
       for (int i = 0; i < jsonArray.length(); i++) {
         JSONObject entry = jsonArray.getJSONObject(i);
@@ -1277,7 +1325,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
   public Future<ActivityEntry> getActivityEntry(UserId userId, GroupId groupId,
       String appId, Set<String> fields, String activityId, SecurityToken token)
       throws ProtocolException {
-    try {       
+    try {
       String user = userId.getUserId(token);
       if (db.getJSONObject(ACTIVITYSTREAMS_TABLE).has(user)) {
         JSONArray activityEntries = db.getJSONObject(ACTIVITYSTREAMS_TABLE).getJSONArray(user);
@@ -1293,7 +1341,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
       throw new ProtocolException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, je.getMessage(), je);
     }
   }
-  
+
 
 /** {@inheritDoc} */
   public Future<RestfulCollection<ActivityEntry>> getActivityEntries(
@@ -1325,7 +1373,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
       UserId userId, GroupId groupId, String appId, Set<String> fields,
       CollectionOptions options, Set<String> activityIds, SecurityToken token)
       throws ProtocolException {
-    List<ActivityEntry> result = Lists.newArrayList();    
+    List<ActivityEntry> result = Lists.newArrayList();
     try {
       String user = userId.getUserId(token);
       if (db.getJSONObject(ACTIVITYSTREAMS_TABLE).has(user)) {
@@ -1359,7 +1407,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
     // TODO Not using fields yet
     return new JSONObject(converter.convertToString(activity));
   }
-  
+
   private JSONObject convertFromActivityEntry(ActivityEntry activityEntry, Set<String> fields) throws JSONException {
     // TODO Not using fields yet
     return new JSONObject(converter.convertToString(activityEntry));
