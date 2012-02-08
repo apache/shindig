@@ -29,7 +29,7 @@ import org.apache.shindig.social.core.oauth2.OAuth2AuthenticationHandler;
 import java.util.List;
 
 /**
- * Guice provider of an ordered list of Auntentication Providers
+ * Guice provider of an ordered list of Authentication Providers
  */
 public class AuthenticationHandlerProvider implements Provider<List<AuthenticationHandler>> {
   protected List<AuthenticationHandler> handlers;
