@@ -633,30 +633,30 @@
   osapi.container.Container.addMixin('actions', function(container) {
     container_ = container;
 
-    gadgets.rpc.register('actions.registerHideCallback', function() {
-      hideActionSiteIds[this.f] = 1;
-    });
-    gadgets.rpc.register('actions.registerShowCallback', function() {
-      showActionSiteIds[this.f] = 1;
-    });
+    container_.rpcRegister('actions.registerHideCallback', function(rpcArgs) {
+        hideActionSiteIds[rpcArgs.f] = 1;
+      });
+    container_.rpcRegister('actions.registerShowCallback', function(rpcArgs) {
+        showActionSiteIds[rpcArgs.f] = 1;
+      });
+    container_.rpcRegister('actions.bindAction', function(rpcArgs, actionObj) {
+        bindAction(actionObj);
+      });
+    container_.rpcRegister('actions.get_actions_by_type', function (rpcArgs, dataType) {
+        return [].concat(registry.getActionsByDataType(dataType));
+      });
+    container_.rpcRegister('actions.get_actions_by_path', function(rpcArgs, path) {
+        return [].concat(registry.getActionsByPath(path));
+      });
+    container_.rpcRegister('actions.removeAction', function(rpcArgs, id) {
+        return removeAction(id);
+      });
+    container_.rpcRegister('actions.runAction', function (rpcArgs, id, selection) {
+        container_.actions.runAction(id, selection);
+      });
 
-    function getActionsByDataType(dataType) {
-      return [].concat(registry.getActionsByDataType(dataType));
-    }
-    function getActionsByPath(path) {
-      return [].concat(registry.getActionsByPath(path));
-    }
-
-    gadgets.rpc.register('actions.bindAction', bindAction);
-    gadgets.rpc.register('actions.get_actions_by_type', getActionsByDataType);
-    gadgets.rpc.register('actions.get_actions_by_path', getActionsByPath);
-    gadgets.rpc.register('actions.removeAction', removeAction);
-    gadgets.rpc.register('actions.runAction', function(id, selection) {
-      container.actions.runAction(id, selection);
-    });
-
-    if (container.addGadgetLifecycleCallback) {
-      container.addGadgetLifecycleCallback('actions', actionsLifecycleCallback);
+    if (container_.addGadgetLifecycleCallback) {
+      container_.addGadgetLifecycleCallback('actions', actionsLifecycleCallback);
     }
 
     return /** @scope osapi.container.actions */ {
@@ -773,7 +773,9 @@
        * @return {Array} An array with any action objects in the
        *         specified path.
        */
-      getActionsByPath: getActionsByPath,
+      getActionsByPath: function(path) {
+        return registry.getActionsByPath(path);
+      },
 
       /**
        * Gets action object from registry based on the dataType.
@@ -783,7 +785,9 @@
        * @return {Array} An array of action objects bound to the specified
        *         data type.
        */
-      getActionsByDataType: getActionsByDataType,
+      getActionsByDataType: function(dataType) {
+        return registry.getActionsByDataType(dataType);
+      },
 
       /**
        * Adds a listener to be notified when an action is invoked.
