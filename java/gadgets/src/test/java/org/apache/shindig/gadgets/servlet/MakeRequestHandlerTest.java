@@ -69,7 +69,7 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
   private static final Uri REQUEST_URL = Uri.parse("http://example.org/file");
   private static final String REQUEST_BODY = "I+am+the+request+body!foo=baz%20la";
   private static final String RESPONSE_BODY = "makeRequest response body";
-  private static final SecurityToken DUMMY_TOKEN = new FakeGadgetToken();
+  private static final FakeGadgetToken DUMMY_TOKEN = new FakeGadgetToken();
 
   private final GadgetAdminStore gadgetAdminStore = mock(GadgetAdminStore.class);
   private ContainerConfig containerConfig;
@@ -125,8 +125,10 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
 
     containerConfig = new JsonContainerConfig(config, Expressions.forTesting());
     ldService = new HashLockedDomainService(containerConfig, false, new HashShaLockedDomainPrefixGenerator());
-    handler = new MakeRequestHandler(pipeline, rewriterRegistry, feedProcessorProvider, gadgetAdminStore, processor, ldService);
+    handler = new MakeRequestHandler(containerConfig, pipeline, rewriterRegistry, feedProcessorProvider, gadgetAdminStore, processor, ldService);
 
+    DUMMY_TOKEN.setAppUrl("http://some/gadget.xml");
+    DUMMY_TOKEN.setContainer(ContainerConfig.DEFAULT_CONTAINER);
     expect(request.getParameter(Param.GADGET.getKey())).andReturn("http://some/gadget.xml").anyTimes();
     expect(processor.process(capture(context))).andReturn(gadget).anyTimes();
     expect(gadgetAdminStore.isWhitelisted(isA(String.class), isA(String.class))).andReturn(true);
@@ -440,7 +442,10 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
     // Doesn't actually sign since it returns the standard fetcher.
     // Signing tests are in SigningFetcherTest
     expectGetAndReturnBody(AuthType.SIGNED, RESPONSE_BODY);
-    FakeGadgetToken authToken = new FakeGadgetToken().setUpdatedToken("updated");
+    FakeGadgetToken authToken = new FakeGadgetToken()
+      .setUpdatedToken("updated")
+      .setAppUrl(DUMMY_TOKEN.getAppUrl())
+      .setContainer(DUMMY_TOKEN.getContainer());
     expect(request.getAttribute(AuthInfoUtil.Attribute.SECURITY_TOKEN.getId()))
         .andReturn(authToken).atLeastOnce();
     expect(request.getParameter(MakeRequestHandler.AUTHZ_PARAM))
@@ -461,7 +466,10 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
     // Doesn't actually do oauth dance since it returns the standard fetcher.
     // OAuth tests are in OAuthRequestTest
     expectGetAndReturnBody(AuthType.OAUTH, RESPONSE_BODY);
-    FakeGadgetToken authToken = new FakeGadgetToken().setUpdatedToken("updated");
+    FakeGadgetToken authToken = new FakeGadgetToken()
+      .setUpdatedToken("updated")
+      .setAppUrl(DUMMY_TOKEN.getAppUrl())
+      .setContainer(DUMMY_TOKEN.getContainer());
     expect(request.getAttribute(AuthInfoUtil.Attribute.SECURITY_TOKEN.getId()))
         .andReturn(authToken).atLeastOnce();
     expect(request.getParameter(MakeRequestHandler.AUTHZ_PARAM))

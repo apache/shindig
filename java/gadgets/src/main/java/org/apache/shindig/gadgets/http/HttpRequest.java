@@ -26,6 +26,7 @@ import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.util.CharsetUtil;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.AuthType;
+import org.apache.shindig.gadgets.admin.BasicGadgetAdminStore;
 import org.apache.shindig.gadgets.oauth.OAuthArguments;
 import org.apache.shindig.gadgets.oauth2.OAuth2Arguments;
 
@@ -40,12 +41,16 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Creates HttpRequests. A new HttpRequest should be created for every unique HttpRequest
  * being constructed.
  */
 public class HttpRequest {
+  private static final Logger LOG = Logger.getLogger(HttpRequest.class.getName());
+
   /** Automatically added to every request so that we know that the request came from our server. */
   public static final String DOS_PREVENTION_HEADER = "X-shindig-dos";
   static final String DEFAULT_CONTENT_TYPE = "application/x-www-form-urlencoded; charset=utf-8";
@@ -188,20 +193,26 @@ public class HttpRequest {
    * Assigns the specified body to the request, copying all input bytes.
    */
   public HttpRequest setPostBody(byte[] postBody) {
-    if (postBody == null) {
-      this.postBody = ArrayUtils.EMPTY_BYTE_ARRAY;
-    } else {
-      this.postBody = new byte[postBody.length];
-      System.arraycopy(postBody, 0, this.postBody, 0, postBody.length);
+    try {
+      setPostBody(postBody == null ? null : new ByteArrayInputStream(postBody));
+    } catch (IOException e){
+      if (LOG.isLoggable(Level.WARNING)) {
+        LOG.log(Level.WARNING, e.getMessage(), e);  // Shouldn't ever happen.
+      }
     }
     return this;
   }
 
   /**
    * Fills in the request body from an InputStream.
+   * @throws IOException
    */
   public HttpRequest setPostBody(InputStream is) throws IOException {
-    postBody = IOUtils.toByteArray(is);
+    if (postBody == null) {
+      this.postBody = ArrayUtils.EMPTY_BYTE_ARRAY;
+    } else {
+      postBody = IOUtils.toByteArray(is);
+    }
     return this;
   }
 
@@ -291,7 +302,7 @@ public class HttpRequest {
     this.oauth2Arguments = oauth2Arguments;
     return this;
   }
-  
+
   /**
    * @param followRedirects whether this request should automatically follow redirects.
    */
@@ -465,7 +476,7 @@ public class HttpRequest {
     return oauth2Arguments;
   }
 
-  
+
   /**
    * @return true if redirects should be followed.
    */
@@ -516,7 +527,7 @@ public class HttpRequest {
       ^ Arrays.hashCode(postBody)
       ^ headers.hashCode();
   }
-  
+
   @Override
   public boolean equals(Object obj) {
     if (obj == this) {

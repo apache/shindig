@@ -174,18 +174,18 @@ osapi.container.util.createIframeHtml = function(iframeParams) {
   // requires more code, and creating an element with it results in a click
   // sound in IE (unconfirmed), setAttribute('class') may need browser-specific
   // variants.
-  var out = [];
-  out.push('<iframe ');
+  var out = [], n = 0;
+  out[n++] = '<iframe ';
   for (var key in iframeParams) {
       var value = iframeParams[key];
       if (typeof(value) != 'undefined') {
-          out.push(key);
-          out.push('="');
-          out.push(value);
-          out.push('" ');
+          out[n++] = key;
+          out[n++] = '="';
+          out[n++] = value;
+          out[n++] = '" ';
       }
   }
-  out.push('></iframe>');
+  out[n++] = '></iframe>';
 
   return out.join('');
 };

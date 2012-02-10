@@ -170,7 +170,7 @@
                 <source>opensocial-base/fieldtranslations.js</source>
                 <source>opensocial-base/jsonactivity.js</source>
                 <source>opensocial-base/jsonalbum.js</source>
-                <source>opensocial-base/jsonmediaitem.js</source> 
+                <source>opensocial-base/jsonmediaitem.js</source>
                 <source>opensocial-base/jsonperson.js</source>
                 <source>opensocial-jsonrpc/jsonrpccontainer.js</source>
                 <source>osapi.base/osapi.js</source>
@@ -188,6 +188,7 @@
                 <source>embeddedexperiences/embedded_experiences_container.js</source>
                 <source>open-views/viewenhancements-container.js</source>
                 <source>open-views/viewenhancements.js</source>
+                <source>proxied-form-post/post.js</source>
               </sources>
               <testSourceDirectory>${basedir}/src/test/javascript/features</testSourceDirectory>
               <testSuites>

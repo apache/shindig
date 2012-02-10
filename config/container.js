@@ -140,6 +140,9 @@
 // Enables whitelist checks
 "gadgets.admin.enableGadgetWhitelist" : "false",
 
+// Max post size for posts through the makeRequest proxy.
+"gadgets.jsonProxyUrl.maxPostSize" : 5242880, // 5 MiB
+
 // This config data will be passed down to javascript. Please
 // configure your object using the feature name rather than
 // the javascript name.

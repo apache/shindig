@@ -87,7 +87,7 @@ public class MakeRequestServletTest extends ServletTestFixture {
     Capture<GadgetContext> context = new Capture<GadgetContext>();
     expect(processor.process(EasyMock.capture(context))).andReturn(gadget).anyTimes();
     ldService = new HashLockedDomainService(containerConfig, false, mock(LockedDomainPrefixGenerator.class));
-    handler = new MakeRequestHandler(pipeline, rewriterRegistry, feedProcessorProvider, gadgetAdminStore, processor, ldService);
+    handler = new MakeRequestHandler(containerConfig, pipeline, rewriterRegistry, feedProcessorProvider, gadgetAdminStore, processor, ldService);
 
     servlet.setMakeRequestHandler(handler);
     expect(request.getHeaderNames()).andReturn(EMPTY_ENUM).anyTimes();

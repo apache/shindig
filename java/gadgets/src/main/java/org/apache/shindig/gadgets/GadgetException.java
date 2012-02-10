@@ -51,6 +51,7 @@ public class GadgetException extends Exception {
     INVALID_PARAMETER,
     MISSING_PARAMETER,
     UNRECOGNIZED_PARAMETER,
+    POST_TOO_LARGE,
 
     // Interface component errors.
     MISSING_FEATURE_REGISTRY,

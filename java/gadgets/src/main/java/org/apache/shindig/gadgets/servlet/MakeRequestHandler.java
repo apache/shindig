@@ -19,7 +19,9 @@
 package org.apache.shindig.gadgets.servlet;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
@@ -54,20 +56,20 @@ import org.apache.shindig.gadgets.rewrite.ResponseRewriterList.RewriteFlow;
 import org.apache.shindig.gadgets.rewrite.ResponseRewriterRegistry;
 import org.apache.shindig.gadgets.rewrite.RewriterRegistry;
 import org.apache.shindig.gadgets.rewrite.RewritingException;
-import org.apache.shindig.gadgets.uri.UriCommon;
 import org.apache.shindig.gadgets.uri.UriCommon.Param;
 
+import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
 /**
  * Handles gadgets.io.makeRequest requests.
- * 
+ *
  * Unlike ProxyHandler, this may perform operations such as OAuth or signed fetch.
  */
 @Singleton
-public class MakeRequestHandler {
+public class MakeRequestHandler implements ContainerConfig.ConfigObserver {
   // Relaxed visibility for ease of integration. Try to avoid relying on these.
   public static final String UNPARSEABLE_CRUFT = "throw 1; < don't be evil' >";
   public static final String POST_DATA_PARAM = "postData";
@@ -79,6 +81,10 @@ public class MakeRequestHandler {
   public static final String GET_SUMMARIES_PARAM = "getSummaries";
   public static final String GET_FULL_HEADERS_PARAM = "getFullHeaders";
   public static final String AUTHZ_PARAM = "authz";
+  public static final String MAX_POST_SIZE_KEY = "gadgets.jsonProxyUrl.maxPostSize";
+  public static final String MULTI_PART_FORM_POST = "MPFP";
+  public static final String MULTI_PART_FORM_POST_IFRAME = "iframe";
+  public static final int MAX_POST_SIZE_DEFAULT = 5 * 1024 * 1024; // 5 MiB
 
   private final RequestPipeline requestPipeline;
   private final ResponseRewriterRegistry contentRewriterRegistry;
@@ -86,9 +92,11 @@ public class MakeRequestHandler {
   private final GadgetAdminStore gadgetAdminStore;
   private final Processor processor;
   private final LockedDomainService lockedDomainService;
+  private final Map<String, Integer> maxPostSizes;
 
   @Inject
   public MakeRequestHandler(
+          ContainerConfig config,
           RequestPipeline requestPipeline,
           @RewriterRegistry(rewriteFlow = RewriteFlow.DEFAULT) ResponseRewriterRegistry contentRewriterRegistry,
           Provider<FeedProcessor> feedProcessorProvider, GadgetAdminStore gadgetAdminStore,
@@ -100,6 +108,8 @@ public class MakeRequestHandler {
     this.gadgetAdminStore = gadgetAdminStore;
     this.processor = processor;
     this.lockedDomainService = lockedDomainService;
+    this.maxPostSizes = Maps.newConcurrentMap();
+    config.addConfigObserver(this, true);
   }
 
   /**
@@ -107,9 +117,9 @@ public class MakeRequestHandler {
    */
   public void fetch(HttpServletRequest request, HttpServletResponse response)
           throws GadgetException, IOException {
+
     HttpRequest rcr = buildHttpRequest(request);
     String container = rcr.getContainer();
-
     final Uri gadgetUri = rcr.getGadget();
     if (gadgetUri == null) {
       throw new GadgetException(GadgetException.Code.MISSING_PARAMETER,
@@ -118,10 +128,11 @@ public class MakeRequestHandler {
 
     Gadget gadget;
     GadgetContext context = new HttpGadgetContext(request) {
+      @Override
       public Uri getUrl() {
         return gadgetUri;
       }
-
+      @Override
       public boolean getIgnoreCache() {
         return getParameter("bypassSpecCache").equals("1");
       }
@@ -164,20 +175,29 @@ public class MakeRequestHandler {
 
     // Find and set the refresh interval
     setResponseHeaders(request, response, results);
-
     response.setStatus(HttpServletResponse.SC_OK);
-    response.setContentType("application/json");
     response.setCharacterEncoding("UTF-8");
-    response.getWriter().write(UNPARSEABLE_CRUFT + output);
+
+    PrintWriter out = response.getWriter();
+    if ("1".equals(getParameter(request, MULTI_PART_FORM_POST_IFRAME, null))) {
+      response.setContentType("text/html");
+      out.write("<html><head></head><body><textarea>");
+      out.write(UNPARSEABLE_CRUFT);
+      out.write(output);
+      out.write("</textarea></body></html>");
+    } else {
+      response.setContentType("application/json");
+      out.write(UNPARSEABLE_CRUFT + output);
+    }
   }
 
   /**
    * Generate a remote content request based on the parameters sent from the client.
-   * 
+   *
    * @throws GadgetException
    */
   protected HttpRequest buildHttpRequest(HttpServletRequest request) throws GadgetException {
-    String urlStr = request.getParameter(Param.URL.getKey());
+    String urlStr = getParameter(request, Param.URL.getKey(), null);
     if (urlStr == null) {
       throw new GadgetException(GadgetException.Code.INVALID_PARAMETER, Param.URL.getKey()
               + " parameter is missing.", HttpResponse.SC_BAD_REQUEST);
@@ -191,10 +211,38 @@ public class MakeRequestHandler {
               + Param.URL.getKey() + " parameter", HttpResponse.SC_BAD_REQUEST);
     }
 
-    HttpRequest req = new HttpRequest(url).setMethod(getParameter(request, METHOD_PARAM, "GET"))
-            .setContainer(getContainer(request));
+    SecurityToken token = AuthInfoUtil.getSecurityTokenFromRequest(request);
+    String container = null;
+    Uri gadgetUri = null;
+    if ("1".equals(getParameter(request, MULTI_PART_FORM_POST, null))) {
+      // This endpoint is being used by the proxied-form-post feature.
+      // Require a token.
+      if (token == null) {
+        throw new GadgetException(GadgetException.Code.INVALID_SECURITY_TOKEN);
+      }
+    }
 
-    setPostData(request, req);
+    // If we have a token, we should use it.
+    if (token != null && !token.isAnonymous()) {
+      container = token.getContainer();
+      String appurl = token.getAppUrl();
+      if (appurl != null) {
+        gadgetUri = Uri.parse(appurl);
+      }
+    } else {
+      container = getContainer(request);
+      String gadgetUrl = getParameter(request, Param.GADGET.getKey(), null);
+      if (gadgetUrl != null) {
+        gadgetUri = Uri.parse(gadgetUrl);
+      }
+    }
+
+    HttpRequest req = new HttpRequest(url).setMethod(getParameter(request, METHOD_PARAM, "GET"))
+            .setContainer(container).setGadget(gadgetUri);
+
+    if ("POST".equals(req.getMethod())) {
+      setPostData(container, request, req);
+    }
 
     String headerData = getParameter(request, HEADERS_PARAM, "");
     if (headerData.length() > 0) {
@@ -215,28 +263,28 @@ public class MakeRequestHandler {
     // Set the default content type for post requests when a content type is not specified
     if ("POST".equals(req.getMethod()) && req.getHeader("Content-Type") == null) {
       req.addHeader("Content-Type", "application/x-www-form-urlencoded");
+    } else if ("1".equals(getParameter(request, MULTI_PART_FORM_POST, null))) {
+      // We need the entire header from the original request because it comes with a boundry value we need to reuse.
+      req.addHeader("Content-Type", request.getHeader("Content-Type"));
     }
 
-    req.setIgnoreCache("1".equals(request.getParameter(Param.NO_CACHE.getKey())));
+    req.setIgnoreCache("1".equals(getParameter(request, Param.NO_CACHE.getKey(), null)));
 
-    if (request.getParameter(Param.GADGET.getKey()) != null) {
-      req.setGadget(Uri.parse(request.getParameter(Param.GADGET.getKey())));
-    }
+
 
     // If the proxy request specifies a refresh param then we want to force the min TTL for
     // the retrieved entry in the cache regardless of the headers on the content when it
     // is fetched from the original source.
-    if (request.getParameter(Param.REFRESH.getKey()) != null) {
+    String refresh = getParameter(request, Param.REFRESH.getKey(), null);
+    if (refresh != null) {
       try {
-        req.setCacheTtl(Integer.parseInt(request.getParameter(Param.REFRESH.getKey())));
-      } catch (NumberFormatException nfe) {
-        // Ignore
-      }
+        req.setCacheTtl(Integer.parseInt(refresh));
+      } catch (NumberFormatException ignore) {}
     }
     // Allow the rewriter to use an externally forced mime type. This is needed
     // allows proper rewriting of <script src="x"/> where x is returned with
     // a content type like text/html which unfortunately happens all too often
-    req.setRewriteMimeType(request.getParameter(Param.REWRITE_MIME_TYPE.getKey()));
+    req.setRewriteMimeType(getParameter(request, Param.REWRITE_MIME_TYPE.getKey(), null));
 
     // Figure out whether authentication is required
     AuthType auth = AuthType.parse(getParameter(request, AUTHZ_PARAM, null));
@@ -259,18 +307,34 @@ public class MakeRequestHandler {
    * Set http request post data according to servlet request. It uses header encoding if available,
    * and defaulted to utf8 Override the function if different behavior is needed.
    */
-  protected void setPostData(HttpServletRequest request, HttpRequest req) throws GadgetException {
+  protected void setPostData(String container, HttpServletRequest request, HttpRequest req) throws GadgetException {
+    if (maxPostSizes.get(container) < request.getContentLength()) {
+      throw new GadgetException(GadgetException.Code.POST_TOO_LARGE, "Posted data too large.",
+          HttpResponse.SC_REQUEST_ENTITY_TOO_LARGE);
+    }
+
     String encoding = request.getCharacterEncoding();
     if (encoding == null) {
       encoding = "UTF-8";
     }
     try {
-      req.setPostBody(getParameter(request, POST_DATA_PARAM, "").getBytes(encoding.toUpperCase()));
+      String contentType = request.getHeader("Content-Type");
+      if (contentType != null && contentType.startsWith("multipart/form-data")) {
+        // TODO: This will read the entire posted response in server memory.
+        // Is there a way to stream this even with OAUTH flows?
+        req.setPostBody(request.getInputStream());
+      } else {
+        req.setPostBody(getParameter(request, POST_DATA_PARAM, "").getBytes(encoding.toUpperCase()));
+      }
     } catch (UnsupportedEncodingException e) {
       // We might consider enumerating at least a small list of encodings
       // that we must always honor. For now, we return SC_BAD_REQUEST since
       // the encoding parameter could theoretically be anything.
       throw new GadgetException(Code.HTML_PARSE_ERROR, e, HttpResponse.SC_BAD_REQUEST);
+    } catch (IOException e) {
+      // Something went wrong reading the request data.
+      // TODO: perhaps also support a max post size and enforce it by throwing and catching exceptions here.
+      throw new GadgetException(Code.INTERNAL_SERVER_ERROR, e, HttpResponse.SC_BAD_REQUEST);
     }
   }
 
@@ -281,10 +345,10 @@ public class MakeRequestHandler {
           HttpResponse results) throws GadgetException {
     boolean getFullHeaders = Boolean.parseBoolean(getParameter(request, GET_FULL_HEADERS_PARAM,
             "false"));
-    String originalUrl = request.getParameter(Param.URL.getKey());
+    String originalUrl = getParameter(request, Param.URL.getKey(), null);
     String body = results.getResponseAsString();
     if (body.length() > 0) {
-      if ("FEED".equals(request.getParameter(CONTENT_TYPE_PARAM))) {
+      if ("FEED".equals(getParameter(request, CONTENT_TYPE_PARAM, null))) {
         body = processFeed(originalUrl, request, body);
       }
     }
@@ -339,9 +403,9 @@ public class MakeRequestHandler {
    */
   @SuppressWarnings("deprecation")
   protected static String getContainer(HttpServletRequest request) {
-    String container = request.getParameter(Param.CONTAINER.getKey());
+    String container = getParameter(request, Param.CONTAINER.getKey(), null);
     if (container == null) {
-      container = request.getParameter(Param.SYND.getKey());
+      container = getParameter(request, Param.SYND.getKey(), null);
     }
     return container != null ? container : ContainerConfig.DEFAULT_CONTAINER;
   }
@@ -362,11 +426,11 @@ public class MakeRequestHandler {
           HttpServletResponse response, HttpResponse results) throws GadgetException {
     int refreshInterval = 0;
     if (results.isStrictNoCache()
-            || "1".equals(request.getParameter(UriCommon.Param.NO_CACHE.getKey()))) {
+            || "1".equals(getParameter(request, Param.NO_CACHE.getKey(), null))) {
       refreshInterval = 0;
-    } else if (request.getParameter(UriCommon.Param.REFRESH.getKey()) != null) {
+    } else if (getParameter(request, Param.REFRESH.getKey(), null) != null) {
       try {
-        refreshInterval = Integer.valueOf(request.getParameter(UriCommon.Param.REFRESH.getKey()));
+        refreshInterval = Integer.valueOf(getParameter(request, Param.REFRESH.getKey(), null));
       } catch (NumberFormatException nfe) {
         throw new GadgetException(GadgetException.Code.INVALID_PARAMETER,
                 "refresh parameter is not a number", HttpResponse.SC_BAD_REQUEST);
@@ -376,11 +440,37 @@ public class MakeRequestHandler {
     }
     HttpUtil.setCachingHeaders(response, refreshInterval, false);
 
-    // Always set Content-Disposition header as XSS prevention mechanism.
-    response.setHeader("Content-Disposition", "attachment;filename=p.txt");
+    /*
+     * The proxied-form-post feature uses this endpoint to post a form
+     * element (in order to support file upload).
+     *
+     * For cross-browser support (IE) it requires that we use a hidden iframe
+     * to post the request. Setting Content-Disposition breaks that solution.
+     * In this particular case, we will always have a security token, so we
+     * shouldn't need to be as cautious here.
+     */
+    if (!"1".equals(getParameter(request, MULTI_PART_FORM_POST, null))) {
+      // Always set Content-Disposition header as XSS prevention mechanism.
+      response.setHeader("Content-Disposition", "attachment;filename=p.txt");
+    }
 
     if (response.getContentType() == null) {
       response.setContentType("application/octet-stream");
+    }
+  }
+
+  public void containersChanged(ContainerConfig config, Collection<String> changed,
+      Collection<String> removed) {
+    for (String container : changed) {
+      Integer maxPostSize = config.getInt(container, MAX_POST_SIZE_KEY);
+      if (maxPostSize == null) {
+        maxPostSize = MAX_POST_SIZE_DEFAULT;
+      } else {
+        maxPostSizes.put(container, maxPostSize);
+      }
+    }
+    for (String container : removed) {
+      maxPostSizes.remove(container);
     }
   }
 }

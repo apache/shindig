@@ -541,7 +541,12 @@ gadgets.io = function() {
         ret = window.location.protocol + ret;
       }
       return ret;
-    }
+    },
+
+    /**
+     * @private
+     */
+    processResponse_: processResponse
   };
 }();
 
