@@ -505,6 +505,9 @@
         <module>java/common</module>
         <module>java/gadgets</module>
         <module>java/social-api</module>
+        <module>java/sample-container</module>
+        <module>java/server-resources</module>
+        <module>java/server-dependencies</module>
         <module>java/server</module>
         <module>extras</module>
       </modules>
@@ -603,6 +606,9 @@
         <module>java/common</module>
         <module>java/gadgets</module>
         <module>java/social-api</module>
+        <module>java/sample-container</module>
+        <module>java/server-resources</module>
+        <module>java/server-dependencies</module>
         <module>java/server</module>
         <module>java/samples</module>
         <module>extras</module>
@@ -899,6 +905,9 @@
         <module>java/common</module>
         <module>java/gadgets</module>
         <module>java/social-api</module>
+        <module>java/sample-container</module>
+        <module>java/server-resources</module>
+        <module>java/server-dependencies</module>
         <module>java/server</module>
         <module>java/samples</module>
         <module>java/uber</module>
@@ -995,6 +1004,9 @@
         <module>java/common</module>
         <module>java/gadgets</module>
         <module>java/social-api</module>
+        <module>java/sample-container</module>
+        <module>java/server-resources</module>
+        <module>java/server-dependencies</module>
         <module>java/server</module>
         <module>extras</module>
         <module>assembly</module>
@@ -1505,9 +1517,30 @@
       </dependency>
       <dependency>
         <groupId>org.apache.shindig</groupId>
+        <artifactId>shindig-sample-container</artifactId>
+        <version>${project.version}</version>
+        <classifier>${shindig.jdk.classifier}</classifier>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.shindig</groupId>
+        <artifactId>shindig-server-resources</artifactId>
+        <version>${project.version}</version>
+        <classifier>${shindig.jdk.classifier}</classifier>
+        <type>war</type>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.shindig</groupId>
+        <artifactId>shindig-server-dependencies</artifactId>
+        <version>${project.version}</version>
+        <classifier>${shindig.jdk.classifier}</classifier>
+        <type>pom</type>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.shindig</groupId>
         <artifactId>shindig-server</artifactId>
         <version>${project.version}</version>
         <classifier>${shindig.jdk.classifier}</classifier>
+        <type>war</type>
       </dependency>
       <dependency>
         <groupId>org.apache.shindig</groupId>
