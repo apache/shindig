@@ -34,7 +34,7 @@ import java.util.Map;
 
 /**
  * This class provides simple way for doing parallel fetches for multiple
- * resourcs using FutureTask's.
+ * resources using FutureTask's.
  */
 public class MultipleResourceHttpFetcher {
   private final RequestPipeline requestPipeline;
