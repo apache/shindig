@@ -70,7 +70,7 @@
          */
         var partsOfPath = path.split('/');
         var parent = this.registryByPath;
-        for (var i in partsOfPath) {
+        for (var i = 0; i < partsOfPath.length; i++) {
           var currentNode = partsOfPath[i];
           if (!parent[currentNode]) {
             parent[currentNode] = {};
@@ -173,7 +173,9 @@
     this.getAllActions = function() {
       var actions = [];
       for (actionId in this.registryById) {
-        actions = actions.concat(this.registryById[actionId]);
+        if(this.registryById.hasOwnProperty(actionId)) {
+          actions = actions.concat(this.registryById[actionId]);
+        }
       }
       return actions;
     };
@@ -189,7 +191,7 @@
       var actions = [];
       var partsOfPath = path.split('/');
       var children = this.registryByPath ? this.registryByPath : {};
-      for (var i in partsOfPath) {
+      for (var i = 0; i < partsOfPath.length; i++) {
         var currentNode = partsOfPath[i];
         if (children[currentNode]) {
           children = children[currentNode];
@@ -241,9 +243,9 @@
      *          site The instance of the gadget site.
      */
     this.addGadgetSite = function(url, site) {
-      var existingSite = this.urlToSite[url];
-      if (existingSite) {
-        this.urlToSite[url] = existingSite.concat(site);
+      var existingSites = this.urlToSite[url];
+      if (existingSites) {
+        this.urlToSite[url] = existingSites.concat(site);
       } else {
         this.urlToSite[url] = [site];
       }
@@ -285,18 +287,18 @@
      */
     this.getGadgetSites = function(actionId) {
       var action = this.getItemById(actionId);
+      var url = this.actionToUrl[actionId];
+      var sites = [];
+      var candidates = this.urlToSite[url];
 
-      var url = this.actionToUrl[actionId],
-          sites,
-          candidates;
-
-      if (candidates = this.urlToSite[url]) {
+      if (candidates) {
         // Return subset of matching sites (gadget view matches declared action view,
         // if the action declared a view) Do not modify existing array.
-        for (var i = 0, site; site = candidates[i]; i++) {
+        for (var i = 0; i < candidates.length; i++) {
+          var site = candidates[i];
           var holder = site.getActiveSiteHolder();
           if (!action.view || (holder && holder.getView() === action.view)) {
-            (sites = sites || []).push(site);
+            sites.push(site);
           }
         }
       }
@@ -398,13 +400,15 @@
     showActionHandler([actionObj]);  // notify the container to display the action
 
     for (var to in showActionSiteIds) {
-      if (!container_.getGadgetSiteByIframeId_(to)) {
-        delete showActionSiteIds[to];
-      }
-      else {
-        // Comply with spec by passing an array of the object
-        // TODO: Update spec, since there will never be more than 1 element in the array
-        gadgets.rpc.call(to, 'actions.onActionShow', null, [actionObj]);
+      if(showActionSiteIds.hasOwnProperty(to)) {
+        if (!container_.getGadgetSiteByIframeId_(to)) {
+          delete showActionSiteIds[to];
+        }
+        else {
+          // Comply with spec by passing an array of the object
+          // TODO: Update spec, since there will never be more than 1 element in the array
+          gadgets.rpc.call(to, 'actions.onActionShow', null, [actionObj]);
+        }
       }
     }
   };
@@ -426,13 +430,15 @@
     hideActionHandler([actionObj]);  // notify the container to hide the action
 
     for (var to in hideActionSiteIds) {
-      if (!container_.getGadgetSiteByIframeId_(to)) {
-        delete hideActionSiteIds[to];
-      }
-      else {
-        // Comply with spec by passing an array of the object
-        // TODO: Update spec, since there will never be more than 1 element in the array
-        gadgets.rpc.call(to, 'actions.onActionHide', null, [actionObj]);
+      if (hideActionSiteIds.hasOwnProperty(to)) {
+        if (!container_.getGadgetSiteByIframeId_(to)) {
+          delete hideActionSiteIds[to];
+        }
+        else {
+          // Comply with spec by passing an array of the object
+          // TODO: Update spec, since there will never be more than 1 element in the array
+          gadgets.rpc.call(to, 'actions.onActionHide', null, [actionObj]);
+        }
       }
     }
   };
@@ -467,25 +473,27 @@
     }
 
     // call all container listeners, if any, for this actionId
-    var list = actionListenerMap[id];
-    if (list) {
-      for (var i = 0, listener; listener = list[i]; i++) {
+    var listenersArray = actionListenerMap[id];
+    var i;
+    if (listenersArray) {
+      for (i = 0; i < listenersArray.length; i++) {
+        var listener = listenersArray[i];
         listener.call(null, id, selection);
       }
     }
-    for (var i = 0, listener; listener = actionListeners[i]; i++) {
+    for (i = 0;  i < actionListeners.length; i++) {
+      var listener = actionListeners[i];
       listener.call(null, id, selection);
     }
 
     // make rpc call to get gadgets to run callback based on action id
     var gadgetSites = registry.getGadgetSites(id);
     if (gadgetSites) {
-      for (var i = 0, site; site = gadgetSites[i]; i++) {
+      for (i = 0; i < gadgetSites.length; i++) {
+        var site = gadgetSites[i];
         var holder = site.getActiveSiteHolder();
         if (holder) {
-          gadgets.rpc.call(holder.getIframeId(), 'actions.runAction', null,
-            id, selection
-          );
+          gadgets.rpc.call(holder.getIframeId(), 'actions.runAction', null, id, selection);
         }
       }
     }
@@ -494,12 +502,15 @@
   /**
    * Callback for loading actions after gadget has been preloaded.
    *
-   * @param {Array}
+   * @param {Object}
    *          Response from container's lifecycle handling of preloading the
    *          gadget.
    */
   var preloadCallback = function(response) {
     for (var url in response) {
+      if(!response.hasOwnProperty(url)) {
+        continue;
+      }
       var metadata = response[url];
       if (metadata.error || !metadata.modulePrefs) {
         continue; // bail
@@ -523,11 +534,14 @@
       }
 
       var actions = [].concat(actionsJson['action']);
-      for (var i = 0, actionObj; actionObj = actions[i]; i++) {
+      for (var i = 0; i < actions.length; i++) {
+        var actionObj = actions[i];
         var actionClone = {};
         // replace @ for attribute keys;
         for (var key in actionObj) {
-          actionClone[key.substring(1)] = actionObj[key];
+          if(actionObj.hasOwnProperty(key)) {
+            actionClone[key.substring(1)] = actionObj[key];
+          }
         }
         // check if action already exists
         if (!registry.getItemById(actionClone.id)) {
@@ -570,7 +584,7 @@
    */
   var unloadedCallback = function(url) {
     var actionsForUrl = registry.getActionsByUrl(url);
-    for (var i in actionsForUrl) {
+    for (var i = 0; i < actionsForUrl.length; i++) {
       var action = actionsForUrl[i];
       removeAction(action.id);
     }
