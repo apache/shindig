@@ -60,6 +60,9 @@
 /extras/drop.sql
 /extras/derby.log
 
+# /extras/src/main/java/
+/extras/src/main/java/META-INF
+
 # /features/
 /features/*.iml
 /features/*.ipr
@@ -83,6 +86,13 @@
 /features/target
 /features/velocity.log*
 /features/work
+
+# /features/src/main/javascript/features/
+/features/src/main/javascript/features/META-INF
+
+# /features/src/main/javascript/features/dynamic-size.util/
+
+# /features/src/main/javascript/features/dynamic-width/
 
 # /java/
 /java/target
@@ -133,6 +143,9 @@
 /java/common/derby.log
 /java/common/maven-eclipse.xml
 
+# /java/common/src/main/java/
+/java/common/src/main/java/META-INF
+
 # /java/gadgets/
 /java/gadgets/target
 /java/gadgets/work
@@ -157,6 +170,33 @@
 /java/gadgets/drop.sql
 /java/gadgets/derby.log
 /java/gadgets/maven-eclipse.xml
+
+# /java/gadgets/src/main/java/
+/java/gadgets/src/main/java/META-INF
+
+# /java/sample-container/
+/java/sample-container/target
+/java/sample-container/work
+/java/sample-container/dojo
+/java/sample-container/*.iws
+/java/sample-container/*.ipr
+/java/sample-container/*.iml
+/java/sample-container/derby.log
+/java/sample-container/maven.log
+/java/sample-container/build.xml
+/java/sample-container/build-dependency.xml
+/java/sample-container/velocity.log*
+/java/sample-container/junit*.properties
+/java/sample-container/surefire*.properties
+/java/sample-container/.project
+/java/sample-container/.classpath
+/java/sample-container/.settings
+/java/sample-container/.deployables
+/java/sample-container/.wtpmodules
+/java/sample-container/.externalToolBuilders
+/java/sample-container/create.sql
+/java/sample-container/drop.sql
+/java/sample-container/derby.log
 
 # /java/samples/
 /java/samples/target
@@ -207,6 +247,57 @@
 /java/server/derby.log
 /java/server/maven-eclipse.xml
 
+# /java/server-dependencies/
+/java/server-dependencies/target
+/java/server-dependencies/work
+/java/server-dependencies/dojo
+/java/server-dependencies/*.iws
+/java/server-dependencies/*.ipr
+/java/server-dependencies/*.iml
+/java/server-dependencies/derby.log
+/java/server-dependencies/maven.log
+/java/server-dependencies/build.xml
+/java/server-dependencies/build-dependency.xml
+/java/server-dependencies/velocity.log*
+/java/server-dependencies/junit*.properties
+/java/server-dependencies/surefire*.properties
+/java/server-dependencies/.project
+/java/server-dependencies/.classpath
+/java/server-dependencies/.settings
+/java/server-dependencies/.deployables
+/java/server-dependencies/.wtpmodules
+/java/server-dependencies/.externalToolBuilders
+/java/server-dependencies/create.sql
+/java/server-dependencies/drop.sql
+/java/server-dependencies/derby.log
+
+# /java/server-resources/
+/java/server-resources/target
+/java/server-resources/work
+/java/server-resources/dojo
+/java/server-resources/*.iws
+/java/server-resources/*.ipr
+/java/server-resources/*.iml
+/java/server-resources/derby.log
+/java/server-resources/maven.log
+/java/server-resources/build.xml
+/java/server-resources/build-dependency.xml
+/java/server-resources/velocity.log*
+/java/server-resources/junit*.properties
+/java/server-resources/surefire*.properties
+/java/server-resources/.project
+/java/server-resources/.classpath
+/java/server-resources/.settings
+/java/server-resources/.deployables
+/java/server-resources/.wtpmodules
+/java/server-resources/.externalToolBuilders
+/java/server-resources/create.sql
+/java/server-resources/drop.sql
+/java/server-resources/derby.log
+
+# /java/server-resources/src/main/webapp/
+/java/server-resources/src/main/webapp/META-INF
+
 # /java/social-api/
 /java/social-api/target
 /java/social-api/work
@@ -231,6 +322,33 @@
 /java/social-api/drop.sql
 /java/social-api/derby.log
 /java/social-api/maven-eclipse.xml
+
+# /java/social-api/src/main/java/
+/java/social-api/src/main/java/META-INF
+
+# /java/uber/
+/java/uber/target
+/java/uber/work
+/java/uber/dojo
+/java/uber/*.iws
+/java/uber/*.ipr
+/java/uber/*.iml
+/java/uber/derby.log
+/java/uber/maven.log
+/java/uber/build.xml
+/java/uber/build-dependency.xml
+/java/uber/velocity.log*
+/java/uber/junit*.properties
+/java/uber/surefire*.properties
+/java/uber/.project
+/java/uber/.classpath
+/java/uber/.settings
+/java/uber/.deployables
+/java/uber/.wtpmodules
+/java/uber/.externalToolBuilders
+/java/uber/create.sql
+/java/uber/drop.sql
+/java/uber/derby.log
 
 # /php/
 /php/target
