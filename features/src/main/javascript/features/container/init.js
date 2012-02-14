@@ -19,8 +19,7 @@
 
 /**
  * @fileoverview Initial configuration/boot-strapping work for common container
- * to operate. This includes setting up gadgets config and global environment
- * variables.
+ * to operate. This includes setting up global environment variables.
  */
 (function() {
   function initializeGlobalVars() {

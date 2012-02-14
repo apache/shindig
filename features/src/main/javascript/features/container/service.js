@@ -130,6 +130,7 @@ osapi.container.Service.prototype.getGadgetMetadata = function(request, opt_call
         // If response entirely fails, augment individual errors.
         if (response['error']) {
           for (var i = 0; i < request['ids'].length; i++) {
+            var id = request['ids'][i];
             finalResponse[id] = { 'error' : response['error'] };
           }
 
