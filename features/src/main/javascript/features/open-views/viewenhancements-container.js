@@ -49,6 +49,25 @@
     resultCallbackMap = {};
 
     returnValueMap = {};
+
+    var lifecyclecb = {};
+    lifecyclecb[osapi.container.CallbackType.ON_BEFORE_CLOSE] = function(site) {
+      var id = site.getId(),
+          returnValue = returnValueMap[id],
+          resultCallback = resultCallbackMap[id];
+
+      if (resultCallback) {
+        if (site.ownerId_) {
+          gadgets.rpc.call(site.ownerId_, 'gadgets.views.deliverResult', null,
+            resultCallback, returnValue
+          );
+        }
+      }
+
+      delete returnValueMap[id];
+      delete resultCallbackMap[id];
+    };
+    context.addGadgetLifecycleCallback("open-views", lifecyclecb);
   };
   /**
    * Opens a gadget in the container UI. The location of the gadget site in the
@@ -324,34 +343,17 @@
   function close(opt_site) {
     // opt_site may be 0, do not do a truthy test on the value.
     var orig_site = context.getGadgetSiteByIframeId_(this.f),
-        site = typeof(opt_site) != 'undefined' && opt_site != null ? 
+        site = typeof(opt_site) != 'undefined' && opt_site != null ?
           context.getSiteById(opt_site) : orig_site;
 
     if (!site) {
       return;
     }
 
-    // A side effect of this check is that if a gadget tries to close a site it did not
-    // create, the gadget itself will be closed.  That's the price to pay for trying to
-    // be evil, I guess :)
-    var siteId = site.getId(),
-        allowed = site == orig_site || site.ownerId_ == this.f;
-
-    if (typeof(siteId) != 'undefined' && allowed) {
-      var returnValue = returnValueMap[siteId],
-          resultCallback = resultCallbackMap[siteId];
-
-      if (typeof(resultCallback) != 'undefined') { // may be 0
-        if (typeof(returnValue) != 'undefined' && site.ownerId_) {
-          gadgets.rpc.call(site.ownerId_, 'gadgets.views.deliverResult', null,
-            resultCallback, returnValue
-          );
-        }
-        delete resultCallbackMap[siteId];
-      }
+    if (site == orig_site || site.ownerId_ == this.f) {
+      // The provided method must ultimately call container.closeGadget(site);
+      context.views.destroyElement(site);
     }
-
-    context.views.destroyElement(site);
   }
 
   /**
