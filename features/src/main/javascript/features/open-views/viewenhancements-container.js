@@ -34,17 +34,17 @@
 
     context = container;
 
-    gadgets.rpc.register('gadgets.views.openGadget', openGadget);
+    context.rpcRegister('gadgets.views.openGadget', openGadget);
 
-    gadgets.rpc.register('gadgets.views.openEmbeddedExperience', openEE);
+    context.rpcRegister('gadgets.views.openEmbeddedExperience', openEE);
 
-    gadgets.rpc.register('gadgets.views.openUrl', openUrl);
+    context.rpcRegister('gadgets.views.openUrl', openUrl);
 
-    gadgets.rpc.register('gadgets.views.close', close);
+    context.rpcRegister('gadgets.views.close', close);
 
-    gadgets.rpc.register('gadgets.views.setReturnValue', setReturnValue);
+    context.rpcRegister('gadgets.views.setReturnValue', setReturnValue);
 
-    gadgets.rpc.register('gadgets.window.getContainerDimensions', getContainerDimensions);
+    context.rpcRegister('gadgets.window.getContainerDimensions', getContainerDimensions);
 
     resultCallbackMap = {};
 
@@ -102,7 +102,7 @@
    *              for other viewTargets, and custom viewTargets at their
    *              discretion.
    */
-  function openGadget(resultCallback, opt_params) {
+  function openGadget(rpcArgs, resultCallback, opt_params) {
 
     var navigateCallback = this.callback,
         siteOwnerId = this.f,
@@ -208,7 +208,7 @@
    *              for other viewTargets, and custom viewTargets at their
    *              discretion.
    */
-  function openEE(resultCallback, dataModel, opt_params) {
+  function openEE(rpcArgs, resultCallback, dataModel, opt_params) {
     var navigateCallback = this.callback,
         siteOwnerId = this.f,
         gadgetUrl = dataModel.gadget;
@@ -308,7 +308,7 @@
    *          discretion.
    * @returns {string} The ID of the site created, if a callback was registered.
    */
-  function openUrl(url, opt_viewTarget, opt_coordinates) {
+  function openUrl(rpcArgs, url, opt_viewTarget, opt_coordinates) {
     var rel;
     if (opt_coordinates) {
       rel = context.getGadgetSiteByIframeId_(this.f).getActiveSiteHolder()
@@ -340,7 +340,7 @@
    *          opt_site: Optional parameter which specifies what site to close.
    *          If not provided or null, it will close the current gadget site.
    */
-  function close(opt_site) {
+  function close(rpcArgs, opt_site) {
     // opt_site may be 0, do not do a truthy test on the value.
     var orig_site = context.getGadgetSiteByIframeId_(this.f),
         site = typeof(opt_site) != 'undefined' && opt_site != null ?
@@ -364,7 +364,7 @@
    * @param {object}
    *          returnValue: Return value for this window.
    */
-  function setReturnValue(returnValue) {
+  function setReturnValue(rpcArgs, returnValue) {
     var site;
     if (site = context.getGadgetSiteByIframeId_(this.f)) {
       returnValueMap[site.getId()] = returnValue;
@@ -374,7 +374,7 @@
   /**
    * Gets the dimensions of the container displaying the gadget.
    */
-  function getContainerDimensions() {
+  function getContainerDimensions(rpcArgs) {
     var el = document.documentElement; // Container element
     return {
       width : el ? el.clientWidth : -1,

@@ -65,8 +65,10 @@
       }
     }
 
-    gadgets.rpc.register('gadgets.selection.set', notifySelection);
-    gadgets.rpc.register('gadgets.selection.register', function() {
+    context.rpcRegister('gadgets.selection.set', function(rpcArgs, selection) {
+      notifySelection(selection);
+    });
+    context.rpcRegister('gadgets.selection.register', function(rpcArgs) {
       listeningGadgets[this.f] = 1;
     });
 
