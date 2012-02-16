@@ -37,7 +37,7 @@ gadgets['actions'] = (function() {
     this.getCallback = function(actionId) {
       return this.registryById[actionId];
     };
-  };
+  }
 
   // create the callback registry
   var callbackRegistry = new ActionCallbackRegistry(),
