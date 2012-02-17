@@ -1,4 +1,4 @@
-FROM 2.0.x TO 3.0.x
+FROM 2.0.x TO 2.5.x
 ===================
 
 == container.js config changes ==
@@ -14,7 +14,7 @@ details.
 * commons-codec 1.5 -> 1.6
 * commons-lang to commons-lang3 3.1
 * ehcache  2.3.2 -> 2.5.0
-* guava r09->10.0.1
+* guava r09->11.0.1
 * guice 2.0->3.0
 * htmlunit 2.8->2.9 
 * nekohtml 1.9.14->1.9.15
