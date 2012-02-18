@@ -90,6 +90,7 @@ return array(
    '/gadgets/api/rpc' => 'apache\shindig\social\servlet\JsonRpcServlet',
    '/gadgets/api/rest' => 'apache\shindig\social\servlet\DataServiceServlet',
    '/social/rest' => 'apache\shindig\social\servlet\DataServiceServlet',
+   '/rest' => 'apache\shindig\social\servlet\DataServiceServlet',
    '/social/rpc' => 'apache\shindig\social\servlet\CompatibilityJsonRpcServlet',
    '/rpc' => 'apache\shindig\social\servlet\JsonRpcServlet',
    '/public.crt' => 'apache\shindig\gadgets\servlet\CertServlet',
