@@ -17,15 +17,19 @@
  */
 package org.apache.shindig.gadgets.http;
 
+import com.google.common.base.Charsets;
 import com.google.common.base.Supplier;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
-import com.google.common.collect.MapMaker;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
+import com.google.common.net.HttpHeaders;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
@@ -43,6 +47,8 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.nio.charset.IllegalCharsetNameException;
+import java.nio.charset.UnsupportedCharsetException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -52,6 +58,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Represents the results of an HTTP content retrieval operation.
@@ -128,7 +135,7 @@ public final class HttpResponse implements Externalizable {
   // Default TTL for an entry in the cache that does not have any cache control headers.
   static final long DEFAULT_TTL = 5L * 60L * 1000L;
 
-  static final Charset DEFAULT_ENCODING = Charset.forName("UTF-8");
+  static final Charset DEFAULT_ENCODING = Charsets.UTF_8;
 
   @Inject(optional = true) @Named("shindig.cache.http.negativeCacheTtl")
   private static long negativeCacheTtl = DEFAULT_NEGATIVE_CACHE_TTL;
@@ -155,7 +162,19 @@ public final class HttpResponse implements Externalizable {
   }
 
   // Holds character sets for fast conversion
-  private static final Map<String, Charset> encodingToCharset = new MapMaker().makeMap();
+  private static final LoadingCache<String, Charset> encodingToCharset = CacheBuilder
+    .newBuilder()
+    .build(new CacheLoader<String, Charset>() {
+      public Charset load(String encoding) throws ExecutionException {
+        try {
+          return Charset.forName(encoding);
+        } catch (UnsupportedCharsetException e) {
+          throw new ExecutionException(e);
+        } catch (IllegalCharsetNameException e) {
+          throw new ExecutionException(e);
+        }
+      }
+    });
 
   private String responseString;
   private long date;
@@ -398,7 +417,7 @@ public final class HttpResponse implements Externalizable {
     if (isError() && !NEGATIVE_CACHING_EXEMPT_STATUS.contains(httpStatusCode)) {
       return false;
     }
-    String cacheControl = getHeader("Cache-Control");
+    String cacheControl = getHeader(HttpHeaders.CACHE_CONTROL);
     if (cacheControl != null) {
       String[] directives = StringUtils.split(cacheControl, ',');
       for (String directive : directives) {
@@ -411,7 +430,7 @@ public final class HttpResponse implements Externalizable {
       }
     }
 
-    for (String pragma : getHeaders("Pragma")) {
+    for (String pragma : getHeaders(HttpHeaders.PRAGMA)) {
       if ("no-cache".equalsIgnoreCase(pragma)) {
         return true;
       }
@@ -423,7 +442,7 @@ public final class HttpResponse implements Externalizable {
    * @return the expiration time from the Expires header or -1 if not set
    */
   private long getExpiresTime() {
-    String expires = getHeader("Expires");
+    String expires = getHeader(HttpHeaders.EXPIRES);
     if (expires != null) {
       Date expiresDate = DateUtil.parseRfc1123Date(expires);
       if (expiresDate != null) {
@@ -443,7 +462,7 @@ public final class HttpResponse implements Externalizable {
    * @return max-age value or -1 if invalid or not set
    */
   public long getCacheControlMaxAge() {
-    String cacheControl = getHeader("Cache-Control");
+    String cacheControl = getHeader(HttpHeaders.CACHE_CONTROL);
     if (cacheControl != null) {
       String[] directives = StringUtils.split(cacheControl, ',');
       for (String directive : directives) {
@@ -472,7 +491,7 @@ public final class HttpResponse implements Externalizable {
     // Validate the Date header. Must conform to the HTTP date format.
     long timestamp = -1;
     long currentTime = getTimeSource().currentTimeMillis();
-    Collection<String> dates = headers.get("Date");
+    Collection<String> dates = headers.get(HttpHeaders.DATE);
 
     if (!dates.isEmpty()) {
       Date d = DateUtil.parseRfc1123Date(dates.iterator().next());
@@ -482,7 +501,7 @@ public final class HttpResponse implements Externalizable {
     }
     if (timestamp == -1) {
       timestamp = currentTime;
-      headers.replaceValues("Date", ImmutableList.of(DateUtil.formatRfc1123Date(timestamp)));
+      headers.replaceValues(HttpHeaders.DATE, ImmutableList.of(DateUtil.formatRfc1123Date(timestamp)));
     }
     return timestamp;
   }
@@ -507,7 +526,7 @@ public final class HttpResponse implements Externalizable {
       return DEFAULT_ENCODING;
     }
 
-    Collection<String> values = headers.get("Content-Type");
+    Collection<String> values = headers.get(HttpHeaders.CONTENT_TYPE);
     if (!values.isEmpty()) {
       String contentType = values.iterator().next();
       String[] parts = StringUtils.split(contentType, ';');
@@ -527,12 +546,13 @@ public final class HttpResponse implements Externalizable {
           }
 
           try {
-            return charsetForName(charset);
-          } catch (IllegalArgumentException e) {
+            return encodingToCharset.get(charset);
+          } catch (ExecutionException e) {
             // fall through to detection
           }
         }
       }
+
       Charset encoding = EncodingDetector.detectEncoding(body, fastEncodingDetection,
           customEncodingDetector);
       // Record the charset in the content-type header so that its value can be cached
@@ -547,20 +567,6 @@ public final class HttpResponse implements Externalizable {
     }
   }
 
-  /**
-   * Cover for Charset.forName() that caches results.
-   * @return the charset
-   * @throws IllegalArgumentException if the encoding is invalid
-   */
-  private static Charset charsetForName(String encoding) {
-    Charset charset = encodingToCharset.get(encoding);
-    if (charset == null) {
-      charset = Charset.forName(encoding);
-      encodingToCharset.put(encoding, charset);
-    }
-
-    return charset;
-  }
 
   @Override
   public int hashCode() {
