@@ -62,5 +62,4 @@ public class BeanXStreamAtomConverter extends BeanXStreamConverter {
 
     return cc.xstream.toXML(af);
   }
-
 }

@@ -50,8 +50,6 @@ public class BeanXStreamConverter implements BeanConverter {
       XStreamConfiguration.ConverterSet.DEFAULT };
   private static final Logger LOG = Logger.getLogger(BeanXStreamConverter.class.getName());
 
-  private ReflectionProvider rp;
-  private HierarchicalStreamDriver driver;
   protected WriterStack writerStack;
 
 
@@ -59,7 +57,7 @@ public class BeanXStreamConverter implements BeanConverter {
 
   @Inject
   public BeanXStreamConverter(XStreamConfiguration configuration) {
-    rp = new PureJavaReflectionProvider();
+    ReflectionProvider rp = new PureJavaReflectionProvider();
     Mapper dmapper = new DefaultMapper(this.getClass().getClassLoader());
     /*
      * Putting this here means only one conversion per thread may be active at
@@ -73,13 +71,13 @@ public class BeanXStreamConverter implements BeanConverter {
      * create a driver that wires into a standard driver, and updates the stack
      * position.
      */
-    driver = new StackDriver(new XppDriver(), writerStack, configuration.getNameSpaces());
+    HierarchicalStreamDriver driver = new StackDriver(new XppDriver(), writerStack, configuration.getNameSpaces());
     /*
      * Create an interface class mapper that understands class hierarchy for
      * single items
      */
     for (XStreamConfiguration.ConverterSet c : MAPPER_SCOPES) {
-      converterMap.put(c, configuration.getConverterConfig(c,rp,dmapper,driver,writerStack));
+      converterMap.put(c, configuration.getConverterConfig(c, rp,dmapper, driver,writerStack));
     }
   }
 
