@@ -19,6 +19,9 @@
 package org.apache.shindig.gadgets.templates;
 
 import com.google.common.base.Strings;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.util.ResourceLoader;
 import org.apache.shindig.common.xml.XmlException;
@@ -27,12 +30,9 @@ import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.GadgetException;
 
 import java.io.IOException;
-import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.google.common.base.Function;
-import com.google.common.collect.MapMaker;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -45,10 +45,10 @@ public class ContainerTagLibraryFactory {
       ContainerTagLibraryFactory.class.getName());
   
   private final ContainerConfig config;
-  private final ConcurrentMap<String, TemplateLibrary> osmlLibraryCache = 
-    new MapMaker().makeComputingMap(
-        new Function<String, TemplateLibrary>() {
-          public TemplateLibrary apply(String resourceName) {
+  private final LoadingCache<String, TemplateLibrary> osmlLibraryCache = CacheBuilder
+      .newBuilder()
+      .build(new CacheLoader<String, TemplateLibrary>() {
+          public TemplateLibrary load(String resourceName) {
             return loadTrustedLibrary(resourceName);
           }
         });
@@ -72,7 +72,7 @@ public class ContainerTagLibraryFactory {
       return NullTemplateLibrary.INSTANCE;
     }
     
-    return osmlLibraryCache.get(library);
+    return osmlLibraryCache.getUnchecked(library);
   }
   
   static private TemplateLibrary loadTrustedLibrary(String resource) {

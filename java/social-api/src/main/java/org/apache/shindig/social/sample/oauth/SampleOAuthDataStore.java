@@ -18,7 +18,9 @@
 package org.apache.shindig.social.sample.oauth;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.MapMaker;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
@@ -35,7 +37,6 @@ import org.json.JSONObject;
 
 import java.util.Date;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentMap;
 
 import net.oauth.OAuthConsumer;
 import net.oauth.OAuthServiceProvider;
@@ -63,12 +64,13 @@ public class SampleOAuthDataStore implements OAuthDataStore {
   }
 
   // All valid OAuth tokens
-  private static ConcurrentMap<String,OAuthEntry> oauthEntries = new MapMaker().makeMap();
+  private static Cache<String, OAuthEntry> oauthEntries = CacheBuilder.newBuilder()
+      .build();
 
   // Get the OAuthEntry that corresponds to the oauthToken
   public OAuthEntry getEntry(String oauthToken) {
     Preconditions.checkNotNull(oauthToken);
-    return oauthEntries.get(oauthToken);
+    return oauthEntries.asMap().get(oauthToken);
   }
 
   public OAuthConsumer getConsumer(String consumerKey) {
@@ -132,7 +134,7 @@ public class SampleOAuthDataStore implements OAuthDataStore {
     accessEntry.setType(OAuthEntry.Type.ACCESS);
     accessEntry.setIssueTime(new Date());
 
-    oauthEntries.remove(entry.getToken());
+    oauthEntries.invalidate(entry.getToken());
     oauthEntries.put(accessEntry.getToken(), accessEntry);
 
     return accessEntry;
@@ -161,7 +163,7 @@ public class SampleOAuthDataStore implements OAuthDataStore {
   public void removeToken(OAuthEntry entry) {
     Preconditions.checkNotNull(entry);
 
-    oauthEntries.remove(entry.getToken());
+    oauthEntries.invalidate(entry.getToken());
   }
 
   // Return the proper security token for a 2 legged oauth request that has been validated
