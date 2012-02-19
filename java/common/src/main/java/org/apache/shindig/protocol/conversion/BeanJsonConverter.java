@@ -32,6 +32,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import org.apache.shindig.common.JsonProperty;
 import org.apache.shindig.common.JsonSerializer;
 import org.apache.shindig.common.uri.Uri;
@@ -47,7 +50,6 @@ import org.json.JSONObject;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
-import com.google.common.collect.MapMaker;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
@@ -58,8 +60,23 @@ import com.google.inject.Injector;
  */
 public class BeanJsonConverter implements BeanConverter {
 
-  // Only compute the filtered setters once per-class
-  private static final Map<Class<?>, Map<String, Method>> setters = new MapMaker().makeMap();
+  // Only compute the filtered SETTERS once per-class
+  private static final LoadingCache<Class<?>, Map<String, Method>> SETTERS = CacheBuilder
+      .newBuilder()
+      .build(new CacheLoader<Class<?>, Map<String, Method>>() {
+        public Map<String, Method> load(Class<?> type) {
+          ImmutableMap.Builder<String, Method> builder = ImmutableMap.builder();
+          for (Method method : type.getMethods()) {
+            if (method.getParameterTypes().length == 1) {
+              String name = getPropertyName(method);
+              if (name != null) {
+                builder.put(name, method);
+              }
+            }
+          }
+          return builder.build();
+        }
+      });
 
   private final Injector injector;
 
@@ -84,28 +101,6 @@ public class BeanJsonConverter implements BeanConverter {
 
   public void append(Appendable buf, Object pojo) throws IOException {
     JsonSerializer.append(buf, pojo);
-  }
-
-  private static Map<String, Method> getSetters(Class<?> type) {
-    Map<String, Method> methods = setters.get(type);
-
-    if (methods != null) {
-      return methods;
-    }
-
-    ImmutableMap.Builder<String,Method> builder = ImmutableMap.builder();
-    for (Method method : type.getMethods()) {
-      if (method.getParameterTypes().length == 1) {
-        String name = getPropertyName(method);
-        if (name != null) {
-          builder.put(name, method);
-        }
-      }
-    }
-    methods = builder.build();
-
-    setters.put(type, methods);
-    return methods;
   }
 
   private static String getPropertyName(Method setter) {
@@ -274,7 +269,7 @@ public class BeanJsonConverter implements BeanConverter {
       }
     }
   
-    for (Map.Entry<String, Method> entry : getSetters(out.getClass()).entrySet()) {
+    for (Map.Entry<String, Method> entry : SETTERS.getUnchecked(out.getClass()).entrySet()) {
       Object value = in.opt(entry.getKey());
       if (value != null) {
         Method method = entry.getValue();

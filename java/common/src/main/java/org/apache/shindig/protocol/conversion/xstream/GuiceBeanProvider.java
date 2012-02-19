@@ -28,10 +28,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Lists;
-import com.google.common.collect.MapMaker;
 import com.google.inject.Injector;
 import com.thoughtworks.xstream.converters.reflection.ObjectAccessException;
 
@@ -42,7 +44,27 @@ public class GuiceBeanProvider {
 
   protected static final Object[] NO_PARAMS = new Object[0];
   private final Comparator<String> propertyNameComparator;
-  private final transient Map<Class<?>, Map<String, PropertyDescriptor>> propertyNameCache = new MapMaker().weakKeys().makeMap();
+
+  private final transient LoadingCache<Class<?>, Map<String, PropertyDescriptor>> propertyNameCache = CacheBuilder
+      .newBuilder().weakKeys().build(
+          new CacheLoader<Class<?>, Map<String, PropertyDescriptor>>() {
+            public Map<String, PropertyDescriptor> load(Class<?> type) {
+
+              BeanInfo beanInfo;
+              try {
+                beanInfo = Introspector.getBeanInfo(type, Object.class);
+              } catch (IntrospectionException e) {
+                throw new ObjectAccessException("Cannot get BeanInfo of type " + type.getName(), e);
+              }
+
+              ImmutableMap.Builder<String, PropertyDescriptor> nameMapBuilder = ImmutableMap.builder();
+              for (PropertyDescriptor descriptor : beanInfo.getPropertyDescriptors()) {
+                nameMapBuilder.put(descriptor.getName(), descriptor);
+              }
+              return nameMapBuilder.build();
+            }
+          }
+      );
   private Injector injector;
 
   public GuiceBeanProvider(Injector injector) {
@@ -107,7 +129,7 @@ public class GuiceBeanProvider {
   }
 
   private List<PropertyDescriptor> getSerializableProperties(Object object) {
-    Map<String, PropertyDescriptor> nameMap = getNameMap(object.getClass());
+    Map<String, PropertyDescriptor> nameMap = propertyNameCache.getUnchecked(object.getClass());
 
     Set<String> names = (propertyNameComparator == null) ? nameMap.keySet() :
       ImmutableSortedSet.orderedBy(propertyNameComparator).addAll(nameMap.keySet()).build();
@@ -134,32 +156,7 @@ public class GuiceBeanProvider {
   }
 
   private PropertyDescriptor getProperty(String name, Class<?> type) {
-    return getNameMap(type).get(name);
-  }
-
-  private Map<String, PropertyDescriptor> getNameMap(Class<?> type) {
-    Map<String, PropertyDescriptor> nameMap = propertyNameCache.get(type);
-
-    if (nameMap != null) {
-      return nameMap;
-    }
-
-    ImmutableMap.Builder<String,PropertyDescriptor> nameMapBuilder = ImmutableMap.builder();
-
-    BeanInfo beanInfo;
-    try {
-      beanInfo = Introspector.getBeanInfo(type, Object.class);
-    } catch (IntrospectionException e) {
-      throw new ObjectAccessException("Cannot get BeanInfo of type "
-          + type.getName(), e);
-    }
-
-    for (PropertyDescriptor descriptor : beanInfo.getPropertyDescriptors()) {
-        nameMapBuilder.put(descriptor.getName(), descriptor);
-    }
-    nameMap = nameMapBuilder.build();
-    propertyNameCache.put(type, nameMap);
-    return nameMap;
+    return propertyNameCache.getUnchecked(type).get(name);
   }
 
   interface Visitor {

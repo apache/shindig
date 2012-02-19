@@ -17,6 +17,10 @@
  */
 package org.apache.shindig.common;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import com.google.common.collect.ImmutableMap;
 import org.json.JSONObject;
 
 import java.lang.reflect.InvocationTargetException;
@@ -26,8 +30,6 @@ import java.util.Set;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.MapMaker;
-import com.google.common.collect.Maps;
 
 /**
  * JSON utilities that are not specific to either serialization or conversion.
@@ -38,7 +40,23 @@ public final class JsonUtil {
   private static final Set<String> EXCLUDE_METHODS
       = ImmutableSet.of("getClass", "getDeclaringClass");
 
-  private static final Map<Class<?>, Map<String, Method>> GETTERS = new MapMaker().makeMap();
+  private static final LoadingCache<Class<?>, Map<String, Method>> GETTERS = CacheBuilder
+      .newBuilder()
+      .build(new CacheLoader<Class<?>, Map<String, Method>>() {
+        public Map<String, Method> load(Class<?> clazz) {
+          ImmutableMap.Builder<String,Method> methods = ImmutableMap.builder();
+          
+          for (Method method : clazz.getMethods()) {
+            if (method.getParameterTypes().length == 0) {
+              String name = getPropertyName(method);
+              if (name != null) {
+                methods.put(name, method);
+              }
+            }
+          }
+          return methods.build();
+        }
+      });
 
   /**
    * Gets a property of an Object.  Will return a property value if
@@ -55,7 +73,7 @@ public final class JsonUtil {
       return ((Map<?, ?>) value).get(propertyName);
     } else {
       // Try getter conversion
-      Method method = getGetters(value).get(propertyName);
+      Method method = GETTERS.getUnchecked(value.getClass()).get(propertyName);
       if (method != null) {
         try {
           return method.invoke(value);
@@ -74,28 +92,9 @@ public final class JsonUtil {
     
     return null;
   }
-  
+
   static Map<String, Method> getGetters(Object pojo) {
-    Class<?> clazz = pojo.getClass();
-
-    Map<String, Method> methods = GETTERS.get(clazz);
-    if (methods != null) {
-      return methods;
-    }
-    // Ensure consistent method ordering by using a linked hash map.
-    methods = Maps.newHashMap();
-
-    for (Method method : clazz.getMethods()) {
-      if (method.getParameterTypes().length == 0) {
-        String name = getPropertyName(method);
-        if (name != null) {
-          methods.put(name, method);
-        }
-      }
-    }
-
-    GETTERS.put(clazz, methods);
-    return methods;
+    return GETTERS.getUnchecked(pojo.getClass()) ;
   }
 
   private static String getPropertyName(Method method) {
