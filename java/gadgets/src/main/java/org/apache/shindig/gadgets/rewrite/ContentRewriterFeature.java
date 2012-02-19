@@ -19,6 +19,9 @@ package org.apache.shindig.gadgets.rewrite;
 
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Lists;
@@ -72,6 +75,18 @@ public class ContentRewriterFeature {
     private final GadgetSpecFactory specFactory;
     private final Provider<DefaultConfig> defaultConfig;
 
+    private final LoadingCache<GadgetSpec, Config> rewriterConfigCache = CacheBuilder
+        .newBuilder()
+        .weakKeys()
+        .build(
+            new CacheLoader<GadgetSpec, Config>() {
+              @Override
+              public Config load(GadgetSpec spec) throws Exception {
+                return new Config(spec, defaultConfig.get());
+              }
+            }
+        );
+
     @Inject
     public Factory(GadgetSpecFactory specFactory, Provider<DefaultConfig> defaultConfig) {
       this.specFactory = specFactory;
@@ -112,12 +127,7 @@ public class ContentRewriterFeature {
     }
 
     public Config get(GadgetSpec spec) {
-      Config rewriterFeature =
-          (Config)spec.getAttribute("content-rewriter");
-      if (rewriterFeature != null) return rewriterFeature;
-      rewriterFeature = new Config(spec, defaultConfig.get());
-      spec.setAttribute("content-rewriter", rewriterFeature);
-      return rewriterFeature;
+      return rewriterConfigCache.getUnchecked(spec);
     }
 
     /**
@@ -163,7 +173,6 @@ public class ContentRewriterFeature {
 
     // Lazily computed
     private Integer fingerprint;
-    private static final Pattern COMMA_WHITESPACE_PATTERN = Pattern.compile("\\s*,\\s*");
 
     /**
      * Constructor which takes a gadget spec and container settings
