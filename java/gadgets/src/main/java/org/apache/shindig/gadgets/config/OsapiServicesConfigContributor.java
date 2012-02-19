@@ -61,6 +61,8 @@ public class OsapiServicesConfigContributor implements ConfigContributor {
   /**
    * Add osapi.services to the config
    * @param config config map to add it to.
+   * @param container container to use to add osapi.services.
+   * @param host hostname to query from.
    */
   private void addServicesConfig(Map<String,Object> config, String container, String host) {
     if (rpcServiceLookup != null) {
