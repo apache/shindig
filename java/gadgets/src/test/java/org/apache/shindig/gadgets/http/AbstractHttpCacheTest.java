@@ -519,8 +519,8 @@ public class AbstractHttpCacheTest {
     }
 
     @Override
-    public HttpResponse removeResponseImpl(String key) {
-      return map.remove(key);
+    public void removeResponseImpl(String key) {
+      map.remove(key);
     }
   }
 }

@@ -49,7 +49,7 @@ public class DefaultHttpCache extends AbstractHttpCache {
   }
 
   @Override
-  protected HttpResponse removeResponseImpl(String key) {
-    return cache.removeElement(key);
+  protected void removeResponseImpl(String key) {
+    cache.removeElement(key);
   }
 }

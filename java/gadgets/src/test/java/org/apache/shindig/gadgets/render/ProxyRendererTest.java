@@ -251,8 +251,8 @@ public class ProxyRendererTest {
     }
 
     @Override
-    protected HttpResponse removeResponseImpl(String key) {
-      return map.remove(key);
+    protected void removeResponseImpl(String key) {
+      map.remove(key);
     }
   }
 

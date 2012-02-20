@@ -89,7 +89,7 @@ public abstract class AbstractHttpCache implements HttpCache {
   // Implement these methods to create a concrete HttpCache class.
   protected abstract HttpResponse getResponseImpl(String key);
   protected abstract void addResponseImpl(String key, HttpResponse response);
-  protected abstract HttpResponse removeResponseImpl(String key);
+  protected abstract void removeResponseImpl(String key);
 
   public HttpResponse getResponse(HttpRequest request) {
     if (isCacheable(request)) {

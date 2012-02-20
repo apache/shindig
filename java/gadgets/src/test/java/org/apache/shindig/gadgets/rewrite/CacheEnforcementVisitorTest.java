@@ -253,8 +253,8 @@ public class CacheEnforcementVisitorTest extends DomWalkerTestBase {
       return map.get(key);
     }
 
-    public HttpResponse removeResponseImpl(String key) {
-      return map.remove(key);
+    public void removeResponseImpl(String key) {
+      map.remove(key);
     }
   }
 
