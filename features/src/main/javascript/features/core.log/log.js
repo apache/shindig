@@ -93,6 +93,12 @@ gadgets.log = (function() {
  * @private
  */
   function logAtLevel(level, message) {
+    if(typeof _console === 'undefined') {
+      //Purposely set to null if there is no console that way we don't come
+      //back in here
+      _console = window.console ? window.console :
+        window.opera ? window.opera.postError : null;
+    }
     if (level < logLevelThreshold_ || !_console) {
       return;
     }
@@ -147,8 +153,7 @@ gadgets.log = (function() {
  * @private
  * @static
  */
-  var _console = window.console ? window.console :
-                       window.opera ? window.opera.postError : undefined;
+  var _console;
 
   return log;
 })();
