@@ -32,7 +32,7 @@ import java.util.Map;
  *
  * It includes the child ServiceTag and its text element.
  *
- * @since 3.0.0
+ * @since 2.5.0
  */
 public class ExternalServices {
   // The name to be used in the "alias" request parameters.
@@ -72,7 +72,7 @@ public class ExternalServices {
   /**
    * Represent the ServiceTag tag in the gadget spec.
    *
-   * @since 3.0.0
+   * @since 2.5.0
    */
   public static class ServiceTag {
     public static final String SERVICE_TAG = "ServiceTag";

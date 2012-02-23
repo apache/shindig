@@ -42,7 +42,7 @@
 
   <properties>
     <!-- What version of the API are we targeting for compatible -->
-    <shindig.api.compatible>3.0.0</shindig.api.compatible>
+    <shindig.api.compatible>2.5.0</shindig.api.compatible>
     <!-- What version of the API did we ship last -->
     <shindig.api.previous>2.0.0</shindig.api.previous>
 

@@ -30,8 +30,7 @@ import com.google.inject.name.Named;
 /**
  * Provides a default implementation of much of the basic functionality for managing locked domains.
  *
- * @author <a href="mailto:dev@shindig.apache.org">Shindig Dev</a>
- * @since 3.0.0
+ * @since 2.5.0
  */
 public abstract class AbstractLockedDomainService implements LockedDomainService {
 

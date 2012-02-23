@@ -26,7 +26,7 @@ import org.apache.shindig.gadgets.spec.Feature;
 /**
  * Interface for working with the store of gadget administration data.
  *
- * @version 3.0.0
+ * @since 2.5.0
  */
 public interface GadgetAdminStore {
 
