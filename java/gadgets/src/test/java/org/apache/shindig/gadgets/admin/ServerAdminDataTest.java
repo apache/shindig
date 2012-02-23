@@ -37,7 +37,7 @@ import com.google.common.base.Objects;
 import com.google.common.collect.Maps;
 
 /**
- * @version $Id: $
+ * @since 2.5.0
  */
 public class ServerAdminDataTest {
 
@@ -57,6 +57,7 @@ public class ServerAdminDataTest {
   private FeatureAdminData blacklistFeatures;
   private GadgetAdminData whitelistInfo;
   private GadgetAdminData blacklistInfo;
+  private RpcAdminData rpcAdminData;
   private Map<String, GadgetAdminData> defaultMap;
   private Map<String, GadgetAdminData> myMap;
   private Map<String, ContainerAdminData> containerMap;
@@ -73,9 +74,10 @@ public class ServerAdminDataTest {
     blacklist = Sets.newHashSet(EE, SELECTION);
     whitelistFeatures = new FeatureAdminData(whitelist, Type.WHITELIST);
     blacklistFeatures = new FeatureAdminData(blacklist, Type.BLACKLIST);
+    rpcAdminData = new RpcAdminData(Sets.newHashSet("rpc1", "rpc2"));
 
-    whitelistInfo = new GadgetAdminData(whitelistFeatures);
-    blacklistInfo = new GadgetAdminData(blacklistFeatures);
+    whitelistInfo = new GadgetAdminData(whitelistFeatures, rpcAdminData);
+    blacklistInfo = new GadgetAdminData(blacklistFeatures, new RpcAdminData());
 
     defaultMap = Maps.newHashMap();
     defaultMap.put(GADGET_URL_1, whitelistInfo);

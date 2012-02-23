@@ -33,7 +33,7 @@ import com.google.caja.util.Sets;
 import com.google.common.base.Objects;
 
 /**
- * @version $Id: 3.0.0
+ * @since 2.5.0
  */
 public class GadgetAdminDataTest {
 
@@ -42,10 +42,14 @@ public class GadgetAdminDataTest {
   private static final String TABS = "tabs";
   private static final String EE = "embedded-experiences";
   private static final String SELECTION = "selection";
+  private static final String RPC1 = "rcp1";
+  private static final String RPC2 = "rpc2";
   private Set<String> whitelist;
   private Set<String> blacklist;
+  private Set<String> rpcServiceIds;
   private FeatureAdminData whitelistFeatures;
   private FeatureAdminData blacklistFeatures;
+  private RpcAdminData rpcAdminData;
   private GadgetAdminData whitelistInfo;
   private GadgetAdminData blacklistInfo;
   private GadgetAdminData nullInfo;
@@ -55,11 +59,13 @@ public class GadgetAdminDataTest {
   public void setUp() throws Exception {
     whitelist = Sets.newHashSet(VIEWS, SETPREFS, TABS);
     blacklist = Sets.newHashSet(EE, SELECTION);
+    rpcServiceIds = Sets.newHashSet(RPC1, RPC2);
     whitelistFeatures = new FeatureAdminData(whitelist, Type.WHITELIST);
     blacklistFeatures = new FeatureAdminData(blacklist, Type.BLACKLIST);
-    whitelistInfo = new GadgetAdminData(whitelistFeatures);
-    blacklistInfo = new GadgetAdminData(blacklistFeatures);
-    nullInfo = new GadgetAdminData(null);
+    rpcAdminData = new RpcAdminData(rpcServiceIds);
+    whitelistInfo = new GadgetAdminData(whitelistFeatures, rpcAdminData);
+    blacklistInfo = new GadgetAdminData(blacklistFeatures, new RpcAdminData());
+    nullInfo = new GadgetAdminData(null, null);
     defaultInfo = new GadgetAdminData();
   }
 
@@ -68,8 +74,10 @@ public class GadgetAdminDataTest {
     whitelist = null;
     whitelistInfo = null;
     blacklistInfo = null;
+    rpcServiceIds = null;
     whitelistFeatures = null;
     blacklistFeatures = null;
+    rpcAdminData = null;
     nullInfo = null;
     defaultInfo = null;
   }
@@ -83,9 +91,56 @@ public class GadgetAdminDataTest {
   }
 
   @Test
+  public void testSetFeatureAdminData() {
+    assertEquals(whitelistFeatures, whitelistInfo.getFeatureAdminData());
+    whitelistInfo.setFeatureAdminData(null);
+    assertEquals(new FeatureAdminData(), whitelistInfo.getFeatureAdminData());
+
+    assertEquals(blacklistFeatures, blacklistInfo.getFeatureAdminData());
+    blacklistInfo.setFeatureAdminData(whitelistFeatures);
+    assertEquals(whitelistFeatures, blacklistInfo.getFeatureAdminData());
+
+    assertEquals(new FeatureAdminData(), nullInfo.getFeatureAdminData());
+    nullInfo.setFeatureAdminData(whitelistFeatures);
+    assertEquals(whitelistFeatures, nullInfo.getFeatureAdminData());
+
+    assertEquals(new FeatureAdminData(), defaultInfo.getFeatureAdminData());
+    defaultInfo.setFeatureAdminData(whitelistFeatures);
+    assertEquals(whitelistFeatures, defaultInfo.getFeatureAdminData());
+  }
+
+  @Test
+  public void testGetRpcAdminData() {
+    assertEquals(rpcAdminData, whitelistInfo.getRpcAdminData());
+    assertEquals(new RpcAdminData(), blacklistInfo.getRpcAdminData());
+    assertEquals(new RpcAdminData(), nullInfo.getRpcAdminData());
+    assertEquals(new RpcAdminData(), defaultInfo.getRpcAdminData());
+  }
+
+  @Test
+  public void testSetRpcAdminData() {
+    assertEquals(rpcAdminData, whitelistInfo.getRpcAdminData());
+    whitelistInfo.setRpcAdminData(null);
+    assertEquals(new RpcAdminData(), whitelistInfo.getRpcAdminData());
+
+    assertEquals(new RpcAdminData(), blacklistInfo.getRpcAdminData());
+    blacklistInfo.setRpcAdminData(rpcAdminData);
+    assertEquals(rpcAdminData, blacklistInfo.getRpcAdminData());
+
+    assertEquals(new RpcAdminData(), nullInfo.getRpcAdminData());
+    nullInfo.setRpcAdminData(rpcAdminData);
+    assertEquals(rpcAdminData, nullInfo.getRpcAdminData());
+
+    assertEquals(new RpcAdminData(), defaultInfo.getRpcAdminData());
+    defaultInfo.setRpcAdminData(rpcAdminData);
+    assertEquals(rpcAdminData, defaultInfo.getRpcAdminData());
+  }
+
+  @Test
   public void testEquals() {
-    assertTrue(whitelistInfo.equals(new GadgetAdminData(whitelistFeatures)));
-    assertTrue(nullInfo.equals(new GadgetAdminData(null)));
+    assertTrue(whitelistInfo.equals(new GadgetAdminData(whitelistFeatures,
+            rpcAdminData)));
+    assertTrue(nullInfo.equals(new GadgetAdminData(null, null)));
     assertTrue(defaultInfo.equals(new GadgetAdminData()));
     assertTrue(nullInfo.equals(defaultInfo));
     assertFalse(whitelistInfo.equals(null));
@@ -97,10 +152,14 @@ public class GadgetAdminDataTest {
 
   @Test
   public void testHashCode() {
-    assertEquals(Objects.hashCode(whitelistFeatures), whitelistInfo.hashCode());
-    assertEquals(Objects.hashCode(blacklistFeatures), blacklistInfo.hashCode());
-    assertEquals(Objects.hashCode(new FeatureAdminData()), nullInfo.hashCode());
-    assertEquals(Objects.hashCode(new FeatureAdminData()), defaultInfo.hashCode());
+    assertEquals(Objects.hashCode(whitelistFeatures, rpcAdminData),
+            whitelistInfo.hashCode());
+    assertEquals(Objects.hashCode(blacklistFeatures, new RpcAdminData()),
+            blacklistInfo.hashCode());
+    assertEquals(Objects.hashCode(new FeatureAdminData(), new RpcAdminData()),
+            nullInfo.hashCode());
+    assertEquals(Objects.hashCode(new FeatureAdminData(), new RpcAdminData()),
+            defaultInfo.hashCode());
     assertEquals(nullInfo.hashCode(), defaultInfo.hashCode());
     assertFalse(blacklistInfo.hashCode() == whitelistInfo.hashCode());
   }

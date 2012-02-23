@@ -663,7 +663,7 @@ osapi.container.Container.prototype.setupRpcArbitrator_ = function(config) {
             config, osapi.container.ContainerConfig.RPC_ARBITRATOR, null);
     if(!arbitrate) {
       var self = this;
-      //This implementation uses the metadata cache to check to allowed rpc service ids
+      //This implementation uses the metadata cache to check for allowed rpc service ids
       arbitrate = function(serviceId, from) {
         var site = self.getGadgetSiteByIframeId_(from);
         if(site && site.getActiveSiteHolder()) {

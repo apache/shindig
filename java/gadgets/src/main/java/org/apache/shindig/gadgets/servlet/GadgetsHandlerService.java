@@ -234,7 +234,7 @@ public class GadgetsHandlerService {
    */
   private Set<String> getRpcServiceIds(Gadget gadget) {
     GadgetContext context = gadget.getContext();
-    Set<String> rpcEndpoints = Sets.newHashSet();
+    Set<String> rpcEndpoints = Sets.newHashSet(gadgetAdminStore.getAdditionalRpcServiceIds(gadget));
     List<Feature> modulePrefFeatures = gadget.getSpec().getModulePrefs().getAllFeatures();
     List<String> featureNames = Lists.newArrayList();
     for(Feature feature : modulePrefFeatures) {

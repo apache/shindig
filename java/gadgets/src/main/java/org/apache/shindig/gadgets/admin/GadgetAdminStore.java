@@ -18,6 +18,8 @@
  */
 package org.apache.shindig.gadgets.admin;
 
+import java.util.Set;
+
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.spec.Feature;
 
@@ -110,4 +112,12 @@ public interface GadgetAdminStore {
    */
   public boolean isWhitelisted(String container, String gadgetUrl);
 
+  /**
+   * Gets additional RPC service IDs to allow for the gadget.
+   *
+   * @param gadget
+   *          The gadget to get the IDs for.
+   * @return The set of additional RPC service IDs to allow for the gadget.
+   */
+  public Set<String> getAdditionalRpcServiceIds(Gadget gadget);
 }

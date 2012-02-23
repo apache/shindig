@@ -30,7 +30,6 @@ import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.codec.binary.Base64;
-import org.apache.shindig.auth.BasicSecurityTokenCodec;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.auth.SecurityTokenCodec;
 import org.apache.shindig.auth.SecurityTokenException;
@@ -85,6 +84,7 @@ import com.google.caja.reporting.SimpleMessageQueue;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
@@ -96,9 +96,9 @@ public class GadgetsHandlerTest extends EasyMockTestCase {
   private static final String CONTAINER = "container";
   private static final String TOKEN = "_nekot_";
   private static final Long SPEC_REFRESH_INTERVAL = 123L;
-  private static final Long EXPIRY_TIME_MS = 456L;
   private static final String RPC_SERVICE_1 = "rcp_service_1";
   private static final String RPC_SERVICE_2 = "rpc_service_2";
+  private static final String RPC_SERVICE_3 = "rpc_service_3";
 
   private final FakeTimeSource timeSource = new FakeTimeSource();
   private final FeatureRegistry mockRegistry = mock(FeatureRegistry.class);
@@ -194,6 +194,8 @@ public class GadgetsHandlerTest extends EasyMockTestCase {
   private void setupGadgetAdminStore() {
     EasyMock.expect(gadgetAdminStore.checkFeatureAdminInfo(isA(Gadget.class)))
     .andReturn(true).anyTimes();
+    EasyMock.expect(gadgetAdminStore.getAdditionalRpcServiceIds(isA(Gadget.class)))
+    .andReturn((Sets.newHashSet(RPC_SERVICE_3))).anyTimes();
   }
 
   private FeatureBundle createMockFeatureBundle() {
@@ -475,6 +477,7 @@ public class GadgetsHandlerTest extends EasyMockTestCase {
   @Test
   public void testAllowedRpcSecurityIds() throws Exception {
     registerGadgetsHandler(null);
+    setupGadgetAdminStore();
     setupMockRegistry(Lists.newArrayList("core"));
     JSONObject request = makeMetadataRequest(null, null, new String[] { "rpcServiceIds" },
             GADGET1_URL);
@@ -485,9 +488,10 @@ public class GadgetsHandlerTest extends EasyMockTestCase {
     JSONObject gadget = response.getJSONObject(GADGET1_URL);
 
     JSONArray rpcServiceIds = gadget.getJSONArray("rpcServiceIds");
-    assertEquals(2, rpcServiceIds.length());
-    boolean result = rpcServiceIds.get(0).equals(RPC_SERVICE_2) || rpcServiceIds.get(0).equals(RPC_SERVICE_1);
-    result &= rpcServiceIds.get(1).equals(RPC_SERVICE_2) || rpcServiceIds.get(1).equals(RPC_SERVICE_1);
+    assertEquals(3, rpcServiceIds.length());
+    boolean result = rpcServiceIds.get(0).equals(RPC_SERVICE_2) || rpcServiceIds.get(0).equals(RPC_SERVICE_1) || rpcServiceIds.get(0).equals(RPC_SERVICE_3);
+    result &= rpcServiceIds.get(1).equals(RPC_SERVICE_2) || rpcServiceIds.get(1).equals(RPC_SERVICE_1) || rpcServiceIds.get(1).equals(RPC_SERVICE_3);
+    result &= rpcServiceIds.get(2).equals(RPC_SERVICE_2) || rpcServiceIds.get(2).equals(RPC_SERVICE_1) || rpcServiceIds.get(2).equals(RPC_SERVICE_3);
     assertTrue(result);
 
     verify();
@@ -521,9 +525,10 @@ public class GadgetsHandlerTest extends EasyMockTestCase {
 
   @Test
   public void testMetadataOneGadgetFailure() throws Exception {
+    registerGadgetsHandler(null);
     setupGadgetAdminStore();
     replay();
-    registerGadgetsHandler(null);
+
     JSONObject request = makeMetadataRequest(null, null, null, GADGET1_URL);
     urlGenerator.throwRandomFault = true;
     RpcHandler operation = registry.getRpcHandler(request);

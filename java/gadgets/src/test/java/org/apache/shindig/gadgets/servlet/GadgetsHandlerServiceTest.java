@@ -43,10 +43,6 @@ import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.GadgetException.Code;
 import org.apache.shindig.gadgets.RenderingContext;
-import org.apache.shindig.gadgets.admin.ContainerAdminData;
-import org.apache.shindig.gadgets.admin.FeatureAdminData;
-import org.apache.shindig.gadgets.admin.FeatureAdminData.Type;
-import org.apache.shindig.gadgets.admin.GadgetAdminData;
 import org.apache.shindig.gadgets.admin.GadgetAdminStore;
 import org.apache.shindig.gadgets.features.ApiDirective;
 import org.apache.shindig.gadgets.features.FeatureRegistry;
@@ -92,6 +88,7 @@ public class GadgetsHandlerServiceTest extends EasyMockTestCase {
   private static final String FALLBACK = "http://example.com/data2";
   private static final String RPC_SERVICE_1 = "rcp_service_1";
   private static final String RPC_SERVICE_2 = "rpc_service_2";
+  private static final String RPC_SERVICE_3 = "rpc_service_3";
 
   private final BeanDelegator delegator = new BeanDelegator(GadgetsHandlerService.API_CLASSES,
           GadgetsHandlerService.ENUM_CONVERSION_MAP);
@@ -116,11 +113,6 @@ public class GadgetsHandlerServiceTest extends EasyMockTestCase {
   @Before
   public void setUp() {
     tokenCodec = new FakeSecurityTokenCodec();
-    GadgetAdminData gadgetAdminData = new GadgetAdminData(
-            new FeatureAdminData(Sets.newHashSet(FakeProcessor.FEATURE2, FakeProcessor.FEATURE3),
-                    Type.WHITELIST));
-    ContainerAdminData containerAdminData = new ContainerAdminData();
-    containerAdminData.addGadgetAdminData(FakeProcessor.SPEC_URL4.toString(), gadgetAdminData);
     featureRegistryProvider = new FeatureRegistryProvider() {
       public FeatureRegistry get(String repository) throws GadgetException {
         return mockRegistry;
@@ -148,6 +140,8 @@ public class GadgetsHandlerServiceTest extends EasyMockTestCase {
   private void setupMockGadgetAdminStore(boolean isAllowed) {
     EasyMock.expect(gadgetAdminStore.checkFeatureAdminInfo(EasyMock.isA(Gadget.class)))
     .andReturn(isAllowed).anyTimes();
+    EasyMock.expect(gadgetAdminStore.getAdditionalRpcServiceIds(EasyMock.isA(Gadget.class)))
+    .andReturn(Sets.newHashSet(RPC_SERVICE_3));
   }
 
   @SuppressWarnings("unchecked")
@@ -198,7 +192,7 @@ public class GadgetsHandlerServiceTest extends EasyMockTestCase {
     assertEquals(4, response.getUserPrefs().get("up_one").getOrderedEnumValues().size());
     assertEquals(CURRENT_TIME_MS, response.getResponseTimeMs());
     assertEquals(METADATA_EXPIRY_TIME_MS, response.getExpireTimeMs());
-    assertEquals(Sets.newHashSet(RPC_SERVICE_1, RPC_SERVICE_2), response.getRpcServiceIds());
+    assertEquals(Sets.newHashSet(RPC_SERVICE_1, RPC_SERVICE_2, RPC_SERVICE_3), response.getRpcServiceIds());
     verify();
   }
 
@@ -222,7 +216,7 @@ public class GadgetsHandlerServiceTest extends EasyMockTestCase {
     assertEquals(4, response.getUserPrefs().get("up_one").getOrderedEnumValues().size());
     assertEquals(CURRENT_TIME_MS, response.getResponseTimeMs());
     assertEquals(METADATA_EXPIRY_TIME_MS, response.getExpireTimeMs());
-    assertEquals(Sets.newHashSet(RPC_SERVICE_1, RPC_SERVICE_2), response.getRpcServiceIds());
+    assertEquals(Sets.newHashSet(RPC_SERVICE_1, RPC_SERVICE_2, RPC_SERVICE_3), response.getRpcServiceIds());
     verify();
   }
 
@@ -239,6 +233,7 @@ public class GadgetsHandlerServiceTest extends EasyMockTestCase {
   public void testGetMetadataOnlyView() throws Exception {
     GadgetsHandlerApi.MetadataRequest request = createMetadataRequest(FakeProcessor.SPEC_URL,
             CONTAINER, null, createAuthContext(null, null), ImmutableList.of("views.*"));
+    setupMockGadgetAdminStore(false);
     setupMockRegistry(new ArrayList<String>());
     GadgetsHandlerApi.MetadataResponse response = gadgetHandler.getMetadata(request);
     assertNull(response.getIframeUrls());

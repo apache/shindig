@@ -23,18 +23,20 @@ import com.google.common.base.Objects;
 /**
  * Information about the container's administration data.
  *
- * @version 3.0.0
+ * @since 2.5.0
  */
 public class GadgetAdminData {
   // In the future as more gadget admin data is created we
   // should add it here.
   private FeatureAdminData featureAdminData;
+  private RpcAdminData rpcAdminData;
 
   /**
    * Constructor
    */
   public GadgetAdminData() {
     this.featureAdminData = new FeatureAdminData();
+    this.rpcAdminData = new RpcAdminData();
   }
 
   /**
@@ -42,12 +44,19 @@ public class GadgetAdminData {
    *
    * @param featureAdminData
    *          Feature administration data for this gadget
+   * @param rpcAdminData
+   *          RPC administration data for this gadget
    */
-  public GadgetAdminData(FeatureAdminData featureAdminData) {
+  public GadgetAdminData(FeatureAdminData featureAdminData,
+          RpcAdminData rpcAdminData) {
     if (featureAdminData == null) {
       featureAdminData = new FeatureAdminData();
     }
+    if (rpcAdminData == null) {
+      rpcAdminData = new RpcAdminData();
+    }
     this.featureAdminData = featureAdminData;
+    this.rpcAdminData = rpcAdminData;
   }
 
   /**
@@ -66,20 +75,46 @@ public class GadgetAdminData {
    *          the feature admin data to set.
    */
   public void setFeatureAdminData(FeatureAdminData featureAdminData) {
+    if(featureAdminData == null) {
+      featureAdminData = new FeatureAdminData();
+    }
     this.featureAdminData = featureAdminData;
+  }
+
+  /**
+   * Gets the RPC administration data.
+   *
+   * @return
+   */
+  public RpcAdminData getRpcAdminData() {
+    return this.rpcAdminData;
+  }
+
+  /**
+   * Sets the RPC administration data.
+   *
+   * @param rpcAdminData
+   *          The RPC administration data to set.
+   */
+  public void setRpcAdminData(RpcAdminData rpcAdminData) {
+    if(rpcAdminData == null) {
+      rpcAdminData = new RpcAdminData();
+    }
+    this.rpcAdminData = rpcAdminData;
   }
 
   @Override
   public boolean equals(Object obj) {
     if (obj instanceof GadgetAdminData) {
       GadgetAdminData test = (GadgetAdminData) obj;
-      return this.getFeatureAdminData().equals(test.getFeatureAdminData());
+      return this.getFeatureAdminData().equals(test.getFeatureAdminData()) &&
+      this.getRpcAdminData().equals(test.getRpcAdminData());
     }
     return false;
   }
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(this.featureAdminData);
+    return Objects.hashCode(this.featureAdminData, this.rpcAdminData);
   }
 }

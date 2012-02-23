@@ -38,7 +38,7 @@ import com.google.common.base.Objects;
 import com.google.common.collect.Maps;
 
 /**
- * @version $Id: 3.0.0
+ * @since 2.5.0
  */
 public class ContainerAdminDataTest {
 
@@ -65,6 +65,7 @@ public class ContainerAdminDataTest {
   private ContainerAdminData emptyData;
   private ContainerAdminData nullData;
   private ContainerAdminData defaultData;
+  private RpcAdminData rpcAdminData;
 
   @Before
   public void setUp() throws Exception {
@@ -72,9 +73,10 @@ public class ContainerAdminDataTest {
     blacklist = Sets.newHashSet(EE, SELECTION);
     whitelistFeatures = new FeatureAdminData(whitelist, Type.WHITELIST);
     blacklistFeatures = new FeatureAdminData(blacklist, Type.BLACKLIST);
+    rpcAdminData = new RpcAdminData(Sets.newHashSet("rpc1", "rpc2"));
 
-    whitelistData = new GadgetAdminData(whitelistFeatures);
-    blacklistData = new GadgetAdminData(blacklistFeatures);
+    whitelistData = new GadgetAdminData(whitelistFeatures, rpcAdminData);
+    blacklistData = new GadgetAdminData(blacklistFeatures, new RpcAdminData());
 
     gadgetMap = Maps.newHashMap();
     gadgetMap.put(GADGET_URL_1, whitelistData);
@@ -103,6 +105,7 @@ public class ContainerAdminDataTest {
     emptyData = null;
     nullData = null;
     defaultData = null;
+    rpcAdminData = null;
   }
 
   @Test

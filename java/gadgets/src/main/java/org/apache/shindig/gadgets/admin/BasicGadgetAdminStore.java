@@ -48,7 +48,7 @@ import com.google.inject.Singleton;
 /**
  * A simple implementation of a gadget administration store.
  *
- * @version $Id: $
+ * @since 2.5.0
  */
 @Singleton
 public class BasicGadgetAdminStore implements GadgetAdminStore {
@@ -63,7 +63,10 @@ public class BasicGadgetAdminStore implements GadgetAdminStore {
 
   private static final String GADGETS = "gadgets";
   private static final String FEATURES = "features";
+  private static final String FEATURES_NAMES = "names";
   private static final String TYPE = "type";
+  private static final String RPC = "rpc";
+  private static final String ADDITIONAL_RPC_SERVICE_IDS = "additionalServiceIds";
   private static final String BLACKLIST = "blacklist";
   private static final String CORE_FEATURE = "core";
 
@@ -126,6 +129,25 @@ public class BasicGadgetAdminStore implements GadgetAdminStore {
   }
 
   /**
+   * Creates an RpcAdminData object from a JSON object.
+   *
+   * @param rpcJson
+   *          the JSON object representing the RPC admin data.
+   * @return an RpcAdminData object.
+   * @throws JSONException thrown when the RpcAdminData object cannot be created.
+   */
+  private RpcAdminData createRpcAdminData(JSONObject rpcJson) throws JSONException {
+    RpcAdminData adminData = new RpcAdminData();
+    if(rpcJson.has(ADDITIONAL_RPC_SERVICE_IDS)) {
+      JSONArray ids = rpcJson.getJSONArray(ADDITIONAL_RPC_SERVICE_IDS);
+      for(int i = 0; i < ids.length(); i++) {
+        adminData.addAdditionalRpcServiceId(ids.getString(i));
+      }
+    }
+    return adminData;
+  }
+
+  /**
    * Creates a map of gadget administration data.
    *
    * @param gadgetsJson
@@ -158,9 +180,29 @@ public class BasicGadgetAdminStore implements GadgetAdminStore {
    *           thrown when the information cannot found in the JSON object.
    */
   private GadgetAdminData createGadgetAdminData(JSONObject gadgetJson) throws JSONException {
+    FeatureAdminData featureData = new FeatureAdminData();
+    RpcAdminData rpcData = new RpcAdminData();
+    if(gadgetJson.has(FEATURES)) {
+      featureData = createFeatureAdminData(gadgetJson.getJSONObject(FEATURES));
+    }
+    if(gadgetJson.has(RPC)) {
+      rpcData = createRpcAdminData(gadgetJson.getJSONObject(RPC));
+    }
+    return new GadgetAdminData(featureData, rpcData);
+  }
+
+  /**
+   * Creates the feature admin data.
+   *
+   * @param featuresJson
+   *          The JSON object representing the feature admin data.
+   * @return Feature admin data.
+   * @throws JSONException Thrown when the JSON cannot be parsed.
+   */
+  private FeatureAdminData createFeatureAdminData(JSONObject featuresJson) throws JSONException {
     FeatureAdminData data = new FeatureAdminData();
-    if (gadgetJson.has(FEATURES)) {
-      JSONArray features = gadgetJson.getJSONArray(FEATURES);
+    if (featuresJson.has(FEATURES_NAMES)) {
+      JSONArray features = featuresJson.getJSONArray(FEATURES_NAMES);
       for (int i = 0; i < features.length(); i++) {
         data.addFeature(features.getString(i));
       }
@@ -171,15 +213,15 @@ public class BasicGadgetAdminStore implements GadgetAdminStore {
       // Add the core feature since every gadget needs this and it can't be disabled
       data.addFeature(CORE_FEATURE);
     }
-    if (gadgetJson.has(TYPE)) {
-      String type = gadgetJson.getString(TYPE);
+    if (featuresJson.has(TYPE)) {
+      String type = featuresJson.getString(TYPE);
       if (type.equalsIgnoreCase(BLACKLIST)) {
         data.setType(Type.BLACKLIST);
         //We need core for everything so remove it if it is blacklisted
         data.removeFeature(CORE_FEATURE);
       }
     }
-    return new GadgetAdminData(data);
+    return data;
   }
 
   public GadgetAdminData getGadgetAdminData(String container, String gadgetUrl) {
@@ -403,5 +445,15 @@ public class BasicGadgetAdminStore implements GadgetAdminStore {
    */
   private boolean isFeatureAdminEnabled(String container) {
     return config.getBool(container, ENABLE_FEATURE_ADMIN);
+  }
+
+  public Set<String> getAdditionalRpcServiceIds(Gadget gadget) {
+    GadgetAdminData gadgetData = this.getGadgetAdminData(getSafeContainerFromGadget(gadget),
+            getSafeGadgetUrlFromGadget(gadget));
+    Set<String> ids = Sets.newHashSet();
+    if(gadgetData != null) {
+      ids.addAll(gadgetData.getRpcAdminData().getAdditionalRpcServiceIds());
+    }
+    return ids;
   }
 }

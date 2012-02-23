@@ -54,15 +54,25 @@ public class BasicGadgetAdminStoreTest extends EasyMockTestCase {
 
   private static final String SAMPLE_STORE = "{" + "\"default\" : {" + "\"gadgets\" : {"
           + "\"http://www.google.com:80/ig/modules/horoscope.xml\" : {"
-          + "\"features\" : [\"views\", \"tabs\", \"setprefs\", \"dynamic-height\", \"settitle\"],"
-          + "\"type\" : \"whitelist\"" + "},"
+          + "\"features\" : {"
+          + "\"names\" : [\"views\", \"tabs\", \"setprefs\", \"dynamic-height\", \"settitle\"],"
+          + "\"type\" : \"whitelist\"" + "}},"
           + "\"http://www.labpixies.com/campaigns/todo/todo.xml\" : {"
-          + "\"features\" : [\"setprefs\", \"dynamic-height\", \"views\"],"
-          + "\"type\" : \"blacklist\"" + "},"
+          + "\"features\" : {"
+          + "\"names\" : [\"setprefs\", \"dynamic-height\", \"views\"],"
+          + "\"type\" : \"blacklist\"" + "}},"
           + "\"https://foo.com/*\" : {"
-          + "\"features\" : []" + "},"
+          + "\"features\" : {"
+          + "\"names\" : []" + "}},"
           + "\"http://*\" : {"
-          + "\"features\" : []," + "\"type\" : \"whitelist\"" + "},"+ "}" + "}" + "}";
+          + "\"features\" : {"
+          + "\"names\" : [],"
+          + "\"type\" : \"whitelist\""
+          + "},"
+          + "\"rpc\" : {"
+          + "\"additionalServiceIds\" : [\"rpc1\", \"rpc2\"]"
+          +"}}}"
+          + "}}";
 
   private static final String DEFAULT = "default";
   private static final String HOROSCOPE = "http://www.google.com/ig/modules/horoscope.xml";
@@ -93,6 +103,7 @@ public class BasicGadgetAdminStoreTest extends EasyMockTestCase {
   private GadgetAdminData httpAdminData;
   private ContainerAdminData defaultAdminData;
   private FeatureRegistryProvider featureRegistryProvider;
+  private RpcAdminData rpcAdminData;
 
   @Before
   public void setUp() throws Exception {
@@ -101,6 +112,9 @@ public class BasicGadgetAdminStoreTest extends EasyMockTestCase {
         return mockRegistry;
       }
     };
+
+    rpcAdminData = new RpcAdminData(Sets.newHashSet("rpc1", "rpc2"));
+
     enabledStore = new BasicGadgetAdminStore(featureRegistryProvider, enabledConfig,
         new ServerAdminData());
     enabledStore.init(SAMPLE_STORE);
@@ -109,13 +123,13 @@ public class BasicGadgetAdminStoreTest extends EasyMockTestCase {
         new ServerAdminData());
 
     horoscopeAdminData = new GadgetAdminData(new FeatureAdminData(HOROSCOPE_FEATURES,
-            Type.WHITELIST));
+            Type.WHITELIST), new RpcAdminData());
     todoAdminData = new GadgetAdminData(new FeatureAdminData(TODO_FEATURES,
-            Type.BLACKLIST));
+            Type.BLACKLIST), new RpcAdminData());
     fooAdminData = new GadgetAdminData(new FeatureAdminData(FOO_FEATURES,
-            Type.WHITELIST));
+            Type.WHITELIST), new RpcAdminData());
     httpAdminData = new GadgetAdminData(new FeatureAdminData(HTTP_FEATURES,
-            Type.WHITELIST));
+            Type.WHITELIST), rpcAdminData);
 
     defaultAdminData = new ContainerAdminData();
     defaultAdminData.addGadgetAdminData(TODO, todoAdminData);
@@ -131,6 +145,7 @@ public class BasicGadgetAdminStoreTest extends EasyMockTestCase {
     horoscopeAdminData = null;
     todoAdminData = null;
     defaultAdminData = null;
+    rpcAdminData = null;
   }
 
   private void mockGadget(List<Feature> allFeatures) {
@@ -254,7 +269,7 @@ public class BasicGadgetAdminStoreTest extends EasyMockTestCase {
             createMockFeature(gadgetRequiredFeatureNames.get(1), true),
             createMockFeature(gadgetRequiredFeatureNames.get(2), true));
     enabledStore.getContainerAdminData(DEFAULT).addGadgetAdminData(TEST_GADGET,
-            new GadgetAdminData(data));
+            new GadgetAdminData(data, null));
     mockRegistryForFeatureAdmin(features, featuresAndDeps,
             allGadgetFeatures, gadgetRequiredFeatureNames);
     mockGadget(allFeatures);
@@ -276,7 +291,7 @@ public class BasicGadgetAdminStoreTest extends EasyMockTestCase {
             createMockFeature(gadgetRequiredFeatureNames.get(1), true),
             createMockFeature(gadgetRequiredFeatureNames.get(2), true));
     enabledStore.getContainerAdminData(DEFAULT).addGadgetAdminData(TEST_GADGET,
-            new GadgetAdminData(data));
+            new GadgetAdminData(data, null));
     mockRegistryForFeatureAdmin(features, featuresAndDeps,
             allGadgetFeatures, gadgetRequiredFeatureNames);
     mockGadget(allFeatures);
@@ -297,7 +312,7 @@ public class BasicGadgetAdminStoreTest extends EasyMockTestCase {
             createMockFeature(gadgetRequiredFeatureNames.get(1), true));
     FeatureAdminData data = new FeatureAdminData(features,Type.WHITELIST);
     enabledStore.getContainerAdminData(DEFAULT).addGadgetAdminData(TEST_GADGET,
-            new GadgetAdminData(data));
+            new GadgetAdminData(data, new RpcAdminData()));
     mockRegistryForFeatureAdmin(features, featuresAndDeps,
             allGadgetFeatures, gadgetRequiredFeatureNames);
     mockGadget(allFeatures);
@@ -319,7 +334,7 @@ public class BasicGadgetAdminStoreTest extends EasyMockTestCase {
             createMockFeature(gadgetRequiredFeatureNames.get(2), true));
     FeatureAdminData data = new FeatureAdminData(features,Type.WHITELIST);
     enabledStore.getContainerAdminData(DEFAULT).addGadgetAdminData(TEST_GADGET,
-            new GadgetAdminData(data));
+            new GadgetAdminData(data, new RpcAdminData()));
     mockRegistryForFeatureAdmin(features, featuresAndDeps,
             allGadgetFeatures, gadgetRequiredFeatureNames);
     mockGadget(allFeatures);
@@ -340,7 +355,7 @@ public class BasicGadgetAdminStoreTest extends EasyMockTestCase {
             createMockFeature(gadgetRequiredFeatureNames.get(1), true));
     FeatureAdminData data = new FeatureAdminData(features,Type.BLACKLIST);
     enabledStore.getContainerAdminData(DEFAULT).addGadgetAdminData(TEST_GADGET,
-            new GadgetAdminData(data));
+            new GadgetAdminData(data, null));
     mockRegistryForFeatureAdmin(features, featuresAndDeps,
             allGadgetFeatures, gadgetRequiredFeatureNames);
     mockGadget(allFeatures);
@@ -361,7 +376,7 @@ public class BasicGadgetAdminStoreTest extends EasyMockTestCase {
             createMockFeature(gadgetRequiredFeatureNames.get(1), true));
     FeatureAdminData data = new FeatureAdminData(features,Type.BLACKLIST);
     enabledStore.getContainerAdminData(DEFAULT).addGadgetAdminData(TEST_GADGET,
-            new GadgetAdminData(data));
+            new GadgetAdminData(data, null));
     mockRegistryForFeatureAdmin(features, featuresAndDeps,
             allGadgetFeatures, gadgetRequiredFeatureNames);
     mockGadget(allFeatures);
@@ -383,7 +398,7 @@ public class BasicGadgetAdminStoreTest extends EasyMockTestCase {
             createMockFeature("foo5", false));
     FeatureAdminData data = new FeatureAdminData(features,Type.WHITELIST);
     enabledStore.getContainerAdminData(DEFAULT).addGadgetAdminData(TEST_GADGET,
-            new GadgetAdminData(data));
+            new GadgetAdminData(data, new RpcAdminData()));
     mockRegistryForFeatureAdmin(features, featuresAndDeps,
             allGadgetFeatures, gadgetRequiredFeatureNames);
     mockGadget(allFeatures);
@@ -442,6 +457,32 @@ public class BasicGadgetAdminStoreTest extends EasyMockTestCase {
     assertTrue(enabledStore.isAllowedFeature(allowed, mockGadget));
     assertTrue(disabledStore.isAllowedFeature(denied, mockGadget));
     assertTrue(disabledStore.isAllowedFeature(allowed, mockGadget));
+  }
+
+  @Test
+  public void testGetAdditionalRpcServiceIds() throws Exception {
+    mockGadget(ImmutableList.<Feature>of(), DEFAULT, "http://example.com/gadget.xml");
+    replay();
+    assertEquals(Sets.newHashSet("rpc1", "rpc2"),
+            enabledStore.getAdditionalRpcServiceIds(mockGadget));
+    assertEquals(Sets.newHashSet(),
+            disabledStore.getAdditionalRpcServiceIds(mockGadget));
+
+    reset();
+    mockGadget(ImmutableList.<Feature>of(), DEFAULT, "https://example.com/gadget.xml");
+    replay();
+    assertEquals(Sets.newHashSet(),
+            enabledStore.getAdditionalRpcServiceIds(mockGadget));
+    assertEquals(Sets.newHashSet(),
+            disabledStore.getAdditionalRpcServiceIds(mockGadget));
+
+    reset();
+    mockGadget(ImmutableList.<Feature>of(), DEFAULT, HOROSCOPE);
+    replay();
+    assertEquals(Sets.newHashSet(),
+            enabledStore.getAdditionalRpcServiceIds(mockGadget));
+    assertEquals(Sets.newHashSet(),
+            disabledStore.getAdditionalRpcServiceIds(mockGadget));
   }
 
   private static class FakeContainerConfig extends BasicContainerConfig {
