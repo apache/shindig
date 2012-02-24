@@ -445,13 +445,13 @@ if (!window['gadgets']['rpc']) { // make lib resilient to double-inclusion
       id = String(id);
       
       // Try getElementById() first
-      target = document.getElementById(id);
+      var target = document.getElementById(id);
       if (target && target.contentWindow) {
         return target.contentWindow;
       }
 
       // Fallback to window.frames
-      var target = window.frames[id];
+      target = window.frames[id];
       if (target && !target.closed) {
         return target;
       }
