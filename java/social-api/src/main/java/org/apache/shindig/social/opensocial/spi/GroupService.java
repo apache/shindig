@@ -22,6 +22,7 @@ import java.util.Set;
 import java.util.concurrent.Future;
 
 import org.apache.shindig.auth.SecurityToken;
+import org.apache.shindig.protocol.ProtocolException;
 import org.apache.shindig.protocol.RestfulCollection;
 import org.apache.shindig.social.opensocial.model.Group;
 
@@ -37,7 +38,9 @@ public interface GroupService {
    * @param fields  Field search/sort
    * @param token   a valid security token
    * @return a collection of groups for a specific userId
+   * @throws org.apache.shindig.protocol.ProtocolException
    */
-  public Future<RestfulCollection<Group>> getGroups(UserId userId, CollectionOptions options, Set<String> fields, SecurityToken token);
+  public Future<RestfulCollection<Group>> getGroups(UserId userId, CollectionOptions options,
+    Set<String> fields, SecurityToken token) throws ProtocolException;
 
 }
