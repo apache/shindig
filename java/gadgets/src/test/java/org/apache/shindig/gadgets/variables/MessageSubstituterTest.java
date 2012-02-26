@@ -34,7 +34,7 @@ public class MessageSubstituterTest extends Assert {
 
   @Test
   public void testMessageReplacements() throws Exception {
-    String xml = 
+    String xml =
         "<Module>" +
         " <ModulePrefs title=''>" +
         "  <Locale>" +
@@ -44,10 +44,10 @@ public class MessageSubstituterTest extends Assert {
         " </ModulePrefs>" +
         " <Content />" +
         "</Module>";
-      
+
     Substitutions substitutions = new Substitutions();
     substituter.addSubstitutions(substitutions, context, new GadgetSpec(Uri.parse("#"), xml));
-    
+
     assertEquals("bar", substitutions.getSubstitution(Type.MESSAGE, "foo"));
     assertEquals("baz", substitutions.getSubstitution(Type.MESSAGE, "bar"));
   }

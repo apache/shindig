@@ -31,9 +31,9 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 /**
- * 
+ *
  * {@link OAuth2Cache} implementation using in-memory {@link HashMap}s.
- * 
+ *
  */
 @Singleton
 public class InMemoryCache implements OAuth2Cache {

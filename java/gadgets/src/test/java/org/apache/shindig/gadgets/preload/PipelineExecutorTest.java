@@ -61,7 +61,7 @@ public class PipelineExecutorTest {
   private PreloaderService preloaderService;
   private GadgetContext context;
   private PipelineExecutor executor;
-  
+
   private static final Uri GADGET_URI = Uri.parse("http://example.org/gadget.php");
 
   private static final String CONTENT =
@@ -89,7 +89,7 @@ public class PipelineExecutorTest {
     preloader = control.createMock(PipelinedDataPreloader.class);
     preloaderService = new ConcurrentPreloaderService(Executors.newSingleThreadExecutor(), null);
     executor = new PipelineExecutor(preloader, preloaderService, Expressions.forTesting());
-    
+
     context = new GadgetContext(){};
   }
 
@@ -97,16 +97,16 @@ public class PipelineExecutorTest {
     Element element = XmlUtil.parseSilent(pipelineXml);
     return new PipelinedData(element, GADGET_URI);
   }
-  
+
   @Test
   public void execute() throws Exception {
     PipelinedData pipeline = getPipelinedData(CONTENT);
 
     Capture<PipelinedData.Batch> batchCapture =
       new Capture<PipelinedData.Batch>();
-    
+
     JSONObject expectedData = new JSONObject("{result: {foo: 'bar'}}");
-    
+
     // Dummy return results (the "real" return would have two values)
     Callable<PreloadedData> callable = createPreloadTask("key", expectedData.toString());
 
@@ -119,17 +119,17 @@ public class PipelineExecutorTest {
 
     PipelineExecutor.Results results = executor.execute(context,
         ImmutableList.of(pipeline));
-    
+
     // Verify the data set is injected, and the os-data was deleted
     assertTrue(batchCapture.getValue().getPreloads().containsKey("me"));
     assertTrue(batchCapture.getValue().getPreloads().containsKey("json"));
-    
+
     JsonAssert.assertJsonEquals("[{id: 'key', result: {foo: 'bar'}}]",
         JsonSerializer.serialize(results.results));
     JsonAssert.assertJsonEquals("{foo: 'bar'}",
         JsonSerializer.serialize(results.keyedResults.get("key")));
     assertTrue(results.remainingPipelines.isEmpty());
-    
+
     control.verify();
   }
 
@@ -153,13 +153,13 @@ public class PipelineExecutorTest {
       new Capture<PipelinedData.Batch>();
     Callable<PreloadedData> firstTask = createPreloadTask("json",
         "{result: {user: 'canonical'}}");
-    
+
     // Second batch, the user fetch
     Capture<PipelinedData.Batch> secondBatch =
       new Capture<PipelinedData.Batch>();
     Callable<PreloadedData> secondTask = createPreloadTask("me",
         "{result: {'id':'canonical'}}");
-    
+
     // First, a batch with an HTTP request
     expect(
         preloader.createPreloadTasks(same(context),
@@ -181,7 +181,7 @@ public class PipelineExecutorTest {
         JsonSerializer.serialize(results.results));
     assertEquals(ImmutableSet.of("json", "me"), results.keyedResults.keySet());
     assertTrue(results.remainingPipelines.isEmpty());
-    
+
     control.verify();
 
     // Verify the data set is injected, and the os-data was deleted
@@ -190,7 +190,7 @@ public class PipelineExecutorTest {
     RequestAuthenticationInfo request = (RequestAuthenticationInfo)
         firstBatch.getValue().getPreloads().get("json").getData();
     assertEquals("http://example.org/test.json", request.getHref().toString());
-    
+
     // Check the evaluated person request
     JSONObject personRequest = (JSONObject) secondBatch.getValue().getPreloads().get("me").getData();
     assertEquals("canonical", personRequest.getJSONObject("params").getJSONArray("userId").get(0));
@@ -213,19 +213,19 @@ public class PipelineExecutorTest {
     assertTrue(results.keyedResults.isEmpty());
     assertEquals(1, results.remainingPipelines.size());
     assertSame(pipeline, results.remainingPipelines.iterator().next());
-    
+
     control.verify();
   }
-  
+
   @Test
   public void executeError() throws Exception {
     PipelinedData pipeline = getPipelinedData(CONTENT);
 
     Capture<PipelinedData.Batch> batchCapture =
       new Capture<PipelinedData.Batch>();
-    
+
     JSONObject expectedData = new JSONObject("{error: {message: 'NO!', code: 500}}");
-    
+
     // Dummy return results (the "real" return would have two values)
     Callable<PreloadedData> callable = createPreloadTask("key", expectedData.toString());
 
@@ -238,17 +238,17 @@ public class PipelineExecutorTest {
 
     PipelineExecutor.Results results = executor.execute(context,
         ImmutableList.of(pipeline));
-    
+
     // Verify the data set is injected, and the os-data was deleted
     assertTrue(batchCapture.getValue().getPreloads().containsKey("me"));
     assertTrue(batchCapture.getValue().getPreloads().containsKey("json"));
-    
+
     JsonAssert.assertJsonEquals("[{id: 'key', error: {message: 'NO!', code: 500}}]",
         JsonSerializer.serialize(results.results));
     JsonAssert.assertJsonEquals("{message: 'NO!', code: 500}",
         JsonSerializer.serialize(results.keyedResults.get("key")));
     assertTrue(results.remainingPipelines.isEmpty());
-    
+
     control.verify();
   }
 
@@ -256,7 +256,7 @@ public class PipelineExecutorTest {
   public void executePreloadException() throws Exception {
     PipelinedData pipeline = getPipelinedData(CONTENT);
     final PreloadedData willThrow = control.createMock(PreloadedData.class);
-    
+
     Callable<PreloadedData> callable = new Callable<PreloadedData>() {
       public PreloadedData call() throws Exception {
         return willThrow;
@@ -279,7 +279,7 @@ public class PipelineExecutorTest {
     assertEquals(0, results.results.size());
     assertTrue(results.keyedResults.isEmpty());
     assertTrue(results.remainingPipelines.isEmpty());
-    
+
     control.verify();
   }
 
@@ -288,7 +288,7 @@ public class PipelineExecutorTest {
     reportMatcher(new BatchMatcher(socialCount, httpCount));
     return null;
   }
-  
+
   private static class BatchMatcher implements IArgumentMatcher {
     private final int socialCount;
     private final int httpCount;
@@ -297,7 +297,7 @@ public class PipelineExecutorTest {
       this.socialCount = socialCount;
       this.httpCount = httpCount;
     }
-    
+
     public void appendTo(StringBuffer buffer) {
       buffer.append("eqBuffer[social=").append(socialCount).append(",http=").append(httpCount).append(']');
     }
@@ -306,7 +306,7 @@ public class PipelineExecutorTest {
       if (!(obj instanceof PipelinedData.Batch)) {
         return false;
       }
-      
+
       PipelinedData.Batch batch = (PipelinedData.Batch) obj;
       int actualSocialCount = 0;
       int actualHttpCount = 0;
@@ -317,10 +317,10 @@ public class PipelineExecutorTest {
           actualSocialCount++;
         }
       }
-      
+
       return socialCount == actualSocialCount && httpCount == actualHttpCount;
     }
-    
+
   }
   /** Create a mock Callable for a single preload task */
   private Callable<PreloadedData> createPreloadTask(final String key, String jsonResult)
@@ -336,7 +336,7 @@ public class PipelineExecutorTest {
     Callable<PreloadedData> callable = new Callable<PreloadedData>() {
       public PreloadedData call() throws Exception {
         return preloadResult;
-      }      
+      }
     };
     return callable;
   }

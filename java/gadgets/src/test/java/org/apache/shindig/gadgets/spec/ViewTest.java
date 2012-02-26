@@ -206,7 +206,7 @@ public class ViewTest {
     View view = new View("test", Arrays.asList(XmlUtil.parse(xml)), SPEC_URL);
     assertEquals(Uri.parse(href), view.getHref());
   }
-  
+
   @Test
   public void authAttributes() throws Exception {
     String xml = "<Content type='html' sign_owner='false' sign_viewer='false' foo='bar' " +
@@ -234,7 +234,7 @@ public class ViewTest {
     View view = new View("test", Arrays.asList(XmlUtil.parse(xml)), SPEC_URL);
     PipelinedData.Batch batch = view.getPipelinedData().getBatch(
         Expressions.forTesting(), new RootELResolver());
-    
+
     assertEquals(1, batch.getPreloads().size());
     assertTrue(batch.getPreloads().containsKey("key"));
   }

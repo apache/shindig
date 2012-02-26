@@ -84,7 +84,7 @@ public class CryptoTest {
       assertArrayEquals("Array of length " + i, orig, plainText);
     }
   }
-  
+
   @Test
   public void testRandomDigits() throws Exception {
     Pattern digitPattern = Pattern.compile("^\\d+$");

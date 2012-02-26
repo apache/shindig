@@ -32,7 +32,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class DefaultRpcServiceLookupTest extends Assert {
-  
+
   private DefaultRpcServiceLookup svcLookup;
   private String socialEndpoint;
   private String host;
@@ -76,25 +76,25 @@ public class DefaultRpcServiceLookupTest extends Assert {
 
   @Test
   public void testGetServicesForContainer_OneContainerTwoServices() throws Exception {
-    Set<String> expectedServiceMethods = Sets.newHashSet("system.listMethods", "people.get", 
+    Set<String> expectedServiceMethods = Sets.newHashSet("system.listMethods", "people.get",
             "people.update", "people.create", "people.delete");
-    
+
     LinkedHashMultimap<String, String> expectedServices = LinkedHashMultimap.create();
     expectedServices.putAll(socialEndpoint, expectedServiceMethods);
 
     String container = "ig";
-    svcLookup.setServicesFor(container, expectedServices);    
+    svcLookup.setServicesFor(container, expectedServices);
 
-    assertServiceHasCorrectConfig(socialEndpoint, expectedServiceMethods, container, 1);  
+    assertServiceHasCorrectConfig(socialEndpoint, expectedServiceMethods, container, 1);
   }
 
   @Test
   public void testGetServiceForContainer_TwoContainersOneEndpoint() throws Exception {
     String socialEndpoint2 = "http://localhost:8080/api/rpc";
-    Set<String> expectedServiceMethods = Sets.newHashSet("system.listMethods", "people.get", 
+    Set<String> expectedServiceMethods = Sets.newHashSet("system.listMethods", "people.get",
             "people.update", "people.create", "people.delete");
     Set<String> expectedServiceMethods2 = Sets.newHashSet("cache.invalidate");
-    
+
     LinkedHashMultimap<String, String> expectedServices = LinkedHashMultimap.create();
     expectedServices.putAll(socialEndpoint, expectedServiceMethods);
 
@@ -105,8 +105,8 @@ public class DefaultRpcServiceLookupTest extends Assert {
     String container2 = "gm";
     svcLookup.setServicesFor(container, expectedServices);
     svcLookup.setServicesFor(container2, expectedServices2);
-    
-    assertServiceHasCorrectConfig(socialEndpoint, expectedServiceMethods, container, 1);    
+
+    assertServiceHasCorrectConfig(socialEndpoint, expectedServiceMethods, container, 1);
     assertServiceHasCorrectConfig(socialEndpoint2, expectedServiceMethods2, container2, 1);
   }
 

@@ -36,27 +36,27 @@ import com.google.common.collect.ImmutableList;
  * and JSONArray is supported.
  */
 public class ShindigTypeConverter implements ELTypeConverter {
- 
-  
+
+
   public  boolean isPostConvertible(Class<?> type) {
     return false;
   }
-  
+
   @SuppressWarnings("unchecked")
   public <T> T convert(Object obj, Class<T> type) throws ELException {
     // Handle boolean specially
     if (type == Boolean.class || type == Boolean.TYPE) {
       return (T) coerceToBoolean(obj);
     }
-    
+
     if (type == JSONArray.class) {
       return (T) coerceToJsonArray(obj);
     }
-    
+
     if (type == Iterable.class) {
       return (T) coerceToIterable(obj);
     }
-    
+
     //  Nothing more we can do.
     return null;
   }
@@ -70,11 +70,11 @@ public class ShindigTypeConverter implements ELTypeConverter {
     if (obj == null) {
       return ImmutableList.of();
     }
-    
+
     if (obj instanceof Iterable<?>) {
       return ((Iterable<?>) obj);
     }
-    
+
     if (obj instanceof JSONArray) {
       final JSONArray array = (JSONArray) obj;
       // TODO: Extract JSONArrayIterator class?
@@ -82,23 +82,23 @@ public class ShindigTypeConverter implements ELTypeConverter {
         public Iterator<Object> iterator() {
           return new Iterator<Object>() {
             private int i = 0;
-            
+
             public boolean hasNext() {
               return i < array.length();
             }
-          
+
             public Object next() {
               if (i >= array.length()) {
                 throw new NoSuchElementException();
               }
-              
+
               try {
                 return array.get(i++);
               } catch (Exception e) {
                 throw new ELException(e);
               }
             }
-          
+
             public void remove() {
               throw new UnsupportedOperationException();
             }
@@ -106,33 +106,33 @@ public class ShindigTypeConverter implements ELTypeConverter {
         }
       };
     }
-    
+
     if (obj instanceof JSONObject) {
       JSONObject json = (JSONObject) obj;
-      
+
       // Does this object have a "list" property that is an array?
       // TODO: add to specification
       Object childList = json.opt("list");
       if (childList instanceof JSONArray) {
         return coerceToIterable(childList);
       }
-      
+
       // A scalar JSON value is treated as a single element list.
       return ImmutableList.of(json);
     }
-    
+
     return ImmutableList.of(obj);
   }
-  
+
   private JSONArray coerceToJsonArray(Object obj) {
     if (obj == null) {
       return null;
     }
-    
+
     if (obj instanceof JSONArray) {
       return (JSONArray) obj;
     }
-    
+
     if (obj instanceof String) {
       JSONArray array = new JSONArray();
       StringTokenizer tokenizer = new StringTokenizer(obj.toString(), ",");
@@ -142,37 +142,37 @@ public class ShindigTypeConverter implements ELTypeConverter {
 
       return array;
     }
-    
+
     throw new ELException("Could not coerce " + obj.getClass().getName() + " to JSONArray");
   }
 
   /**
    * Coerce the following booleans:
-   * 
+   *
    * null -> false
    * empty string, and "false" -> false
    * boolean false -> false
    * number 0 -> false
-   * 
+   *
    * All else is true.
    */
   private Boolean coerceToBoolean(Object obj) {
     if (obj == null) {
       return false;
     }
-    
+
     if (obj instanceof String) {
       return !("".equals(obj) || "false".equals(obj));
     }
-    
+
     if (obj instanceof Boolean) {
       return (Boolean) obj;
     }
-    
+
     if (obj instanceof Number) {
       return 0 != ((Number) obj).intValue();
     }
-    
+
     return true;
   }
 }

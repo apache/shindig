@@ -77,7 +77,7 @@ public class ActivityStreamHandler {
     HandlerPreconditions.requireNotEmpty(userIds, "No userId specified");
     HandlerPreconditions.requireSingular(userIds, "Multiple userIds not supported");
     HandlerPreconditions.requireNotEmpty(activityIds, "At least one activity ID must be specified");
-    
+
     return service.deleteActivityEntries(Iterables.getOnlyElement(userIds), request.getGroup(),
         request.getAppId(), activityIds, request.getToken());
   }

@@ -40,7 +40,7 @@ public class ProxyUriBaseTest {
         "<Module><ModulePrefs author=\"a\" title=\"t\"></ModulePrefs>" +
         "<Content></Content></Module>");
     return new Gadget().setContext(new GadgetContext() {
-      @Override                     
+      @Override
       public String getParameter(String name) {
         return "0";
       }

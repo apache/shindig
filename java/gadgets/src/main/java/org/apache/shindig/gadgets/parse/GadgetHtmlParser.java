@@ -45,11 +45,11 @@ import java.util.logging.Logger;
  */
 
 public abstract class GadgetHtmlParser {
-  
+
   //class name for logging purpose
   private static final String classname = GadgetHtmlParser.class.getName();
   private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
-	  
+
 
   public static final String PARSED_DOCUMENTS = "parsedDocuments";
   public static final String PARSED_FRAGMENTS = "parsedFragments";
@@ -62,7 +62,7 @@ public abstract class GadgetHtmlParser {
   protected GadgetHtmlParser(DOMImplementation documentFactory) {
     this.documentFactory = documentFactory;
   }
-  
+
   protected GadgetHtmlParser(DOMImplementation documentFactory,
       final HtmlSerializer serializer) {
     this.documentFactory = documentFactory;
@@ -331,12 +331,12 @@ public abstract class GadgetHtmlParser {
             // including any xmlns attribute. This allows children to be reparsed within the
             // correct xml namespace.
             next.getAttributes().removeNamedItem("type");
-            
+
             HtmlSerialization.printStartElement(osType,
                 next.getAttributes(), sb, /*withXmlClose*/ false);
 
           } catch (IOException e) {
-            if (LOG.isLoggable(Level.INFO)) {    
+            if (LOG.isLoggable(Level.INFO)) {
               LOG.logp(Level.INFO, classname, "reprocessScriptForOpenSocial", MessageKeys.UNABLE_TO_CONVERT_SCRIPT);
             }
           }
@@ -349,7 +349,7 @@ public abstract class GadgetHtmlParser {
             }
             sb.append(scriptKid.getTextContent());
           }
-          
+
           if (parseOs) {
             // Clean out the script node.
             while (next.hasChildNodes()) {
@@ -366,7 +366,7 @@ public abstract class GadgetHtmlParser {
               }
             }
 
-            next.getParentNode().removeChild(next);            
+            next.getParentNode().removeChild(next);
           }
         }
       }

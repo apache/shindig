@@ -81,7 +81,7 @@ public class CompactHtmlSerializer extends DefaultHtmlSerializer {
   /**
    * Collapse any consecutive HTML whitespace characters inside a string into
    * one space character (0x20). This method will not output any characters when
-   * the given string is entirely composed of whitespaces.  
+   * the given string is entirely composed of whitespaces.
    *
    * References:
    * <ul>

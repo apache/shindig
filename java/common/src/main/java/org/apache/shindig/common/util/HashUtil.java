@@ -42,10 +42,10 @@ public final class HashUtil {
     byte[] hashBytes = getMessageDigest().digest(Preconditions.checkNotNull(data));
     return bytesToHex(hashBytes);
   }
-  
+
   /**
    * Converts a byte array into a hex string.
-   * 
+   *
    * @param hashBytes The byte array to convert.
    * @return The hex string.
    */
@@ -75,7 +75,7 @@ public final class HashUtil {
 
   /**
    * Provides a {@link MessageDigest} object for calculating checksums.
-   * 
+   *
    * @return A MessageDigest object.
    */
   public static MessageDigest getMessageDigest() {

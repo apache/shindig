@@ -18,7 +18,7 @@ package org.apache.shindig.gadgets.oauth2.persistence;
 
 /**
  * Subclass of {@link OAuth2PersistenceException} for caching issues.
- * 
+ *
  */
 public class OAuth2CacheException extends OAuth2PersistenceException {
   private static final long serialVersionUID = -7722454386821962603L;

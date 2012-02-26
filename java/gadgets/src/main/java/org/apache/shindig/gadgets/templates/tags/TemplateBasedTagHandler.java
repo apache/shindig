@@ -38,45 +38,45 @@ import com.google.common.collect.Maps;
 public class TemplateBasedTagHandler extends AbstractTagHandler {
 
   private final Element templateDefinition;
-  
+
   public TemplateBasedTagHandler(Element templateDefinition, String namespaceUri, String tagName) {
     super(namespaceUri, tagName);
     this.templateDefinition = templateDefinition;
   }
-  
+
   public void process(Node result, Element tagInstance, TemplateProcessor processor) {
     // Process the children of the tag
     DocumentFragment processedContent = processChildren(tagInstance, processor);
-    
+
     // Save the old values of "My", "Cur", and the template root element,
     // and update each
     Map<String, Object> oldMy = processor.getTemplateContext().setMy(
         computeMy(tagInstance, processedContent, processor));
     Object oldCur = processor.getTemplateContext().setCur(null);
     Node oldTemplateRoot = processor.getTemplateContext().setTemplateRoot(processedContent);
-    
+
     processTemplate(result, tagInstance, processor);
-    
+
     // And restore the template context
     processor.getTemplateContext().setMy(oldMy);
     processor.getTemplateContext().setCur(oldCur);
     processor.getTemplateContext().setTemplateRoot(oldTemplateRoot);
   }
-  
+
   /** Process the template content in the new EL state */
   protected void processTemplate(Node result, Element tagInstance, TemplateProcessor processor) {
     processor.processChildNodes(result, templateDefinition);
   }
-  
+
   /**
    * Compute the value of ${My} for this tag execution.
    */
   protected Map<String, Object> computeMy(Element tagInstance, Node processedContent,
       TemplateProcessor processor) {
     Map<String, Object> myMap = Maps.newHashMap();
-    
+
     NodeList children = processedContent.getChildNodes();
-    
+
     for (int i = 0;  i < children.getLength(); i++) {
       Node child = children.item(i);
       if (child instanceof Element) {
@@ -110,10 +110,10 @@ public class TemplateBasedTagHandler extends AbstractTagHandler {
       String name = atts.item(i).getNodeName();
       // Overwrite any pre-existing values, as attributes take
       // precedence over elements.  This is wasteful if there are attributes
-      // and elements with the same name, but that should be very rare 
+      // and elements with the same name, but that should be very rare
       myMap.put(name, getValueFromTag(tagInstance, name, processor, Object.class));
     }
-    
+
     return myMap;
   }
 }

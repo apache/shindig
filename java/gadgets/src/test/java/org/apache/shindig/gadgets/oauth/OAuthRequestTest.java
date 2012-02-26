@@ -125,10 +125,10 @@ public class OAuthRequestTest {
       public String generateCallback(OAuthFetcherConfig fetcherConfig, String baseCallback,
           HttpRequest request, OAuthResponseParams responseParams) {
         return null;
-      }      
+      }
     };
   }
-  
+
   private OAuthCallbackGenerator createRealCallbackGenerator() {
     return new OAuthCallbackGenerator() {
       public String generateCallback(OAuthFetcherConfig fetcherConfig, String baseCallback,
@@ -142,7 +142,7 @@ public class OAuthRequestTest {
             .setAuthority(activeUrl.getAuthority())
             .setPath("/realcallback")
             .toString();
-      }      
+      }
     };
   }
 
@@ -152,7 +152,7 @@ public class OAuthRequestTest {
   public GadgetOAuthTokenStore getOAuthStore(BasicOAuthStore base) {
     return getOAuthStore(base, new FakeGadgetSpecFactory());
   }
-  
+
   private GadgetOAuthTokenStore getOAuthStore(BasicOAuthStore base,
       GadgetSpecFactory specFactory) {
     if (base == null) {
@@ -351,7 +351,7 @@ public class OAuthRequestTest {
     assertEquals("User data is hello-oauth", response.getResponseAsString());
     checkEmptyLog();
   }
-  
+
   @Test
   public void testOAuthFlow_badCallbackVerifier() throws Exception {
     fetcherConfig = new OAuthFetcherConfig(
@@ -364,18 +364,18 @@ public class OAuthRequestTest {
 
     HttpResponse response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
     assertEquals("", response.getResponseAsString());
-    
+
     client.approveToken("user_data=hello-oauth");
     client.setReceivedCallbackUrl("nonsense");
     response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
     assertEquals("", response.getResponseAsString());
     assertNotNull(response.getMetadata().get("oauthErrorText"));
-    
+
     client.approveToken("user_data=try-again");
     response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
     assertEquals("User data is try-again", response.getResponseAsString());
   }
-  
+
   @Test
   public void testOAuthFlow_tokenReused() throws Exception {
     MakeRequestClient client = makeNonSocialClient("owner", "owner", GADGET_URL);
@@ -430,7 +430,7 @@ public class OAuthRequestTest {
         getOAuthStore(base, null),
         clock, callbackGenerator,
         false);
-    
+
     MakeRequestClient client = makeNonSocialClient("owner", "owner", GADGET_URL);
     setNoSpecOptions(client);
 
@@ -442,7 +442,7 @@ public class OAuthRequestTest {
     assertEquals("User data is hello-oauth", response.getResponseAsString());
     checkEmptyLog();
   }
-  
+
   private void setNoSpecOptions(MakeRequestClient client) {
     client.getBaseArgs().setRequestOption(OAuthArguments.PROGRAMMATIC_CONFIG_PARAM, "true");
     client.getBaseArgs().setRequestOption(OAuthArguments.PARAM_LOCATION_PARAM, "uri-query");
@@ -454,14 +454,14 @@ public class OAuthRequestTest {
     client.getBaseArgs().setRequestOption(OAuthArguments.AUTHORIZATION_URL_PARAM,
         FakeOAuthServiceProvider.APPROVAL_URL);
   }
-  
+
   @Test
   public void testOAuthFlow_noSpecNoRequestTokenUrl() throws Exception {
     fetcherConfig = new OAuthFetcherConfig(
         new BasicBlobCrypter("abcdefghijklmnop".getBytes()),
         getOAuthStore(base, null),
         clock, null, false);
-    
+
     MakeRequestClient client = makeNonSocialClient("owner", "owner", GADGET_URL);
     setNoSpecOptions(client);
     client.getBaseArgs().removeRequestOption(OAuthArguments.REQUEST_TOKEN_URL_PARAM);
@@ -476,21 +476,21 @@ public class OAuthRequestTest {
     checkStringContains("should report no request token url", errorText,
         "No request token URL specified");
   }
-  
+
   @Test
   public void testOAuthFlow_noSpecNoAccessTokenUrl() throws Exception {
     fetcherConfig = new OAuthFetcherConfig(
         new BasicBlobCrypter("abcdefghijklmnop".getBytes()),
         getOAuthStore(base, null),
         clock, callbackGenerator, false);
-    
+
     MakeRequestClient client = makeNonSocialClient("owner", "owner", GADGET_URL);
     setNoSpecOptions(client);
     client.getBaseArgs().removeRequestOption(OAuthArguments.ACCESS_TOKEN_URL_PARAM);
 
     // Get the request token
     HttpResponse response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
-    
+
     // try to swap for access token
     response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
 
@@ -503,14 +503,14 @@ public class OAuthRequestTest {
     checkStringContains("should report no access token url", errorText,
         "No access token URL specified");
   }
-  
+
   @Test
   public void testOAuthFlow_noSpecNoApprovalUrl() throws Exception {
     fetcherConfig = new OAuthFetcherConfig(
         new BasicBlobCrypter("abcdefghijklmnop".getBytes()),
         getOAuthStore(base, null),
         clock, callbackGenerator, false);
-    
+
     MakeRequestClient client = makeNonSocialClient("owner", "owner", GADGET_URL);
     setNoSpecOptions(client);
     client.getBaseArgs().removeRequestOption(OAuthArguments.AUTHORIZATION_URL_PARAM);
@@ -526,7 +526,7 @@ public class OAuthRequestTest {
     checkStringContains("should report no authorization url", errorText,
         "No authorization URL specified");
   }
-  
+
   @Test
   public void testOAuthFlow_noSpecAuthHeader() throws Exception {
     serviceProvider.setParamLocation(OAuthParamLocation.AUTH_HEADER);
@@ -534,7 +534,7 @@ public class OAuthRequestTest {
         new BasicBlobCrypter("abcdefghijklmnop".getBytes()),
         getOAuthStore(base, null),
         clock, callbackGenerator, false);
-    
+
     MakeRequestClient client = makeNonSocialClient("owner", "owner", GADGET_URL);
     setNoSpecOptions(client);
     client.getBaseArgs().setRequestOption(OAuthArguments.PARAM_LOCATION_PARAM, "auth-header");
@@ -547,7 +547,7 @@ public class OAuthRequestTest {
     assertEquals("User data is hello-oauth", response.getResponseAsString());
     checkEmptyLog();
   }
-  
+
   @Test
   public void testOAuthFlow_noSpecPostBody() throws Exception {
     serviceProvider.setParamLocation(OAuthParamLocation.POST_BODY);
@@ -555,7 +555,7 @@ public class OAuthRequestTest {
         new BasicBlobCrypter("abcdefghijklmnop".getBytes()),
         getOAuthStore(base, null),
         clock, callbackGenerator, false);
-    
+
     MakeRequestClient client = makeNonSocialClient("owner", "owner", GADGET_URL);
     setNoSpecOptions(client);
     client.getBaseArgs().setRequestOption(OAuthArguments.REQUEST_METHOD_PARAM, "POST");
@@ -578,7 +578,7 @@ public class OAuthRequestTest {
         new BasicBlobCrypter("abcdefghijklmnop".getBytes()),
         getOAuthStore(base, null),
         clock, callbackGenerator, false);
-    
+
     MakeRequestClient client = makeNonSocialClient("owner", "owner", GADGET_URL);
     setNoSpecOptions(client);
     client.getBaseArgs().setRequestOption(OAuthArguments.REQUEST_METHOD_PARAM, "POST");
@@ -599,7 +599,7 @@ public class OAuthRequestTest {
         new BasicBlobCrypter("abcdefghijklmnop".getBytes()),
         getOAuthStore(base, null),
         clock, null, false);
-    
+
     MakeRequestClient client = makeNonSocialClient("owner", "owner", GADGET_URL);
     setNoSpecOptions(client);
     client.getBaseArgs().setRequestOption(OAuthArguments.REQUEST_TOKEN_URL_PARAM, "foo");
@@ -613,14 +613,14 @@ public class OAuthRequestTest {
     assertNotNull(errorText);
     checkStringContains("should report invalid url", errorText, "Invalid URL: foo");
   }
-  
+
   @Test
   public void testOAuthFlow_noSpecBlankUrl() throws Exception {
     fetcherConfig = new OAuthFetcherConfig(
         new BasicBlobCrypter("abcdefghijklmnop".getBytes()),
         getOAuthStore(base, null),
         clock, null, false);
-    
+
     MakeRequestClient client = makeNonSocialClient("owner", "owner", GADGET_URL);
     setNoSpecOptions(client);
     client.getBaseArgs().setRequestOption(OAuthArguments.REQUEST_TOKEN_URL_PARAM, "");
@@ -634,7 +634,7 @@ public class OAuthRequestTest {
     assertNotNull(errorText);
     checkStringContains("should report invalid url", errorText, "Invalid URL: ");
   }
-  
+
   @Test
   public void testAccessTokenNotUsedForSocialPage() throws Exception {
     MakeRequestClient client = makeNonSocialClient("owner", "owner", GADGET_URL);
@@ -956,7 +956,7 @@ public class OAuthRequestTest {
     assertEquals("User data is hello-oauth", response.getResponseAsString());
   }
 
-  
+
   @Test
   public void testConsumerThrottled() throws Exception {
     assertEquals(0, serviceProvider.getRequestTokenCount());
@@ -1064,7 +1064,7 @@ public class OAuthRequestTest {
     assertEquals(3, serviceProvider.getResourceAccessCount());
 
     serviceProvider.setConsumersThrottled(false);
-    
+
     client.clearState(); // remove any cached oauth tokens
 
     response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL + "?cachebust=3");
@@ -1199,14 +1199,14 @@ public class OAuthRequestTest {
     assertTrue(contains(queryParams, "xoauth_public_key", "foo"));
     assertFalse(contains(queryParams, "opensocial_proxied_content", "1"));
   }
-  
+
   @Test
   public void testSignedFetch_authHeader() throws Exception {
     serviceProvider.setParamLocation(OAuthParamLocation.AUTH_HEADER);
     MakeRequestClient client = makeSignedFetchClient("o", "v", "http://www.example.com/app");
     client.getBaseArgs().setRequestOption(OAuthArguments.PROGRAMMATIC_CONFIG_PARAM, "true");
     client.getBaseArgs().setRequestOption(OAuthArguments.PARAM_LOCATION_PARAM, "auth-header");
-    
+
     HttpResponse resp = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
     String auth = resp.getHeader(FakeOAuthServiceProvider.AUTHZ_ECHO_HEADER);
     assertNotNull("Should have echoed authz header", auth);
@@ -1228,7 +1228,7 @@ public class OAuthRequestTest {
     assertTrue(contains(queryParams, "xoauth_public_key", "foo"));
     assertTrue(contains(queryParams, "opensocial_proxied_content", "1"));
   }
-  
+
   @Test
   public void testPostBinaryData() throws Exception {
     byte[] raw = { 0, 1, 2, 3, 4, 5 };
@@ -1255,7 +1255,7 @@ public class OAuthRequestTest {
     byte[] echoedBytes = Base64.decodeBase64(CharsetUtil.getUtf8Bytes(echoed));
     assertTrue(Arrays.equals(raw, echoedBytes));
   }
-  
+
   @Test
   public void testGetWithFormEncodedBody() throws Exception {
     MakeRequestClient client = makeSignedFetchClient("o", "v", "http://www.example.com/app");
@@ -1263,7 +1263,7 @@ public class OAuthRequestTest {
         OAuth.FORM_ENCODED, "war=peace&yes=no".getBytes());
     assertEquals("war=peace&yes=no", resp.getHeader(FakeOAuthServiceProvider.BODY_ECHO_HEADER));
   }
-  
+
   @Test
   public void testGetWithRawBody() throws Exception {
     MakeRequestClient client = makeSignedFetchClient("o", "v", "http://www.example.com/app");
@@ -1308,7 +1308,7 @@ public class OAuthRequestTest {
         OAuth.FORM_ENCODED, "foo=bar".getBytes());
     fail("Should have thrown with oauth signature mismatch");
   }
-  
+
   @Test(expected=RuntimeException.class)
   public void testGetTamperedRemoveRawContent() throws Exception {
     byte[] raw = { 0, 1, 2, 3, 4, 5 };
@@ -1355,7 +1355,7 @@ public class OAuthRequestTest {
     client.sendFormPost(FakeOAuthServiceProvider.RESOURCE_URL, "foo=bar");
     fail("Should have thrown with oauth signature mismatch");
   }
-  
+
   @Test(expected=RuntimeException.class)
   public void testPostTamperedRemoveRawContent() throws Exception {
     byte[] raw = { 0, 1, 2, 3, 4, 5 };
@@ -1372,7 +1372,7 @@ public class OAuthRequestTest {
         "funky-content", raw);
     fail("Should have thrown with body hash in form encoded request");
   }
-  
+
   @Test
   public void testSignedFetch_error401() throws Exception {
     assertEquals(0, base.getAccessTokenRemoveCount());
@@ -1388,7 +1388,7 @@ public class OAuthRequestTest {
     checkStringContains("Should return response", errorText, "some vague error");
     assertEquals(0, base.getAccessTokenRemoveCount());
   }
-  
+
   @Test
   public void testSignedFetch_error403() throws Exception {
     assertEquals(0, base.getAccessTokenRemoveCount());
@@ -1928,7 +1928,7 @@ public class OAuthRequestTest {
     client.setTrustedParam("oauth_magic", "foo");
     client.setTrustedParam("opensocial_magic", "bar");
     client.setTrustedParam("xoauth_magic", "quux");
-    
+
     client.setTrustedParam("opensocial_owner_id", "overridden_opensocial_owner_id");
 
     HttpResponse response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
@@ -1939,7 +1939,7 @@ public class OAuthRequestTest {
     assertEquals("User data is hello-oauth", response.getResponseAsString());
     assertEquals(12, serviceProvider.getTrustedParamCount());
   }
-  
+
   /**
    * Test different behaviors of trusted parameters.
    * 1) pass two parameters with same name, the latter will win.
@@ -1952,10 +1952,10 @@ public class OAuthRequestTest {
     MakeRequestClient client = makeNonSocialClient("owner", "owner", GADGET_URL);
     client.setTrustedParam("oauth_magic", "foo");
     client.setTrustedParam("opensocial_magic", "bar");
-    
+
     client.setTrustedParam("xoauth_magic", "quux_overridden");
     client.setTrustedParam("xoauth_magic", "quux");
-    
+
     client.setTrustedParam("opensocial_owner_id", "overridden_opensocial_owner_id");
 
     HttpResponse response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
@@ -1966,7 +1966,7 @@ public class OAuthRequestTest {
     assertEquals("User data is hello-oauth", response.getResponseAsString());
     assertEquals(12, serviceProvider.getTrustedParamCount());
   }
-  
+
   /**
    * Test trusted parameters will always be sent when signOwner and signViewer
    * are false.
@@ -1978,7 +1978,7 @@ public class OAuthRequestTest {
     client.setTrustedParam("oauth_magic", "foo");
     client.setTrustedParam("opensocial_magic", "bar");
     client.setTrustedParam("xoauth_magic", "quux");
-    
+
     client.setTrustedParam("opensocial_owner_id", "overridden_opensocial_owner_id");
 
     HttpResponse response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
@@ -1989,9 +1989,9 @@ public class OAuthRequestTest {
     assertEquals("User data is hello-oauth", response.getResponseAsString());
     assertEquals(12, serviceProvider.getTrustedParamCount());
   }
-  
+
   /**
-   * Test invalid trusted parameters which are not prefixed with 'oauth' 'xoauth' or 'opensocial'. 
+   * Test invalid trusted parameters which are not prefixed with 'oauth' 'xoauth' or 'opensocial'.
    */
   @Test
   public void testTrustedParamsInvalidParameter() throws Exception {
@@ -2006,8 +2006,8 @@ public class OAuthRequestTest {
     HttpResponse response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
     assertEquals(HttpResponse.SC_FORBIDDEN, response.getHttpStatusCode());
   }
-  
-  
+
+
 
   // Checks whether the given parameter list contains the specified
   // key/value pair
@@ -2019,7 +2019,7 @@ public class OAuthRequestTest {
     }
     return false;
   }
-  
+
   private void checkContains(List<Parameter> params, String key, String value) {
     for (Parameter p : params) {
       if (p.getKey().equals(key)) {

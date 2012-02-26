@@ -51,7 +51,7 @@ public class JsResponseBuilderTest {
         "var e = {};\ne.prototype.f = {};\n",
         builder.build().getExterns());
   }
-  
+
   @Test
   public void skipsEmptyContent() throws Exception {
     builder.appendJs("number 1", "num1");

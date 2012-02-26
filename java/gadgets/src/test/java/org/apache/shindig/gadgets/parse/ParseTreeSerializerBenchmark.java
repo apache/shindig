@@ -46,7 +46,7 @@ public class ParseTreeSerializerBenchmark {
   private GadgetHtmlParser cajaParser = new CajaHtmlParser(
       DOCUMENT_PROVIDER);
 
-  
+
   private boolean warmup;
 
   private static final DOMImplementation DOCUMENT_PROVIDER =
@@ -133,7 +133,7 @@ public class ParseTreeSerializerBenchmark {
 
       output("Serializing DOM Transformer [" + parseMillis + " ms total: " +
             ((double) parseMillis) / numRuns + "ms/run]");
-      
+
     } catch (Exception e) {
       throw new GadgetException(GadgetException.Code.HTML_PARSE_ERROR, e);
     }

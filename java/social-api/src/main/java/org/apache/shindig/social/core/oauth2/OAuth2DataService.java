@@ -21,33 +21,33 @@ package org.apache.shindig.social.core.oauth2;
  * Services to support the management of data for the OAuth 2.0 specification.
  * Includes management of clients, authorization codes, access tokens, and
  * refresh tokens.
- * 
+ *
  * TODO (Eric): client registration services
  */
 public interface OAuth2DataService {
 
   /**
    * Retrieves a pre-registered client by ID.
-   * 
+   *
    * @param clientId identifies the client to retrieve
-   * 
+   *
    * @param OAuth2Client is the retrieved client
    */
   public OAuth2Client getClient(String clientId);
 
   /**
    * Retrieves an authorization code by its value.
-   * 
+   *
    * @param clientId identifies the client who owns the authorization code
    * @param authCode is the value of the authorization code to get
-   * 
+   *
    * @return OAuth2Code is the retrieved authorization code
    */
   public OAuth2Code getAuthorizationCode(String clientId, String authCode);
 
   /**
    * Registers an authorization code with a client.
-   * 
+   *
    * @param clientId identifies the client who owns the authorization code
    * @param authCode is the authorization code to register with the client
    */
@@ -55,7 +55,7 @@ public interface OAuth2DataService {
 
   /**
    * Unregisters an authorization code with a client.
-   * 
+   *
    * @param clientId identifies the client who owns the authorization code
    * @param authCode is the value of the authorization code to unregister
    */
@@ -63,16 +63,16 @@ public interface OAuth2DataService {
 
   /**
    * Retrieves an access token by its value.
-   * 
+   *
    * @param accessToken is the value of the accessToken to retrieve
-   * 
+   *
    * @return OAuth2Code is the retrieved access token; null if not found
    */
   public OAuth2Code getAccessToken(String accessToken);
 
   /**
    * Registers an access token with a client.
-   * 
+   *
    * @param clientId identifies the client to register the access token with
    * @param accessToken is the access token to register with the client
    */
@@ -80,7 +80,7 @@ public interface OAuth2DataService {
 
   /**
    * Unregisters an access token with a client.
-   * 
+   *
    * @param clientId identifies the client who owns the access token
    * @param accessToken is the value of the access token to unregister
    */
@@ -88,16 +88,16 @@ public interface OAuth2DataService {
 
   /**
    * Retrieves a refresh token by its value.
-   * 
+   *
    * @param refreshToken is the value of the refresh token to retrieve
-   * 
+   *
    * @return OAuth2Code is the retrieved refresh token; null if not found
    */
   public OAuth2Code getRefreshToken(String refreshToken);
 
   /**
    * Registers a refresh token with a client.
-   * 
+   *
    * @param clientId identifies the client who owns the refresh token
    * @param refreshToken is the refresh token to register with the client
    */
@@ -105,7 +105,7 @@ public interface OAuth2DataService {
 
   /**
    * Unregisters a refresh token with a client.
-   * 
+   *
    * @param clientId identifies the client who owns the refresh token
    * @param refreshToken is the value of the refresh token to unregister
    */

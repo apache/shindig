@@ -38,7 +38,7 @@ public class OAuthGadgetContext extends GadgetContext {
     this.appUrl = Uri.parse(securityToken.getAppUrl());
     this.bypassSpecCache = arguments.getBypassSpecCache();
   }
-  
+
   @Override
   public String getContainer() {
     return container;

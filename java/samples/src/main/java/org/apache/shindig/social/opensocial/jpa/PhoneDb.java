@@ -33,7 +33,7 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "phone")
 @PrimaryKeyJoinColumn(name = "oid")
-@NamedQuery(name = PhoneDb.FINDBY_PHONE_NUMBER, 
+@NamedQuery(name = PhoneDb.FINDBY_PHONE_NUMBER,
     query = "select p from PhoneDb p where p.value = :phonenumber ")
 public class PhoneDb extends ListFieldDb {
 
@@ -45,7 +45,7 @@ public class PhoneDb extends ListFieldDb {
    * The name of the phone number parameter in JPA queries
    */
   public static final String PARAM_PHONE_NUMBER = "phonenumber";
-  
+
   /**
    * The person who is associated with this phone number.
    */

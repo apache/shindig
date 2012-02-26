@@ -65,7 +65,7 @@ public class JsServlet extends InjectedServlet {
     checkInitialized();
     this.jsRequestBuilder = jsRequestBuilder;
   }
-  
+
   @Inject
   public void setCachingSetter(CachingSetter cachingSetter) {
     this.cachingSetter = cachingSetter;
@@ -95,10 +95,10 @@ public class JsServlet extends InjectedServlet {
       resp.sendError(e.getStatusCode(), e.getMessage());
       return;
     }
-    
+
     emitJsResponse(jsResponse, req, resp);
   }
-  
+
   protected void emitJsResponse(JsResponse jsResponse, HttpServletRequest req,
       HttpServletResponse resp) throws IOException {
     if (jsResponse.getStatusCode() == 200 && jsResponse.toJsString().length() == 0) {

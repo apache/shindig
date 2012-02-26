@@ -77,7 +77,7 @@ public class JsonRpcHandler {
     // Process all JSON first so that we don't wind up with hanging threads if
     // a JSONException is thrown.
     gadgets = Lists.newArrayListWithCapacity(requestedGadgets.length());
-    
+
     for (int i = 0, j = requestedGadgets.length(); i < j; ++i) {
       GadgetContext context = new JsonRpcGadgetContext(
           requestContext, requestedGadgets.getJSONObject(i));
@@ -123,7 +123,7 @@ public class JsonRpcHandler {
       } finally {
         numJobs--;
       }
-    } 
+    }
     return response;
   }
 
@@ -147,7 +147,7 @@ public class JsonRpcHandler {
         throw new RpcException(context, e);
       }
     }
-    
+
     protected JSONObject getGadgetJson(Gadget gadget, GadgetSpec spec)
         throws JSONException {
         JSONObject gadgetJson = new JSONObject();
@@ -174,9 +174,9 @@ public class JsonRpcHandler {
         // Features.
         Set<String> feats = prefs.getFeatures().keySet();
         String[] features = feats.toArray(new String[feats.size()]);
-        
+
         // Feature details
-        // The following renders an object containing feature details, of the form 
+        // The following renders an object containing feature details, of the form
         //   { <featureName>*: { "required": <boolean>, "parameters": { <paramName>*: <string> } } }
         JSONObject featureDetailList = new JSONObject();
         for (Feature featureSpec : prefs.getFeatures().values()) {
@@ -190,7 +190,7 @@ public class JsonRpcHandler {
           }
           featureDetailList.put(featureSpec.getName(), featureDetail);
         }
-        
+
         // Links
         JSONObject links = new JSONObject();
         for (LinkSpec link : prefs.getLinks().values()) {

@@ -563,7 +563,7 @@ public class DefaultConcatUriManagerTest extends UriManagerTestBase {
   private String generateUrl(int length) {
     return "http://www.url.com/" + RandomStringUtils.randomAlphanumeric(length - 22) + ".js";
   }
-  
+
   private void checkMissingHostConfig(ConcatUriManager.Type type) throws Exception {
     Gadget gadget = mockGadget(false, false);
     DefaultConcatUriManager manager = makeManager(null, "/foo", "token", null);

@@ -64,19 +64,19 @@ public class HttpServletUserAgentProviderTest extends EasyMockTestCase {
     assertNull(provider.get());
     verify();
   }
-  
+
   private static class HttpServletRequestProvider implements Provider<HttpServletRequest> {
     private HttpServletRequest req;
-    
+
     private HttpServletRequestProvider(HttpServletRequest req) {
       this.req = req;
     }
-    
+
     public HttpServletRequest get() {
       return req;
     }
   }
-  
+
   private static class PassThroughUAParser implements UserAgent.Parser {
     public UserAgent parse(String agentVersion) {
       return new UserAgent(UserAgent.Browser.OTHER, agentVersion);

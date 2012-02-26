@@ -89,7 +89,7 @@ public class GadgetTest extends EasyMockTestCase {
     assertSame(returned, requiredFeatures2);
     verify();
   }
-  
+
   @Test
   public void testGetView1Features() throws Exception {
     String xml = "<Module>" +
@@ -116,10 +116,10 @@ public class GadgetTest extends EasyMockTestCase {
     assertTrue(requiredFeatures.contains("requiredview1"));
     assertTrue(requiredFeatures.contains("core"));
     assertTrue(!requiredFeatures.contains("requiredview2"));
-    
+
     verify();
   }
-  
+
   @Test
   public void testGetView2Features() throws Exception {
     String xml = "<Module>" +
@@ -150,7 +150,7 @@ public class GadgetTest extends EasyMockTestCase {
     assertTrue(requiredFeatures.contains("required"));
     assertTrue(requiredFeatures.contains("core"));
     assertTrue(requiredFeatures.contains("requiredview2"));
-    
+
     verify();
   }
 

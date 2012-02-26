@@ -51,7 +51,7 @@ class FeatureParser {
     List<String> deps = Lists.newArrayList();
     List<ParsedFeature.Bundle> bundles = Lists.newArrayList();
     boolean supportDefer = false;
-   
+
     NodeList children = doc.getChildNodes();
     for (int i = 0, j = children.getLength(); i < j; ++i) {
       Node child = children.item(i);
@@ -107,10 +107,10 @@ class FeatureParser {
         }
       }
     }
-    
+
     return new ParsedFeature(name, deps, bundles);
   }
-  
+
   private Map<String, String> getAttribs(Element element) {
     ImmutableMap.Builder<String, String> attribs = ImmutableMap.builder();
     NamedNodeMap attribNodes = element.getAttributes();
@@ -122,30 +122,30 @@ class FeatureParser {
     }
     return attribs.build();
   }
-  
+
   static final class ParsedFeature {
     private final String name;
     private final List<String> deps;
     private final List<Bundle> bundles;
-    
+
     private ParsedFeature(String name, List<String> deps, List<Bundle> bundles) {
       this.name = name;
       this.deps = ImmutableList.copyOf(deps);
       this.bundles = ImmutableList.copyOf(bundles);
     }
-    
+
     public String getName() {
       return name;
     }
-    
+
     public List<String> getDeps() {
       return deps;
     }
-    
+
     public List<Bundle> getBundles() {
       return bundles;
     }
-    
+
     public final static class Bundle {
       private final String name;
       private final String type;
@@ -153,7 +153,7 @@ class FeatureParser {
       private final List<Resource> resources;
       private final List<ApiDirective> apiDirectives;
       private final boolean supportDefer;
-      
+
       private Bundle(String name, String type, Map<String, String> attribs,
           List<Resource> resources, List<ApiDirective> apiDirectives, boolean supportDefer) {
         this.name = name;
@@ -163,11 +163,11 @@ class FeatureParser {
         this.apiDirectives = apiDirectives;
         this.supportDefer = supportDefer;
       }
-      
+
       public String getName() {
         return name;
       }
-      
+
       public String getType() {
         return type;
       }
@@ -175,39 +175,39 @@ class FeatureParser {
       public Map<String, String> getAttribs() {
         return attribs;
       }
-      
+
       public List<Resource> getResources() {
         return resources;
       }
-      
+
       public List<ApiDirective> getApis() {
         return apiDirectives;
       }
-      
+
       public boolean isSupportDefer() {
         return supportDefer;
       }
     }
-    
+
     static final class Resource {
       private final Uri source;
       private final String content;
       private final Map<String, String> attribs;
-      
+
       private Resource(Uri source, String content, Map<String, String> attribs) {
         this.source = source;
         this.content = content;
         this.attribs = ImmutableMap.copyOf(attribs);
       }
-      
+
       public Uri getSource() {
         return source;
       }
-      
+
       public String getContent() {
         return content;
       }
-      
+
       public Map<String, String> getAttribs() {
         return attribs;
       }

@@ -67,14 +67,14 @@ public class FeatureParserTest {
       "  </other_type>" +
       "</feature>";
     FeatureParser.ParsedFeature parsed = new FeatureParser().parse(parent, featureXml);
-    
+
     // Top-level validation.
     assertEquals("the_feature", parsed.getName());
     assertEquals(2, parsed.getDeps().size());
     assertEquals("myDep1", parsed.getDeps().get(0));
     assertEquals("mySecondDep", parsed.getDeps().get(1));
     assertEquals(4, parsed.getBundles().size());
-    
+
     // First gadget bundle.
     FeatureParser.ParsedFeature.Bundle bundle1 = parsed.getBundles().get(0);
     assertEquals("gadget", bundle1.getType());
@@ -105,7 +105,7 @@ public class FeatureParserTest {
     assertEquals(ApiDirective.Type.JS, bundle1.getApis().get(4).getType());
     assertTrue(bundle1.getApis().get(4).isUses());
     assertEquals("last.symbol", bundle1.getApis().get(4).getValue());
-    
+
     // Second gadget bundle.
     FeatureParser.ParsedFeature.Bundle bundle2 = parsed.getBundles().get(1);
     assertEquals("gadget", bundle2.getType());
@@ -113,7 +113,7 @@ public class FeatureParserTest {
     assertEquals("container1", bundle2.getAttribs().get("container"));
     assertEquals(0, bundle2.getResources().size());
     assertEquals(0, bundle2.getApis().size());
-    
+
     // Container bundle.
     FeatureParser.ParsedFeature.Bundle bundle3 = parsed.getBundles().get(2);
     assertEquals("container", bundle3.getType());
@@ -131,7 +131,7 @@ public class FeatureParserTest {
     assertEquals("Inlined content", bundle3.getResources().get(1).getContent());
     assertEquals(0, bundle3.getResources().get(1).getAttribs().size());
     assertEquals(0, bundle3.getApis().size());
-    
+
     // Other_type bundle.
     FeatureParser.ParsedFeature.Bundle bundle4 = parsed.getBundles().get(3);
     assertEquals("other_type", bundle4.getType());
@@ -146,7 +146,7 @@ public class FeatureParserTest {
     assertEquals(0, bundle4.getResources().get(0).getAttribs().size());
     assertEquals(0, bundle4.getApis().size());
   }
-  
+
   @Test(expected=GadgetException.class)
   public void parseInvalidXml() throws GadgetException {
     // Should failed to parse invalid XML");

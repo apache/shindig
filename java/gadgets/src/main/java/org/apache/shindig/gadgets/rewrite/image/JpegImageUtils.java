@@ -104,7 +104,7 @@ public class JpegImageUtils {
           return;
         }
       }
-      
+
       mode = SamplingModes.UNKNOWN;
       LOG.log(Level.WARNING, "Unable to read subsampling information for Jpeg Image");
     }
@@ -240,7 +240,7 @@ public class JpegImageUtils {
        * The structure of the 'SOF' marker is as follows.
        *   - data precision (1 byte) in bits/sample,
        *   - image height (2 bytes, little endian),
-       *   - image width (2 bytes, little endian), 
+       *   - image width (2 bytes, little endian),
        *   - number of components (1 byte), usually 1 = grey scaled, 3 = color YCbCr
        *     or YIQ, 4 = color CMYK)
        *   - for each component: 3 bytes
@@ -257,7 +257,7 @@ public class JpegImageUtils {
         int toBeProcessed = markerLength - 2;
         int numComponents = 0;
         InputStream is = new ByteArrayInputStream(segmentData);
-        
+
         // Skip precision(1 Byte), height(2 Bytes), width(2 bytes) bytes.
         if (toBeProcessed > 6) {
           binaryParser.skipBytes(is, 5, INVALID_JPEG_ERROR_MSG);
@@ -295,7 +295,7 @@ public class JpegImageUtils {
        * object. If segmentData has more bytes after parsing first QT, that means DQT segment has
        * multiple quantization tables. We allow multiple quant tables to have same tableIndex,
        * and the latter one overrides the previous one. we currently parse upto 2 quantization
-       * tables. 
+       * tables.
        * The structure of the DQT (Define Quantization Table) segment.
        *   - QT information (1 byte): (bit 0 = LSB and bit 7 = MSB)
        *     bit 3..0: index of QT (3..0, otherwise error)

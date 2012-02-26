@@ -62,7 +62,7 @@ public class Functions extends FunctionMapper {
      */
     String[] names() default {};
   }
-  
+
   /**
    * Creates a Functions class with the specified
    */
@@ -72,19 +72,19 @@ public class Functions extends FunctionMapper {
         if ((m.getModifiers() & Modifier.STATIC) == 0) {
           continue;
         }
-        
+
         addMethod(m);
       }
     }
   }
-  
+
   @Override
   public Method resolveFunction(String prefix, String methodName) {
     Map<String, Method> prefixMap = functions.get(prefix);
     if (prefixMap == null) {
       return null;
     }
-    
+
     return prefixMap.get(methodName);
   }
 
@@ -98,7 +98,7 @@ public class Functions extends FunctionMapper {
         prefixMap = Maps.newHashMap();
         functions.put(prefix, prefixMap);
       }
-      
+
       for (String methodName : annotation.names()) {
         Method priorMethod = prefixMap.put(methodName, m);
         if (priorMethod != null) {
@@ -108,7 +108,7 @@ public class Functions extends FunctionMapper {
       }
     }
   }
-  
+
   /**
    * A default version for Guice;  includes the Opensocial functions.
    */

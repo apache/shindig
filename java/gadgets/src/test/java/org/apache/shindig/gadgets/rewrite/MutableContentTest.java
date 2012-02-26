@@ -76,7 +76,7 @@ public class MutableContentTest {
     mhc.documentChanged();
     assertEquals(2, mhc.getNumChanges());
   }
-  
+
   @Test
   public void modifyContentReflectedInTreeUtf8() throws Exception {
     String theContent = "N\uFFFDW C\uFFFDNT\uFFFDNT";
@@ -91,7 +91,7 @@ public class MutableContentTest {
     mhc.documentChanged();
     assertEquals(2, mhc.getNumChanges());
   }
-  
+
   @Test
   public void modifyBytesReflectedInContentAndTree() throws Exception {
     assertEquals(0, mhc.getNumChanges());
@@ -106,7 +106,7 @@ public class MutableContentTest {
     assertEquals("NEW CONTENT", new String(IOUtils.toByteArray(is), "UTF8"));
     assertEquals(1, mhc.getNumChanges());
   }
-  
+
   @Test
   public void modifyTreeReflectedInContent() throws Exception {
     Document document = mhc.getDocument();

@@ -63,7 +63,7 @@ public class ActivityHandlerTest extends EasyMockTestCase {
 
   private FakeGadgetToken token;
 
-  private static final Set<UserId> JOHN_DOE = 
+  private static final Set<UserId> JOHN_DOE =
       ImmutableSet.of(new UserId(UserId.Type.userId, "john.doe"));
 
   protected HandlerRegistry registry;

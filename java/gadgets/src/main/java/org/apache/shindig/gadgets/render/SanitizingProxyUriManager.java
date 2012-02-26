@@ -33,7 +33,7 @@ import java.util.List;
 public class SanitizingProxyUriManager implements ProxyUriManager {
   private final ProxyUriManager wrapped;
   private final String expectedMime;
-    
+
   public SanitizingProxyUriManager(ProxyUriManager wrapped, String expectedMime) {
     this.wrapped = wrapped;
     this.expectedMime = expectedMime;

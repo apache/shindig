@@ -42,7 +42,7 @@ import com.google.inject.Inject;
 
 /**
  * see {@link OAuth2Request}
- * 
+ *
  */
 public class BasicOAuth2Request implements OAuth2Request {
   private final static String LOG_CLASS = BasicOAuth2Request.class.getName();

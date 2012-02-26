@@ -25,12 +25,12 @@ import org.apache.shindig.social.opensocial.model.EmbeddedExperience;
  *
  */
 public class EmbeddedExperienceImpl implements EmbeddedExperience {
-	
+
 	private Object context;
 	private String gadget;
 	private String previewImage;
 	private String url;
-	
+
 	/**
 	 * Constructor
 	 */
@@ -50,7 +50,7 @@ public class EmbeddedExperienceImpl implements EmbeddedExperience {
 	public String getPreviewImage() {
 		return previewImage;
 	}
-	
+
 	/** {@inheritDoc} */
 	public String getUrl(){
 		return url;
@@ -70,7 +70,7 @@ public class EmbeddedExperienceImpl implements EmbeddedExperience {
 	public void setPreviewImage(String previewImage) {
 		this.previewImage = previewImage;
 	}
-	
+
 	/** {@inheritDoc} */
 	public void setUrl(String url){
 		this.url = url;

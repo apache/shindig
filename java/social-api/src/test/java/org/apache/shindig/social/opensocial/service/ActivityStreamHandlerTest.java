@@ -57,21 +57,21 @@ import com.google.common.collect.Sets;
  * Tests the ActivityStreamsHandler.
  */
 public class ActivityStreamHandlerTest extends EasyMockTestCase {
-  
+
   private BeanJsonConverter converter;
-  
+
   private ActivityStreamService service;
-  
+
   private ActivityStreamHandler handler;
-  
+
   private FakeGadgetToken token;
-  
+
   private static final Set<UserId> JOHN_DOE = ImmutableSet.of(new UserId(
       UserId.Type.userId, "john.doe"));
-  
+
   protected HandlerRegistry registry;
   protected ContainerConfig containerConfig;
-  
+
   @Before
   public void setUp() throws Exception {
     token = new FakeGadgetToken();
@@ -92,7 +92,7 @@ public class ActivityStreamHandlerTest extends EasyMockTestCase {
         new HandlerExecutionListener.NoOpHandler());
     registry.addHandlers(ImmutableSet.<Object>of(handler));
   }
-  
+
   /* Helper for retrieving groups. */
   private void assertHandleGetForGroup(GroupId.Type group) throws Exception {
     String path = "/activitystreams/john.doe/@" + group.toString();
@@ -111,7 +111,7 @@ public class ActivityStreamHandlerTest extends EasyMockTestCase {
     verify();
     reset();
   }
-  
+
   @Test
   public void testHandleGetAll() throws Exception {
     assertHandleGetForGroup(GroupId.Type.all);
@@ -126,7 +126,7 @@ public class ActivityStreamHandlerTest extends EasyMockTestCase {
   public void testHandleGetSelf() throws Exception {
     assertHandleGetForGroup(GroupId.Type.self);
   }
-  
+
   @Test
   public void testHandleGetPlural() throws Exception {
     String path = "/activitystreams/john.doe,jane.doe/@self/@app";
@@ -147,7 +147,7 @@ public class ActivityStreamHandlerTest extends EasyMockTestCase {
     verify();
     reset();
   }
-  
+
   @Test
   public void testHandleGetActivityEntryById() throws Exception {
     String path = "/activitystreams/john.doe/@friends/@app/myObjectId123";  // TODO: change id=1 in DB for consistency
@@ -165,7 +165,7 @@ public class ActivityStreamHandlerTest extends EasyMockTestCase {
     verify();
     reset();
   }
-  
+
   /* Helper for testing PUT and POST */
   private Future<?> setupBodyRequest(String method) throws ProtocolException {
     String jsonActivityEntry = "{title: 'hi mom!', object: {id: 'testObject'}}";
@@ -185,7 +185,7 @@ public class ActivityStreamHandlerTest extends EasyMockTestCase {
     return operation.execute(Maps.<String, String[]>newHashMap(),
         new StringReader(jsonActivityEntry), token, converter);
   }
-  
+
   @Test
   public void testHandlePost() throws Exception {
     String jsonActivityEntry = "{title: 'hi mom!', object: {id: 'testObject'}}";
@@ -231,7 +231,7 @@ public class ActivityStreamHandlerTest extends EasyMockTestCase {
     verify();
     reset();
   }
-  
+
   @Test
   public void testHandleDelete() throws Exception {
     String path = "/activitystreams/john.doe/@self/@app/myObjectId123";
@@ -247,7 +247,7 @@ public class ActivityStreamHandlerTest extends EasyMockTestCase {
     verify();
     reset();
   }
-  
+
   @Test
   public void testHandleGetSupportedFields() throws Exception {
     String path = "/activitystreams/@supportedFields";

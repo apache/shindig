@@ -47,7 +47,7 @@ public class GadgetELResolverTest {
         if ("view-params".equals(name)) {
           return viewParams;
         }
-        
+
         return null;
       }
 
@@ -56,10 +56,10 @@ public class GadgetELResolverTest {
         return userPrefs;
       }
     };
-    
+
     resolver = new GadgetELResolver(gadgetContext);
     expressions = Expressions.forTesting();
-    
+
     context = expressions.newELContext(resolver);
   }
 
@@ -67,7 +67,7 @@ public class GadgetELResolverTest {
   public void getPrefs() {
     userPrefs = new UserPrefs(ImmutableMap.of("foo", "bar"));
     ValueExpression expression = expressions.parse("${UserPrefs.foo}", String.class);
-    
+
     assertEquals("bar", expression.getValue(context));
 
     expression = expressions.parse("${UserPrefs.wrongKey}", String.class);
@@ -84,7 +84,7 @@ public class GadgetELResolverTest {
   @Test
   public void testViewParams() {
     viewParams = "{foo: 'bar'}";
-    
+
     ValueExpression expression = expressions.parse("${ViewParams.foo}", String.class);
     assertEquals("bar", expression.getValue(context));
 

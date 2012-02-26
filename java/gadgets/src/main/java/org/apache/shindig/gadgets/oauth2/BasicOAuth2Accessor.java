@@ -21,7 +21,7 @@ import com.google.common.collect.Maps;
 import java.util.Map;
 
 /**
- * 
+ *
  * see {@link OAuth2Accessor}
  */
 public class BasicOAuth2Accessor implements OAuth2Accessor {

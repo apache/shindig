@@ -37,7 +37,7 @@ public class DefaultJsServingPipeline implements JsServingPipeline {
   }
 
   public JsResponse execute(JsRequest jsRequest) throws JsException {
-    JsResponseBuilder resp = new JsResponseBuilder();    
+    JsResponseBuilder resp = new JsResponseBuilder();
     jsProcessorRegistry.process(jsRequest, resp);
     return resp.build();
   }

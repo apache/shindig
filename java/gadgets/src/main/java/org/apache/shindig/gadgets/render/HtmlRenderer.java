@@ -83,11 +83,11 @@ public class HtmlRenderer {
       }
 
       MutableContent mc = new MutableContent(htmlParser, content);
-      for (GadgetRewriter rewriter : 
+      for (GadgetRewriter rewriter :
           gadgetRewritersProvider.getRewriters(gadget.getContext())) {
         rewriter.rewrite(gadget, mc);
       }
-      
+
       return mc.getContent();
     } catch (GadgetException e) {
       throw new RenderingException(e.getMessage(), e, e.getHttpStatusCode());
@@ -95,7 +95,7 @@ public class HtmlRenderer {
       throw new RenderingException(e.getMessage(), e, e.getHttpStatusCode());
     }
   }
-  
+
   protected String getViewContent(Gadget gadget) {
     View currentView = gadget.getCurrentView();
     return currentView.getContent();

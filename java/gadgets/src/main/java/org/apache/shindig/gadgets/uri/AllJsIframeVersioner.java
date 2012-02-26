@@ -44,7 +44,7 @@ import com.google.inject.Inject;
  */
 public class AllJsIframeVersioner implements Versioner {
   private final String allJsChecksum;
-  
+
   @Inject
   public AllJsIframeVersioner(FeatureRegistry registry) {
     StringBuilder jsBuf = new StringBuilder();
@@ -62,11 +62,11 @@ public class AllJsIframeVersioner implements Versioner {
     if (value == null || value.length() == 0) {
       return UriStatus.VALID_UNVERSIONED;
     }
-    
+
     if (value.equals(allJsChecksum)) {
       return UriStatus.VALID_VERSIONED;
     }
-    
+
     return UriStatus.INVALID_VERSION;
   }
 }

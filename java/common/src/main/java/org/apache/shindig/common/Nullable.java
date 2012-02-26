@@ -26,9 +26,9 @@ import java.lang.annotation.RetentionPolicy;
 /**
  * Temporary package for use until we the jsr people release to maven central.
  * http://code.google.com/p/jsr-305/issues/detail?id=13
- * 
+ *
  * This allows us to remove the jsr305 jar from findbugs which is LGPL and
- * moved from 'provided' to 'runtime' scope due to use by Guice. 
+ * moved from 'provided' to 'runtime' scope due to use by Guice.
  */
 
 @Retention(RetentionPolicy.RUNTIME)

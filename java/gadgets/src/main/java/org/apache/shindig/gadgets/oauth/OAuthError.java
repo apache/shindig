@@ -27,7 +27,7 @@ public enum OAuthError {
   BAD_OAUTH_CONFIGURATION("%s"),
 
   /**
-   * The request cannot be completed because the gadget didn't specify 
+   * The request cannot be completed because the gadget didn't specify
    * an endpoint required for redirection-based authorization.
    */
   BAD_OAUTH_TOKEN_URL("No %s URL specified"),
@@ -80,7 +80,7 @@ public enum OAuthError {
       + " must start with oauth, xoauth, or opensocial"),
 
   UNKNOWN_PARAMETER_LOCATION("Unknown parameter location: %s"),
-  
+
   /**
    * The request cannot be completed because the request options were invalid.
    * Generic message.

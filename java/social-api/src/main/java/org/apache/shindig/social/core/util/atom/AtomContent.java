@@ -58,7 +58,7 @@ public class AtomContent {
   public AtomContent(Activity activity) {
     this.activity = activity;
   }
-  
+
   /**
    * @param activityEntry
    */

@@ -21,21 +21,21 @@ import org.apache.shindig.gadgets.oauth2.OAuth2Accessor;
 import org.apache.shindig.gadgets.oauth2.OAuth2Token;
 
 /**
- * 
+ *
  * Enables inject of token type handlers to add OAuth2 auth data to resource
  * requests.
- * 
+ *
  * By default shindig supports "Bearer" token types.
- * 
+ *
  * Matches on {@link OAuth2Token#getTokenType()}
- * 
+ *
  * All matching handlers are executed.
- * 
+ *
  */
 public interface ResourceRequestHandler {
   /**
    * Do the handler magic for the token type.
-   * 
+   *
    * @param accessor
    * @param request
    * @return {@link OAuth2HandlerError} if one occurs
@@ -43,7 +43,7 @@ public interface ResourceRequestHandler {
   public OAuth2HandlerError addOAuth2Params(final OAuth2Accessor accessor, final HttpRequest request);
 
   /**
-   * 
+   *
    * @return the token type this handler handles
    */
   public String getTokenType();

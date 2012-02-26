@@ -49,7 +49,7 @@ public class PipelineExecutor {
   //class name for logging purpose
   private static final String classname = PipelineExecutor.class.getName();
   private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
-  
+
 
   private final PipelinedDataPreloader preloader;
   private final PreloaderService preloaderService;
@@ -152,7 +152,7 @@ public class PipelineExecutor {
           if (LOG.isLoggable(Level.WARNING)) {
             LOG.logp(Level.WARNING, classname, "execute", MessageKeys.ERROR_PRELOADING);
             LOG.log(Level.WARNING, "", pe);
-          } 
+          }
         }
       }
 

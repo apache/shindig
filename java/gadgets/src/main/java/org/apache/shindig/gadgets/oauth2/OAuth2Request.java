@@ -21,20 +21,20 @@ import org.apache.shindig.gadgets.http.HttpResponse;
 
 /**
  * Implements OAuth2 fetch for gadgets.
- * 
+ *
  * OAuth 2.0 authorization_code flows will redirects the user to the OAuth 2.0
  * service provider site to obtain the user's permission to access their data.
- * 
+ *
  * See {@link http://oauth.net/2/}.
- * 
+ *
  */
 public interface OAuth2Request {
   /**
    * OAuth 2.0 authenticated request
-   * 
+   *
    * @param request
    *          gadget request
-   * 
+   *
    * @return the response to send to the client, never <code>null</code>
    */
   public HttpResponse fetch(final HttpRequest request);

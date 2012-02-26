@@ -55,7 +55,7 @@ public class DefaultResponseRewriterRegistry implements ResponseRewriterRegistry
     for (ResponseRewriter rewriter : rewriters) {
       rewriter.rewrite(req, builder);
     }
-    
+
     // Returns the original HttpResponse if no changes have been made.
     return builder.create();
   }

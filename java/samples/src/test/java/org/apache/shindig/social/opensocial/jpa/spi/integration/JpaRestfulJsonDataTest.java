@@ -30,15 +30,15 @@ import org.junit.Before;
  * but uses the JPA AppDataService implementation <code>AppDataServiceDb</code>
  */
 public class JpaRestfulJsonDataTest extends RestfulJsonDataTest {
-  
+
   /** The bootstrap. */
   private SpiDatabaseBootstrap bootstrap;
-  
+
   /**
    * Calls super.setup so to initialise servlet and easy mock objects.
    * Note that super.setup (i.e. AbstractLargeRestfulTests) also injects SocialApiTestsGuiceModule,
    * which will be overriden here to use the JPA guice bindings
-   * 
+   *
    * @throws Exception the exception
    */
   @Before
@@ -56,7 +56,7 @@ public class JpaRestfulJsonDataTest extends RestfulJsonDataTest {
       fail();
     }
   }
-  
+
   @After
   public void tearDown() throws Exception {
     this.bootstrap.tearDown();

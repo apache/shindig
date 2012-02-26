@@ -75,7 +75,7 @@ public class ConcatProxyServlet extends InjectedServlet {
   //class name for logging purpose
   private static final String classname = ConcatProxyServlet.class.getName();
   private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
-  
+
   private transient RequestPipeline requestPipeline;
   private transient ConcatUriManager concatUriManager;
   private transient ResponseRewriterRegistry contentRewriterRegistry;

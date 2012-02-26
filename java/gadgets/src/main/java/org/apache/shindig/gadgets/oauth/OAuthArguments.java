@@ -45,7 +45,7 @@ public class OAuthArguments {
   private static final String SIGN_OWNER_PARAM = "signOwner";
   private static final String SIGN_VIEWER_PARAM = "signViewer";
   private static final String RECEIVED_CALLBACK_PARAM = "OAUTH_RECEIVED_CALLBACK";
-  
+
   // Experimental support for configuring OAuth without special parameters in the spec XML.
   public static final String PROGRAMMATIC_CONFIG_PARAM = "OAUTH_PROGRAMMATIC_CONFIG";
   public static final String REQUEST_METHOD_PARAM = "OAUTH_REQUEST_METHOD";
@@ -92,16 +92,16 @@ public class OAuthArguments {
 
   /** Include information about the viewer? */
   private boolean signViewer = false;
-  
+
   /** Arbitrary name/value pairs associated with the request */
   private final Map<String, String> requestOptions = new TreeMap<String,String>(String.CASE_INSENSITIVE_ORDER);
 
   /** Whether the request is one for proxied content */
   private boolean proxiedContentRequest = false;
-  
+
   /** Callback URL returned from service provider */
   private String receivedCallbackUrl = null;
-  
+
   /**
    * Parse OAuthArguments from parameters to the makeRequest servlet.
    *
@@ -321,40 +321,40 @@ public class OAuthArguments {
   public void setSignViewer(boolean signViewer) {
     this.signViewer = signViewer;
   }
-  
+
   public void setRequestOption(String name, String value) {
     requestOptions.put(name, value);
   }
-  
+
   public void removeRequestOption(String name) {
     requestOptions.remove(name);
   }
-  
+
   public String getRequestOption(String name) {
     return requestOptions.get(name);
   }
-  
+
   public String getRequestOption(String name, String def) {
     String val = requestOptions.get(name);
     return (val != null ? val : def);
   }
-  
+
   public boolean isProxiedContentRequest() {
     return proxiedContentRequest;
   }
-  
+
   public void setProxiedContentRequest(boolean proxiedContentRequest) {
     this.proxiedContentRequest = proxiedContentRequest;
   }
-  
+
   public boolean programmaticConfig() {
     return Boolean.parseBoolean(requestOptions.get(PROGRAMMATIC_CONFIG_PARAM));
   }
-  
+
   public String getReceivedCallbackUrl() {
     return receivedCallbackUrl;
   }
-  
+
   public void setReceivedCallbackUrl(String receivedCallbackUrl) {
     this.receivedCallbackUrl = receivedCallbackUrl;
   }
@@ -371,7 +371,7 @@ public class OAuthArguments {
   public boolean equals(Object obj) {
     if (this == obj)
       return true;
-    
+
     if (!(obj instanceof OAuthArguments)) {
       return false;
     }

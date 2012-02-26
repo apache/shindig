@@ -24,7 +24,7 @@ import com.google.inject.AbstractModule;
 
 /**
  * Binds default persistence classes for shindig.
- * 
+ *
  */
 public class OAuth2PersistenceModule extends AbstractModule {
 

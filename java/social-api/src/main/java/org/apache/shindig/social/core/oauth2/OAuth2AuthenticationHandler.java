@@ -34,7 +34,7 @@ import com.google.inject.Inject;
  * using one of the OAuth 2.0 flows.
  */
 public class OAuth2AuthenticationHandler implements AuthenticationHandler {
-  
+
   //class name for logging purpose
   private static final String classname = OAuth2AuthenticationHandler.class.getName();
   private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);

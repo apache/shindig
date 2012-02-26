@@ -228,7 +228,7 @@ public class HttpRequestHandler {
       // TODO: Allow the rewriter to use an externally forced mime type. This is needed
       // allows proper rewriting of <script src="x"/> where x is returned with
       // a content type like text/html which unfortunately happens all too often
-      
+
       req.setIgnoreCache(httpApiRequest.noCache);
       req.setSanitizationRequested(httpApiRequest.sanitize);
 
@@ -271,14 +271,14 @@ public class HttpRequestHandler {
     // Keys in a request item are always Strings
     @SuppressWarnings("unchecked")
     Set<String> allParameters = requestItem.getTypedRequest(Map.class).keySet();
-    
+
     Map<String, String> authSettings = Maps.newHashMap();
     for (String paramName : allParameters) {
       if (!HttpApiRequest.KNOWN_PARAMETERS.contains(paramName)) {
         authSettings.put(paramName, requestItem.getParameter(paramName));
       }
     }
-    
+
     return authSettings;
   }
 
@@ -316,7 +316,7 @@ public class HttpRequestHandler {
         throw new ProtocolException(HttpServletResponse.SC_NOT_ACCEPTABLE, "Response not valid JSON", e);
       }
     }
-    
+
     return body;
   }
 
@@ -354,13 +354,13 @@ public class HttpRequestHandler {
 
     /** Authorization type ("none", "signed", "oauth") */
     String authz = "none";
-    
+
     /** Should the request be signed by owner? */
     boolean signOwner = true;
-    
+
     /** Should the request be signed by viewer? */
     boolean signViewer = true;
-    
+
     // The format type to coerce the response into. Supported values are
     // "text", "json", and "feed".
     String format;
@@ -437,7 +437,7 @@ public class HttpRequestHandler {
     public String getAuthz() {
       return authz;
     }
-    
+
     public void setAuthz(String authz) {
       this.authz = authz;
     }
@@ -445,21 +445,21 @@ public class HttpRequestHandler {
     public boolean isSignViewer() {
       return signViewer;
     }
-    
+
     @JsonProperty("sign_viewer")
     public void setSignViewer(boolean signViewer) {
       this.signViewer = signViewer;
     }
-    
+
     public boolean isSignOwner() {
       return signOwner;
     }
-    
+
     @JsonProperty("sign_owner")
     public void setSignOwner(boolean signOwner) {
       this.signOwner = signOwner;
     }
-    
+
     public boolean isSummarize() {
       return summarize;
     }
@@ -483,7 +483,7 @@ public class HttpRequestHandler {
   public static class HttpApiResponse {
     // Http status code
     int status;
-    
+
     // Returned headers
     Map<String, Collection<String>> headers;
 
@@ -513,7 +513,7 @@ public class HttpRequestHandler {
       if (response.getHeaders().containsKey("location")) {
         this.headers.put("location", response.getHeaders("location"));
       }
-      
+
       this.content = content;
 
       this.metadata = response.getMetadata();

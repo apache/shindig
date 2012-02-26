@@ -32,7 +32,7 @@ public class OAuth2Client {
 
   /**
    * Gets the client's ID.
-   * 
+   *
    * @return String represents the client's ID.
    */
   public String getId() {
@@ -41,7 +41,7 @@ public class OAuth2Client {
 
   /**
    * Sets the client's ID.
-   * 
+   *
    * @param id
    *          represents the client's ID.
    */
@@ -51,7 +51,7 @@ public class OAuth2Client {
 
   /**
    * Gets the client's secret.
-   * 
+   *
    * @return String represents the client's secret
    */
   public String getSecret() {
@@ -60,7 +60,7 @@ public class OAuth2Client {
 
   /**
    * Sets the client's secret.
-   * 
+   *
    * @param secret
    *          represents the client's secret
    */
@@ -70,7 +70,7 @@ public class OAuth2Client {
 
   /**
    * Gets the client's redirect URI.
-   * 
+   *
    * @return String represents the client's redirect URI
    */
   public String getRedirectURI() {
@@ -79,7 +79,7 @@ public class OAuth2Client {
 
   /**
    * Sets the client's redirect URI.
-   * 
+   *
    * @param redirectUri
    *          represents the client's redirect URI
    */
@@ -89,7 +89,7 @@ public class OAuth2Client {
 
   /**
    * Gets the client's title.
-   * 
+   *
    * @return String represents the client's title
    */
   public String getTitle() {
@@ -98,7 +98,7 @@ public class OAuth2Client {
 
   /**
    * Sets the client's title.
-   * 
+   *
    * @param title
    *          represents the client's title
    */
@@ -108,7 +108,7 @@ public class OAuth2Client {
 
   /**
    * Gets the client's icon URL.
-   * 
+   *
    * @return String represents the client's icon URL
    */
   public String getIconUrl() {
@@ -117,7 +117,7 @@ public class OAuth2Client {
 
   /**
    * Sets the client's icon URL.
-   * 
+   *
    * @param iconUrl
    *          represents the client's icon URL
    */
@@ -127,7 +127,7 @@ public class OAuth2Client {
 
   /**
    * Gets the client's type.
-   * 
+   *
    * @return ClientType represents the client's type
    */
   public ClientType getType() {
@@ -136,7 +136,7 @@ public class OAuth2Client {
 
   /**
    * Sets the client's type.
-   * 
+   *
    * @param clientType
    *          represents the client's type
    */
@@ -146,7 +146,7 @@ public class OAuth2Client {
 
   /**
    * Sets the client's OAuth2 flow (via a String flow identifier)
-   * 
+   *
    * @param flow
    */
   public void setFlow(String flow) {
@@ -163,7 +163,7 @@ public class OAuth2Client {
 
   /**
    * Sets the client's OAuth2 flow
-   * 
+   *
    * @param flow
    */
   public void setFlowEnum(Flow flow) {
@@ -172,7 +172,7 @@ public class OAuth2Client {
 
   /**
    * Gets the client's OAuth2 flow
-   * 
+   *
    * @return
    */
   public Flow getFlow() {

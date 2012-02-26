@@ -41,7 +41,7 @@ import java.util.List;
 
 /**
  * Address storage, stored in "address", may be joined with other subclasses and if so
- * "address_usage" will contain the subclass discriminatory value. 
+ * "address_usage" will contain the subclass discriminatory value.
  * This might also be "sharedaddress" if this address is shared.
  */
 @Entity
@@ -49,7 +49,7 @@ import java.util.List;
 @Inheritance(strategy = InheritanceType.JOINED)
 @DiscriminatorColumn(name = "address_usage")
 @DiscriminatorValue(value = "sharedaddress")
-@NamedQuery(name = AddressDb.FINDBY_POSTCODE, 
+@NamedQuery(name = AddressDb.FINDBY_POSTCODE,
     query = "select a from AddressDb a where a.postalCode = :postalcode ")
 public class AddressDb implements Address, DbObject {
   /**
@@ -178,7 +178,7 @@ public class AddressDb implements Address, DbObject {
     this.formatted = formatted;
   }
 
-  /** 
+  /**
    * {@inheritDoc}
    * @see org.apache.shindig.social.opensocial.model.Address#getCountry()
    */
@@ -186,7 +186,7 @@ public class AddressDb implements Address, DbObject {
     return country;
   }
 
-  /** 
+  /**
    * {@inheritDoc}
    * @see org.apache.shindig.social.opensocial.model.Address#setCountry(java.lang.String)
    */
@@ -194,7 +194,7 @@ public class AddressDb implements Address, DbObject {
     this.country = country;
   }
 
-  /** 
+  /**
    * {@inheritDoc}
    * @see org.apache.shindig.social.opensocial.model.Address#getLatitude()
    */
@@ -202,7 +202,7 @@ public class AddressDb implements Address, DbObject {
     return latitude;
   }
 
-  /** 
+  /**
    * {@inheritDoc}
    * @see org.apache.shindig.social.opensocial.model.Address#setLatitude(java.lang.Float)
    */
@@ -210,7 +210,7 @@ public class AddressDb implements Address, DbObject {
     this.latitude = latitude;
   }
 
-  /** 
+  /**
    * {@inheritDoc}
    * @see org.apache.shindig.social.opensocial.model.Address#getLocality()
    */
@@ -218,7 +218,7 @@ public class AddressDb implements Address, DbObject {
     return locality;
   }
 
-  /** 
+  /**
    * {@inheritDoc}
    * @see org.apache.shindig.social.opensocial.model.Address#setLocality(java.lang.String)
    */
@@ -226,7 +226,7 @@ public class AddressDb implements Address, DbObject {
     this.locality = locality;
   }
 
-  /** 
+  /**
    * {@inheritDoc}
    * @see org.apache.shindig.social.opensocial.model.Address#getLongitude()
    */
@@ -234,7 +234,7 @@ public class AddressDb implements Address, DbObject {
     return longitude;
   }
 
-  /** 
+  /**
    * {@inheritDoc}
    * @see org.apache.shindig.social.opensocial.model.Address#setLongitude(java.lang.Float)
    */
@@ -242,7 +242,7 @@ public class AddressDb implements Address, DbObject {
     this.longitude = longitude;
   }
 
-  /** 
+  /**
    * {@inheritDoc}
    * @see org.apache.shindig.social.opensocial.model.Address#getPostalCode()
    */
@@ -250,7 +250,7 @@ public class AddressDb implements Address, DbObject {
     return postalCode;
   }
 
-  /** 
+  /**
    * {@inheritDoc}
    * @see org.apache.shindig.social.opensocial.model.Address#setPostalCode(java.lang.String)
    */
@@ -258,7 +258,7 @@ public class AddressDb implements Address, DbObject {
     this.postalCode = postalCode;
   }
 
-  /** 
+  /**
    * {@inheritDoc}
    * @see org.apache.shindig.social.opensocial.model.Address#getRegion()
    */
@@ -266,7 +266,7 @@ public class AddressDb implements Address, DbObject {
     return region;
   }
 
-  /** 
+  /**
    * {@inheritDoc}
    * @see org.apache.shindig.social.opensocial.model.Address#setRegion(java.lang.String)
    */
@@ -274,7 +274,7 @@ public class AddressDb implements Address, DbObject {
     this.region = region;
   }
 
-  /** 
+  /**
    * {@inheritDoc}
    * @see org.apache.shindig.social.opensocial.model.Address#getStreetAddress()
    */
@@ -282,7 +282,7 @@ public class AddressDb implements Address, DbObject {
     return streetAddress;
   }
 
-  /** 
+  /**
    * {@inheritDoc}
    * @see org.apache.shindig.social.opensocial.model.Address#setStreetAddress(java.lang.String)
    */
@@ -290,7 +290,7 @@ public class AddressDb implements Address, DbObject {
     this.streetAddress = streetAddress;
   }
 
-  /** 
+  /**
    * {@inheritDoc}
    * @see org.apache.shindig.social.opensocial.model.Address#getType()
    */
@@ -298,7 +298,7 @@ public class AddressDb implements Address, DbObject {
     return type;
   }
 
-  /** 
+  /**
    * {@inheritDoc}
    * @see org.apache.shindig.social.opensocial.model.Address#setType(java.lang.String)
    */
@@ -306,7 +306,7 @@ public class AddressDb implements Address, DbObject {
     this.type = type;
   }
 
-  /** 
+  /**
    * {@inheritDoc}
    * @see org.apache.shindig.social.opensocial.model.Address#getFormatted()
    */
@@ -314,7 +314,7 @@ public class AddressDb implements Address, DbObject {
     return formatted;
   }
 
-  /** 
+  /**
    * {@inheritDoc}
    * @see org.apache.shindig.social.opensocial.model.Address#setFormatted(java.lang.String)
    */
@@ -322,7 +322,7 @@ public class AddressDb implements Address, DbObject {
     this.formatted = formatted;
   }
 
-  /** 
+  /**
    * {@inheritDoc}
    * @see org.apache.shindig.social.opensocial.model.Address#getPrimary()
    */
@@ -330,7 +330,7 @@ public class AddressDb implements Address, DbObject {
     return primary;
   }
 
-  /** 
+  /**
    * {@inheritDoc}
    * @see org.apache.shindig.social.opensocial.model.Address#setPrimary(java.lang.Boolean)
    */

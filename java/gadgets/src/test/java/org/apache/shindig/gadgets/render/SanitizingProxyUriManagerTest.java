@@ -44,28 +44,28 @@ public class SanitizingProxyUriManagerTest {
   private ProxyUriManager uriManager;
   private Uri uri;
   private ProxyUri proxyUri;
-  
+
   @Before
   public void setUp() throws Exception {
     uriManager = createMock(ProxyUriManager.class);
     uri = new UriBuilder().setScheme("http").setAuthority("host.com").setPath("/path").toUri();
     proxyUri = createMock(ProxyUri.class);
   }
-  
+
   @Test
   public void processPassesThrough() throws Exception {
     Capture<Uri> uriCapture = new Capture<Uri>();
     expect(uriManager.process(capture(uriCapture))).andReturn(proxyUri).once();
     replay(uriManager);
-    
+
     SanitizingProxyUriManager rewriter = makeRewriter(null);
     ProxyUri returned = rewriter.process(uri);
-    
+
     verify(uriManager);
     assertSame(uri, uriCapture.getValue());
     assertSame(returned, proxyUri);
   }
-  
+
   @Test
   public void makeSingleNoMime() throws Exception {
     Capture<List<ProxyUri>> uriCapture = new Capture<List<ProxyUri>>();
@@ -78,17 +78,17 @@ public class SanitizingProxyUriManagerTest {
     replay(uriManager);
     expect(proxyUri.setSanitizeContent(true)).andReturn(proxyUri).once();
     replay(proxyUri);
-    
+
     SanitizingProxyUriManager rewriter = makeRewriter(null);
     List<Uri> returned = rewriter.make(input, refresh);
-    
+
     verify(uriManager);
     assertSame(uriCapture.getValue(), input);
     assertSame(intCapture.getValue(), refresh);
     assertEquals(1, returned.size());
     verify(proxyUri);
   }
-  
+
   @Test
   public void makeSingleExpectedMime() throws Exception {
     Capture<List<ProxyUri>> uriCapture = new Capture<List<ProxyUri>>();
@@ -103,17 +103,17 @@ public class SanitizingProxyUriManagerTest {
     expect(proxyUri.setSanitizeContent(true)).andReturn(proxyUri).once();
     expect(proxyUri.setRewriteMimeType(mime)).andReturn(proxyUri).once();
     replay(proxyUri);
-    
+
     SanitizingProxyUriManager rewriter = makeRewriter(mime);
     List<Uri> returned = rewriter.make(input, refresh);
-    
+
     verify(uriManager);
     assertSame(uriCapture.getValue(), input);
     assertSame(intCapture.getValue(), refresh);
     assertEquals(1, returned.size());
     verify(proxyUri);
   }
-  
+
   @Test
   public void makeList() throws Exception {
     Capture<List<ProxyUri>> uriCapture = new Capture<List<ProxyUri>>();
@@ -132,17 +132,17 @@ public class SanitizingProxyUriManagerTest {
     expect(proxyUri2.setSanitizeContent(true)).andReturn(proxyUri2).once();
     expect(proxyUri2.setRewriteMimeType(mime)).andReturn(proxyUri2).once();
     replay(proxyUri, proxyUri2);
-    
+
     SanitizingProxyUriManager rewriter = makeRewriter(mime);
     List<Uri> returned = rewriter.make(input, refresh);
-    
+
     verify(uriManager);
     assertSame(uriCapture.getValue(), input);
     assertSame(intCapture.getValue(), refresh);
     assertEquals(2, returned.size());
     verify(proxyUri, proxyUri2);
   }
-  
+
   private SanitizingProxyUriManager makeRewriter(String mime) {
     return new SanitizingProxyUriManager(uriManager, mime);
   }

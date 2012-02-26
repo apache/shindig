@@ -35,7 +35,7 @@ public class MessageELResolverTest {
     "<messagebundle>" +
       "<msg name='hello'>world</msg>" +
       "<msg name='number'>${1+1}</msg>" +
-      "<msg name='concat'>${Msg.hello} ${Msg.number}</msg>" + 
+      "<msg name='concat'>${Msg.hello} ${Msg.number}</msg>" +
       "<msg name='multiLevel'>${Msg.concat} ${Msg.concat}</msg>" +
       // Self-recursive EL, should fail
       "<msg name='recurse'>${Msg.recurse}</msg>" +
@@ -46,7 +46,7 @@ public class MessageELResolverTest {
   private MessageBundle messageBundle;
   private Expressions expressions;
   private ELContext context;
-  
+
   @Before
   public void setUp() throws Exception {
     messageBundle = new MessageBundle(XmlUtil.parse(MESSAGE_BUNDLE));
@@ -56,36 +56,36 @@ public class MessageELResolverTest {
 
   @Test
   public void basicExpression() {
-    assertEquals("world", expressions.parse("${Msg.hello}", String.class).getValue(context)); 
+    assertEquals("world", expressions.parse("${Msg.hello}", String.class).getValue(context));
   }
-  
+
   @Test
   public void nullForMissingProperty() {
-    assertNull(expressions.parse("${Msg.notThere}", Object.class).getValue(context)); 
+    assertNull(expressions.parse("${Msg.notThere}", Object.class).getValue(context));
   }
-  
+
   @Test
   public void innerEvaluation() {
-    assertEquals(2, expressions.parse("${Msg.number}", Integer.class).getValue(context)); 
+    assertEquals(2, expressions.parse("${Msg.number}", Integer.class).getValue(context));
   }
 
   @Test
   public void recursiveEvaluation() {
-    assertEquals("world 2", expressions.parse("${Msg.concat}", String.class).getValue(context)); 
+    assertEquals("world 2", expressions.parse("${Msg.concat}", String.class).getValue(context));
   }
 
   @Test
   public void multiLevelRecursiveEvaluation() {
-    assertEquals("world 2 world 2", expressions.parse("${Msg.multiLevel}", String.class).getValue(context)); 
+    assertEquals("world 2 world 2", expressions.parse("${Msg.multiLevel}", String.class).getValue(context));
   }
 
   @Test(expected = ELException.class)
   public void failsInsteadOfInfiniteRecursion() {
-    expressions.parse("${Msg.recurse}", String.class).getValue(context); 
+    expressions.parse("${Msg.recurse}", String.class).getValue(context);
   }
 
   @Test(expected = ELException.class)
   public void failsInsteadOfMutualInfiniteRecursion() {
-    expressions.parse("${Msg.mutual1}", String.class).getValue(context); 
+    expressions.parse("${Msg.mutual1}", String.class).getValue(context);
   }
 }

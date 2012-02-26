@@ -62,7 +62,7 @@ public abstract class AbstractHttpFetcherTest {
     } catch (GadgetException e) {
       assertEquals(400, e.getHttpStatusCode());
       assertTrue(e.getMessage().contains("Bad host name in request"));
-    }    
+    }
   }
 
   @Test public void testHttpBadPort() throws Exception {
@@ -74,7 +74,7 @@ public abstract class AbstractHttpFetcherTest {
     } catch (GadgetException e) {
       assertEquals(400, e.getHttpStatusCode());
       assertTrue(e.getMessage().contains("Bad port number in request"));
-    }    
+    }
   }
 
   @Test public void testHttpBadUrl() throws Exception {
@@ -86,7 +86,7 @@ public abstract class AbstractHttpFetcherTest {
     } catch (GadgetException e) {
       assertEquals(400, e.getHttpStatusCode());
       assertTrue(e.getMessage().contains("Missing domain name for request"));
-    }    
+    }
   }
 
   @Test public void testHttpNoSchema() throws Exception {
@@ -98,7 +98,7 @@ public abstract class AbstractHttpFetcherTest {
     } catch (GadgetException e) {
       assertEquals(400, e.getHttpStatusCode());
       assertTrue(e.getMessage().contains("Missing schema for request"));
-    }    
+    }
   }
 
   @Test public void testHttpUnderscore() throws Exception {
@@ -232,7 +232,7 @@ public abstract class AbstractHttpFetcherTest {
     assertEquals("POST", response.getHeader("x-method"));
     ArrayAssert.assertEquals(body, response.getResponseAsBytes());
   }
-  
+
   @Test public void testFollowRedirects() throws Exception {
     String content = "";
     Uri uri = new UriBuilder(BASE_URL)

@@ -68,20 +68,20 @@ public class PipelinedData {
       }
 
       Element child = (Element) node;
-      
+
       if (EXTENSION_NAMESPACE.equals(child.getNamespaceURI())) {
         if ("Variable".equals(child.getLocalName())) {
           allPreloads.put(child.getAttribute("key"), createVariableRequest(child));
         }
-        
+
       } else if (OPENSOCIAL_NAMESPACE.equals(child.getNamespaceURI())) {
         String elementName = child.getLocalName();
-  
+
         String key = child.getAttribute("key");
         if (key == null) {
           throw new SpecParserException("Missing key attribute on os:" + elementName);
         }
-  
+
         try {
           if ("PeopleRequest".equals(elementName)) {
             allPreloads.put(key, createPeopleRequest(child));
@@ -123,7 +123,7 @@ public class PipelinedData {
     for (Map.Entry<String, BatchItemData> preload : socialData.allPreloads.entrySet()) {
       allPreloads.put(preload.getKey(), preload.getValue().substitute(substituter));
     }
-    
+
     this.allPreloads = Collections.unmodifiableMap(allPreloads);
   }
 
@@ -139,26 +139,26 @@ public class PipelinedData {
     Map<String, BatchItem> getPreloads();
     Batch getNextBatch(ELResolver rootObjects);
   }
-  
+
   /** Temporary type until BatchItem is made fully polymorphic */
   public enum BatchType {
     SOCIAL,
     HTTP,
     VARIABLE
   }
-  
+
   /** Item within a batch */
   public interface BatchItem {
     BatchType getType();
     Object getData();
   }
-  
+
   /** Shared data used to generate BatchItems */
   interface BatchItemData {
     BatchItem evaluate(Expressions expressions, ELContext elContext);
     BatchItemData substitute(Substitutions substituter);
   }
-  
+
   /**
    * Gets the first batch of preload requests.  Preloads that require root
    * objects not yet available will not be executed in this batch, but may
@@ -186,7 +186,7 @@ public class PipelinedData {
 
     Map<String, BatchItem> evaluatedPreloads = Maps.newHashMap();
     Map<String, BatchItemData> pendingPreloads = null;
-    
+
     if (currentPreloads != null) {
       for (Map.Entry<String, BatchItemData> preload : currentPreloads.entrySet()) {
         try {
@@ -199,7 +199,7 @@ public class PipelinedData {
           if (pendingPreloads == null) {
             pendingPreloads = Maps.newHashMap();
           }
-          
+
           pendingPreloads.put(preload.getKey(), preload.getValue());
         } catch (ELException e) {
           // TODO: Handle!?!
@@ -207,7 +207,7 @@ public class PipelinedData {
         }
       }
     }
-    
+
     // Nothing evaluated or pending;  return null for the batch.  Note that
     // there may be multiple PipelinedData objects (e.g., from multiple
     // <script type="text/os-data"> elements), so even if all evaluations
@@ -320,10 +320,10 @@ public class PipelinedData {
     copyAttribute("count", child, expression, Integer.class);
 
     // TODO: add activity paging support
-    
+
     return expression;
   }
-  
+
   /** Handle the os:ActivityStreamsRequest element */
   private SocialData createActivityStreamRequest(Element child) throws ELException {
     SocialData expression = new SocialData(child.getAttribute("key"), "activitystreams.get");
@@ -524,7 +524,7 @@ public class PipelinedData {
           return signViewer;
         }
       };
-      
+
       return new BatchItem() {
         public Object getData() {
           return info;
@@ -532,7 +532,7 @@ public class PipelinedData {
 
         public BatchType getType() {
           return BatchType.HTTP;
-        }        
+        }
       };
     }
 
@@ -634,7 +634,7 @@ public class PipelinedData {
     public VariableData(String value) {
       this.value = value;
     }
-    
+
     public BatchItem evaluate(Expressions expressions, ELContext elContext) throws ELException {
       ValueExpression expression = expressions.parse(value, Object.class);
       final Object result = expression.getValue(elContext);
@@ -646,7 +646,7 @@ public class PipelinedData {
         public BatchType getType() {
           return BatchType.VARIABLE;
         }
-        
+
       };
     }
 

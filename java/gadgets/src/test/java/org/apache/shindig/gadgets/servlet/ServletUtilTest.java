@@ -123,17 +123,17 @@ public class ServletUtilTest {
   public void testValidateUrlNullInput() throws Exception {
     ServletUtil.validateUrl(null);
   }
-  
+
   @Test
   public void testOutputDataUri() throws Exception {
     checkOutputDataUri("text/foo", "text/foo", "UTF-8");
   }
-  
+
   @Test
   public void testOutputDataUriWithCharset() throws Exception {
     checkOutputDataUri("text/bar; charset=ISO-8859-1", "text/bar", "ISO-8859-1");
   }
-  
+
   @Test
   public void testOutputDataUriWithEmptyCharset() throws Exception {
     checkOutputDataUri("text/bar; charset=", "text/bar", "UTF-8");
@@ -155,7 +155,7 @@ public class ServletUtilTest {
     HttpResponse jsonified = ServletUtil.convertToJsonResponse(response);
 
     assertEquals("application/json; charset=UTF-8", jsonified.getHeader("Content-Type"));
-    
+
     String emitted = jsonified.getResponseAsString();
     JSONObject js = new JSONObject(emitted);
     assertEquals(mv1, js.getString(mk1));
@@ -164,11 +164,11 @@ public class ServletUtilTest {
     assertEquals("data:" + expectedType + ";base64;charset=" + expectedEncoding + "," + content64,
         js.getString(ServletUtil.DATA_URI_KEY));
   }
-  
+
   private String getBase64(String input) throws Exception {
     return new String(Base64.encodeBase64(input.getBytes("UTF8")), "UTF8");
   }
-  
+
   @Test
   public void testFromHttpServletRequest() throws Exception {
     HttpServletRequest original = EasyMock.createMock(HttpServletRequest.class);
@@ -195,11 +195,11 @@ public class ServletUtilTest {
     };
     EasyMock.expect(original.getInputStream()).andReturn(sis);
     EasyMock.expect(original.getRemoteAddr()).andReturn("1.2.3.4");
-    
+
     EasyMock.replay(original);
     HttpRequest request = ServletUtil.fromHttpServletRequest(original);
     EasyMock.verify(original);
-    
+
     assertEquals(Uri.parse("https://www.example.org:444/path/foo?one=two&three=four"),
         request.getUri());
     assertEquals(3, request.getHeaders().size());
@@ -211,7 +211,7 @@ public class ServletUtilTest {
     assertEquals("post body", request.getPostBodyAsString());
     assertEquals("1.2.3.4", request.getParam(ServletUtil.REMOTE_ADDR_KEY));
   }
-  
+
   @Test
   public void testCopyToServletResponseAndOverrideCacheHeadersForPublic() throws Exception {
     FakeTimeSource fakeTime = new FakeTimeSource();
@@ -223,9 +223,9 @@ public class ServletUtilTest {
 
     HttpServletResponse servletResponse = EasyMock.createMock(HttpServletResponse.class);
     HttpServletResponseRecorder recorder = new HttpServletResponseRecorder(servletResponse);
-    
+
     ServletUtil.copyToServletResponseAndOverrideCacheHeaders(response, recorder);
-    
+
     assertEquals(200, recorder.getHttpStatusCode());
     assertEquals("response string", recorder.getResponseAsString());
     assertEquals("v1", recorder.getHeader("h1"));
@@ -268,7 +268,7 @@ public class ServletUtilTest {
     HttpServletResponseRecorder recorder = new HttpServletResponseRecorder(servletResponse);
     long testStartTime = fakeTime.currentTimeMillis();
     ServletUtil.copyToServletResponseAndOverrideCacheHeaders(response, recorder);
-    assertEquals(200, recorder.getHttpStatusCode());    
+    assertEquals(200, recorder.getHttpStatusCode());
     assertEquals("response string", recorder.getResponseAsString());
     assertEquals("v1", recorder.getHeader("h1"));
     assertEquals("v2", recorder.getHeader("h2"));
@@ -277,7 +277,7 @@ public class ServletUtilTest {
     assertGreater(testStartTime - 2000L, expires);
     assertLesser(testStartTime + 2000L, expires);
   }
-  
+
   @Test
   public void testCopyToServletResponseAndOverrideCacheHeadersForStrictNoCache()
       throws Exception {
@@ -287,11 +287,11 @@ public class ServletUtilTest {
 
     HttpServletResponse servletResponse = EasyMock.createMock(HttpServletResponse.class);
     HttpServletResponseRecorder recorder = new HttpServletResponseRecorder(servletResponse);
-    
+
     FakeTimeSource fakeTime = new FakeTimeSource();
     HttpUtil.setTimeSource(fakeTime);
     ServletUtil.copyToServletResponseAndOverrideCacheHeaders(response, recorder);
-    
+
     assertEquals(200, recorder.getHttpStatusCode());
     assertEquals("response string", recorder.getResponseAsString());
     assertEquals("v1", recorder.getHeader("h1"));

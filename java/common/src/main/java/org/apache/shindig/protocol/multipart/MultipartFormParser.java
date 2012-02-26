@@ -31,7 +31,7 @@ import com.google.inject.ImplementedBy;
 public interface MultipartFormParser {
   /** Parse a request into a list of data items */
   Collection<FormDataItem> parse(HttpServletRequest request) throws IOException;
-  
+
   /**
    * @return true if the request requires multipart parsing.
    */

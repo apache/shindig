@@ -48,7 +48,7 @@ public interface HandlerRegistry {
    * @return the handler
    */
   RestHandler getRestHandler(String path, String method);
-  
+
   /**
    * @return The list of available services
    */

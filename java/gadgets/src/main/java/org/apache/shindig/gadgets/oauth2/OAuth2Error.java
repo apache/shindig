@@ -24,15 +24,15 @@ import org.apache.shindig.gadgets.oauth2.logger.FilteredLogger;
 /**
  * Any time there's an error in the OAuth2 layer it's reported with an
  * OAuth2Error.
- * 
+ *
  * errorCode - should correspond to an OAuth2Message errorCode when appropriate.
- * 
+ *
  */
 public enum OAuth2Error {
   AUTHORIZATION_CODE_PROBLEM("authorization_code_problem"),
   AUTHORIZE_PROBLEM("authorize_problem"),
   AUTHENTICATION_PROBLEM( "authentication_problem"),
-  BEARER_TOKEN_PROBLEM("bearer_token_problem"), 
+  BEARER_TOKEN_PROBLEM("bearer_token_problem"),
   CALLBACK_PROBLEM("callback_problem"),
   CLIENT_CREDENTIALS_PROBLEM("client_credentials_problem"),
   CODE_GRANT_PROBLEM("code_grant_problem"),

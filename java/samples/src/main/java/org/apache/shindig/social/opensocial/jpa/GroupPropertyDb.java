@@ -52,7 +52,7 @@ public class GroupPropertyDb extends ListFieldDb {
   public void setGroup(GroupDb group) {
     this.group = group;
   }
-  
+
 
 
 

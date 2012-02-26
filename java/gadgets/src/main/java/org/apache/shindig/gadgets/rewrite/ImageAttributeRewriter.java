@@ -71,7 +71,7 @@ public class ImageAttributeRewriter extends DomWalker.Rewriter {
   public static class ImageAttributeVisitor implements DomWalker.Visitor {
     private final RequestPipeline requestPipeline;
     private final ExecutorService executor;
-    
+
     private static final String IMG_ATTR_CLASS_NAME_PREFIX = "__shindig__image";
 
     public ImageAttributeVisitor(RequestPipeline requestPipeline,

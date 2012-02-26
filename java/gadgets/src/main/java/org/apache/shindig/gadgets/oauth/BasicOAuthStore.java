@@ -70,12 +70,12 @@ public class BasicOAuthStore implements OAuthStore {
    * Key to use when no other key is found.
    */
   private BasicOAuthStoreConsumerKeyAndSecret defaultKey;
-  
+
   /**
    * Callback to use when no per-key callback URL is found.
    */
   private String defaultCallbackUrl;
-  
+
   /** Number of times we looked up a consumer key */
   private int consumerKeyLookupCount = 0;
 
@@ -87,7 +87,7 @@ public class BasicOAuthStore implements OAuthStore {
 
   /** Number of times we removed an access token */
   private int accessTokenRemoveCount = 0;
-  
+
   private Authority authority;
 
   public BasicOAuthStore() {
@@ -154,7 +154,7 @@ public class BasicOAuthStore implements OAuthStore {
   public void setDefaultKey(BasicOAuthStoreConsumerKeyAndSecret defaultKey) {
     this.defaultKey = defaultKey;
   }
-  
+
   public void setDefaultCallbackUrl(String defaultCallbackUrl) {
     this.defaultCallbackUrl = defaultCallbackUrl;
   }
@@ -163,7 +163,7 @@ public class BasicOAuthStore implements OAuthStore {
       BasicOAuthStoreConsumerIndex providerKey, BasicOAuthStoreConsumerKeyAndSecret keyAndSecret) {
     consumerInfos.put(providerKey, keyAndSecret);
   }
-  
+
   public void setAuthority(Authority authority) {
     this.authority = authority;
   }
@@ -196,11 +196,11 @@ public class BasicOAuthStore implements OAuthStore {
       consumer.setProperty(OAuth.OAUTH_SIGNATURE_METHOD, OAuth.HMAC_SHA1);
     }
     String callback = (cks.getCallbackUrl() != null ? cks.getCallbackUrl() : defaultCallbackUrl);
-    
+
     if (authority != null) {
       callback = callback.replace("%authority%", authority.getAuthority());
     }
- 
+
     return new ConsumerInfo(consumer, cks.getKeyName(), callback);
   }
 

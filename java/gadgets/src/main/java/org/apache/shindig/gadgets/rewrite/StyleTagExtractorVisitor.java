@@ -37,7 +37,7 @@ public class StyleTagExtractorVisitor implements Visitor {
   private final ContentRewriterFeature.Config config;
   private final CssResponseRewriter cssRewriter;
   private final ProxyUriManager proxyUriManager;
-  
+
   public StyleTagExtractorVisitor(ContentRewriterFeature.Config config,
       CssResponseRewriter cssRewriter, ProxyUriManager proxyUriManager) {
     this.config = config;
@@ -49,13 +49,13 @@ public class StyleTagExtractorVisitor implements Visitor {
     if (!config.isRewriteEnabled() || !config.getIncludedTags().contains("style")) {
       return VisitStatus.BYPASS;
     }
-    
+
     // Only process <style> elements.
     if (node.getNodeType() != Node.ELEMENT_NODE ||
         !node.getNodeName().equalsIgnoreCase("style")) {
       return VisitStatus.BYPASS;
     }
-    
+
     return VisitStatus.RESERVE_NODE;
   }
 
@@ -65,13 +65,13 @@ public class StyleTagExtractorVisitor implements Visitor {
     if (nodes.isEmpty()) {
       return mutated;
     }
-    
+
     Uri contentBase = gadget.getSpec().getUrl();
     View view = gadget.getCurrentView();
     if (view != null && view.getHref() != null) {
       contentBase = view.getHref();
     }
-    
+
     Element head = (Element)DomUtil.getFirstNamedChildNode(
         nodes.get(0).getOwnerDocument().getDocumentElement(), "head");
     for (Node node : nodes) {
@@ -89,7 +89,7 @@ public class StyleTagExtractorVisitor implements Visitor {
         mutated = true;
       }
     }
-    
+
     return mutated;
   }
 }

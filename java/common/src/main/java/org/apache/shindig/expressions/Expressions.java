@@ -49,14 +49,14 @@ import com.google.inject.Singleton;
  */
 @Singleton
 public class Expressions {
-  
+
   private final ExpressionFactory factory;
   private final ELContext parseContext;
   private final ELResolver defaultELResolver;
   private final Functions functions;
   private final ELTypeConverter typeConverter;
 
-  /** 
+  /**
    * Returns an instance of Expressions that doesn't require
    * any functions or perform any caching.  Use only for testing.
    */
@@ -64,8 +64,8 @@ public class Expressions {
   public static Expressions forTesting(Functions functions) {
     return new Expressions(functions, null, new JuelTypeConverter(), new JuelProvider());
   }
-  
-  /** 
+
+  /**
    * Returns an instance of Expressions that doesn't require
    * any functions or perform any caching.  Use only for testing.
    */
@@ -73,7 +73,7 @@ public class Expressions {
   public static Expressions forTesting() {
     return new Expressions(null, null, new JuelTypeConverter(), new JuelProvider());
   }
-  
+
   @Inject
   public Expressions(Functions functions, CacheProvider cacheProvider,
       ELTypeConverter typeConverter, ExpressionProvider expProvider) {
@@ -83,8 +83,8 @@ public class Expressions {
     // Stub context with no FunctionMapper, used only to parse expressions
     parseContext = new Context(null);
     defaultELResolver = createDefaultELResolver();
-   
-  
+
+
   }
 
   /**
@@ -118,7 +118,7 @@ public class Expressions {
       return factory.createValueExpression(parseContext, expression, type);
     }
   }
-  
+
   public ValueExpression constant(Object value, Class<?> type) {
     boolean shouldConvert = typeConverter.isPostConvertible(type);
     if (shouldConvert) {
@@ -127,15 +127,15 @@ public class Expressions {
     else {
       return factory.createValueExpression(value, type);
     }
-   
+
   }
-  
-  
+
+
   private ExpressionFactory newExpressionFactory(
       ExpressionProvider expProvider, CacheProvider cacheProvider) {
     return expProvider.newExpressionFactory(cacheProvider, typeConverter);
   }
-  
+
   /**
    * @return a default ELResolver with functionality needed by all
    * expression evaluation.
@@ -150,7 +150,7 @@ public class Expressions {
     resolver.add(new ListELResolver());
     resolver.add(new ArrayELResolver());
     // TODO: bean el resolver?
-    
+
     return resolver;
   }
 
@@ -165,7 +165,7 @@ public class Expressions {
     public Context(ELResolver resolver) {
       this.resolver = resolver;
     }
-    
+
     @Override
     public ELResolver getELResolver() {
       return resolver;
@@ -181,12 +181,12 @@ public class Expressions {
       if (variables == null) {
         variables = new Variables();
       }
-      
+
       return variables;
     }
-    
+
   }
-  
+
   static private class Variables extends VariableMapper {
     private final Map<String, ValueExpression> variables = Maps.newHashMap();
     @Override
@@ -198,9 +198,9 @@ public class Expressions {
     public ValueExpression setVariable(String var, ValueExpression expression) {
       return variables.put(var, expression);
     }
-    
+
   }
-  
+
   private static class ValueExpressionWrapper extends ValueExpression {
 
     private static final long serialVersionUID = 2135607228206570229L;

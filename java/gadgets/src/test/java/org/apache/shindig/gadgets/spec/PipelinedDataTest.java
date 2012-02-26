@@ -59,7 +59,7 @@ public class PipelinedDataTest {
     elResolver = new RootELResolver(elValues);
     expressions = Expressions.forTesting();
   }
-  
+
   @Test
   public void testDataRequest() throws Exception {
     String xml = "<Content><DataRequest xmlns=\"" + PipelinedData.OPENSOCIAL_NAMESPACE + "\" "
@@ -74,7 +74,7 @@ public class PipelinedDataTest {
     elValues.put("startIndex", 10);
     // Test a param that evaluates to null
     elValues.put("params", ImmutableMap.of());
-    elValues.put("userIds", Lists.newArrayList("first", "second"));    
+    elValues.put("userIds", Lists.newArrayList("first", "second"));
     elValues.put("fields", new JSONArray("['name','id']"));
     PipelinedData socialData = new PipelinedData(XmlUtil.parse(xml), null);
     assertFalse(socialData.needsOwner());
@@ -123,7 +123,7 @@ public class PipelinedDataTest {
     JsonAssert.assertObjectEquals(expected, batchItem.getData());
     assertNull(batch.getNextBatch(elResolver));
   }
-  
+
   @Test
   public void testPeopleRequestWithExpressions() throws Exception {
     String xml = "<Content><PeopleRequest xmlns=\"" + PipelinedData.OPENSOCIAL_NAMESPACE + "\" "
@@ -255,7 +255,7 @@ public class PipelinedDataTest {
     assertEquals(PipelinedData.BatchType.SOCIAL, batchItem.getType());
     JsonAssert.assertObjectEquals(expected, batchItem.getData());
   }
-  
+
   @Test
   public void testActivityStreamsRequest() throws Exception {
     String xml = "<Content><ActivityStreamsRequest xmlns=\"" + PipelinedData.OPENSOCIAL_NAMESPACE + "\" "
@@ -307,7 +307,7 @@ public class PipelinedDataTest {
 
     new PipelinedData(XmlUtil.parse(xml), null);
   }
-  
+
   @Test
   public void testBatching() throws Exception {
     String xml = "<Content xmlns=\"" + PipelinedData.OPENSOCIAL_NAMESPACE + "\">"
@@ -316,7 +316,7 @@ public class PipelinedDataTest {
         + "</Content>";
 
     PipelinedData socialData = new PipelinedData(XmlUtil.parse(xml), GADGET_URI);
-    
+
     PipelinedData.Batch batch = socialData.getBatch(expressions, elResolver);
 
     assertTrue(batch.getPreloads().isEmpty());
@@ -332,7 +332,7 @@ public class PipelinedDataTest {
     batch = batch.getNextBatch(elResolver);
     assertEquals(1, batch.getPreloads().size());
     assertTrue(batch.getPreloads().containsKey("key2"));
-    
+
     // And the final batch should be empty
     assertNull(batch.getNextBatch(elResolver));
   }
@@ -345,11 +345,11 @@ public class PipelinedDataTest {
         + "</Content>";
 
     PipelinedData pipelinedData = new PipelinedData(XmlUtil.parse(xml), GADGET_URI);
-    
+
     PipelinedData.Batch batch = pipelinedData.getBatch(expressions, elResolver);
     assertFalse(pipelinedData.needsViewer());
     assertFalse(pipelinedData.needsOwner());
-    
+
     assertEquals(1, batch.getPreloads().size());
     BatchItem output = batch.getPreloads().get("key");
     assertEquals(BatchType.VARIABLE, output.getType());
@@ -367,13 +367,13 @@ public class PipelinedDataTest {
     PipelinedData.Batch batch = pipelinedData.getBatch(expressions, elResolver);
     assertFalse(pipelinedData.needsViewer());
     assertFalse(pipelinedData.needsOwner());
-    
+
     assertEquals(1, batch.getPreloads().size());
     BatchItem output = batch.getPreloads().get("key");
     assertEquals(BatchType.HTTP, output.getType());
     RequestAuthenticationInfo preload = (RequestAuthenticationInfo) output.getData();
     assertEquals(AuthType.NONE, preload.getAuthType());
-    assertEquals(Uri.parse("http://example.org/example.html"), preload.getHref());    
+    assertEquals(Uri.parse("http://example.org/example.html"), preload.getHref());
   }
 
   @Test
@@ -407,7 +407,7 @@ public class PipelinedDataTest {
     PipelinedData.Batch batch = pipelinedData.getBatch(expressions, elResolver);
     assertTrue(pipelinedData.needsViewer());
     assertFalse(pipelinedData.needsOwner());
-    
+
     assertEquals(1, batch.getPreloads().size());
     BatchItem output = batch.getPreloads().get("key");
     assertEquals(BatchType.HTTP, output.getType());

@@ -38,14 +38,14 @@ public class HtmlTagHandlerTest {
   private FakeTemplateProcessor processor;
   private DOMImplementation documentProvider;
   private HtmlTagHandler handler;
-  
+
   @Before
   public void setUp() throws Exception {
     processor = new FakeTemplateProcessor();
     documentProvider = new ParseModule.DOMImplementationProvider().get();
     handler = new HtmlTagHandler(new NekoSimplifiedHtmlParser(documentProvider));
   }
-  
+
   @Test
   public void testHtmlTag() throws Exception {
     Document doc = documentProvider.createDocument(null, null, null);

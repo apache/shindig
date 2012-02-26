@@ -47,11 +47,11 @@ public class FeatureRegistryTest {
       getFeatureTpl("top", new String[] { "mid_a", "mid_b" });
   private static final String MID_A_TPL =
       getFeatureTpl("mid_a", new String[] { "bottom" });
-  private static final String MID_B_TPL = 
+  private static final String MID_B_TPL =
       getFeatureTpl("mid_b", new String[] { "bottom" });
-  private static final String BOTTOM_TPL = 
+  private static final String BOTTOM_TPL =
       getFeatureTpl("bottom", new String[] {});
-  private static final String LOOP_A_TPL = 
+  private static final String LOOP_A_TPL =
       getFeatureTpl("loop_a", new String[] { "loop_b" });
   private static final String LOOP_B_TPL =
       getFeatureTpl("loop_b", new String[] { "loop_c" });
@@ -59,21 +59,21 @@ public class FeatureRegistryTest {
       getFeatureTpl("loop_c", new String[] { "loop_a" });
   private static final String BAD_DEP_TPL =
       getFeatureTpl("bad_dep", new String[] { "no-exists" });
-  
+
   private static String RESOURCE_BASE_PATH = "/resource/base/path";
   private static int resourceIdx = 0;
   private TestFeatureRegistry registry;
-  
+
   @Test
   public void registerFromFileFeatureXmlFileScheme() throws Exception {
     checkRegisterFromFileFeatureXml(true);
   }
-  
+
   @Test
   public void registerFromFileFeatureXmlNoScheme() throws Exception {
     checkRegisterFromFileFeatureXml(false);
   }
-  
+
   private void checkRegisterFromFileFeatureXml(boolean withScheme) throws Exception {
     TestFeatureRegistry.Builder builder = TestFeatureRegistry.newBuilder();
     String content = "content-" + (withScheme ? "withScheme" : "noScheme");
@@ -81,13 +81,13 @@ public class FeatureRegistryTest {
     Uri featureFile = makeFile(xml(NODEP_TPL, "gadget",
         withScheme ? resUri.toString() : resUri.getPath(), null));
     registry = builder.build(withScheme ? featureFile.toString() : featureFile.getPath());
-    
+
     // Verify single resource works all the way through.
     List<FeatureResource> resources = registry.getAllFeatures().getResources();
     assertEquals(1, resources.size());
     assertEquals(content, resources.get(0).getContent());
   }
-  
+
   @Test
   public void registerFromFileInNestedDirectoryFeatureXmlFile() throws Exception {
     // Get the directory from dummyUri and create a subdir.
@@ -113,13 +113,13 @@ public class FeatureRegistryTest {
     out.write(xml(NODEP_TPL, "gadget", resFile.toURI().toString(), null));
     out.close();
     registry = TestFeatureRegistry.newBuilder().build(childDir.toURI().toString());
-    
+
     // Verify single resource works all the way through.
     List<FeatureResource> resources = registry.getAllFeatures().getResources();
     assertEquals(1, resources.size());
     assertEquals(content, resources.get(0).getContent());
   }
-  
+
   @Test
   public void registerFromResourceFeatureXml() throws Exception {
     TestFeatureRegistry.Builder builder = TestFeatureRegistry.newBuilder();
@@ -128,13 +128,13 @@ public class FeatureRegistryTest {
     Uri featureUri = builder.expectResource(xml(NODEP_TPL, "gadget", contentUri.getPath(), null));
     builder.addFeatureFile(featureUri.toString());
     registry = builder.build();
-    
+
     // Verify single resource works all the way through.
     List<FeatureResource> resources = registry.getAllFeatures().getResources();
     assertEquals(1, resources.size());
     assertEquals(content, resources.get(0).getContent());
   }
-  
+
   @Test
   public void registerFromResourceFeatureXmlRelativeContent() throws Exception {
     TestFeatureRegistry.Builder builder = TestFeatureRegistry.newBuilder();
@@ -143,17 +143,17 @@ public class FeatureRegistryTest {
     String relativePath = contentUri.getPath().substring(contentUri.getPath().lastIndexOf('/') + 1);
     Uri featureUri = builder.expectResource(xml(NODEP_TPL, "gadget", relativePath, null));
     registry = builder.build(featureUri.toString());
-    
+
     // Verify single resource works all the way through.
     List<FeatureResource> resources = registry.getAllFeatures().getResources();
     assertEquals(1, resources.size());
     assertEquals(content, resources.get(0).getContent());
   }
-  
+
   @Test
   public void registerFromResourceIndex() throws Exception {
     TestFeatureRegistry.Builder builder = TestFeatureRegistry.newBuilder();
-    
+
     // One with extern resource loaded content...
     String content1 = "content1()";
     Uri content1Uri = builder.expectResource(content1);
@@ -162,20 +162,20 @@ public class FeatureRegistryTest {
     // One feature with inline content (that it depends on)...
     String content2 = "inline()";
     Uri feature2Uri = builder.expectResource(xml(BOTTOM_TPL, "gadget", null, content2));
-    
+
     // .txt file to join the two
     Uri txtFile = builder.expectResource(feature1Uri.toString() + '\n' + feature2Uri.toString(), ".txt");
-    
+
     // Load resources from the text file and do basic validation they're good.
     registry = builder.build(txtFile.toString());
-    
+
     // Contents should be ordered based on the way they went in.
     List<FeatureResource> resources = registry.getAllFeatures().getResources();
     assertEquals(2, resources.size());
     assertEquals(content2, resources.get(0).getContent());
     assertEquals(content1, resources.get(1).getContent());
   }
-  
+
   @Test
   public void registerOverrideFeature() throws Exception {
     TestFeatureRegistry.Builder builder = TestFeatureRegistry.newBuilder();
@@ -184,16 +184,16 @@ public class FeatureRegistryTest {
     String content1 = "content1()";
     Uri content1Uri = builder.expectResource(content1);
     Uri feature1Uri = builder.expectResource(xml(BOTTOM_TPL, "gadget", content1Uri.getPath(), null));
-    
+
     String content2 = "content_two()";
     Uri content2Uri = builder.expectResource(content2);
     Uri feature2Uri = builder.expectResource(xml(BOTTOM_TPL, "gadget", content2Uri.getPath(), null));
-    
+
     registry = builder.build(feature1Uri.toString());
     List<FeatureResource> resources1 = registry.getAllFeatures().getResources();
     assertEquals(1, resources1.size());
     assertEquals(content1, resources1.get(0).getContent());
-    
+
     // Register it again, different def.
     registry = builder.build(feature2Uri.toString());
     List<FeatureResource> resources2 = registry.getAllFeatures().getResources();
@@ -204,7 +204,7 @@ public class FeatureRegistryTest {
     List<FeatureResource> resourcesAgain = registry.getAllFeatures().getResources();
     assertSame(resources2, resourcesAgain);
   }
-  
+
   @Test
   public void cacheAccountsForUnsupportedState() throws Exception {
     TestFeatureRegistry.Builder builder = TestFeatureRegistry.newBuilder();
@@ -215,20 +215,20 @@ public class FeatureRegistryTest {
     String theContainer = "the-container";
     attribs.put("container", theContainer);
     Uri feature1Uri = builder.expectResource(xml(BOTTOM_TPL, "gadget", content1Uri.getPath(), null, attribs));
-    
+
     // Register it.
     registry = builder.build(feature1Uri.toString());
-    
+
     // Retrieve content for matching context.
     List<String> needed = Lists.newArrayList("bottom");
     List<String> unsupported = Lists.newArrayList();
     List<FeatureResource> resources = registry.getFeatureResources(
         getCtx(RenderingContext.GADGET, theContainer), needed, unsupported).getResources();
-    
+
     // Retrieve again w/ no unsupported list.
     List<FeatureResource> resourcesUnsup = registry.getFeatureResources(
         getCtx(RenderingContext.GADGET, theContainer), needed, null).getResources();
-    
+
     assertNotSame(resources, resourcesUnsup);
     assertEquals(resources, resourcesUnsup);
     assertEquals(1, resources.size());
@@ -242,7 +242,7 @@ public class FeatureRegistryTest {
     List<FeatureResource> resourcesUnsup2 = registry.getFeatureResources(
         getCtx(RenderingContext.GADGET, theContainer), needed, null).getResources();
     assertSame(resourcesUnsup, resourcesUnsup2);
-    
+
     // Lastly, ensure that ignoreCache is properly accounted.
     List<FeatureResource> resourcesIgnoreCache = registry.getFeatureResources(
         getCtx(RenderingContext.GADGET, theContainer, true), needed, unsupported).getResources();
@@ -250,7 +250,7 @@ public class FeatureRegistryTest {
     assertEquals(1, resourcesIgnoreCache.size());
     assertEquals(content1, resourcesIgnoreCache.get(0).getContent());
   }
-  
+
   @Test
   public void cacheAccountsForContext() throws Exception {
     TestFeatureRegistry.Builder builder = TestFeatureRegistry.newBuilder();
@@ -261,52 +261,52 @@ public class FeatureRegistryTest {
     String theContainer = "the-container";
     attribs.put("container", theContainer);
     Uri feature1Uri = builder.expectResource(xml(BOTTOM_TPL, "gadget", content1Uri.getPath(), null, attribs));
-    
+
     // Register it.
     registry = builder.build(feature1Uri.toString());
-    
+
     // Retrieve content for matching context.
     List<String> needed = Lists.newArrayList("bottom");
     List<String> unsupported = Lists.newArrayList();
     List<FeatureResource> resources = registry.getFeatureResources(
         getCtx(RenderingContext.GADGET, theContainer), needed, unsupported).getResources();
-    
+
     // Retrieve again w/ mismatch container.
     List<FeatureResource> resourcesNoMatch = registry.getFeatureResources(
         getCtx(RenderingContext.GADGET, "foo"), needed, unsupported).getResources();
-    
+
     // Retrieve again w/ mismatched context.
     List<FeatureResource> ctxMismatch = registry.getFeatureResources(
         getCtx(RenderingContext.CONTAINER, theContainer), needed, unsupported).getResources();
 
     assertNotSame(resources, resourcesNoMatch);
     assertNotSame(resources, ctxMismatch);
-    
+
     assertEquals(1, resources.size());
     assertEquals(content1, resources.get(0).getContent());
-    
+
     assertEquals(0, resourcesNoMatch.size());
     assertEquals(0, ctxMismatch.size());
-    
+
     // Make sure caches work with appropriate matching.
     List<FeatureResource> resources2 = registry.getFeatureResources(
         getCtx(RenderingContext.GADGET, theContainer), needed, unsupported).getResources();
     assertSame(resources, resources2);
-    
+
     List<FeatureResource> resourcesNoMatch2 = registry.getFeatureResources(
         getCtx(RenderingContext.GADGET, "foo"), needed, unsupported).getResources();
     assertSame(resourcesNoMatch, resourcesNoMatch2);
-    
+
     List<FeatureResource> ctxMismatch2 = registry.getFeatureResources(
         getCtx(RenderingContext.CONTAINER, theContainer), needed, unsupported).getResources();
     assertSame(ctxMismatch, ctxMismatch2);
-    
+
     // Check ignoreCache
     List<FeatureResource> resourcesIC = registry.getFeatureResources(
         getCtx(RenderingContext.GADGET, theContainer, true), needed, unsupported).getResources();
     assertNotSame(resources, resourcesIC);
   }
-  
+
   @Test
   public void missingIndexResultsInException() throws Exception {
     try {
@@ -317,7 +317,7 @@ public class FeatureRegistryTest {
       assertEquals(GadgetException.Code.INVALID_PATH, e.getCode());
     }
   }
-  
+
   @Test
   public void missingFileResultsInException() throws Exception {
     try {
@@ -329,17 +329,17 @@ public class FeatureRegistryTest {
       assertEquals(GadgetException.Code.INVALID_CONFIG, e.getCode());
     }
   }
-  
+
   @Test
   public void selectExactFeatureResourcesGadget() throws Exception {
     checkExactFeatureResources("gadget", RenderingContext.GADGET);
   }
-  
+
   @Test
   public void selectExactFeatureResourcesContainer() throws Exception {
     checkExactFeatureResources("container", RenderingContext.CONTAINER);
   }
-  
+
   private void checkExactFeatureResources(String type, RenderingContext rctx) throws Exception {
     setupFullRegistry(type, null);
     GadgetContext ctx = getCtx(rctx, null);
@@ -351,17 +351,17 @@ public class FeatureRegistryTest {
     assertEquals("nodep", resources.get(0).getContent());
     assertEquals("bottom", resources.get(1).getContent());
   }
-  
+
   @Test
   public void selectNoContentValidFeatureResourcesGadget() throws Exception {
     checkNoContentValidFeatureResources("gadget", RenderingContext.CONTAINER);
   }
-  
+
   @Test
   public void selectNoContentValidFeatureResourcesContainer() throws Exception {
     checkNoContentValidFeatureResources("container", RenderingContext.GADGET);
   }
-  
+
   private void checkNoContentValidFeatureResources(
       String type, RenderingContext rctx) throws Exception {
     setupFullRegistry(type, null);
@@ -371,24 +371,24 @@ public class FeatureRegistryTest {
     List<FeatureResource> resources = registry.getFeatureResources(ctx, needed, unsupported).getResources();
     assertEquals(0, resources.size());
   }
-  
+
   @Test
   public void testTransitiveFeatureResourcesGadget() throws Exception {
     checkTransitiveFeatureResources("gadget", RenderingContext.GADGET);
   }
-  
+
   @Test
   public void testTransitiveFeatureResourcesContainer() throws Exception {
     checkTransitiveFeatureResources("container", RenderingContext.CONTAINER);
   }
-  
+
   private void checkTransitiveFeatureResources(String type, RenderingContext rctx)
       throws Exception {
     setupFullRegistry(type, null);
     GadgetContext ctx = getCtx(rctx, null);
     List<String> needed = Lists.newArrayList("top", "nodep");
     List<String> unsupported = Lists.newLinkedList();
-    
+
     // Should come back in insertable order (from bottom of the graph up),
     // querying in feature.xml dependency order.
     List<FeatureResource> resources = registry.getFeatureResources(ctx, needed, unsupported).getResources();
@@ -399,7 +399,7 @@ public class FeatureRegistryTest {
     assertEquals("top", resources.get(3).getContent());
     assertEquals("nodep", resources.get(4).getContent());
   }
-  
+
   @Test
   public void unsupportedFeaturesPopulated() throws Exception {
     // Test only for gadget case; above tests are sufficient to ensure
@@ -414,7 +414,7 @@ public class FeatureRegistryTest {
     assertEquals(1, unsupported.size());
     assertEquals("does-not-exist", unsupported.get(0));
   }
-  
+
   @Test
   public void filterFeaturesByContainerMatch() throws Exception {
     // Again test only for gadget case; above tests cover type <-> RenderingContext
@@ -428,7 +428,7 @@ public class FeatureRegistryTest {
     assertEquals("bottom", resources.get(1).getContent());
     assertEquals(0, unsupported.size());
   }
-  
+
   @Test
   public void filterFeaturesByContainerNoMatch() throws Exception {
     // Again test only for gadget case; above tests cover type <-> RenderingContext
@@ -440,7 +440,7 @@ public class FeatureRegistryTest {
     assertEquals(0, resources.size());  // no resource matches but all feature keys valid
     assertEquals(0, unsupported.size());
   }
-  
+
   @Test
   public void getFeatureResourcesNoTransitiveSingle() throws Exception {
     setupFullRegistry("gadget", null);
@@ -454,18 +454,18 @@ public class FeatureRegistryTest {
     assertEquals("bottom", resources.get(1).getContent());
     assertEquals(0, unsupported.size());
   }
-  
+
   @Test
   public void getAllFeatures() throws Exception {
     setupFullRegistry("gadget", null);
     List<FeatureResource> resources = registry.getAllFeatures().getResources();
-    
+
     // No guaranteed order (top/mid/bottom bundle may be before nodep)
     // Just check that there are 5 resources around and let the above tests
     // handle transitivity checks.
     assertEquals(5, resources.size());
   }
-  
+
   @Test
   public void getFeaturesStringsNoTransitive() throws Exception {
     setupFullRegistry("gadget", null);
@@ -475,7 +475,7 @@ public class FeatureRegistryTest {
     assertEquals("nodep", featureNames.get(0));
     assertEquals("bottom", featureNames.get(1));
   }
-  
+
   @Test
   public void getFeaturesStringsTransitive() throws Exception {
     setupFullRegistry("gadget", null);
@@ -488,11 +488,11 @@ public class FeatureRegistryTest {
     assertEquals("top", featureNames.get(3));
     assertEquals("nodep", featureNames.get(4));
   }
-  
+
   @Test
   public void loopIsDetectedAndCrashes() throws Exception {
     TestFeatureRegistry.Builder builder = TestFeatureRegistry.newBuilder();
-    
+
     // Set up a registry with features loop_a,b,c. C points back to A, which should
     // cause an exception to be thrown by the register method.
     String type = "gadget";
@@ -508,7 +508,7 @@ public class FeatureRegistryTest {
       assertEquals(GadgetException.Code.INVALID_CONFIG, e.getCode());
     }
   }
-  
+
   @Test
   public void unavailableFeatureCrashes() throws Exception {
     TestFeatureRegistry.Builder builder = TestFeatureRegistry.newBuilder();
@@ -519,7 +519,7 @@ public class FeatureRegistryTest {
       assertEquals(GadgetException.Code.INVALID_CONFIG, e.getCode());
     }
   }
-  
+
   @Test
   public void returnOnlyContainerFilteredJs() throws Exception {
     TestFeatureRegistry.Builder builder = TestFeatureRegistry.newBuilder();
@@ -539,7 +539,7 @@ public class FeatureRegistryTest {
     assertEquals(1, resources.size());
     assertEquals(containerContent, resources.get(0).getContent());
   }
-  
+
   @Test
   public void returnDefaultMatchJs() throws Exception {
     TestFeatureRegistry.Builder builder = TestFeatureRegistry.newBuilder();
@@ -553,13 +553,13 @@ public class FeatureRegistryTest {
     registry = builder.build(featureUri.toString());
     List<String> needed = Lists.newArrayList(feature);
     List<String> unsupported = Lists.newLinkedList();
-    List<FeatureResource> resources = 
+    List<FeatureResource> resources =
         registry.getFeatureResources(
           getCtx(RenderingContext.GADGET, "othercontainer"), needed, unsupported).getResources();
     assertEquals(1, resources.size());
     assertEquals(defaultContent, resources.get(0).getContent());
   }
-  
+
   private String getContainerAndDefaultTpl(String name, String container, String c1, String c2) {
     StringBuilder sb = new StringBuilder();
     sb.append("<feature><name>").append(name).append("</name>");
@@ -570,7 +570,7 @@ public class FeatureRegistryTest {
     sb.append("</feature>");
     return sb.toString();
   }
-  
+
   @Test
   public void resourceGetsMergedAttribs() throws Exception {
     TestFeatureRegistry.Builder builder = TestFeatureRegistry.newBuilder();
@@ -582,16 +582,16 @@ public class FeatureRegistryTest {
     attribs.put("container", theContainer);
     attribs.put("one", "bundle-one");
     attribs.put("two", "bundle-two");
-    
+
     Map<String, String> resourceAttribs = Maps.newHashMap();
     attribs.put("two", "attrib-two");
     attribs.put("three", "attrib-three");
     Uri feature1Uri = builder.expectResource(xml(BOTTOM_TPL, "gadget", content1Uri.getPath(),
         null, attribs, resourceAttribs));
-    
+
     // Register it.
     registry = builder.build(feature1Uri.toString());
-    
+
     // Retrieve the resource for matching context.
     List<String> needed = Lists.newArrayList("bottom");
     List<String> unsupported = Lists.newArrayList();
@@ -610,7 +610,7 @@ public class FeatureRegistryTest {
     assertEquals("attrib-two", lastAttribs.get("two"));
     assertEquals("attrib-three", lastAttribs.get("three"));
   }
-  
+
   @Test
   public void testGetGadgetFromMixedRegistry() throws Exception {
     setupMixedFullRegistry();
@@ -618,16 +618,16 @@ public class FeatureRegistryTest {
     GadgetContext ctx = getCtx(RenderingContext.GADGET, null);
     List<String> needed = Lists.newArrayList("top");
     List<String> unsupported = Lists.newLinkedList();
-    
+
     List<FeatureResource> resources = registry.getFeatureResources(ctx, needed, unsupported).getResources();
-    
+
     assertEquals(4, resources.size());
     assertEquals("bottom();all();", resources.get(0).getContent());
     assertEquals("mid_b();gadget();", resources.get(1).getContent());
     assertEquals("mid_a();all();", resources.get(2).getContent());
     assertEquals("top();gadget();", resources.get(3).getContent());
   }
-  
+
   @Test
   public void testGetContainerFromMixedRegistry() throws Exception {
     setupMixedFullRegistry();
@@ -635,16 +635,16 @@ public class FeatureRegistryTest {
     GadgetContext ctx = getCtx(RenderingContext.CONTAINER, null);
     List<String> needed = Lists.newArrayList("top");
     List<String> unsupported = Lists.newLinkedList();
-    
+
     List<FeatureResource> resources = registry.getFeatureResources(ctx, needed, unsupported).getResources();
-    
+
     assertEquals(4, resources.size());
     assertEquals("bottom();all();", resources.get(0).getContent());
     assertEquals("mid_b();container();", resources.get(1).getContent());
     assertEquals("mid_a();container();", resources.get(2).getContent());
     assertEquals("top();all();", resources.get(3).getContent());
   }
-  
+
   @Test
   public void testGetConfiguredGadgetFromMixedRegistry() throws Exception {
     setupMixedFullRegistry();
@@ -652,20 +652,20 @@ public class FeatureRegistryTest {
     GadgetContext ctx = getCtx(RenderingContext.CONFIGURED_GADGET, null);
     List<String> needed = Lists.newArrayList("top");
     List<String> unsupported = Lists.newLinkedList();
-    
+
     List<FeatureResource> resources = registry.getFeatureResources(ctx, needed, unsupported).getResources();
-    
+
     assertEquals(4, resources.size());
     assertEquals("bottom();all();", resources.get(0).getContent());
     assertEquals("mid_b();gadget();", resources.get(1).getContent());
     assertEquals("mid_a();all();", resources.get(2).getContent());
     assertEquals("top();gadget();", resources.get(3).getContent());
   }
-  
+
   private GadgetContext getCtx(final RenderingContext rctx, final String container) {
     return getCtx(rctx, container, false);
   }
-  
+
   private GadgetContext getCtx(final RenderingContext rctx, final String container,
       final boolean ignoreCache) {
     return new GadgetContext() {
@@ -673,26 +673,26 @@ public class FeatureRegistryTest {
       public RenderingContext getRenderingContext() {
         return rctx;
       }
-      
+
       @Override
       public String getContainer() {
         return container != null ? container : ContainerConfig.DEFAULT_CONTAINER;
       }
-      
+
       @Override
       public boolean getIgnoreCache() {
         return ignoreCache;
       }
     };
   }
-  
+
   private void setupMixedFullRegistry() throws Exception {
     // Sets up a "full" gadget feature registry with several features registered in linear
     // dependency order: top -> mid_a -> mid_b -> bottom
     // The content registered for each is equal to the feature's name, for simplicity.
     // Also, all content is loaded as inline, also for simplicity.
     TestFeatureRegistry.Builder builder = TestFeatureRegistry.newBuilder();
-    
+
     Uri topUri = builder.expectResource(
       "<feature>" +
         "<name>top</name>" +
@@ -740,10 +740,10 @@ public class FeatureRegistryTest {
       );
     Uri txtFile = builder.expectResource(topUri.toString() + '\n' +
         midAUri.toString() + '\n' + midBUri.toString() + '\n' + bottomUri.toString(), ".txt");
-    
+
     registry = builder.build(txtFile.toString());
   }
-  
+
   private void setupFullRegistry(String type, String containers) throws Exception {
     // Sets up a "full" gadget feature registry with several features registered:
     // nodep - has no deps on anything else
@@ -753,12 +753,12 @@ public class FeatureRegistryTest {
     // The content registered for each is equal to the feature's name, for simplicity.
     // Also, all content is loaded as inline, also for simplicity.
     TestFeatureRegistry.Builder builder = TestFeatureRegistry.newBuilder();
-    
+
     Map<String, String> attribs = Maps.newHashMap();
     if (containers != null) {
       attribs.put("container", containers);
     }
-    
+
     Uri nodepUri = builder.expectResource(xml(NODEP_TPL, type, null, "nodep", attribs));
     Uri topUri = builder.expectResource(xml(TOP_TPL, type, null, "top", attribs));
     Uri midAUri = builder.expectResource(xml(MID_A_TPL, type, null, "mid_a", attribs));
@@ -768,7 +768,7 @@ public class FeatureRegistryTest {
         midAUri.toString() + '\n' + midBUri.toString() + '\n' + bottomUri.toString(), ".txt");
     registry = builder.build(txtFile.toString());
   }
-  
+
   private static String getFeatureTpl(String name, String[] deps) {
     StringBuilder sb = new StringBuilder();
     sb.append("<feature><name>").append(name).append("</name>");
@@ -779,16 +779,16 @@ public class FeatureRegistryTest {
     sb.append("</feature>");
     return sb.toString();
   }
-  
+
   private static String xml(String tpl, String type, String uri, String content) {
     return xml(tpl, type, uri, content, Maps.<String, String>newHashMap());
   }
-  
+
   private static String xml(String tpl, String type, String uri, String content,
       Map<String, String> attribs) {
     return xml(tpl, type, uri, content, attribs, Maps.<String, String>newHashMap());
   }
-  
+
   private static String xml(String tpl, String type, String uri, String content,
       Map<String, String> attribs, Map<String, String> resourceAttribs) {
     StringBuilder sb = new StringBuilder();
@@ -805,7 +805,7 @@ public class FeatureRegistryTest {
         .replace("%type_attribs%", sb.toString())
         .replace("%res_attribs%", sbRes.toString());
   }
-  
+
   private static Uri makeFile(String content) throws Exception {
     // .xml suffix used even for js -- should be OK per FeatureResourceLoader tests
     // which simply indicate not to attempt .opt.js loading in this case.
@@ -816,7 +816,7 @@ public class FeatureRegistryTest {
     out.close();
     return Uri.fromJavaUri(file.toURI());
   }
-  
+
   private static Uri makeResourceUri(String suffix) {
     return Uri.parse("res://" + RESOURCE_BASE_PATH + "/file" + (++resourceIdx) + suffix);
   }

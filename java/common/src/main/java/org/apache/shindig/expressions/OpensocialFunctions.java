@@ -36,7 +36,7 @@ import javax.el.ELException;
 public final class OpensocialFunctions {
   private OpensocialFunctions() {
   }
-  
+
   /**
    * Convert a string to a JSON Object or JSON Array.
    */
@@ -45,7 +45,7 @@ public final class OpensocialFunctions {
     if ((text == null) || "".equals(text)) {
       return null;
     }
-    
+
     try {
       if (text.startsWith("[")) {
         return new JSONArray(text);
@@ -56,7 +56,7 @@ public final class OpensocialFunctions {
       throw new ELException(je);
     }
   }
-  
+
   /**
    * Decode a base-64 encoded string.
    */
@@ -65,7 +65,7 @@ public final class OpensocialFunctions {
     if (text == null) {
       return null;
     }
-    
+
     // TODO: allow a charset to be passed in?
     return CharsetUtil.newUtf8String(Base64.decodeBase64(CharsetUtil.getUtf8Bytes(text)));
   }
@@ -78,7 +78,7 @@ public final class OpensocialFunctions {
     if (text == null) {
       return null;
     }
-    
+
     return Utf8UrlCoder.encode(text);
   }
 
@@ -92,7 +92,7 @@ public final class OpensocialFunctions {
     if (text == null) {
       return null;
     }
-    
+
     return Utf8UrlCoder.decode(text);
   }
 

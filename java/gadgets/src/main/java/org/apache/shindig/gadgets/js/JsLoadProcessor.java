@@ -43,7 +43,7 @@ public class JsLoadProcessor implements JsProcessor {
   public static final String JSLOAD_JS_TPL = "(function() {" +
       "document.write('<scr' + 'ipt type=\"text/javascript\" src=\"%s\"></scr' + 'ipt>');" +
       "})();"; // Concatenated to avoid some browsers do dynamic script injection.
-  
+
   @VisibleForTesting
   public static final String ASYNC_JSLOAD_JS_TPL = "(function() {" +
       "var s=document.createElement('script');" +
@@ -66,7 +66,7 @@ public class JsLoadProcessor implements JsProcessor {
     this.requireOnload = requireOnload;
     this.template = JSLOAD_JS_TPL;
   }
-  
+
   @Inject(optional = true)
   public void setUseAsync(@Named("shindig.jsload.async-mode") Boolean jsloadAsync) {
     if (jsloadAsync) {

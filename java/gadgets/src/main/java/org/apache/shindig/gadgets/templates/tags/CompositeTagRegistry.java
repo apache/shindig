@@ -27,11 +27,11 @@ import java.util.Collection;
  */
 public class CompositeTagRegistry extends AbstractTagRegistry {
   private final Collection<? extends TagRegistry> registries;
-  
+
   public CompositeTagRegistry(Collection<? extends TagRegistry> registries) {
     this.registries = registries;
   }
-    
+
   public TagHandler getHandlerFor(NSName name) {
     TagHandler handler;
     for (TagRegistry registry : registries) {

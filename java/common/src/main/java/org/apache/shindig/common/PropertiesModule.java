@@ -82,7 +82,7 @@ public class PropertiesModule extends AbstractModule {
   }
 
   /*
-   * Should return the hostname set as system property. Return empty string  if its' not set. 
+   * Should return the hostname set as system property. Return empty string  if its' not set.
    * @return a hostname
    */
   protected String getServerHostname() {
@@ -104,7 +104,7 @@ public class PropertiesModule extends AbstractModule {
     try {
       is = ResourceLoader.openResource(propertyFile);
       properties.load(is);
-      
+
       for (Object key : properties.keySet()) {
         String value = (String)properties.get((String)key);
         if (value != null && value.contains("%contextRoot%")){

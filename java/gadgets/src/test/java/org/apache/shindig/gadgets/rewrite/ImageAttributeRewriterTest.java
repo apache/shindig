@@ -116,7 +116,7 @@ public class ImageAttributeRewriterTest extends DomWalkerTestBase {
         .andReturn(reqCxtImg1.getHttpResp());
     expect(requestPipeline.execute(eq(reqCxtImg2.getHttpReq())))
         .andReturn(reqCxtImg2.getHttpResp());
-    
+
     Node html = htmlDoc(new Node[] {}, img1, img2);
 
     String expectedContent = new StringBuilder()

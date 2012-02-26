@@ -55,7 +55,7 @@ public class ETaggingHttpResponseTest {
   private static final String SECOND_ETAG = "b6e56fb0129c3530f23dbb795daa3200";
   private static final String BAD_ETAG = "some bogus etag";
   private static final String EMPTY_CONTENT_ETAG = "d41d8cd98f00b204e9800998ecf8427e";
-  
+
   private static final Function<String, String> ETAG_QUOTER = new Function<String, String>() {
     public String apply(String input) {
       return '"' + input + '"';
@@ -88,14 +88,14 @@ public class ETaggingHttpResponseTest {
     expectRequestETag();
     expectFullResponse();
     control.replay();
-    
+
     response.getWriter().print(RESPONSE_BODY);
     response.flushBuffer();
 
     assertResponseHasBody();
     control.verify();
   }
-  
+
   @Test
   public void testNotModifiedWithPrint() throws Exception {
     expectRequestETag(GOOD_ETAG);
@@ -108,7 +108,7 @@ public class ETaggingHttpResponseTest {
     assertResponseBodyIsEmpty();
     control.verify();
   }
-  
+
   @Test
   public void testNotModifiedWithManyETagsInRequest() throws Exception {
     expectRequestETag(SECOND_ETAG, GOOD_ETAG, BAD_ETAG);
@@ -134,7 +134,7 @@ public class ETaggingHttpResponseTest {
     assertResponseHasBody();
     control.verify();
   }
-  
+
   @Test
   public void testNonMatchingETagWithManyETagsInRequest() throws Exception {
     expectRequestETag(BAD_ETAG, SECOND_ETAG, EMPTY_CONTENT_ETAG);
@@ -156,7 +156,7 @@ public class ETaggingHttpResponseTest {
 
     response.getOutputStream().write(RESPONSE_BODY_BYTES);
     response.flushBuffer();
-    
+
     assertResponseHasBody();
     control.verify();
   }
@@ -169,7 +169,7 @@ public class ETaggingHttpResponseTest {
 
     response.getOutputStream().write(RESPONSE_BODY_BYTES);
     response.flushBuffer();
-    
+
     assertResponseBodyIsEmpty();
     control.verify();
   }
@@ -182,7 +182,7 @@ public class ETaggingHttpResponseTest {
 
     response.getOutputStream().write(RESPONSE_BODY_BYTES);
     response.flushBuffer();
-    
+
     assertResponseHasBody();
     control.verify();
   }
@@ -193,7 +193,7 @@ public class ETaggingHttpResponseTest {
     origResponse.setHeader(ETaggingHttpResponse.RESPONSE_HEADER, '"' + EMPTY_CONTENT_ETAG + '"');
     origResponse.setContentLength(0);
     control.replay();
-    
+
     response.getOutputStream();
     response.flushBuffer();
 
@@ -205,40 +205,40 @@ public class ETaggingHttpResponseTest {
   public void testStreamingMode() throws Exception {
     expectRequestETag();
     control.replay();
-    
+
     response.getWriter().print(RESPONSE_BODY);
     assertEquals(0, stream.getBuffer().length);
-    
+
     response.startStreaming();
     assertArrayEquals(RESPONSE_BODY_BYTES, stream.getBuffer());
-    
+
     response.getOutputStream().write(SECOND_RESPONSE_BODY.getBytes("UTF-8"));
-    assertArrayEquals(AFTER_SECOND_RESPONSE_BODY_BYTES, stream.getBuffer());    
+    assertArrayEquals(AFTER_SECOND_RESPONSE_BODY_BYTES, stream.getBuffer());
   }
-  
+
   @Test
   public void testCanCalculateHashSeveralTimes() throws Exception {
     expectRequestETag(GOOD_ETAG);
     expectNotModifiedResponse(GOOD_ETAG);
     control.replay();
-    
+
     response.getOutputStream().write(RESPONSE_BODY.getBytes("UTF-8"));
     String hash = ((BufferServletOutputStream) response.getOutputStream()).getContentHash();
     assertEquals(GOOD_ETAG, hash);
     hash = ((BufferServletOutputStream) response.getOutputStream()).getContentHash();
     assertEquals(GOOD_ETAG, hash);
-    
+
     response.flushBuffer();
     assertResponseBodyIsEmpty();
     control.verify();
   }
-  
+
   @Test
   public void testHashVariesAsDataIsAdded() throws Exception {
     expectRequestETag(SECOND_ETAG);
     expectNotModifiedResponse(SECOND_ETAG);
     control.replay();
-    
+
     response.getOutputStream().write(RESPONSE_BODY.getBytes("UTF-8"));
     String hash = ((BufferServletOutputStream) response.getOutputStream()).getContentHash();
     assertEquals(GOOD_ETAG, hash);

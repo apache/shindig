@@ -26,7 +26,7 @@ import java.util.concurrent.ExecutionException;
  */
 public final class ImmediateFuture {
   private ImmediateFuture() {}
-  
+
   /**
    * Returns a future instance.
    * @param value the value, which may be null.

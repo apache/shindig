@@ -27,7 +27,7 @@ import org.apache.shindig.gadgets.oauth2.OAuth2Error;
 /**
  * Wraps a {@link Logger} with functions to remove OAuth2 secrets so they don't
  * show up in trace logs.
- * 
+ *
  */
 public class FilteredLogger {
   private static final Level DEFAULT_LOG_LEVEL = Level.FINEST;

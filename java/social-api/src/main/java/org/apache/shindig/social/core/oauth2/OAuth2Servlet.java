@@ -44,7 +44,7 @@ public class OAuth2Servlet extends InjectedServlet {
   private static final long serialVersionUID = -4257719224664564922L;
   private static OAuth2AuthorizationHandler authorizationHandler;
   private static OAuth2TokenHandler tokenHandler;
-  
+
   //class name for logging purpose
   private static final String classname = OAuth2Servlet.class.getName();
   private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
@@ -82,7 +82,7 @@ public class OAuth2Servlet extends InjectedServlet {
 
   /**
    * Sends an OAuth 2.0 response based on an OAuth2NormalizedResponse object.
-   * 
+   *
    * @param servletResp is the servlet's response object
    * @param normalizedResp maintains the headers and body fields to respond with
    * @param createBody defines whether or not to create a body from the response parameters

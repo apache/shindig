@@ -19,7 +19,7 @@ package org.apache.shindig.social.core.oauth2;
 
 /**
  * Services to support the OAuth 2.0 specification flows and enforcement.
- * 
+ *
  * TODO (Eric): include grant methods?
  */
 public interface OAuth2Service {

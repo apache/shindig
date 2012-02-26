@@ -38,7 +38,7 @@ import javax.persistence.Version;
 import java.util.List;
 
 /**
- * The body type entity, stored in "body_type" 
+ * The body type entity, stored in "body_type"
  *
  */
 @Entity
@@ -57,7 +57,7 @@ public class BodyTypeDb implements BodyType, DbObject {
   public static final String PARAM_HEIGHT = "height";
 
   /**
-   * The internal object ID used for references to this object. Should be generated 
+   * The internal object ID used for references to this object. Should be generated
    * by the underlying storage mechanism
    */
   @Id
@@ -115,7 +115,7 @@ public class BodyTypeDb implements BodyType, DbObject {
   @Column(name = "weight")
   private Float weight;
 
-  /** 
+  /**
    * {@inheritDoc}
    * @see org.apache.shindig.social.opensocial.model.BodyType#getBuild()
    */
@@ -123,7 +123,7 @@ public class BodyTypeDb implements BodyType, DbObject {
     return build;
   }
 
-  /** 
+  /**
    * {@inheritDoc}
    * @see org.apache.shindig.social.opensocial.model.BodyType#setBuild(java.lang.String)
    */
@@ -131,7 +131,7 @@ public class BodyTypeDb implements BodyType, DbObject {
     this.build = build;
   }
 
-  /** 
+  /**
    * {@inheritDoc}
    * @see org.apache.shindig.social.opensocial.model.BodyType#getEyeColor()
    */
@@ -139,7 +139,7 @@ public class BodyTypeDb implements BodyType, DbObject {
     return eyeColor;
   }
 
-  /** 
+  /**
    * {@inheritDoc}
    * @see org.apache.shindig.social.opensocial.model.BodyType#setEyeColor(java.lang.String)
    */
@@ -147,7 +147,7 @@ public class BodyTypeDb implements BodyType, DbObject {
     this.eyeColor = eyeColor;
   }
 
-  /** 
+  /**
    * {@inheritDoc}
    * @see org.apache.shindig.social.opensocial.model.BodyType#getHairColor()
    */
@@ -155,7 +155,7 @@ public class BodyTypeDb implements BodyType, DbObject {
     return hairColor;
   }
 
-  /** 
+  /**
    * {@inheritDoc}
    * @see org.apache.shindig.social.opensocial.model.BodyType#setHairColor(java.lang.String)
    */
@@ -163,7 +163,7 @@ public class BodyTypeDb implements BodyType, DbObject {
     this.hairColor = hairColor;
   }
 
-  /** 
+  /**
    * {@inheritDoc}
    * @see org.apache.shindig.social.opensocial.model.BodyType#getHeight()
    */
@@ -171,7 +171,7 @@ public class BodyTypeDb implements BodyType, DbObject {
     return height;
   }
 
-  /** 
+  /**
    * {@inheritDoc}
    * @see org.apache.shindig.social.opensocial.model.BodyType#setHeight(java.lang.String)
    */
@@ -179,7 +179,7 @@ public class BodyTypeDb implements BodyType, DbObject {
     this.height = height;
   }
 
-  /** 
+  /**
    * {@inheritDoc}
    * @see org.apache.shindig.social.opensocial.model.BodyType#getWeight()
    */
@@ -187,7 +187,7 @@ public class BodyTypeDb implements BodyType, DbObject {
     return weight;
   }
 
-  /** 
+  /**
    * {@inheritDoc}
    * @see org.apache.shindig.social.opensocial.model.BodyType#setWeight(java.lang.String)
    */

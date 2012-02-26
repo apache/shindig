@@ -52,7 +52,7 @@ public class GadgetRenderingServletTest {
   public final HttpServletResponseRecorder recorder = new HttpServletResponseRecorder(response);
   private final GadgetRenderingServlet servlet = new GadgetRenderingServlet();
   private final IframeUriManager iframeUriManager = control.createMock(IframeUriManager.class);
-  
+
   @Before
   public void setUpUrlGenerator() {
     expect(iframeUriManager.validateRenderingUri(isA(Uri.class))).andReturn(UriStatus.VALID_UNVERSIONED);

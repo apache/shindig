@@ -122,7 +122,7 @@ public class GadgetOAuth2TokenStore {
   /**
    * Retrieves and merges the data from the {@link OAuth2Store}, the gadget spec
    * and the request itself to populate the OAuth2 data for this requets.
-   * 
+   *
    * @param securityToken
    *          {@link SecurityToken} from the request
    * @param arguments
@@ -222,7 +222,7 @@ public class GadgetOAuth2TokenStore {
   }
 
   /**
-   * 
+   *
    * @return the {@link OAuth2Store}, never <code>null</code>
    */
   public OAuth2Store getOAuth2Store() {

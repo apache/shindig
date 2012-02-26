@@ -75,7 +75,7 @@ public class JPEGOptimizer extends BaseOptimizer {
       // Output the image as PNG
       PNGOptimizer pngOptimizer = new PNGOptimizer(pngConfig, response);
       pngOptimizer.rewriteImpl(image);
-      
+
       if (pngOptimizer.getRewrittenImage()  != null) {
         // PNG was better than original so use it
         minBytes = pngOptimizer.getRewrittenImage();

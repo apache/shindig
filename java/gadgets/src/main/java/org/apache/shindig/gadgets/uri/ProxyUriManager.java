@@ -39,13 +39,13 @@ import java.util.List;
 public interface ProxyUriManager {
   /**
    * Generate a Uri that proxies the given resource Uri.
-   * 
+   *
    * @param resource Resource Uri to proxy
    * @param forcedRefresh Forced expires value to use for resource
    * @return Uri of proxied resource
    */
   List<Uri> make(List<ProxyUri> resource, Integer forcedRefresh);
-  
+
   public static class ProxyUri extends ProxyUriBase {
     private final Uri resource;
     private String fallbackUrl;
@@ -102,10 +102,10 @@ public interface ProxyUriManager {
         return true;
       }
       if (!(obj instanceof ProxyUri)) {
-        return false; 
+        return false;
       }
       ProxyUri objUri = (ProxyUri) obj;
-      return (super.equals(obj) 
+      return (super.equals(obj)
           && Objects.equal(this.resource, objUri.resource)
           && Objects.equal(this.fallbackUrl, objUri.fallbackUrl)
           && Objects.equal(this.resizeHeight, objUri.resizeHeight)
@@ -157,7 +157,7 @@ public interface ProxyUriManager {
     public Uri getResource() {
       return resource;
     }
-    
+
     public Uri getFallbackUri() throws GadgetException {
       if (fallbackUrl == null) {
         return null;
@@ -205,9 +205,9 @@ public interface ProxyUriManager {
       }
       return builder;
     }
-    
+
     @Override
-    public HttpRequest makeHttpRequest(Uri targetUri) 
+    public HttpRequest makeHttpRequest(Uri targetUri)
         throws GadgetException {
       HttpRequest req = super.makeHttpRequest(targetUri);
       // Set image params:
@@ -221,7 +221,7 @@ public interface ProxyUriManager {
       req.setParam(Param.HTML_TAG_CONTEXT.getKey(), htmlTagContext);
       return req;
     }
-    
+
     // Creates new ProxyUri's for the given list of resource uri's. Note that
     // the proxy uri's will have default values for internal parameters.
     public static List<ProxyUri> fromList(Gadget gadget, List<Uri> uris) {
@@ -232,16 +232,16 @@ public interface ProxyUriManager {
       return res;
     }
   }
-  
+
   /**
    * Parse and validate the proxied Uri.
-   * 
+   *
    * @param uri A Uri presumed to be a proxied Uri generated
    *     by this class or in a compatible way
    * @return Status of the Uri passed in
    */
   ProxyUri process(Uri uri) throws GadgetException;
-                                                                  
+
   public interface Versioner {
     /**
      * Generates a version for each of the provided resources.

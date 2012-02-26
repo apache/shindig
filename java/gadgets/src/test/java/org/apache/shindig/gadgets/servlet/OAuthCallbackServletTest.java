@@ -41,13 +41,13 @@ public class OAuthCallbackServletTest extends ServletTestFixture {
     String body = this.recorder.getResponseAsString();
     Assert.assertNotSame("body is " + body, body.indexOf("window.close()"), -1);
   }
-  
+
   @Test
   public void testServletWithCallback() throws Exception {
     BlobCrypter crypter = new BasicBlobCrypter("00000000000000000000".getBytes());
     OAuthCallbackState state = new OAuthCallbackState(crypter);
     OAuthCallbackServlet servlet = new OAuthCallbackServlet();
-    servlet.setStateCrypter(crypter);    
+    servlet.setStateCrypter(crypter);
     state.setRealCallbackUrl("http://www.example.com/callback");
     expect(request.getParameter("cs")).andReturn(state.getEncryptedState());
     expect(request.getQueryString()).andReturn("cs=foo&bar=baz");
@@ -59,13 +59,13 @@ public class OAuthCallbackServletTest extends ServletTestFixture {
     String cacheControl = this.recorder.getHeader("Cache-Control");
     assertEquals("private,max-age=3600", cacheControl);
   }
-  
+
   @Test
   public void testServletWithCallback_noQueryParams() throws Exception {
     BlobCrypter crypter = new BasicBlobCrypter("00000000000000000000".getBytes());
     OAuthCallbackState state = new OAuthCallbackState(crypter);
     OAuthCallbackServlet servlet = new OAuthCallbackServlet();
-    servlet.setStateCrypter(crypter);    
+    servlet.setStateCrypter(crypter);
     state.setRealCallbackUrl("http://www.example.com/callback");
     expect(request.getParameter("cs")).andReturn(state.getEncryptedState());
     expect(request.getQueryString()).andReturn("cs=foo");

@@ -79,6 +79,6 @@ public class CajaResponseRewriterTest extends RewriterTestBase {
     req.setCajaRequested(true);
     HttpResponse response = new HttpResponseBuilder().setResponseString("<html></html>").create();
 
-    assertEquals("", rewrite(req, response));    
+    assertEquals("", rewrite(req, response));
   }
 }

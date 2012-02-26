@@ -65,5 +65,5 @@ public class JpegImageUtilsTest extends Assert {
     InputStream is = getClass().getClassLoader().getResourceAsStream(resource);
     JpegImageUtils.JpegImageParams imageParams = JpegImageUtils.getJpegImageData(is, resource);
     assertEquals(false, imageParams.isHuffmanOptimized());
-  }  
+  }
 }

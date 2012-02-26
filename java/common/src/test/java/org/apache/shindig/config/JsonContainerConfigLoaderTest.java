@@ -90,7 +90,7 @@ public class JsonContainerConfigLoaderTest {
     JsonContainerConfigLoader
         .getTransactionFromFile(containers, "localhost", "8080", "",config).commit();
   }
-  
+
   @Before
   public void setUp() {
     config = new ExpressionContainerConfig(Expressions.forTesting());
@@ -112,7 +112,7 @@ public class JsonContainerConfigLoaderTest {
     String nestedValue = nested.get(NESTED_NAME).toString();
     assertEquals(NESTED_VALUE, nestedValue);
   }
-  
+
 
   @Test
   public void aliasesArePopulated() throws Exception {
@@ -258,13 +258,13 @@ public class JsonContainerConfigLoaderTest {
     createConfigForTest(createTemporaryFile(json, ".json").getAbsolutePath());
     assertNull(config.getMap("default", "features").get("osapi"));
   }
-  
+
   @Test
   public void testNullEntriesOverrideEntriesInParent() throws Exception {
     // We use JSON Objects here to guarantee that we're well formed up front.
-    JSONObject parent = new JSONObject("{ 'gadgets.container' : ['default'], features : { osapi : 'foo' }}");    
-    JSONObject child = new JSONObject("{ 'gadgets.container' : ['child'], features : null}");    
-    JSONObject grand = new JSONObject("{ 'gadgets.container' : ['grand'], parent : 'child'}");    
+    JSONObject parent = new JSONObject("{ 'gadgets.container' : ['default'], features : { osapi : 'foo' }}");
+    JSONObject child = new JSONObject("{ 'gadgets.container' : ['child'], features : null}");
+    JSONObject grand = new JSONObject("{ 'gadgets.container' : ['grand'], parent : 'child'}");
     createConfigForTest(createTemporaryFile(parent, ".json").getAbsolutePath());
     createConfigForTest(createTemporaryFile(child, ".json").getAbsolutePath());
     createConfigForTest(createTemporaryFile(grand, ".json").getAbsolutePath());

@@ -33,7 +33,7 @@ import java.io.StringWriter;
  * Test cases for CompactHtmlSerializer.
  */
 public abstract class CompactHtmlSerializerTest extends AbstractParsingTestBase {
-  
+
   protected abstract GadgetHtmlParser makeParser();
 
   private GadgetHtmlParser full = makeParser();
@@ -55,7 +55,7 @@ public abstract class CompactHtmlSerializerTest extends AbstractParsingTestBase 
         "org/apache/shindig/gadgets/parse/test-with-specialtags-expected.html");
     parseAndCompareBalanced(content, expected, full);
   }
-  
+
   @Test
   public void ieConditionalCommentNotRemoved() throws Exception {
     String content = loadFile("org/apache/shindig/gadgets/parse/test-with-iecond-comments.html");

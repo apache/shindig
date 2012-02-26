@@ -62,7 +62,7 @@ public class DefaultGadgetSpecFactory extends AbstractSpecFactory<GadgetSpec>
       // Set URI to a fixed, safe value (localhost), preventing a gadget rendered
       // via raw XML (eg. via POST) to be rendered on a locked domain of any other
       // gadget whose spec is hosted non-locally.
-      try 
+      try
       {
         Uri uri = RAW_GADGET_URI;
         return new GadgetSpec(uri, XmlUtil.parse(rawxml), rawxml);

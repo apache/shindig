@@ -43,7 +43,7 @@ public class LocaleSpecTest {
     assertEquals("http://example.org/msgs.xml", locale.getMessages().toString());
     assertEquals(0, locale.getViews().size());
   }
-  
+
   @Test
   public void viewLocale() throws Exception {
     String xml = "<Locale" +

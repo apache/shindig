@@ -99,7 +99,7 @@ public class FlashTagHandlerTest extends EasyMockTestCase {
         .getFeatureResources(isA(GadgetContext.class), eq(ImmutableSet.of("swfobject")),
             EasyMock.<List<String>>isNull())).andReturn(lr);
   }
-  
+
   private static class SwfResource extends FeatureResource.Default {
     public String getContent() {
       return "swfobject()";
@@ -108,7 +108,7 @@ public class FlashTagHandlerTest extends EasyMockTestCase {
     public String getDebugContent() {
       return "swfobject";
     }
-    
+
     public String getName() {
       return "swfname";
     }

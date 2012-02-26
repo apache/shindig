@@ -49,10 +49,10 @@ import com.google.inject.spi.Message;
 public class OAuth2ServiceImpl implements OAuth2Service {
 
   private OAuth2DataService store; // underlying OAuth data store
-  
+
   private long authCodeExpires;
   private long accessTokenExpires;
-  
+
   // validators
   private OAuth2RequestValidator accessTokenValidator;
   private OAuth2RequestValidator authCodeValidator;
@@ -62,12 +62,12 @@ public class OAuth2ServiceImpl implements OAuth2Service {
   @Inject
   public OAuth2ServiceImpl(OAuth2DataService store) {
     this.store = store;
-    
+
     // TODO (Eric): properties should be injected, but getting "no implementation bound"
     Properties props = readPropertyFile("shindig.properties");
     this.authCodeExpires = Long.valueOf(props.getProperty("shindig.oauth2.authCodeExpiration"));
     this.accessTokenExpires = Long.valueOf(props.getProperty("shindig.oauth2.accessTokenExpiration"));
-    
+
     // TODO (Matt): validators should be injected
     authCodeValidator = new AuthorizationCodeRequestValidator(store);
     accessTokenValidator = new AccessTokenRequestValidator(store);
@@ -104,7 +104,7 @@ public class OAuth2ServiceImpl implements OAuth2Service {
       }
     }
   }
-  
+
   public void validateRequestForAuthCode(OAuth2NormalizedRequest req)
       throws OAuth2Exception {
     authCodeValidator.validateRequest(req);
@@ -186,7 +186,7 @@ public class OAuth2ServiceImpl implements OAuth2Service {
   public OAuth2Code generateRefreshToken(OAuth2NormalizedRequest req) {
     throw new RuntimeException("not yet implemented");
   }
-  
+
   private Properties readPropertyFile(String propertyFile) {
     Properties properties = new Properties();
     InputStream is = null;

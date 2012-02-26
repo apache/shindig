@@ -32,16 +32,16 @@ public class UriModule extends AbstractModule {
   protected void configure() {
     bind(IframeUriManager.class).to(DefaultIframeUriManager.class);
     bind(IframeUriManager.Versioner.class).to(AllJsIframeVersioner.class);
-    
+
     bind(JsUriManager.class).to(DefaultJsUriManager.class);
     bind(JsUriManager.Versioner.class).to(DefaultJsVersioner.class);
-    
+
     bind(OAuthUriManager.class).to(DefaultOAuthUriManager.class);
-    
+
     bind(ProxyUriManager.class).to(DefaultProxyUriManager.class);
     bind(ProxyUriManager.Versioner.class)
         .toProvider(Providers.<ProxyUriManager.Versioner>of(null));
-    
+
     bind(ConcatUriManager.class).to(DefaultConcatUriManager.class);
     bind(ConcatUriManager.Versioner.class)
         .toProvider(Providers.<ConcatUriManager.Versioner>of(null));

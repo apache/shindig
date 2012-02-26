@@ -31,13 +31,13 @@ public class SpiEntityManagerFactory {
 
   /** The entity manager. */
   private EntityManager entityManager;
-  
+
   /** The Constant INSTANCE. */
   public final static SpiEntityManagerFactory INSTANCE = new SpiEntityManagerFactory();
-  
+
   /** The Constant DEFAULT_UNIT_NAME. */
   private static final String DEFAULT_UNIT_NAME = "hibernate_spi_testing";
-  
+
   /**
    * Instantiates a new test entity manager factory.
    */
@@ -45,10 +45,10 @@ public class SpiEntityManagerFactory {
     EntityManagerFactory entityManagerFactory = Persistence.createEntityManagerFactory(DEFAULT_UNIT_NAME, new HashMap<String, String>());
     this.entityManager = entityManagerFactory.createEntityManager();
   }
-  
+
   /**
    * Gets the entity manager.
-   * 
+   *
    * @return the entity manager
    */
   public static EntityManager getEntityManager() {

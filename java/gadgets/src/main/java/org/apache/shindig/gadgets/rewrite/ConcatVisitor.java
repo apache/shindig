@@ -256,7 +256,7 @@ public class ConcatVisitor implements DomWalker.Visitor {
       if (cur.getNodeType() == Node.TEXT_NODE ||
           (cur.getNodeType() == Node.COMMENT_NODE && !isConditionalComment(cur))) {
         continue;
-      } 
+      }
       break;
     }
     if (cur != null && cur.getNodeType() == Node.ELEMENT_NODE) {

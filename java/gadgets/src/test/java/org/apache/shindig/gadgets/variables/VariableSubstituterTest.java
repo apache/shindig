@@ -100,11 +100,11 @@ public class VariableSubstituterTest {
 
     assertEquals("I heart shindig", spec.getModulePrefs().getTitle());
   }
-  
+
   @Test
   public void nestedMessageBundleInUserPrefSubstituted() throws Exception {
-    String xml = 
-      "<Module>" + 
+    String xml =
+      "<Module>" +
       " <ModulePrefs title='__UP_title__ for __MODULE_ID__'>" +
       "  <Locale>" +
       "   <msg name='title'>Gadget title</msg>" +

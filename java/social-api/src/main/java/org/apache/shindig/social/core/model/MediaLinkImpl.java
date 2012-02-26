@@ -26,14 +26,14 @@ import org.apache.shindig.social.opensocial.model.MediaLink;
  *
  */
 public class MediaLinkImpl extends ExtendableBeanImpl implements MediaLink {
-  
+
   private static final long serialVersionUID = 1L;
   private Integer duration;
   private Integer height;
   private String url;
   private Integer width;
   private ExtendableBean openSocial;
-  
+
   /**
    * Create a new MediaLink
    */
@@ -83,7 +83,7 @@ public class MediaLinkImpl extends ExtendableBeanImpl implements MediaLink {
     this.width = width;
     put("width", width);
   }
-  
+
   /** {@inheritDoc} */
   public ExtendableBean getOpenSocial() {
     return openSocial;

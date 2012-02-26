@@ -37,7 +37,7 @@ import java.util.regex.Pattern;
  */
 public final class JsonConversionUtil {
   private JsonConversionUtil() {}
-  
+
   private static final Pattern ARRAY_MATCH = Pattern.compile("(\\w+)\\((\\d+)\\)");
 
   private static final Set<String> RESERVED_PARAMS = ImmutableSet.of("method", "id", "st", "oauth_token");

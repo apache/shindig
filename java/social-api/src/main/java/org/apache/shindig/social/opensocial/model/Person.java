@@ -209,7 +209,7 @@ public interface Person {
      * a Map to convert json string to Field representations.
      */
 
-    private static final Map<String,Field> LOOKUP = Maps.uniqueIndex(EnumSet.allOf(Field.class), 
+    private static final Map<String,Field> LOOKUP = Maps.uniqueIndex(EnumSet.allOf(Field.class),
         Functions.toStringFunction());
 
     /**
@@ -339,15 +339,15 @@ public interface Person {
 
   /**
    * Get app data for the person.
-   * 
+   *
    * @return the app data, possibly a subset.
    */
   Map<String, ?> getAppData();
-  
+
   /**
    * Sets app data for the person.
-   * 
-   * @param appData the app data, possibly a subset 
+   *
+   * @param appData the app data, possibly a subset
    */
   void setAppData(Map<String, ?> appData);
 
@@ -891,17 +891,17 @@ public interface Person {
    * @param politicalViews the Person's political views
    */
   void setPoliticalViews(String politicalViews);
-  
+
   /**
    * Get the Person's preferred username, specified as a string. Container support for this field is OPTIONAL
-   * 
+   *
    * @return the Person's preferred username
    */
   String getPreferredUsername();
-  
+
   /**
    * Set the Person's preferred username, specified as a string. Container support for this field is OPTIONAL
-   *  
+   *
    * @param preferredString the Person's preferred username
    */
   void setPreferredUsername(String preferredString);

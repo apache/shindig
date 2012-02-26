@@ -141,11 +141,11 @@ public class BasicContainerConfigTest {
     config.newTransaction().addContainer(defaultContainer).addContainer(newContainer).commit();
     assertEquals(expectedContainer, config.getProperties("new"));
   }
-  
+
   @Test
   public void testNulledPropertiesRemainNulledAfterSeveralTransactions() throws Exception {
-    Map<String, Object> defaultContainer = makeContainer("default", "o1", "v1", "o2", "v2", "o3", "v3"); 
-    Map<String, Object> parentContainer = makeContainer("parent", "o3", null); 
+    Map<String, Object> defaultContainer = makeContainer("default", "o1", "v1", "o2", "v2", "o3", "v3");
+    Map<String, Object> parentContainer = makeContainer("parent", "o3", null);
     Map<String, Object> childContainer = makeContainer("child", "parent", "parent", "o2", null);
     config.newTransaction().addContainer(defaultContainer).commit();
     config.newTransaction().addContainer(parentContainer).commit();
@@ -218,7 +218,7 @@ public class BasicContainerConfigTest {
     assertFalse(config.getContainers().contains("extra"));
     EasyMock.verify(observer);
   }
-  
+
   @Test
   public void testClearContainerConfig() throws Exception {
     ConfigObserver observer = EasyMock.createMock(ContainerConfig.ConfigObserver.class);
@@ -233,7 +233,7 @@ public class BasicContainerConfigTest {
         .addContainer(EXTRA_CONTAINER)
         .commit();
     config.addConfigObserver(observer, false);
-    
+
     config
         .newTransaction()
         .clearContainers()
@@ -243,17 +243,17 @@ public class BasicContainerConfigTest {
 
     assertFalse(config.getContainers().contains("extra"));
     assertTrue(config.getContainers().contains("additional"));
-    
+
     EasyMock.verify(observer);
   }
-  
+
   @Test
   public void testAddObserverNotifiesImmediately() throws Exception {
     ConfigObserver observer = EasyMock.createMock(ContainerConfig.ConfigObserver.class);
     observer.containersChanged(EasyMock.isA(ContainerConfig.class),
         EasyMock.eq(ImmutableSet.of("default", "extra")), EasyMock.eq(ImmutableSet.<String>of()));
     EasyMock.replay(observer);
-    
+
     config = new BasicContainerConfig();
     config
         .newTransaction()
@@ -261,10 +261,10 @@ public class BasicContainerConfigTest {
         .addContainer(EXTRA_CONTAINER)
         .commit();
     config.addConfigObserver(observer, true);
-    
+
     EasyMock.verify(observer);
   }
-  
+
   @Test
   public void testAliasesArePopulated() throws Exception {
     Map<String, Object> container =

@@ -94,7 +94,7 @@ public class CssResponseRewriterTest extends RewriterTestBase {
         return overrideFeature;
       }
     };
-    
+
     rewriter = new CssResponseRewriter(new CajaCssParser(),
         proxyUriManager, factory);
     dummyUri = Uri.parse("http://www.w3c.org");
@@ -173,7 +173,7 @@ public class CssResponseRewriterTest extends RewriterTestBase {
     expected = expected.replace("container=default", "container=" + MOCK_CONTAINER);
     rewriter = new CssResponseRewriter(new CajaCssParser(),
         proxyUriManager, factory);
-    
+
     HttpRequest request = new HttpRequest(Uri.parse("http://www.example.org/path/rewritebasic.css"));
     request.setMethod("GET");
     request.setGadget(SPEC_URL);
@@ -223,7 +223,7 @@ public class CssResponseRewriterTest extends RewriterTestBase {
             + "&url=http%3A%2F%2Fa.b.com%2Fbullet.gif');\n"
             + "list-style-position:outside;margin:5px;padding:0}\n"
             + ".someid {background-image:url('//www.test.com/dir/proxy?container=default"
-            + "&gadget=http%3A%2F%2Fwww.w3c.org&debug=0&nocache=0" 
+            + "&gadget=http%3A%2F%2Fwww.w3c.org&debug=0&nocache=0"
             + "&url=http%3A%2F%2Fa.b.com%2Fbigimg.png');\n"
             + "float:right;width:165px;height:23px;margin-top:4px;margin-left:5px}";
     validateRewritten(original, rewritten);

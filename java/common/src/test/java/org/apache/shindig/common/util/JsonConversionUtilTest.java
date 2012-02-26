@@ -146,7 +146,7 @@ public class JsonConversionUtilTest extends Assert {
         return;
       }
       assertEquals(expectedObject.names().length(), actualObject.names().length());
-      
+
       for (String key : JSONObject.getNames(expectedObject)) {
         assertTrue("missing key " + key, actualObject.has(key));
         assertJsonEquals(expectedObject.get(key), actualObject.get(key));

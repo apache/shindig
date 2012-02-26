@@ -45,7 +45,7 @@ public class DefaultAccelUriManagerTest {
         .put(AccelUriManager.PROXY_PATH_PARAM, path)
         .build();
   }
-  
+
   @Before
   public void setUp() throws Exception {
     config = new BasicContainerConfig();

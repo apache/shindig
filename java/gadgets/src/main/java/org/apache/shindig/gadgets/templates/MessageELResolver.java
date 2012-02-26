@@ -44,13 +44,13 @@ public class MessageELResolver extends ELResolver {
     this.expressions = expressions;
     this.bundle = bundle;
   }
-  
+
   @Override
   public Class<?> getCommonPropertyType(ELContext context, Object base) {
     if (base == null) {
       return String.class;
     }
-    
+
     return null;
   }
 
@@ -77,7 +77,7 @@ public class MessageELResolver extends ELResolver {
         context.setPropertyResolved(true);
         return null;
       }
-      
+
       List<Object> properties = null;
       try {
         properties = pushCurrentProperty(context, property);
@@ -88,7 +88,7 @@ public class MessageELResolver extends ELResolver {
         context.setPropertyResolved(true);
       }
     }
-    
+
     return null;
   }
 
@@ -108,7 +108,7 @@ public class MessageELResolver extends ELResolver {
         throw new ELException("Recursive invocation of message bundle properties");
       }
     }
-    
+
     propertyList.add(property);
     return propertyList;
   }
@@ -125,7 +125,7 @@ public class MessageELResolver extends ELResolver {
       context.setPropertyResolved(true);
       return true;
     }
-    
+
     return false;
   }
 

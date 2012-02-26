@@ -29,13 +29,13 @@ public class AtomAuthor {
   private String uri;
   @SuppressWarnings("unused")
   private String name;
-  
+
   /**
    * Default constructor for POSTs to the REST API.
    */
   public AtomAuthor() {
   }
-  
+
   /**
    * @param activity
    */

@@ -22,7 +22,7 @@ package org.apache.shindig.common.util;
  * Simple source of current time to use for dependency injection.
  */
 public class TimeSource {
-  
+
   public long currentTimeMillis() {
     return System.currentTimeMillis();
   }

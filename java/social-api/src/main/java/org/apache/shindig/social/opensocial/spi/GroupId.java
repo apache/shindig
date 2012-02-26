@@ -82,7 +82,7 @@ public class GroupId {
     if (o == this) {
       return true;
     }
-    
+
     if (!(o instanceof GroupId)) {
       return false;
     }

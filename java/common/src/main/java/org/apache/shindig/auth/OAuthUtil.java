@@ -37,7 +37,7 @@ import java.util.Map.Entry;
  */
 public final class OAuthUtil {
   private OAuthUtil() {}
-  
+
   public static String getParameter(OAuthMessage message, String name) {
     try {
       return message.getParameter(name);
@@ -80,13 +80,13 @@ public final class OAuthUtil {
       throw new OAuthException(e);
     }
   }
-  
+
   public static enum SignatureType {
     URL_ONLY,
     URL_AND_FORM_PARAMS,
     URL_AND_BODY_HASH,
   }
-  
+
   /**
    * @param tokenEndpoint true if this is a request token or access token request.  We don't check
    * oauth_body_hash on those.

@@ -21,7 +21,7 @@ import org.eclipse.persistence.config.SessionCustomizer;
 import org.eclipse.persistence.sessions.Session;
 
 /**
- * 
+ *
  */
 public class EnableIntegrityChecker implements SessionCustomizer {
 

@@ -188,7 +188,7 @@ public class MutableContent {
       incrementNumChanges();
     }
   }
-  
+
   /**
    * Sets content to new byte array, with unspecified charset. It is
    * recommended to use the {@code setContentBytes(byte[], Charset)} API instead,
@@ -198,7 +198,7 @@ public class MutableContent {
   public final void setContentBytes(byte[] newBytes) {
     setContentBytes(newBytes, null);
   }
-  
+
   /**
    * Sets internal state having to do with content bytes, from the provided
    * byte array and charset.
@@ -250,7 +250,7 @@ public class MutableContent {
     }
     return document;
   }
-  
+
   public GadgetHtmlParser getContentParser() {
     return contentParser;
   }

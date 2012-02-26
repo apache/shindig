@@ -28,7 +28,7 @@ import org.apache.shindig.social.opensocial.spi.PersonService;
 import org.junit.Test;
 
 /**
- * 
+ *
  */
 public class JPASocialModuleTest {
 

@@ -91,7 +91,7 @@ public class MakeRequestClient {
   public void setIgnoreCache(boolean ignoreCache) {
     this.ignoreCache = ignoreCache;
   }
-  
+
   public void setNextFetcher(HttpFetcher nextFetcher) {
     this.nextFetcher = nextFetcher;
   }
@@ -233,11 +233,11 @@ public class MakeRequestClient {
     // This will throw if approvalUrl looks wrong.
     receivedCallbackUrl = serviceProvider.browserVisit(approvalUrl + '&' + params);
   }
-  
+
   public void setReceivedCallbackUrl(String receivedCallbackUrl) {
     this.receivedCallbackUrl = receivedCallbackUrl;
   }
-  
+
   public void clearState() {
     this.oauthState = null;
   }

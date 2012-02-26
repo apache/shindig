@@ -32,9 +32,9 @@ import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 
 /**
- * 
+ *
  * See {@link GrantRequestHandler}
- * 
+ *
  * Handles the "client_credentials" flow
  */
 public class ClientCredentialsGrantTypeHandler implements GrantRequestHandler {

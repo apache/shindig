@@ -22,7 +22,7 @@ import com.google.inject.ImplementedBy;
 
 /**
  * A class to run a series of processing steps on a JS response.
- * 
+ *
  * The way the processing steps are registered is implementation-dependent.
  */
 @ImplementedBy(DefaultJsProcessorRegistry.class)
@@ -30,7 +30,7 @@ public interface JsProcessorRegistry {
 
   /**
    * Executes the processing steps.
-   * 
+   *
    * @param jsRequest The JS request that originated this execution.
    * @param response A builder for the JS response.
    * @throws JsException If any of the steps resulted in an error.

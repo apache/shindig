@@ -45,7 +45,7 @@ public interface XStreamConfiguration {
 
   /**
    * Generate the converter config.
-   * 
+   *
    * @param c
    *          which converter set.
    * @param rp

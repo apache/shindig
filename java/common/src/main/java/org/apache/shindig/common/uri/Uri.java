@@ -354,7 +354,7 @@ public final class Uri {
   public String getFragment() {
     return fragment;
   }
-  
+
   /**
    * @return The fragment part of the uri, separated into component parts.
    */
@@ -396,7 +396,7 @@ public final class Uri {
     if (!(obj instanceof Uri)) {return false;}
     return Objects.equal(text, ((Uri)obj).text);
   }
-  
+
   /**
    * Interim typed, but not checked, exception facilitating migration
    * of Uri methods to throwing a checked UriException later.
@@ -405,7 +405,7 @@ public final class Uri {
     private UriException(Exception e) {
       super(e);
     }
-    
+
     private UriException(String msg) {
       super(msg);
     }

@@ -148,7 +148,7 @@ public class AuthenticationServletFilter extends InjectedFilter {
     if (request.getAttribute(AuthenticationHandler.STASHED_BODY) != null) {
       chain.doFilter(new StashedBodyRequestwrapper(request), response);
     } else {
-      chain.doFilter(request, response);      
+      chain.doFilter(request, response);
     }
   }
 

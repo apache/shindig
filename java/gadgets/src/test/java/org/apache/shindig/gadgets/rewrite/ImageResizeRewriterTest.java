@@ -53,7 +53,7 @@ public class ImageResizeRewriterTest {
     config = EasyMock.createMock(ContainerConfig.class);
     factory = EasyMock.createMock(ContentRewriterFeature.Factory.class);
     featureConfig = EasyMock.createMock(ContentRewriterFeature.Config.class);
-    
+
     ProxyUriManager proxyUriManager = new DefaultProxyUriManager(config, null);
     rewriter = new ImageResizeRewriter(proxyUriManager, factory);
     domImpl = new ParseModule.DOMImplementationProvider();
@@ -75,7 +75,7 @@ public class ImageResizeRewriterTest {
         + "<img src=\"shindig.com/proxy?container=test&url=1.jpg\">"
         + "<img height=\"50px\" id=\"img\" src=\"shindig.com/proxy?container=test&url=2.jpg\">"
         + "<img src=\"shindig.com/proxy?container=test&url=3.jpg\" width=\"50px\">"
-        + "<img height=\"50px\" id=\"id\" src=\"shindig.com/proxy?container=test&url=4.jpg\"" 
+        + "<img height=\"50px\" id=\"id\" src=\"shindig.com/proxy?container=test&url=4.jpg\""
         + " width=\"110px\">"
         + "<img height=\"5\" src=\"shindig.com/proxy?container=test&url=5.jpg\" width=\"10em\">"
         + "<img height=\"50\" src=\"shindig.com/proxy?container=test&url=6.jpg\" width=\"110px\">"

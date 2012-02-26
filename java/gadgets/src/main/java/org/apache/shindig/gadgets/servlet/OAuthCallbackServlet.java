@@ -51,11 +51,11 @@ import javax.servlet.http.HttpServletResponse;
 public class OAuthCallbackServlet extends InjectedServlet {
 
   private static final long serialVersionUID = 7126255229334669172L;
-  
+
   public static final String CALLBACK_STATE_PARAM = "cs";
   public static final String REAL_DOMAIN_PARAM = "d";
   private static final int ONE_HOUR_IN_SECONDS = 3600;
-  
+
   // This bit of magic passes the entire callback URL into the opening gadget for later use.
   // gadgets.io.makeRequest (or osapi.oauth) will then pick up the callback URL to complete the
   // oauth dance.

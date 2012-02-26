@@ -21,13 +21,13 @@ import java.util.Map;
 
 /**
  * Contains all relevant data for a token.
- * 
+ *
  * OAuth2Token implementations should be {@link Serializable} to facilitate
  * cluster storage and caching across the various phases of OAuth 2.0 flows.
- * 
+ *
  * OAuth2Tokens are stored in the {@link OAuth2Store}, they may be held in
  * memory or in another persistence layer.
- * 
+ *
  */
 public interface OAuth2Token extends Serializable {
   public enum Type {
@@ -36,147 +36,147 @@ public interface OAuth2Token extends Serializable {
 
   /**
    * Used for creating MAC token nonces
-   * 
+   *
    * @return the time (in seconds) when the token was issued
    */
   public long getIssuedAt();
 
   /**
    * issuedAt + expires_in or 0 if no expires_in was sent by server
-   * 
+   *
    * @return the time (in seconds) when the token expires
    */
   public long getExpiresAt();
 
   /**
-   * 
+   *
    * @return uri of the gadget the token applies to
    */
   public String getGadgetUri();
 
   /**
    * For use with the MAC token specification.
-   * 
+   *
    * See See http://tools.ietf.org/html/draft-hammer-oauth-v2-mac-token-05
-   * 
+   *
    * @return the Mac algorithm
    */
   public String getMacAlgorithm();
 
   /**
    * For use with the MAC token specification.
-   * 
+   *
    * See See http://tools.ietf.org/html/draft-hammer-oauth-v2-mac-token-05
-   * 
+   *
    * @return the mac ext
    */
   public String getMacExt();
 
   /**
    * For use with the MAC token specification.
-   * 
+   *
    * See See http://tools.ietf.org/html/draft-hammer-oauth-v2-mac-token-05
-   * 
+   *
    * @return the mac secret
    */
   public byte[] getMacSecret();
 
   /**
    * Contains any additional properties sent on the token.
-   * 
+   *
    * @return properties sent on the token
    */
   public Map<String, String> getProperties();
 
   /**
    * See {@link http://tools.ietf.org/html/draft-ietf-oauth-v2-21#section-3.3}
-   * 
+   *
    * @return scope the token applies to, or "" for no scope
    */
   public String getScope();
 
   /**
-   * 
+   *
    * @return the token secret (unencrypted or signed)
    */
   public byte[] getSecret();
 
   /**
-   * 
+   *
    * @return serviceName (in gadget spec) the token applies to
    */
   public String getServiceName();
 
   /**
-   * 
+   *
    * @return type of this token e.g. "Bearer"
    */
   public String getTokenType();
 
   /**
-   * 
+   *
    * @return if this is an Type.ACCESS or Type.REFRESH token
    */
   public Type getType();
 
   /**
-   * 
+   *
    * @return shindig user the token was issued for
    */
   public String getUser();
 
   /**
    * Setter for expiresAt field
-   * 
+   *
    * @param expiresIn
    */
   public void setExpiresAt(long expiresAt);
 
   /**
    * Setter for gadgetUri field
-   * 
+   *
    * @param gadgetUri
    */
   public void setGadgetUri(String gadgetUri);
 
   /**
    * Setter for issuedAt field
-   * 
+   *
    * @param expiresIn
    */
   public void setIssuedAt(long issuedAt);
 
   /**
    * For use with the MAC token specification.
-   * 
+   *
    * See See http://tools.ietf.org/html/draft-hammer-oauth-v2-mac-token-05
-   * 
+   *
    */
   public void setMacAlgorithm(final String algorithm);
 
   /**
    * For use with the MAC token specification.
-   * 
+   *
    * See See http://tools.ietf.org/html/draft-hammer-oauth-v2-mac-token-05
-   * 
+   *
    */
   public void setMacSecret(final byte[] secret) throws OAuth2RequestException;
 
   /**
    * Set the properties on the token
-   * 
+   *
    */
   public void setProperties(Map<String, String> properties);
 
   /**
    * Setter for scope field
-   * 
+   *
    */
   public void setScope(String scope);
 
   /**
    * Setter for secret property
-   * 
+   *
    * @param secret
    * @throws OAuth2RequestException
    */
@@ -184,28 +184,28 @@ public interface OAuth2Token extends Serializable {
 
   /**
    * Setter for serviceName field
-   * 
+   *
    * @param serviceName
    */
   public void setServiceName(String serviceName);
 
   /**
    * Setter for tokenType property
-   * 
+   *
    * @param tokenType
    */
   public void setTokenType(String tokenType);
 
   /**
    * Setter for type property
-   * 
+   *
    * @param type
    */
   public void setType(Type type);
 
   /**
    * Setter for user property
-   * 
+   *
    * @param user
    */
   public void setUser(String user);

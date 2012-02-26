@@ -68,14 +68,14 @@ public class SanitizingGadgetRewriter extends DomWalker.Rewriter {
   public static boolean isSanitizedRenderingRequest(Gadget gadget) {
     return "1".equals(gadget.getContext().getParameter("sanitize"));
   }
-  
+
   /**
    * Marks that an element and all its attributes are trusted content.
    * This status is preserved across {@link Node#cloneNode} calls.  Be
    * extremely careful when using this, especially with {@code includingChildren}
    * set to {@code true}, as untrusted content that gets inserted (e.g, via
    * os:RenderAll in templating) would become trusted.
-   * 
+   *
    * @param element the trusted element
    * @param includingChildren if true, children of this element will are also
    *     trusted.  Never set this to true on an element that will ever have
@@ -85,7 +85,7 @@ public class SanitizingGadgetRewriter extends DomWalker.Rewriter {
     element.setUserData(BYPASS_SANITIZATION_KEY,
         includingChildren ? Bypass.ALL : Bypass.ONLY_SELF, copyOnClone);
   }
-  
+
   // Public so it can be used by the old rewriter
   public static enum Bypass { ALL, ONLY_SELF, NONE }
 
@@ -147,14 +147,14 @@ public class SanitizingGadgetRewriter extends DomWalker.Rewriter {
     }
     return bypass;
   }
-  
+
   private static abstract class SanitizingWalker implements DomWalker.Visitor {
     protected abstract boolean removeTag(Gadget gadget, Element elem, Uri ctx);
     protected abstract boolean removeAttr(Gadget gadget, Attr attr, Uri ctx);
-    
+
     public VisitStatus visit(Gadget gadget, Node node) throws RewritingException {
       Element elem;
-      
+
       switch (node.getNodeType()) {
       case Node.CDATA_SECTION_NODE:
       case Node.TEXT_NODE:
@@ -180,12 +180,12 @@ public class SanitizingGadgetRewriter extends DomWalker.Rewriter {
       } else if (bypass == Bypass.ONLY_SELF) {
         return VisitStatus.BYPASS;
       }
-      
+
       if (removeTag(gadget, elem, gadget.getSpec().getUrl())) {
         // All reserved trees are removed in revisit.
         return VisitStatus.RESERVE_TREE;
       }
-      
+
       // Otherwise move on to attributes.
       VisitStatus status = VisitStatus.MODIFY;
       for (Attr attr : toList(elem.getAttributes())) {
@@ -193,7 +193,7 @@ public class SanitizingGadgetRewriter extends DomWalker.Rewriter {
           elem.removeAttributeNode(attr);
         }
       }
-      
+
       return status;
     }
 
@@ -215,13 +215,13 @@ public class SanitizingGadgetRewriter extends DomWalker.Rewriter {
   static final class BasicElementFilter extends SanitizingWalker {
     private final Provider<Set<String>> allowedTags;
     private final Provider<Set<String>> allowedAttributes;
-    
+
     private BasicElementFilter(Provider<Set<String>> allowedTags,
                                Provider<Set<String>> allowedAttributes) {
       this.allowedTags = allowedTags;
       this.allowedAttributes = allowedAttributes;
     }
-    
+
     @Override
     public boolean removeTag(Gadget gadget, Element elem, Uri context) {
       return !allowedTags.get().contains(elem.getNodeName().toLowerCase());
@@ -244,7 +244,7 @@ public class SanitizingGadgetRewriter extends DomWalker.Rewriter {
     protected boolean removeTag(Gadget gadget, Element elem, Uri ctx) {
       return false;
     }
-    
+
     @Override
     protected boolean removeAttr(Gadget gadget, Attr attr, Uri ctx) {
       if (URI_ATTRIBUTES.contains(attr.getName().toLowerCase())) {
@@ -272,12 +272,12 @@ public class SanitizingGadgetRewriter extends DomWalker.Rewriter {
     private ImageFilter(ProxyUriManager proxyUriManager) {
       this.imageRewriter = new SanitizingProxyUriManager(proxyUriManager, "image/*");
     }
-    
+
     @Override
     protected boolean removeTag(Gadget gadget, Element elem, Uri ctx) {
       return false;
     }
-    
+
     @Override
     protected boolean removeAttr(Gadget gadget, Attr attr, Uri ctx) {
       if ("img".equalsIgnoreCase(attr.getOwnerElement().getNodeName()) &&
@@ -311,7 +311,7 @@ public class SanitizingGadgetRewriter extends DomWalker.Rewriter {
       this.cssImportRewriter = new SanitizingProxyUriManager(proxyUriManager, "text/css");
       this.cssSanitizer = cssSanitizer;
     }
-  
+
     public VisitStatus visit(Gadget gadget, Node node) throws RewritingException {
       if (node.getNodeType() == Node.ELEMENT_NODE &&
           "style".equalsIgnoreCase(node.getNodeName())) {
@@ -321,7 +321,7 @@ public class SanitizingGadgetRewriter extends DomWalker.Rewriter {
       }
       return VisitStatus.BYPASS;
     }
-    
+
     public boolean revisit(Gadget gadget, List<Node> nodes) throws RewritingException {
       return false;
     }
@@ -337,7 +337,7 @@ public class SanitizingGadgetRewriter extends DomWalker.Rewriter {
     private LinkFilter(ProxyUriManager proxyUriManager) {
       this.cssImportRewriter = new SanitizingProxyUriManager(proxyUriManager, "text/css");
     }
-    
+
     @Override
     protected boolean removeTag(Gadget gadget, Element elem, Uri ctx) {
       if (!elem.getNodeName().equalsIgnoreCase("link")) {
@@ -363,7 +363,7 @@ public class SanitizingGadgetRewriter extends DomWalker.Rewriter {
       }
       return !hasType;
     }
-    
+
     @Override
     protected boolean removeAttr(Gadget gadget, Attr attr, Uri ctx) {
       return false;

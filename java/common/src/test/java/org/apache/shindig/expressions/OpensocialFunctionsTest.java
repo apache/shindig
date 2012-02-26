@@ -35,7 +35,7 @@ public class OpensocialFunctionsTest extends Assert {
   private Expressions expressions;
   private ELContext context;
   private Map<String, Object> vars = Maps.newHashMap();
-  
+
   @Before
   public void setUp() {
     Functions functions = new Functions(OpensocialFunctions.class);
@@ -62,7 +62,7 @@ public class OpensocialFunctionsTest extends Assert {
     String test = "12345";
     String encoded = new String(Base64.encodeBase64(test.getBytes("UTF-8")), "UTF-8");
     vars.put("encoded", encoded);
-    
+
     ValueExpression testDecodeBase64 =
       expressions.parse("${osx:decodeBase64(encoded)}", String.class);
     assertEquals("12345", testDecodeBase64.getValue(context));

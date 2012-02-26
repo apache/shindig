@@ -47,13 +47,13 @@ public class CompositeTagRegistryTest {
     fooTag = createTagHandler("foo");
     fooTag2 = createTagHandler("foo");
     barTag = createTagHandler("bar");
-    
+
     TagRegistry first = new DefaultTagRegistry(ImmutableSet.of(fooTag, barTag));
     TagRegistry second = new DefaultTagRegistry(ImmutableSet.of(fooTag2));
-    
+
     registry = new CompositeTagRegistry(ImmutableList.of(first, second));
   }
-  
+
   @Test
   public void firstRegistryWins() {
     TagRegistry.NSName foo = new TagRegistry.NSName(TEST_NAMESPACE, "foo");
@@ -77,6 +77,6 @@ public class CompositeTagRegistryTest {
       public void process(Node result, Element tag, TemplateProcessor processor) {
       }
     };
-    
+
   }
 }

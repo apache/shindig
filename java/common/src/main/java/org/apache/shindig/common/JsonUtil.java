@@ -45,7 +45,7 @@ public final class JsonUtil {
       .build(new CacheLoader<Class<?>, Map<String, Method>>() {
         public Map<String, Method> load(Class<?> clazz) {
           ImmutableMap.Builder<String,Method> methods = ImmutableMap.builder();
-          
+
           for (Method method : clazz.getMethods()) {
             if (method.getParameterTypes().length == 0) {
               String name = getPropertyName(method);
@@ -60,7 +60,7 @@ public final class JsonUtil {
 
   /**
    * Gets a property of an Object.  Will return a property value if
-   * serializing the value would produce a JSON object containing that 
+   * serializing the value would produce a JSON object containing that
    * property, otherwise returns null.
    */
   public static Object getProperty(Object value, String propertyName) {
@@ -89,7 +89,7 @@ public final class JsonUtil {
         }
       }
     }
-    
+
     return null;
   }
 

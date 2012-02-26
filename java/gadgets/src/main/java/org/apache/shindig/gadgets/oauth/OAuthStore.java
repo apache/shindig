@@ -53,7 +53,7 @@ public interface OAuthStore {
     private final OAuthConsumer consumer;
     private final String keyName;
     private final String callbackUrl;
-    
+
     /**
      * @param consumer the OAuth consumer
      * @param keyName the name of the key to use for this consumer (passed on query parameters to
@@ -66,20 +66,20 @@ public interface OAuthStore {
       this.keyName = keyName;
       this.callbackUrl = callbackUrl;
     }
-    
+
     public OAuthConsumer getConsumer() {
       return consumer;
     }
-    
+
     public String getKeyName() {
       return keyName;
     }
-    
+
     public String getCallbackUrl() {
       return callbackUrl;
     }
   }
-  
+
   /**
    * Information about an access token.
    */
@@ -88,7 +88,7 @@ public interface OAuthStore {
     private final String tokenSecret;
     private final String sessionHandle;
     private final long tokenExpireMillis;
-    
+
     /**
      * @param accessToken the token
      * @param tokenSecret the secret for the token
@@ -120,11 +120,11 @@ public interface OAuthStore {
   /**
    * Retrieve OAuth consumer to use for requests.  The returned consumer is ready to use for signed
    * fetch requests.
-   * 
+   *
    * @param securityToken token for user/gadget making request.
    * @param serviceName gadget's nickname for the service being accessed.
    * @param provider OAuth service provider info to be inserted into the returned consumer.
-   * 
+   *
    * @throws GadgetException if no OAuth consumer can be found (e.g. no consumer key can be used.)
    */
   ConsumerInfo getConsumerKeyAndSecret(SecurityToken securityToken, String serviceName,

@@ -31,10 +31,10 @@ public final class NullTemplateLibrary implements TemplateLibrary {
   public static final TemplateLibrary INSTANCE = new NullTemplateLibrary();
 
   private final TagRegistry registry = new DefaultTagRegistry(ImmutableSet.<TagHandler>of());
-  
-  private NullTemplateLibrary() {  
+
+  private NullTemplateLibrary() {
   }
-  
+
   public Uri getLibraryUri() {
     return null;
   }

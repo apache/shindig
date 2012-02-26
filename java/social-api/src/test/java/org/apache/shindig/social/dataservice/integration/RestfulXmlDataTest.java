@@ -49,7 +49,7 @@ public class RestfulXmlDataTest extends AbstractLargeRestfulTests {
     Map<String, String> extraParams = ImmutableMap.of("fields", "count");
     String resp = getResponse("/appdata/john.doe/@friends/app", "GET",
         extraParams, "xml", "application/xml");
-    
+
     XSDValidator.validateOpenSocial(resp);
 
      // /*[local-name()="TestSchema" and namespace-uri()='http://MapTest.TestSchema']/*[local-name()="A"]
@@ -88,7 +88,7 @@ public class RestfulXmlDataTest extends AbstractLargeRestfulTests {
     extraParams.put("fields", null);
     String resp = getResponse("/appdata/john.doe/@self/app", "GET",
         extraParams, "xml", "application/xml");
-    
+
     XSDValidator.validateOpenSocial(resp);
 
     NodeList result = xp.getMatchingNodes("/:appdata/:entry", XMLUnit.buildTestDocument(resp));
@@ -197,7 +197,7 @@ public class RestfulXmlDataTest extends AbstractLargeRestfulTests {
     String postData = XSDValidator.XMLDEC + "<map><entry><key>count</key><value>5</value></entry></map>";
     String resp = getResponse("/appdata/john.doe/@self/app", "POST", extraParams, postData,
         "xml", "application/xml");
-    
+
     XSDValidator.validateOpenSocial(resp);
 
 
@@ -207,7 +207,7 @@ public class RestfulXmlDataTest extends AbstractLargeRestfulTests {
   private void assertCount(String expectedCount) throws Exception {
     String resp = getResponse("/appdata/john.doe/@self/app", "GET", "xml",
         "application/xml");
-    
+
     XSDValidator.validateOpenSocial(resp);
 
     NodeList result = xp.getMatchingNodes("/:appdata/:entry", XMLUnit.buildTestDocument(resp));

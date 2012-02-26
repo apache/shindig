@@ -42,27 +42,27 @@ public class RepeatTagHandlerTest {
   private FakeTemplateProcessor processor;
   private DOMImplementation documentProvider;
   private TagHandler handler;
-   
+
   @Before
   public void setUp() throws Exception {
     processor = EasyMock.createMock(FakeTemplateProcessor.class);
     documentProvider = new ParseModule.DOMImplementationProvider().get();
     handler = new RepeatTagHandler();
   }
-  
+
   @Test
   public void repeat() throws Exception {
     Document doc = documentProvider.createDocument(null, null, null);
     // Create a mock tag;  the name doesn't truly matter
     Element tag = doc.createElement("repeat");
     tag.setAttribute(RepeatTagHandler.EXPRESSION_ATTR, "fakeExpression");
-    
+
     List<String> mockList = ImmutableList.of("a", "b", "c");
     processor.expressionResults = ImmutableMap.of("fakeExpression", mockList);
 
     processor.processChildNodes(null, tag);
     EasyMock.expectLastCall().times(3);
-    
+
     replay(processor);
     handler.process(null, tag, processor);
     verify(processor);
@@ -73,7 +73,7 @@ public class RepeatTagHandlerTest {
     Document doc = documentProvider.createDocument(null, null, null);
     // Create a mock tag;  the name doesn't truly matter
     Element tag = doc.createElement("repeat");
-    
+
     replay(processor);
     handler.process(null, tag, processor);
     verify(processor);
@@ -86,7 +86,7 @@ public class RepeatTagHandlerTest {
     Element tag = doc.createElement("repeat");
     tag.setAttribute(RepeatTagHandler.EXPRESSION_ATTR, "fakeExpression");
     tag.setAttribute(RepeatTagHandler.IF_ATTR, "fakeIf");
-    
+
     List<String> mockList = ImmutableList.of("a", "b", "c");
     processor.expressionResults = ImmutableMap.of("fakeExpression", mockList,
         // Return "false", "true", and "false" for each step
@@ -95,7 +95,7 @@ public class RepeatTagHandlerTest {
     processor.processChildNodes(null, tag);
     // "if" should evaluate to true only once
     EasyMock.expectLastCall().times(1);
-    
+
     replay(processor);
     handler.process(null, tag, processor);
     verify(processor);

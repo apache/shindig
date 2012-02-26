@@ -33,17 +33,17 @@ public class AnonFuncWrappingProcessorTest {
   public void wrapCodeAllRunTime() throws Exception {
     checkWrapCode(JsCompileMode.CONCAT_COMPILE_EXPORT_ALL, true);
   }
-  
+
   @Test
   public void wrapCodeExplicitRunTime() throws Exception {
     checkWrapCode(JsCompileMode.CONCAT_COMPILE_EXPORT_EXPLICIT, true);
   }
-  
+
   @Test
   public void wrapCodeBuildTimeDoesNothing() throws Exception {
     checkWrapCode(JsCompileMode.COMPILE_CONCAT, false);
   }
-  
+
   private void checkWrapCode(JsCompileMode mode, boolean wraps) throws Exception {
     IMocksControl control = createControl();
     JsRequest request = control.createMock(JsRequest.class);

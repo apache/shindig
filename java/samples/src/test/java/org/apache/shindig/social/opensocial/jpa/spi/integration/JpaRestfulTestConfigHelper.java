@@ -47,7 +47,7 @@ public class JpaRestfulTestConfigHelper {
 
   /**
    * Init configuration.
-   * 
+   *
    * @return the injector
    */
   protected static Injector init() {
@@ -55,12 +55,12 @@ public class JpaRestfulTestConfigHelper {
     Injector injector = Guice.createInjector(new JpaTestGuiceModule(entityManager));
     return injector;
   }
-  
+
   /**
    * Gets the data service servlet.
-   * 
+   *
    * @param injector the injector
-   * 
+   *
    * @return the data service servlet
    */
   public static DataServiceServlet getDataServiceServlet(Injector injector) {
@@ -82,5 +82,5 @@ public class JpaRestfulTestConfigHelper {
     servlet.setContainerConfig(containerConfig);
     return servlet;
   }
-  
+
 }

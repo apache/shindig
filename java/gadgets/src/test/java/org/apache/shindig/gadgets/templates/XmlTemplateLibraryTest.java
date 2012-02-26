@@ -35,12 +35,12 @@ import com.google.common.collect.ImmutableMap;
 
 /**
  * Test for TemplateLibrary parsing.
- * 
+ *
  * TODO: Parse failure tests
  */
 public class XmlTemplateLibraryTest {
 
-  public static final String LIB_MARKUP = 
+  public static final String LIB_MARKUP =
     "<Templates xmlns:my='#my'>" +
     "  <Namespace prefix='my' url='#my'/>" +
     "  <JavaScript>libscript</JavaScript>" +
@@ -54,17 +54,17 @@ public class XmlTemplateLibraryTest {
     "    <Style>tagstyle</Style>" +
     "  </TemplateDef>" +
     "</Templates>";
-  
+
   private static TemplateLibrary lib;
 
   private static Element doc;
-  
+
   @BeforeClass
   public static void createDefaultLibrary() throws Exception {
     doc = XmlUtil.parse(LIB_MARKUP);
     lib = new XmlTemplateLibrary(Uri.parse("http://example.com/my"), doc, LIB_MARKUP);
   }
-  
+
   @Test
   public void testTemplateElement() throws Exception {
     TagRegistry registry = lib.getTagRegistry();
@@ -91,17 +91,17 @@ public class XmlTemplateLibraryTest {
       @Override
       public TemplateContext getTemplateContext() {
         return context;
-      }      
+      }
     };
-    
+
     TagHandler handlerWithResources = lib.getTagRegistry()
        .getHandlerFor(new TagRegistry.NSName("#my", "Def"));
     TagHandler handlerWithNoResources = lib.getTagRegistry()
         .getHandlerFor(new TagRegistry.NSName("#my", "Flat"));
-    
+
     Node result = doc.getOwnerDocument().createDocumentFragment();
     Element tag = doc.getOwnerDocument().createElement("test");
-    
+
     // Script and style elements for the library should get registered
     // with the first tag for the whole library
     handlerWithNoResources.process(result, tag, processor);
@@ -125,18 +125,18 @@ public class XmlTemplateLibraryTest {
         "<STYLE>tagstyle</STYLE>",
         serializeResources(context));
   }
-  
+
   private String serializeResources(TemplateContext context) {
     StringBuilder builder = new StringBuilder();
     for (TemplateResource resource : context.getResources()) {
       builder.append(resource);
     }
-    
+
     return builder.toString();
   }
   @Test
   public void testSerialize() {
     assertEquals(LIB_MARKUP, lib.serialize());
   }
-  
+
 }

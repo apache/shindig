@@ -39,7 +39,7 @@ import java.util.List;
  * @since 2.0.0
  */
 public class StyleAdjacencyVisitor implements Visitor {
-  
+
   public VisitStatus visit(Gadget gadget, Node node) throws RewritingException {
     if (node.getNodeType() == Node.ELEMENT_NODE &&
         ("style".equalsIgnoreCase(node.getNodeName()) ||
@@ -49,15 +49,15 @@ public class StyleAdjacencyVisitor implements Visitor {
       // Reserve <style...>, <link rel="stylesheet"...>, or <link type="text/css"...>
       return VisitStatus.RESERVE_TREE;
     }
-    
+
     return VisitStatus.BYPASS;
   }
-  
+
   public boolean revisit(Gadget gadget, List<Node> nodes)
       throws RewritingException {
     Node head = DomUtil.getFirstNamedChildNode(
         nodes.get(0).getOwnerDocument().getDocumentElement(), "head");
-    
+
     if (head == null) {
       // Should never occur; do for paranoia's sake.
       return false;

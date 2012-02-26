@@ -256,7 +256,7 @@ public class BeanJsonConverter implements BeanConverter {
 
   private Object convertToClass(JSONObject in, Class<?> type) {
     Object out = injector.getInstance(type);
-    
+
     /*
      * Simple hack to add support for arbitrary extensions to Shindig's data
      * model.  It initializes keys/values of an ExtendableBean class, which is
@@ -268,7 +268,7 @@ public class BeanJsonConverter implements BeanConverter {
         ((ExtendableBean) out).put(name, convertToObject(in.opt(name), null));
       }
     }
-  
+
     for (Map.Entry<String, Method> entry : SETTERS.getUnchecked(out.getClass()).entrySet()) {
       Object value = in.opt(entry.getKey());
       if (value != null) {

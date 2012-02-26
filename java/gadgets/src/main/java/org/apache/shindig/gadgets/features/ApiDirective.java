@@ -26,13 +26,13 @@ public class ApiDirective {
   public enum Type {
     JS("js"),
     RPC("rpc");
-    
+
     private final String code;
-    
+
     private Type(String code) {
       this.code = code;
     }
-    
+
     public static Type fromCode(String code) {
       for (Type value : Type.values()) {
         if (value.code.equals(code)) {
@@ -42,29 +42,29 @@ public class ApiDirective {
       return null;
     }
   }
-  
+
   private final Type type;
   private final String value;
   private final boolean isUses;
-  
+
   ApiDirective(String type, String value, boolean isUses) {
     this.type = Type.fromCode(type);
     this.value = value;
     this.isUses = isUses;
   }
-  
+
   public Type getType() {
     return type;
   }
-  
+
   public String getValue() {
     return value;
   }
-  
+
   public boolean isUses() {
     return isUses;
   }
-  
+
   public boolean isExports() {
     return !isUses;
   }

@@ -49,11 +49,11 @@ public class SanitizingResponseRewriter implements ResponseRewriter {
   //class name for logging purpose
   private static final String classname = SanitizingResponseRewriter.class.getName();
   private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
- 
+
   private final ContentRewriterFeature.Factory featureConfigFactory;
   private final CajaCssSanitizer cssSanitizer;
   private final ProxyUriManager proxyUriManager;
-  
+
   @Inject
   public SanitizingResponseRewriter(ContentRewriterFeature.Factory featureConfigFactory,
       CajaCssSanitizer cssSanitizer,
@@ -78,7 +78,7 @@ public class SanitizingResponseRewriter implements ResponseRewriter {
         rewriteProxiedImage(request, resp);
       } else {
         if (LOG.isLoggable(Level.WARNING)) {
-          LOG.logp(Level.WARNING, classname, "rewrite", 
+          LOG.logp(Level.WARNING, classname, "rewrite",
             MessageKeys.REQUEST_TO_SANITIZE_UNKNOW_CONTENT,
             new Object[] {request.getRewriteMimeType(),request.getUri()});
         }

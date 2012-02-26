@@ -49,7 +49,7 @@ public class OAuth2ImplicitFlowTest extends AbstractLargeRestfulTests {
 
   /**
    * Test retrieving an access token using a public client with a redirect uri
-   * 
+   *
    * @throws Exception
    */
   @Test
@@ -87,7 +87,7 @@ public class OAuth2ImplicitFlowTest extends AbstractLargeRestfulTests {
 
   /**
    * Test retrieving an access token using a public client with redirect uri
-   * 
+   *
    * @throws Exception
    */
   @Test
@@ -121,7 +121,7 @@ public class OAuth2ImplicitFlowTest extends AbstractLargeRestfulTests {
 
   /**
    * Test attempting to retrieve an access token using a bad redirect URI
-   * 
+   *
    * @throws Exception
    */
   @Test
@@ -155,7 +155,7 @@ public class OAuth2ImplicitFlowTest extends AbstractLargeRestfulTests {
 
   /**
    * Test attempting to retrieve an access token using a bad client id
-   * 
+   *
    * @throws Exception
    */
   @Test

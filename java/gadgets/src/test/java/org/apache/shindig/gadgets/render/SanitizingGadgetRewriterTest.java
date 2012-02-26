@@ -56,7 +56,7 @@ public class SanitizingGadgetRewriterTest extends RewriterTestBase {
     public String getParameter(String name) {
       return Param.SANITIZE.getKey().equals(name) ? "1" : null;
     }
-    
+
     @Override
     public String getContainer() {
       return MOCK_CONTAINER;
@@ -81,7 +81,7 @@ public class SanitizingGadgetRewriterTest extends RewriterTestBase {
   @Override
   public void setUp() throws Exception {
     super.setUp();
-    
+
     gadget = new Gadget().setContext(unsanitaryGadgetContext);
     gadget.setSpec(new GadgetSpec(Uri.parse("http://www.example.org/gadget.xml"),
         "<Module><ModulePrefs title=''/><Content type='x-html-sanitized'/></Module>"));
@@ -92,7 +92,7 @@ public class SanitizingGadgetRewriterTest extends RewriterTestBase {
         "<Module><ModulePrefs title=''/><Content type='x-html-sanitized'/></Module>"));
     gadgetNoCacheAndDebug.setCurrentView(gadgetNoCacheAndDebug.getSpec().getViews().values().iterator().next());
   }
-  
+
   @Override
   protected Class<? extends GadgetHtmlParser> getParserClass() {
     return CajaHtmlParser.class;
@@ -156,7 +156,7 @@ public class SanitizingGadgetRewriterTest extends RewriterTestBase {
             + "href=\"http://www.test.com/dir/proxy?"
             + "url=http%3A%2F%2Fwww.evil.com%2Fx.css&gadget=www.example.org%2Fgadget.xml&"
             + "fp=45508&rewriteMime=text/css\"/>";
-    String sanitized = 
+    String sanitized =
         "<html><head><link href=\"http://host.com/proxy?url=http%3A%2F%2Fwww.test.com%2Fdir%2F" +
         "proxy%3Furl%3Dhttp%253A%252F%252Fwww.evil.com%252Fx.css%26gadget%3Dwww.example.org%252F" +
         "gadget.xml%26fp%3D45508%26rewriteMime%3Dtext%2Fcss&amp;sanitize=1&amp;rewriteMime=text%2Fcss\" " +
@@ -172,7 +172,7 @@ public class SanitizingGadgetRewriterTest extends RewriterTestBase {
             + "href=\"http://www.test.com/dir/proxy?"
             + "url=http%3A%2F%2Fwww.evil.com%2Fx.css&gadget=www.example.org%2Fgadget.xml&"
             + "fp=45508&rewriteMime=text/css\"/>";
-    String sanitized = 
+    String sanitized =
         "<html><head><link href=\"http://host.com/proxy?url=http%3A%2F%2Fwww.test.com%2F"
             + "dir%2Fproxy%3Furl%3Dhttp%253A%252F%252Fwww.evil.com%252Fx.css%26gadget%3D"
             + "www.example.org%252Fgadget.xml%26fp%3D45508%26rewriteMime%3Dtext%2Fcss&amp;"
@@ -206,7 +206,7 @@ public class SanitizingGadgetRewriterTest extends RewriterTestBase {
         "<style type=\"text/css\">@import url('www.evil.com/x.js');</style>";
     // The caja css sanitizer does *not* remove the initial colon in urls
     // since this does not work in IE
-    String sanitized = 
+    String sanitized =
         "<html><head><style>"
       + "@import url('http://host.com/proxy?url=http%3A%2F%2Fwww.example.org%2Fwww.evil.com%2Fx.js&"
       + "sanitize=1&rewriteMime=text%2Fcss');"
@@ -221,7 +221,7 @@ public class SanitizingGadgetRewriterTest extends RewriterTestBase {
         "<style type=\"text/css\">@import url('www.evil.com/x.js');</style>";
     // The caja css sanitizer does *not* remove the initial colon in urls
     // since this does not work in IE
-    String sanitized = 
+    String sanitized =
         "<html><head><style>"
       + "@import url('http://host.com/proxy?url=http%3A%2F%2Fwww.example.org%2Fwww.evil.com%2Fx.js&sanitize=1"
       + "&rewriteMime=text%2Fcss');</style></head><body></body></html>";
@@ -299,16 +299,16 @@ public class SanitizingGadgetRewriterTest extends RewriterTestBase {
     // Force the content to get re-serialized
     MutableContent.notifyEdit(document);
     String fullMarkup = mc.getContent();
-    
+
     Element paragraphTag = (Element) document.getElementsByTagName("p").item(0);
     // Mark the paragraph tag element as trusted
     SanitizingGadgetRewriter.bypassSanitization(paragraphTag, true);
     rewriter.rewrite(gadget, mc);
-     
+
     // The document should be unchanged
     assertEquals(fullMarkup, mc.getContent());
   }
-     
+
   @Test
   public void sanitizationBypassOnlySelf() throws Exception {
     String markup = "<p foo=\"bar\"><b>Parag</b><!--raph--></p>";
@@ -317,19 +317,19 @@ public class SanitizingGadgetRewriterTest extends RewriterTestBase {
 
     MutableContent mc = new MutableContent(parser, markup);
     Document document = mc.getDocument();
-    
+
     Element paragraphTag = (Element) document.getElementsByTagName("p").item(0);
     // Mark the paragraph tag element as trusted
     SanitizingGadgetRewriter.bypassSanitization(paragraphTag, false);
     rewriter.rewrite(gadget, mc);
-     
+
     // The document should be unchanged
     String content = mc.getContent();
     Matcher matcher = BODY_REGEX.matcher(content);
     matcher.matches();
     assertEquals("<p foo=\"bar\"></p>", matcher.group(1));
   }
-     
+
   @Test
   public void sanitizationBypassPreservedAcrossClone() throws Exception {
     String markup = "<p foo=\"bar\"><b>Parag</b><!--raph--></p>";
@@ -338,7 +338,7 @@ public class SanitizingGadgetRewriterTest extends RewriterTestBase {
 
     MutableContent mc = new MutableContent(parser, markup);
     Document document = mc.getDocument();
-    
+
     Element paragraphTag = (Element) document.getElementsByTagName("p").item(0);
     // Mark the paragraph tag element as trusted
     SanitizingGadgetRewriter.bypassSanitization(paragraphTag, false);
@@ -348,7 +348,7 @@ public class SanitizingGadgetRewriterTest extends RewriterTestBase {
     paragraphTag.getParentNode().replaceChild(cloned, paragraphTag);
 
     rewriter.rewrite(gadget, mc);
-     
+
     // The document should be unchanged
     String content = mc.getContent();
     Matcher matcher = BODY_REGEX.matcher(content);

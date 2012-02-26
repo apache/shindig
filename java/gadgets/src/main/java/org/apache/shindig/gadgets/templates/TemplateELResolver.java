@@ -42,22 +42,22 @@ public class TemplateELResolver extends ELResolver {
   public static final String PROPERTY_CONTEXT = "Context";
   public static final String PROPERTY_CUR = "Cur";
   public static final String PROPERTY_MY = "My";
-  
+
   private static final Set<String> TOP_LEVEL_PROPERTIES =
     ImmutableSet.of(PROPERTY_TOP, PROPERTY_CONTEXT, PROPERTY_CUR, PROPERTY_MY);
-  
+
   private final TemplateContext templateContext;
 
   public TemplateELResolver(TemplateContext templateContext) {
-    this.templateContext = templateContext;  
+    this.templateContext = templateContext;
   }
-  
+
   @Override
   public Class<?> getCommonPropertyType(ELContext context, Object base) {
     if (base == null) {
       return String.class;
     }
-    
+
     return null;
   }
 
@@ -88,7 +88,7 @@ public class TemplateELResolver extends ELResolver {
           return templateContext.getCur();
         }
       }
-           
+
       // Check variables.
       if (property instanceof String) {
         // Workaround for inability of Jasper-EL resolvers to access VariableMapper
@@ -99,7 +99,7 @@ public class TemplateELResolver extends ELResolver {
           return valueExp.getValue(context);
         }
       }
-      
+
       // Check ${Cur} next.
       Object cur = templateContext.getCur();
       // Resolve through "cur" as if it were a value - if "isPropertyResolved()"
@@ -114,14 +114,14 @@ public class TemplateELResolver extends ELResolver {
           }
         }
       }
-      
+
       // Check ${My} next.
       Map<String, ? extends Object> scope = templateContext.getMy();
       if (scope != null && scope.containsKey(property)) {
         context.setPropertyResolved(true);
         return scope.get(property);
       }
-      
+
       // Look at ${Top} context last.
       scope = templateContext.getTop();
       if (scope != null && scope.containsKey(property)) {
@@ -129,7 +129,7 @@ public class TemplateELResolver extends ELResolver {
         return scope.get(property);
       }
     }
-    
+
     return null;
   }
 
@@ -139,7 +139,7 @@ public class TemplateELResolver extends ELResolver {
       context.setPropertyResolved(true);
       return true;
     }
-    
+
     return false;
   }
 

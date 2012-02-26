@@ -293,9 +293,9 @@ public class DefaultGadgetSpecFactoryTest {
     try {
       specFactory.getGadgetSpec(createContext(SPEC_URL, true));
     } catch (GadgetException e) {
-      // Expected condition. 
+      // Expected condition.
     }
-    
+
     // Now make sure the cache wasn't populated w/ the error.
     specFactory.getGadgetSpec(createContext(SPEC_URL, false));
   }

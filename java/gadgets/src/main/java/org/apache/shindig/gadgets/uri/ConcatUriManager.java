@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Generates concat servlet specific uris. 
+ * Generates concat servlet specific uris.
  *
  * @since 2.0.0
  */
@@ -37,35 +37,35 @@ public interface ConcatUriManager {
   public enum Type {
     JS("text/javascript", "src", "js", "script"), // JavaScript
     CSS("text/css", "href", "css", "link");     // CSS/styling
-    
+
     private final String mimeType;
     private final String srcAttrib;
     private final String type;
     private final String tagName;
-    
+
     private Type(String mimeType, String srcAttrib, String type, String tagName) {
       this.mimeType = mimeType;
       this.srcAttrib = srcAttrib;
       this.type = type;
       this.tagName = tagName;
     }
-    
+
     public String getMimeType() {
       return mimeType;
     }
-    
+
     public String getSrcAttrib() {
       return srcAttrib;
     }
-    
+
     public String getType() {
       return type;
     }
-    
+
     public String getTagName() {
       return tagName;
     }
-    
+
     public static Type fromType(String type) {
       for (Type val : Type.values()) {
         if (val.getType().equalsIgnoreCase(type)) {
@@ -74,7 +74,7 @@ public interface ConcatUriManager {
       }
       return null;
     }
-    
+
     public static Type fromMime(String mime) {
       for (Type val : Type.values()) {
         if (val.getMimeType().equals(mime)) {
@@ -93,7 +93,7 @@ public interface ConcatUriManager {
    *     in index-correlated order, one per input.
    */
   List<ConcatData> make(List<ConcatUri> batches, boolean isAdjacent);
-  
+
   /**
    * Represents a single concatenated Uri. This must include a Uri for
    * loading the given resource(s), and may optionally include a
@@ -122,19 +122,19 @@ public interface ConcatUriManager {
           null : snippets.get(orig);
     }
   }
-  
+
   public static class ConcatUri extends ProxyUriBase {
     private final List<Uri> batch;
     private final Type type;
     private final String splitParam;
-    
+
     public ConcatUri(Gadget gadget, List<Uri> batch, Type type) {
       super(gadget);
       this.batch = batch;
       this.type = type;
       this.splitParam = null;
     }
-    
+
     public ConcatUri(
         UriStatus status, List<Uri> uris, String splitParam, Type type, Uri origUri) {
       super(status, origUri);
@@ -149,10 +149,10 @@ public interface ConcatUriManager {
         return true;
       }
       if (!(obj instanceof ConcatUri)) {
-        return false; 
+        return false;
       }
       ConcatUri objUri = (ConcatUri) obj;
-      return (super.equals(obj) 
+      return (super.equals(obj)
           && Objects.equal(this.batch, objUri.batch)
           && Objects.equal(this.splitParam, objUri.splitParam)
           && Objects.equal(this.type, objUri.type));
@@ -166,11 +166,11 @@ public interface ConcatUriManager {
     public List<Uri> getBatch() {
       return batch;
     }
-    
+
     public Type getType() {
       return type;
     }
-    
+
     public String getSplitParam() {
       return splitParam;
     }
@@ -183,7 +183,7 @@ public interface ConcatUriManager {
       return ctx;
     }
   }
-  
+
   /**
    * Parses a given Uri indicating whether it's a concat Uri and if so,
    * whether it's valid.
@@ -191,7 +191,7 @@ public interface ConcatUriManager {
    * @return Uri validation status
    */
   ConcatUri process(Uri uri);
-  
+
   public interface Versioner {
     /**
      * Generates a version for each of the provided resources.
@@ -204,7 +204,7 @@ public interface ConcatUriManager {
      */
     List<String> version(List<List<Uri>> resourceUris, String container,
                          List<String> resourceTags);
-    
+
     /**
      * Validate the version of the resource list.
      * @param resourceUris Uris of a proxied resource

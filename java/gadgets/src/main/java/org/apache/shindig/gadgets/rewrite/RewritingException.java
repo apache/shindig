@@ -25,7 +25,7 @@ package org.apache.shindig.gadgets.rewrite;
  */
 public class RewritingException extends Exception {
   private final int httpStatusCode;
-  
+
   public RewritingException(Throwable t, int httpStatusCode) {
     super(t);
     this.httpStatusCode = httpStatusCode;

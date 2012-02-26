@@ -52,7 +52,7 @@ public class AtomEntry {
   private AtomLink link;
   @SuppressWarnings("unused")
   private Object content;
-  
+
   /**
    * Default constructor for POSTs to the REST API.
    */
@@ -68,7 +68,7 @@ public class AtomEntry {
       // Try to recognize Entry's value
       o = ((Entry<?, ?>)o).getValue();
     }
-    
+
     if (o instanceof Person) {
       Person person = (Person) o;
       content = new AtomContent(person);

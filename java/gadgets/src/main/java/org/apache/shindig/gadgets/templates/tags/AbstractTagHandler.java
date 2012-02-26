@@ -56,7 +56,7 @@ public abstract class AbstractTagHandler implements TagHandler {
   /**
    * Returns the value of a tag attribute, evaluating any contained EL
    * expressions if necessary.
-   * 
+   *
    * @param <T> the type of the value
    * @param tag the element
    * @param name the attribute name

@@ -29,7 +29,7 @@ import java.util.List;
  */
 public final class CajaCssUtils {
   private CajaCssUtils() {}
-  
+
   /**
    * Get the immediate children of the passed node with the specified node type
    */

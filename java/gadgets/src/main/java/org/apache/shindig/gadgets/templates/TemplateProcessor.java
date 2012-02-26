@@ -32,7 +32,7 @@ public interface TemplateProcessor {
 
   /**
    * Process an entire template.
-   * 
+   *
    * @param template the DOM template, typically a script element
    * @param templateContext a template context providing top-level
    *     variables
@@ -41,21 +41,21 @@ public interface TemplateProcessor {
    * @return a document fragment with the resolved content
    */
   DocumentFragment processTemplate(Element template,
-      TemplateContext templateContext, ELResolver globals, TagRegistry registry);    
-  
-  
+      TemplateContext templateContext, ELResolver globals, TagRegistry registry);
+
+
   /**
    * @return the current template context.
    */
   TemplateContext getTemplateContext();
-  
+
   /**
    * Process the children of an element or document.
    * @param result the node to which results should be appended
    * @param source the node whose children should be processed
    */
   void processChildNodes(Node result, Node source);
-  
+
   void processRepeat(Node result, Element element, Iterable<?> dataList,
       Runnable onEachLoop);
 
@@ -63,7 +63,7 @@ public interface TemplateProcessor {
    *  Evaluates an expression within the scope of this processor's context.
    *  @param expression The String expression
    *  @param type Expected result type
-   *  @param defaultValue Default value to return 
+   *  @param defaultValue Default value to return
    */
   <T> T evaluate(String expression, Class<T> type, @Nullable T defaultValue);
 }

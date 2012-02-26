@@ -25,11 +25,11 @@ import org.apache.shindig.gadgets.oauth2.OAuth2Message;
 import java.util.Map;
 
 /**
- * 
+ *
  * See {@link ClientAuthenticationHandler}
- * 
+ *
  * Handler for Basic Authentication
- * 
+ *
  */
 public class BasicAuthenticationHandler implements ClientAuthenticationHandler {
   private static final OAuth2Error ERROR = OAuth2Error.AUTHENTICATION_PROBLEM;

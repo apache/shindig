@@ -106,14 +106,14 @@ public interface OAuthDataStore {
 
   /**
    * Mark a token DISABLED and store it.
-   * 
+   *
    * @param entry A valid OAuthEntry
    */
   void disableToken(OAuthEntry entry);
 
   /**
    * Remove a token
-   * 
+   *
    * @param entry A valid OAuthEntry
    */
   void removeToken(OAuthEntry entry);

@@ -40,7 +40,7 @@ import org.junit.Assert;
 public class GadgetTokenStoreTest {
 
   private static final String GADGET_URL = "http://www.example.com/gadget.xml";
-  
+
   public static final String DEFAULT_CALLBACK = "http://www.example.com/oauthcallback";
 
   public static final String GADGET_SPEC =

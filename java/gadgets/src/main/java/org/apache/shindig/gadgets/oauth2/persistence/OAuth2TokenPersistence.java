@@ -28,7 +28,7 @@ import com.google.inject.Inject;
 
 /**
  * see {@link OAuth2Token}
- * 
+ *
  */
 public class OAuth2TokenPersistence implements OAuth2Token {
   private static final long serialVersionUID = 6853969404389015886L;

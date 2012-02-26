@@ -145,7 +145,7 @@ public class JsonSerializerTest {
     }
     @JsonProperty("simple!")
     public void setSimpleName(int foo) {
-      
+
     }
     @JsonProperty("invalid-setter-two-args")
     public void setInvalidSetterTwoArgs(String foo, String bar) {

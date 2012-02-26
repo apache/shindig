@@ -107,7 +107,7 @@ public class UrlParameterAuthenticationHandler implements AuthenticationHandler 
     params.put(SecurityTokenCodec.ACTIVE_URL_NAME, getActiveUrl(request));
     return params;
   }
-  
+
   protected String getActiveUrl(HttpServletRequest request) {
     return request.getRequestURL().toString();
   }

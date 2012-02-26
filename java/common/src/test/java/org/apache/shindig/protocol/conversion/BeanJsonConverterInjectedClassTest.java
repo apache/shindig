@@ -28,7 +28,7 @@ import org.junit.Test;
  * The Class BeanJsonConverterInjectedClassTest.
  */
 public class BeanJsonConverterInjectedClassTest extends Assert {
-  
+
   /** The bean json converter. */
   private BeanJsonConverter beanJsonConverter;
 
@@ -36,10 +36,10 @@ public class BeanJsonConverterInjectedClassTest extends Assert {
   public void setUp() throws Exception {
     this.beanJsonConverter = new BeanJsonConverter(Guice.createInjector(new TestModule()));
   }
-  
+
   /**
    * Test json conversion of a TestInterface into a TestObject
-   * 
+   *
    * @throws Exception the exception
    */
   @Test
@@ -49,25 +49,25 @@ public class BeanJsonConverterInjectedClassTest extends Assert {
     assertNotNull("expected 'x' field not set after json conversion", object.getX());
     assertNotNull("expected 'y' field not set after json conversion", object.getY());
   }
-  
+
   /**
    * TestModule that binds TestObject to TestInterface
    */
-  private static class TestModule extends AbstractModule {    
+  private static class TestModule extends AbstractModule {
     /* (non-Javadoc)
      * @see com.google.inject.AbstractModule#configure()
      */
     @Override
     protected void configure() {
       bind(TestInterface.class).to(TestObject.class);
-    }    
+    }
   }
-  
+
   /**
    * TestInterface.
    */
-  public interface TestInterface {    
-    String getX();    
+  public interface TestInterface {
+    String getX();
     void setX(String x);
   }
 
@@ -75,23 +75,23 @@ public class BeanJsonConverterInjectedClassTest extends Assert {
    * TestObject.
    */
   public static class TestObject implements TestInterface {
-    
-    private String x;    
+
+    private String x;
     private String y;
-    
+
     public String getX() {
       return x;
-    }    
+    }
     public void setX(String x) {
       this.x = x;
     }
-    
+
     public String getY() {
       return y;
-    }    
+    }
     public void setY(String y) {
       this.y = y;
-    }    
+    }
   }
 
 }

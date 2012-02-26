@@ -44,7 +44,7 @@ import org.w3c.dom.Document;
  */
 public final class SocialDataTags {
   private SocialDataTags() { }
-  
+
   /**
    * Allowed tag names for OpenSocial Data and template blocks.
    * Make the tag names lower case since they're normalized by
@@ -59,7 +59,7 @@ public final class SocialDataTags {
    */
   public static final BiMap<String, String> SCRIPT_TYPE_TO_OSML_TAG = ImmutableBiMap.of(
       "text/os-data", OSML_DATA_TAG, "text/os-template", OSML_TEMPLATE_TAG);
-  
+
   public static List<Element> getTags(Document doc, String tagName) {
     NodeList list = doc.getElementsByTagName(tagName);
     List<Element> elements = Lists.newArrayListWithExpectedSize(list.getLength());
@@ -81,7 +81,7 @@ public final class SocialDataTags {
     }
     return elements;
   }
-  
+
   public static boolean isOpenSocialScript(Element script) {
     Attr typeAttr = (Attr)script.getAttributes().getNamedItem("type");
     return (typeAttr != null && typeAttr.getValue() != null &&

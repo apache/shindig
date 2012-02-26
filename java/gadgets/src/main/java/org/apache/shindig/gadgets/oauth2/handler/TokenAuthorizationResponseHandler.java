@@ -31,9 +31,9 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 
 /**
- * 
+ *
  * See {@link TokenEndpointResponseHandler}
- * 
+ *
  * Handles the "client_credentials" flow
  */
 public class TokenAuthorizationResponseHandler implements TokenEndpointResponseHandler {

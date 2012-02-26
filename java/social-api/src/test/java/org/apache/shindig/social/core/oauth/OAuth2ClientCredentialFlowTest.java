@@ -47,7 +47,7 @@ public class OAuth2ClientCredentialFlowTest extends AbstractLargeRestfulTests {
 
   /**
    * Test using basic authentication scheme for client cred flow
-   * 
+   *
    * @throws Exception
    */
   @Test
@@ -76,7 +76,7 @@ public class OAuth2ClientCredentialFlowTest extends AbstractLargeRestfulTests {
 
   /**
    * Test using basic authentication scheme for client cred flow
-   * 
+   *
    * @throws Exception
    */
   @Test
@@ -109,7 +109,7 @@ public class OAuth2ClientCredentialFlowTest extends AbstractLargeRestfulTests {
 
   /**
    * Test using basic authentication scheme for client cred flow
-   * 
+   *
    * @throws Exception
    */
   @Test
@@ -146,7 +146,7 @@ public class OAuth2ClientCredentialFlowTest extends AbstractLargeRestfulTests {
 
   /**
    * Test using URL parameter with client cred flow
-   * 
+   *
    * @throws Exception
    */
   @Test

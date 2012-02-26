@@ -29,9 +29,9 @@ import com.google.inject.Inject;
 public class DefaultOAuthUriManager implements OAuthUriManager {
   static final String OAUTH_GADGET_CALLBACK_URI_PARAM =
       "gadgets.uri.oauth.callbackTemplate";
-  
+
   private final ContainerConfig config;
-  
+
   @Inject
   public DefaultOAuthUriManager(ContainerConfig config) {
     this.config = config;

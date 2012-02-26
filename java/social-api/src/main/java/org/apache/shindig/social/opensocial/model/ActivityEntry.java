@@ -31,7 +31,7 @@ import com.google.inject.ImplementedBy;
 @ImplementedBy(ActivityEntryImpl.class)
 @Exportablebean
 public interface ActivityEntry extends Comparable<ActivityEntry>, ExtendableBean {
-  
+
   /**
    * Fields that represent the JSON elements.
    */
@@ -50,29 +50,29 @@ public interface ActivityEntry extends Comparable<ActivityEntry>, ExtendableBean
     URL("url"),
     VERB("verb"),
     OPENSOCIAL("openSocial");
-    
+
     // The name of the JSON element
     private final String jsonString;
-    
+
     /**
      * Constructs the field base for the JSON element.
-     * 
+     *
      * @param jsonString the name of the element
      */
     private Field(String jsonString) {
       this.jsonString = jsonString;
     }
-    
+
     /**
      * Returns the name of the JSON element.
-     * 
+     *
      * @return String the name of the JSON element
      */
     public String toString() {
       return jsonString;
     }
   }
-  
+
   /**
    * <p>getActor</p>
    *
@@ -100,7 +100,7 @@ public interface ActivityEntry extends Comparable<ActivityEntry>, ExtendableBean
    * @param content a {@link java.lang.String} object.
    */
   void setContent(String content);
-  
+
   /**
    * <p>getGenerator</p>
    *
@@ -114,7 +114,7 @@ public interface ActivityEntry extends Comparable<ActivityEntry>, ExtendableBean
    * @param generator a {@link org.apache.shindig.social.opensocial.model.ActivityObject} object.
    */
   void setGenerator(ActivityObject generator);
-  
+
   /**
    * <p>getIcon</p>
    *
@@ -128,7 +128,7 @@ public interface ActivityEntry extends Comparable<ActivityEntry>, ExtendableBean
    * @param icon a {@link org.apache.shindig.extras.as.opensocial.model.MediaLink} object.
    */
   void setIcon(MediaLink icon);
-  
+
   /**
    * <p>getId</p>
    *
@@ -170,7 +170,7 @@ public interface ActivityEntry extends Comparable<ActivityEntry>, ExtendableBean
    * @param published a {@link java.lang.String} object.
    */
   void setPublished(String published);
-  
+
   /**
    * <p>getProvider</p>
    *
@@ -184,14 +184,14 @@ public interface ActivityEntry extends Comparable<ActivityEntry>, ExtendableBean
    * @param provider a {@link org.apache.shindig.social.opensocial.model.ActivityObject} object.
    */
   void setProvider(ActivityObject provider);
-  
+
   /**
    * <p>getTarget</p>
    *
    * @return a {@link org.apache.shindig.social.opensocial.model.ActivityObject} object.
    */
   ActivityObject getTarget();
-  
+
   /**
    * <p>setTarget</p>
    *
@@ -212,7 +212,7 @@ public interface ActivityEntry extends Comparable<ActivityEntry>, ExtendableBean
    * @param title a {@link java.lang.String} object.
    */
   void setTitle(String title);
-  
+
   /**
    * <p>getUpdated</p>
    *
@@ -226,7 +226,7 @@ public interface ActivityEntry extends Comparable<ActivityEntry>, ExtendableBean
    * @param updated a {@link java.lang.String} object.
    */
   void setUpdated(String updated);
-  
+
   /**
    * <p>getUrl</p>
    *
@@ -254,31 +254,31 @@ public interface ActivityEntry extends Comparable<ActivityEntry>, ExtendableBean
    * @param verb a {@link java.lang.String} object.
    */
   void setVerb(String verb);
-  
+
   /**
    * <p>getOpenSocial</p>
-   * 
+   *
    * @return a {@link org.apache.shindig.protocol.model.ExtendableBean} object
    */
   ExtendableBean getOpenSocial();
-  
+
   /**
    * <p>setOpenSocial</p>
-   * 
+   *
    * @return a {@link org.apache.shindig.protocol.model.ExtendableBean} object
    */
   void setOpenSocial(ExtendableBean opensocial);
-  
+
   /**
    * <p>getExtensions</p>
-   * 
+   *
    * @return a {@link org.apache.shindig.protocol.model.ExtendableBean} object
    */
   ExtendableBean getExtensions();
-  
+
   /**
    * <p>setOpenSocial</p>
-   * 
+   *
    * @return a {@link org.apache.shindig.protocol.model.ExtendableBean} object
    */
   void setExtensions(ExtendableBean extensions);

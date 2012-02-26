@@ -114,15 +114,15 @@ public class UriUtilsTest {
         .addHeader("Content-length", "10")
         .addHeader("vary", "1")
         .create();
-    
+
     HttpResponseBuilder builder = new HttpResponseBuilder();
 
     UriUtils.copyResponseHeadersAndStatusCode(resp, builder, false, false,
         UriUtils.DisallowedHeaders.OUTPUT_TRANSFER_DIRECTIVES,
         UriUtils.DisallowedHeaders.CACHING_DIRECTIVES);
-    
+
     HttpResponse response = builder.create();
-    
+
     // Date is added by HttpResponse.
     assertEquals(3, response.getHeaders().size());
     Iterator<String> headers = response.getHeaders("hello").iterator();
@@ -141,7 +141,7 @@ public class UriUtilsTest {
         .addHeader("Content-length", "10")
         .addHeader("vary", "1")
         .create();
-    
+
     HttpResponseBuilder builder = new HttpResponseBuilder();
 
     UriUtils.copyResponseHeadersAndStatusCode(resp, builder, false, true,
@@ -212,7 +212,7 @@ public class UriUtilsTest {
           .put("unchanged_header", ImmutableList.<String>of())
           .put("Content-Length", ImmutableList.of("50", "100"))
           .build();
-    
+
     origRequest.addAllHeaders(addedHeaders);
 
     HttpRequest req = new HttpRequest(Uri.parse(
@@ -241,10 +241,10 @@ public class UriUtilsTest {
   public void testCopyRequestData() throws Exception {
     HttpRequest origRequest = new HttpRequest(Uri.parse("http://www.example.com"));
     origRequest.setMethod("Post");
-    
+
     String data = "hello world";
     origRequest.setPostBody(data.getBytes());
-    
+
     HttpRequest req = new HttpRequest(Uri.parse(
         "http://www.example.org/data.html"));
 

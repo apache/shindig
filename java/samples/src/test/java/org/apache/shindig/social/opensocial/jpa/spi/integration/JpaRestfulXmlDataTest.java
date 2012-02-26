@@ -30,15 +30,15 @@ import org.junit.Before;
  * but uses the JPA AppDataService implementation <code>AppDataServiceDb</code>
  */
 public class JpaRestfulXmlDataTest extends RestfulXmlDataTest {
-  
+
   /** The bootstrap. */
   private SpiDatabaseBootstrap bootstrap;
-  
+
   /**
    * Calls super.setup so to initialise servlet and easy mock objects.
    * Note that super.setup (i.e. AbstractLargeRestfulTests) also injects SocialApiTestsGuiceModule,
    * which will be overriden here to use the JPA guice bindings
-   * 
+   *
    * @throws Exception the exception
    */
   @Before
@@ -46,15 +46,15 @@ public class JpaRestfulXmlDataTest extends RestfulXmlDataTest {
     // Init config
     Injector injector = JpaRestfulTestConfigHelper.init();
     this.setServlet(JpaRestfulTestConfigHelper.getDataServiceServlet(injector));
-    
+
     // Bootstrap hibernate and associated test db, and setup db with test data
     this.bootstrap = injector.getInstance(SpiDatabaseBootstrap.class);
     this.bootstrap.init();
   }
-  
+
   @After
   public void tearDown() throws Exception {
     this.bootstrap.tearDown();
   }
-  
+
 }

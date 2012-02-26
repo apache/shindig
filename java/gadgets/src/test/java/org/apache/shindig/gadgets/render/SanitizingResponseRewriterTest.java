@@ -83,7 +83,7 @@ public class SanitizingResponseRewriterTest extends RewriterTestBase {
         "@import url('http://www.evil.com/more.css'); A { font : BOLD }").create();
     // The caja css sanitizer does *not* remove the initial colon in urls
     // since this does not work in IE
-    String sanitized = 
+    String sanitized =
       // Resultant URL is just the "sanitized" version of same, since we're using
       // PassthruUriManager for testing purposes.
       "@import url('http://" + PROXY_BASE + "?url="
@@ -104,7 +104,7 @@ public class SanitizingResponseRewriterTest extends RewriterTestBase {
         "@import url('http://www.evil.com/more.css'); A { font : BOLD }").create();
     // The caja css sanitizer does *not* remove the initial colon in urls
     // since this does not work in IE
-    String sanitized = 
+    String sanitized =
       "@import url('http://" + PROXY_BASE + "?url="
         + "http%3A%2F%2Fwww.evil.com%2Fmore.css&sanitize=1&rewriteMime=text%2Fcss');\n"
         + "A {\n"

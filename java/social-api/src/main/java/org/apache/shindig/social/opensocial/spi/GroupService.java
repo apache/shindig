@@ -28,7 +28,7 @@ import org.apache.shindig.social.opensocial.model.Group;
 
 /**
  * A service for gathering group information for specific users.
- * 
+ *
  * @since 2.0.0
  */
 public interface GroupService {

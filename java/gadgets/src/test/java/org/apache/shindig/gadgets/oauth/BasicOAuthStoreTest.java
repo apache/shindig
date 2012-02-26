@@ -140,19 +140,19 @@ public class BasicOAuthStoreTest {
     assertEquals(provider, consumer.getConsumer().serviceProvider);
     assertEquals("keyname", consumer.getKeyName());
     assertEquals("default callback", consumer.getCallbackUrl());
-    
+
     cks = new BasicOAuthStoreConsumerKeyAndSecret(
         "somekey", "default", KeyType.RSA_PRIVATE, "keyname", "callback");
     store.setDefaultKey(cks);
     consumer = store.getConsumerKeyAndSecret(t, "", provider);
     assertEquals("callback", consumer.getCallbackUrl());
   }
-  
+
   @Test
   public void testNullCallback() throws Exception {
     store = new BasicOAuthStore();
     store.initFromConfigString(SAMPLE_FILE);
-    
+
     FakeGadgetToken t = new FakeGadgetToken();
     t.setAppUrl("http://localhost:8080/samplecontainer/examples/oauth.xml");
     OAuthServiceProvider provider = new OAuthServiceProvider("req", "authorize", "access");

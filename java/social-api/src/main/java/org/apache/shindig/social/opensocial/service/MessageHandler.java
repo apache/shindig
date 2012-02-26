@@ -62,7 +62,7 @@ public class MessageHandler {
       throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST,
           "A message collection is required");
     }
-    
+
     HandlerPreconditions.requireNotEmpty(messageIds, "No message IDs specified");
 
     UserId user = request.getUsers().iterator().next();

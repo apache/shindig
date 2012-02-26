@@ -109,7 +109,7 @@ public class HttpPreloaderTest extends PreloaderTestFixture {
     assertFalse("request should not ignore cache", plainFetcher.requests.get(0).getIgnoreCache());
     checkResults(data.toJson().iterator().next());
   }
-  
+
   @Test
   public void ignoreCachePreloads() throws Exception {
     String xml =
@@ -118,9 +118,9 @@ public class HttpPreloaderTest extends PreloaderTestFixture {
         "</ModulePrefs><Content/></Module>";
     GadgetSpec spec = new GadgetSpec(GADGET_URL, xml);
     Preloader preloader = new HttpPreloader(requestPipeline);
-    
+
     ignoreCache = true;
-    
+
     Gadget gadget = new Gadget()
         .setContext(context)
         .setSpec(spec)

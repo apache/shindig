@@ -43,7 +43,7 @@ public class StyleConcatContentRewriter extends DomWalker.Rewriter {
   private final Executor executor;
   private final RequestPipeline requestPipeline;
   private final HttpCache cache;
-  
+
   @Inject
   public StyleConcatContentRewriter(ConcatUriManager concatUriManager,
                                     ContentRewriterFeature.Factory featureConfigFactory,

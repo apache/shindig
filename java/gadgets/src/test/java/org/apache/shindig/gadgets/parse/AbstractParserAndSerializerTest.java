@@ -28,9 +28,9 @@ import org.junit.Test;
  */
 public abstract class AbstractParserAndSerializerTest extends AbstractParsingTestBase {
   protected GadgetHtmlParser parser;
-  
+
   protected abstract GadgetHtmlParser makeParser();
-  
+
   @Before
   public void setUp() throws Exception {
     parser = makeParser();
@@ -53,7 +53,7 @@ public abstract class AbstractParserAndSerializerTest extends AbstractParsingTes
     assertNull(parser.parseDom(content).getDoctype());
     parseAndCompareBalanced(content, expected, parser);
   }
-  
+
   @Test
   public void docStartsWithHeader() throws Exception {
     String content = loadFile("org/apache/shindig/gadgets/parse/test-startswithcomment.html");
@@ -94,11 +94,11 @@ public abstract class AbstractParserAndSerializerTest extends AbstractParsingTes
         loadFile("org/apache/shindig/gadgets/parse/test-with-ampersands-expected.html");
     parseAndCompareBalanced(content, expected, parser);
   }
-  
+
   @Test
   public void textBeforeScript() throws Exception {
     String content = loadFile("org/apache/shindig/gadgets/parse/test-text-before-script.html");
-    String expected = 
+    String expected =
         loadFile("org/apache/shindig/gadgets/parse/test-text-before-script-expected.html");
     parseAndCompareBalanced(content, expected, parser);
   }

@@ -36,7 +36,7 @@ import com.google.common.collect.Maps;
 public class FakeTemplateProcessor implements TemplateProcessor {
   public Map<String, ? extends Object> expressionResults = Maps.newHashMap();
   public TemplateContext context;
-  
+
   public final <T extends Object> T evaluate(String expression, Class<T> type, T defaultValue) {
     // Some quick-and-dirty mocking:  put a List in the map, and
     // you get one result per-entry
@@ -46,7 +46,7 @@ public class FakeTemplateProcessor implements TemplateProcessor {
     }
     return type.cast(result);
   }
-  
+
   public TemplateContext getTemplateContext() {
     return context;
   }

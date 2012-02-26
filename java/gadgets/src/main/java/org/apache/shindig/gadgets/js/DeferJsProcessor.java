@@ -58,9 +58,9 @@ public class DeferJsProcessor extends BaseSurfaceJsProcessor implements JsProces
         needDefers |= appendDeferJsStatements(resp, jsRequest.getJsUri(), bundle);
       }
     }
-    
+
     // TODO: Instead of clearing, do a replacement of feature impl with defer stubs.
-    // Clearing has an effect of ignoring previous processors work.  
+    // Clearing has an effect of ignoring previous processors work.
     if (needDefers) {
       builder.appendAllJs(getSurfaceJsContents(featureRegistry, FEATURE_NAME));
     }
@@ -82,7 +82,7 @@ public class DeferJsProcessor extends BaseSurfaceJsProcessor implements JsProces
     }
     return false;
   }
-  
+
   private String toDeferStatement(Input input) {
     StringBuilder result = new StringBuilder();
 

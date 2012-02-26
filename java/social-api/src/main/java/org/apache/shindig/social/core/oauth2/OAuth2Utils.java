@@ -28,9 +28,9 @@ public class OAuth2Utils {
 
   /**
    * Converts a Map<String, String> to a URL query string.
-   * 
+   *
    * @param params represents the Map of query parameters
-   * 
+   *
    * @return String is the URL encoded parameter String
    */
   public static String convertQueryString(Map<String, String> params) {
@@ -43,7 +43,7 @@ public class OAuth2Utils {
   /**
    * Normalizes a URL and parameters. If the URL already contains parameters,
    * new parameters will be added properly.
-   * 
+   *
    * @param URL is the base URL to normalize
    * @param queryParams query parameters to add to the URL
    * @param fragmentParams fragment params to add to the URL

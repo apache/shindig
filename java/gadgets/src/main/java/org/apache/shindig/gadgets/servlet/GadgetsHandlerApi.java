@@ -187,7 +187,7 @@ public class GadgetsHandlerApi {
   public interface OAuth2Spec {
 	    public Map<String, OAuth2Service> getServices();
   }
-  
+
   public interface OAuthService {
     public EndPoint getRequestUrl();
     public EndPoint getAccessUrl();

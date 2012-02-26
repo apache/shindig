@@ -54,7 +54,7 @@ public interface WriterStack {
   /**
    * Remove and return the current node name, making the parent node the active
    * node name.
-   * 
+   *
    * @return the node name just removed from the stack.
    */
   String pop();

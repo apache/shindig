@@ -81,7 +81,7 @@ public abstract class RewriterTestBase {
         .setResponse(new byte[]{ (byte)0xFE, (byte)0xFF});
     control = EasyMock.createControl();
   }
-  
+
   private Module getParseModule() {
     return Modules.override(new ParseModule()).with(new AbstractModule() {
       @Override
@@ -90,7 +90,7 @@ public abstract class RewriterTestBase {
       }
     });
   }
-  
+
   protected Class<? extends GadgetHtmlParser> getParserClass() {
     return NekoSimplifiedHtmlParser.class;
   }
@@ -172,7 +172,7 @@ public abstract class RewriterTestBase {
       final String container) throws Exception {
     return rewriteContent(rewriter, s, container, false, false);
   }
-  
+
   protected MutableContent rewriteContent(GadgetRewriter rewriter, String s,
       final String container, final boolean debug, final boolean ignoreCache)
       throws Exception {
@@ -191,12 +191,12 @@ public abstract class RewriterTestBase {
       public String getContainer() {
         return container;
       }
-      
+
       @Override
       public boolean getDebug() {
         return debug;
       }
-      
+
       @Override
       public boolean getIgnoreCache() {
         return ignoreCache;

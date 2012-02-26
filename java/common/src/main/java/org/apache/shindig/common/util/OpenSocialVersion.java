@@ -27,16 +27,16 @@ import java.util.StringTokenizer;
  * Convenience class for working with OpenSocial Specification and Feature versions.
  * Applies the rules specified in the OS specification
  * http://opensocial-resources.googlecode.com/svn/spec/1.0/Core-Gadget.xml#Versioning
- * 
+ *
  */
 public class OpenSocialVersion {
-  
+
   public static Comparator<OpenSocialVersion> COMPARATOR = new VersionComparator();
-  
+
   public int major = -1;
   public int minor = -1;
   public int patch = -1;
-  
+
   /**
    * Create a new OpenSocialVersion based upon a versionString
    * @param versionString Version string
@@ -60,8 +60,8 @@ public class OpenSocialVersion {
       patch = -1;
     }
   }
-  
-  
+
+
   /**
    * Same version number matches same version number
    */
@@ -94,7 +94,7 @@ public class OpenSocialVersion {
     }
     return cmp == 0;
   }
-  
+
   /**
    * Tests if OpenSocialVersion is equivalent to the parameter version
    * @param version Compare with this version string
@@ -103,7 +103,7 @@ public class OpenSocialVersion {
   public boolean isEquivalent(String version){
     return isEquivalent(new OpenSocialVersion(version));
   }
-  
+
   /**
    * Tests if OpenSocialVersion is equal to or greater than parameter version
    * @param version Compare with this version
@@ -127,7 +127,7 @@ public class OpenSocialVersion {
     }
     return cmp <= 0;
   }
-  
+
   /**
    * Tests if OpenSocialVersion is equal to or greater than parameter version
    * @param version Compare with this version string
@@ -155,6 +155,6 @@ class VersionComparator implements java.util.Comparator<OpenSocialVersion>{
     }
     return cmp;
   }
-  
+
 }
 

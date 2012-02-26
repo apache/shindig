@@ -36,7 +36,7 @@ import javax.el.ValueExpression;
  */
 public class DynamicConfigProperty implements CharSequence {
   private static final String classname = DynamicConfigProperty.class.getName();
-  private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES); 
+  private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
   private final ELContext context;
   private final ValueExpression expression;
 
@@ -55,7 +55,7 @@ public class DynamicConfigProperty implements CharSequence {
           LOG.logp(Level.WARNING, classname, "toString", MessageKeys.EVAL_EL_FAILED, new Object[] {expression.getExpressionString()});
           //now log the stacktrace
           LOG.logp(Level.WARNING, classname, "toString", MessageKeys.EVAL_EL_FAILED, e);
-        }    	
+        }
       return "";
     }
   }

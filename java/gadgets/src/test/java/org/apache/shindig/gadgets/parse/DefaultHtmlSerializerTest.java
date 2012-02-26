@@ -52,7 +52,7 @@ public class DefaultHtmlSerializerTest {
 
   @Test
   public void testComments() throws Exception {
-    
+
     Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
     doc.appendChild(doc.createElement("ABC"));
     doc.appendChild(doc.createComment("XYZ"));

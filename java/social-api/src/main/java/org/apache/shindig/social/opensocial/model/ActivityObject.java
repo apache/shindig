@@ -28,7 +28,7 @@ import com.google.inject.ImplementedBy;
 
 /**
  * A representation of an Activity's object.
- * 
+ *
  * Note that an Activity's object may contain fields from an Activity when
  * the objectType is of type 'activity'.  As such, ActivityObject becomes
  * a superset of Activity.  Refer to the Activity Streams spec.
@@ -36,7 +36,7 @@ import com.google.inject.ImplementedBy;
 @ImplementedBy(ActivityObjectImpl.class)
 @Exportablebean
 public interface ActivityObject extends ExtendableBean {
-  
+
   /**
    * Fields that represent the JSON elements.
    */
@@ -56,22 +56,22 @@ public interface ActivityObject extends ExtendableBean {
     UPSTREAM_DUPLICATES("upstreamDuplicates"),
     URL("url"),
     OPENSOCIAL("openSocial");
-    
+
     // The name of the JSON element
     private final String jsonString;
-    
+
     /**
      * Constructs the field base for the JSON element.
-     * 
+     *
      * @param jsonString the name of the element
      */
     private Field(String jsonString) {
       this.jsonString = jsonString;
     }
-    
+
     /**
      * Returns the name of the JSON element.
-     * 
+     *
      * @return String the name of the JSON element
      */
     public String toString() {
@@ -106,7 +106,7 @@ public interface ActivityObject extends ExtendableBean {
    * @param author a {@link org.apache.shindig.social.opensocial.model.ActivityObject} object
    */
   void setAuthor(ActivityObject author);
-  
+
   /**
    * <p>getContent</p>
    *
@@ -148,7 +148,7 @@ public interface ActivityObject extends ExtendableBean {
    * @param downstreamDuplicates a list of {@link java.lang.String} objects
    */
   void setDownstreamDuplicates(List<String> downstreamDuplicates);
-  
+
   /**
    * <p>getId</p>
    *
@@ -190,7 +190,7 @@ public interface ActivityObject extends ExtendableBean {
    * @param objectType a {@link java.lang.String} object
    */
   void setObjectType(String objectType);
-  
+
   /**
    * <p>getPublished</p>
    *
@@ -218,7 +218,7 @@ public interface ActivityObject extends ExtendableBean {
    * @param summary a {@link java.lang.String} object
    */
   void setSummary(String summary);
-  
+
   /**
    * <p>getUpdated</p>
    *
@@ -246,7 +246,7 @@ public interface ActivityObject extends ExtendableBean {
    * @param upstreamDuplicates a list of {@link java.lang.String} objects
    */
   void setUpstreamDuplicates(List<String> upstreamDuplicates);
-  
+
   /**
    * <p>getUrl</p>
    *
@@ -260,17 +260,17 @@ public interface ActivityObject extends ExtendableBean {
    * @param url a {@link java.lang.String} object.
    */
   void setUrl(String url);
-  
+
   /**
    * <p>getOpenSocial</p>
-   * 
+   *
    * @return a {@link org.apache.shindig.protocol.model.ExtendableBean} object
    */
   ExtendableBean getOpenSocial();
-  
+
   /**
    * <p>setOpenSocial</p>
-   * 
+   *
    * @return a {@link org.apache.shindig.protocol.model.ExtendableBean} object
    */
   void setOpenSocial(ExtendableBean opensocial);

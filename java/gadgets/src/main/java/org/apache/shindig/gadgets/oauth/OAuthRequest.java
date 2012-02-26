@@ -74,7 +74,7 @@ public class OAuthRequest {
 
   //class name for logging purpose
   private static final String classname = OAuthRequest.class.getName();
-	  
+
   // Maximum number of attempts at the protocol before giving up.
   private static final int MAX_ATTEMPTS = 2;
 
@@ -218,7 +218,7 @@ public class OAuthRequest {
     // OK, got some data back, annotate it as necessary.
     if (response.getHttpStatusCode() >= 400) {
       responseParams.logDetailedWarning(classname,"fetchNoThrow",MessageKeys.OAUTH_FETCH_FATAL_ERROR);
-      
+
       responseParams.setSendTraceToClient(true);
     } else if (responseParams.getAznUrl() != null && responseParams.sawErrorResponse()) {
       responseParams.logDetailedWarning(classname,"fetchNoThrow",MessageKeys.OAUTH_FETCH_ERROR_REPROMPT);

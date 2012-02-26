@@ -28,7 +28,7 @@ import org.apache.shindig.social.core.oauth2.OAuth2Types.TokenFormat;
 
 /**
  * Handles operations to the OAuth 2.0 token end point.
- * 
+ *
  * TODO (Eric): generate refreshToken & associate with accessToken
  */
 public class OAuth2TokenHandler {
@@ -37,7 +37,7 @@ public class OAuth2TokenHandler {
 
   /**
    * Constructs the token handler with the OAuth2Service.
-   * 
+   *
    * @param service is the service that will support this handler
    */
   public OAuth2TokenHandler(OAuth2Service service) {
@@ -46,11 +46,11 @@ public class OAuth2TokenHandler {
 
   /**
    * Handles an OAuth 2.0 request to the token endpoint.
-   * 
+   *
    * @param request is the servlet request object
    * @param response is the servlet response object
    * @return OAuth2NormalizedResponse encapsulates the request's response
-   * 
+   *
    * @throws ServletException
    * @throws IOException
    */

@@ -22,7 +22,7 @@ import org.apache.shindig.protocol.model.Enum;
 /**
  * This a utility holder class for Enums to assist in database storage. It does not have any
  * database tables or persistence associated with it.
- * 
+ *
  * @param <E> The Enum type.
  */
 public final class EnumDb<E extends Enum.EnumKey> implements Enum<E> {
@@ -31,7 +31,7 @@ public final class EnumDb<E extends Enum.EnumKey> implements Enum<E> {
 
   /**
    * Constructs a Enum object.
-   * 
+   *
    * @param value EnumKey The key to use
    * @param displayValue String The display value
    */
@@ -42,14 +42,14 @@ public final class EnumDb<E extends Enum.EnumKey> implements Enum<E> {
 
   /**
    * Constructs a Enum object.
-   * 
+   *
    * @param value The key to use. Will use the value from getDisplayValue() as the display value.
    */
   public EnumDb(E value) {
     this(value, value.getDisplayValue());
   }
 
-  /** 
+  /**
    * {@inheritDoc}
    * @see org.apache.shindig.social.opensocial.model.Enum#getDisplayValue()
    */
@@ -57,7 +57,7 @@ public final class EnumDb<E extends Enum.EnumKey> implements Enum<E> {
     return displayValue;
   }
 
-  /** 
+  /**
    * {@inheritDoc}
    * @see org.apache.shindig.social.opensocial.model.Enum#setDisplayValue(java.lang.String)
    */
@@ -65,7 +65,7 @@ public final class EnumDb<E extends Enum.EnumKey> implements Enum<E> {
     this.displayValue = displayValue;
   }
 
-  /** 
+  /**
    * {@inheritDoc}
    * @see org.apache.shindig.social.opensocial.model.Enum#getValue()
    */
@@ -73,7 +73,7 @@ public final class EnumDb<E extends Enum.EnumKey> implements Enum<E> {
     return value;
   }
 
-  /** 
+  /**
    * {@inheritDoc}
    * @see org.apache.shindig.social.opensocial.model.Enum#setValue(org.apache.shindig.social.opensocial.model.Enum.EnumKey)
    */

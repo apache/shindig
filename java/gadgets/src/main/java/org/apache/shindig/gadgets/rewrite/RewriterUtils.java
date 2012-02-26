@@ -31,7 +31,7 @@ import org.apache.shindig.common.Nullable;
  */
 public final class RewriterUtils {
   private RewriterUtils() {}
-  
+
   public static boolean isHtml(HttpRequest request, HttpResponse original) {
     String mimeType = getMimeType(request, original);
     return mimeType != null && (mimeType.contains("html"));
@@ -59,7 +59,7 @@ public final class RewriterUtils {
     String mimeType = getMimeType(request, original);
     return mimeType != null && mimeType.contains("css");
   }
-  
+
   public static boolean isCss(HttpRequest request, HttpResponseBuilder original) {
     String mimeType = getMimeType(request, original);
     return mimeType != null && mimeType.contains("css");
@@ -70,7 +70,7 @@ public final class RewriterUtils {
     String mimeType = getMimeType(request, original);
     return mimeType != null && mimeType.contains("javascript");
   }
-  
+
   public static boolean isJavascript(HttpRequest request, HttpResponseBuilder original) {
     String mimeType = getMimeType(request, original);
     return mimeType != null && mimeType.contains("javascript");

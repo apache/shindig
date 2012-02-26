@@ -80,10 +80,10 @@ public class TemplateRewriter implements GadgetRewriter {
 
   /** Set to true to block auto-processing of templates */
   static final String DISABLE_AUTO_PROCESSING_PARAM = "disableAutoProcessing";
-  
+
   /** Specifies what template libraries to load */
   static final String REQUIRE_LIBRARY_PARAM = "requireLibrary";
-  
+
   /** Enable client support? **/
   static final String CLIENT_SUPPORT_PARAM = "client";
 
@@ -91,7 +91,7 @@ public class TemplateRewriter implements GadgetRewriter {
   private static final String classname = TemplateRewriter.class.getName();
   private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
 
-  
+
   /**
    * Provider of the processor.  TemplateRewriters are stateless and multithreaded,
    * processors are not.
@@ -105,7 +105,7 @@ public class TemplateRewriter implements GadgetRewriter {
 
   @Inject
   public TemplateRewriter(Provider<TemplateProcessor> processor,
-      MessageBundleFactory messageBundleFactory, Expressions expressions, 
+      MessageBundleFactory messageBundleFactory, Expressions expressions,
       TagRegistry baseTagRegistry, TemplateLibraryFactory libraryFactory,
       ContainerTagLibraryFactory containerTagLibraryFactory) {
     this.processor = processor;
@@ -123,7 +123,7 @@ public class TemplateRewriter implements GadgetRewriter {
     if (feature == null && directFeatures.containsKey(OSML_FEATURE_NAME)) {
       feature = directFeatures.get(OSML_FEATURE_NAME);
     }
-    
+
     if (feature != null && isServerTemplatingEnabled(feature)) {
       try {
         rewriteImpl(gadget, feature, content);
@@ -144,17 +144,17 @@ public class TemplateRewriter implements GadgetRewriter {
   }
 
   private void rewriteImpl(Gadget gadget, Feature feature, MutableContent content)
-      throws GadgetException {   
+      throws GadgetException {
     List<TagRegistry> registries = Lists.newArrayList();
     List<TemplateLibrary> libraries = Lists.newArrayList();
-   
+
     // TODO: Add View-specific library as Priority 0
-    
+
     // Built-in Java-based tags - Priority 1
     registries.add(baseTagRegistry);
-    
+
     TemplateLibrary osmlLibrary = containerTagLibraryFactory.getLibrary(gadget.getContext().getContainer());
-    
+
     // OSML Built-in tags - Priority 2
     registries.add(osmlLibrary.getTagRegistry());
     libraries.add(osmlLibrary);
@@ -170,20 +170,20 @@ public class TemplateRewriter implements GadgetRewriter {
       // User-defined libraries - Priority 4
       loadTemplateLibraries(gadget.getContext(), feature, registries, libraries);
     }
-    
+
     TagRegistry registry = new CompositeTagRegistry(registries);
-    
-    TemplateContext templateContext = new TemplateContext(gadget, content.getPipelinedData());    
+
+    TemplateContext templateContext = new TemplateContext(gadget, content.getPipelinedData());
     boolean needsFeature = executeTemplates(templateContext, content, templates, registry);
 
-    // Check if a feature param overrides  our guess at whether the client-side    
-    // feature is needed.                                                  
-    String clientOverride = feature.getParam(CLIENT_SUPPORT_PARAM);            
-    if ("true".equalsIgnoreCase(clientOverride)) {                              
-      needsFeature = true;                                                      
-    } else if ("false".equalsIgnoreCase(clientOverride)) {                      
-      needsFeature = false;                                                     
-    }                                                                           
+    // Check if a feature param overrides  our guess at whether the client-side
+    // feature is needed.
+    String clientOverride = feature.getParam(CLIENT_SUPPORT_PARAM);
+    if ("true".equalsIgnoreCase(clientOverride)) {
+      needsFeature = true;
+    } else if ("false".equalsIgnoreCase(clientOverride)) {
+      needsFeature = false;
+    }
 
     Element head = (Element) DomUtil.getFirstNamedChildNode(
         content.getDocument().getDocumentElement(), "head");
@@ -192,9 +192,9 @@ public class TemplateRewriter implements GadgetRewriter {
 
   /**
    * Post-processes the gadget content after rendering templates.
-   * 
+   *
    * @param templateContext TemplateContext to operate on
-   * @param needsFeature Should the templates feature be made available to 
+   * @param needsFeature Should the templates feature be made available to
    * client?
    * @param head Head element of the gadget's document
    * @param libraries Keeps track of all libraries, and which got used
@@ -231,12 +231,12 @@ public class TemplateRewriter implements GadgetRewriter {
 
   private void loadTemplateLibraries(GadgetContext context, Feature feature,
       List<TagRegistry> registries, List<TemplateLibrary> libraries)  throws GadgetException {
-    Collection<String> urls = feature.getParams().get(REQUIRE_LIBRARY_PARAM); 
+    Collection<String> urls = feature.getParams().get(REQUIRE_LIBRARY_PARAM);
     if (urls != null) {
       for (String url : urls) {
         Uri uri = Uri.parse(url.trim());
         uri = context.getUrl().resolve(uri);
-        
+
         try {
           TemplateLibrary library = libraryFactory.loadTemplateLibrary(context, uri);
           registries.add(library.getTagRegistry());
@@ -251,7 +251,7 @@ public class TemplateRewriter implements GadgetRewriter {
       }
     }
   }
-  
+
   private void injectTemplateLibraryAssets(TemplateResource resource, Element head) {
     Element contentElement;
     switch (resource.getType()) {
@@ -264,23 +264,23 @@ public class TemplateRewriter implements GadgetRewriter {
         contentElement.setAttribute("type", "text/css");
         break;
       default:
-        throw new IllegalStateException("Unhandled type");  
+        throw new IllegalStateException("Unhandled type");
     }
 
     if (resource.isSafe()) {
       SanitizingGadgetRewriter.bypassSanitization(contentElement, false);
     }
     contentElement.setTextContent(resource.getContent());
-    head.appendChild(contentElement);    
+    head.appendChild(contentElement);
   }
-  
+
   private void injectTemplateLibrary(TemplateLibrary library, Element head) {
     try {
       String libraryContent = library.serialize();
       if (Strings.isNullOrEmpty(libraryContent)) {
         return;
       }
-      
+
       Element scriptElement = head.getOwnerDocument().createElement("script");
       scriptElement.setAttribute("type", "text/javascript");
       StringBuilder buffer = new StringBuilder();
@@ -288,14 +288,14 @@ public class TemplateRewriter implements GadgetRewriter {
       JsonSerializer.appendString(buffer, library.serialize());
       buffer.append(',');
       JsonSerializer.appendString(buffer, library.getLibraryUri().toString());
-      buffer.append(");");       
+      buffer.append(");");
       scriptElement.setTextContent(buffer.toString());
       head.appendChild(scriptElement);
     } catch (IOException ioe) {
       // This should never happen.
     }
   }
-  
+
   /**
    * Register templates with a "tag" attribute.
    */
@@ -306,9 +306,9 @@ public class TemplateRewriter implements GadgetRewriter {
       if (template.getAttribute("tag").length() == 0) {
         continue;
       }
-      
+
       Iterable<String> nameParts = Splitter.on(':').split(template.getAttribute("tag"));
-      // At this time, we only support 
+      // At this time, we only support
       if (Iterables.size(nameParts) != 2) {
         continue;
       }
@@ -317,10 +317,10 @@ public class TemplateRewriter implements GadgetRewriter {
         handlers.add(new TemplateBasedTagHandler(template, namespaceUri, Iterables.get(nameParts, 1)));
       }
     }
-    
+
     return new DefaultTagRegistry(handlers.build());
   }
-  
+
   /**
    * Processes and renders inline templates.
    * @return Do we think the templates feature is still needed on the client?
@@ -343,15 +343,15 @@ public class TemplateRewriter implements GadgetRewriter {
         templates.add(element);
       }
     }
-    
+
     if (!templates.isEmpty()) {
       Gadget gadget = templateContext.getGadget();
-      
+
       MessageBundle bundle = messageBundleFactory.getBundle(gadget.getSpec(),
-          gadget.getContext().getLocale(), gadget.getContext().getIgnoreCache(), 
+          gadget.getContext().getLocale(), gadget.getContext().getIgnoreCache(),
           gadget.getContext().getContainer(), gadget.getContext().getView());
       MessageELResolver messageELResolver = new MessageELResolver(expressions, bundle);
-  
+
       int autoUpdateID = 0;
       for (Element template : templates) {
         DocumentFragment result = processor.get().processTemplate(
@@ -360,22 +360,22 @@ public class TemplateRewriter implements GadgetRewriter {
         if ("true".equals(template.getAttribute("autoUpdate"))) {
           // autoUpdate requires client-side processing.
           needsFeature = true;
-          Element span = template.getOwnerDocument().createElement("span");     
-          String id = "template_auto" + (autoUpdateID++);                       
-          span.setAttribute("id", "_T_" + id);                                  
-          template.setAttribute("name", id);                                    
-          template.getParentNode().insertBefore(span, template);                
-          span.appendChild(result);                                             
+          Element span = template.getOwnerDocument().createElement("span");
+          String id = "template_auto" + (autoUpdateID++);
+          span.setAttribute("id", "_T_" + id);
+          template.setAttribute("name", id);
+          template.getParentNode().insertBefore(span, template);
+          span.appendChild(result);
         } else {
           template.getParentNode().insertBefore(result, template);
           template.getParentNode().removeChild(template);
         }
       }
       MutableContent.notifyEdit(content.getDocument());
-    } 
+    }
     return needsFeature;
   }
-  
+
   /**
    * Checks that all the required data is available at rewriting time.
    * @param requiredData A string of comma-separated data set names

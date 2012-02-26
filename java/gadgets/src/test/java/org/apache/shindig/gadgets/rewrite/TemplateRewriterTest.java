@@ -56,37 +56,37 @@ import org.w3c.dom.Node;
 import java.util.Map;
 import java.util.Set;
 
-/** 
+/**
  * Tests for TemplateRewriter
  */
 public class TemplateRewriterTest {
-  
+
   private GadgetSpec gadgetSpec;
   private Gadget gadget;
   private MutableContent content;
   private TemplateRewriter rewriter;
   private final Map<String, Object> data = Maps.newHashMap();
-  
+
   private static final Uri GADGET_URI = Uri.parse("http://example.org/gadget.php");
-  
+
   private static final String CONTENT_PLAIN =
-    "<script type='text/os-template'>Hello, ${user.name}</script>";  
+    "<script type='text/os-template'>Hello, ${user.name}</script>";
 
   private static final String CONTENT_WITH_MESSAGE =
-    "<script type='text/os-template'>Hello, ${Msg.name}</script>";  
+    "<script type='text/os-template'>Hello, ${Msg.name}</script>";
 
   private static final String CONTENT_REQUIRE =
-    "<script type='text/os-template' require='user'>Hello, ${user.name}</script>";  
-  
+    "<script type='text/os-template' require='user'>Hello, ${user.name}</script>";
+
   private static final String CONTENT_REQUIRE_MISSING =
-    "<script type='text/os-template' require='foo'>Hello, ${user.name}</script>";  
+    "<script type='text/os-template' require='foo'>Hello, ${user.name}</script>";
 
   private static final String CONTENT_WITH_TAG =
     "<script type='text/os-template' xmlns:foo='#foo' tag='foo:Bar'>Hello, ${user.name}</script>";
-  
+
   private static final String CONTENT_WITH_AUTO_UPDATE =
     "<script type='text/os-template' autoUpdate='true'>Hello, ${user.name}</script>";
-  
+
   private static final String TEMPLATE_LIBRARY =
     "<Templates xmlns:my='#my'>" +
     "  <Namespace prefix='my' url='#my'/>" +
@@ -119,11 +119,11 @@ public class TemplateRewriterTest {
         },
         new FakeMessageBundleFactory(),
         Expressions.forTesting(),
-        new DefaultTagRegistry(handlers), 
+        new DefaultTagRegistry(handlers),
         new FakeTemplateLibraryFactory(),
         new ContainerTagLibraryFactory(new FakeContainerConfig()));
   }
-  
+
  private static TagHandler testTagHandler(String name, final String content) {
    return new AbstractTagHandler("#my", name) {
     public void process(Node result, Element tag, TemplateProcessor processor) {
@@ -131,54 +131,54 @@ public class TemplateRewriterTest {
     }
    };
  }
- 
+
   @Test
   public void simpleTemplate() throws Exception {
     // Render a simple template
     testExpectingTransform(getGadgetXml(CONTENT_PLAIN), "simple");
     testFeatureRemoved();
   }
-  
+
   @Test
   public void noTemplateFeature() throws Exception {
     // Without opensocial-templates feature, shouldn't render
     testExpectingNoTransform(getGadgetXml(CONTENT_PLAIN, false), "no feature");
   }
-  
+
   @Test
   public void requiredDataPresent() throws Exception {
-    // Required data is present - render 
+    // Required data is present - render
     testExpectingTransform(getGadgetXml(CONTENT_REQUIRE), "required data");
     testFeatureRemoved();
   }
-  
+
   @Test
   public void requiredDataMissing() throws Exception {
     // Required data is missing - don't render
     testExpectingNoTransform(getGadgetXml(CONTENT_REQUIRE_MISSING), "missing data");
     testFeatureNotRemoved();
   }
-   
+
   @Test
   public void tagAttributePresent() throws Exception {
     // Don't render templates with a @tag
     testExpectingNoTransform(getGadgetXml(CONTENT_WITH_TAG), "with @tag");
     testFeatureRemoved();
   }
-   
+
   @Test
   public void templateUsingMessage() throws Exception {
     // Render a simple template
     testExpectingTransform(getGadgetXml(CONTENT_WITH_MESSAGE), "simple");
     testFeatureRemoved();
   }
-  
+
   @Test
   public void autoUpdateTemplate() throws Exception {
     setupGadget(getGadgetXml(CONTENT_WITH_AUTO_UPDATE));
     rewriter.rewrite(gadget, content);
     // The template should get transformed, but not removed
-    assertTrue("Template wasn't transformed", 
+    assertTrue("Template wasn't transformed",
         content.getContent().indexOf("Hello, John") > 0);
     assertTrue("Template tag was removed",
         content.getContent().contains("text/os-template"));
@@ -197,7 +197,7 @@ public class TemplateRewriterTest {
         "<style type=\"text/css\">style</style>") > 0);
     assertTrue("Tag not executed", content.getContent().indexOf(
         "external4") > 0);
-    
+
     testFeatureRemoved();
   }
 
@@ -210,7 +210,7 @@ public class TemplateRewriterTest {
 
     testFeatureRemoved();
   }
-  
+
   @Test
   public void tagPrecedenceRules() throws Exception {
     // Tag definitions include:
@@ -218,7 +218,7 @@ public class TemplateRewriterTest {
     // OSML: tag1 osml1 tag2 osml2
     // inline tags: tag1 inline1 tag2 inline2 tag3 inline3
     // External tags: tag1 external1 tag2 external2 tag3 external3 tag4 external4
-    
+
     data.put("${Cur['gadgets.features'].osml.library}",
         "org/apache/shindig/gadgets/rewrite/OSML_test.xml");
 
@@ -226,7 +226,7 @@ public class TemplateRewriterTest {
     rewriter.rewrite(gadget, content);
     assertTrue("Precedence rules violated",
         content.getContent().indexOf("default1osml2inline3external4") > 0);
-   
+
     testFeatureRemoved();
   }
 
@@ -247,7 +247,7 @@ public class TemplateRewriterTest {
 
     testFeatureRemoved();
   }
-  
+
   @Test
   public void tagPrecedenceRulesWithoutOSML() throws Exception {
     // Tag definitions include:
@@ -263,21 +263,21 @@ public class TemplateRewriterTest {
     rewriter.rewrite(gadget, content);
     assertTrue("Precedence rules violated",
         content.getContent().indexOf("default1inline2inline3external4") > 0);
-   
+
     testFeatureRemoved();
   }
-  
+
   @Test
   public void testClientOverride() throws Exception {
     // Should normally remove feature
     testExpectingTransform(getGadgetXml(CONTENT_PLAIN, true, "true"), "keep client");
     testFeatureNotRemoved();
-    
+
     // Should normally keep feature
     testExpectingNoTransform(getGadgetXml(CONTENT_WITH_TAG, true, "false"), "remove client");
     testFeatureRemoved();
   }
-  
+
   private void testFeatureRemoved() {
     assertFalse("Feature wasn't removed",
         gadget.getDirectFeatureDeps().contains("opensocial-templates"));
@@ -305,7 +305,7 @@ public class TemplateRewriterTest {
     assertTrue("Template tag was removed (" + condition + ')',
         content.getContent().indexOf("text/os-template") > 0);
   }
-  
+
   private void setupGadget(String gadgetXml) throws SpecParserException, JSONException {
     gadgetSpec = new GadgetSpec(GADGET_URI, gadgetXml);
     gadget = new Gadget();
@@ -323,26 +323,26 @@ public class TemplateRewriterTest {
         new ParseModule.DOMImplementationProvider().get()), gadget.getCurrentView().getContent());
     putPipelinedData("user", new JSONObject("{ name: 'John'}"));
   }
-  
+
   private void putPipelinedData(String key, JSONObject data) {
     content.addPipelinedData(key, data);
   }
-  
+
   private static String getGadgetXml(String content) {
     return getGadgetXml(content, true);
   }
-  
+
   private static String getGadgetXml(String content, boolean requireFeature) {
     return getGadgetXml(content, requireFeature, null);
   }
-  
-  private static String getGadgetXml(String content, boolean requireFeature, 
+
+  private static String getGadgetXml(String content, boolean requireFeature,
       String clientParam) {
     String feature = requireFeature ?
-        "<Require feature='opensocial-templates'" + 
-        (clientParam != null ? 
-            ("><Param name='client'>" + clientParam + "</Param></Require>") 
-            : "/>") 
+        "<Require feature='opensocial-templates'" +
+        (clientParam != null ?
+            ("><Param name='client'>" + clientParam + "</Param></Require>")
+            : "/>")
         : "";
     return "<Module>" + "<ModulePrefs title='Title'>"
         + feature
@@ -354,7 +354,7 @@ public class TemplateRewriterTest {
         + "    <![CDATA[" + content + "]]>"
         + "</Content></Module>";
   }
-  
+
   private static String getGadgetXmlWithLibrary(String content) {
     return getGadgetXmlWithLibrary(content, "opensocial-templates");
   }
@@ -381,16 +381,16 @@ public class TemplateRewriterTest {
     public TemplateLibrary loadTemplateLibrary(GadgetContext context, Uri uri)
         throws GadgetException {
       assertEquals(TEMPLATE_LIBRARY_URI, uri.toString());
-      return new XmlTemplateLibrary(uri, XmlUtil.parseSilent(TEMPLATE_LIBRARY), 
+      return new XmlTemplateLibrary(uri, XmlUtil.parseSilent(TEMPLATE_LIBRARY),
           TEMPLATE_LIBRARY);
     }
   }
-  
+
   private class FakeContainerConfig extends BasicContainerConfig {
     @Override
     public Object getProperty(String container, String name) {
       return data.get(name);
     }
-    
+
   }
 }

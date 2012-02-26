@@ -39,14 +39,14 @@ public class DefaultTagRegistryTest {
   public static final String TEST_NAME = "Tag";
   private TagHandler tag;
   private DefaultTagRegistry registry;
-  
+
   @Before
   public void setUp() {
     tag = new AbstractTagHandler(TEST_NAMESPACE, TEST_NAME) {
       public void process(Node result, Element tag, TemplateProcessor processor) {
       }
     };
-    
+
     registry = new DefaultTagRegistry(ImmutableSet.of(tag));
   }
 
@@ -67,7 +67,7 @@ public class DefaultTagRegistryTest {
     Element el = XmlUtil.parseSilent("<tag xmlns='#test'/>");
     assertNull(registry.getHandlerFor(el));
   }
-  
+
   @Test
   public void getHandlerForWithNSName() {
     TagRegistry.NSName nsName = new TagRegistry.NSName(TEST_NAMESPACE, TEST_NAME);

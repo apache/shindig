@@ -30,7 +30,7 @@ import javax.persistence.Table;
 /**
  * This object connects to a single account to a person, defining the relationship
  * between the person and the account. It extends the account object, which stored its instances in
- * the 'account' table by storing instances of this class in the 'person_account table. Records 
+ * the 'account' table by storing instances of this class in the 'person_account table. Records
  * are joined using oid, and use the same shared account discriminator.
  */
 @Entity
@@ -40,14 +40,14 @@ public class PersonAccountDb extends AccountDb {
   @Basic
   @Column(name="primary_account")
   private Boolean primary;
-  
+
   /**
    * The person connected the account
    */
   @ManyToOne(targetEntity=PersonDb.class)
   @JoinColumn(name="person_id", referencedColumnName="oid")
   private Person person;
-  
+
   @Basic
   @Column(name="type", length=255)
   private String type;

@@ -48,14 +48,14 @@ import javax.persistence.Version;
 @DiscriminatorValue(value="ListFieldDb")
 public class ListFieldDb implements ListField, DbObject {
   /**
-   * The internal object ID used for references to this object. Should be generated 
+   * The internal object ID used for references to this object. Should be generated
    * by the underlying storage mechanism
    */
   @Id
   @GeneratedValue(strategy=IDENTITY)
   @Column(name="oid")
   protected long objectId;
-  
+
   /**
    * An optimistic locking field.
    */
@@ -63,7 +63,7 @@ public class ListFieldDb implements ListField, DbObject {
   @Column(name="version")
   protected long version;
 
-  
+
   /**
    * model field.
    * @see org.apache.shindig.social.opensocial.model.ListField
@@ -71,7 +71,7 @@ public class ListFieldDb implements ListField, DbObject {
   @Basic
   @Column(name="field_type", length=255)
   protected String type;
-  
+
   /**
    * model field.
    * @see org.apache.shindig.social.opensocial.model.ListField
@@ -79,7 +79,7 @@ public class ListFieldDb implements ListField, DbObject {
   @Basic
   @Column(name="field_value", length=255)
   protected String value;
-  
+
   /**
    * model field.
    * @see org.apache.shindig.social.opensocial.model.ListField
@@ -103,7 +103,7 @@ public class ListFieldDb implements ListField, DbObject {
     this.value = value;
   }
 
-  /** 
+  /**
    * {@inheritDoc}
    * @see org.apache.shindig.social.opensocial.model.ListField#getType()
    */
@@ -111,7 +111,7 @@ public class ListFieldDb implements ListField, DbObject {
     return type;
   }
 
-  /** 
+  /**
    * {@inheritDoc}
    * @see org.apache.shindig.social.opensocial.model.ListField#setType(java.lang.String)
    */
@@ -119,7 +119,7 @@ public class ListFieldDb implements ListField, DbObject {
     this.type = type;
   }
 
-  /** 
+  /**
    * {@inheritDoc}
    * @see org.apache.shindig.social.opensocial.model.ListField#getValue()
    */
@@ -127,7 +127,7 @@ public class ListFieldDb implements ListField, DbObject {
     return value;
   }
 
-  /** 
+  /**
    * {@inheritDoc}
    * @see org.apache.shindig.social.opensocial.model.ListField#setValue(java.lang.String)
    */
@@ -135,7 +135,7 @@ public class ListFieldDb implements ListField, DbObject {
     this.value = value;
   }
 
-  /** 
+  /**
    * {@inheritDoc}
    * @see org.apache.shindig.social.opensocial.model.ListField#getPrimary()
    */
@@ -143,7 +143,7 @@ public class ListFieldDb implements ListField, DbObject {
     return primary;
   }
 
-  /** 
+  /**
    * {@inheritDoc}
    * @see org.apache.shindig.social.opensocial.model.ListField#setPrimary(java.lang.Boolean)
    */
@@ -151,7 +151,7 @@ public class ListFieldDb implements ListField, DbObject {
     this.primary = primary;
   }
 
-  /** 
+  /**
    * {@inheritDoc}
    * @see org.apache.shindig.social.opensocial.jpa.api.DbObject#getObjectId()
    */

@@ -66,11 +66,11 @@ public class ProxyRendererTest {
     public SecurityToken getToken() {
       return new AnonymousSecurityToken();
     }
-    
+
     @Override
     public String getUserAgent() {
       return USER_AGENT;
-    }    
+    }
   };
 
   private final FakeHttpCache cache = new FakeHttpCache();
@@ -102,7 +102,7 @@ public class ProxyRendererTest {
     HttpRequest request = new HttpRequest(EXPECTED_PROXIED_HTML_HREF);
     HttpResponse response = new HttpResponse(PROXIED_HTML_CONTENT);
     pipeline.plainResponses.put(EXPECTED_PROXIED_HTML_HREF, response);
-    
+
     String content = proxyRenderer.render(makeHrefGadget("none"));
     assertEquals(PROXIED_HTML_CONTENT, content);
     assertEquals(response, cache.getResponse(request));
@@ -206,7 +206,7 @@ public class ProxyRendererTest {
   @Test
   public void renderProxiedWithPreload() throws Exception {
     List<JSONObject> prefetchedJson = ImmutableList.of(new JSONObject("{id: 'foo', data: 'bar'}"));
-    
+
     pipelineExecutor.results = new PipelineExecutor.Results(null, prefetchedJson, null);
 
     pipeline.plainResponses.put(EXPECTED_PROXIED_HTML_HREF, new HttpResponse(PROXIED_HTML_CONTENT));
@@ -222,13 +222,13 @@ public class ProxyRendererTest {
     JsonAssert.assertJsonEquals(JsonSerializer.serialize(prefetchedJson), postBody);
     assertTrue(pipelineExecutor.wasPreloaded);
   }
-  
+
   @Test
   public void appendUserAgent() throws Exception {
     String expectedUA = USER_AGENT + " Shindig";
     HttpResponse response = new HttpResponse(PROXIED_HTML_CONTENT);
     pipeline.plainResponses.put(EXPECTED_PROXIED_HTML_HREF, response);
-    
+
     proxyRenderer.render(makeHrefGadget("none"));
     String actualUA = pipeline.lastHttpRequest.getHeader("User-Agent");
     assertEquals(expectedUA, actualUA);
@@ -289,7 +289,7 @@ public class ProxyRendererTest {
       }
 
       assertTrue(request.getOAuthArguments().isProxiedContentRequest());
-      
+
       HttpResponse response;
       switch (request.getAuthType()) {
         case NONE:
@@ -320,11 +320,11 @@ public class ProxyRendererTest {
   private static class FakePipelineExecutor extends PipelineExecutor {
     protected boolean wasPreloaded;
     protected Results results;
-    
+
     public FakePipelineExecutor() {
       super(null, null, null);
     }
-    
+
     @Override
     public Results execute(GadgetContext context, Collection<PipelinedData> pipelines) {
       wasPreloaded = true;

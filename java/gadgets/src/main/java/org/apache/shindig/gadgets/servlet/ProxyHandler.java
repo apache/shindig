@@ -175,7 +175,7 @@ public class ProxyHandler {
 
   /**
    * Test for presence of flash
-   * 
+   *
    * @param responseContentType
    *          the Content-Type header from the HttpResponseBuilder
    * @param resultsContentType
@@ -192,7 +192,7 @@ public class ProxyHandler {
    * rationale behind it is that errors should be thrown only in case of serious grave errors
    * (defined to be un recoverable). It should always be preferred to handle errors and return the
    * original content at least.
-   * 
+   *
    * @param results
    *          The result of rewriting.
    * @return True if the error is recoverable, false otherwise.

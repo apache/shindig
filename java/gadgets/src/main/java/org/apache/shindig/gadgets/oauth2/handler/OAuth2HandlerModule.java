@@ -27,7 +27,7 @@ import com.google.inject.Singleton;
 
 /**
  * Injects the default handlers.
- * 
+ *
  */
 public class OAuth2HandlerModule extends AbstractModule {
   private static final FilteredLogger LOG = FilteredLogger

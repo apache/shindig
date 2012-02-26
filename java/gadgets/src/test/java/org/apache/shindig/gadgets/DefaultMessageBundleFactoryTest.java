@@ -192,7 +192,7 @@ public class DefaultMessageBundleFactoryTest {
     assertNull(bundle.getMessages().get(MSG_2_NAME));
     assertEquals(MSG_3_VALUE, bundle.getMessages().get(MSG_3_NAME));
   }
-  
+
   @Test
   public void getViewCountryBundle() throws Exception {
     MessageBundle bundle = bundleFactory.getBundle(gadgetSpec, COUNTRY_LOCALE, true, ContainerConfig.DEFAULT_CONTAINER, "view1");
@@ -202,7 +202,7 @@ public class DefaultMessageBundleFactoryTest {
     assertEquals(MSG_2_VIEW_VALUE, bundle.getMessages().get(MSG_2_NAME));
     assertEquals(MSG_3_VALUE, bundle.getMessages().get(MSG_3_NAME));
   }
-  
+
 
   @Test
   public void getViewAllAllBundle() throws Exception {

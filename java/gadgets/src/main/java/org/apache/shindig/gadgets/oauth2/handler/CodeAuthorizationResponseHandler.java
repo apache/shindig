@@ -38,9 +38,9 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 
 /**
- * 
+ *
  * See {@link AuthorizationEndpointResponseHandler}
- * 
+ *
  * Handles the "code" flow
  */
 public class CodeAuthorizationResponseHandler implements AuthorizationEndpointResponseHandler {

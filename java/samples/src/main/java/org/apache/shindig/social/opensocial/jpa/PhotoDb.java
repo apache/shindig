@@ -33,10 +33,10 @@ import javax.persistence.Table;
 @Entity
 @Table(name="photo")
 @PrimaryKeyJoinColumn(name="oid")
-@NamedQuery(name = PhotoDb.FINDBY_PHOTO, 
+@NamedQuery(name = PhotoDb.FINDBY_PHOTO,
     query = "select p from PhotoDb p where p.value = :photo ")
 public class PhotoDb extends ListFieldDb {
-  
+
   /**
    * The name of the JPA query to find phone numbers by phone number (bit odd)
    */

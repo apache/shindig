@@ -41,11 +41,11 @@ public class ElementELResolver extends ELResolver {
    */
   public static class ElementWrapper {
     public final Element element;
-    
+
     public ElementWrapper(Element element) {
       this.element = element;
     }
-    
+
     @Override
     public String toString() {
       return element.getTextContent();
@@ -77,42 +77,42 @@ public class ElementELResolver extends ELResolver {
     if (!(base instanceof ElementWrapper)) {
       return null;
     }
-    
+
     context.setPropertyResolved(true);
     Element element = ((ElementWrapper) base).element;
     String propertyString = property.toString();
-    
-    // See if there is an Object property. 
+
+    // See if there is an Object property.
     Object data = element.getUserData(propertyString);
     if (data != null) {
       return data;
     }
-    
+
     // Next, check for an attribute.
     Attr attribute = element.getAttributeNode(propertyString);
     if (attribute != null) {
       return attribute.getValue();
     }
-    
+
     // Finally, look for child nodes with matching local names.
     List<ElementWrapper> childElements = null;
     for (Node child = element.getFirstChild(); child != null; child = child.getNextSibling()) {
       if (!(child instanceof Element)) {
         continue;
       }
-      
+
       Element childElement = (Element) child;
       if (!propertyString.equals(childElement.getLocalName())) {
         continue;
       }
-      
+
       if (childElements == null) {
         childElements = Lists.newArrayListWithCapacity(2);
       }
-      
+
       childElements.add(new ElementWrapper(childElement));
     }
-    
+
     if (childElements == null) {
       return null;
     } else if (childElements.size() == 1) {

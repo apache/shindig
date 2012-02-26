@@ -60,7 +60,7 @@ import java.util.Set;
  * Content and UserPref nodes.
  */
 public class ModulePrefs {
-	
+
 
   private static final String ATTR_TITLE = "title";
   private static final String ATTR_TITLE_URL = "title_url";
@@ -88,7 +88,7 @@ public class ModulePrefs {
   private static final String ATTR_CATEGORY2 = "category2";
   private static final Uri EMPTY_URI = Uri.parse("");
   private static final String UP_SUBST_PREFIX = "__UP_";
-  
+
   // Used to identify Locales that are globally scoped
   private static final String GLOBAL_LOCALE = "";
 
@@ -109,7 +109,7 @@ public class ModulePrefs {
 
     // Eventually use a list of classes
     MutableBoolean oauthMarker = new MutableBoolean(false);
-    
+
     Set<ElementVisitor> visitors = ImmutableSet.of(
         new FeatureVisitor(oauthMarker),
         new PreloadVisitor(),
@@ -171,11 +171,11 @@ public class ModulePrefs {
       String substituted = substituter.substituteString(attr.getValue());
       attributes.put(attr.getKey(), substituted);
     }
-    
+
     ImmutableMap.Builder<String, Feature> featureBuilder= ImmutableMap.builder();
     for (Map.Entry<String, Feature> feature : features.entrySet()) {
       ImmutableMultimap.Builder<String, String> params = ImmutableMultimap.builder();
-      for (Map.Entry<String, String> param: feature.getValue().getParams().entries()){     
+      for (Map.Entry<String, String> param: feature.getValue().getParams().entries()){
         String substituted=substituter.substituteString(param.getValue());
         params.put(param.getKey(), substituted);
       }
@@ -184,8 +184,8 @@ public class ModulePrefs {
       featureBuilder.put(feature.getKey(), newFeature);
     }
     this.features=featureBuilder.build();
-    
-    
+
+
     this.extraElements = ImmutableMultimap.copyOf(prefs.extraElements);
     this.attributes = attributes.build();
     this.needsUserPrefSubstitution = prefs.needsUserPrefSubstitution;
@@ -370,10 +370,10 @@ public class ModulePrefs {
   public int getHeight() {
     return getIntAttribute(ATTR_HEIGHT);
   }
-  
+
   /**
    * Returns this Gadget's doctype mode.  If null, we will use default mode.
-   * 
+   *
    * @return Value of doctype attribute
    */
   public String getDoctype(){
@@ -473,17 +473,17 @@ public class ModulePrefs {
   public List<String> getCategories() {
     return categories;
   }
-  
+
   /**
-   * All features are included in ModulePrefs.  
+   * All features are included in ModulePrefs.
    * View level features have view qualifiers appended.
    * @return a map of ModulePrefs/Require and ModulePrefs/Optional elements to Feature
    */
   public Map<String, Feature> getFeatures() {
     return features;
   }
-  
-  
+
+
   /**
    * All features elements defined in ModulePrefs
    * @return a list of all Features included in ModulePrefs
@@ -491,7 +491,7 @@ public class ModulePrefs {
   public List<Feature> getAllFeatures() {
     return allFeatures;
   }
-  
+
   /**
    * Returns Map of features to load for the given View
    * @return a map of ModuleSpec/Require and ModuleSpec/Optional elements to Feature
@@ -543,7 +543,7 @@ public class ModulePrefs {
   public OAuthSpec getOAuthSpec() {
     return oauth;
   }
-  
+
   /**
    * @return an OAuth2Spec built from the ModuleSpec/OAuthSpec element
    */
@@ -575,7 +575,7 @@ public class ModulePrefs {
   public LocaleSpec getGlobalLocale(Locale locale) {
     return getLocale(locale, GLOBAL_LOCALE);
   }
-  
+
   /**
    * Gets the locale spec for the given locale and view, if any exists.
    *
@@ -654,7 +654,7 @@ public class ModulePrefs {
     if (oauth != null) {
       buf.append(oauth).append('\n');
     }
-    
+
     if (extraElements != null) {
       for (Node node : extraElements.values()) {
         Source source = new DOMSource(node);
@@ -739,7 +739,7 @@ public class ModulePrefs {
   private final class OAuthVisitor implements ElementVisitor {
     private OAuthSpec oauthSpec = null;
     private final MutableBoolean oauthMarker;
-    
+
     private OAuthVisitor(MutableBoolean oauthMarker) {
       this.oauthMarker = oauthMarker;
     }
@@ -760,14 +760,14 @@ public class ModulePrefs {
     }
 
   }
-  
+
   /**
    * Process ModulePrefs/OAuth2
    */
   private final class OAuth2Visitor implements ElementVisitor {
     private OAuth2Spec oauth2Spec = null;
     private final MutableBoolean oauth2Marker;
-    
+
     private OAuth2Visitor(MutableBoolean oauth2Marker) {
       this.oauth2Marker = oauth2Marker;
     }
@@ -799,7 +799,7 @@ public class ModulePrefs {
     private boolean coreIncluded = false;
 
     private static final Set<String> TAGS = ImmutableSet.of("Require", "Optional");
-    
+
     private FeatureVisitor(MutableBoolean oauthMarker) {
       this.oauthMarker = oauthMarker;
     }
@@ -829,7 +829,7 @@ public class ModulePrefs {
       }
       return true;
     }
-    
+
     public void apply(ModulePrefs moduleprefs) {
       if (!coreIncluded) {
         // No library was explicitly included from core - add it as an implicit dependency.
@@ -887,7 +887,7 @@ public class ModulePrefs {
       }
       return true;
     }
-    
+
     public void apply(ModulePrefs moduleprefs) {
       Map<Locale, LocaleSpec> allLocales = Maps.newHashMap();
       moduleprefs.locales = locales;
@@ -896,7 +896,7 @@ public class ModulePrefs {
       }
       moduleprefs.allLocales = ImmutableMap.copyOf(allLocales);
     }
-    
+
     private void storeLocaleSpec(String view, LocaleSpec locale){
       Map<Locale, LocaleSpec> viewLocaleSpecs;
       if (locales.get(view) == null) {
@@ -905,9 +905,9 @@ public class ModulePrefs {
       } else {
         viewLocaleSpecs = locales.get(view);
       }
-      viewLocaleSpecs.put(new Locale(locale.getLanguage(), locale.getCountry()), locale);      
+      viewLocaleSpecs.put(new Locale(locale.getLanguage(), locale.getCountry()), locale);
     }
-    
+
   }
 
   /**

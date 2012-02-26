@@ -43,8 +43,8 @@ import com.google.inject.name.Named;
 /**
  * Injects the default OAuth2 implementation for {@link BasicOAuth2Request} and
  * {@link BasicOAuth2Store}
- * 
- * 
+ *
+ *
  */
 public class OAuth2Module extends AbstractModule {
   private static final String CLASS_NAME = OAuth2Module.class.getName();

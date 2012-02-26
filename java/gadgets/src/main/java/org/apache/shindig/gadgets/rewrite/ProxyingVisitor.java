@@ -44,7 +44,7 @@ public class ProxyingVisitor extends ResourceMutateVisitor {
   //class name for logging purpose
   private static final String classname = ProxyingVisitor.class.getName();
   private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
-  
+
   private final ProxyUriManager uriManager;
 
   public ProxyingVisitor(ContentRewriterFeature.Config featureConfig,
@@ -59,7 +59,7 @@ public class ProxyingVisitor extends ResourceMutateVisitor {
     List<ProxyUriManager.ProxyUri> reservedUris =
         Lists.newArrayListWithCapacity(nodes.size());
     List<Node> reservedNodes = Lists.newArrayListWithCapacity(nodes.size());
-    
+
     for (Node node : nodes) {
       Element element = (Element)node;
       String nodeName = node.getNodeName().toLowerCase();
@@ -80,18 +80,18 @@ public class ProxyingVisitor extends ResourceMutateVisitor {
         }
       }
     }
-    
+
     List<Uri> resourceUris = uriManager.make(reservedUris, featureConfig.getExpires());
-    
+
     // By contract, resourceUris matches by index with inbound Uris. Create an easy-access
     // List with the results.
     List<Pair<Node, Uri>> proxiedUris = Lists.newArrayListWithCapacity(nodes.size());
-    
+
     Iterator<Uri> uriIt = resourceUris.iterator();
     for (Node node : reservedNodes) {
       proxiedUris.add(Pair.of(node, uriIt.next()));
     }
-    
+
     return proxiedUris;
   }
 }

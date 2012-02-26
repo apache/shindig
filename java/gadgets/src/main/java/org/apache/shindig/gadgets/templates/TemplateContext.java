@@ -40,17 +40,17 @@ public class TemplateContext {
   private Map<String, Object> myMap = null;
   private Node templateRoot;
   private Map<Object, TemplateResource> resources = Maps.newLinkedHashMap();
-  
+
   public TemplateContext(Gadget gadget, Map<String, ? extends Object> top) {
     this.gadget = gadget;
     this.top = top;
     this.cur = top;
   }
-  
+
   public Map<String, ? extends Object> getTop() {
     return top;
   }
-  
+
   public Object getCur() {
     return cur;
   }
@@ -70,17 +70,17 @@ public class TemplateContext {
     context = newContext;
     return oldContext;
   }
-  
+
   public Map<String, Object> setMy(Map<String, Object> myMap) {
     Map<String, Object> oldMy = this.myMap;
     this.myMap = myMap;
     return oldMy;
   }
-  
+
   public Map<String, Object> getMy() {
     return myMap;
   }
-  
+
   public Gadget getGadget() {
     return gadget;
   }
@@ -90,17 +90,17 @@ public class TemplateContext {
     this.templateRoot = root;
     return oldRoot;
   }
-  
+
   public Node getTemplateRoot() {
     return this.templateRoot;
   }
-  
+
   public void addResource(Object key, TemplateResource resource) {
     if (!resources.containsKey(key)) {
       resources.put(key, resource);
     }
   }
-  
+
   public Collection<TemplateResource> getResources() {
     return resources.values();
   }

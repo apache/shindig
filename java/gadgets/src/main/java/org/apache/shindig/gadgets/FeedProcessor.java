@@ -29,7 +29,7 @@ public interface FeedProcessor {
 
   /**
    * Converts feed XML to JSON.
-   * 
+   *
    * @param feedUrl
    *            The url that the feed was retrieved from.
    * @param feedXml

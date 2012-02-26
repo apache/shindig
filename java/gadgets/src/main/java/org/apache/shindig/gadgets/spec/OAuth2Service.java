@@ -85,14 +85,14 @@ public class OAuth2Service extends BaseOAuthService {
   public String getScope() {
     return scope;
   }
-  
+
   /**
    * Represents /OAuth/Service@name
    */
   public String getName() {
     return name;
   }
-  
+
 
 
 }

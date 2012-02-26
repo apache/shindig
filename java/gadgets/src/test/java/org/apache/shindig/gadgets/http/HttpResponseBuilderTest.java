@@ -188,9 +188,9 @@ public class HttpResponseBuilderTest {
     HttpResponseBuilder builder = new HttpResponseBuilder()
         .addHeader("Content-Type", "text/html; charset=Big5")
         .setEncoding(Charsets.UTF_8);
-    
+
     Multimap<String, String> headers = builder.getHeaders();
-    assertEquals("text/html; charset=UTF-8", headers.get("Content-Type").iterator().next());        
+    assertEquals("text/html; charset=UTF-8", headers.get("Content-Type").iterator().next());
   }
 
   @Test
@@ -198,9 +198,9 @@ public class HttpResponseBuilderTest {
     HttpResponseBuilder builder = new HttpResponseBuilder()
         .addHeader("Content-Type", "text/html")
         .setEncoding(Charsets.UTF_8);
-    
+
     Multimap<String, String> headers = builder.getHeaders();
-    assertEquals("text/html; charset=UTF-8", headers.get("Content-Type").iterator().next());        
+    assertEquals("text/html; charset=UTF-8", headers.get("Content-Type").iterator().next());
   }
 
   @Test
@@ -218,7 +218,7 @@ public class HttpResponseBuilderTest {
         .setResponseString("foo")
         .create();
     Multimap<String, String> headers = resp.getHeaders();
-    assertEquals("text/html; charset=UTF-8", headers.get("Content-Type").iterator().next());        
+    assertEquals("text/html; charset=UTF-8", headers.get("Content-Type").iterator().next());
     assertEquals("foo", resp.getResponseAsString());
   }
 
@@ -255,7 +255,7 @@ public class HttpResponseBuilderTest {
     // Insure that headers are stored in the order they are added
     assertEquals(Joiner.on(",").join(resp.getHeaders("Soup")), Joiner.on(",").join(soupList));
   }
-  
+
   @Test
   public void noModsReturnsSameResponse() {
     HttpResponseBuilder builder = new HttpResponseBuilder();
@@ -264,7 +264,7 @@ public class HttpResponseBuilderTest {
     HttpResponse response = builder.create();
     assertSame(response, builder.create());
   }
-  
+
   @Test
   public void noModsReturnsSameResponseBuilderCtor() {
     HttpResponseBuilder builder = new HttpResponseBuilder();
@@ -272,7 +272,7 @@ public class HttpResponseBuilderTest {
     HttpResponseBuilder nextBuilder = new HttpResponseBuilder(builder);
     assertSame(builder.create(), nextBuilder.create());
   }
-  
+
   @Test
   public void noModsReturnsSameResponseBaseCtor() {
     HttpResponse response = new HttpResponse("foo");

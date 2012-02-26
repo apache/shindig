@@ -19,7 +19,7 @@
 /**
 <h1>XStream Utilities package</h1>
 <p>The XStream classes enable Bean to XML to Bean conversion using the XStream
-library. These are configured to produce and consume XML that conforms to the 
+library. These are configured to produce and consume XML that conforms to the
 OpenSocial XSD. Most of the mapping is performed by InterfaceClassMapper which is
 configured by the BeanXStreamConverter class.</p>
 */

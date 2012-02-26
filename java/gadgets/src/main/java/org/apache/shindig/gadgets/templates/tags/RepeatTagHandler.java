@@ -43,7 +43,7 @@ public class RepeatTagHandler extends AbstractTagHandler {
     Iterable<?> repeat = getValueFromTag(tag, EXPRESSION_ATTR, processor, Iterable.class);
     if (repeat != null) {
       final Attr ifAttribute = tag.getAttributeNode(IF_ATTR);
-    
+
       // On each iteration, process child nodes, after checking the value of the "if" attribute
       processor.processRepeat(result, tag, repeat, new Runnable() {
         public void run() {

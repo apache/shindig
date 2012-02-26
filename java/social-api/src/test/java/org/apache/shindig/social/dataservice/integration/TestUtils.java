@@ -44,13 +44,13 @@ import org.xml.sax.InputSource;
  * Collection of utilities to assist in testing.
  */
 public class TestUtils {
-  
+
   /**
    * Loads the contents of the test fixture specified at the given path.
-   * 
+   *
    * @param path specifies the file to load the contents of
    * @return String is the file contents
-   * @throws IOException 
+   * @throws IOException
    */
   public static String loadTestFixture(String path) throws IOException {
     BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(path)));
@@ -61,10 +61,10 @@ public class TestUtils {
     }
     return sb.toString();
   }
-  
+
   /**
    * Tests two JSON strings for equality by performing a deep comparison.
-   * 
+   *
    * @param json1 represents a JSON object to compare with json2
    * @param json2 represents a JSON object to compare with json1
    * @return true if the JSON objects are equal, false otherwise
@@ -74,38 +74,38 @@ public class TestUtils {
     Object obj2Converted = convertJsonElement(new JSONObject(json2));
     return obj1Converted.equals(obj2Converted);
   }
-  
+
   /**
    * Tests the DOMs represented by two XML strings for equality by performing
    * a deep comparison.
-   * 
+   *
    * @param xml1 represents the XML DOM to compare with xml2
    * @param xml2 represents the XML DOM to compare with xml1
-   * 
+   *
    * return true if the represented DOMs are equal, false otherwise
    */
   public static boolean xmlsEqual(String xml1, String xml2) throws Exception {
     DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
     DocumentBuilder db = dbf.newDocumentBuilder();
-    
+
     Document doc1 = db.parse(new InputSource(new StringReader(xml1)));
     Document doc2 = db.parse(new InputSource(new StringReader(xml2)));
-    
+
     Set<Object> childSet1 = getChildSet(doc1.getDocumentElement(), "");
     Set<Object> childSet2 = getChildSet(doc2.getDocumentElement(), "");
-    
+
     return childSet1.equals(childSet2); // comparing sets does all the hard work :)
   }
-  
+
   // ---------------------------- PRIVATE HELPERS -----------------------------
-  
+
   /*
    * Recursive utility to convert a JSONObject to an Object composed of Sets,
    * Maps, and the target types (e.g. Integer, String, Double).  Used to do a
    * deep comparison of two JSON objects.
-   * 
+   *
    * @param Object is the JSON element to convert (JSONObject, JSONArray, or target type)
-   * 
+   *
    * @return an Object representing the appropriate JSON element
    */
   @SuppressWarnings("unchecked")
@@ -130,13 +130,13 @@ public class TestUtils {
       return elem;
     }
   }
-  
+
   /*
    * Recursive utility to represent an XML Document as a Set.
-   * 
+   *
    * @param node is the root node to map to a Set
    * @param basePath is the path to the root node
-   * 
+   *
    * @return Set<Object> represents the XML Document as a Set
    */
   private static Set<Object> getChildSet(Node node, String basePath) {

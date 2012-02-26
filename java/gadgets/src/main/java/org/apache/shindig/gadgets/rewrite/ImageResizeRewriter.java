@@ -44,7 +44,7 @@ import java.util.List;
 public class ImageResizeRewriter extends DomWalker.Rewriter {
   private final ContentRewriterFeature.Factory featureConfigFactory;
   private final ProxyUriManager proxyUriManager;
-  
+
   @Inject
   public ImageResizeRewriter(ProxyUriManager proxyUriManager,
                              ContentRewriterFeature.Factory featureConfigFactory) {
@@ -57,7 +57,7 @@ public class ImageResizeRewriter extends DomWalker.Rewriter {
     ContentRewriterFeature.Config config = featureConfigFactory.get(context.getSpec());
     return Arrays.<DomWalker.Visitor>asList(new ImageResizeVisitor(proxyUriManager, config));
   }
-  
+
   public static class ImageResizeVisitor implements DomWalker.Visitor {
     protected final ProxyUriManager proxyUriManager;
     protected final ContentRewriterFeature.Config featureConfig;
@@ -67,7 +67,7 @@ public class ImageResizeRewriter extends DomWalker.Rewriter {
       this.proxyUriManager = proxyUriManager;
       this.featureConfig = featureConfig;
     }
-    
+
     public VisitStatus visit(Gadget gadget, Node node) throws RewritingException {
       if (node.getNodeType() == Node.ELEMENT_NODE &&
           node.getNodeName().equalsIgnoreCase("img")) {
@@ -108,7 +108,7 @@ public class ImageResizeRewriter extends DomWalker.Rewriter {
       }
 
       if (null == proxied || proxied.getStatus() == UriStatus.BAD_URI) {
-        return VisitStatus.BYPASS;  
+        return VisitStatus.BYPASS;
       }
 
       VisitStatus status = VisitStatus.BYPASS;

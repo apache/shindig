@@ -32,13 +32,13 @@ import com.google.inject.Inject;
 
 /**
  * see {@link OAuth2Store}
- * 
+ *
  * Default OAuth2Store.
- * 
+ *
  * Uses 3 Guice bindings to achieve storage implementation.
- * 
+ *
  * 1) {@link OAuth2Persister} 2) {@link OAuth2Cache} 3) {@link OAuth2Encrypter}
- * 
+ *
  */
 public class BasicOAuth2Store implements OAuth2Store {
   private final static String LOG_CLASS = BasicOAuth2Store.class.getName();

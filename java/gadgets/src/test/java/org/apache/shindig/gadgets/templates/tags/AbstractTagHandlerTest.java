@@ -50,26 +50,26 @@ public class AbstractTagHandlerTest {
     document = documentProvider.createDocument(null, null, null);
     handler = new AbstractTagHandler(null, null) {
       public void process(Node result, Element tag, TemplateProcessor processor) {
-      }      
+      }
     };
-    
+
     templateProcessor = createMock(TemplateProcessor.class);
   }
-  
+
   @Test
   public void getValueFromTag() {
     Element element = document.createElement("test");
     element.setAttribute("key", "expression");
- 
+
     expect(templateProcessor.evaluate(eq("expression"), eq(String.class), (String) isNull()))
         .andReturn("evaluated");
     replay(templateProcessor);
-    
+
     assertEquals("evaluated",
         handler.getValueFromTag(element, "key", templateProcessor, String.class));
     verify(templateProcessor);
   }
-  
+
   @Test
   public void getValueFromTagNoAttribute() {
     Element element = document.createElement("test");
@@ -77,5 +77,5 @@ public class AbstractTagHandlerTest {
     replay(templateProcessor);
     assertNull(handler.getValueFromTag(element, "notthere", templateProcessor, String.class));
     verify(templateProcessor);
-  }  
+  }
 }

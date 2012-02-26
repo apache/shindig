@@ -61,14 +61,14 @@ public class OpenSocialI18NGadgetRewriter implements GadgetRewriter {
       mutableContent.documentChanged();
     } catch (GadgetException e) {
       throw new RewritingException(e, e.getHttpStatusCode());
-    } 
-  } 
+    }
+  }
 
   private void injectI18NConstants(Gadget gadget, Node headTag) throws GadgetException {
     StringBuilder inlineJs = new StringBuilder();
     Locale locale = gadget.getContext().getLocale();
     if (i18nConstantsCache.containsKey(locale)) {
-      inlineJs.append(i18nConstantsCache.get(locale));    
+      inlineJs.append(i18nConstantsCache.get(locale));
     } else {
       // load gadgets.i18n.DateTimeConstants and gadgets.i18n.NumberFormatConstants
       String localeName = getLocaleNameForLoadingI18NConstants(locale);
@@ -86,17 +86,17 @@ public class OpenSocialI18NGadgetRewriter implements GadgetRewriter {
     }
     Element inlineTag = headTag.getOwnerDocument().createElement("script");
     headTag.appendChild(inlineTag);
-    inlineTag.appendChild(headTag.getOwnerDocument().createTextNode(inlineJs.toString()));    
+    inlineTag.appendChild(headTag.getOwnerDocument().createTextNode(inlineJs.toString()));
   }
 
   String getLocaleNameForLoadingI18NConstants(Locale locale) {
-    String localeName = "en"; 
+    String localeName = "en";
     String language = locale.getLanguage();
-    String country = locale.getCountry(); 
+    String country = locale.getCountry();
     if (!language.equalsIgnoreCase("ALL")) {
       try {
         attemptToLoadDateConstants(language);
-        localeName = language; 
+        localeName = language;
       } catch (IOException e) {
         // ignore
       }
@@ -109,18 +109,18 @@ public class OpenSocialI18NGadgetRewriter implements GadgetRewriter {
       } catch (IOException e) {
         // ignore
       }
-    } 
+    }
     return localeName;
   }
 
   protected String attemptToLoadDateConstants(String localeName) throws IOException {
     return attemptToLoadResource("DateTimeConstants__" + localeName + ".js");
   }
-  
+
   private String attemptToLoadResource(String i18nRes) throws IOException {
     return attemptToLoadResourceFullyQualified(DATA_PATH + i18nRes);
   }
-  
+
   protected String attemptToLoadResourceFullyQualified(String resource) throws IOException {
     return ResourceLoader.getContent(resource);
   }

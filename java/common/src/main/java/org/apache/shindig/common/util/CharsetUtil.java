@@ -29,7 +29,7 @@ import java.nio.ByteBuffer;
  */
 public final class CharsetUtil {
   private CharsetUtil() {}
-  
+
   /**
    * A clean version of String#getBytes that does not throw exceptions for
    * the UTF-8 Charset.
@@ -46,7 +46,7 @@ public final class CharsetUtil {
     }
     ByteBuffer bb = Charsets.UTF_8.encode(s);
     return ArrayUtils.subarray(bb.array(), 0, bb.limit());
-    
+
   }
 
   /**

@@ -42,9 +42,9 @@ public abstract class BaseOAuthService {
   BaseOAuthService() { }
 
   public BaseOAuthService(Element serviceElement, Uri base) throws SpecParserException{
-    
+
   }
- 
+
 
 
   /**

@@ -26,7 +26,7 @@ import java.util.Set;
  * No-Op implementation of the invalidation service
  */
 public class NoOpInvalidationService implements InvalidationService {
-  
+
   public void invalidateApplicationResources(Set<Uri> uris, SecurityToken token) {
     // No op
   }

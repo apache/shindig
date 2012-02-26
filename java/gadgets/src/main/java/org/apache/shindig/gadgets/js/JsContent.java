@@ -30,7 +30,7 @@ public class JsContent {
   private final String source;
   private final FeatureBundle bundle;
   private final FeatureResource resource;
-  
+
   public static JsContent fromText(String content, String source) {
     return new JsContent(content, source, null, null);
   }
@@ -39,7 +39,7 @@ public class JsContent {
       FeatureBundle bundle, FeatureResource resource) {
     return new JsContent(content, source, bundle, resource);
   }
-  
+
   private JsContent(String content, String source,
       FeatureBundle bundle, FeatureResource resource) {
     this.content = content;
@@ -59,7 +59,7 @@ public class JsContent {
   public FeatureBundle getFeatureBundle() {
     return bundle;
   }
-  
+
   public FeatureResource getFeatureResource() {
     return resource;
   }

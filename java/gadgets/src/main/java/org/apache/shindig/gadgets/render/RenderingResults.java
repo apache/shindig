@@ -41,7 +41,7 @@ public final class RenderingResults {
     this.content = content;
     this.errorMessage = errorMessage;
     this.httpStatusCode = httpStatusCode;
-    
+
     this.redirect = redirect;
   }
 

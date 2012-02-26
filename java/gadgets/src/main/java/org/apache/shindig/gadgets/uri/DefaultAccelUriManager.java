@@ -50,7 +50,7 @@ public class DefaultAccelUriManager implements AccelUriManager, ContainerConfig.
     this.proxyUriManager = proxyUriManager;
     config.addConfigObserver(this, true);
   }
-  
+
   public void containersChanged(
       ContainerConfig config, Collection<String> changed, Collection<String> removed) {
     accelHost = config.getString(AccelUriManager.CONTAINER, PROXY_HOST_PARAM);

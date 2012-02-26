@@ -37,7 +37,7 @@ public class ProxyingContentRewriter extends DomWalker.Rewriter {
   private final ContentRewriterFeature.Factory featureConfigFactory;
   private final ProxyUriManager proxyUriManager;
   private final ConcatUriManager concatUriManager;
-  
+
   @Inject
   public ProxyingContentRewriter(ContentRewriterFeature.Factory featureConfigFactory,
       ProxyUriManager proxyUriManager, ConcatUriManager concatUriManager) {
@@ -45,11 +45,11 @@ public class ProxyingContentRewriter extends DomWalker.Rewriter {
     this.proxyUriManager = proxyUriManager;
     this.concatUriManager = concatUriManager;
   }
-  
+
   @Override
   protected List<Visitor> makeVisitors(Gadget context, Uri gadgetUri) {
     ContentRewriterFeature.Config config = featureConfigFactory.get(context.getSpec());
-    // Note that concat is including with proxy in order to prevent 
+    // Note that concat is including with proxy in order to prevent
     // proxying the rewritten concat url
     // Basically Url rewritters should all be in one dom walker.
     return ImmutableList.of(

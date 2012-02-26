@@ -29,7 +29,7 @@ public abstract class AbstractTagRegistry implements TagRegistry {
   public final TagHandler getHandlerFor(Element element) {
     if (element.getNamespaceURI() == null) {
       return null;
-    }  
+    }
     return getHandlerFor(new NSName(element.getNamespaceURI(), element.getLocalName()));
   }
 }

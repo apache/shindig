@@ -70,13 +70,13 @@ public class ExportJsProcessorTest {
       "exportJs('shindig',[shindig]);" +
       "exportJs('gadgets.rpc',[gadgets,gadgets.rpc],{call:'call',register:'register'});" +
       "exportJs('shindig',[shindig],{random:'random'});";
-  
+
   private final String EXPORT_STRING_2 =
       "exportJs('foo',[foo]);" +
       "exportJs('foo.prototype',[foo,foo.prototype],{bar:'bar'});";
 
   private final String EXPORT_STRING_3 = "";
-  
+
   private JsContent textJsContent1;
   private JsContent textJsContent2;
   private JsContent featureJsContent1;
@@ -119,7 +119,7 @@ public class ExportJsProcessorTest {
   private JsUri mockJsUri(JsCompileMode mode) {
     return mockJsUri(mode, false);
   }
-  
+
   private JsUri mockJsUri(JsCompileMode mode, boolean isJsload) {
     JsUri result = createMock(JsUri.class);
     expect(result.getCompileMode()).andStubReturn(mode);

@@ -31,18 +31,18 @@ import java.util.Set;
  * Implements the
  * <a href="http://wiki.oauth.net/ProblemReporting">
  * OAuth problem reporting extension</a>
- * 
+ *
  * We divide problems into three categories:
  * - problems that cause us to abort the protocol.  For example, if we don't
  *   have a consumer key that the service provider accepts, we give up.
- *   
+ *
  * - problems that cause us to ask for the user's permission again.  For
  *   example, if the service provider reports that an access token has been
  *   revoked, we throw away the token and start over.
- *   
+ *
  * - problems that require us to refresh our access token per the OAuth
  *   session extension protocol
- *   
+ *
  * By default we assume most service provider errors fall into the second
  * category: we should ask for the user's permission again.
  */
@@ -63,7 +63,7 @@ class OAuthProtocolException extends Exception {
    * Problems that should force us to abort the protocol right away,
    * but we can still try to use the access token again later.
    */
-  private static Set<String> temporaryProblems = 
+  private static Set<String> temporaryProblems =
       ImmutableSet.of("consumer_key_refused");
 
   /**

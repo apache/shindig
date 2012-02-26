@@ -33,9 +33,9 @@ import com.google.inject.ImplementedBy;
 public interface ExpressionProvider {
 
   /**
-   * 
+   *
    * @param cacheProvider - the cache provider - not used by all EL implementations.
-   * @param converter - type conversion class - 
+   * @param converter - type conversion class -
    * @return
    */
   ExpressionFactory newExpressionFactory(CacheProvider cacheProvider,

@@ -40,7 +40,7 @@ public class TemplateModule extends AbstractModule {
     bindTagHandlers();
   }
 
-  /* No need to subclass. 
+  /* No need to subclass.
      You can add the same construct in your own modules to register your own tag handler.. */
   protected void bindTagHandlers() {
     Multibinder<TagHandler> tagBinder = Multibinder.newSetBinder(binder(), TagHandler.class);

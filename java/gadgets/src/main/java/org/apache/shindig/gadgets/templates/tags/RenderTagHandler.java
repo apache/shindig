@@ -34,20 +34,20 @@ import com.google.inject.Inject;
 public class RenderTagHandler extends AbstractTagHandler {
 
   public static final String DEFAULT_NAME = "Render";
-  
+
   public static final String ATTR_CONTENT = "content";
-  
+
   @Inject
   public RenderTagHandler() {
     super(TagHandler.OPENSOCIAL_NAMESPACE, DEFAULT_NAME);
   }
-  
+
   public void process(Node result, Element tag, TemplateProcessor processor) {
     Map<String, Object> myMap = processor.getTemplateContext().getMy();
     if (myMap == null) {
       return;
     }
-    
+
     String content = tag.getAttribute(ATTR_CONTENT);
     // No @content specified - move it all.
     if ("".equals(content)) {
@@ -69,7 +69,7 @@ public class RenderTagHandler extends AbstractTagHandler {
             copyChildren((ElementWrapper) probablyAnElement, result);
           }
         }
-      } 
+      }
     }
   }
 

@@ -295,7 +295,7 @@ public class XStream081Configuration implements XStreamConfiguration {
         new ImplicitCollectionFieldMapping(Message.class, "recipients", String.class, "recipients"),
         new ImplicitCollectionFieldMapping(Message.class, "collectionIds", String.class, "collectionsIds"),
         new ImplicitCollectionFieldMapping(Message.class, "replies", String.class, "replies"),
-        
+
         new ImplicitCollectionFieldMapping(ActivityObject.class, "downstreamDuplicates", String.class, "downstreamDuplicate"),
         new ImplicitCollectionFieldMapping(ActivityObject.class, "upstreamDuplicates", String.class, "upstreamDuplicate"),
 

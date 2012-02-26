@@ -34,9 +34,9 @@ public class TemplateParserException extends GadgetException {
   public TemplateParserException(XmlException e) {
     super(GadgetException.Code.MALFORMED_XML_DOCUMENT, e);
   }
-  
+
   public TemplateParserException(String message, XmlException e) {
     super(GadgetException.Code.MALFORMED_XML_DOCUMENT, message, e);
   }
-  
+
 }

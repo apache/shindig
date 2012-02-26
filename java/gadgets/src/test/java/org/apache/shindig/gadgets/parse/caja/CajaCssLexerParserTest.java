@@ -45,7 +45,7 @@ public class CajaCssLexerParserTest extends Assert {
   public void testBasicCssParse() throws Exception {
     String css = ".xyz { font : bold; } A { color : #7f7f7f }";
     List<Object> styleSheet = cajaCssParser.parse(css);
-    assertEquals(cajaCssParser.serialize(styleSheet), css); 
+    assertEquals(cajaCssParser.serialize(styleSheet), css);
   }
 
   @Test

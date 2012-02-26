@@ -53,7 +53,7 @@ public class ConcatProxyServletTest extends ServletTestFixture {
   private static final String SCRT3 = "var v3 = \"world\";";
 
   private static final String SCRT1_ESCAPED = "var v1 = 1;";
-  private static final String SCRT2_ESCAPED = 
+  private static final String SCRT2_ESCAPED =
       "var v2 = { \\\"a-b\\\": 1 , c: \\\"hello!,\\\" };";
   private static final String SCRT3_ESCAPED = "var v3 = \\\"world\\\";";
 
@@ -68,7 +68,7 @@ public class ConcatProxyServletTest extends ServletTestFixture {
     servlet.setRequestPipeline(pipeline);
     uriManager = new TestConcatUriManager();
     servlet.setConcatUriManager(uriManager);
-    
+
     expect(request.getHeader("Host")).andReturn(REQUEST_DOMAIN).anyTimes();
     expect(lockedDomainService.isSafeForOpenProxy(REQUEST_DOMAIN))
         .andReturn(true).anyTimes();
@@ -126,7 +126,7 @@ public class ConcatProxyServletTest extends ServletTestFixture {
   private void runConcat(ExecutorService exec, String result, String tok, Uri... uris)
       throws Exception {
     expectRequestWithUris(Lists.newArrayList(uris), tok);
-    
+
     // Run the servlet
     servlet.setExecutor(exec);
     servlet.doGet(request, recorder);
@@ -134,7 +134,7 @@ public class ConcatProxyServletTest extends ServletTestFixture {
     assertEquals(result, recorder.getResponseAsString());
     assertEquals(200, recorder.getHttpStatusCode());
   }
-  
+
   @Test
   public void testSimpleConcat() throws Exception {
     String results = addComment(SCRT1, URL1.toString()) + addComment(SCRT2,URL2.toString());
@@ -146,7 +146,7 @@ public class ConcatProxyServletTest extends ServletTestFixture {
     String results = addComment(SCRT1, URL1.toString()) + addComment(SCRT2,URL2.toString());
     runConcat(threadedExecutor, results, null, URL1, URL2);
   }
-  
+
   @Test
   public void testThreeConcat() throws Exception {
     String results = addComment(SCRT1, URL1.toString()) + addComment(SCRT2,URL2.toString())
@@ -160,7 +160,7 @@ public class ConcatProxyServletTest extends ServletTestFixture {
         + addComment(SCRT3, URL3.toString());
     runConcat(threadedExecutor, results, null, URL1, URL2, URL3);
   }
-  
+
   @Test
   public void testConcatBadException() throws Exception {
     final Uri URL4 = Uri.parse("http://example.org/4.js");
@@ -170,7 +170,7 @@ public class ConcatProxyServletTest extends ServletTestFixture {
         new GadgetException(GadgetException.Code.HTML_PARSE_ERROR)).anyTimes();
 
     expectRequestWithUris(Lists.newArrayList(URL1, URL4));
-    
+
     // Run the servlet
     servlet.doGet(request, recorder);
     verify();
@@ -178,7 +178,7 @@ public class ConcatProxyServletTest extends ServletTestFixture {
     String results = addComment(SCRT1, URL1.toString())
         + addConcatErrComment(GadgetException.Code.HTML_PARSE_ERROR, URL4.toString());
     assertEquals(results, recorder.getResponseAsString());
-    
+
     assertEquals(400, recorder.getHttpStatusCode());
   }
 
@@ -188,12 +188,12 @@ public class ConcatProxyServletTest extends ServletTestFixture {
     HttpRequest req = new HttpRequest(Uri.parse(url));
     HttpResponse resp = new HttpResponseBuilder().setHttpStatusCode(404).create();
     expect(pipeline.execute(req)).andReturn(resp).anyTimes();
-    
+
     expectRequestWithUris(Lists.newArrayList(URL1, Uri.parse(url)));
-    
+
     servlet.doGet(request, recorder);
     verify();
-    
+
     String results = addComment(SCRT1, URL1.toString()) + addErrComment(url,404);
     assertEquals(results, recorder.getResponseAsString());
     assertEquals(200, recorder.getHttpStatusCode());
@@ -217,7 +217,7 @@ public class ConcatProxyServletTest extends ServletTestFixture {
         + "};\r\n";
     runConcat(sequentialExecutor, results, "_js", URL1, URL2, URL3);
   }
-  
+
   @Test
   public void testBadJsonVarConcat() throws Exception {
     expectRequestWithUris(Lists.<Uri>newArrayList(), "bad code;");
@@ -242,7 +242,7 @@ public class ConcatProxyServletTest extends ServletTestFixture {
         + "};\r\n";
     runConcat(sequentialExecutor, results, "_js", URL1, URL4);
   }
-  
+
   @Test
   public void testAsJsonConcatException() throws Exception {
     final Uri URL4 = Uri.parse("http://example.org/4.js");
@@ -274,7 +274,7 @@ public class ConcatProxyServletTest extends ServletTestFixture {
         + addConcatErrComment(GadgetException.Code.HTML_PARSE_ERROR, URL4.toString()) + "};\r\n";
 
     expectRequestWithUris(Lists.newArrayList(URL1, URL4), "_js");
-    
+
     // Run the servlet
     servlet.doGet(request, recorder);
     verify();
@@ -328,7 +328,7 @@ public class ConcatProxyServletTest extends ServletTestFixture {
   }
 
   /**
-   * Returns cache control max age from HttpServletResponseRecorder  
+   * Returns cache control max age from HttpServletResponseRecorder
    */
   private int getCacheControlMaxAge(HttpServletResponseRecorder recorder) {
     String cacheControl = recorder.getHeader("Cache-Control");
@@ -336,11 +336,11 @@ public class ConcatProxyServletTest extends ServletTestFixture {
     String cacheValue = cacheControl.substring(cacheControl.indexOf('=') + 1);
     return Integer.decode(cacheValue);
   }
-  
+
   private void expectRequestWithUris(List<Uri> uris) {
     expectRequestWithUris(uris, null);
   }
-  
+
   private void expectRequestWithUris(List<Uri> uris, String tok) {
     expect(request.getScheme()).andReturn("http").anyTimes();
     expect(request.getServerPort()).andReturn(80).anyTimes();
@@ -355,11 +355,11 @@ public class ConcatProxyServletTest extends ServletTestFixture {
 
   private static class TestConcatUriManager implements ConcatUriManager {
     private final Map<Uri, ConcatUri> uriMap;
-    
+
     private TestConcatUriManager() {
       this.uriMap = Maps.newHashMap();
     }
-    
+
     public List<ConcatData> make(List<ConcatUri> resourceUris, boolean isAdjacent) {
       // Not used by ConcatProxyServlet
       throw new UnsupportedOperationException();
@@ -368,11 +368,11 @@ public class ConcatProxyServletTest extends ServletTestFixture {
     public ConcatUri process(Uri uri) {
       return uriMap.get(uri);
     }
-    
+
     private void expect(Uri orig, UriStatus status, Type type, List<Uri> uris, String json) {
       uriMap.put(orig, new ConcatUri(status, uris, json, type, null));
     }
-    
+
     private void expect(Uri orig, List<Uri> uris, String tok) {
       expect(orig, UriStatus.VALID_UNVERSIONED, Type.JS, uris, tok);
     }

@@ -30,26 +30,26 @@ public final class UserAgent {
   private final Browser browser;
   private final String version;
   private static final Pattern VERSION_NUMBER_REGEX = Pattern.compile(".*?([0-9]+(\\.[0-9]+)?).*");
-  
+
   public UserAgent(Browser browser, String version) {
     this.browser = browser;
     this.version = version;
   }
-  
+
   /**
    * @return Identifying browser string.
    */
   public Browser getBrowser() {
     return browser;
   }
-  
+
   /**
    * @return Version string of user agent.
    */
   public String getVersion() {
     return version != null ? version.trim() : null;
   }
-  
+
   /**
    * @return Numeric version number, if parseable. Otherwise -1.
    */
@@ -62,11 +62,11 @@ public final class UserAgent {
     String matched = matcher.group(1);
     return Double.parseDouble(matched);
   }
-  
+
   public interface Parser {
     UserAgent parse(String userAgent);
   }
-  
+
   public enum Browser {
     MSIE,
     FIREFOX,

@@ -53,7 +53,7 @@ public class ActivityServiceDb implements ActivityService {
 
   /**
    * Instantiates a new activity service db.
-   * 
+   *
    * @param entityManager the entity manager
    */
   @Inject
@@ -125,7 +125,7 @@ public class ActivityServiceDb implements ActivityService {
     // TODO Auto-generated method stub
     return null;
   }
-  
+
   /* (non-Javadoc)
    * @see org.apache.shindig.social.opensocial.spi.ActivityService#getActivities(java.util.Set, org.apache.shindig.social.opensocial.spi.GroupId, java.lang.String, java.util.Set, org.apache.shindig.social.opensocial.spi.CollectionOptions, org.apache.shindig.auth.SecurityToken)
    */
@@ -176,10 +176,10 @@ public class ActivityServiceDb implements ActivityService {
       throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST, "Group ID not recognized");
 
     }
-    
+
     // Get total results, that is count the total number of rows for this query
     Long totalResults = JPQLUtils.getTotalResults(entityManager, sb.toString(), paramList);
-    
+
     // Execute paginated query
     if (totalResults > 0) {
       plist = JPQLUtils.getListQuery(entityManager, sb.toString(), paramList, options);
@@ -201,7 +201,7 @@ public class ActivityServiceDb implements ActivityService {
         plist, options.getFirst(), totalResults.intValue(), options.getMax());
     return ImmediateFuture.newInstance(restCollection);
   }
-  
+
   /* (non-Javadoc)
    * @see org.apache.shindig.social.opensocial.spi.ActivityService#getActivities(org.apache.shindig.social.opensocial.spi.UserId, org.apache.shindig.social.opensocial.spi.GroupId, java.lang.String, java.util.Set, org.apache.shindig.social.opensocial.spi.CollectionOptions, java.util.Set, org.apache.shindig.auth.SecurityToken)
    */
@@ -227,11 +227,11 @@ public class ActivityServiceDb implements ActivityService {
 
   /**
    * Gets the activities.
-   * 
+   *
    * @param userId the user id
    * @param token the token
    * @param activityId the activity id
-   * 
+   *
    * @return the activities
    */
   private Activity getActivities(UserId userId, String activityId,
@@ -252,11 +252,11 @@ public class ActivityServiceDb implements ActivityService {
 
   /**
    * Gets the activities.
-   * 
+   *
    * @param userId the user id
    * @param token the token
    * @param activityIds the activity ids
-   * 
+   *
    * @return the activities
    */
   private List<Activity> getActivities(UserId userId, Set<String> activityIds,

@@ -225,13 +225,13 @@ public class PipelinedDataPreloaderTest extends PreloaderTestFixture {
   }
 
   @Test
-  /** 
+  /**
    * Verify that social preloads where the request doesn't contain a token
    * serve up 403s for the preloaded data, instead of failing the whole request.
    */
   public void testSocialPreloadWithoutToken() throws Exception {
     GadgetSpec spec = new GadgetSpec(GADGET_URL, XML);
-    
+
     RecordingRequestPipeline pipeline = new RecordingRequestPipeline("");
     PipelinedDataPreloader preloader = new PipelinedDataPreloader(pipeline, containerConfig);
     view = "profile";
@@ -262,7 +262,7 @@ public class PipelinedDataPreloaderTest extends PreloaderTestFixture {
       resultsById.put((String) JsonUtil.getProperty(o, "id"),
           JsonSerializer.serialize(o));
     }
-    
+
     return resultsById;
   }
 

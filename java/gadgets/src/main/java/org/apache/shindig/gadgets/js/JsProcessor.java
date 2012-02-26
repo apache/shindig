@@ -25,7 +25,7 @@ public interface JsProcessor {
 
   /**
    * Populates or modifies the Javascript response.
-   * 
+   *
    * @param jsRequest The JS request that originated this execution.
    * @param builder The response builder to work on.
    * @return Whether processing should continue after this processor.

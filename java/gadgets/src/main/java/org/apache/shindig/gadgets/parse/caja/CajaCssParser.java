@@ -76,7 +76,7 @@ public class CajaCssParser {
     // Use a fake source if the real source is unknown
     return parseDom(content, FAKE_SOURCE);
   }
-  
+
   public CssTree.StyleSheet parseDom(String content, Uri source)
       throws GadgetException {
     CssTree.StyleSheet parsedCss = null;

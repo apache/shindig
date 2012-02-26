@@ -64,7 +64,7 @@ public class ExportJsProcessor extends BaseSurfaceJsProcessor implements JsProce
         needExports |= appendExportJsStatements(resp, jsUri, last);
       }
     }
-    
+
     builder.clearJs();
     if (needExports) {
       builder.appendAllJs(getSurfaceJsContents(featureRegistry, FEATURE_NAME));
@@ -87,7 +87,7 @@ public class ExportJsProcessor extends BaseSurfaceJsProcessor implements JsProce
     }
     return false;
   }
-  
+
   private String toExportStatement(Input input) {
     StringBuilder result = new StringBuilder();
 

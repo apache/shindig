@@ -25,11 +25,11 @@ public class BlobCrypterException extends Exception {
   public BlobCrypterException(Throwable cause) {
     super(cause);
   }
-  
+
   public BlobCrypterException(String msg, Throwable cause) {
     super(msg, cause);
   }
-  
+
   protected BlobCrypterException(String msg) {
     super(msg);
   }

@@ -56,7 +56,7 @@ public abstract class AbstractParsingTestBase {
     String serialized = HtmlSerialization.serialize(document);
     assertHtmlEquals(expected, serialized);
   }
-  
+
   private void assertHtmlEquals(String expected, String serialized) {
     // Compute the diff of expected vs. serialized, and disregard constructs that we don't
     // care about, such as whitespace deltas and differently-computed escape sequences.
@@ -98,7 +98,7 @@ public abstract class AbstractParsingTestBase {
       }
     }
   }
-  
+
   private boolean equivalentEntities(String prev, String cur) {
     if (!prev.endsWith(";") && !cur.endsWith(";")) {
       return false;

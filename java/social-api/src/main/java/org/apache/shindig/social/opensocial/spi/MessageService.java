@@ -49,11 +49,11 @@ public interface MessageService {
    * @throws ProtocolException when invalid parameters are given
    */
   Future<RestfulCollection<MessageCollection>> getMessageCollections(UserId userId,
-     Set<String> fields, CollectionOptions options, SecurityToken token) throws ProtocolException; 
+     Set<String> fields, CollectionOptions options, SecurityToken token) throws ProtocolException;
 
   /**
    * Creates a new message collection for the given arguments
-   * 
+   *
    * @param userId  The userId to create the message collection for
    * @param msgCollection A message collection that is to be created
    * @param token  A security token for this request
@@ -65,7 +65,7 @@ public interface MessageService {
 
   /**
    * Modifies/Updates a message collection for the given arguments
-   * 
+   *
    * @param userId  The userId to modify the message collection for
    * @param msgCollection Data for the message collection to be modified
    * @param token  A security token for this request
@@ -77,7 +77,7 @@ public interface MessageService {
 
   /**
    * Deletes a message collection for the given arguments
-   * 
+   *
    * @param userId  The userId to create the message collection for
    * @param msgCollId Data for the message collection to be modified
    * @param token  A security token for this request
@@ -137,7 +137,7 @@ public interface MessageService {
    * Modifies/Updates a specific message with new data
    * @param userId      The User to modify for
    * @param msgCollId   The Message Collection ID to modify from, default @all
-   * @param messageId   The messageId to modify       
+   * @param messageId   The messageId to modify
    * @param message     The message details to modify
    * @param token       Given Security Token for this request
    * @return            Future<Void>

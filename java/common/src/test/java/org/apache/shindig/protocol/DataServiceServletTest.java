@@ -70,7 +70,7 @@ public class DataServiceServletTest extends Assert {
         ContentTypes.OUTPUT_XML_CONTENT_TYPE).anyTimes();
     EasyMock.expect(atomConverter.getContentType()).andReturn(
         ContentTypes.OUTPUT_ATOM_CONTENT_TYPE).anyTimes();
-    
+
     HandlerRegistry registry = new DefaultHandlerRegistry(null, jsonConverter,
         new HandlerExecutionListener.NoOpHandler());
     registry.addHandlers(Sets.<Object>newHashSet(new TestHandler()));

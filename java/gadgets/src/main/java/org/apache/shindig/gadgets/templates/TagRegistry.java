@@ -32,9 +32,9 @@ import com.google.inject.ImplementedBy;
 public interface TagRegistry {
 
   public TagHandler getHandlerFor(Element element);
-  
+
   public TagHandler getHandlerFor(NSName name);
-  
+
   /**
    * A namespace-name pair used as Hash key for handler lookups.
    */
@@ -42,29 +42,29 @@ public interface TagRegistry {
     private final String namespaceUri;
     private final String localName;
     private final int hash;
-    
+
     public NSName(String namespaceUri, String localName) {
       this.namespaceUri = namespaceUri;
       this.localName = localName;
       hash = (namespaceUri.hashCode() * 37) ^ localName.hashCode();
     }
-    
+
     @Override
     public String toString() {
       return namespaceUri + ':' + localName;
     }
-    
+
     @Override
     public boolean equals(Object obj) {
-      if (this == obj) { return true; } 
+      if (this == obj) { return true; }
       if (!(obj instanceof NSName)) { return false; }
       NSName nsn = (NSName) obj;
       return namespaceUri.equals(nsn.namespaceUri) && localName.equals(nsn.localName);
     }
-    
+
     @Override
-    public int hashCode() {    
+    public int hashCode() {
       return hash;
-    }    
+    }
   }
 }

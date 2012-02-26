@@ -96,10 +96,10 @@ public interface ActivityStreamService {
    */
   Future<Void> deleteActivityEntries(UserId userId, GroupId groupId, String appId,
       Set<String> activityIds, SecurityToken token) throws ProtocolException;
-  
+
   /**
    * Updates the specified Activity.
-   * 
+   *
    * @param userId      The id of the person to update the activity for
    * @param groupId     The group
    * @param appId       The app id

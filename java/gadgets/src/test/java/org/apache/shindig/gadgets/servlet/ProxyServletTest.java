@@ -38,7 +38,7 @@ import javax.servlet.http.HttpServletResponse;
 
 /**
  * Tests for ProxyServlet.
- * 
+ *
  * Tests are trivial; real tests are in ProxyHandlerTest.
  */
 public class ProxyServletTest extends ServletTestFixture {
@@ -49,7 +49,7 @@ public class ProxyServletTest extends ServletTestFixture {
   private static final String ERROR_MESSAGE = "Broken!";
   private static final String POST_CONTENT = "my post stuff";
   private static final String POST_METHOD = "POST";
-  
+
   private ServletInputStream postContentStream = new ServletInputStream() {
     InputStream is = new ByteArrayInputStream(POST_CONTENT.getBytes());
     @Override
@@ -165,7 +165,7 @@ public class ProxyServletTest extends ServletTestFixture {
   public void testDoPostNormal() throws Exception {
     setupRequest(BASIC_SYNTAX_URL);
     expect(request.getInputStream()).andReturn(postContentStream);
-    expect(request.getMethod()).andReturn(POST_METHOD);    
+    expect(request.getMethod()).andReturn(POST_METHOD);
     expect(proxyHandler.fetch(proxyUri, POST_CONTENT)).andReturn(new HttpResponse(RESPONSE_BODY));
 
     replay();

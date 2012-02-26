@@ -30,11 +30,11 @@ public interface TemplateLibrary {
    * @return a registry of tags in this library.
    */
   TagRegistry getTagRegistry();
-  
+
   Uri getLibraryUri();
 
   boolean isSafe();
-  
+
   String serialize();
-  
+
 }

@@ -47,8 +47,8 @@ public class ModuleSubstituterTest extends Assert {
 
   @Test
   public void testSpecific() throws Exception {
-    final int moduleId = 12345678;  
-      
+    final int moduleId = 12345678;
+
     ModuleSubstituter substituter = new ModuleSubstituter();
     substituter.addSubstitutions(substitutions, new GadgetContext() {
         @Override

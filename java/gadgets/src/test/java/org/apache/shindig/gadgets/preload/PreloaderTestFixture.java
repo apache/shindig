@@ -68,7 +68,7 @@ public class PreloaderTestFixture {
     public String getParameter(String name) {
       return contextParams.get(name);
     }
-    
+
     @Override
     public boolean getIgnoreCache() {
       return ignoreCache;

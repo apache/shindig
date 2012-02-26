@@ -42,7 +42,7 @@ public class OAuth2Spec {
    * @param element the OAuth2 spec element
    * @param base  The uri that the spec is loaded from. messages is assumed
    *     to be relative to this path.
-   * @throws SpecParserException 
+   * @throws SpecParserException
    */
   public OAuth2Spec(Element element, Uri base) throws SpecParserException {
     serviceMap = Maps.newHashMap();
@@ -77,7 +77,7 @@ public class OAuth2Spec {
         sb.append(service.getAuthorizationUrl().toString("Authorization"));
       }
       if (service.getTokenUrl() != null) {
-        sb.append(service.getTokenUrl().toString("Token"));        
+        sb.append(service.getTokenUrl().toString("Token"));
       }
       sb.append("</Service>");
     }

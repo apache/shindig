@@ -78,7 +78,7 @@ public class DefaultJsCompilerTest {
 
   @Test
   public void testCompile() throws Exception {
-    JsResponse actual = compiler.compile(null, 
+    JsResponse actual = compiler.compile(null,
         ImmutableList.of(JsContent.fromText(COMPILE_CONTENT, "js")), null);
     assertEquals(COMPILE_CONTENT, actual.toJsString());
     assertEquals(0, actual.getErrors().size());
@@ -108,7 +108,7 @@ public class DefaultJsCompilerTest {
     replay(result);
     return result;
   }
-  
+
   private String getContent(Iterable<JsContent> jsContent) {
     StringBuilder sb = new StringBuilder();
     for (JsContent js : jsContent) {

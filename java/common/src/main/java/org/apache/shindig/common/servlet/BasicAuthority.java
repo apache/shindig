@@ -57,7 +57,7 @@ public class BasicAuthority implements Authority {
   public String getScheme(){
     return Objects.firstNonNull(ServletRequestContext.getScheme(), "http");
   }
-  
+
   public String getOrigin(){
 	return getScheme() + "://" + getAuthority();
   }

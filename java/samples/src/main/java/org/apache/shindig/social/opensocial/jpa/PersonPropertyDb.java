@@ -26,7 +26,7 @@ import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 
 /**
- * A property, associated with a person, extends the "list_field" table, 
+ * A property, associated with a person, extends the "list_field" table,
  * and sets the "list_field_type" to PersonPropertiesDb.
  */
 @Entity

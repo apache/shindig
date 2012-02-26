@@ -61,14 +61,14 @@ public class JsonRpcServlet extends ApiServlet {
    * actual request, per the proposed Opensocial 0.9 specification.
    */
   public static final String REQUEST_PARAM = "request";
-  
+
   private MultipartFormParser formParser;
 
   @Inject
   void setMultipartFormParser(MultipartFormParser formParser) {
     this.formParser = formParser;
   }
-  
+
   private String jsonRpcResultField = "result";
   private boolean jsonRpcBothFields = false;
 
@@ -88,7 +88,7 @@ public class JsonRpcServlet extends ApiServlet {
     String method = servletRequest.getMethod();
 
     if (!("GET".equals(method) || "POST".equals(method))) {
-      sendError(servletResponse, 
+      sendError(servletResponse,
                 new ResponseItem(HttpServletResponse.SC_BAD_REQUEST, "Only POST/GET Allowed"));
       return;
     }
@@ -121,7 +121,7 @@ public class JsonRpcServlet extends ApiServlet {
           return;
         }
       }
-      
+
       if (content == null) {
         sendError(servletResponse, new ResponseItem(HttpServletResponse.SC_BAD_REQUEST, "No content specified"));
         return;
@@ -230,7 +230,7 @@ public class JsonRpcServlet extends ApiServlet {
   }
 
   /**
-   * 
+   *
    */
   protected void addResult(Map<String,Object> result, Object data) {
     if (jsonRpcBothFields) {
@@ -311,7 +311,7 @@ public class JsonRpcServlet extends ApiServlet {
      .put(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "internalError")
      .put(HttpServletResponse.SC_EXPECTATION_FAILED, "limitExceeded")
      .build();
-        
+
   // TODO(doll): Refactor the responseItem so that the fields on it line up with this format.
   // Then we can use the general converter to output the response to the client and we won't
   // be harcoded to json.
@@ -327,7 +327,7 @@ public class JsonRpcServlet extends ApiServlet {
         message += ": " + responseItem.getErrorMessage();
       }
     }
-    
+
     if (StringUtils.isNotBlank(message)) {
       error.put("message", message);
     }

@@ -24,7 +24,7 @@ import java.util.Map;
  */
 public class DataCollection {
   private Map<String, Map<String, String>> entry;
-  
+
   public DataCollection(Map<String, Map<String, String>> entry) {
     this.entry = entry;
   }

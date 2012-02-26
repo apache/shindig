@@ -43,7 +43,7 @@ public class OpenSocialI18NGadgetRewriterTest {
     assertEquals("en",
                  i18nRewriter.getLocaleNameForLoadingI18NConstants(localeAtRendering));
   }
-  
+
   @Test
   public void localeNameForEnglishUS() throws Exception {
     localeAtRendering = new Locale("en", "US");
@@ -85,14 +85,14 @@ public class OpenSocialI18NGadgetRewriterTest {
     assertEquals("en",
                  i18nRewriter.getLocaleNameForLoadingI18NConstants(localeAtRendering));
   }
- 
+
   @Test
   public void localeNameForInvalidCountry() throws Exception {
     localeAtRendering = new Locale("zh", "foo");
     assertEquals("zh",
                  i18nRewriter.getLocaleNameForLoadingI18NConstants(localeAtRendering));
   }
- 
+
   @Test
   public void localeNameForInvalidLanguage() throws Exception {
     localeAtRendering = new Locale("foo", "CN");
@@ -106,7 +106,7 @@ public class OpenSocialI18NGadgetRewriterTest {
     assertEquals("en",
                  i18nRewriter.getLocaleNameForLoadingI18NConstants(localeAtRendering));
   }
-  
+
   private static class FakeOpenSocialI18NGadgetRewriter extends OpenSocialI18NGadgetRewriter {
     private Map<String, String> resources = new HashMap<String,String>();
     public FakeOpenSocialI18NGadgetRewriter() {
@@ -124,7 +124,7 @@ public class OpenSocialI18NGadgetRewriterTest {
       } else {
         throw new IOException("Resource Unavailable.");
       }
-    } 
+    }
   }
 }
 

@@ -57,7 +57,7 @@ public interface HandlerExecutionListener {
    * You can configure this for use by adding a binding in your Guice Module like this:
    *   bind(HandlerExecutionListener.class).to(HandlerExecutionListener.LoggingHandler.class);
    */
-  
+
   public static class LoggingHandler implements HandlerExecutionListener {
     public static final Logger LOG = Logger.getLogger(HandlerExecutionListener.class.toString());
 

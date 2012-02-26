@@ -77,7 +77,7 @@ public class CacheEnforcementVisitorTest extends DomWalkerTestBase {
     GadgetSpec gadgetSpec = createMock(GadgetSpec.class);
     expect(gadgetSpec.getUrl()).andReturn(uri);
     expect(gadget.getSpec()).andReturn(gadgetSpec);
-    
+
     GadgetContext context = createMock(GadgetContext.class);
     expect(context.getContainer()).andReturn(CONTAINER);
     expect(gadget.getContext()).andReturn(context);

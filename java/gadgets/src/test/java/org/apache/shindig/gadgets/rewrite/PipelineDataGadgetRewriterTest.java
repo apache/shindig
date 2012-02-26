@@ -117,7 +117,7 @@ public class PipelineDataGadgetRewriterTest {
 
     Capture<PipelinedData.Batch> batchCapture =
       new Capture<PipelinedData.Batch>();
-    
+
     // Dummy return results (the "real" return would have two values)
     Callable<PreloadedData> callable = createPreloadTask(
         "key", "{result: {foo: 'bar'}}");
@@ -138,7 +138,7 @@ public class PipelineDataGadgetRewriterTest {
 
     assertTrue(batchCapture.getValue().getPreloads().containsKey("me"));
     assertTrue(batchCapture.getValue().getPreloads().containsKey("json"));
-    
+
     assertFalse(gadget.getDirectFeatureDeps().contains("opensocial-data"));
     assertTrue(gadget.getDirectFeatureDeps().contains("opensocial-data-context"));
 
@@ -156,7 +156,7 @@ public class PipelineDataGadgetRewriterTest {
     control.replay();
 
     rewriter.rewrite(gadget, content);
-    
+
     control.verify();
 
     // Check there is no DataContext inserted
@@ -166,13 +166,13 @@ public class PipelineDataGadgetRewriterTest {
     assertTrue("os-data was deleted",
         content.getContent().indexOf("type=\"text/os-data\"") > 0);
   }
-  
+
   /** Match a batch with the specified count of social and HTTP data items */
   private PipelinedData.Batch eqBatch(int socialCount, int httpCount) {
     reportMatcher(new BatchMatcher(socialCount, httpCount));
     return null;
   }
-  
+
   private static class BatchMatcher implements IArgumentMatcher {
     private final int socialCount;
     private final int httpCount;
@@ -181,7 +181,7 @@ public class PipelineDataGadgetRewriterTest {
       this.socialCount = socialCount;
       this.httpCount = httpCount;
     }
-    
+
     public void appendTo(StringBuffer buffer) {
       buffer.append("eqBuffer[social=" + socialCount + ",http=" + httpCount + ']');
     }
@@ -190,7 +190,7 @@ public class PipelineDataGadgetRewriterTest {
       if (!(obj instanceof PipelinedData.Batch)) {
         return false;
       }
-      
+
       PipelinedData.Batch batch = (PipelinedData.Batch) obj;
       int actualSocialCount = 0;
       int actualHttpCount = 0;
@@ -201,12 +201,12 @@ public class PipelineDataGadgetRewriterTest {
           actualSocialCount++;
         }
       }
-      
+
       return socialCount == actualSocialCount && httpCount == actualHttpCount;
     }
-    
+
   }
-  
+
   @Test
   public void rewriteWithoutPipeline() throws Exception {
     setupGadget(XML_WITHOUT_PIPELINE);
@@ -247,7 +247,7 @@ public class PipelineDataGadgetRewriterTest {
     Map<String, PipelinedData.BatchItem> preloads = batch.getPreloads();
     assertTrue(preloads.containsKey("me"));
     assertEquals(PipelinedData.BatchType.SOCIAL, preloads.get("me").getType());
-        
+
     JsonAssert.assertObjectEquals(
         "{params: {userId: 'canonical'}, method: 'people.get', id: 'me'}",
         preloads.get("me").getData());
@@ -267,7 +267,7 @@ public class PipelineDataGadgetRewriterTest {
     Callable<PreloadedData> callable = new Callable<PreloadedData>() {
       public PreloadedData call() throws Exception {
         return preloadResult;
-      }      
+      }
     };
     return callable;
   }
@@ -278,5 +278,5 @@ public class PipelineDataGadgetRewriterTest {
         + "<Content>"
         + "    <![CDATA[" + content + "]]>"
         + "</Content></Module>";
-  }  
+  }
 }

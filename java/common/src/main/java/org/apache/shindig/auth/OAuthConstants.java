@@ -27,7 +27,7 @@ public final class OAuthConstants {
   public static final String OAUTH_SESSION_HANDLE = "oauth_session_handle";
   public static final String OAUTH_EXPIRES_IN = "oauth_expires_in";
   public static final String OAUTH_BODY_HASH = "oauth_body_hash";
-  
+
   public static final String PROBLEM_ACCESS_TOKEN_EXPIRED = "access_token_expired";
   public static final String PROBLEM_PARAMETER_MISSING = "parameter_missing";
   public static final String PROBLEM_TOKEN_INVALID = "token_invalid";

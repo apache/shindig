@@ -71,7 +71,7 @@ public class AddJslInfoVariableProcessorTest {
     assertEquals("", response.build().toJsString());
     control.verify();
   }
-  
+
   @Test
   public void addsHint() throws Exception {
     setJsUri(URI);
@@ -82,7 +82,7 @@ public class AddJslInfoVariableProcessorTest {
         AddJslInfoVariableProcessor.FEATURES_HINT_TEMPLATE,
         URI_JS, LIBS_JS);
     assertEquals(expected, response.build().toJsString());
-    control.verify();    
+    control.verify();
   }
 
   @Test
@@ -99,9 +99,9 @@ public class AddJslInfoVariableProcessorTest {
     assertEquals(expected, response.build().toJsString());
     assertFalse(captureJsUri.getValue().isJsload());
     assertTrue(captureJsUri.getValue().isNohint());
-    control.verify();    
+    control.verify();
   }
-  
+
   @Test
   public void addsHintWithoutUriIfBlank() throws Exception {
     setJsUri("");
@@ -111,9 +111,9 @@ public class AddJslInfoVariableProcessorTest {
         AddJslInfoVariableProcessor.FEATURES_HINT_TEMPLATE,
         LIBS_JS);
     assertEquals(expected, response.build().toJsString());
-    control.verify();    
+    control.verify();
   }
-  
+
 
   private void setJsUri(String uri) {
     jsUri = new JsUri(UriStatus.VALID_UNVERSIONED, Uri.parse(uri), LIBS, null);

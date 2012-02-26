@@ -161,7 +161,7 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
     htmlScanner.scanDocument(true);
     return handler;
   }
-  
+
   private void fixNekoWeirdness(Document document) {
     // Neko as of versions > 1.9.13 stuffs all leading <script> nodes into <head>.
     // This breaks all sorts of assumptions in gadgets, notably the existence of document.body.
@@ -192,7 +192,7 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
         headScripts.add(headChild);
       }
     }
-    
+
     // Remove from head, add to top of <body> in <head> order.
     Node body = DomUtil.getFirstNamedChildNode(html, "body");
     if (body == null) {

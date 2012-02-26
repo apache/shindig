@@ -587,7 +587,7 @@ public class FeatureRegistry {
     public List<ApiDirective> getApis() {
       return bundle.getApis();
     }
-    
+
     public boolean isSupportDefer() {
       return bundle.isSupportDefer();
     }

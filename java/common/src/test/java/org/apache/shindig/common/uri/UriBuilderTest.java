@@ -198,7 +198,7 @@ public class UriBuilderTest {
         .setFragment("foo");
     assertEquals("http://apache.org/shindig?hello=world&hello=monde#foo", builder.toString());
   }
- 
+
   @Test
   public void removeQueryParameter() {
     UriBuilder uri = UriBuilder.parse("http://www.example.com/foo?bar=baz&quux=baz");
@@ -255,7 +255,7 @@ public class UriBuilderTest {
     assertEquals("http://apache.org/shindig?hello+world=foo%26bar#foo", builder.toString());
     assertEquals("hello+world=foo%26bar", builder.getQuery());
   }
-  
+
   @Test
   public void addSingleFragmentParameter() {
     UriBuilder builder = new UriBuilder()
@@ -289,7 +289,7 @@ public class UriBuilderTest {
         .setQuery("foo");
     assertEquals("http://apache.org/shindig?foo#hello=world&hello=monde", builder.toString());
   }
- 
+
   @Test
   public void removeFragmentParameter() {
     UriBuilder uri = UriBuilder.parse("http://www.example.com/foo#bar=baz&quux=baz");
@@ -398,7 +398,7 @@ public class UriBuilderTest {
 
     assertEquals(uri.hashCode(), uri2.hashCode());
   }
-  
+
   @Test
   public void constructFromServletRequestHttpStandardPortAndModify() {
     HttpServletRequest req = createMock(HttpServletRequest.class);
@@ -408,19 +408,19 @@ public class UriBuilderTest {
     expect(req.getRequestURI()).andReturn("/my/path");
     expect(req.getQueryString()).andReturn("foo=bar&baz=bak");
     replay(req);
-    
+
     UriBuilder builder = new UriBuilder(req);
     verify(req);
-    
+
     assertEquals("http://example.com/my/path?foo=bar&baz=bak", builder.toString());
     assertEquals("bar", builder.getQueryParameter("foo"));  // sanity check on a single param
     assertEquals(0, builder.getFragmentParameters().size());  // shouldn't NPE
-    
+
     // Simple modification
     builder.setPath("/other/path");
     assertEquals("http://example.com/other/path?foo=bar&baz=bak", builder.toString());
   }
-  
+
   @Test
   public void constructFromServletRequestHttpsStandardPort() {
     HttpServletRequest req = createMock(HttpServletRequest.class);
@@ -430,13 +430,13 @@ public class UriBuilderTest {
     expect(req.getRequestURI()).andReturn("/my/path");
     expect(req.getQueryString()).andReturn("foo=bar&baz=bak");
     replay(req);
-    
+
     UriBuilder builder = new UriBuilder(req);
     verify(req);
-    
+
     assertEquals("https://example.com/my/path?foo=bar&baz=bak", builder.toString());
   }
-  
+
   @Test
   public void constructFromServletRequestNonStandardPort() {
     HttpServletRequest req = createMock(HttpServletRequest.class);
@@ -446,13 +446,13 @@ public class UriBuilderTest {
     expect(req.getRequestURI()).andReturn("/my/path");
     expect(req.getQueryString()).andReturn("one=two&three=four");
     replay(req);
-    
+
     UriBuilder builder = new UriBuilder(req);
     verify(req);
-    
+
     assertEquals("http://example.com:5000/my/path?one=two&three=four", builder.toString());
   }
-  
+
   @Test
   public void constructFromServletRequestNonePort() {
     HttpServletRequest req = createMock(HttpServletRequest.class);
@@ -462,10 +462,10 @@ public class UriBuilderTest {
     expect(req.getRequestURI()).andReturn("/my/path");
     expect(req.getQueryString()).andReturn("one=two&three=four");
     replay(req);
-    
+
     UriBuilder builder = new UriBuilder(req);
     verify(req);
-    
+
     assertEquals("http://example.com/my/path?one=two&three=four", builder.toString());
   }
 }

@@ -31,7 +31,7 @@ import java.util.Set;
 final class ModuleCacheKeys implements JobCache.Keys {
 
   final ImmutableList<ModuleCacheKey> keys;
-  
+
   ModuleCacheKeys(ModuleCacheKey key) {
     this.keys = ImmutableList.of(key);
   }

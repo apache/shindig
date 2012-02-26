@@ -39,11 +39,11 @@ class JsonELResolver extends ELResolver {
     if (base instanceof JSONArray) {
       return Integer.class;
     }
-    
+
     if (base instanceof JSONObject) {
       return String.class;
     }
-    
+
     return null;
   }
 
@@ -60,7 +60,7 @@ class JsonELResolver extends ELResolver {
       Object value = getValue(context, base, property);
       return value == null ? null : value.getClass();
     }
-    
+
     return null;
   }
 
@@ -76,7 +76,7 @@ class JsonELResolver extends ELResolver {
       int index = toInt(property);
       return ((JSONArray) base).opt(index);
     }
-    
+
     return null;
   }
 
@@ -85,7 +85,7 @@ class JsonELResolver extends ELResolver {
     if (isJson(base)) {
       context.setPropertyResolved(true);
     }
-    
+
     return false;
   }
 
@@ -117,7 +117,7 @@ class JsonELResolver extends ELResolver {
     if (property instanceof Number) {
       return ((Number) property).intValue();
     }
-    
+
     try {
       return Integer.parseInt(String.valueOf(property));
     } catch (NumberFormatException nfe) {

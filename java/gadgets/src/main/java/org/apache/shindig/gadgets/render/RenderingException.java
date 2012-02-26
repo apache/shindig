@@ -26,7 +26,7 @@ package org.apache.shindig.gadgets.render;
  */
 public class RenderingException extends Exception {
   private final int httpStatusCode;
-  
+
   public RenderingException(Throwable t, int httpStatusCode) {
     super(t);
     this.httpStatusCode = httpStatusCode;
@@ -34,12 +34,12 @@ public class RenderingException extends Exception {
 
   public RenderingException(String message, int httpStatusCode) {
     super(message);
-    this.httpStatusCode = httpStatusCode;    
+    this.httpStatusCode = httpStatusCode;
   }
 
   public RenderingException(String message, Throwable t, int httpStatusCode) {
     super(message, t);
-    this.httpStatusCode = httpStatusCode;    
+    this.httpStatusCode = httpStatusCode;
   }
 
   public int getHttpStatusCode() {

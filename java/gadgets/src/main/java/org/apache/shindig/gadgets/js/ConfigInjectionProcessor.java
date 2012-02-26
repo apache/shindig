@@ -93,7 +93,7 @@ public class ConfigInjectionProcessor implements JsProcessor {
     }
     return true;
   }
-  
+
   protected void injectBaseConfig(String configJson, JsResponseBuilder builder) {
     builder.prependJs(String.format(CONFIG_INJECT_CODE, configJson), CONFIG_INIT_ID);
     builder.appendJs(String.format(CONFIG_INIT_TPL, configJson), CONFIG_INIT_ID);

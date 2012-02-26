@@ -31,7 +31,7 @@ public interface Substituter {
 
   /**
    * Add the substitutions from this Substituter to the {@link Substitutions}.
-   * 
+   *
    * @param substituter container for the new substitutions, containing any existing substitutions
    * @param context the context in which this gadget is being rendered
    * @param spec the gadget specification being substituted

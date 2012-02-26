@@ -48,16 +48,16 @@ public class DefaultConfigProcessorTest {
   private static final String CONTAINER = "container";
   private static final String HOST = "host";
   private static final Gadget GADGET = new Gadget();
-  
+
   private ContainerConfig config;
-  
+
   @Before
   public void setUp() {
     config = createMock(ContainerConfig.class);
     expect(config.getMap(CONTAINER, DefaultConfigProcessor.GADGETS_FEATURES_KEY)).andReturn(CONFIG_FEATURE_MAP);
     replay(config);
   }
-  
+
   @Test
   public void testGlobalConfig() {
     ConfigContributor contrib = mockContrib(HOST);
@@ -69,7 +69,7 @@ public class DefaultConfigProcessorTest {
     processor.getConfig(CONTAINER, CONFIG_FEATURES, HOST, null);
     verify(config, contrib, noContrib);
   }
-  
+
   @Test
   public void testFeatureConfigHost() {
     ConfigContributor contrib = mockContrib(HOST);
@@ -82,7 +82,7 @@ public class DefaultConfigProcessorTest {
     processor.getConfig(CONTAINER, CONFIG_FEATURES, HOST, null);
     verify(config, contrib, noContrib);
   }
-  
+
   @Test
   public void testFeatureConfigGadget() {
     ConfigContributor contrib = mockContrib(GADGET);
@@ -95,7 +95,7 @@ public class DefaultConfigProcessorTest {
     processor.getConfig(CONTAINER, CONFIG_FEATURES, null, GADGET);
     verify(config, contrib, noContrib);
   }
-  
+
   @SuppressWarnings("unchecked")
   private ConfigContributor mockContrib(String host) {
     ConfigContributor contrib = EasyMock.createMock(ConfigContributor.class);
@@ -107,7 +107,7 @@ public class DefaultConfigProcessorTest {
     replay(contrib);
     return contrib;
   }
-  
+
   @SuppressWarnings("unchecked")
   private ConfigContributor mockContrib(Gadget gadget) {
     ConfigContributor contrib = EasyMock.createMock(ConfigContributor.class);

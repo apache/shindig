@@ -78,7 +78,7 @@ public class MultipleResourceHttpFetcherTest extends EasyMockTestCase {
     assertEquals(CSS_URI, futureTasks.get(1).one);
     assertEquals(reqCxt2, futureTasks.get(1).two.get());
     assertEquals(IMG_URI, futureTasks.get(2).one);
-    assertEquals(reqCxt3, futureTasks.get(2).two.get());    
+    assertEquals(reqCxt3, futureTasks.get(2).two.get());
     verify();
   }
 
@@ -94,7 +94,7 @@ public class MultipleResourceHttpFetcherTest extends EasyMockTestCase {
     assertEquals(2, futureTasks.size());
     assertTrue(futureTasks.containsKey(IMG_URI));
     assertEquals(reqCxt1, futureTasks.get(IMG_URI).get());
-    assertTrue(futureTasks.containsKey(CSS_URI));  
+    assertTrue(futureTasks.containsKey(CSS_URI));
     assertEquals(reqCxt2, futureTasks.get(CSS_URI).get());
     verify();
   }

@@ -33,7 +33,7 @@ public class NekoParserAndSerializeTest extends AbstractParserAndSerializerTest 
     return new NekoSimplifiedHtmlParser(
         new ParseModule.DOMImplementationProvider().get());
   }
-  
+
   // Neko-specific tests.
   @Test
   public void scriptPushedToBody() throws Exception {
@@ -41,7 +41,7 @@ public class NekoParserAndSerializeTest extends AbstractParserAndSerializerTest 
     String expected =
         loadFile("org/apache/shindig/gadgets/parse/nekohtml/test-leadingscript-expected.html");
     parseAndCompareBalanced(content, expected, parser);
-  }  
+  }
 
   // Neko overridden tests (due to Neko quirks)
   @Override
@@ -52,7 +52,7 @@ public class NekoParserAndSerializeTest extends AbstractParserAndSerializerTest 
     String expected = loadFile("org/apache/shindig/gadgets/parse/nekohtml/test-fragment-expected.html");
     parseAndCompareBalanced(content, expected, parser);
   }
-  
+
   @Override
   @Test
   public void noBody() throws Exception {
@@ -75,7 +75,7 @@ public class NekoParserAndSerializeTest extends AbstractParserAndSerializerTest 
     assertNull(parser.parseDom(content).getDoctype());
     parseAndCompareBalanced(content, expected, parser);
   }
-  
+
   @Test
   public void textBeforeScript() throws Exception {
     // Doesn't work in "native" form due to Neko's internals. Upon finding first text, then a

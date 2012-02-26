@@ -39,15 +39,15 @@ import java.util.Set;
 /**
  * An Object representing a Library of Template-based custom OSML tags.
  */
-public class XmlTemplateLibrary implements TemplateLibrary { 
-   
+public class XmlTemplateLibrary implements TemplateLibrary {
+
   public static final String TAG_ATTRIBUTE = "tag";
   public static final String NAMESPACE_TAG = "Namespace";
   public static final String TEMPLATE_TAG = "Template";
   public static final String STYLE_TAG = "Style";
   public static final String JAVASCRIPT_TAG = "JavaScript";
   public static final String TEMPLATEDEF_TAG = "TemplateDef";
-  
+
   private final Uri libraryUri;
   private final String source;
   private final boolean safe;
@@ -62,7 +62,7 @@ public class XmlTemplateLibrary implements TemplateLibrary {
    * @param uri URI of the template library
    * @param root Element representing the Templates tag of this library
    */
-  public XmlTemplateLibrary(Uri uri, Element root, String source) 
+  public XmlTemplateLibrary(Uri uri, Element root, String source)
       throws GadgetException {
     this(uri, root, source, false);
   }
@@ -72,7 +72,7 @@ public class XmlTemplateLibrary implements TemplateLibrary {
    * @param root Element representing the Templates tag of this library
    * @param safe Is this library exempt from being sanitized?
    */
-  public XmlTemplateLibrary(Uri uri, Element root, String source, boolean safe) 
+  public XmlTemplateLibrary(Uri uri, Element root, String source, boolean safe)
       throws GadgetException {
     this.libraryUri = uri;
     this.source = source;
@@ -85,7 +85,7 @@ public class XmlTemplateLibrary implements TemplateLibrary {
     if (javaScript != null) {
       resources.add(TemplateResource.newJavascriptResource(javaScript, this));
     }
-    
+
     this.libraryResources = resources.build();
   }
 
@@ -95,7 +95,7 @@ public class XmlTemplateLibrary implements TemplateLibrary {
   public TagRegistry getTagRegistry() {
     return registry;
   }
-  
+
   /**
    * @return the URI from which the library was loaded.  (This is not the
    * namespace of tags in the library.)
@@ -103,21 +103,21 @@ public class XmlTemplateLibrary implements TemplateLibrary {
   public Uri getLibraryUri() {
     return libraryUri;
   }
-  
+
   /**
-   * @return this library is safe and its content doesn't need to be sanitized. 
+   * @return this library is safe and its content doesn't need to be sanitized.
    */
   public boolean isSafe() {
     return safe;
   }
-  
+
   /**
    * @return This library as XML source.
    */
   public String serialize() {
     return source;
   }
-  
+
   /**
    * Creates a tag handler wrapping an element.  By default, creates
    * a {@link TemplateBasedTagHandler}.  Override this to create custom
@@ -127,17 +127,17 @@ public class XmlTemplateLibrary implements TemplateLibrary {
       String localName) {
     return new TemplateBasedTagHandler(template, namespaceUri, localName);
   }
-  
+
   private Set<TagHandler> parseLibraryDocument(Element root) throws GadgetException {
     ImmutableSet.Builder<TagHandler> handlers = ImmutableSet.builder();
-    
+
     NodeList nodes = root.getChildNodes();
     for (int i = 0; i < nodes.getLength(); i++) {
       Node node = nodes.item(i);
       if (!(node instanceof Element)) {
         continue;
       }
-      
+
       Element element = (Element) node;
       if (NAMESPACE_TAG.equals(element.getLocalName())) {
         processNamespace(element);
@@ -151,10 +151,10 @@ public class XmlTemplateLibrary implements TemplateLibrary {
         processTemplateDef(handlers, element);
       }
     }
-    
+
     return handlers.build();
   }
-  
+
   private void processTemplateDef(Builder<TagHandler> handlers, Element defElement)
       throws TemplateParserException {
     Attr tagAttribute = defElement.getAttributeNode(TAG_ATTRIBUTE);
@@ -163,12 +163,12 @@ public class XmlTemplateLibrary implements TemplateLibrary {
     }
 
     ImmutableSet.Builder<TemplateResource> resources = ImmutableSet.builder();
-    
+
     Element scriptElement = (Element) DomUtil.getFirstNamedChildNode(defElement, JAVASCRIPT_TAG);
     if (scriptElement != null) {
       resources.add(TemplateResource.newJavascriptResource(scriptElement.getTextContent(), this));
     }
-    
+
     Element styleElement = (Element) DomUtil.getFirstNamedChildNode(defElement, STYLE_TAG);
     if (styleElement != null) {
       resources.add(TemplateResource.newStyleResource(styleElement.getTextContent(), this));
@@ -188,7 +188,7 @@ public class XmlTemplateLibrary implements TemplateLibrary {
     if (tagAttribute == null) {
       throw new TemplateParserException("Missing tag attribute on Template");
     }
-    
+
     TagHandler handler = createHandler(tagAttribute.getNodeValue(), templateElement,
         ImmutableSet.<TemplateResource>of());
     if (handler != null) {
@@ -216,12 +216,12 @@ public class XmlTemplateLibrary implements TemplateLibrary {
     if ((nsPrefix != null) || (nsUri != null)) {
       throw new TemplateParserException("Duplicate Namespace elements");
     }
-    
+
     nsPrefix = namespaceNode.getAttribute("prefix");
     if ("".equals(nsPrefix)) {
       throw new TemplateParserException("Missing prefix attribute on Namespace");
     }
-    
+
     nsUri = namespaceNode.getAttribute("url");
     if ("".equals(nsUri)) {
       throw new TemplateParserException("Missing url attribute on Namespace");
@@ -241,16 +241,16 @@ public class XmlTemplateLibrary implements TemplateLibrary {
       throw new TemplateParserException(
           "Can't create tags in undeclared namespace: " + nameParts[0]);
     }
-    
+
     if (isSafe()) {
       bypassTemplateSanitization(template);
     }
-    
+
     return new LibraryTagHandler(
         createTagHandler(template, namespaceUri, nameParts[1]),
         resources);
   }
-  
+
   /**
    * For "safe" libraries, bypass sanitization.  Sanitization should
    * be bypassed on each element in the tree, but not on the whole
@@ -270,7 +270,7 @@ public class XmlTemplateLibrary implements TemplateLibrary {
 
   /**
    * TagHandler delegate reponsible for adding necessary tag resources
-   * as each tag gets processed. 
+   * as each tag gets processed.
    */
   private class LibraryTagHandler implements TagHandler {
     private final TagHandler tagHandler;
@@ -297,7 +297,7 @@ public class XmlTemplateLibrary implements TemplateLibrary {
       for (TemplateResource resource : tagResources) {
         processor.getTemplateContext().addResource(resource, resource);
       }
-      
+
       for (TemplateResource resource : libraryResources) {
         processor.getTemplateContext().addResource(resource, resource);
       }

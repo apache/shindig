@@ -70,7 +70,7 @@ public class HtmlParserTest extends Assert {
   @Test
   public void testParseNestedContentWithNoCloseForBrAndHr() throws Exception {
     parseNestedContentWithNoCloseForBrAndHr(nekoParser);
-  }                     
+  }
 
   void parseNestedContentWithNoCloseForBrAndHr(GadgetHtmlParser htmlParser) throws Exception {
     Document doc = htmlParser.parseDom("<div>x and y<br> and <hr>z</div>");

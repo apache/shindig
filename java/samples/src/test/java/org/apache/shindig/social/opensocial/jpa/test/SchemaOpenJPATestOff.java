@@ -28,7 +28,7 @@ import javax.persistence.EntityTransaction;
 import java.util.Random;
 
 /**
- * 
+ *
  */
 public class SchemaOpenJPATestOff {
 

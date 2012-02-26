@@ -42,7 +42,7 @@ public class OAuthRequestException extends Exception {
   public OAuthRequestException (OAuthError error) {
     this(error.name(), error.toString());
   }
-  
+
 
   /**
    * Create an exception and record information about the exception to be returned to the gadget.
@@ -60,9 +60,9 @@ public class OAuthRequestException extends Exception {
    * @param cause
    */
   public OAuthRequestException(OAuthError error, String errorText, Throwable cause) {
-    this(error.name(), String.format(error.toString(), errorText), cause);    
+    this(error.name(), String.format(error.toString(), errorText), cause);
   }
-  
+
 
   /**
    * Create an exception and record information about the exception to be returned to the gadget.
@@ -74,7 +74,7 @@ public class OAuthRequestException extends Exception {
     this.error = Preconditions.checkNotNull(error);
     this.errorText = Preconditions.checkNotNull(errorText);
   }
-  
+
 
   /**
    * Create an exception and record information about the exception to be returned to the gadget.

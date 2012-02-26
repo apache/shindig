@@ -63,7 +63,7 @@ import com.google.common.collect.MapMaker;
 import com.google.inject.Inject;
 
 /**
- * 
+ *
  * Bootstrap class to setup a test database with some dummy data,
  * which is used by unit tests in spi package.
  *
@@ -71,21 +71,21 @@ import com.google.inject.Inject;
 public class SpiDatabaseBootstrap {
 
   private final static SimpleDateFormat DATE_FORMATTER = new SimpleDateFormat("yyyy-MM-dd");
-  
+
   private EntityManager entityManager;
-  
+
   @Inject
   public SpiDatabaseBootstrap(EntityManager entityManager) {
     this.entityManager = entityManager;
   }
-  
+
   /*
    * Init database bootstrap
    */
   public void init() throws ParseException {
-    this.bootstrapDatabase();    
+    this.bootstrapDatabase();
   }
-  
+
   /*
    * Bootstrap database with some dummy test data
    */
@@ -94,23 +94,23 @@ public class SpiDatabaseBootstrap {
     if (!entityManager.getTransaction().isActive()) {
       entityManager.getTransaction().begin();
     }
-  
+
     // Build person with dummy data
-    Person canonical = buildCanonicalPerson();    
+    Person canonical = buildCanonicalPerson();
     Person johnDoe = buildPerson("john.doe", "Johnny", Person.Gender.male, true, "Doe", "John", "John Doe");
-    Person janeDoe = buildPerson("jane.doe", "Janey", Person.Gender.female, true, "Doe", "Jane", "Jane Doe"); 
+    Person janeDoe = buildPerson("jane.doe", "Janey", Person.Gender.female, true, "Doe", "Jane", "Jane Doe");
     Person georgeDoe = buildPerson("george.doe", "Georgey", Person.Gender.male, true, "Doe", "George", "George Doe");
-    Person mario = buildPerson("mario.rossi", "Mario", Person.Gender.male, true, "Rossi", "Mario", "Mario Rossi"); 
+    Person mario = buildPerson("mario.rossi", "Mario", Person.Gender.male, true, "Rossi", "Mario", "Mario Rossi");
     Person maija = buildPerson("maija.m", "Maija", Person.Gender.female, true, "Meik\u00e4l\u00e4inen", "Maija", "Maija Meik\u00e4l\u00e4inen");
-    
+
     // Persist each person
     entityManager.persist(canonical);
     entityManager.persist(johnDoe);
-    entityManager.persist(janeDoe);    
+    entityManager.persist(janeDoe);
     entityManager.persist(georgeDoe);
     entityManager.persist(mario);
     entityManager.persist(maija);
-    
+
     // Build and persist friend relationships
     entityManager.persist(buildFriend(canonical, johnDoe));
     entityManager.persist(buildFriend(canonical, janeDoe));
@@ -121,17 +121,17 @@ public class SpiDatabaseBootstrap {
     entityManager.persist(buildFriend(johnDoe, maija));
     entityManager.persist(buildFriend(janeDoe, johnDoe));
     entityManager.persist(buildFriend(georgeDoe, johnDoe));
-    
-    // Build and persist activity test data    
+
+    // Build and persist activity test data
     entityManager.persist(buildCanonicalActivity("canonical", "1"));
     entityManager.persist(buildCanonicalActivity("canonical", "2"));
-    
-    ActivityDb activity1 = buildActivityTemplate("john.doe", "1");    
+
+    ActivityDb activity1 = buildActivityTemplate("john.doe", "1");
     activity1.setTitle("yellow");
     activity1.setBody("what a color!");
     entityManager.persist(activity1);
-    
-    ActivityDb activity2 = buildActivityTemplate("jane.doe", "1");    
+
+    ActivityDb activity2 = buildActivityTemplate("jane.doe", "1");
     activity2.setBody("and she thinks you look like him");
     List<MediaItem> mediaItems = new ArrayList<MediaItem>();
     MediaItemDb mediaItem1 = new MediaItemDb();
@@ -148,8 +148,8 @@ public class SpiDatabaseBootstrap {
     activity2.setStreamTitle("jane's photos");
     activity2.setTitle("Jane just posted a photo of a monkey");
     entityManager.persist(activity2);
-    
-    ActivityDb activity3 = buildActivityTemplate("jane.doe", "2");    
+
+    ActivityDb activity3 = buildActivityTemplate("jane.doe", "2");
     activity3.setBody("or is it you?");
     List<MediaItem> mediaItems2 = new ArrayList<MediaItem>();
     MediaItemDb mediaItem3 = new MediaItemDb();
@@ -161,35 +161,35 @@ public class SpiDatabaseBootstrap {
     activity3.setStreamTitle("jane's photos");
     activity3.setTitle("Jane says George likes yoda!");
     entityManager.persist(activity3);
-    
+
     // Build and persist application data test data
     ApplicationDb testApplication = new ApplicationDb();
     testApplication.setId("app");
     entityManager.persist(testApplication);
-    
+
     ApplicationDataMapDb applicationDataMap1 = buildApplicationDataTemplate(testApplication, "canonical", "2");
     applicationDataMap1.getValues().put("size", "100");
     entityManager.persist(applicationDataMap1);
-    
+
     ApplicationDataMapDb applicationDataMap2 = buildApplicationDataTemplate(testApplication, "john.doe", "0");
     entityManager.persist(applicationDataMap2);
-    
+
     ApplicationDataMapDb applicationDataMap3 = buildApplicationDataTemplate(testApplication, "george.doe", "2");
     entityManager.persist(applicationDataMap3);
-    
+
     ApplicationDataMapDb applicationDataMap4 = buildApplicationDataTemplate(testApplication, "jane.doe", "7");
     entityManager.persist(applicationDataMap4);
-    
+
     ApplicationDataMapDb applicationDataMap5 = buildApplicationDataTemplate(testApplication, "maija.m", null);
     entityManager.persist(applicationDataMap5);
-   
+
     // Commit transaction
     entityManager.getTransaction().commit();
   }
-  
+
   /**
    * Delete all previous data
-   * 
+   *
    * @throws Exception
    */
   public void tearDown() throws Exception {
@@ -197,7 +197,7 @@ public class SpiDatabaseBootstrap {
     if (!entityManager.getTransaction().isActive()) {
       entityManager.getTransaction().begin();
     }
-    
+
     // Delete all data
     entityManager.createNativeQuery("delete from friend where 1 > 0").executeUpdate();
     entityManager.createNativeQuery("delete from activity_media where 1 > 0").executeUpdate();
@@ -227,26 +227,26 @@ public class SpiDatabaseBootstrap {
     entityManager.createNativeQuery("delete from application_datavalue where 1 > 0").executeUpdate();
     entityManager.createNativeQuery("delete from application_datamap where 1 > 0").executeUpdate();
     entityManager.createNativeQuery("delete from application where 1 > 0").executeUpdate();
-    entityManager.createNativeQuery("delete from address where 1 > 0").executeUpdate();    
+    entityManager.createNativeQuery("delete from address where 1 > 0").executeUpdate();
     entityManager.createNativeQuery("delete from activity where 1 > 0").executeUpdate();
     entityManager.createNativeQuery("delete from account where 1 > 0").executeUpdate();
-    entityManager.createNativeQuery("delete from list_field where 1 > 0").executeUpdate();    
-    
+    entityManager.createNativeQuery("delete from list_field where 1 > 0").executeUpdate();
+
     // Commit transaction
     entityManager.getTransaction().commit();
-    
+
     // Clear entity manager
     entityManager.clear();
   }
-  
+
   //
-  // Build methods that create dummy test data 
+  // Build methods that create dummy test data
   //
-  
+
   private ApplicationDataMapDb buildApplicationDataTemplate(ApplicationDb application, String personId, String count) {
     ApplicationDataMapDb applicationDataMap = new ApplicationDataMapDb();
     applicationDataMap.setApplication(application);
-    applicationDataMap.setPersonId(personId);    
+    applicationDataMap.setPersonId(personId);
     Map<String, String> values = new MapMaker().makeMap();
     if (null != count) {
       values.put("count", count);
@@ -254,19 +254,19 @@ public class SpiDatabaseBootstrap {
     applicationDataMap.setValues(values);
     return applicationDataMap;
   }
-  
+
   private ActivityDb buildCanonicalActivity(String userId, String id) {
     ActivityDb activity = buildActivityTemplate(userId, id);
-    
+
     // Common attributes
     activity.setPriority(0.7F);
     activity.setStreamFaviconUrl("http://upload.wikimedia.org/wikipedia/commons/0/02/Nuvola_apps_edu_languages.gif");
     activity.setStreamSourceUrl("http://www.example.org/canonical/streamsource");
     activity.setStreamTitle("All my activities");
     activity.setStreamUrl("http://www.example.org/canonical/activities");
-        
+
     // Set othe attributes depending on given id
-    if ("1".equals(id)) {          
+    if ("1".equals(id)) {
       activity.setBody("Went rafting");
       activity.setBodyId("1");
       activity.setExternalId("http://www.example.org/123456");
@@ -291,8 +291,8 @@ public class SpiDatabaseBootstrap {
       activity.setTitleId("1");
       activity.setUpdated(new Date());
       activity.setUrl("http://www.example.org/canonical/activities/1");
-      
-    } else if ("2".equals(id)) {      
+
+    } else if ("2".equals(id)) {
       activity.setBody("Went skiing");
       activity.setBodyId("2");
       activity.setExternalId("http://www.example.org/123457");
@@ -314,10 +314,10 @@ public class SpiDatabaseBootstrap {
   private ActivityDb buildActivityTemplate(String userId, String id) {
     ActivityDb activity = new ActivityDb();
     activity.setUserId(userId);
-    activity.setId(id);    
+    activity.setId(id);
     return activity;
   }
-  
+
   private FriendDb buildFriend(Person person, Person friend) {
     FriendDb friendDb = new FriendDb();
     friendDb.setPerson(person);
@@ -331,20 +331,20 @@ public class SpiDatabaseBootstrap {
     person.setDisplayName(displayName);
     person.setGender(gender);
     person.setHasApp(hasApp);
-    
+
     NameDb name = new NameDb();
     name.setFamilyName(familyName);
     name.setGivenName(givenName);
     name.setFormatted(formatted);
     person.setName(name);
-    
+
     return person;
   }
-  
+
   private Person buildCanonicalPerson() throws ParseException {
     Person person = buildPersonTemplate("canonical");
-    person.setAboutMe("I have an example of every piece of data");    
-    person.setActivities(asList("Coding Shindig"));    
+    person.setAboutMe("I have an example of every piece of data");
+    person.setActivities(asList("Coding Shindig"));
     List<Address> addresses = new ArrayList<Address>();
     PersonAddressDb address = new PersonAddressDb();
     address.setCountry("US");
@@ -358,9 +358,9 @@ public class SpiDatabaseBootstrap {
     address.setFormatted("PoBox 3565, 1 OpenStandards Way, Apache, CA");
     // address.setPerson(person);
     addresses.add(address);
-    person.setAddresses(addresses);    
+    person.setAddresses(addresses);
     person.setAge(33);
-    
+
     BodyTypeDb bodyType = new BodyTypeDb();
     bodyType.setBuild("svelte");
     bodyType.setEyeColor("blue");
@@ -368,40 +368,40 @@ public class SpiDatabaseBootstrap {
     bodyType.setHeight(1.84F);
     bodyType.setWeight(74F);
     person.setBodyType(bodyType);
-    
+
     person.setBooks(asList("The Cathedral & the Bazaar","Catch 22"));
     person.setCars(asList("beetle","prius"));
     person.setChildren("3");
-    
+
     AddressDb currentLocation = new AddressDb();
     currentLocation.setLatitude(48.858193F);
     currentLocation.setLongitude(2.29419F);
     person.setCurrentLocation(currentLocation);
-        
+
     person.setBirthday(buildDate("1975-01-01"));
     person.setDisplayName("Shin Digg");
     person.setDrinker(new EnumDb<Drinker>(Drinker.SOCIALLY));
-    
+
     List<ListField> emails = new ArrayList<ListField>();
     EmailDb email = new EmailDb();
     email.setValue("dev@shindig.apache.org");
     email.setType("work");
     emails.add(email);
     person.setEmails(emails);
-   
-    person.setEthnicity("developer");    
-    person.setFashion("t-shirts");    
-    person.setFood(asList("sushi","burgers"));    
+
+    person.setEthnicity("developer");
+    person.setFashion("t-shirts");
+    person.setFood(asList("sushi","burgers"));
     person.setGender(Person.Gender.male);
-    person.setHappiestWhen("coding");    
-    person.setHasApp(true);    
-    person.setHeroes(asList("Doug Crockford", "Charles Babbage"));    
-    person.setHumor("none to speak of");    
-    person.setInterests(asList("PHP","Java"));    
+    person.setHappiestWhen("coding");
+    person.setHasApp(true);
+    person.setHeroes(asList("Doug Crockford", "Charles Babbage"));
+    person.setHumor("none to speak of");
+    person.setInterests(asList("PHP","Java"));
     person.setJobInterests("will work for beer");
-    
+
     List<Organization> organizations = new ArrayList<Organization>();
-    
+
     PersonOrganizationDb organization1 = new PersonOrganizationDb();
     OrganizationAddressDb orgAddress1 = new OrganizationAddressDb();
     orgAddress1.setFormatted("1 Shindig Drive");
@@ -416,7 +416,7 @@ public class SpiDatabaseBootstrap {
     organization1.setTitle("Grand PooBah");
     organization1.setWebpage("http://shindig.apache.org/");
     organization1.setType("job");
-    
+
     PersonOrganizationDb organization2 = new PersonOrganizationDb();
     OrganizationAddressDb orgAddress2 = new OrganizationAddressDb();
     orgAddress2.setFormatted("1 Skid Row");
@@ -431,25 +431,25 @@ public class SpiDatabaseBootstrap {
     organization2.setTitle("Gopher");
     organization2.setWebpage("");
     organization2.setType("job");
-    
+
     organizations.add(organization1);
     organizations.add(organization2);
     person.setOrganizations(organizations);
-    
+
     person.setLanguagesSpoken(asList("English","Dutch","Esperanto"));
     person.setUpdated(new Date());
     person.setLivingArrangement("in a house");
-        
+
     List<Enum<LookingFor>> lookingFor = Lists.newArrayList();
     Enum<LookingFor> lookingForOne = new EnumImpl<LookingFor>(LookingFor.RANDOM);
     Enum<LookingFor> lookingForTwo = new EnumImpl<LookingFor>(LookingFor.NETWORKING);
     lookingFor.add(lookingForOne);
     lookingFor.add(lookingForTwo);
     person.setLookingFor(lookingFor);
-    
+
     person.setMovies(asList("Iron Man", "Nosferatu"));
     person.setMusic(asList("Chieftains","Beck"));
-    
+
     NameDb name = new NameDb();
     name.setAdditionalName("H");
     name.setFamilyName("Digg");
@@ -458,12 +458,12 @@ public class SpiDatabaseBootstrap {
     name.setHonorificSuffix("Social Butterfly");
     name.setFormatted("Sir Shin H. Digg Social Butterfly");
     person.setName(name);
-    
+
     person.setNetworkPresence(new EnumDb<NetworkPresence>(NetworkPresence.ONLINE));
-    
+
     person.setNickname("diggy");
     person.setPets("dog,cat");
-    
+
     List<ListField> phoneNumbers = new ArrayList<ListField>();
     PhoneDb phone1 = new PhoneDb();
     phone1.setValue("111-111-111");
@@ -474,19 +474,19 @@ public class SpiDatabaseBootstrap {
     phoneNumbers.add(phone1);
     phoneNumbers.add(phone2);
     person.setPhoneNumbers(phoneNumbers);
-    
-    person.setPoliticalViews("open leaning");    
+
+    person.setPoliticalViews("open leaning");
     person.setProfileSong(buildUrl("http://www.example.org/songs/OnlyTheLonely.mp3", "Feelin' blue", "road"));
     person.setProfileUrl("http://www.example.org/?id=1");
     person.setProfileVideo(buildUrl("http://www.example.org/videos/Thriller.flv", "Thriller", "video"));
-   
+
     person.setQuotes(asList("I am therfore I code", "Doh!"));
     person.setRelationshipStatus("married to my job");
     person.setReligion("druidic");
     person.setRomance("twice a year");
     person.setScaredOf("COBOL");
     person.setSexualOrientation("north");
-    person.setSmoker(new EnumDb<Smoker>(Smoker.NO));    
+    person.setSmoker(new EnumDb<Smoker>(Smoker.NO));
     person.setSports(asList("frisbee","rugby"));
     person.setStatus("happy");
     person.setTags(asList("C#","JSON","template"));
@@ -494,29 +494,29 @@ public class SpiDatabaseBootstrap {
     person.setTurnOffs(asList("lack of unit tests","cabbage"));
     person.setTurnOns(asList("well document code"));
     person.setTvShows(asList("House","Battlestar Galactica"));
-    
+
     List<Url> urls = new ArrayList<Url>();
     urls.add(buildUrl("http://www.example.org/?id=1", "my profile", "Profile"));
     urls.add(buildUrl("http://www.example.org/pic/?id=1", "my awesome picture", "Thumbnail"));
     person.setUrls(urls);
-    
+
     List<ListField> photos = new ArrayList<ListField>();
     PhotoDb photo = new PhotoDb();
     photo.setValue("http://www.example.org/pic/?id=1");
     photo.setType("thumbnail");
     photos.add(photo);
     person.setPhotos(photos);
-    
+
     return person;
   }
-  
+
   private Person buildPersonTemplate(String personId) {
     PersonDb person = new PersonDb();
     person.setId(personId);
     person.setAboutMe("");
-    
+
     person.setActivities(asList(""));
-    
+
     List<Address> addresses = new ArrayList<Address>();
     PersonAddressDb address = new PersonAddressDb();
     address.setCountry("");
@@ -532,9 +532,9 @@ public class SpiDatabaseBootstrap {
     // address.setPerson(person);
     addresses.add(address);
     person.setAddresses(addresses);
-    
+
     person.setAge(0);
-    
+
     BodyTypeDb bodyType = new BodyTypeDb();
     bodyType.setBuild("");
     bodyType.setEyeColor("");
@@ -542,40 +542,40 @@ public class SpiDatabaseBootstrap {
     bodyType.setHeight(0F);
     bodyType.setWeight(0F);
     person.setBodyType(bodyType);
-    
+
     person.setBooks(asList(""));
     person.setCars(asList(""));
     person.setChildren("");
-    
+
     AddressDb currentLocation = new AddressDb();
     currentLocation.setLatitude(0F);
     currentLocation.setLongitude(0F);
     person.setCurrentLocation(currentLocation);
-    
+
     person.setBirthday(new Date());
     person.setDisplayName("");
     person.setDrinker(new EnumDb<Drinker>(Drinker.SOCIALLY));
-    
+
     List<ListField> emails = new ArrayList<ListField>();
     EmailDb email = new EmailDb();
     email.setValue("");
     email.setType("");
     emails.add(email);
     person.setEmails(emails);
-    
-    person.setEthnicity("");    
-    person.setFashion("");    
-    person.setFood(asList(""));    
+
+    person.setEthnicity("");
+    person.setFashion("");
+    person.setFood(asList(""));
     person.setGender(Person.Gender.male);
-    person.setHappiestWhen("");    
-    person.setHasApp(true);    
-    person.setHeroes(asList(""));    
-    person.setHumor("");    
-    person.setInterests(asList(""));    
+    person.setHappiestWhen("");
+    person.setHasApp(true);
+    person.setHeroes(asList(""));
+    person.setHumor("");
+    person.setInterests(asList(""));
     person.setJobInterests("");
-    
+
     List<Organization> organizations = new ArrayList<Organization>();
-    
+
     PersonOrganizationDb organization1 = new PersonOrganizationDb();
     OrganizationAddressDb orgAddress1 = new OrganizationAddressDb();
     orgAddress1.setFormatted("");
@@ -589,25 +589,25 @@ public class SpiDatabaseBootstrap {
     organization1.setSubField("");
     organization1.setTitle("");
     organization1.setWebpage("");
-    organization1.setType("");    
-    
+    organization1.setType("");
+
     organizations.add(organization1);
     person.setOrganizations(organizations);
-    
+
     person.setLanguagesSpoken(asList(""));
     person.setUpdated(new Date());
     person.setLivingArrangement("");
-        
+
     List<Enum<LookingFor>> lookingFor = Lists.newArrayList();
     Enum<LookingFor> lookingForOne = new EnumImpl<LookingFor>(LookingFor.RANDOM);
     Enum<LookingFor> lookingForTwo = new EnumImpl<LookingFor>(LookingFor.NETWORKING);
     lookingFor.add(lookingForOne);
     lookingFor.add(lookingForTwo);
     person.setLookingFor(lookingFor);
-    
+
     person.setMovies(asList(""));
     person.setMusic(asList(""));
-    
+
     NameDb name = new NameDb();
     name.setAdditionalName("");
     name.setFamilyName("");
@@ -616,11 +616,11 @@ public class SpiDatabaseBootstrap {
     name.setHonorificSuffix("");
     name.setFormatted("");
     person.setName(name);
-    
+
     person.setNetworkPresence(new EnumDb<NetworkPresence>(NetworkPresence.ONLINE));
     person.setNickname("");
     person.setPets("");
-    
+
     List<ListField> phoneNumbers = new ArrayList<ListField>();
     PhoneDb phone1 = new PhoneDb();
     phone1.setValue("");
@@ -631,8 +631,8 @@ public class SpiDatabaseBootstrap {
     phoneNumbers.add(phone1);
     phoneNumbers.add(phone2);
     person.setPhoneNumbers(phoneNumbers);
-    
-    person.setPoliticalViews("");    
+
+    person.setPoliticalViews("");
     person.setProfileSong(buildUrl("", "Link Text", "URL"));
     person.setProfileUrl("");
     person.setProfileVideo(buildUrl("", "Link Text", "URL"));
@@ -642,7 +642,7 @@ public class SpiDatabaseBootstrap {
     person.setRomance("");
     person.setScaredOf("");
     person.setSexualOrientation("");
-    person.setSmoker(new EnumDb<Smoker>(Smoker.NO));    
+    person.setSmoker(new EnumDb<Smoker>(Smoker.NO));
     person.setSports(asList(""));
     person.setStatus("");
     person.setTags(asList(""));
@@ -650,30 +650,30 @@ public class SpiDatabaseBootstrap {
     person.setTurnOffs(asList(""));
     person.setTurnOns(asList(""));
     person.setTvShows(asList(""));
-    
+
     List<Url> urls = new ArrayList<Url>();
     urls.add(buildUrl("", "", "Profile"));
     urls.add(buildUrl("", "", "Thumbnail"));
     person.setUrls(urls);
-    
+
     List<ListField> photos = new ArrayList<ListField>();
     PhotoDb photo = new PhotoDb();
     photo.setValue("");
     photo.setType("thumbnail");
     photos.add(photo);
     person.setPhotos(photos);
-    
+
     return person;
   }
-  
+
   private Date buildDate(String dateAsString) throws ParseException {
     return DATE_FORMATTER.parse(dateAsString);
   }
-  
+
   private List<String> asList(String... items) {
     return Arrays.asList(items);
   }
-  
+
   private Url buildUrl(String targetUrl, String linkTest, String type) {
     Url url = new UrlDb();
     url.setValue(targetUrl);
@@ -681,5 +681,5 @@ public class SpiDatabaseBootstrap {
     url.setType(type);
     return url;
   }
-  
+
 }

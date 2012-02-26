@@ -44,7 +44,7 @@ public class Substitutions {
      * User preferences.
      */
     USER_PREF("UP"),
-    
+
     /**
      * MODULE_ variables (i.e. MODULE_ID)
      */

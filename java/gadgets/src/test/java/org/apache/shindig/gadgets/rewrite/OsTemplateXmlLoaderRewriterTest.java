@@ -60,7 +60,7 @@ public class OsTemplateXmlLoaderRewriterTest {
   private DOMImplementation domImpl;
   private Document doc;
   private Converter converter;
-  
+
   @Before
   public void setUp() {
     Injector injector = Guice.createInjector(new ParseModule(), new PropertiesModule());
@@ -69,7 +69,7 @@ public class OsTemplateXmlLoaderRewriterTest {
     doc = domImpl.createDocument(null, null, null);
     converter = new Converter(parser, domImpl);
   }
-  
+
   @Test
   public void convertSingleElement() throws Exception {
     String xml = "<os:elem id=\"id\" foo=\"bar\">String value</os:elem>";
@@ -78,7 +78,7 @@ public class OsTemplateXmlLoaderRewriterTest {
             "{n:\"id\",v:\"id\"}],c:[\"String value\"]}]}").toString(),
         converter.domToJson(xml));
   }
-  
+
   @Test
   public void convertMixedTreeWithIgnorables() throws Exception {
     String xml = "<b>Some ${viewer} content</b>  <img/><!-- comment --><os:Html/>";
@@ -88,19 +88,19 @@ public class OsTemplateXmlLoaderRewriterTest {
             "{n:\"os:Html\",a:[],c:[]}]}").toString(),
         converter.domToJson(xml));
   }
-  
+
   @Test
   public void visitNonElement() throws Exception {
     assertEquals(VisitStatus.BYPASS, visit(doc.createTextNode("text")));
     assertEquals(VisitStatus.BYPASS, visit(doc.createAttribute("foo")));
     assertEquals(VisitStatus.BYPASS, visit(doc.createComment("comment")));
   }
-  
+
   @Test
   public void visitDivSansType() throws Exception {
     assertEquals(VisitStatus.BYPASS, visit(doc.createElement("div")));
   }
-  
+
   @Test
   public void visitDivMismatchingType() throws Exception {
     Element div = doc.createElement("div");
@@ -108,7 +108,7 @@ public class OsTemplateXmlLoaderRewriterTest {
     div.setAttribute("type", "os/template-but-not");
     assertEquals(VisitStatus.BYPASS, visit(div));
   }
-  
+
   @Test
   public void visitDivMatchingTypeNoId() throws Exception {
     Element div = doc.createElement("div");
@@ -124,13 +124,13 @@ public class OsTemplateXmlLoaderRewriterTest {
     div.setAttribute("type", OsTemplateXmlLoaderRewriter.OS_TEMPLATE_MIME);
     assertEquals(VisitStatus.BYPASS, visit(div));
   }
-  
+
   @Test
   public void visitDivMatchingTypeWithId() throws Exception {
     Element div = createRewritableDiv();
     assertEquals(VisitStatus.RESERVE_NODE, visit(div));
   }
-  
+
   @Test
   public void visitDivMatchingCaseMixedWithId() throws Exception {
     Element div = doc.createElement("dIv");
@@ -146,7 +146,7 @@ public class OsTemplateXmlLoaderRewriterTest {
     div.setAttribute("type", OsTemplateXmlLoaderRewriter.OS_TEMPLATE_MIME);
     assertEquals(VisitStatus.RESERVE_NODE, visit(div));
   }
-  
+
   @Test
   public void visitDivMatchingCaseMixedWithName() throws Exception {
     Element div = doc.createElement("dIv");
@@ -154,22 +154,22 @@ public class OsTemplateXmlLoaderRewriterTest {
     div.setAttribute("type", OsTemplateXmlLoaderRewriter.OS_TEMPLATE_MIME.toUpperCase());
     assertEquals(VisitStatus.RESERVE_NODE, visit(div));
   }
-  
+
   private VisitStatus visit(Node node) throws Exception {
     return new OsTemplateXmlLoaderRewriter.GadgetHtmlVisitor(null).visit(null, node);
   }
-  
+
   @Test
   public void revisitWithoutOsTemplates() throws Exception {
     assertFalse(revisit(mockGadget("foo", "bar"), null));
   }
-  
+
   @Test(expected = RewritingException.class)
   public void revisitWithoutValidDocument() throws Exception {
     revisit(mockGadget(OsTemplateXmlLoaderRewriter.OS_TEMPLATES_FEATURE_NAME, "foo"),
         null, createRewritableDiv());
   }
-  
+
   @Test(expected = RewritingException.class)
   public void revisitWithoutHeadNode() throws Exception {
     Node html = doc.createElement("html");
@@ -178,13 +178,13 @@ public class OsTemplateXmlLoaderRewriterTest {
     revisit(mockGadget(OsTemplateXmlLoaderRewriter.OS_TEMPLATES_FEATURE_NAME, "foo"),
         null, createRewritableDiv());
   }
-  
+
   @Test
   public void revisitWithIdDivSingle() throws Exception {
     Element tpl = createRewritableDiv("tpl_id");
     checkRevisitSingle(tpl, "tpl_id");
   }
-  
+
   @Test
   public void revisitWithNameDivSingle() throws Exception {
     Element tpl = createRewritableDiv();
@@ -192,14 +192,14 @@ public class OsTemplateXmlLoaderRewriterTest {
     tpl.setAttribute("name", "otherid");
     checkRevisitSingle(tpl, "otherid");
   }
-  
+
   @Test
   public void revisitWithBothLabeledDivSingle() throws Exception {
     Element tpl = createRewritableDiv();
     tpl.setAttribute("name", "otherid");
     checkRevisitSingle(tpl, "otherid");
   }
-  
+
   private void checkRevisitSingle(Element tpl, String id) throws Exception {
     Gadget gadget = mockGadget(OsTemplateXmlLoaderRewriter.OS_TEMPLATES_FEATURE_NAME, "another");
     String xmlVal = "xml";
@@ -217,7 +217,7 @@ public class OsTemplateXmlLoaderRewriterTest {
     assertEquals("script", addedScript.getNodeName());
     assertEquals("gadgets.jsondom.preload_('" + id + "',{thejson});", addedScript.getTextContent());
   }
-  
+
   @Test
   public void revisitMultiples() throws Exception {
     Element tplId = createRewritableDiv("tpl_id");
@@ -243,37 +243,37 @@ public class OsTemplateXmlLoaderRewriterTest {
         "gadgets.jsondom.preload_('tpl_id',{thejson});gadgets.jsondom.preload_('otherid',{thejson});",
         addedScript.getTextContent());
   }
-  
+
   private boolean revisit(Gadget gadget, Converter converter, Node... nodes) throws Exception {
     return new OsTemplateXmlLoaderRewriter.GadgetHtmlVisitor(converter)
         .revisit(gadget, Arrays.asList(nodes));
   }
-  
+
   private Gadget mockGadget(String... features) {
     Gadget gadget = createMock(Gadget.class);
     expect(gadget.getAllFeatures()).andReturn(Arrays.asList(features)).once();
     replay(gadget);
     return gadget;
   }
-  
+
   private Converter mockConverter(String xml, String result, int times) {
     Converter converter = createMock(Converter.class);
     expect(converter.domToJson(xml)).andReturn(result).times(times);
     replay(converter);
     return converter;
   }
-  
+
   private Element createRewritableDiv() {
     return createRewritableDiv("id");
   }
-  
+
   private Element createRewritableDiv(String id) {
     Element div = doc.createElement("div");
     div.setAttribute("type", OsTemplateXmlLoaderRewriter.OS_TEMPLATE_MIME);
     div.setAttribute("id", id);
     return div;
   }
-  
+
   private void completeDocAsHtml(Node... nodes) {
     Node html = doc.createElement("html");
     Node head = doc.createElement("head");
@@ -290,32 +290,32 @@ public class OsTemplateXmlLoaderRewriterTest {
     }
     doc.appendChild(html);
   }
-  
+
   @Test
   public void rewriteHttpNoMime() throws Exception {
     checkRewriteHttp(null, null, false);
   }
-  
+
   @Test
   public void rewriteHttpMismatchedMime() throws Exception {
     checkRewriteHttp("os/template-not!", null, false);
   }
-  
+
   @Test
   public void rewriteHttpMimeMatchOverride() throws Exception {
     checkRewriteHttp(OsTemplateXmlLoaderRewriter.OS_TEMPLATE_MIME, "os/template-not!", true);
   }
-  
+
   @Test
   public void rewriteHttpMimeMatchOriginal() throws Exception {
     checkRewriteHttp(null, OsTemplateXmlLoaderRewriter.OS_TEMPLATE_MIME, true);
   }
-  
+
   @Test
   public void rewriteHttpMimeMatchOverrideMismatchOriginal() throws Exception {
     checkRewriteHttp("foo", OsTemplateXmlLoaderRewriter.OS_TEMPLATE_MIME, false);
   }
-  
+
   private void checkRewriteHttp(String reqMime, String origMime, boolean expectRewrite)
       throws Exception {
     HttpRequest req = new HttpRequest(Uri.parse("http://dummy.com")).setRewriteMimeType(reqMime);

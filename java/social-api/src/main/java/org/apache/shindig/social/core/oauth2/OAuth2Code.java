@@ -44,7 +44,7 @@ public class OAuth2Code implements Comparable<OAuth2Code> {
 
   /**
    * Constructs an OAuth2Code.
-   * 
+   *
    * @param value is the String key that makes up the code
    * @param redirectURI is redirect URI associated with this code
    * @param expiration indicates when this code expires
@@ -60,7 +60,7 @@ public class OAuth2Code implements Comparable<OAuth2Code> {
 
   /**
    * Constructs an OAuth2Code with a value.
-   * 
+   *
    * @param value is the String key that makes up the code
    */
   public OAuth2Code(String value) {
@@ -69,7 +69,7 @@ public class OAuth2Code implements Comparable<OAuth2Code> {
 
   /**
    * Returns the value of this code.
-   * 
+   *
    * @return String is the key of this code
    */
   public String getValue() {
@@ -78,7 +78,7 @@ public class OAuth2Code implements Comparable<OAuth2Code> {
 
   /**
    * Sets the value of this code.
-   * 
+   *
    * @param value is the value to set this code to
    */
   public void setValue(String value) {
@@ -87,7 +87,7 @@ public class OAuth2Code implements Comparable<OAuth2Code> {
 
   /**
    * Returns the redirect URI associated with this code.
-   * 
+   *
    * @return String represents this code's redirect URI
    */
   public String getRedirectURI() {
@@ -96,7 +96,7 @@ public class OAuth2Code implements Comparable<OAuth2Code> {
 
   /**
    * Sets the redirect URI associated with this code.
-   * 
+   *
    * @param redirectURI represents the redirect URI of this code
    */
   public void setRedirectURI(String redirectURI) {
@@ -105,7 +105,7 @@ public class OAuth2Code implements Comparable<OAuth2Code> {
 
   /**
    * Returns when this code expires.
-   * 
+   *
    * @return long represents when this code will expire
    */
   public long getExpiration() {
@@ -114,7 +114,7 @@ public class OAuth2Code implements Comparable<OAuth2Code> {
 
   /**
    * Sets the expiration of this code.
-   * 
+   *
    * @param expiration is when this code will expire
    */
   public void setExpiration(long expiration) {
@@ -123,7 +123,7 @@ public class OAuth2Code implements Comparable<OAuth2Code> {
 
   /**
    * Compares this code to another code.
-   * 
+   *
    * @return int indicates how the value of this code compares to another
    */
   public int compareTo(OAuth2Code target) {
@@ -132,7 +132,7 @@ public class OAuth2Code implements Comparable<OAuth2Code> {
 
   /**
    * Returns the scope of this code.
-   * 
+   *
    * @return List<String> represents the scope of this code
    */
   public List<String> getScope() {
@@ -141,7 +141,7 @@ public class OAuth2Code implements Comparable<OAuth2Code> {
 
   /**
    * Sets the scope of this code.
-   * 
+   *
    * @param scope is this code's authorized scope
    */
   public void setScope(List<String> scope) {
@@ -150,7 +150,7 @@ public class OAuth2Code implements Comparable<OAuth2Code> {
 
   /**
    * Sets the client associated with this code.
-   * 
+   *
    * @param client is the client to associate with this code
    */
   public void setClient(OAuth2Client client) {
@@ -159,7 +159,7 @@ public class OAuth2Code implements Comparable<OAuth2Code> {
 
   /**
    * Returns the client associated with this code.
-   * 
+   *
    * @return OAuth2Client represents the client associated with this code
    */
   public OAuth2Client getClient() {
@@ -171,7 +171,7 @@ public class OAuth2Code implements Comparable<OAuth2Code> {
    *  AUTHORIZATION_CODE,
    *  ACCESS_TOKEN,
    *  REFRESH_TOKEN
-   *  
+   *
    * @param type is this code's type
    */
   public void setType(CodeType type) {
@@ -180,7 +180,7 @@ public class OAuth2Code implements Comparable<OAuth2Code> {
 
   /**
    * Returns the type of this code.
-   * 
+   *
    * @return CodeType represents the type of this code
    */
   public CodeType getType() {
@@ -189,7 +189,7 @@ public class OAuth2Code implements Comparable<OAuth2Code> {
 
   /**
    * Sets the authorization code that this code is related to, if applicable.
-   * 
+   *
    * @param code is the authorization code to associate with this code
    */
   public void setRelatedAuthCode(OAuth2Code code) {
@@ -198,7 +198,7 @@ public class OAuth2Code implements Comparable<OAuth2Code> {
 
   /**
    * Returns the authorization code related to this code.
-   * 
+   *
    * @return OAuth2Code is the authorization code related to this code
    */
   public OAuth2Code getRelatedAuthCode() {
@@ -207,7 +207,7 @@ public class OAuth2Code implements Comparable<OAuth2Code> {
 
   /**
    * Sets the related refresh token.
-   * 
+   *
    * @param relatedRefreshToken is the refresh token related to this code
    */
   public void setRelatedRefreshToken(OAuth2Code relatedRefreshToken) {
@@ -216,7 +216,7 @@ public class OAuth2Code implements Comparable<OAuth2Code> {
 
   /**
    * Gets the related refresh token.
-   * 
+   *
    * @return OAuth2Code is the refresh token related to this code
    */
   public OAuth2Code getRelatedRefreshToken() {
@@ -225,7 +225,7 @@ public class OAuth2Code implements Comparable<OAuth2Code> {
 
   /**
    * Sets the related access token.
-   * 
+   *
    * @param relatedAccessToken is the access token related to this code
    */
   public void setRelatedAccessToken(OAuth2Code relatedAccessToken) {
@@ -234,7 +234,7 @@ public class OAuth2Code implements Comparable<OAuth2Code> {
 
   /**
    * Gets the related access token.
-   * 
+   *
    * @return OAuth2Code is the access token related to this code
    */
   public OAuth2Code getRelatedAccessToken() {

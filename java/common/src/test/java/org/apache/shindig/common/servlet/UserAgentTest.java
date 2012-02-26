@@ -35,7 +35,7 @@ public class UserAgentTest extends Assert {
   public void testVersionNumberParsingStandardDecimal() {
     assertEquals(3.1415, getUaEntry("3.1415").getVersionNumber(), 0);
   }
-  
+
   @Test
   public void testVersionNumberParsingMultiPart() {
     assertEquals(3.1, getUaEntry("3.1.5").getVersionNumber(), 0);

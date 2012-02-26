@@ -226,7 +226,7 @@ public class DefaultHandlerRegistry implements HandlerRegistry {
       Operation op, Method m) {
     try {
       MethodCaller methodCaller = new MethodCaller(m, false);
-      
+
       String opName = m.getName();
       // Use the override if its defined
       if (op.name().length() > 0) {
@@ -394,7 +394,7 @@ public class DefaultHandlerRegistry implements HandlerRegistry {
       return handler.execute(pathParams, body, token, converter);
     }
   }
-  
+
   /**
    * Calls methods annotated with {@link Operation} and appropriately translates
    * RequestItem to the actual input class of the method.
@@ -402,14 +402,14 @@ public class DefaultHandlerRegistry implements HandlerRegistry {
   private static class MethodCaller {
     /** Type of object to create for this method, or null if takes no args */
     private Class<?> inputClass;
-    
+
     /** Constructors for request item class that will be used */
     private final Constructor<?> restRequestItemConstructor;
     private final Constructor<?> rpcRequestItemConstructor;
-    
+
     /** The method */
     private final Method method;
-    
+
     /**
      * Create information needed to call a method
      * @param method The method
@@ -420,16 +420,16 @@ public class DefaultHandlerRegistry implements HandlerRegistry {
       this.method = method;
 
       inputClass = method.getParameterTypes().length > 0 ? method.getParameterTypes()[0] : null;
-      
+
       // Methods that need RequestItem interface should automatically get a BaseRequestItem
       if (RequestItem.class.equals(inputClass)) {
         inputClass = BaseRequestItem.class;
       }
       boolean inputIsRequestItem = (inputClass != null) &&
           RequestItem.class.isAssignableFrom(inputClass);
-      
+
       Class<?> requestItemType = inputIsRequestItem ? inputClass : BaseRequestItem.class;
-    
+
       restRequestItemConstructor = requestItemType.getConstructor(Map.class,
           SecurityToken.class, BeanConverter.class, BeanJsonConverter.class);
       rpcRequestItemConstructor = requestItemType.getConstructor(JSONObject.class,
@@ -440,13 +440,13 @@ public class DefaultHandlerRegistry implements HandlerRegistry {
         BeanConverter converter, BeanJsonConverter jsonConverter) {
       return getRequestItem(params, token, converter, jsonConverter, restRequestItemConstructor);
     }
-    
-    public RequestItem getRpcRequestItem(JSONObject params, Map<String, FormDataItem> formItems, 
+
+    public RequestItem getRpcRequestItem(JSONObject params, Map<String, FormDataItem> formItems,
         SecurityToken token, BeanJsonConverter converter) {
       return getRequestItem(params, formItems, token, converter, converter, rpcRequestItemConstructor);
     }
-    
-    private RequestItem getRequestItem(Object params, Map<String, FormDataItem> formItems, 
+
+    private RequestItem getRequestItem(Object params, Map<String, FormDataItem> formItems,
         SecurityToken token, BeanConverter converter, BeanJsonConverter jsonConverter,
         Constructor<?> constructor) {
       try {
@@ -460,7 +460,7 @@ public class DefaultHandlerRegistry implements HandlerRegistry {
         throw new RuntimeException(e);
       }
     }
-    
+
     private RequestItem getRequestItem(Object params, SecurityToken token, BeanConverter converter,
         BeanJsonConverter jsonConverter, Constructor<?> constructor) {
       try {
@@ -473,7 +473,7 @@ public class DefaultHandlerRegistry implements HandlerRegistry {
         throw new RuntimeException(e);
       }
     }
-    
+
     public Future<?> call(Object handler, RequestItem item) {
       try {
         Object result;
@@ -631,12 +631,12 @@ public class DefaultHandlerRegistry implements HandlerRegistry {
       }
       return false;
     }
-    
+
     @Override
     public int hashCode() {
       return this.constCount ^ this.lastConstIndex ^ operationPath.hashCode();
     }
-    
+
     /**
      * Rank based on the number of consant parts they accept, where the constant parts occur
      * and lexical ordering.

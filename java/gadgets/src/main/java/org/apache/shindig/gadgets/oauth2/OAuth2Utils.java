@@ -37,7 +37,7 @@ import com.google.common.collect.Maps;
 
 /**
  * Some common OAuth2 related utility methods
- * 
+ *
  */
 public class OAuth2Utils {
   private final static String LOG_CLASS = OAuth2Utils.class.getName();
@@ -46,7 +46,7 @@ public class OAuth2Utils {
   /**
    * Normalizes a URL and parameters. If the URL already contains parameters,
    * new parameters will be added properly.
-   * 
+   *
    * @param url2
    *          is the base URL to normalize
    * @param queryParams
@@ -114,10 +114,10 @@ public class OAuth2Utils {
 
   /**
    * Converts a Map<String, String> to a URL query string.
-   * 
+   *
    * @param params
    *          represents the Map of query parameters
-   * 
+   *
    * @return String is the URL encoded parameter String
    */
   public static String convertQueryString(final Map<String, String> params) {
@@ -135,9 +135,9 @@ public class OAuth2Utils {
 
   /**
    * Fetch bearer token from http request
-   * 
+   *
    * @param req httpServletRequest
-   * 
+   *
    * @return String bearer token from the request
    */
   public static String fetchBearerTokenFromHttpRequest(final HttpServletRequest req) {
@@ -154,12 +154,12 @@ public class OAuth2Utils {
 
   /**
    * Fetch client secret from http request for a given client.
-   * 
+   *
    * @param req
    *          httpServletRequest
    * @param clientId
    *          id of the client
-   * 
+   *
    * @return String client secret from the request
    */
   public static String fetchClientSecretFromHttpRequest(final String clientId,

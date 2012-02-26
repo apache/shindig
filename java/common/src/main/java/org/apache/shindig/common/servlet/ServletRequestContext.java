@@ -37,31 +37,31 @@ public class ServletRequestContext {
     System.setProperty(PORT, "" + req.getServerPort());
     System.setProperty(SCHEME, req.getScheme());
   }
-  
+
   /**
    * A Thread Local holder for host
    */
   private static ThreadLocal<String> host = new ThreadLocal<String>();
-  
+
   /**
    * A Thread Local holder for port
    */
   private static ThreadLocal<String> port = new ThreadLocal<String>();
-  
+
   /**
    * A Thread Local holder for scheme
    */
   private static ThreadLocal<String> scheme = new ThreadLocal<String>();
-  
-  
+
+
   public static String getHost(){
     return host.get() != null ? host.get() : System.getProperty(HOST);
   }
-  
+
   public static String getPort(){
     return port.get() != null ? port.get() : System.getProperty(PORT);
   }
-  
+
   public static String getScheme(){
     return scheme.get() != null ? scheme.get() : System.getProperty(SCHEME);
   }

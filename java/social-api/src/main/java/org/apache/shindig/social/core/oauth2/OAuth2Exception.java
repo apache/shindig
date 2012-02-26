@@ -27,7 +27,7 @@ public class OAuth2Exception extends Exception {
 
   /**
    * Constructs an OAuth2Exception.
-   * 
+   *
    * @param response is the normalized response that should be used to
    * formulate a server response.
    */
@@ -38,7 +38,7 @@ public class OAuth2Exception extends Exception {
 
   /**
    * Retrieves the normalized response.
-   * 
+   *
    * @return OAuth2NormalizedResponse encapsulates the OAuth error
    */
   public OAuth2NormalizedResponse getNormalizedResponse() {

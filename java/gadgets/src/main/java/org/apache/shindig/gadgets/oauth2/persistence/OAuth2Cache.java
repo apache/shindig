@@ -24,28 +24,28 @@ import org.apache.shindig.gadgets.oauth2.OAuth2Token;
 
 /**
  * Used by {@link OAuth2Store} to cache OAuth2 data.
- * 
+ *
  * Default implementation is in-memory HashMaps for shindig.
- * 
+ *
  */
 public interface OAuth2Cache {
   /**
    * Clears all cached {@link OAuth2Client}s.
-   * 
+   *
    * @throws OAuth2CacheException
    */
   void clearClients() throws OAuth2CacheException;
 
   /**
    * Clears all cached {@link OAuth2Token}s.
-   * 
+   *
    * @throws OAuth2CacheException
    */
   void clearTokens() throws OAuth2CacheException;
 
   /**
    * Find an {@link OAuth2Client} by {@link Integer} index.
-   * 
+   *
    * @param index
    * @return OAuth2Client
    */
@@ -53,7 +53,7 @@ public interface OAuth2Cache {
 
   /**
    * Generate an {@link OAuth2Client} index for the given mapping.
-   * 
+   *
    * @param gadgetUri
    * @param serviceName
    * @return client index
@@ -62,7 +62,7 @@ public interface OAuth2Cache {
 
   /**
    * Find an {@link OAuth2Accessor} by index.
-   * 
+   *
    * @param index
    * @return OAuth2Accessor
    */
@@ -70,7 +70,7 @@ public interface OAuth2Cache {
 
   /**
    * Generate in index for an {@link OAuth2Accessor} by the given parameters.
-   * 
+   *
    * @param gadgetUri
    * @param serviceName
    * @param user
@@ -81,7 +81,7 @@ public interface OAuth2Cache {
 
   /**
    * Find an {@link OAuth2Token} based on index
-   * 
+   *
    * @param index
    * @return an OAuth2Token
    */
@@ -89,7 +89,7 @@ public interface OAuth2Cache {
 
   /**
    * Returns the {@link Integer} index for the given {@link OAuth2Token}.
-   * 
+   *
    * @param token
    * @return index of the OAuth2Token
    */
@@ -97,7 +97,7 @@ public interface OAuth2Cache {
 
   /**
    * Generate index for {@link OAuth2Token} based on parameters
-   * 
+   *
    * @param gadgetUri
    * @param serviceName
    * @param user
@@ -110,7 +110,7 @@ public interface OAuth2Cache {
 
   /**
    * Removes the {@link OAuth2Client} from the cache.
-   * 
+   *
    * @param index
    * @return the removed client, or <code>null</code> if none was found
    * @throws OAuth2CacheException
@@ -119,7 +119,7 @@ public interface OAuth2Cache {
 
   /**
    * Removes the given {@link OAuth2Accessor} from the cache.
-   * 
+   *
    * @param index
    * @return the removed {@link OAuth2Accessor} or <code>null</code> if none was
    *         found
@@ -128,7 +128,7 @@ public interface OAuth2Cache {
 
   /**
    * Removes the given {@link OAuth2Token} from the cache.
-   * 
+   *
    * @param index
    * @return the removed {@link OAuth2Token} or <code>null</code> if none was
    *         found
@@ -138,7 +138,7 @@ public interface OAuth2Cache {
 
   /**
    * Stores the given client.
-   * 
+   *
    * @param index
    * @param client
    * @throws OAuth2CacheException
@@ -147,7 +147,7 @@ public interface OAuth2Cache {
 
   /**
    * Store all clients in the collection.
-   * 
+   *
    * @param clients
    * @throws OAuth2CacheException
    */
@@ -155,7 +155,7 @@ public interface OAuth2Cache {
 
   /**
    * Stores the given accessor.
-   * 
+   *
    * @param accessor
    */
   Integer storeOAuth2Accessor(OAuth2Accessor accessor);
@@ -167,7 +167,7 @@ public interface OAuth2Cache {
 
   /**
    * Stores all tokens in the collection.
-   * 
+   *
    * @param tokens
    * @throws OAuth2CacheException
    */

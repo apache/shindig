@@ -27,11 +27,11 @@ import java.io.InputStream;
  */
 class CommonsFormDataItem implements FormDataItem {
   private final FileItem fileItem;
-  
+
   CommonsFormDataItem(FileItem fileItem) {
     this.fileItem = fileItem;
   }
-  
+
   public byte[] get() {
     return fileItem.get();
   }

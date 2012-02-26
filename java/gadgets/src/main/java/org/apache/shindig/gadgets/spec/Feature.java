@@ -38,7 +38,7 @@ import com.google.common.collect.Multimap;
 public class Feature {
   public static final Feature CORE_FEATURE = new Feature("core");
   public static final Feature SECURITY_TOKEN_FEATURE = new Feature("security-token");
-  
+
   // Instantiable only by CORE_FEATURE.
   private Feature(String name) {
     this.params = ImmutableMultimap.of();
@@ -46,7 +46,7 @@ public class Feature {
     this.name = name;
     this.views = ImmutableSet.of();
   }
-  
+
   /**
    * Require@feature
    * Optional@feature
@@ -67,7 +67,7 @@ public class Feature {
   public Multimap<String, String> getParams() {
     return params;
   }
-  
+
   /**
    * Returns the first value for any feature parameter, or null
    * if the parameter does not exist.
@@ -77,7 +77,7 @@ public class Feature {
     if (values == null || values.isEmpty()) {
       return null;
     }
-    
+
     return values.iterator().next();
   }
 
@@ -95,11 +95,11 @@ public class Feature {
   public boolean getRequired() {
     return required;
   }
-  
+
   /**
    * Require@views
    * Optional@views
-   * 
+   *
    * Views associated with this feature
    */
   private final Set<String> views;
@@ -166,7 +166,7 @@ public class Feature {
     this.views = ImmutableSet.copyOf(Splitter.on(',').omitEmptyStrings().trimResults().split(viewNames));
   }
 
-  
+
   /**
    * @param name feature name
    * @param params feature parameters
@@ -180,6 +180,6 @@ public class Feature {
     this.required = required;
     this.views = views;
   }
-  
- 
+
+
 }

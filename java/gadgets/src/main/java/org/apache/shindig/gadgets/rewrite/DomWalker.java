@@ -58,19 +58,19 @@ public final class DomWalker {
   public interface Visitor {
     /**
      * Returned by the {@code visit(Gadget, Node)} method, signaling:
-     * 
+     *
      * BYPASS = Visitor doesn't care about the node.
      * MODIFY = Visitor has modified the node.
      * RESERVE_NODE = Visitor reserves exactly the node passed. No other
      *   Visitor will visit the node.
      * RESERVE_TREE = Visitor reserves the node passed and all its descendants
      *   No other Visitor will visit them.
-     *   
+     *
      * Visitors are expected to be well-behaved in that they do not
      * modify unreserved nodes: that is, in revisit(...) they do not access
      * adjacent, parent, etc. nodes and modify them. visit(...) may return
      * MODIFY to indicate a modification of the given node.
-     * 
+     *
      * Other append and delete operations are acceptable
      * but only in revisit(). Reservations are supported in order to support
      * "batched" lookups relating to a similar set of data retrieved from a
@@ -82,27 +82,27 @@ public final class DomWalker {
       RESERVE_NODE,
       RESERVE_TREE
     }
-    
+
     /**
      * Visit a particular Node in the DOM.
-     * 
+     *
      * @param gadget Context for the request.
      * @param node Node being visited.
      * @return Status, see {@code VisitStatus}
      */
     VisitStatus visit(Gadget gadget, Node node) throws RewritingException;
-    
+
     /**
      * Revisit a node in the DOM that was marked by the
      * {@code visit(Gadget, Node)} as reserved during DOM traversal.
-     * 
+     *
      * @param gadget Context for the request.
      * @param nodes Nodes being revisited, previously marked as reserved.
      * @return True if any node modified, false otherwise.
      */
     boolean revisit(Gadget gadget, List<Node> nodes) throws RewritingException;
   }
-  
+
   /**
    * Rewriter that traverses the DOM, passing each node to its
    * list of {@code Visitor} instances in order. Each visitor
@@ -112,15 +112,15 @@ public final class DomWalker {
    */
   public static class Rewriter implements GadgetRewriter, ResponseRewriter {
     private final List<Visitor> visitors;
-    
+
     public Rewriter(List<Visitor> visitors) {
       this.visitors = visitors;
     }
-    
+
     public Rewriter(Visitor... visitors) {
       this.visitors = Arrays.asList(visitors);
     }
-    
+
     public Rewriter() {
       this.visitors = null;
     }
@@ -146,11 +146,11 @@ public final class DomWalker {
         rewrite(makeVisitors(context, request.getGadget()), context, builder);
       }
     }
-    
-    private boolean rewrite(List<Visitor> visitors, Gadget gadget, MutableContent content) 
+
+    private boolean rewrite(List<Visitor> visitors, Gadget gadget, MutableContent content)
         throws RewritingException {
       Map<Visitor, List<Node>> reservations = Maps.newHashMap();
-        
+
       LinkedList<Node> toVisit = Lists.newLinkedList();
       Document doc = content.getDocument();
       if (doc == null) {
@@ -162,7 +162,7 @@ public final class DomWalker {
       boolean mutated = false;
       while (!toVisit.isEmpty()) {
         Node visiting = toVisit.removeFirst();
-          
+
         // Iterate through all visitors evaluating their visitation status.
         boolean treeReserved = false;
         boolean nodeReserved = false;
@@ -182,7 +182,7 @@ public final class DomWalker {
             // Aka BYPASS - do nothing.
             break;
           }
-            
+
           if (nodeReserved || treeReserved) {
             // Reservation was made.
             if (!reservations.containsKey(visitor)) {
@@ -192,7 +192,7 @@ public final class DomWalker {
             break;
           }
         }
-          
+
         if (!treeReserved && visiting.hasChildNodes()) {
           // Tree wasn't reserved - walk children.
           // In order to preserve DFS order, walk children in reverse.
@@ -202,7 +202,7 @@ public final class DomWalker {
           }
         }
       }
-        
+
       // Run through all reservations, revisiting as needed.
       for (Visitor visitor : visitors) {
         List<Node> nodesReserved = reservations.get(visitor);
@@ -211,7 +211,7 @@ public final class DomWalker {
           mutated = true;
         }
       }
-      
+
       return mutated;
     }
   }

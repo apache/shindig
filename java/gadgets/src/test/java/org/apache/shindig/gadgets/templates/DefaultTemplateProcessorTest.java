@@ -60,7 +60,7 @@ import javax.el.ELResolver;
  * Unit tests for DefaultTemplateProcessor.
  * TODO: Refactor to remove boilerplate.
  * TODO: Add tests for special vars.
- * TODO: Add test for @var in @repeat loops. 
+ * TODO: Add test for @var in @repeat loops.
  */
 public class DefaultTemplateProcessorTest {
 
@@ -73,7 +73,7 @@ public class DefaultTemplateProcessorTest {
   private TagRegistry registry;
 
   private NekoSimplifiedHtmlParser parser;
-  
+
   private static final String TEST_NS = "http://example.com";
   protected SingletonElementHandler singletonElementHandler;
 
@@ -91,7 +91,7 @@ public class DefaultTemplateProcessorTest {
     resolver = new RootELResolver();
     parser = new NekoSimplifiedHtmlParser(new ParseModule.DOMImplementationProvider().get());
     context = new TemplateContext(new Gadget(), variables);
-    
+
     variables.put("foo", new JSONObject("{ title: 'bar' }"));
     variables.put("user", new JSONObject("{ id: '101', name: { first: 'John', last: 'Doe' }}"));
     variables.put("toys", new JSONObject("{ list: [{name: 'Ball'}, {name: 'Car'}]}"));
@@ -105,27 +105,27 @@ public class DefaultTemplateProcessorTest {
     String output = executeTemplate("${foo.title}");
     assertEquals("bar", output);
   }
-  
+
   @Test
   public void testTopVariable() throws Exception {
     String output = executeTemplate("${Top.foo.title}");
     assertEquals("bar", output);
   }
-  
+
   @Test
   public void testCurVariable() throws Exception {
     // Cur starts as Top
     String output = executeTemplate("${Cur.foo.title}");
     assertEquals("bar", output);
   }
-  
+
   @Test
   public void testMyVariable() throws Exception {
     // My starts as null
     String output = executeTemplate("${My.foo.title}");
     assertEquals("", output);
   }
-  
+
   @Test
   public void testPlainText() throws Exception {
     // Verify that plain text is not interfered with, or incorrectly escaped
@@ -138,19 +138,19 @@ public class DefaultTemplateProcessorTest {
     String output = executeTemplate("${xss.script}");
     assertFalse("Escaping not performed: \"" + output + '\"', output.contains("<script>alert("));
   }
-  
+
   @Test
   public void testAppending() throws Exception {
     String output = executeTemplate("${user.id}${user.name.first}");
     assertEquals("101John", output);
-    
+
     output = executeTemplate("foo${user.id}bar${user.name.first}baz");
     assertEquals("foo101barJohnbaz", output);
 
     output = executeTemplate("foo${user.nope}bar${user.nor}baz");
     assertEquals("foobarbaz", output);
   }
-  
+
   @Test
   public void testEscapedExpressions() throws Exception {
     String output = executeTemplate("\\${escaped}");
@@ -183,13 +183,13 @@ public class DefaultTemplateProcessorTest {
     String output = executeTemplate("<span repeat=\"${countries}\">${Cur}</span>");
     assertEquals("<span>Ireland</span><span>France</span>", output);
   }
-  
+
   @Test
   public void testCurAttribute() throws Exception {
     String output = executeTemplate("<span cur=\"${user.name}\">${first}</span>");
     assertEquals("<span>John</span>", output);
   }
-  
+
   @Test
   public void testConditional() throws Exception {
     String output = executeTemplate(
@@ -199,10 +199,10 @@ public class DefaultTemplateProcessorTest {
         "</span>");
     assertEquals("<span><span>Not Car</span></span><span><span>Car</span></span>", output);
   }
-  
+
   @Test
   public void testCustomTag() throws Exception {
-    String output = executeTemplate("<test:Foo text='${foo.title}' data='${user}'/>", 
+    String output = executeTemplate("<test:Foo text='${foo.title}' data='${user}'/>",
         "xmlns:test='" + TEST_NS + '\'');
     assertEquals("<b>BAR</b>", output);
   }
@@ -219,17 +219,17 @@ public class DefaultTemplateProcessorTest {
     String output = executeTemplate("<span oncreate=\"foo\"></span>");
     assertEquals("<span id=\"ostid0\"></span><script type=\"text/javascript\">" +
         "(function(){foo}).apply(document.getElementById('ostid0'));</script>", output);
-    
+
     output = executeTemplate("<span x-oncreate=\"foo\"></span>");
     assertEquals("<span id=\"ostid1\"></span><script type=\"text/javascript\">" +
         "(function(){foo}).apply(document.getElementById('ostid1'));</script>", output);
-    
+
     output = executeTemplate("<span id=\"bar\" oncreate=\"foo\"></span>");
     assertEquals("<span id=\"bar\"></span><script type=\"text/javascript\">" +
         "(function(){foo}).apply(document.getElementById('bar'));</script>", output);
 
   }
-  
+
   /**
    * Ensure that the element cloning handling of processChildren correctly
    * copies and element to the target element, including making sure that
@@ -271,19 +271,19 @@ public class DefaultTemplateProcessorTest {
   private String executeTemplate(String markup) throws Exception {
     return executeTemplate(markup, "");
   }
-  
+
   private String executeTemplate(String markup, String extra) throws Exception {
     Element template = prepareTemplate(markup, extra);
     DocumentFragment result = processor.processTemplate(template, context, resolver, registry);
     return serialize(result);
   }
-  
-  private Element prepareTemplate(String markup, String extra) throws GadgetException {    
+
+  private Element prepareTemplate(String markup, String extra) throws GadgetException {
     String content = "<script type=\"text/os-template\"" + extra + '>' + markup + "</script>";
     Document document = parser.parseDom(content);
     return SocialDataTags.getTags(document, SocialDataTags.OSML_TEMPLATE_TAG).get(0);
   }
-  
+
   private String serialize(Node node) throws IOException {
     StringBuilder sb = new StringBuilder();
     NodeList children = node.getChildNodes();
@@ -293,24 +293,24 @@ public class DefaultTemplateProcessorTest {
     }
     return sb.toString();
   }
-  
+
   /**
    * A dummy custom tag.
    * Expects a @text attribute equal to "bar", and a @data attribute that
    * evaluates to a JSONObject with an id property equal to "101".
-   * If these conditions are met, returns <code>&lt;b&gt;BAR&lt;/b&gt;</code> 
+   * If these conditions are met, returns <code>&lt;b&gt;BAR&lt;/b&gt;</code>
    */
   private static class TestTagHandler extends AbstractTagHandler {
-    
+
     public TestTagHandler() {
       super(TEST_NS, "Foo");
     }
-    
-    public void process(Node result, Element tag, TemplateProcessor processor) {     
+
+    public void process(Node result, Element tag, TemplateProcessor processor) {
       Object data = getValueFromTag(tag, "data", processor, Object.class);
       assertTrue(data instanceof JSONObject);
       assertEquals("101", ((JSONObject) data).optString("id"));
-            
+
       String text = getValueFromTag(tag, "text", processor, String.class);
       text = text.toUpperCase();
       Document doc = result.getOwnerDocument();

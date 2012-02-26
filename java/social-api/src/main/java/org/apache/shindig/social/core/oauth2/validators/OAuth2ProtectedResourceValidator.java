@@ -27,10 +27,10 @@ public interface OAuth2ProtectedResourceValidator extends OAuth2RequestValidator
 
   /**
    * Validates a request for a protected resource.
-   * 
+   *
    * @param req is the normalized OAuth 2.0 request
    * @param resourceRequest identifies the resource being requested
-   * 
+   *
    * @throws OAuth2Exception
    */
   public void validateRequestForResource(OAuth2NormalizedRequest req,

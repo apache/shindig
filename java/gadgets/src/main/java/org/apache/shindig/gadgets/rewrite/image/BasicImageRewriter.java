@@ -333,7 +333,7 @@ public class BasicImageRewriter implements ResponseRewriter {
     } catch (IOException ioe) {
       if (LOG.isLoggable(Level.WARNING)) {
         LOG.logp(Level.WARNING, classname, "rewrite", MessageKeys.IO_ERROR_REWRITING_IMG, new Object[] {request.toString(),ioe.getMessage()});
-      } 
+      }
     } catch (RuntimeException re) {
       // This is safe to recover from and necessary because the ImageIO/Sanselan calls can
       // throw a very wide variety of exceptions
@@ -473,7 +473,7 @@ public class BasicImageRewriter implements ResponseRewriter {
     long imageSizeBits = imagePixels * imageInfo.getBitsPerPixel();
     return imageSizeBits > config.getMaxInMemoryBytes() * BITS_PER_BYTE;
   }
-  
+
   protected boolean isSupportedImageResult(HttpResponseBuilder response, Uri uri) {
     return isSupportedContent(response) || isImageUri(uri);
   }

@@ -36,7 +36,7 @@ public interface TagHandler {
    * @return the local name of the element this tag parses.
    */
   String getTagName();
-  
+
   /**
    * @return the namespace of the element this tag parses.
    */
@@ -45,11 +45,11 @@ public interface TagHandler {
   /**
    * Processes the custom tag.
    * @param result A Node to append output to.
-   * @param tag The Element reference to the tag, useful for inspecting 
+   * @param tag The Element reference to the tag, useful for inspecting
    *     attributes and children
    * @param processor A TemplateProcessor, used to evaluate expressions and render
    *     sub-templates if needed.
    */
   void process(Node result, Element tag, TemplateProcessor processor);
-  
+
 }

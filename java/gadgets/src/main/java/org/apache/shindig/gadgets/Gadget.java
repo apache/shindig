@@ -169,28 +169,28 @@ public class Gadget {
       }
     }
   }
-  
+
   public void addFeature(String name) {
     initializeFeatureDeps();
     directFeatureDeps.add(name);
   }
-  
+
   public void removeFeature(String name) {
     initializeFeatureDeps();
     directFeatureDeps.remove(name);
   }
-  
+
   public Set<String> getDirectFeatureDeps() {
     initializeFeatureDeps();
     return Collections.unmodifiableSet(directFeatureDeps);
   }
-  
+
   /**
    * Convenience method that returns Map of features to load for gadget's current view
-   * 
+   *
    * @return a map of ModuleSpec/Require and ModuleSpec/Optional elements to Feature
    */
-  public Map<String, Feature> getViewFeatures() {    
+  public Map<String, Feature> getViewFeatures() {
     View view = getCurrentView();
     String name = (view == null) ? GadgetSpec.DEFAULT_VIEW : view.getName();
 
@@ -206,7 +206,7 @@ public class Gadget {
         getCurrentView().getType() == View.ContentType.HTML_SANITIZED) ||
         "1".equals(getContext().getParameter(UriCommon.Param.SANITIZE.getKey()));
   }
-  
+
   /**
    * True if the gadget opts into caja or the container forces caja
    */

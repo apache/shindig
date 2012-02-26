@@ -27,7 +27,7 @@ public interface FilterCapability {
    * Check to see if the property is filterable on an operation. The final property that is returned
    * must not be directly based on the fieldName passed in and must be suitable for direct use
    * within a JPQL statement. (ie don't trust the passed in parameter)
-   * 
+   *
    * @param fieldName the field name that is being filtered, value is not to be trusted.
    * @param filterOperation the operation being applied to the field.
    * @return the final property that is being filtered or null is the filter operation specified is

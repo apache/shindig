@@ -67,7 +67,7 @@ public class HashLockedDomainServiceTest extends EasyMockTestCase {
         gadgetFeatures.add("security-token");
       }
     }
-    
+
     String gadgetXml = "<Module><ModulePrefs title=''>" + requires + "</ModulePrefs><Content/></Module>";
 
     GadgetSpec spec = null;

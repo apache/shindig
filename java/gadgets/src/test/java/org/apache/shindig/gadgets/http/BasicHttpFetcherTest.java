@@ -176,7 +176,7 @@ public class BasicHttpFetcherTest {
     }
     EasyMock.verify(mockEntity, mockInputStream);
   }
-  
+
   /*
    * https://issues.apache.org/jira/browse/SHINDIG-1425
    */

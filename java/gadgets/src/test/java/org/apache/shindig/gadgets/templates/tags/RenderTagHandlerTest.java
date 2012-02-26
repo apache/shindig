@@ -50,7 +50,7 @@ import java.util.Map;
 import java.util.Set;
 
 public class RenderTagHandlerTest {
-  
+
   private Expressions expressions;
 
   private TemplateContext context;
@@ -60,9 +60,9 @@ public class RenderTagHandlerTest {
   private TagRegistry registry;
 
   private NekoSimplifiedHtmlParser parser;
-  
+
   private static final String TEST_NS = "http://example.com";
-  
+
   @Before
   public void setUp() throws Exception {
     expressions = Expressions.forTesting();
@@ -76,7 +76,7 @@ public class RenderTagHandlerTest {
     Gadget gadget = new Gadget();
     gadget.setContext(new GadgetContext());
     context = new TemplateContext(gadget, variables);
-    
+
     addVariable("foo", new JSONObject("{ title: 'bar' }"));
   }
 
@@ -86,7 +86,7 @@ public class RenderTagHandlerTest {
         "[<os:Render/>]",
         "<foo:Bar>Hello</foo:Bar>", "[Hello]");
   }
-  
+
   @Test
   public void renderSingleChildren() throws Exception {
     runTest("Panel",
@@ -94,32 +94,32 @@ public class RenderTagHandlerTest {
         "<foo:Panel><footer>Second</footer><header>First</header></foo:Panel>",
         "First Second");
   }
-  
-  private void runTest(String tagName, String tagMarkup, String templateMarkup, 
+
+  private void runTest(String tagName, String tagMarkup, String templateMarkup,
       String expectedResult) throws GadgetException, IOException {
     Element templateDef = parseTemplate(templateMarkup);
     Element tagInstance = parseTemplate(tagMarkup);
-    
+
     templateDef.getOwnerDocument().adoptNode(tagInstance);
-    TagHandler tagHandler = 
+    TagHandler tagHandler =
       new TemplateBasedTagHandler(tagInstance, TEST_NS, tagName);
 
     TagRegistry reg = new CompositeTagRegistry(ImmutableList.of(
         registry,
         new DefaultTagRegistry(ImmutableSet.of(tagHandler))));
-        
+
     DocumentFragment result = processor.processTemplate(templateDef, context, resolver, reg);
     String output = serialize(result);
     assertEquals(expectedResult, output);
   }
-  
-  private Element parseTemplate(String markup) throws GadgetException {    
-    String content = "<script type=\"text/os-template\" xmlns:foo=\"" + TEST_NS + 
+
+  private Element parseTemplate(String markup) throws GadgetException {
+    String content = "<script type=\"text/os-template\" xmlns:foo=\"" + TEST_NS +
         "\" xmlns:os=\"" + TagHandler.OPENSOCIAL_NAMESPACE + "\">" + markup + "</script>";
     Document document = parser.parseDom(content);
     return SocialDataTags.getTags(document, SocialDataTags.OSML_TEMPLATE_TAG).get(0);
   }
-  
+
   private String serialize(Node node) throws IOException {
     StringBuilder sb = new StringBuilder();
     NodeList children = node.getChildNodes();
@@ -129,9 +129,9 @@ public class RenderTagHandlerTest {
     }
     return sb.toString();
   }
-  
+
   private void addVariable(String key, JSONObject value) {
     variables.put(key, value);
   }
-  
+
 }

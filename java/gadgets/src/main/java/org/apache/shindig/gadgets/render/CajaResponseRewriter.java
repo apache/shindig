@@ -78,7 +78,7 @@ public class CajaResponseRewriter implements ResponseRewriter {
   //class name for logging purpose
   private static final String classname = CajaResponseRewriter.class.getName();
   private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
-  
+
   private final RequestPipeline requestPipeline;
 
   @Inject
@@ -95,7 +95,7 @@ public class CajaResponseRewriter implements ResponseRewriter {
       resp.setHttpStatusCode(HttpResponse.SC_BAD_REQUEST);
       return;
     }
-    
+
     boolean passed = false;
 
     MessageQueue mq = new SimpleMessageQueue();
@@ -124,7 +124,7 @@ public class CajaResponseRewriter implements ResponseRewriter {
       return;
     }
 
-    try { 
+    try {
       if (RewriterUtils.isJavascript(req, resp)) {
         compiler.setGoals(
             compiler.getGoals().without(PipelineMaker.HTML_SAFE_STATIC));
@@ -187,7 +187,7 @@ public class CajaResponseRewriter implements ResponseRewriter {
         HttpRequest request = new HttpRequest(resourceUri)
                 .setContainer(req.getContainer())
                 .setGadget(req.getGadget());
-        
+
         try {
           HttpResponse response = requestPipeline.execute(request);
           byte[] responseBytes = IOUtils.toByteArray(response.getResponse());

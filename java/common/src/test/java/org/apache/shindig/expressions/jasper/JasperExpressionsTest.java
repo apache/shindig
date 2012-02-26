@@ -29,14 +29,14 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 public class JasperExpressionsTest  extends ExpressionsTest{
- 
+
   @Before
   @Override
   public void setUp() {
     super.setUp();
     expressions = new Expressions(null, null, new JasperTypeConverter(), new JasperProvider());
   }
-  
+
   @Ignore
   @Test
   public void booleanCoercionOfStringsFails() throws Exception{
@@ -44,12 +44,12 @@ public class JasperExpressionsTest  extends ExpressionsTest{
     // Test fails because Jasper type conversion routines does not recognize FALSE.
     addVariable("bool", "FALSE");
     assertFalse(evaluate("${!bool}", Boolean.class));
-    
+
     // Jasper cannot handle this
     addVariable("bool", "booga");
     assertFalse(evaluate("${!bool}", Boolean.class));
   }
-  
+
   @Ignore
   @Test
   public void booleanCoercionOfNumbersFails() throws Exception {
@@ -63,5 +63,5 @@ public class JasperExpressionsTest  extends ExpressionsTest{
 
     evaluate("${true && 5}", String.class);
   }
-  
+
 }

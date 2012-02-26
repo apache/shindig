@@ -34,20 +34,20 @@ public class DefaultMultipartFormParserTest extends Assert {
 
   private static final String REQUEST_FIELDNAME = "request";
   private static final String REQUEST_DATA = "{name: 'HelloWorld'}";
-  
+
   private static final String ALBUM_IMAGE_FIELDNAME = "album-image";
   private static final String ALBUM_IMAGE_FILENAME = "album-image.jpg";
   private static final String ALBUM_IMAGE_DATA = "album image data";
   private static final String ALBUM_IMAGE_TYPE = "image/jpeg";
-  
+
   private static final String PROFILE_IMAGE_FIELDNAME = "profile-image";
   private static final String PROFILE_IMAGE_FILENAME = "profile-image.jpg";
   private static final String PROFILE_IMAGE_DATA = "profile image data";
   private static final String PROFILE_IMAGE_TYPE = "image/png";
-  
+
   private MultipartFormParser multipartFormParser;
   private HttpServletRequest request;
-  
+
   @Before
   public void setUp() throws Exception {
     multipartFormParser = new DefaultMultipartFormParser();
@@ -61,19 +61,19 @@ public class DefaultMultipartFormParserTest extends Assert {
   public void testIsMultipartContent() {
     FakeHttpServletRequest request = new FakeHttpServletRequest();
 
-    request.setMethod("GET");    
+    request.setMethod("GET");
     assertFalse(multipartFormParser.isMultipartContent(request));
 
     request.setMethod("POST");
     assertFalse(multipartFormParser.isMultipartContent(request));
-    
-    request.setContentType("multipart/form-data");
-    assertTrue(multipartFormParser.isMultipartContent(request));    
 
-    request.setMethod("GET");    
+    request.setContentType("multipart/form-data");
+    assertTrue(multipartFormParser.isMultipartContent(request));
+
+    request.setMethod("GET");
     assertFalse(multipartFormParser.isMultipartContent(request));
 }
-  
+
   /**
    * Helper class to create the multipart/form-data body of the POST request.
    */
@@ -81,26 +81,26 @@ public class DefaultMultipartFormParserTest extends Assert {
     private final String boundary;
     private final StringBuilder packet = new StringBuilder();
     private static final String BOUNDARY = "--abcdefgh";
-    
+
     public MultipartFormBuilder() {
       this(BOUNDARY);
     }
-    
+
     public MultipartFormBuilder(String boundary) {
       this.boundary = boundary;
     }
-    
+
     public String getContentType() {
       return "multipart/form-data; boundary=" + boundary;
     }
-    
+
     public byte[] build() {
       write("--");
       write(boundary);
       write("--");
       return packet.toString().getBytes();
     }
-    
+
     public void addFileItem(String fieldName, String fileName, String content,
         String contentType) {
       writeBoundary();
@@ -144,7 +144,7 @@ public class DefaultMultipartFormParserTest extends Assert {
 
   private void setupRequest(byte[] postData, String contentType) throws IOException {
     FakeHttpServletRequest fakeReq = new FakeHttpServletRequest("/social/rest", "", "");
-    fakeReq.setPostData(postData);  
+    fakeReq.setPostData(postData);
     fakeReq.setContentType(contentType);
     request = fakeReq;
   }
@@ -158,14 +158,14 @@ public class DefaultMultipartFormParserTest extends Assert {
 
     List<FormDataItem> formItems =
       Lists.newArrayList(multipartFormParser.parse(request));
-    
+
     assertEquals(1, formItems.size());
     FormDataItem formItem = formItems.get(0);
     assertFalse(formItem.isFormField());
     assertEquals(ALBUM_IMAGE_FIELDNAME, formItem.getFieldName());
     assertEquals(ALBUM_IMAGE_FILENAME, formItem.getName());
     assertEquals(ALBUM_IMAGE_TYPE, formItem.getContentType());
-    assertEquals(ALBUM_IMAGE_DATA, new String(formItem.get()));  
+    assertEquals(ALBUM_IMAGE_DATA, new String(formItem.get()));
   }
 
   @Test
@@ -176,7 +176,7 @@ public class DefaultMultipartFormParserTest extends Assert {
 
     List<FormDataItem> formItems =
       Lists.newArrayList(multipartFormParser.parse(request));
-    
+
     assertEquals(1, formItems.size());
     FormDataItem formItem = formItems.get(0);
     assertTrue(formItem.isFormField());
@@ -194,14 +194,14 @@ public class DefaultMultipartFormParserTest extends Assert {
 
     List<FormDataItem> formItems =
       Lists.newArrayList(multipartFormParser.parse(request));
-    
+
     assertEquals(2, formItems.size());
     FormDataItem formItem = formItems.get(0);
     assertFalse(formItem.isFormField());
     assertEquals(ALBUM_IMAGE_FIELDNAME, formItem.getFieldName());
     assertEquals(ALBUM_IMAGE_FILENAME, formItem.getName());
     assertEquals(ALBUM_IMAGE_TYPE, formItem.getContentType());
-    assertEquals(ALBUM_IMAGE_DATA, new String(formItem.get()));  
+    assertEquals(ALBUM_IMAGE_DATA, new String(formItem.get()));
 
     formItem = formItems.get(1);
     assertTrue(formItem.isFormField());
@@ -221,25 +221,25 @@ public class DefaultMultipartFormParserTest extends Assert {
 
     List<FormDataItem> formItems =
       Lists.newArrayList(multipartFormParser.parse(request));
-    
+
     assertEquals(3, formItems.size());
     FormDataItem formItem = formItems.get(0);
     assertFalse(formItem.isFormField());
     assertEquals(ALBUM_IMAGE_FIELDNAME, formItem.getFieldName());
     assertEquals(ALBUM_IMAGE_FILENAME, formItem.getName());
     assertEquals(ALBUM_IMAGE_TYPE, formItem.getContentType());
-    assertEquals(ALBUM_IMAGE_DATA, new String(formItem.get()));  
+    assertEquals(ALBUM_IMAGE_DATA, new String(formItem.get()));
 
     formItem = formItems.get(1);
     assertTrue(formItem.isFormField());
     assertEquals(REQUEST_FIELDNAME, formItem.getFieldName());
     assertEquals(REQUEST_DATA, new String(formItem.get()));
-    
+
     formItem = formItems.get(2);
     assertFalse(formItem.isFormField());
     assertEquals(PROFILE_IMAGE_FIELDNAME, formItem.getFieldName());
     assertEquals(PROFILE_IMAGE_FILENAME, formItem.getName());
     assertEquals(PROFILE_IMAGE_TYPE, formItem.getContentType());
-    assertEquals(PROFILE_IMAGE_DATA, new String(formItem.get()));  
+    assertEquals(PROFILE_IMAGE_DATA, new String(formItem.get()));
   }
 }

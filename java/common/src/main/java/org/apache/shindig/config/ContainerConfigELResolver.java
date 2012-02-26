@@ -35,7 +35,7 @@ import javax.el.PropertyNotWritableException;
 public class ContainerConfigELResolver extends ELResolver {
   /** Key for the current container. */
   public static final String CURRENT_CONFIG_KEY = "Cur";
-  
+
   private final ContainerConfig config;
   private final String currentContainer;
 
@@ -43,13 +43,13 @@ public class ContainerConfigELResolver extends ELResolver {
     this.config = config;
     this.currentContainer = currentContainer;
   }
-  
+
   @Override
   public Class<?> getCommonPropertyType(ELContext context, Object base) {
     if ((base == null) || (base instanceof ContainerReference)) {
       return String.class;
     }
-    
+
     return null;
   }
 
@@ -66,12 +66,12 @@ public class ContainerConfigELResolver extends ELResolver {
       Object value = getValue(context, base, property);
       return (value == null) ? null : value.getClass();
     }
-    
+
     return null;
   }
 
   @Override
-  public Object getValue(ELContext context, Object base, Object property) {    
+  public Object getValue(ELContext context, Object base, Object property) {
     // Handle all requests off the base, and anything that is a reference to
     // a container
     String container;
@@ -85,7 +85,7 @@ public class ContainerConfigELResolver extends ELResolver {
     }
 
     context.setPropertyResolved(true);
-    if (JsonContainerConfig.PARENT_KEY.equals(property)) {  
+    if (JsonContainerConfig.PARENT_KEY.equals(property)) {
       // "parent": find the parent of the base, and return a ContainerReference
       String parent = config.getString(container, JsonContainerConfig.PARENT_KEY);
       if (parent == null) {
@@ -112,7 +112,7 @@ public class ContainerConfigELResolver extends ELResolver {
       context.setPropertyResolved(true);
       return true;
     }
-    
+
     return false;
   }
 

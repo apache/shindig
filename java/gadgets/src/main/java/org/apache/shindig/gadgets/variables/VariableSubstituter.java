@@ -44,13 +44,13 @@ public class VariableSubstituter {
    *
    * @return A new GadgetSpec, with all fields substituted as needed.
    */
-  public GadgetSpec substitute(GadgetContext context, GadgetSpec spec) throws GadgetException {   
+  public GadgetSpec substitute(GadgetContext context, GadgetSpec spec) throws GadgetException {
     Substitutions substitutions = new Substitutions();
-    
+
     for (Substituter substituter : substituters) {
         substituter.addSubstitutions(substitutions, context, spec);
     }
-    
+
     return spec.substitute(substitutions);
   }
 }

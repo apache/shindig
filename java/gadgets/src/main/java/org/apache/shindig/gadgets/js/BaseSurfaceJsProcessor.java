@@ -47,7 +47,7 @@ public abstract class BaseSurfaceJsProcessor implements JsProcessor {
     this.featureRegistryProvider = featureRegistryProvider;
     this.context = context;
   }
-  
+
   protected final FeatureRegistry getFeatureRegistry(JsUri jsUri) throws JsException {
     try {
       return featureRegistryProvider.get(jsUri.getRepository());
@@ -55,7 +55,7 @@ public abstract class BaseSurfaceJsProcessor implements JsProcessor {
       throw new JsException(e.getHttpStatusCode(), e.getMessage());
     }
   }
-  
+
   protected final List<String> getExports(FeatureBundle bundle, JsUri jsUri) {
     // Add exports of bundle, regardless.
     if (jsUri.getCompileMode() == JsCompileMode.CONCAT_COMPILE_EXPORT_ALL) {
@@ -67,7 +67,7 @@ public abstract class BaseSurfaceJsProcessor implements JsProcessor {
         return bundle.getApis(ApiDirective.Type.JS, true);
       }
     }
-    
+
     return Lists.newArrayList();
   }
 
@@ -115,7 +115,7 @@ public abstract class BaseSurfaceJsProcessor implements JsProcessor {
     }
     return result;
   }
-  
+
   /**
    * Return the namespace for symbol (before last dot). If symbol is global,
    * return null, to indicate "window" namespace.

@@ -183,7 +183,7 @@ public class BeanJsonConverterTest extends Assert {
   @Test
   public void testEmptyJsonMap() throws Exception {
     String emptyMap = "{}";
-    Map<String, String> data = beanJsonConverter.convertToObject(emptyMap, 
+    Map<String, String> data = beanJsonConverter.convertToObject(emptyMap,
          new TypeLiteral<Map<String,String>>(){}.getType());
     assertTrue(data.isEmpty());
   }

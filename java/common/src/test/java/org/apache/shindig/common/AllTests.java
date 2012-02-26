@@ -27,7 +27,7 @@ import junitx.util.SimpleTestFilter;
  * Run all gadgets tests.
  */
 public class AllTests extends TestSuite {
-  
+
   public static Test suite() throws Exception {
     DirectorySuiteBuilder builder = new DirectorySuiteBuilder(
       new SimpleTestFilter());

@@ -35,7 +35,7 @@ public class DefaultConfigProcessor implements ConfigProcessor {
   private final Map<String, ConfigContributor> featureContributors;
   private final List<ConfigContributor> globalContributors;
   private final ContainerConfig containerConfig;
-  
+
   @Inject
   public DefaultConfigProcessor(
       Map<String, ConfigContributor> featureContributors,
@@ -44,12 +44,12 @@ public class DefaultConfigProcessor implements ConfigProcessor {
     this.globalContributors = Lists.newLinkedList();
     this.containerConfig = containerConfig;
   }
-  
+
   @Inject(optional = true)
   public void setGlobalContributors(List<ConfigContributor> globalContribs) {
     globalContributors.addAll(globalContribs);
   }
-  
+
   public Map<String, Object> getConfig(String container, List<String> features, String host,
       Gadget gadget) {
     Map<String, Object> config = Maps.newHashMap();
@@ -58,10 +58,10 @@ public class DefaultConfigProcessor implements ConfigProcessor {
     for (ConfigContributor contrib : globalContributors) {
       contribute(contrib, config, container, host, gadget);
     }
-    
+
     // Append some container specific things
     Map<String, Object> featureConfig = containerConfig.getMap(container, GADGETS_FEATURES_KEY);
-    
+
     if (featureConfig != null) {
       // Discard what we don't care about.
       for (String name : features) {
@@ -75,7 +75,7 @@ public class DefaultConfigProcessor implements ConfigProcessor {
     }
     return config;
   }
-  
+
   private void contribute(ConfigContributor contrib, Map<String, Object> config, String container,
       String host, Gadget gadget) {
     if (contrib != null) {

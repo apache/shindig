@@ -36,9 +36,9 @@ public class DefaultTagRegistry extends AbstractTagRegistry {
   public DefaultTagRegistry(Set<TagHandler> handlers) {
     for (TagHandler handler : handlers) {
       this.handlers.put(new NSName(handler.getNamespaceUri(), handler.getTagName()), handler);
-    }    
+    }
   }
-    
+
   public TagHandler getHandlerFor(NSName name) {
     return handlers.get(name);
   }

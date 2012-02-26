@@ -317,7 +317,7 @@ public final class JsonSerializer {
   public static void appendMultimap(Appendable buf, Multimap<String, Object> map) throws IOException {
     appendMap(buf, map.asMap());
   }
-  
+
   /**
    * Appends a JSONObject to the buffer.
    *

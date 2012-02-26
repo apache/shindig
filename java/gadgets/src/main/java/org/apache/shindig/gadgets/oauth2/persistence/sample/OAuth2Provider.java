@@ -20,7 +20,7 @@ import java.io.Serializable;
 
 /**
  * Representation of OAuth2 endpoints and other relevant endpoint data.
- * 
+ *
  */
 public class OAuth2Provider implements Serializable {
   private static final long serialVersionUID = -6539761759797255778L;

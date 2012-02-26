@@ -188,7 +188,7 @@ public class SampleOAuthServlet extends InjectedServlet {
       } else {
         // Use internal forward to a jsp page
         servletRequest.setAttribute("OAUTH_DATASTORE",  dataStore);
-        
+
         servletRequest.setAttribute("OAUTH_ENTRY",  entry);
         servletRequest.setAttribute("CALLBACK", callback);
 
@@ -207,7 +207,7 @@ public class SampleOAuthServlet extends InjectedServlet {
       // consumer did not specify a callback
       servletResponse.setContentType("text/plain");
       PrintWriter out = servletResponse.getWriter();
-      out.write("Token successfully authorized.\n");      
+      out.write("Token successfully authorized.\n");
       if (entry.getCallbackToken() != null) {
         // Usability fail.
         out.write("Please enter code " + entry.getCallbackToken() + " at the consumer.");
@@ -246,7 +246,7 @@ public class SampleOAuthServlet extends InjectedServlet {
       }
     } else if (!entry.isAuthorized()) {
       // Old protocol.  Catch consumers trying to convert a token to one that's not authorized
-      dataStore.disableToken(entry); 
+      dataStore.disableToken(entry);
       servletResponse.sendError(HttpServletResponse.SC_FORBIDDEN, "This token is not authorized");
       return;
     }
@@ -289,7 +289,7 @@ public class SampleOAuthServlet extends InjectedServlet {
     OAuthConsumer consumer = dataStore.getConsumer(consumerKey);
     if (consumer == null)
       throw new OAuthProblemException(OAuth.Problems.CONSUMER_KEY_UNKNOWN);
-    
+
     OAuthAccessor accessor = new OAuthAccessor(consumer);
     accessor.requestToken = entry.getToken();
     accessor.tokenSecret = entry.getTokenSecret();

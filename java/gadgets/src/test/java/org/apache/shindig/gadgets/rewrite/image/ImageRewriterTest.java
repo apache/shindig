@@ -56,7 +56,7 @@ public class ImageRewriterTest extends Assert {
 
   /** A 600 x 400 image whose size used to cause trouble with rounding when resizing to 171 x 171 */
   private static final String RATIO_IMAGE = "org/apache/shindig/gadgets/rewrite/image/ratio.gif";
-  
+
   /**
    * This image has a huge memory footprint that the rewriter should refuse to resize, but not
    * refuse to render.  The response containing this image should not be rewritten.
@@ -95,7 +95,7 @@ public class ImageRewriterTest extends Assert {
     assertNotNull(imageBytes);
     return imageBytes;
   }
-  
+
   private BufferedImage getResizedHttpResponseContent(String sourceContentType,
       String targetContentType, String imageName, Integer width, Integer height, Integer quality)
       throws Exception {
@@ -294,12 +294,12 @@ public class ImageRewriterTest extends Assert {
     assertEquals(HttpResponse.SC_OK, response.getHttpStatusCode());
     assertTrue(Arrays.equals(imageBytes, IOUtils.toByteArray(response.getContentBytes())));
   }
-  
+
   @Test
   public void testResize_avoidFloatingPointRoundingProblems() throws Exception {
     BufferedImage image = getResizedHttpResponseContent(
         CONTENT_TYPE_GIF, CONTENT_TYPE_PNG, RATIO_IMAGE, 171, 171, null, true);
     assertEquals(171, image.getWidth());
-    assertEquals(114, image.getHeight());    
+    assertEquals(114, image.getHeight());
   }
 }

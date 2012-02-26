@@ -22,8 +22,8 @@ import org.apache.shindig.gadgets.oauth2.OAuth2Error;
 
 /**
  * Stores an error in the handler layer.
- * 
- * 
+ *
+ *
  */
 public class OAuth2HandlerError implements Serializable {
   private static final long serialVersionUID = 6533884367169476207L;
@@ -40,7 +40,7 @@ public class OAuth2HandlerError implements Serializable {
   }
 
   /**
-   * 
+   *
    * @return the {@link OAuth2Error} associated with this error
    */
   public OAuth2Error getError() {
@@ -48,7 +48,7 @@ public class OAuth2HandlerError implements Serializable {
   }
 
   /**
-   * 
+   *
    * @return underlying exception that caused is error or <code>null</code>
    */
   public Exception getCause() {
@@ -56,7 +56,7 @@ public class OAuth2HandlerError implements Serializable {
   }
 
   /**
-   * 
+   *
    * @return non-translated message about the context of this error for
    *         debugging purposes
    */

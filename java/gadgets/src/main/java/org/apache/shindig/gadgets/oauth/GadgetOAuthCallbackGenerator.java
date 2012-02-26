@@ -94,7 +94,7 @@ public class GadgetOAuthCallbackGenerator implements OAuthCallbackGenerator {
     this.oauthUriManager = oauthUriManager;
     this.stateCrypter = stateCrypter;
   }
-  
+
   public String generateCallback(OAuthFetcherConfig fetcherConfig, String baseCallback,
       HttpRequest request, OAuthResponseParams responseParams) throws OAuthRequestException {
     Uri activeUrl = checkGadgetCanRender(request.getSecurityToken(),
@@ -138,7 +138,7 @@ public class GadgetOAuthCallbackGenerator implements OAuthCallbackGenerator {
     }
     return gadgetCallback.toString();
   }
-  
+
   private String generateCallbackForProvider(
       OAuthResponseParams responseParams, String callbackForProvider, String gadgetDomainCallback)
       throws OAuthRequestException {

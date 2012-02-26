@@ -33,7 +33,7 @@ import java.util.List;
 
 /**
  * Injects a global ___jsl variable with information about the JS request.
- * 
+ *
  * Used when loading embedded JS configuration in core.config/config.js.
  */
 public class AddJslInfoVariableProcessor implements JsProcessor {

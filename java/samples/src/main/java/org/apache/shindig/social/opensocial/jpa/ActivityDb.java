@@ -58,7 +58,7 @@ import javax.persistence.Version;
 @Entity
 @Table(name = "activity")
 @NamedQueries(value = {
-    @NamedQuery(name = ActivityDb.FINDBY_ACTIVITY_ID, 
+    @NamedQuery(name = ActivityDb.FINDBY_ACTIVITY_ID,
         query = "select activity from ActivityDb activity where activity.userId = :userId and activity.id = :activityId")
     })
 public class ActivityDb implements Activity, DbObject {
@@ -66,13 +66,13 @@ public class ActivityDb implements Activity, DbObject {
   public static final String FINDBY_ACTIVITY_ID = "q.activity.findbyactivityid";
 
   public static final String PARAM_USERID = "userId";
-  
+
   public static final String PARAM_ACTIVITYID = "activityId";
-   
+
   public static final String JPQL_FINDBY_ACTIVITIES = null;
-  
+
   public static final String JPQL_FINDACTIVITY = "select a from ActivityDb a where ";
-  
+
   public static final String JPQL_FINDACTIVITY_BY_FRIENDS = "select a from ActivityDb a where a.userId in (select p.id from PersonDb p where p.objectId in (select f.friend.objectId from PersonDb p, FriendDb f where p.objectId = f.person.objectId and ";
 
   /**

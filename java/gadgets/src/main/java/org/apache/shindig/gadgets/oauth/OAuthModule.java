@@ -49,7 +49,7 @@ public class OAuthModule extends AbstractModule {
   //class name for logging purpose
   private static final String classname = OAuthModule.class.getName();
   private static final Logger LOG = Logger.getLogger(classname, MessageKeys.MESSAGES);
-  
+
 
   private static final String OAUTH_CONFIG = "config/oauth.json";
   private static final String OAUTH_SIGNING_KEY_FILE = "shindig.signing.key-file";
@@ -80,7 +80,7 @@ public class OAuthModule extends AbstractModule {
         LOG.info("Using random key for OAuth client-side state encryption");
         if (LOG.isLoggable(Level.INFO)) {
           LOG.logp(Level.INFO, classname, "OAuthCrypterProvider constructor", MessageKeys.USING_RANDOM_KEY);
-        }         
+        }
         crypter = new BasicBlobCrypter(Crypto.getRandomBytes(BasicBlobCrypter.MASTER_KEY_MIN_LEN));
       } else {
         if (LOG.isLoggable(Level.INFO)) {
@@ -113,7 +113,7 @@ public class OAuthModule extends AbstractModule {
   @Singleton
   public static class OAuthStoreProvider implements Provider<OAuthStore> {
 
-    private final BasicOAuthStore store; 
+    private final BasicOAuthStore store;
 
     @Inject
     public OAuthStoreProvider(
@@ -151,7 +151,7 @@ public class OAuthModule extends AbstractModule {
       } else {
         if (LOG.isLoggable(Level.WARNING)) {
           LOG.logp(Level.WARNING, classname, "loadDefaultKey", MessageKeys.COULD_NOT_LOAD_SIGN_KEY, new Object[] {OAUTH_SIGNING_KEY_FILE,OAUTH_SIGNING_KEY_NAME});
-        }        
+        }
       }
     }
 
@@ -163,7 +163,7 @@ public class OAuthModule extends AbstractModule {
         if (LOG.isLoggable(Level.WARNING)) {
           LOG.logp(Level.WARNING, classname, "loadConsumers", MessageKeys.FAILED_TO_INIT, new Object[] {OAUTH_CONFIG});
           LOG.log(Level.WARNING, "", t);
-        } 
+        }
       }
     }
 

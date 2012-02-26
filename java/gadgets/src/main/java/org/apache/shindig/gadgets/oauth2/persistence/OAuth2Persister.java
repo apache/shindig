@@ -27,26 +27,26 @@ import org.apache.shindig.gadgets.oauth2.persistence.sample.JSONOAuth2Persister;
 /**
  * Interface, used primarily by {@link OAuth2Store}, to manage
  * {@link OAuth2Accessor} and {@link OAuth2Token} storage.
- * 
+ *
  * An {@link OAuth2Accessor} has the same basic information as the
  * {@link OAuth2Client}, merged with gadget spec and request prefs.
- * 
+ *
  * {@link OAuth2Accessor} is short lived, for the life of one request.
- * 
+ *
  * {@link OAuth2Clients} is intended to be persisted and cached.
- * 
+ *
  * The default persister for shindig is {@link JSONOAuth2Persister}
- * 
+ *
  */
 public interface OAuth2Persister {
   /**
-   * 
+   *
    * @return a new {@link OAuth2Token} suitable for initialization and storage.
    */
   OAuth2Token createToken();
 
   /**
-   * 
+   *
    * @param gadgetUri
    * @param serviceName
    * @return the client in the given mapping
@@ -55,7 +55,7 @@ public interface OAuth2Persister {
   OAuth2Client findClient(String gadgetUri, String serviceName) throws OAuth2PersistenceException;
 
   /**
-   * 
+   *
    * @param gadgetUri
    * @param serviceName
    * @param user
@@ -69,7 +69,7 @@ public interface OAuth2Persister {
 
   /**
    * Inserts a new {@link OAuth2Token} into the persistence layer.
-   * 
+   *
    * @param token
    * @throws OAuth2PersistenceException
    */
@@ -79,7 +79,7 @@ public interface OAuth2Persister {
    * Load all the clients from the persistence layer. The
    * {@link BasicOAuth2Store#init()} method will call this to prepopulate the
    * cache.
-   * 
+   *
    * @return
    * @throws OAuth2PersistenceException
    */
@@ -89,7 +89,7 @@ public interface OAuth2Persister {
    * Load all the tokens from the persistence layer. The
    * {@link BasicOAuth2Store#init()} method will call this to prepopulate the
    * cache.
-   * 
+   *
    * @return
    * @throws OAuth2PersistenceException
    */
@@ -97,7 +97,7 @@ public interface OAuth2Persister {
 
   /**
    * Removes a token from the persistence layer.
-   * 
+   *
    * @param gadgetUri
    * @param serviceName
    * @param user
@@ -111,7 +111,7 @@ public interface OAuth2Persister {
 
   /**
    * Updates an existing {@link OAuth2Token} in the persistence layer.
-   * 
+   *
    * @param token
    * @throws OAuth2PersistenceException
    */

@@ -29,9 +29,9 @@ import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 
 /**
- * 
+ *
  * See {@link GrantRequestHandler}
- * 
+ *
  * Handles the "authorization_code" flow
  */
 public class CodeGrantTypeHandler implements GrantRequestHandler {

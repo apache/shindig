@@ -109,7 +109,7 @@ public class DataServiceServlet extends ApiServlet {
       return;
     }
 
-    HttpUtil.setCORSheader(servletResponse, containerConfig.<String>getList(token.getContainer(), 
+    HttpUtil.setCORSheader(servletResponse, containerConfig.<String>getList(token.getContainer(),
         "gadgets.parentOrigins"));
 
     handleSingleRequest(servletRequest, servletResponse, token);
@@ -127,7 +127,7 @@ public class DataServiceServlet extends ApiServlet {
         case -32700:
         case -32602:
         case -32600:
-          // Parse error, invalid params, and invalid request 
+          // Parse error, invalid params, and invalid request
           errorCode = HttpServletResponse.SC_BAD_REQUEST;
           break;
         case -32601:

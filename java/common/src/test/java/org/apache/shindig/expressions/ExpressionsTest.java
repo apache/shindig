@@ -42,28 +42,28 @@ public class ExpressionsTest {
   public Expressions expressions;
   private ELContext context;
   private Map<String, Object> variables;
-  
+
   @Before
   public void setUp() {
     expressions = Expressions.forTesting();
     variables = Maps.newHashMap();
     context = expressions.newELContext(new RootELResolver(variables));
   }
-    
+
   @Test
   public void arraySupport() {
     addVariable("array", new String[]{"foo", "bar"});
     String result = evaluate("${array[0]}${array[1]}", String.class);
     assertEquals("foobar", result);
   }
-  
+
   @Test
   public void listSupport() {
     addVariable("list", ImmutableList.of("foo", "bar"));
     String result = evaluate("${list[0]}${list[1]}", String.class);
     assertEquals("foobar", result);
   }
-  
+
   @Test
   public void mapSupport() {
     addVariable("map", ImmutableMap.of("foo", "bar"));
@@ -91,7 +91,7 @@ public class ExpressionsTest {
     JSONArray expected = new JSONArray("['first', 'second']");
     assertEquals(expected.toString(), result.toString());
   }
-  
+
   @Test
   public void jsonArrayCoercion() throws Exception {
     addVariable("foo", "first,second");
@@ -99,7 +99,7 @@ public class ExpressionsTest {
     JSONArray expected = new JSONArray("['first', 'second']");
     assertEquals(expected.toString(), result.toString());
   }
-  
+
   @Test
   public void missingJsonSubproperty() throws Exception {
     addVariable("object", new JSONObject("{foo: 125}"));
@@ -130,7 +130,7 @@ public class ExpressionsTest {
     assertTrue(evaluate("${bool}", Boolean.class));
     assertFalse(evaluate("${!bool}", Boolean.class));
   }
-  
+
   @Test
   public void booleanCoercionOfNumbers() throws Exception{
     // Negation tests have been moved to EL subdir
@@ -139,15 +139,15 @@ public class ExpressionsTest {
 
     addVariable("bool", 1);
     assertTrue(evaluate("${bool}", Boolean.class));
-  } 
-  
+  }
+
   @Test
   public void booleanCoercionOfNull() throws Exception{
     addVariable("bool", null);
     assertFalse(evaluate("${bool}", Boolean.class));
     assertTrue(evaluate("${!bool}", Boolean.class));
   }
-  
+
   @Test
   public void booleanCoercionOfStrings() throws Exception{
     // Negation tests for FALSE and any String have been moved El subdir
@@ -166,33 +166,33 @@ public class ExpressionsTest {
     addVariable("bool", "true");
     assertTrue(evaluate("${bool}", Boolean.class));
     assertFalse(evaluate("${!bool}", Boolean.class));
-    
+
     addVariable("bool", "booga");
     assertTrue(evaluate("${bool}", Boolean.class));
-  } 
-  
-  
+  }
+
+
   @Test
   public void iterableCoercionOfScalar() throws Exception {
     addVariable("iter", "foo");
     assertEquals(ImmutableList.of("foo"),
         evaluate("${iter}", Iterable.class));
   }
-  
+
   @Test
   public void iterableCoercionOfNull() throws Exception {
     addVariable("iter", null);
     assertEquals(ImmutableList.of(),
         evaluate("${iter}", Iterable.class));
   }
-  
+
   @Test
   public void iterableCoercionOfCollection() throws Exception {
     addVariable("iter", ImmutableList.of(1, 2, 3));
     assertEquals(ImmutableList.of(1, 2, 3),
         evaluate("${iter}", Iterable.class));
   }
-  
+
   @Test
   @SuppressWarnings("unchecked")
   public void iterableCoercionOfJSONArray() throws Exception {
@@ -200,7 +200,7 @@ public class ExpressionsTest {
     assertEquals(ImmutableList.of(1, 2, 3),
         ImmutableList.copyOf(evaluate("${iter}", Iterable.class)));
   }
-  
+
   @Test
   @SuppressWarnings("unchecked")
   public void iterableCoercionOfJSONObjectWithListProperty() throws Exception {
@@ -208,7 +208,7 @@ public class ExpressionsTest {
     assertEquals(ImmutableList.of(1, 2, 3),
         ImmutableList.copyOf(evaluate("${iter}", Iterable.class)));
   }
-  
+
   @Test
   @SuppressWarnings("unchecked")
   public void iterableCoercionOfJSONObjectWithoutListProperty() throws Exception {
@@ -217,7 +217,7 @@ public class ExpressionsTest {
     assertEquals(ImmutableList.of(json),
         ImmutableList.copyOf(evaluate("${iter}", Iterable.class)));
   }
-  
+
   public <T> T evaluate(String expression, Class<T> type) {
     ValueExpression expr = expressions.parse(expression, type);
     return type.cast(expr.getValue(context));

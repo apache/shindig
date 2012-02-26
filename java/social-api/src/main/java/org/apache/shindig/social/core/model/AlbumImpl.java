@@ -39,9 +39,9 @@ public class AlbumImpl implements Album {
   private String thumbnailUrl;
   private String title;
 
-  public AlbumImpl() {  
+  public AlbumImpl() {
   }
-  
+
   public String getDescription() {
     return description;
   }

@@ -27,22 +27,22 @@ public interface FormDataItem {
 
   /**
    * Returns the Content type of the field item.
-   * 
+   *
    * @return content type
    */
   String getContentType();
 
   /**
    * The size of the content stored in this field item.
-   * 
+   *
    * @return size of the content
    */
   long getSize();
-  
+
   /**
    * Returns an InputStream from which the content of the field item can be
    * read.
-   * 
+   *
    * @return InputStream to the content of the field item.
    * @throws IOException
    */
@@ -50,7 +50,7 @@ public interface FormDataItem {
 
   /**
    * Returns the content of the field item.
-   * 
+   *
    * @return content of the field item
    */
   byte[] get();
@@ -65,15 +65,15 @@ public interface FormDataItem {
   /**
    * Name of the uploaded file, if the item represents file upload.
    * This will be only valid when {@link #isFormField()} returns false.
-   * 
+   *
    * @return name of the uploaded file
    */
   String getName();
-  
+
   /**
    * Field name of this field item. Can be used to identify a field by name but
    * as per RFC this need not be unique.
-   * 
+   *
    * @return name of the field
    */
   String getFieldName();
@@ -81,7 +81,7 @@ public interface FormDataItem {
   /**
    * Used to identify if the field item represents a file upload or a regular
    * form field.
-   * 
+   *
    * @return true if it is a regular form field
    */
   boolean isFormField();

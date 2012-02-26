@@ -257,7 +257,7 @@ public class ClosureJsCompilerTest extends TestCase {
     expect(result.getContext()).andReturn(RenderingContext.CONFIGURED_GADGET).anyTimes();
     expect(result.getRefresh()).andReturn(1000).anyTimes();
     expect(result.isNoCache()).andReturn(false).anyTimes();
-    expect(result.getGadget()).andReturn("http://foo.com/g.xml").anyTimes();    
+    expect(result.getGadget()).andReturn("http://foo.com/g.xml").anyTimes();
     expect(result.getLibs()).andReturn(ImmutableList.<String>of()).anyTimes();
     expect(result.getLoadedLibs()).andReturn(ImmutableList.<String>of()).anyTimes();
     expect(result.getOnload()).andReturn("foo").anyTimes();

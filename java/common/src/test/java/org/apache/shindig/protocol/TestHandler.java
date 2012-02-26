@@ -104,7 +104,7 @@ public class TestHandler {
       throw new NullPointerException(FAILURE_MESSAGE);
     }
   }
-  
+
   @Operation(httpMethods = "GET", path = "/echo")
   public String echo(Input input) {
     return ECHO_PREFIX + input.value;
@@ -115,7 +115,7 @@ public class TestHandler {
     public String value;
     public void setValue(String value) { this.value = value; }
   }
-  
+
   @Operation(httpMethods = "")
   public String noArg() {
     return NO_ARG_RESPONSE;

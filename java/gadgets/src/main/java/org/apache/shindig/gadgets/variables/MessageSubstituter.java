@@ -42,7 +42,7 @@ public class MessageSubstituter implements Substituter {
           throws GadgetException {
     MessageBundle bundle = messageBundleFactory.getBundle(spec, context.getLocale(),
         context.getIgnoreCache(), context.getContainer(), context.getView());
-        
+
     substituter.addSubstitutions(Substitutions.Type.MESSAGE, bundle.getMessages());
   }
 }

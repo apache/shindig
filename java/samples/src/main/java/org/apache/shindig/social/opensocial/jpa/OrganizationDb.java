@@ -55,7 +55,7 @@ import static javax.persistence.CascadeType.REFRESH;
 @Inheritance(strategy = InheritanceType.JOINED)
 @DiscriminatorColumn(name = "org_usage")
 @DiscriminatorValue("shared")
-@NamedQuery(name = OrganizationDb.FINDBY_NAME, 
+@NamedQuery(name = OrganizationDb.FINDBY_NAME,
     query = "select o from OrganizationDb o where o.name = :name ")
 public class OrganizationDb implements Organization, DbObject {
   /**

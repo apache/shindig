@@ -41,23 +41,23 @@ public class IfTagHandlerTest {
   private FakeTemplateProcessor processor;
   private DOMImplementation documentProvider;
   private TagHandler handler;
-   
+
   @Before
   public void setUp() throws Exception {
     processor = EasyMock.createMock(FakeTemplateProcessor.class);
     documentProvider = new ParseModule.DOMImplementationProvider().get();
     handler = new IfTagHandler();
   }
-  
+
   @Test
   public void conditionIsFalse() throws Exception {
     Document doc = documentProvider.createDocument(null, null, null);
     // Create a mock tag;  the name doesn't truly matter
     Element tag = doc.createElement("if");
-    
+
     tag.setAttribute(IfTagHandler.CONDITION_ATTR, "fakeExpression");
     processor.expressionResults = ImmutableMap.of("fakeExpression", false);
-    
+
     replay(processor);
     handler.process(null, tag, processor);
     verify(processor);
@@ -69,10 +69,10 @@ public class IfTagHandlerTest {
     // Create a mock tag;  the name doesn't truly matter
     Element tag = doc.createElement("if");
     tag.setAttribute(IfTagHandler.CONDITION_ATTR, "fakeExpression");
-    
+
     processor.expressionResults = ImmutableMap.of("fakeExpression", true);
     processor.processChildNodes((Node) isNull(), same(tag));
-    
+
     replay(processor);
     handler.process(null, tag, processor);
     verify(processor);
@@ -83,7 +83,7 @@ public class IfTagHandlerTest {
     Document doc = documentProvider.createDocument(null, null, null);
     // Create a mock tag;  the name doesn't truly matter
     Element tag = doc.createElement("if");
-    
+
     replay(processor);
     handler.process(null, tag, processor);
     verify(processor);

@@ -28,7 +28,7 @@ public interface OAuth2RequestParameterGenerator {
 
   /**
    * Generates additional parameters that are added to the request sent to the authorization server
-   * 
+   *
    * @return map of additional parameters. this should never be <code>null</code>
    */
   public Map<String, String> generateParams(HttpRequest request);

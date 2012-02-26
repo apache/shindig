@@ -75,7 +75,7 @@ public class DefaultContentRewriterRegistryTest extends BaseRewriterTestCase {
       public void rewrite(HttpRequest request, HttpResponseBuilder response)
           throws RewritingException {
         // Do nothing.
-      } 
+      }
     });
     registry = new DefaultResponseRewriterRegistry(rewriters, parser);
 

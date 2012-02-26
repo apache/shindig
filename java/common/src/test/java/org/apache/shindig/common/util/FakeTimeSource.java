@@ -30,20 +30,20 @@ public class FakeTimeSource extends TimeSource {
   public FakeTimeSource() {
     this(System.currentTimeMillis());
   }
-  
+
   public FakeTimeSource(long now) {
     this.now = now;
   }
-  
+
   @Override
   public long currentTimeMillis() {
     return now;
   }
-  
+
   public void setCurrentTimeMillis(long now) {
     this.now = now;
   }
-  
+
   public void incrementSeconds(int seconds) {
     now += seconds*1000;
   }

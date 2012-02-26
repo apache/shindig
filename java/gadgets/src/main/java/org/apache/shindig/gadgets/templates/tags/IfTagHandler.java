@@ -43,7 +43,7 @@ public class IfTagHandler extends AbstractTagHandler {
       return;
     }
 
-    // Condition succeeded, process all child nodes 
+    // Condition succeeded, process all child nodes
     processor.processChildNodes(result, tag);
   }
 }

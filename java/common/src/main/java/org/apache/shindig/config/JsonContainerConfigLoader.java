@@ -146,7 +146,7 @@ public class JsonContainerConfigLoader {
           location = location.substring(6);
           if (LOG.isLoggable(Level.INFO)) {
             LOG.logp(Level.INFO, classname, "loadContainers", MessageKeys.LOAD_RESOURCES_FROM, new Object[] {location});
-          }          
+          }
           if (path.endsWith(".txt")) {
             loadResources(CRLF_SPLITTER.split(ResourceLoader.getContent(location)), all);
           } else {
@@ -155,7 +155,7 @@ public class JsonContainerConfigLoader {
         } else {
           if (LOG.isLoggable(Level.INFO)) {
             LOG.logp(Level.INFO, classname, "loadContainers", MessageKeys.LOAD_FILES_FROM, new Object[] {location});
-          } 
+          }
           File file = new File(location);
           loadFiles(new File[] {file}, all);
         }

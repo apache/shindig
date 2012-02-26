@@ -159,7 +159,7 @@ public class ProxyRenderer {
       request.setHeader("User-Agent", userAgent);
     }
   }
-  
+
   /**
    * Returns the program name which will be added at the end of the User-Agent
    * string, to identify the gadget server.

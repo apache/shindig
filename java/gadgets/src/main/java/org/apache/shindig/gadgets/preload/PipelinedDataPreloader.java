@@ -73,7 +73,7 @@ public class PipelinedDataPreloader {
   public Collection<Callable<PreloadedData>> createPreloadTasks(GadgetContext context,
       PipelinedData.Batch batch) {
     List<Callable<PreloadedData>> preloadList = Lists.newArrayList();
-    
+
     Collection<Object> socialRequest = Lists.newArrayList();
     // Gather all the preload entries;  all social requests in one batch, each HTTP
     // in its own
@@ -96,7 +96,7 @@ public class PipelinedDataPreloader {
           throw new IllegalArgumentException("Unknown pipeline type");
       }
     }
-    
+
     if (!socialRequest.isEmpty()) {
       preloadList.add(new SocialPreloadTask(context, socialRequest));
     }
@@ -121,7 +121,7 @@ public class PipelinedDataPreloader {
 
     public VariableTask(String key, Object data) {
       this.result = (data == null) ? ImmutableMap.of("id", (Object) key)
-          : ImmutableMap.of("id", key, "result", data); 
+          : ImmutableMap.of("id", key, "result", data);
     }
 
     public PreloadedData call() throws Exception {
@@ -132,7 +132,7 @@ public class PipelinedDataPreloader {
       };
     }
   }
-  
+
   /**
    * Callable for issuing HttpRequests to JsonRpcServlet.
    */
@@ -148,7 +148,7 @@ public class PipelinedDataPreloader {
 
     public PreloadedData call() throws Exception {
       HttpResponse response;
-      
+
       String token = context.getParameter("st");
       if (token == null) {
         response = new HttpResponseBuilder()

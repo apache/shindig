@@ -39,5 +39,5 @@ public class DefaultConfigContributorModule extends AbstractModule {
     configBinder.addBinding("shindig.auth").to(ShindigAuthConfigContributor.class);
     configBinder.addBinding("shindig.xhrwrapper").to(XhrwrapperConfigContributor.class);
   }
-  
+
 }

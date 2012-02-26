@@ -70,7 +70,7 @@ public class DefaultServiceFetcher {
   private final ContainerConfig containerConfig;
 
   private final HttpFetcher fetcher;
-  
+
   private Authority authority;
 
   /** @param config Container Config for looking up endpoints */
@@ -79,7 +79,7 @@ public class DefaultServiceFetcher {
     this.containerConfig = config;
     this.fetcher = fetcher;
   }
-  
+
   @Inject(optional = true)
   public void setAuthority(Authority authority) {
     this.authority = authority;

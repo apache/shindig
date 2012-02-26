@@ -41,10 +41,10 @@ public class AllJsIframeVersionerTest {
   // Underscores that neither of these values are even read.
   private static final Uri GADGET_URI = null;
   private static final String CONTAINER = null;
-  
+
   private AllJsIframeVersioner versioner;
   private String featureChecksum;
-  
+
   @Before
   public void setUp() {
     String featureContent = "THE_FEATURE_CONTENT";
@@ -61,29 +61,29 @@ public class AllJsIframeVersionerTest {
     versioner = new AllJsIframeVersioner(registry);
     verify(registry);
   }
-  
+
   @Test
   public void versionIsAsExpectedAlwaysTheSame() {
     assertEquals(featureChecksum, versioner.version(GADGET_URI, CONTAINER));
     assertEquals(featureChecksum, versioner.version(Uri.parse("http://valid.com/"), "foo"));
   }
-  
+
   @Test
   public void validateNull() {
     assertEquals(UriStatus.VALID_UNVERSIONED, versioner.validate(GADGET_URI, CONTAINER, null));
   }
-  
+
   @Test
   public void validateEmpty() {
     assertEquals(UriStatus.VALID_UNVERSIONED, versioner.validate(GADGET_URI, CONTAINER, ""));
   }
-  
+
   @Test
   public void validateMismatch() {
     assertEquals(UriStatus.INVALID_VERSION, versioner.validate(GADGET_URI, CONTAINER,
         featureChecksum + "-not"));
   }
-  
+
   @Test
   public void validateMatch() {
     assertEquals(UriStatus.VALID_VERSIONED, versioner.validate(GADGET_URI, CONTAINER,

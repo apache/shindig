@@ -30,7 +30,7 @@ import javax.servlet.http.HttpServletRequest;
 public class HttpServletUserAgentProvider implements Provider<UserAgent> {
   private final UserAgent.Parser uaParser;
   private final Provider<HttpServletRequest> reqProvider;
-  
+
   @Inject
   public HttpServletUserAgentProvider(UserAgent.Parser uaParser,
       Provider<HttpServletRequest> reqProvider) {

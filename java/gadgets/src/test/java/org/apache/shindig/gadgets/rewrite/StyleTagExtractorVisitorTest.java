@@ -51,67 +51,67 @@ import java.util.List;
 
 public class StyleTagExtractorVisitorTest extends DomWalkerTestBase {
   private ProxyUriManager proxyUriManager;
-  
+
   @Override
   @Before
   public void setUp() throws Exception {
     super.setUp();
     proxyUriManager = new PassthruManager();
   }
-  
+
   @Test
   public void visitBypassesComment() throws Exception {
     Comment comment = doc.createComment("comment");
     assertEquals(VisitStatus.BYPASS, getVisitStatus(comment));
   }
-  
+
   @Test
   public void visitBypassesText() throws Exception {
     Text text = doc.createTextNode("text");
     assertEquals(VisitStatus.BYPASS, getVisitStatus(text));
   }
-  
+
   @Test
   public void visitBypassesNonStyle() throws Exception {
     Node node = elem("div");
     assertEquals(VisitStatus.BYPASS, getVisitStatus(node));
   }
-  
+
   @Test
   public void visitBypassesStyleWhenRewriterOff() throws Exception {
     assertEquals(VisitStatus.BYPASS, getVisitStatus(config(false, true, true), elem("style")));
   }
-  
+
   @Test
   public void visitBypassesStyleWhenStyleTagNotIncluded() throws Exception {
     assertEquals(VisitStatus.BYPASS, getVisitStatus(config(true, false, true), elem("style")));
   }
-  
+
   @Test
   public void visitReservesStyleNode() throws Exception {
     assertEquals(VisitStatus.RESERVE_NODE, getVisitStatus(elem("style")));
   }
-  
+
   @Test
   public void visitReservesCasedStyleNode() throws Exception {
     assertEquals(VisitStatus.RESERVE_NODE, getVisitStatus(elem("sTyLE")));
   }
-  
+
   @Test
   public void revisitNothingExtracted() throws Exception {
     Gadget gadget = gadget();
     CssResponseRewriter cssRewriter = createMock(CssResponseRewriter.class);
     replay(cssRewriter);
-    
+
     // Tag name isn't inspected since visit() filters this.
     List<Node> nodes = ImmutableList.of();
     Node head = addNodesToHtml(nodes);
-    
+
     assertFalse(getRevisitStatus(gadget, true, cssRewriter, nodes));
     verify(cssRewriter);
     assertEquals(0, head.getChildNodes().getLength());
   }
-  
+
   @Test
   public void revisitExtractSpecRelative() throws Exception {
     Uri base = GADGET_URI;
@@ -128,11 +128,11 @@ public class StyleTagExtractorVisitorTest extends DomWalkerTestBase {
     expect(cssRewriter.rewrite(eq(elem2), eq(base), isA(UriMaker.class), eq(true), eq(gadget.getContext())))
         .andReturn(extractedUrls2).once();
     replay(cssRewriter);
-    
+
     // Tag name isn't inspected since visit() filters this.
     List<Node> nodes = ImmutableList.<Node>of(elem1, elem2);
     Node head = addNodesToHtml(nodes);
-    
+
     assertTrue(getRevisitStatus(gadget, true, cssRewriter, nodes));
     verify(cssRewriter);
     assertEquals(2, head.getChildNodes().getLength());
@@ -149,7 +149,7 @@ public class StyleTagExtractorVisitorTest extends DomWalkerTestBase {
     // PassthruManager doesn't modify the inbound URI.
     assertEquals(urlStr2, child2.getAttribute("href"));
   }
-  
+
   @Test
   public void revisitExtractViewHrefRelative() throws Exception {
     Uri base = Uri.parse("http://view.com/viewbase.xml");
@@ -166,11 +166,11 @@ public class StyleTagExtractorVisitorTest extends DomWalkerTestBase {
     expect(cssRewriter.rewrite(eq(elem2), eq(base), isA(UriMaker.class), eq(true), eq(gadget.getContext())))
         .andReturn(extractedUrls2).once();
     replay(cssRewriter);
-    
+
     // Tag name isn't inspected since visit() filters this.
     List<Node> nodes = ImmutableList.<Node>of(elem1, elem2);
     Node head = addNodesToHtml(nodes);
-    
+
     assertTrue(getRevisitStatus(gadget, true, cssRewriter, nodes));
     verify(cssRewriter);
     assertEquals(2, head.getChildNodes().getLength());
@@ -187,7 +187,7 @@ public class StyleTagExtractorVisitorTest extends DomWalkerTestBase {
     // PassthruManager doesn't modify the inbound URI.
     assertEquals(urlStr2, child2.getAttribute("href"));
   }
-  
+
   @Test
   public void revisitExtractSpecRelativeDisabled() throws Exception {
     Uri base = GADGET_URI;
@@ -202,16 +202,16 @@ public class StyleTagExtractorVisitorTest extends DomWalkerTestBase {
     expect(cssRewriter.rewrite(eq(elem2), eq(base), isA(UriMaker.class), eq(true), eq(gadget.getContext())))
         .andReturn(extractedUrls2).once();
     replay(cssRewriter);
-    
+
     // Tag name isn't inspected since visit() filters this.
     List<Node> nodes = ImmutableList.<Node>of(elem1, elem2);
     Node head = addNodesToHtml(nodes);
-    
+
     assertFalse(getRevisitStatus(gadget, false, cssRewriter, nodes));
     verify(cssRewriter);
     assertEquals(0, head.getChildNodes().getLength());
   }
-  
+
   private VisitStatus getVisitStatus(Node node) throws Exception {
     return getVisitStatus(config(true, true, true), node);
   }
@@ -221,7 +221,7 @@ public class StyleTagExtractorVisitorTest extends DomWalkerTestBase {
     // Pass null for all unused (viz. visitor()) APIs to underscore their lack of use.
     return new StyleTagExtractorVisitor(config, null, null).visit(null, node);
   }
-  
+
   private boolean getRevisitStatus(
       Gadget gadget, boolean shouldRewriteUrl, CssResponseRewriter cssRewriter, List<Node> nodes)
       throws Exception {
@@ -229,7 +229,7 @@ public class StyleTagExtractorVisitorTest extends DomWalkerTestBase {
         config(true, true, shouldRewriteUrl), cssRewriter, proxyUriManager)
         .revisit(gadget, nodes);
   }
-  
+
   private ContentRewriterFeature.Config config(
       boolean enabled, boolean styleInc, boolean rewriteUrl) {
     ContentRewriterFeature.Config config = createMock(ContentRewriterFeature.Config.class);
@@ -240,7 +240,7 @@ public class StyleTagExtractorVisitorTest extends DomWalkerTestBase {
     replay(config);
     return config;
   }
-  
+
   private Node addNodesToHtml(List<Node> nodes) throws Exception {
     Node html = elem("html");
     Node head = elem("head");

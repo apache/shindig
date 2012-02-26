@@ -31,15 +31,15 @@ import java.util.Locale;
  * Date parsing and writing utilities.
  */
 public final class DateUtil {
-    
+
   private static final DateTimeFormatter RFC1123_DATE_FORMAT = DateTimeFormat
       .forPattern("EEE, dd MMM yyyy HH:mm:ss 'GMT'")
       .withLocale(Locale.US)
       .withZone(DateTimeZone.UTC);
 
   private static final DateTimeFormatter ISO8601_DATE_FORMAT = ISODateTimeFormat.dateTime()
-      .withZone(DateTimeZone.UTC); 
- 
+      .withZone(DateTimeZone.UTC);
+
   private DateUtil() {}
 
   /**
@@ -57,11 +57,11 @@ public final class DateUtil {
       return null;
     }
   }
-  
+
   /**
    * Parses an ISO8601 formatted datetime into a Date or null
    * is parsing fails.
-   *  
+   *
    * @param dateStr A datetime string in ISO8601 format
    * @return the date
    */
@@ -73,18 +73,18 @@ public final class DateUtil {
           return null;
       }
   }
-  
+
   /**
    * Formats an ISO 8601 format date.
    */
   public static String formatIso8601Date(Date date) {
       return formatIso8601Date(date.getTime());
   }
- 
+
   /**
    * Formats an ISO 8601 format date.
    */
-  public static String formatIso8601Date(long time) {      
+  public static String formatIso8601Date(long time) {
       return ISO8601_DATE_FORMAT.print(time);
   }
 

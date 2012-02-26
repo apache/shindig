@@ -26,7 +26,7 @@ import org.apache.shindig.gadgets.http.HttpRequest;
  * Figures out the OAuth callback URL to send service providers.
  */
 @ImplementedBy(GadgetOAuthCallbackGenerator.class)
-public interface OAuthCallbackGenerator {  
+public interface OAuthCallbackGenerator {
   String generateCallback(OAuthFetcherConfig fetcherConfig, String baseCallback,
       HttpRequest request, OAuthResponseParams responseParams) throws OAuthRequestException;
 }

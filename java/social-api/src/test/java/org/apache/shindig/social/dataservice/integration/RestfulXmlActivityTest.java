@@ -42,7 +42,7 @@ public class RestfulXmlActivityTest extends AbstractLargeRestfulTests {
 
   /**
    * Expected response for an activity in xml:
-   * 
+   *
    * <pre>
    * &lt;response&gt;
    *    &lt;activity&gt;
@@ -53,7 +53,7 @@ public class RestfulXmlActivityTest extends AbstractLargeRestfulTests {
    *    &lt;/activity&gt;
    * &lt;/response&gt;
    * </pre>
-   * 
+   *
    * @throws Exception
    *           if test encounters an error
    */
@@ -63,7 +63,7 @@ public class RestfulXmlActivityTest extends AbstractLargeRestfulTests {
         "xml", "application/xml");
 
     XSDValidator.validateOpenSocial(resp);
-    
+
 
     NodeList result = xp.getMatchingNodes("/:response/:activity", XMLUnit.buildTestDocument(resp));
     assertEquals(1, result.getLength());
@@ -77,7 +77,7 @@ public class RestfulXmlActivityTest extends AbstractLargeRestfulTests {
 
   /**
    * Expected response for a list of activities in json:
-   * 
+   *
    * <pre>
    * &lt;response xmlns=&quot;http://ns.opensocial.org/2008/opensocial&quot;
    *    xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
@@ -111,7 +111,7 @@ public class RestfulXmlActivityTest extends AbstractLargeRestfulTests {
    *   &lt;/activity&gt;
    * &lt;/response&gt;
    * </pre>
-   * 
+   *
    * @throws Exception
    *           if test encounters an error
    */
@@ -120,7 +120,7 @@ public class RestfulXmlActivityTest extends AbstractLargeRestfulTests {
     String resp = getResponse("/activities/john.doe/@self", "GET", "xml",
         "application/xml");
     XSDValidator.validateOpenSocial(resp);
-    
+
 
     assertEquals("0", xp.evaluate("/:response/:startIndex", XMLUnit.buildTestDocument(resp)));
     assertEquals("1", xp.evaluate("/:response/:totalResults", XMLUnit.buildTestDocument(resp)));
@@ -133,8 +133,8 @@ public class RestfulXmlActivityTest extends AbstractLargeRestfulTests {
 
   /**
    * Expected response for a list of activities in json:
-   * 
-   * 
+   *
+   *
    * <pre>
    * &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
    * &lt;response xmlns=&quot;http://ns.opensocial.org/2008/opensocial&quot;
@@ -169,8 +169,8 @@ public class RestfulXmlActivityTest extends AbstractLargeRestfulTests {
    *   &lt;/activity&gt;
    * &lt;/response&gt;
    * </pre>
-   * 
-   * 
+   *
+   *
    * @throws Exception
    *           if test encounters an error
    */
@@ -180,7 +180,7 @@ public class RestfulXmlActivityTest extends AbstractLargeRestfulTests {
         "application/xml");
 
     XSDValidator.validateOpenSocial(resp);
- 
+
     assertEquals("0", xp.evaluate("/:response/:startIndex", XMLUnit.buildTestDocument(resp)));
     assertEquals("2", xp.evaluate("/:response/:totalResults", XMLUnit.buildTestDocument(resp)));
     NodeList nl = xp.getMatchingNodes("/:response/:entry", XMLUnit.buildTestDocument(resp));
@@ -206,10 +206,10 @@ public class RestfulXmlActivityTest extends AbstractLargeRestfulTests {
 
     String resp = getResponse("/activities/john.doe/@self", "GET", "xml",
         "application/xml");
-    
+
     XSDValidator.validateOpenSocial(resp);
 
-    
+
     assertEquals("0", xp.evaluate("/:response/:startIndex", XMLUnit.buildTestDocument(resp)));
     assertEquals("2", xp.evaluate("/:response/:totalResults", XMLUnit.buildTestDocument(resp)));
     NodeList nl = xp.getMatchingNodes("/:response/:entry/:activity", XMLUnit.buildTestDocument(resp));

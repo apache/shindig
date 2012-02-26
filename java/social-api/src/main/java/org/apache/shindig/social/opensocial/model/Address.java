@@ -62,7 +62,7 @@ public interface Address {
     /** the field name for primary. */
     PRIMARY("primary");
 
-    private static final Map<String, Field> LOOKUP = Maps.uniqueIndex(EnumSet.allOf(Field.class), 
+    private static final Map<String, Field> LOOKUP = Maps.uniqueIndex(EnumSet.allOf(Field.class),
         Functions.toStringFunction());
 
     /**

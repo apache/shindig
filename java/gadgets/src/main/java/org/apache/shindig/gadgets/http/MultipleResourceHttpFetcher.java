@@ -27,7 +27,7 @@ import org.apache.shindig.gadgets.GadgetException;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
-import java.util.concurrent.FutureTask; 
+import java.util.concurrent.FutureTask;
 import java.util.List;
 import java.util.Map;
 
@@ -76,11 +76,11 @@ public class MultipleResourceHttpFetcher {
         futureTasks.put(uri, createHttpFetcher(request));
       }
     }
-    
+
     return futureTasks;
   }
 
-  // Fetch the content of the requested uri. 
+  // Fetch the content of the requested uri.
   private FutureTask<RequestContext> createHttpFetcher(HttpRequest request) {
     // Fetch the content of the requested uri.
     FutureTask<RequestContext> httpFetcher =

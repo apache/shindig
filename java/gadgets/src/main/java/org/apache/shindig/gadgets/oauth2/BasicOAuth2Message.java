@@ -32,7 +32,7 @@ import com.google.common.collect.Maps;
 
 /**
  * See {@link OAuth2Message}
- * 
+ *
  */
 public class BasicOAuth2Message implements OAuth2Message {
   private final static String LOG_CLASS = BasicOAuth2Message.class.getName();

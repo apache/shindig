@@ -96,7 +96,7 @@ public final class XmlUtil {
       // Not supported by some very old parsers.
       if (LOG.isLoggable(Level.INFO)) {
         LOG.logp(Level.INFO, CLASSNAME, "static block", MessageKeys.ERROR_PARSING_EXTERNAL_GENERAL_ENTITIES);
-      }	
+      }
     }
 
     try {
@@ -116,7 +116,7 @@ public final class XmlUtil {
       // Only supported by Apache's XML parsers.
       if (LOG.isLoggable(Level.INFO)) {
         LOG.logp(Level.INFO, CLASSNAME, "static block", MessageKeys.ERROR_PARSING_EXTERNAL_DTD);
-      }      
+      }
     }
 
     try {
@@ -134,13 +134,13 @@ public final class XmlUtil {
       canReuseBuilders = true;
       if (LOG.isLoggable(Level.INFO)) {
         LOG.logp(Level.INFO, CLASSNAME, "static block", MessageKeys.REUSE_DOC_BUILDERS);
-      }      
+      }
     } catch (UnsupportedOperationException e) {
       // Only supported by newer parsers (xerces 2.8.x+ for instance).
       canReuseBuilders = false;
       if (LOG.isLoggable(Level.INFO)) {
         LOG.logp(Level.INFO, CLASSNAME, "static block", MessageKeys.NOT_REUSE_DOC_BUILDERS);
-      } 
+      }
     } catch (ParserConfigurationException e) {
       // Only supported by newer parsers (xerces 2.8.x+ for instance).
       canReuseBuilders = false;

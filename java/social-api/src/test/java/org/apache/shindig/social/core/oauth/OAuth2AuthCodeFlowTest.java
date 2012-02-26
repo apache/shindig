@@ -61,7 +61,7 @@ public class OAuth2AuthCodeFlowTest extends AbstractLargeRestfulTests {
 
   /**
    * Test retrieving an access token using a public client
-   * 
+   *
    * @throws Exception
    */
   @Test
@@ -98,7 +98,7 @@ public class OAuth2AuthCodeFlowTest extends AbstractLargeRestfulTests {
 
   /**
    * Test retrieving an authorization code using a public client
-   * 
+   *
    * @throws Exception
    */
   @Test
@@ -137,7 +137,7 @@ public class OAuth2AuthCodeFlowTest extends AbstractLargeRestfulTests {
   /**
    * Test retrieving an authorization code using a public client that preserves
    * state
-   * 
+   *
    * @throws Exception
    */
   @Test
@@ -172,10 +172,10 @@ public class OAuth2AuthCodeFlowTest extends AbstractLargeRestfulTests {
 
   /**
    * Test retrieving an authorization code using a confidential client
-   * 
+   *
    * Client authentication is not required for confidential clients accessing
    * the authorization endpoint
-   * 
+   *
    * @throws Exception
    */
   @Test
@@ -211,10 +211,10 @@ public class OAuth2AuthCodeFlowTest extends AbstractLargeRestfulTests {
   /**
    * Test retrieving an authorization code using a confidential client without
    * setting redirect URI
-   * 
+   *
    * The redirect URI is registered with this client, so omitting it should
    * still generate a response using the registered redirect URI.
-   * 
+   *
    * @throws Exception
    */
   @Test
@@ -251,15 +251,15 @@ public class OAuth2AuthCodeFlowTest extends AbstractLargeRestfulTests {
   /**
    * Test retrieving an authorization code using a confidential client with a
    * bad redirect URI
-   * 
+   *
    * The redirect URI is registered with this client, so passing a redirect that
    * doesn't match the registered value should generate an error per the OAuth
    * 2.0 spec.
-   * 
+   *
    * See Section 3.1.2.3 under
    * http://tools.ietf.org/html/draft-ietf-oauth-v2-20#section-3.1.2
-   * 
-   * 
+   *
+   *
    * @throws Exception
    */
   @Test
@@ -288,7 +288,7 @@ public class OAuth2AuthCodeFlowTest extends AbstractLargeRestfulTests {
 
   /**
    * Test retrieving an auth code and using it to generate an access token
-   * 
+   *
    * @throws Exception
    */
   @Test
@@ -353,7 +353,7 @@ public class OAuth2AuthCodeFlowTest extends AbstractLargeRestfulTests {
 
   /**
    * Test using URL parameter to pass client secret to authenticate client
-   * 
+   *
    * @throws Exception
    */
   @Test
@@ -387,7 +387,7 @@ public class OAuth2AuthCodeFlowTest extends AbstractLargeRestfulTests {
 
   /**
    * Test using basic authentication scheme for client authentication
-   * 
+   *
    * @throws Exception
    */
   @Test
@@ -427,7 +427,7 @@ public class OAuth2AuthCodeFlowTest extends AbstractLargeRestfulTests {
 
   /**
    * Incorrect client ID used in Basic Authorization header
-   * 
+   *
    * @throws Exception
    */
   @Test
@@ -495,7 +495,7 @@ public class OAuth2AuthCodeFlowTest extends AbstractLargeRestfulTests {
 
   /**
    * Test attempting to get an access token with an unregistered client ID
-   * 
+   *
    * @throws Exception
    */
   @Test
@@ -527,7 +527,7 @@ public class OAuth2AuthCodeFlowTest extends AbstractLargeRestfulTests {
 
   /**
    * Test attempting to get an access token with a bad grant type
-   * 
+   *
    * @throws Exception
    */
   @Test
@@ -559,7 +559,7 @@ public class OAuth2AuthCodeFlowTest extends AbstractLargeRestfulTests {
 
   /**
    * Test attempting to get an access token with an invalid authorization code
-   * 
+   *
    * @throws Exception
    */
   @Test
@@ -617,9 +617,9 @@ public class OAuth2AuthCodeFlowTest extends AbstractLargeRestfulTests {
     UUID id = UUID.fromString(code);
     assertTrue(id != null);
     System.out.println("Retrieved authorization code: " + code);
-    
+
     reset();
-    
+
     // use authorization code to get access token
     req = new FakeHttpServletRequest("http://localhost:8080","/oauth2", "client_id=" + CONF_CLIENT_ID + "&grant_type=authorization_code&redirect_uri=" + URLEncoder.encode(REDIRECT_URI,"UTF-8") + "&code=" + code + "&client_secret=" + CONF_CLIENT_SECRET);
     req.setMethod("GET");
@@ -641,18 +641,18 @@ public class OAuth2AuthCodeFlowTest extends AbstractLargeRestfulTests {
     verify();
     String accessToken = tokenResponse.getString("access_token");
     System.out.println("Retrieved access token: " + accessToken);
-    
+
     reset();
-    
+
     // ensure access token can get security token for accessing resources
     OAuth2AuthenticationHandler handler = injector.getInstance(OAuth2AuthenticationHandler.class);
     req = new FakeHttpServletRequest("http://localhost:8080","/social/rest/activitystreams/john.doe/@self/1/object1", "access_token=" + accessToken);
     req.setMethod("GET");
     SecurityToken token = handler.getSecurityTokenFromRequest(req);
     assertNotNull(token);
-    
+
     reset();
-    
+
     // attempt to re-use authorization code to get new access token
     req = new FakeHttpServletRequest("http://localhost:8080","/oauth2", "client_id=" + CONF_CLIENT_ID + "&grant_type=authorization_code&redirect_uri=" + URLEncoder.encode(REDIRECT_URI,"UTF-8") + "&code=" + code + "&client_secret=" + CONF_CLIENT_SECRET);
     req.setMethod("GET");
@@ -671,7 +671,7 @@ public class OAuth2AuthCodeFlowTest extends AbstractLargeRestfulTests {
     System.out.println("Rejection response: " + tokenResponse.toString());
     assertEquals("invalid_grant",tokenResponse.getString("error"));
     verify();
-    
+
     // use (revoked) access token to get a resource
     req = new FakeHttpServletRequest("http://localhost:8080","/social/rest/activitystreams/john.doe/@self/1/object1", "access_token=" + accessToken);
     req.setMethod("GET");

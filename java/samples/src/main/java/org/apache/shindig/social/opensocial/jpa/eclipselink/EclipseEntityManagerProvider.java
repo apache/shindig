@@ -32,7 +32,7 @@ public class EclipseEntityManagerProvider implements Provider<EntityManager> {
   private String unitName;
 
   /**
-   * 
+   *
    */
   @Inject
   public EclipseEntityManagerProvider(Bootstrap bootstrap,
@@ -43,7 +43,7 @@ public class EclipseEntityManagerProvider implements Provider<EntityManager> {
 
   /**
    * {@inheritDoc}
-   * 
+   *
    * @see com.google.inject.Provider#get()
    */
   public EntityManager get() {

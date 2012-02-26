@@ -59,6 +59,6 @@ public class JsonUtilTest {
     JsonPojo pojo = new JsonPojo();
     // These exist as getters on all objects, but not as properties
     assertNull(JsonUtil.getProperty(pojo, "class"));
-    assertNull(JsonUtil.getProperty(pojo, "declaringClass")); 
+    assertNull(JsonUtil.getProperty(pojo, "declaringClass"));
   }
 }

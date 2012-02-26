@@ -42,17 +42,17 @@ public class RootELResolver extends ELResolver {
   public RootELResolver() {
     this(ImmutableMap.<String, Object>of());
   }
-  
+
   public RootELResolver(Map<String, ? extends Object> base) {
     this.map = base;
   }
-  
+
   @Override
   public Class<?> getCommonPropertyType(ELContext context, Object base) {
     if (base == null) {
       return String.class;
     }
-    
+
     return null;
   }
 
@@ -69,7 +69,7 @@ public class RootELResolver extends ELResolver {
       Object value = map.get(property);
       return value == null ? null : value.getClass();
     }
-    
+
     return null;
   }
 
@@ -79,7 +79,7 @@ public class RootELResolver extends ELResolver {
       context.setPropertyResolved(true);
       return map.get(property);
     }
-    
+
     return null;
   }
 
@@ -89,7 +89,7 @@ public class RootELResolver extends ELResolver {
       context.setPropertyResolved(true);
       return true;
     }
-    
+
     return false;
   }
 

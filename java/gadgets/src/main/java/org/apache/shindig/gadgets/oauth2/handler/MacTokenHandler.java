@@ -29,9 +29,9 @@ import org.apache.shindig.gadgets.oauth2.OAuth2Message;
 import org.apache.shindig.gadgets.oauth2.OAuth2Token;
 
 /**
- * 
+ *
  * See {@link ResourceRequestHandler}
- * 
+ *
  * Handles the mac token type
  */
 public class MacTokenHandler implements ResourceRequestHandler {

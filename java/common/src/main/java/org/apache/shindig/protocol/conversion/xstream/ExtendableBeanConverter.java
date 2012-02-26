@@ -31,7 +31,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 
 /**
  * Serializes an ExtendableBeanImpl type as a Map instead of a POJO.
- * 
+ *
  * Note: For an ExtendableBean field within a POJO to be properly serialized to
  * XML, the field must still be hardcoded into the POJO, even if the POJO itself
  * is an ExtendableBean. This is because POJOs are still serialized to XML

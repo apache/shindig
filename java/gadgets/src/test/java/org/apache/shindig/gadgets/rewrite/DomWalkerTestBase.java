@@ -45,7 +45,7 @@ import com.google.inject.util.Modules;
 public class DomWalkerTestBase {
   protected static final Uri GADGET_URI = Uri.parse("http://example.com/gadget.xml");
   protected static final String CONTAINER = "container";
-  
+
   protected Document doc;
 
   @Before
@@ -62,7 +62,7 @@ public class DomWalkerTestBase {
     DOMImplementation domImpl = injector.getInstance(DOMImplementation.class);
     doc = domImpl.createDocument(null, null, null);
   }
-  
+
   protected Element elem(String tag, String... attrStrs) {
     Element elem = doc.createElement(tag);
     for (int i = 0; attrStrs != null && i < attrStrs.length; i += 2) {
@@ -72,13 +72,13 @@ public class DomWalkerTestBase {
     }
     return elem;
   }
-  
+
   protected Element htmlDoc(Node[] headNodes, Node... bodyNodes) {
     // Clear document of all nodes.
     while (doc.hasChildNodes()) {
       doc.removeChild(doc.getFirstChild());
     }
-    
+
     // Recreate document with valid HTML structure.
     Element html = elem("html");
     Element head = elem("head");
@@ -88,26 +88,26 @@ public class DomWalkerTestBase {
     html.appendChild(head);
     html.appendChild(body);
     doc.appendChild(html);
-    
+
     return html;
   }
-  
+
   private void appendAll(Node parent, Node[] children) {
     if (children == null || children.length == 0) return;
-    
+
     for (Node child : children) {
       parent.appendChild(child);
     }
   }
-  
+
   protected Gadget gadget() {
     return gadget(false, false);
   }
-  
+
   protected Gadget gadget(boolean debug, boolean ignoreCache) {
     return gadget(debug, ignoreCache, null);
   }
-  
+
   protected Gadget gadget(boolean debug, boolean ignoreCache, Uri curviewHref) {
     GadgetSpec spec = createMock(GadgetSpec.class);
     expect(spec.getUrl()).andReturn(GADGET_URI).anyTimes();

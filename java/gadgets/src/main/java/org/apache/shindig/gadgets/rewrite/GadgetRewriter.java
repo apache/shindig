@@ -26,7 +26,7 @@ import org.apache.shindig.gadgets.Gadget;
 public interface GadgetRewriter {
   /**
    * Rewrite the gadget.
-   * 
+   *
    * @param gadget Gadget to rewrite.
    * @param content the content of the gadget to be manipulated.
    */

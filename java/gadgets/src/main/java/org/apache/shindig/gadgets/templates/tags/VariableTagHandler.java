@@ -44,10 +44,10 @@ public class VariableTagHandler extends AbstractTagHandler {
     if ("".equals(key)) {
       return;
     }
-    
+
     // Get the value (with EL)
     Object value = getValueFromTag(tag, "value", processor, Object.class);
-    
+
     if (processor.getTemplateContext().getMy() == null) {
       processor.getTemplateContext().setMy(Maps.<String, Object> newHashMap());
     }

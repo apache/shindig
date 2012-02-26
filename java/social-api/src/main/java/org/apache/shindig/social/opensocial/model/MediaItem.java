@@ -218,7 +218,7 @@ public interface MediaItem {
   void setFileSize(String fileSize);
 
   /**
-   * Get the MediaItem's id 
+   * Get the MediaItem's id
    * @return id
    */
   String getId();
@@ -248,7 +248,7 @@ public interface MediaItem {
   String getLastUpdated();
 
   /**
-   * Set the update time associated with the media item 
+   * Set the update time associated with the media item
    * @param lastUpdated
    */
   void setLastUpdated(String lastUpdated);

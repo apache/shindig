@@ -138,7 +138,7 @@ public class HtmlSerialization {
         output.append('"');
       }
     }
-    
+
     output.append(withXmlClose ? "/>" : ">");
   }
 

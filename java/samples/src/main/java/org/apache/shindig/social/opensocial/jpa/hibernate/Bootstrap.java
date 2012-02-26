@@ -56,9 +56,9 @@ public class Bootstrap {
       @Named(DB_MIN_WRITE) String minWrite) {
 
   }
- 
+
   public Bootstrap() {
-   
+
   }
 
   public void init(String unitName) {

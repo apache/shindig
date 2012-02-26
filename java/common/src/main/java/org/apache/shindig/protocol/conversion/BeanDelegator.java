@@ -332,7 +332,7 @@ public class BeanDelegator {
         interfaceType = interfaceParamType.getActualTypeArguments()[1];
         return validateTypes(dataType, interfaceType);
       }
-      
+
       if (Multimap.class.isAssignableFrom((Class<?>) dataParamType.getRawType()) &&
           Multimap.class.isAssignableFrom((Class<?>) interfaceParamType.getRawType())) {
         Type dataKeyType = dataParamType.getActualTypeArguments()[0];

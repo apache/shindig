@@ -101,7 +101,7 @@ public class JsResponse {
   public List<String> getErrors() {
     return errors;
   }
-  
+
   /**
    * Returns a string of all error messages associated with this response.
    */
@@ -115,7 +115,7 @@ public class JsResponse {
     }
     return errorString;
   }
-  
+
   /**
    * Returns a string of generated externs.
    */

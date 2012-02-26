@@ -253,7 +253,7 @@ public class JsonRpcServletTest extends Assert {
 
   /**
    * Test that "request" field undergoes contentType check, and error is thrown if wrong content
-   * type is present. 
+   * type is present.
    */
   @Test
   public void testPostMultipartFormDataRequestFieldIsSubjectedToContentTypeCheck()

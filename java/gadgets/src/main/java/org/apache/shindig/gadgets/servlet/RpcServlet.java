@@ -40,9 +40,9 @@ import java.util.logging.Logger;
  * Handles RPC metadata requests.
  */
 public class RpcServlet extends InjectedServlet {
-  
+
   private static final long serialVersionUID = 1382573217773582182L;
-  
+
   static final String GET_REQUEST_REQ_PARAM = "req";
   static final String GET_REQUEST_CALLBACK_PARAM = "callback";
 
@@ -77,7 +77,7 @@ public class RpcServlet extends InjectedServlet {
         ? callbackValue + '(' + result.getOutput() + ')'
         : result.getOutput());
   }
-  
+
   @Override
   protected void doPost(HttpServletRequest request, HttpServletResponse response)
       throws IOException {

@@ -37,25 +37,25 @@ public class StyleAdjacencyVisitorTest extends DomWalkerTestBase {
     Node node = elem("style");
     assertEquals(VisitStatus.RESERVE_TREE, visit(node));
   }
-  
+
   @Test
   public void visitLinkWithRel() throws Exception {
     Node node = elem("link", "rel", "stylesheet");
     assertEquals(VisitStatus.RESERVE_TREE, visit(node));
   }
-  
+
   @Test
   public void visitLinkWithType() throws Exception {
     Node node = elem("link", "type", "text/css");
     assertEquals(VisitStatus.RESERVE_TREE, visit(node));
   }
-  
+
   @Test
   public void visitStyleCaseInsensitive() throws Exception {
     Node node = elem("sTYlE");
     assertEquals(VisitStatus.RESERVE_TREE, visit(node));
   }
-  
+
   @Test
   public void visitLinkCaseInsensitive() throws Exception {
     Node node = elem("lINK", "REL", "stYlEsheet");
@@ -63,19 +63,19 @@ public class StyleAdjacencyVisitorTest extends DomWalkerTestBase {
     node = elem("LINk", "tyPe", "text/csS");
     assertEquals(VisitStatus.RESERVE_TREE, visit(node));
   }
-  
+
   @Test
   public void visitStyleWithAttribs() throws Exception {
     Node node = elem("style", "foo", "bar");
     assertEquals(VisitStatus.RESERVE_TREE, visit(node));
   }
-  
+
   @Test
   public void bypassUnknownElement() throws Exception {
     Node node = elem("div");
     assertEquals(VisitStatus.BYPASS, visit(node));
   }
-  
+
   @Test
   public void bypassLinkWithoutAttribs() throws Exception {
     Node node = elem("link");
@@ -93,46 +93,46 @@ public class StyleAdjacencyVisitorTest extends DomWalkerTestBase {
     Node node = doc.createTextNode("text");
     assertEquals(VisitStatus.BYPASS, visit(node));
   }
-  
+
   @Test
   public void bypassComment() throws Exception {
     Node node = doc.createComment("comment");
     assertEquals(VisitStatus.BYPASS, visit(node));
   }
-  
+
   @Test
   public void reshuffleSingleNodeInHead() throws Exception {
     Node style = elem("style");
     Node html = htmlDoc(new Node[] { elem("script"), doc.createTextNode("foo"),
         style, doc.createComment("comment") });
     assertTrue(revisit(style));
-    
+
     // Document structure sanity tests.
     assertEquals(2, html.getChildNodes().getLength());
     Node head = html.getFirstChild();
     assertEquals("head", head.getNodeName());
     Node body = html.getLastChild();
     assertEquals("body", body.getNodeName());
-    
+
     // Reshuffling validation.
     assertEquals(4, head.getChildNodes().getLength());
     assertSame(style, head.getChildNodes().item(0)); // First.
   }
-  
+
   @Test
   public void reshuffleSingleNodeFromBody() throws Exception {
     Node style = elem("style");
     Node html = htmlDoc(new Node[] { elem("foo") }, elem("script"), doc.createTextNode("foo"),
         style, doc.createComment("comment"));
     assertTrue(revisit(style));
-    
+
     // Document structure sanity tests.
     assertEquals(2, html.getChildNodes().getLength());
     Node head = html.getFirstChild();
     assertEquals("head", head.getNodeName());
     Node body = html.getLastChild();
     assertEquals("body", body.getNodeName());
-    
+
     // Reshuffling validation.
     assertEquals(2, head.getChildNodes().getLength());
     assertSame(style, head.getChildNodes().item(0)); // First.
@@ -171,7 +171,7 @@ public class StyleAdjacencyVisitorTest extends DomWalkerTestBase {
     Node style1 = elem("style");
     Node style2 = elem("style");
     Node style3 = elem("style");
-    
+
     // Some in head, some in body.
     Node html = htmlDoc(new Node[] { elem("script"), style1, elem("foo") },
         doc.createTextNode("text1"), style2, doc.createComment("comment"), elem("div"),
@@ -184,7 +184,7 @@ public class StyleAdjacencyVisitorTest extends DomWalkerTestBase {
     assertEquals("head", head.getNodeName());
     Node body = html.getLastChild();
     assertEquals("body", body.getNodeName());
-    
+
     // Reshuffling validation.
     assertEquals(5, head.getChildNodes().getLength());
     assertSame(style1, head.getChildNodes().item(0));
@@ -192,13 +192,13 @@ public class StyleAdjacencyVisitorTest extends DomWalkerTestBase {
     assertSame(style3, head.getChildNodes().item(2));
     assertEquals(3, body.getChildNodes().getLength());
   }
-  
+
   @Test
   public void reshuffleMultipleLinkNodes() throws Exception {
     Node link1 = elem("link", "rel", "stylesheet");
     Node link2 = elem("link", "rel", "stylesheet");
     Node link3 = elem("link", "rel", "stylesheet");
-    
+
     // Some in head, some in body.
     Node html = htmlDoc(new Node[] { link1, elem("script"), elem("foo") },
         doc.createTextNode("text1"), link2, doc.createComment("comment"), elem("div"),
@@ -211,7 +211,7 @@ public class StyleAdjacencyVisitorTest extends DomWalkerTestBase {
     assertEquals("head", head.getNodeName());
     Node body = html.getLastChild();
     assertEquals("body", body.getNodeName());
-    
+
     // Reshuffling validation.
     assertEquals(5, head.getChildNodes().getLength());
     assertSame(link1, head.getChildNodes().item(0));
@@ -219,14 +219,14 @@ public class StyleAdjacencyVisitorTest extends DomWalkerTestBase {
     assertSame(link3, head.getChildNodes().item(2));
     assertEquals(3, body.getChildNodes().getLength());
   }
-  
+
   @Test
   public void reshuffleMultiMatchedNodes() throws Exception {
     Node style1 = elem("style");
     Node style2 = elem("style");
     Node link1 = elem("link", "rel", "stylesheet");
     Node link2 = elem("link", "type", "text/css");
-    
+
     // Some in head, some in body, one embedded.
     Node div = elem("div");
     div.appendChild(style2);
@@ -241,7 +241,7 @@ public class StyleAdjacencyVisitorTest extends DomWalkerTestBase {
     assertEquals("head", head.getNodeName());
     Node body = html.getLastChild();
     assertEquals("body", body.getNodeName());
-    
+
     // Reshuffling validation.
     assertEquals(8, head.getChildNodes().getLength());
     assertSame(style1, head.getChildNodes().item(0));
@@ -251,7 +251,7 @@ public class StyleAdjacencyVisitorTest extends DomWalkerTestBase {
     assertEquals(0, div.getChildNodes().getLength());
     assertEquals(3, body.getChildNodes().getLength());
   }
-  
+
   @Test
   public void avoidReshufflingInHeadlessDocument() throws Exception {
     Node style = elem("style");
@@ -260,9 +260,9 @@ public class StyleAdjacencyVisitorTest extends DomWalkerTestBase {
     body.appendChild(style);
     html.appendChild(body);
     doc.appendChild(html);
-    
+
     assertFalse(revisit(style));
-    
+
     // Document structure sanity tests.
     assertEquals(1, html.getChildNodes().getLength());
     assertSame(body, html.getFirstChild());
@@ -291,7 +291,7 @@ public class StyleAdjacencyVisitorTest extends DomWalkerTestBase {
   private VisitStatus visit(Node node) throws Exception {
     return new StyleAdjacencyVisitor().visit(gadget(), node);
   }
-  
+
   private boolean revisit(Node... nodes) throws Exception {
     return new StyleAdjacencyVisitor().revisit(gadget(), ImmutableList.<Node>copyOf(nodes));
   }

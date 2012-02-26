@@ -49,7 +49,7 @@ import com.google.inject.name.Names;
  */
 public abstract class ApiServlet extends InjectedServlet {
   private static final String classname = ApiServlet.class.getName();
-  private static final Logger LOG = Logger.getLogger(classname, MessageKeys.MESSAGES);   
+  private static final Logger LOG = Logger.getLogger(classname, MessageKeys.MESSAGES);
 
   protected static final String FORMAT_PARAM = "format";
   protected static final String JSON_FORMAT = "json";

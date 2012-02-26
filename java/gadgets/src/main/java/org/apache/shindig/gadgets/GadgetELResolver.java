@@ -40,7 +40,7 @@ import com.google.common.collect.ImmutableMap;
 public class GadgetELResolver extends ELResolver {
   public static final String USER_PREFS_PROPERTY = "UserPrefs";
   public static final String VIEW_PARAMS_PROPERTY = "ViewParams";
-  
+
   private final GadgetContext gadgetContext;
 
   public GadgetELResolver(GadgetContext context) {
@@ -52,7 +52,7 @@ public class GadgetELResolver extends ELResolver {
     if (base == null) {
       return String.class;
     }
-    
+
     return null;
   }
 
@@ -73,7 +73,7 @@ public class GadgetELResolver extends ELResolver {
         return Map.class;
       }
     }
-    
+
     return null;
   }
 
@@ -101,7 +101,7 @@ public class GadgetELResolver extends ELResolver {
         return gadgetContext.getUserPrefs().getPrefs();
       }
     }
-    
+
     return null;
   }
 
@@ -109,10 +109,10 @@ public class GadgetELResolver extends ELResolver {
   public boolean isReadOnly(ELContext context, Object base, Object property) {
     if ((base == null) &&
         (VIEW_PARAMS_PROPERTY.equals(property)
-        || USER_PREFS_PROPERTY.equals(property))) { 
+        || USER_PREFS_PROPERTY.equals(property))) {
       context.setPropertyResolved(true);
     }
-    
+
     return true;
   }
 
@@ -120,7 +120,7 @@ public class GadgetELResolver extends ELResolver {
   public void setValue(ELContext context, Object base, Object property, Object value) {
     if ((base == null) &&
         (VIEW_PARAMS_PROPERTY.equals(property)
-        || USER_PREFS_PROPERTY.equals(property))) { 
+        || USER_PREFS_PROPERTY.equals(property))) {
       throw new PropertyNotWritableException("Cannot override " + property);
     }
   }

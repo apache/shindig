@@ -69,7 +69,7 @@ public class MediaItemImpl implements MediaItem {
   public Type getType() {
     return type;
   }
-  
+
   public void setType(Type type) {
     this.type = type;
   }
@@ -131,7 +131,7 @@ public class MediaItemImpl implements MediaItem {
   public String getFileSize() {
     return fileSize;
   }
-  
+
   /** {@inheritDoc} */
   public void setFileSize(String fileSize) {
     this.fileSize = fileSize;
@@ -176,7 +176,7 @@ public class MediaItemImpl implements MediaItem {
   public String getNumComments() {
     return numComments;
   }
-  
+
   /** {@inheritDoc} */
   public void setNumComments(String numComments) {
     this.numComments = numComments;

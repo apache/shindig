@@ -27,9 +27,9 @@ public interface OAuth2RequestValidator {
 
   /**
    * Validates an OAuth 2.0 request.
-   * 
+   *
    * @param req is the normalized OAuth 2.0 request to validate
-   * 
+   *
    * @throws OAuth2Exception if the request failed to validate
    */
   public void validateRequest(OAuth2NormalizedRequest req) throws OAuth2Exception;

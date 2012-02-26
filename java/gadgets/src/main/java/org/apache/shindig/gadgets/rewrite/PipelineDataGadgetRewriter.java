@@ -44,34 +44,34 @@ import java.util.logging.Logger;
  * This rewriter cannot be used currently without the SocialMarkupHtmlParser.
  */
 public class PipelineDataGadgetRewriter implements GadgetRewriter {
-	
+
   //class name for logging purpose
   private static final String classname = PipelineDataGadgetRewriter.class.getName();
   private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
-  
+
   private final PipelineExecutor executor;
 
   @Inject
   public PipelineDataGadgetRewriter(PipelineExecutor executor) {
     this.executor = executor;
   }
-  
+
   public void rewrite(Gadget gadget, MutableContent content) {
     // Only bother for gadgets using the opensocial-data feature
     if (!gadget.getViewFeatures().containsKey("opensocial-data")) {
       return;
     }
-    
+
     Document doc = content.getDocument();
     Map<PipelinedData, Node> pipelineNodes = parsePipelinedData(gadget, doc);
-    
+
     if (pipelineNodes.isEmpty()) {
       return;
     }
-    
+
     PipelineExecutor.Results results =
         executor.execute(gadget.getContext(), pipelineNodes.keySet());
-    
+
     // Remove all pipeline entries that were fully evaluated
     for (Map.Entry<PipelinedData, Node> nodeEntry : pipelineNodes.entrySet()) {
       if (!results.remainingPipelines.contains(nodeEntry.getKey())) {
@@ -86,11 +86,11 @@ public class PipelineDataGadgetRewriter implements GadgetRewriter {
       Element head = (Element) DomUtil.getFirstNamedChildNode(doc.getDocumentElement(), "head");
       Element pipelineScript = doc.createElement("script");
       pipelineScript.setAttribute("type", "text/javascript");
-  
+
       StringBuilder script = new StringBuilder();
       for (Map.Entry<String, ? extends Object> entry : results.keyedResults.entrySet()) {
         String key = entry.getKey();
-  
+
         // TODO: escape key
         content.addPipelinedData(key, entry.getValue());
         script.append("opensocial.data.DataContext.putDataSet(\"")
@@ -99,12 +99,12 @@ public class PipelineDataGadgetRewriter implements GadgetRewriter {
             .append(JsonSerializer.serialize(entry.getValue()))
             .append(");");
       }
-  
+
       pipelineScript.appendChild(doc.createTextNode(script.toString()));
       head.appendChild(pipelineScript);
       MutableContent.notifyEdit(doc);
     }
-    
+
     // And if no pipelines remain unexecuted, remove the opensocial-data feature
     if (results.remainingPipelines.isEmpty()) {
       gadget.addFeature("opensocial-data-context");
@@ -132,9 +132,9 @@ public class PipelineDataGadgetRewriter implements GadgetRewriter {
     }
     return pipelineNodes;
   }
-  
+
   static class PipelineState {
     public Node node;
-    public PipelinedData.Batch batch; 
+    public PipelinedData.Batch batch;
   }
 }

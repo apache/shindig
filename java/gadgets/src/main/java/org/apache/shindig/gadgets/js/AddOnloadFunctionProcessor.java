@@ -49,7 +49,7 @@ public class AddOnloadFunctionProcessor implements JsProcessor {
       "window[nm]();" +
       '}' +
       "})();";
-  
+
   @VisibleForTesting
   static final String JSL_CALLBACK_JS = "(function(){" +
       "var j=window['___jsl'];" +
@@ -80,7 +80,7 @@ public class AddOnloadFunctionProcessor implements JsProcessor {
     }
     return true;
   }
-  
+
   @VisibleForTesting
   protected String createOnloadScript(String function) {
     return String.format(ONLOAD_JS_TPL, StringEscapeUtils.escapeEcmaScript(function));

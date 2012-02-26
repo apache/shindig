@@ -25,10 +25,10 @@ import com.google.inject.Inject;
 
 /**
  * Data class for client data stored in persistence.
- * 
+ *
  * Uses the injected {@link OAuth2Encrypter} protect the client_secret in the
  * persistence store.
- * 
+ *
  */
 public class OAuth2Client implements Serializable {
   private static final long serialVersionUID = -6090033505867216220L;
@@ -82,7 +82,7 @@ public class OAuth2Client implements Serializable {
 
   /**
    * Returns authorization endpoint
-   * 
+   *
    * @return authorization endpoint
    */
   public String getAuthorizationUrl() {
@@ -91,7 +91,7 @@ public class OAuth2Client implements Serializable {
 
   /**
    * Returns client authentication type
-   * 
+   *
    * @return client authentication type
    */
   public String getClientAuthenticationType() {
@@ -100,7 +100,7 @@ public class OAuth2Client implements Serializable {
 
   /**
    * Returns client id.
-   * 
+   *
    * @return client id
    */
   public String getClientId() {
@@ -109,7 +109,7 @@ public class OAuth2Client implements Serializable {
 
   /**
    * Returns client secret
-   * 
+   *
    * @return client secret
    */
   public byte[] getClientSecret() {
@@ -118,7 +118,7 @@ public class OAuth2Client implements Serializable {
 
   /**
    * Returns encrypted secret
-   * 
+   *
    * @return encrypted secret
    */
   public byte[] getEncryptedSecret() {

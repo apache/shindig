@@ -31,7 +31,7 @@ import com.ibm.icu.text.CharsetMatch;
  */
 public final class EncodingDetector {
   private EncodingDetector() {}
-  
+
   public static class FallbackEncodingDetector {
     public Charset detectEncoding(byte[] input) {
       // Fall back to the incredibly slow ICU. It might be better to just skip this entirely.

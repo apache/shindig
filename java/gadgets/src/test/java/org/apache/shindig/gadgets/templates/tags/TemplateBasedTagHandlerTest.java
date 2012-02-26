@@ -58,14 +58,14 @@ import com.google.inject.Injector;
  * Tests the behavior of template-based tag handlers.
  */
 public class TemplateBasedTagHandlerTest {
-  
+
   private TemplateContext context;
   private TemplateProcessor processor;
   private final ELResolver resolver = new RootELResolver();
   private GadgetHtmlParser parser;
-  
+
   private static final String TEST_NS = "http://example.com";
-  
+
   @Before
   public void setUp() throws Exception {
     Injector injector = Guice.createInjector(new GadgetAdminModule(), new DefaultGuiceModule(), new OAuthModule(), new OAuth2Module(), new PropertiesModule(), new OAuth2PersistenceModule(), new OAuth2MessageModule(), new OAuth2HandlerModule());
@@ -156,28 +156,28 @@ public class TemplateBasedTagHandlerTest {
         "<foo:Bar><foo:element text='Hello'/></foo:Bar>", "Hello");
   }
 
-  private void runTest(String tagName, String tagMarkup, String templateMarkup, 
+  private void runTest(String tagName, String tagMarkup, String templateMarkup,
       String expectedResult) throws GadgetException, IOException {
     Element templateDef = parseTemplate(templateMarkup);
     Element tagInstance = parseTemplate(tagMarkup);
-    
+
     templateDef.getOwnerDocument().adoptNode(tagInstance);
     TagHandler tagHandler = new TemplateBasedTagHandler(tagInstance, TEST_NS, tagName);
     TagRegistry reg = new DefaultTagRegistry(
         ImmutableSet.of(tagHandler, new RepeatTagHandler()));
-    
+
     DocumentFragment result = processor.processTemplate(templateDef, context, resolver, reg);
     String output = serialize(result);
     assertEquals(expectedResult, output);
   }
-  
-  private Element parseTemplate(String markup) throws GadgetException {    
-    String content = "<script type=\"text/os-template\" xmlns:foo=\"" + TEST_NS + 
+
+  private Element parseTemplate(String markup) throws GadgetException {
+    String content = "<script type=\"text/os-template\" xmlns:foo=\"" + TEST_NS +
         "\" xmlns:os=\"" + TagHandler.OPENSOCIAL_NAMESPACE + "\">" + markup + "</script>";
     Document document = parser.parseDom(content);
     return SocialDataTags.getTags(document, SocialDataTags.OSML_TEMPLATE_TAG).get(0);
   }
-  
+
   private String serialize(Node node) throws IOException {
     StringBuilder sb = new StringBuilder();
     NodeList children = node.getChildNodes();

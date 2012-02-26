@@ -111,11 +111,11 @@ public class BasicHttpFetcher implements HttpFetcher {
   // mutable fields must be volatile
   private volatile int maxObjSize;
   private volatile long slowResponseWarning;
- 
+
   //class name for logging purpose
   private static final String classname = BasicHttpFetcher.class.getName();
   private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
-  
+
   private final Set<Class<?>> TIMEOUT_EXCEPTIONS = ImmutableSet.<Class<?>>of(ConnectionPoolTimeoutException.class,
       SocketTimeoutException.class, SocketException.class, HttpHostConnectException.class, NoHttpResponseException.class,
       InterruptedException.class, UnknownHostException.class);
@@ -222,7 +222,7 @@ public class BasicHttpFetcher implements HttpFetcher {
     client.setHttpRequestRetryHandler(new DefaultHttpRequestRetryHandler() );
 
     // Disable automatic storage and sending of cookies (see SHINDIG-1382)
-    client.removeRequestInterceptorByClass(RequestAddCookies.class); 
+    client.removeRequestInterceptorByClass(RequestAddCookies.class);
     client.removeResponseInterceptorByClass(ResponseProcessCookies.class);
 
     // Use Java's built-in proxy logic in case no proxy set via guice.
@@ -376,9 +376,9 @@ public class BasicHttpFetcher implements HttpFetcher {
       if (TIMEOUT_EXCEPTIONS.contains(e.getClass())) {
         if (LOG.isLoggable(Level.INFO)) {
           LOG.logp(Level.INFO, classname, "fetch", MessageKeys.TIMEOUT_EXCEPTION, new Object[] {request.getUri(),classname,e.getMessage(),now-started});
-        }        
+        }
         return HttpResponse.timeout();
-      }  
+      }
       if (LOG.isLoggable(Level.INFO)) {
           LOG.logp(Level.INFO, classname, "fetch", MessageKeys.EXCEPTION_OCCURRED, new Object[] {request.getUri(),now-started});
           LOG.logp(Level.INFO, classname, "fetch", "", e);
@@ -407,7 +407,7 @@ public class BasicHttpFetcher implements HttpFetcher {
   protected void slowResponseWarning(HttpRequest request, long started, long finished) {
     if (LOG.isLoggable(Level.WARNING)) {
       LOG.logp(Level.WARNING, classname, "slowResponseWarning", MessageKeys.SLOW_RESPONSE, new Object[] {request.getUri(),finished-started});
-    } 
+    }
   }
 
   /**

@@ -29,9 +29,9 @@ import org.apache.shindig.gadgets.oauth2.OAuth2Utils;
 import com.google.common.collect.Maps;
 
 /**
- * 
+ *
  * See {@link ResourceRequestHandler}
- * 
+ *
  * Handles the mac token type
  */
 public class BearerTokenHandler implements ResourceRequestHandler {

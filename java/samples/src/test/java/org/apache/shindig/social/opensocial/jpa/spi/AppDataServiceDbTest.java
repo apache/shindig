@@ -37,34 +37,34 @@ import org.junit.Test;
 import com.google.common.collect.MapMaker;
 
 /**
- * 
+ *
  * Test the AppDataServiceDb implementation.
  *
  */
 public class AppDataServiceDbTest {
-  
+
   private static final String DEFAULT_APPLICATION_ID = "app";
 
   private AppDataServiceDb appDataServiceDb;
-  
+
   /** The bootstrap. */
   private SpiDatabaseBootstrap bootstrap;
-  
+
   @Before
   public void setup() throws Exception {
     EntityManager entityManager = SpiEntityManagerFactory.getEntityManager();
     this.appDataServiceDb = new AppDataServiceDb(entityManager);
-    
+
     // Bootstrap hibernate and associated test db, and setup db with test data
     this.bootstrap = new SpiDatabaseBootstrap(entityManager);
     this.bootstrap.init();
   }
-  
+
   @After
   public void tearDown() throws Exception {
     bootstrap.tearDown();
   }
-  
+
   @Test
   public void getJohnDoeApplicationData() throws Exception {
     Future<DataCollection> results = this.appDataServiceDb.getPersonData(SpiTestUtil.buildUserIds("john.doe"), new GroupId(GroupId.Type.self, "@self"), DEFAULT_APPLICATION_ID, null, SpiTestUtil.DEFAULT_TEST_SECURITY_TOKEN);
@@ -72,7 +72,7 @@ public class AppDataServiceDbTest {
     assertEquals(1, data.getEntry().size());
     assertEquals("0", data.getEntry().get("john.doe").get("count"));
   }
-  
+
   @Test
   public void getJohnDoeApplicationDataWithCountField() throws Exception {
     Future<DataCollection> results = this.appDataServiceDb.getPersonData(SpiTestUtil.buildUserIds("john.doe"), new GroupId(GroupId.Type.self, "@self"), DEFAULT_APPLICATION_ID, SpiTestUtil.asSet("count"), SpiTestUtil.DEFAULT_TEST_SECURITY_TOKEN);
@@ -80,7 +80,7 @@ public class AppDataServiceDbTest {
     assertEquals(1, data.getEntry().size());
     assertEquals("0", data.getEntry().get("john.doe").get("count"));
   }
-  
+
   @Test
   public void getJohnDoeApplicationDataWithInvalidField() throws Exception {
     Future<DataCollection> results = this.appDataServiceDb.getPersonData(SpiTestUtil.buildUserIds("john.doe"), new GroupId(GroupId.Type.self, "@self"), DEFAULT_APPLICATION_ID, SpiTestUtil.asSet("peabody"), SpiTestUtil.DEFAULT_TEST_SECURITY_TOKEN);
@@ -88,30 +88,30 @@ public class AppDataServiceDbTest {
     assertEquals(1, data.getEntry().size());
     assertEquals(null, data.getEntry().get("john.doe").get("count"));
   }
-  
+
   @Test
   public void getJohnDoeFriendsApplicationDataWithCountField() throws Exception {
     Future<DataCollection> results = this.appDataServiceDb.getPersonData(SpiTestUtil.buildUserIds("john.doe"), new GroupId(GroupId.Type.friends, "@friends"), DEFAULT_APPLICATION_ID, SpiTestUtil.asSet("count"), SpiTestUtil.DEFAULT_TEST_SECURITY_TOKEN);
     DataCollection data = results.get();
     assertEquals(3, data.getEntry().size());
     assertEquals("7", data.getEntry().get("jane.doe").get("count"));
-    assertEquals("2", data.getEntry().get("george.doe").get("count"));    
+    assertEquals("2", data.getEntry().get("george.doe").get("count"));
   }
-  
+
   @Test
   public void updateJohnDoeApplicationDataSettingCountTo5() throws Exception {
     // Do update
     Map<String, String> values = new MapMaker().makeMap();
     values.put("count", "5");
     this.appDataServiceDb.updatePersonData(new UserId(Type.userId, "john.doe"), new GroupId(GroupId.Type.self, "@self"), DEFAULT_APPLICATION_ID, SpiTestUtil.asSet("count"), values, SpiTestUtil.DEFAULT_TEST_SECURITY_TOKEN);
-    
+
     // Verify that update succeeded
     Future<DataCollection> results = this.appDataServiceDb.getPersonData(SpiTestUtil.buildUserIds("john.doe"), new GroupId(GroupId.Type.self, "@self"), DEFAULT_APPLICATION_ID, null, SpiTestUtil.DEFAULT_TEST_SECURITY_TOKEN);
     DataCollection data = results.get();
     assertEquals(1, data.getEntry().size());
     assertEquals("5", data.getEntry().get("john.doe").get("count"));
   }
-  
+
   @Test
   public void deleteJohnDoeApplicationDataWithCountField() throws Exception {
     // Do delete
@@ -122,7 +122,7 @@ public class AppDataServiceDbTest {
     assertEquals(1, data.getEntry().size());
     assertEquals(null, data.getEntry().get("john.doe").get("count"));
   }
-  
+
   @Test
   public void deleteJohnDoeApplicationDataWithInvalidField() throws Exception {
     // Do delete with invalid field
@@ -133,5 +133,5 @@ public class AppDataServiceDbTest {
     assertEquals(1, data.getEntry().size());
     assertEquals("0", data.getEntry().get("john.doe").get("count"));
   }
-    
+
 }

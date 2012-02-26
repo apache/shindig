@@ -19,7 +19,7 @@ package org.apache.shindig.gadgets.oauth2;
 // Could probably gain something by making this more granular.
 /**
  * Thrown by OAuth2 request routines.
- * 
+ *
  */
 public class OAuth2RequestException extends Exception {
   private static final long serialVersionUID = 7670892831898874835L;
@@ -37,7 +37,7 @@ public class OAuth2RequestException extends Exception {
   /**
    * Create an exception and record information about the exception to be
    * returned to the gadget.
-   * 
+   *
    * @param error
    * @param errorText
    * @param cause
@@ -51,7 +51,7 @@ public class OAuth2RequestException extends Exception {
 
   /**
    * Get the error code
-   * 
+   *
    * @return
    */
   public OAuth2Error getError() {
@@ -60,7 +60,7 @@ public class OAuth2RequestException extends Exception {
 
   /**
    * Get a meaningful description of the exception
-   * 
+   *
    * @return
    */
   public String getErrorText() {

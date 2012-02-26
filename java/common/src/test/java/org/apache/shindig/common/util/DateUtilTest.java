@@ -41,7 +41,7 @@ public class DateUtilTest {
           "3090-06-30T03:29:55.000Z",
           "1670-06-06T01:57:27.000Z"
    };
-  
+
   Date[] timeStamps = new Date[] {
     new Date(1211865170000L),
     new Date(1211949648000L),
@@ -53,7 +53,7 @@ public class DateUtilTest {
   public void parse() {
     for (int i = 0, j = rfc1123text.length; i < j; ++i) {
       assertEquals(timeStamps[i].getTime(), DateUtil.parseRfc1123Date(rfc1123text[i]).getTime());
-    }    
+    }
   }
 
   @Test
@@ -62,38 +62,38 @@ public class DateUtilTest {
       assertEquals(rfc1123text[i], DateUtil.formatRfc1123Date(timeStamps[i].getTime()));
     }
   }
-  
+
   @Test
   public void formatIso8601() {
       for (int i = 0, j = timeStamps.length; i < j; ++i) {
           assertEquals(iso8601text[i], DateUtil.formatIso8601Date(timeStamps[i].getTime()));
       }
   }
-  
+
   @Test
   public void formatRfc1123Date() {
     for (int i = 0, j = timeStamps.length; i < j; ++i) {
       assertEquals(rfc1123text[i], DateUtil.formatRfc1123Date(timeStamps[i]));
     }
   }
-  
+
   @Test
   public void formatIso8601Date() {
       for (int i = 0, j = timeStamps.length; i < j; ++i) {
           assertEquals(iso8601text[i], DateUtil.formatIso8601Date(timeStamps[i]));
       }
   }
-  
+
   @Test
   public void parseMalformedRfc1123() {
     assertNull(DateUtil.parseRfc1123Date("Invalid date format"));
   }
-  
+
   @Test
   public void parseMalformedIso8691() {
       assertNull(DateUtil.parseIso8601DateTime("invalid date format"));
   }
-  
+
   @Test
   public void parseWrongTimeZone() {
     String expires = "Mon, 12 May 2008 09:23:29 PDT";

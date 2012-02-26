@@ -29,7 +29,7 @@ public class JsException extends Exception {
     super(msg);
     this.statusCode = statusCode;
   }
-  
+
   public int getStatusCode() {
     return statusCode;
   }

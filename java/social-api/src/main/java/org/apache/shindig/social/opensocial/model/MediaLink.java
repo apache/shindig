@@ -39,29 +39,29 @@ public interface MediaLink extends ExtendableBean {
     URL("url"),
     WIDTH("width"),
     OPENSOCIAL("openSocial");
-    
+
     // The name of the JSON element
     private final String jsonString;
-    
+
     /**
      * Constructs the field base for the JSON element.
-     * 
+     *
      * @param jsonString the name of the element
      */
     private Field(String jsonString) {
       this.jsonString = jsonString;
     }
-    
+
     /**
      * Returns the name of the JSON element.
-     * 
+     *
      * @return String the name of the JSON element
      */
     public String toString() {
       return jsonString;
     }
   }
-  
+
   /**
    * Returns the duration of this media.
    *
@@ -117,17 +117,17 @@ public interface MediaLink extends ExtendableBean {
    * @param width is the target's width
    */
   void setWidth(Integer width);
-  
+
   /**
    * <p>getOpenSocial</p>
-   * 
+   *
    * @return a {@link org.apache.shindig.protocol.model.ExtendableBean} object
    */
   ExtendableBean getOpenSocial();
-  
+
   /**
    * <p>setOpenSocial</p>
-   * 
+   *
    * @return a {@link org.apache.shindig.protocol.model.ExtendableBean} object
    */
   void setOpenSocial(ExtendableBean opensocial);

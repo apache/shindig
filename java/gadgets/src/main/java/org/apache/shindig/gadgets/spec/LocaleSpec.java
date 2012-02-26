@@ -61,7 +61,7 @@ public class LocaleSpec {
     String viewNames = XmlUtil.getAttribute(element, "views", "").trim();
 
     this.views = ImmutableSet.copyOf(Splitter.on(',').omitEmptyStrings().trimResults().split(viewNames));
-    
+
     String messagesString = XmlUtil.getAttribute(element, "messages");
     if (messagesString == null) {
       this.messages = Uri.parse("");
@@ -113,10 +113,10 @@ public class LocaleSpec {
   public MessageBundle getMessageBundle() {
     return messageBundle;
   }
-  
+
   /**
    * Locale@views
-   * 
+   *
    * Views associated with this Locale
    */
   private final Set<String> views;

@@ -130,11 +130,11 @@ public class EndToEndServer {
               SampleModule.class.getName(),
               GadgetAdminModule.class.getName(),
               DefaultGuiceModule.class.getName(),
-              PropertiesModule.class.getName(), 
+              PropertiesModule.class.getName(),
               OAuthModule.class.getName(),
               OAuth2Module.class.getName(),
-              OAuth2PersistenceModule.class.getName(), 
-              OAuth2MessageModule.class.getName(), 
+              OAuth2PersistenceModule.class.getName(),
+              OAuth2MessageModule.class.getName(),
               OAuth2HandlerModule.class.getName()
              );
 
@@ -173,11 +173,11 @@ public class EndToEndServer {
     // Attach MakeRequestServlet
     ServletHolder makeRequestHolder = new ServletHolder(new MakeRequestServlet());
     context.addServlet(makeRequestHolder, MAKE_REQUEST_BASE);
-    
+
     // Attach an EchoServlet, used to test proxied rendering
     ServletHolder echoHolder = new ServletHolder(new EchoServlet());
     context.addServlet(echoHolder, "/echo");
-    
+
     return newServer;
   }
 
@@ -221,9 +221,9 @@ public class EndToEndServer {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
       req.setCharacterEncoding("UTF-8");
       resp.setContentType(req.getContentType());
-      
+
       IOUtils.copy(req.getReader(), resp.getWriter());
     }
-    
+
   }
 }

@@ -30,7 +30,7 @@ import junit.framework.Assert;
  *
  */
 public class OpenSocialVersionTest {
-  
+
   @Test
   public void createOpenSocialVersion(){
     OpenSocialVersion version = new OpenSocialVersion("1.2.3");
@@ -39,44 +39,44 @@ public class OpenSocialVersionTest {
     Assert.assertEquals(3, version.patch);
     Assert.assertEquals(version, new OpenSocialVersion("1.2.3"));
   }
-  
+
   @Test
   public void testEquivalence(){
     OpenSocialVersion version = new OpenSocialVersion("1.2.3");
     OpenSocialVersion version2 = new OpenSocialVersion("1.2");
     Assert.assertTrue(version.isEquivalent(version2));
-    
+
     version = new OpenSocialVersion("2");
     Assert.assertTrue(version.isEquivalent("2.2"));
-    
+
     version = new OpenSocialVersion("3");
     Assert.assertTrue(!version.isEquivalent("2.2"));
   }
-  
+
   @Test
   public void testEqualOrGreaterThan(){
     OpenSocialVersion version = new OpenSocialVersion("1.2.3");
     OpenSocialVersion version2 = new OpenSocialVersion("1.2");
     Assert.assertTrue(version.isEqualOrGreaterThan(version2));
     Assert.assertTrue(!version2.isEqualOrGreaterThan(version));
-    
+
     version = new OpenSocialVersion("2");
     version2 = new OpenSocialVersion("2.2");
     Assert.assertTrue(!version.isEqualOrGreaterThan(version2));
     Assert.assertTrue(version2.isEqualOrGreaterThan(version));
-    
+
     version = new OpenSocialVersion("2.2.48");
     version2 = new OpenSocialVersion("2.2.49");
     Assert.assertTrue(!version.isEqualOrGreaterThan(version2));
     Assert.assertTrue(version2.isEqualOrGreaterThan(version));
-    
+
     version = new OpenSocialVersion("3");
     Assert.assertTrue(version.isEqualOrGreaterThan("2.2"));
-    
+
     version = new OpenSocialVersion("3.1.18");
     Assert.assertTrue(version.isEqualOrGreaterThan("2.2"));
   }
-  
+
   @Test
   public void testVersionSorting(){
     ArrayList<OpenSocialVersion> list = new ArrayList<OpenSocialVersion>();

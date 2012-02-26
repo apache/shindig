@@ -149,7 +149,7 @@ public class ProxyingVisitorTest extends DomWalkerTestBase {
 
     return status != VisitStatus.BYPASS;
   }
-  
+
   @Test
   public void revisitModifyValidSkipInvalid() throws Exception {
     // Batch test: ensures in-order modification.

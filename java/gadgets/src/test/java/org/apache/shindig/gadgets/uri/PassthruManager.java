@@ -30,15 +30,15 @@ import com.google.common.collect.Lists;
 
 public class PassthruManager implements ProxyUriManager {
   private UriStatus expectStatus = UriStatus.VALID_VERSIONED;
-  
+
   private boolean doProxy = false;
   private String proxyHost = null;
   private String proxyPath = null;
-  
+
   public PassthruManager() {
     // Regular no-proxy mode.
   }
-  
+
   public PassthruManager(String proxyHost, String proxyPath) {
     this.proxyHost = proxyHost;
     this.proxyPath = proxyPath;
@@ -52,7 +52,7 @@ public class PassthruManager implements ProxyUriManager {
     }
     return ImmutableList.copyOf(ctx);
   }
-  
+
   private Uri getUri(ProxyUri src) {
     if (!doProxy) {
       return src.getResource();
@@ -76,7 +76,7 @@ public class PassthruManager implements ProxyUriManager {
     proxyUri.setHtmlTagContext(uri.getQueryParameter(Param.HTML_TAG_CONTEXT.getKey()));
     return proxyUri;
   }
-  
+
   public void expectStatus(UriStatus status) {
     this.expectStatus = status;
   }

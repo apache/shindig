@@ -56,7 +56,7 @@ public final class UriBuilder {
     query = new ParamString(uri.getQuery());
     fragment = new ParamString(uri.getFragment());
   }
-  
+
   /**
    * Construct a new builder from a servlet request.
    */
@@ -175,7 +175,7 @@ public final class UriBuilder {
     query.put(name, values);
     return this;
   }
-  
+
   /**
    * Removes a query parameter.
    */
@@ -183,7 +183,7 @@ public final class UriBuilder {
     query.remove(name);
     return this;
   }
-  
+
   /**
    * @return The queryParameters part of the uri, separated into component parts.
    */
@@ -216,7 +216,7 @@ public final class UriBuilder {
     fragment.setString(str);
     return this;
   }
-  
+
   public UriBuilder addFragmentParameter(String name, String value) {
     fragment.add(name, value);
     return this;
@@ -242,7 +242,7 @@ public final class UriBuilder {
     fragment.put(name, values);
     return this;
   }
-  
+
   /**
    * Removes a fragment parameter.
    */
@@ -250,7 +250,7 @@ public final class UriBuilder {
     fragment.remove(name);
     return this;
   }
-  
+
   /**
    * @return The fragmentParameters part of the uri, separated into component parts.
    */
@@ -336,20 +336,20 @@ public final class UriBuilder {
 
     return toString().equals(obj.toString());
   }
-  
+
   private static final class ParamString {
     private final Map<String, List<String>> params;
     private String str;
-    
+
     private ParamString() {
       this.params = Maps.newLinkedHashMap();
     }
-    
+
     private ParamString(String str) {
       this();
       setString(str);
     }
-    
+
     /**
      * @return The queryParameters fragment.
      */
@@ -402,7 +402,7 @@ public final class UriBuilder {
       str = null;
       params.put(name, Lists.newArrayList(values));
     }
-    
+
     /**
      * Removes a query parameter.
      */
@@ -410,7 +410,7 @@ public final class UriBuilder {
       str = null;
       params.remove(name);
     }
-    
+
     /**
      * @return The queryParameters part of the uri, separated into component parts.
      */

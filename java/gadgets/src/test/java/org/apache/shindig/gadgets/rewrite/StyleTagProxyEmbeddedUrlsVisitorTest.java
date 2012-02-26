@@ -113,11 +113,11 @@ public class StyleTagProxyEmbeddedUrlsVisitorTest extends DomWalkerTestBase {
   @Test
   public void testImportsAndBackgroundUrlsInStyleTagMockContainer() throws Exception {
     testImportsAndBackgroundUrlsInStyleTag(ORIGINAL, EXPECTED.replace(
-        "localhost:8080/gadgets/proxy?container=default", "www.mock.com/gadgets/proxy?container=mock"), 
+        "localhost:8080/gadgets/proxy?container=default", "www.mock.com/gadgets/proxy?container=mock"),
         MOCK_CONTAINER);
   }
-  
-  private void testImportsAndBackgroundUrlsInStyleTag(String html, String expected, String container) 
+
+  private void testImportsAndBackgroundUrlsInStyleTag(String html, String expected, String container)
       throws Exception {
     Document doc = htmlParser.parseDom(html);
 

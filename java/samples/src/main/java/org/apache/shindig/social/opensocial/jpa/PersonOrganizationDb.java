@@ -29,7 +29,7 @@ import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 
 /**
- * 
+ *
  */
 /*
  * This object connects to a single Address, and to a single organization, defining the
@@ -38,7 +38,7 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "person_organization")
 @DiscriminatorValue("shared")
-@NamedQuery(name = PersonOrganizationDb.PERSON_ORG_FINDBY_NAME, 
+@NamedQuery(name = PersonOrganizationDb.PERSON_ORG_FINDBY_NAME,
     query = "select p from PersonOrganizationDb p where p.name = :name ")
 public class PersonOrganizationDb extends OrganizationDb {
   public static final String PERSON_ORG_FINDBY_NAME = "q.personorganizationdb.findbyname";

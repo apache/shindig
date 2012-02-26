@@ -90,7 +90,7 @@ public class HttpRequestHandlerTest extends EasyMockTestCase {
             return new FeedProcessorImpl();
         }
   };
-  
+
   @Before
   public void setUp() throws Exception {
     token = new FakeGadgetToken();
@@ -430,7 +430,7 @@ public class HttpRequestHandlerTest extends EasyMockTestCase {
     oauthArgs.setServiceName("oauthService");
     httpRequest.setOAuthArguments(oauthArgs);
     httpRequest.setPostBody("POSTBODY".getBytes());
-    
+
     Capture<HttpRequest> requestCapture = new Capture<HttpRequest>();
     expect(pipeline.execute(capture(requestCapture))).andReturn(builder.create());
     replay();
@@ -438,7 +438,7 @@ public class HttpRequestHandlerTest extends EasyMockTestCase {
 
     operation.execute(emptyFormItems, token, converter).get();
     verify();
-    
+
     assertEquals(httpRequest.getOAuthArguments(),
         requestCapture.getValue().getOAuthArguments());
   }

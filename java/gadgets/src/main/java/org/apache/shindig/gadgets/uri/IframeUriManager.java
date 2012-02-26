@@ -58,7 +58,7 @@ public interface IframeUriManager {
      * @return Version string for the pair.
      */
     String version(Uri gadgetUri, String container);
-    
+
     /**
      * @param gadgetUri Gadget whose version to validate.
      * @param container Container in which gadget is being rendered.

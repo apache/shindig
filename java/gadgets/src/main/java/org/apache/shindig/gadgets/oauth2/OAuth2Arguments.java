@@ -63,7 +63,7 @@ public class OAuth2Arguments {
   /**
    * Public constructor to parse OAuth2Arguments from a
    * {@link HttpServletRequest}
-   * 
+   *
    * @param request
    *          {@link HttpServletRequest} that came into the server
    * @throws GadgetException

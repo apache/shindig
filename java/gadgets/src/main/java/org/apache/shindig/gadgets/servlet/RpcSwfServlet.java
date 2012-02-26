@@ -42,15 +42,15 @@ public class RpcSwfServlet extends HttpServlet {
   private static final String SWF_RESOURCE_NAME = "files/xpc.swf";
   private static final int ONE_YEAR_IN_SEC = 365 * 24 * 60 * 60;
   private static final int DEFAULT_SWF_TTL = 24 * 60 * 60;
-  
+
   private final byte[] swfBytes;
   private final String hash;
   private int defaultSwfTtl = DEFAULT_SWF_TTL;
-  
+
   public RpcSwfServlet() {
     this(SWF_RESOURCE_NAME);
   }
-  
+
   public RpcSwfServlet(String swfResource) {
     try {
       InputStream is = ResourceLoader.openResource(swfResource);
@@ -63,20 +63,20 @@ public class RpcSwfServlet extends HttpServlet {
       throw new RuntimeException(e);
     }
   }
-  
+
   @Inject(optional = true)
   public void setDefaultRpcSwfTtl(@Named("shindig.rpc.swf.defaultTtl") Integer defaultTtl) {
     defaultSwfTtl = defaultTtl;
   }
-  
+
   public String getSwfHash() {
     return hash;
   }
-  
+
   @Override
   protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
     resp.setStatus(HttpServletResponse.SC_OK);
-    
+
     // Similar versioning method to other APIs, implemented more compactly.
     String v = req.getParameter(UriCommon.Param.VERSION.getKey());
     if (v != null && v.equals(hash)) {
@@ -86,7 +86,7 @@ public class RpcSwfServlet extends HttpServlet {
     }
 
     resp.setHeader("Content-Type", "application/x-shockwave-flash");
-    
+
     resp.getOutputStream().write(swfBytes);
   }
 }

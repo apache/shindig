@@ -39,11 +39,11 @@ public class OAuth2AuthorizationHandler {
 
   /**
    * Handles an OAuth 2.0 authorization request.
-   * 
+   *
    * @param request is the original request
    * @param response is the response of the request
    * @return OAuth2NormalizedResponse represents the OAuth 2.0 response
-   * 
+   *
    * @throws ServletException
    * @throws IOException
    */

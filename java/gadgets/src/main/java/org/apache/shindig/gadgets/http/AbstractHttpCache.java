@@ -66,8 +66,8 @@ import org.apache.shindig.gadgets.uri.UriCommon;
  * shouldRefetch() = false when time < date + 3000ms
  * shouldRefetch() = true when time >= date + 3000ms
  *
- * Note that error cases are handled differently. (Even for strict no cache) 
- *  
+ * Note that error cases are handled differently. (Even for strict no cache)
+ *
  * Implementations that override this are discouraged from using custom cache keys unless there is
  * actually customization in the request object itself. It is highly recommended that you still
  * use {@link #createKey} in the base class and append any custom data to the end of the key instead
@@ -80,7 +80,7 @@ public abstract class AbstractHttpCache implements HttpCache {
   private static final String NO_EXPAND = UriCommon.Param.NO_EXPAND.getKey();
 
   // Amount of time after which the entry in cache should be considered for a refetch for a
-  // non-userfacing internal fetch when the response is strict-no-cache. 
+  // non-userfacing internal fetch when the response is strict-no-cache.
   @Inject(optional = true) @Named("shindig.cache.http.strict-no-cache-resource.refetch-after-ms")
   public static long REFETCH_STRICT_NO_CACHE_AFTER_MS_DEFAULT = -1L;
 

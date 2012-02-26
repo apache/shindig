@@ -29,32 +29,32 @@ public interface FeatureResource {
    * @return "Normal"-mode content for the feature, eg. optimized/obfuscated JS.
    */
   String getContent();
-  
+
   /**
    * @return Debug-mode content for the feature.
    */
   String getDebugContent();
-  
+
   /**
    * @return True if the content is actually a URL to be included via &lt;script src&gt;
    */
   boolean isExternal();
-  
+
   /**
    * @return True if the JS can be cached by intermediary proxies or not.
    */
   boolean isProxyCacheable();
-  
+
   /**
    * @return A descriptive name used to reference the JS in various debug and stats contexts.
    */
   String getName();
-  
+
   /**
    * @return XML-defined attributes associated with this for resource selection/inclusion.
    */
   Map<String, String> getAttribs();
-  
+
   /**
    * Helper base class to avoid having to implement rarely-overridden isExternal/isProxyCacheable
    * functionality in FeatureResource.
@@ -67,12 +67,12 @@ public interface FeatureResource {
     public boolean isProxyCacheable() {
       return true;
     }
-    
+
     public Map<String, String> getAttribs() {
       return ImmutableMap.of();
     }
   }
-  
+
   public abstract class Attribute extends Default {
     private final Map<String, String> attribs;
 
@@ -85,12 +85,12 @@ public interface FeatureResource {
       return attribs;
     }
   }
-  
-  public class Simple extends Default {    
+
+  public class Simple extends Default {
     private final String content;
     private final String debugContent;
     private final String name;
-    
+
     public Simple(String content, String debugContent, String name) {
       this.content = content;
       this.debugContent = debugContent;
@@ -104,7 +104,7 @@ public interface FeatureResource {
     public String getDebugContent() {
       return debugContent;
     }
-    
+
     public String getName() {
       return name;
     }

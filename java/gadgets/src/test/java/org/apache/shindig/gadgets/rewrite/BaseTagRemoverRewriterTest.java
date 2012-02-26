@@ -49,11 +49,11 @@ public class BaseTagRemoverRewriterTest {
   public void testRemoveBaseTag() throws Exception {
     String content = "<html><head><base href='http://www.ppq.com/'>"
                      + "</head><body>"
-                     + "<img src='/img1.png'>" 
+                     + "<img src='/img1.png'>"
                      + "</body></html>";
     String expected = "<html><head>"
                      + "</head><body>"
-                     + "<img src=\"/img1.png\">" 
+                     + "<img src=\"/img1.png\">"
                      + "</body></html>";
 
     HttpRequest req = new HttpRequest(Uri.parse("http://www.google.com/"));

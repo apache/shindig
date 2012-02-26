@@ -53,7 +53,7 @@ public class CajaContentRewriterTest extends RewriterTestBase {
   private List<GadgetHtmlParser> parsers;
   private CajaContentRewriter rewriter;
   private ProxyUriManager proxyUriManager;
-  
+
   @Before
   public void setUp() throws Exception {
     super.setUp();
@@ -110,7 +110,7 @@ public class CajaContentRewriterTest extends RewriterTestBase {
             "css property top has bad value: ==&gt;expression(alert(0), 0)");
     testMarkup(markup, expected, messages);
   }
-  
+
   @Test
   public void testRewrite() throws Exception {
     String markup = "<script>var a=0;</script>";
@@ -129,7 +129,7 @@ public class CajaContentRewriterTest extends RewriterTestBase {
     String uri = "http://www.example.com/";
     String unproxied = uri;
     String proxied = "http://shindig.com/gadgets/proxy?url=" + uri;
-    
+
     expect(proxyUriManager.make(EasyMock.anyObject(List.class), EasyMock.isNull(Integer.class)))
         .andReturn(ImmutableList.<Uri>of(Uri.parse(proxied))).anyTimes();
     replay(proxyUriManager);
@@ -137,17 +137,17 @@ public class CajaContentRewriterTest extends RewriterTestBase {
     // Uris that transistion the page
     assertUrlRewritten("a", "href", uri, unproxied);
     assertUrlRewritten("area", "href", uri, unproxied);
-    
+
     // Uris that load media
     assertUrlRewritten("img", "src", uri, proxied);
-    
+
     // Uris that have no effect on the document
     assertUrlRewritten("blockquote", "cite", uri, unproxied);
     assertUrlRewritten("q", "cite", uri, unproxied);
     assertUrlRewritten("del", "cite", uri, unproxied);
     assertUrlRewritten("ins", "cite", uri, unproxied);
   }
-  
+
   private void testMarkup(String markup, String expected) throws GadgetException{
     testMarkup(markup, expected, null);
   }
@@ -158,7 +158,7 @@ public class CajaContentRewriterTest extends RewriterTestBase {
     String expected = attr + "=\"" + rewritten + "\"";
     testMarkup(markUp, expected);
   }
-  
+
   private void testMarkup(String markup, String expected, List<String> msgs) throws GadgetException{
     Gadget gadget = makeGadget();
     for (GadgetHtmlParser parser : parsers) {

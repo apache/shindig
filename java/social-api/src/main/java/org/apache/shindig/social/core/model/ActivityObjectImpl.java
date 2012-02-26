@@ -29,7 +29,7 @@ import org.apache.shindig.social.opensocial.model.MediaLink;
  * <p>ActivityObjectImpl class.</p>
  */
 public class ActivityObjectImpl extends ExtendableBeanImpl implements ActivityObject {
-  
+
   private static final long serialVersionUID = 1L;
   private List<ActivityObject> attachments;
   private ActivityObject author;
@@ -45,7 +45,7 @@ public class ActivityObjectImpl extends ExtendableBeanImpl implements ActivityOb
   private List<String> upstreamDuplicates;
   private String url;
   private ExtendableBean openSocial;
-  
+
   /**
    * Constructs an empty ActivityObject.
    */
@@ -72,7 +72,7 @@ public class ActivityObjectImpl extends ExtendableBeanImpl implements ActivityOb
     this.author = author;
     put("author", author);
   }
-  
+
   /** {@inheritDoc} */
   public String getContent() {
     return content;
@@ -105,7 +105,7 @@ public class ActivityObjectImpl extends ExtendableBeanImpl implements ActivityOb
     this.downstreamDuplicates = downstreamDuplicates;
     put("downstreamDuplicates", downstreamDuplicates);
   }
-  
+
   /** {@inheritDoc} */
   public String getId() {
     return id;
@@ -138,7 +138,7 @@ public class ActivityObjectImpl extends ExtendableBeanImpl implements ActivityOb
     this.objectType = objectType;
     put("objectType", objectType);
   }
-  
+
   /** {@inheritDoc} */
   public String getPublished() {
     return published;
@@ -160,7 +160,7 @@ public class ActivityObjectImpl extends ExtendableBeanImpl implements ActivityOb
     this.summary = summary;
     put("summary", summary);
   }
-  
+
   /** {@inheritDoc} */
   public String getUpdated() {
     return updated;
@@ -182,7 +182,7 @@ public class ActivityObjectImpl extends ExtendableBeanImpl implements ActivityOb
     this.upstreamDuplicates = upstreamDuplicates;
     put("upstreamDuplicates", upstreamDuplicates);
   }
-  
+
   /** {@inheritDoc} */
   public String getUrl() {
     return url;
@@ -193,7 +193,7 @@ public class ActivityObjectImpl extends ExtendableBeanImpl implements ActivityOb
     this.url = url;
     put("url", url);
   }
-  
+
   /** {@inheritDoc} */
   public ExtendableBean getOpenSocial() {
     return openSocial;

@@ -55,7 +55,7 @@ public class CajaCssSanitizer {
   //class name for logging purpose
   private static final String classname = CajaCssSanitizer.class.getName();
   private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
-	  
+
   private static final Set<String> ALLOWED_URI_SCHEMES = ImmutableSet.of("http", "https");
 
   private final CajaCssParser parser;
@@ -86,7 +86,7 @@ public class CajaCssSanitizer {
       return parser.serialize(stylesheet);
     } catch (GadgetException ge) {
       // Failed to parse stylesheet so log and continue
-      if (LOG.isLoggable(Level.INFO)) {    
+      if (LOG.isLoggable(Level.INFO)) {
         LOG.logp(Level.INFO, classname, "sanitize", MessageKeys.FAILED_TO_PARSE);
         LOG.log(Level.INFO, ge.getMessage(), ge);
       }
@@ -113,7 +113,7 @@ public class CajaCssSanitizer {
       content = parser.serialize(stylesheet);
     } catch (GadgetException ge) {
       // Failed to parse stylesheet so log and continue
-        if (LOG.isLoggable(Level.INFO)) {    
+        if (LOG.isLoggable(Level.INFO)) {
           LOG.logp(Level.INFO, classname, "sanitize", MessageKeys.FAILED_TO_PARSE);
           LOG.log(Level.INFO, ge.getMessage(), ge);
         }

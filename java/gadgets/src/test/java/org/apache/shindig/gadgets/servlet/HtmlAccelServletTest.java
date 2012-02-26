@@ -337,7 +337,7 @@ public class HtmlAccelServletTest extends ServletTestFixture {
     assertEquals(recorder.getHeader("Set-Cookie2"), "name2=value2");
     assertEquals(REWRITE_CONTENT, recorder.getResponseAsString());
     assertEquals(200, recorder.getHttpStatusCode());
-    assertTrue(rewriter.responseWasRewritten());    
+    assertTrue(rewriter.responseWasRewritten());
   }
 
   @Test
@@ -371,7 +371,7 @@ public class HtmlAccelServletTest extends ServletTestFixture {
     verify();
     for (Map.Entry<String, String> header : headersMap.entrySet()) {
       assertEquals(recorder.getHeader(header.getKey()), header.getValue());
-    }    
+    }
     assertEquals(REWRITE_CONTENT, recorder.getResponseAsString());
     assertEquals(200, recorder.getHttpStatusCode());
     assertTrue(rewriter.responseWasRewritten());

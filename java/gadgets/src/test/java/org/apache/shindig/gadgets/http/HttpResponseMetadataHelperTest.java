@@ -30,23 +30,23 @@ public class HttpResponseMetadataHelperTest {
     HttpResponse local = new HttpResponseBuilder()
         .setResponseString("data1")
         .create();
-    
-    HttpResponse compiled = HttpResponseMetadataHelper.updateMetadata(local, 
+
+    HttpResponse compiled = HttpResponseMetadataHelper.updateMetadata(local,
         ImmutableMap.<String, String>of("K", "V"));
     assertEquals(1, compiled.getMetadata().size());
     assertEquals("V", compiled.getMetadata().get("K"));
 
-    HttpResponse compiled2 = HttpResponseMetadataHelper.updateMetadata(compiled, 
+    HttpResponse compiled2 = HttpResponseMetadataHelper.updateMetadata(compiled,
         ImmutableMap.<String, String>of("K2", "V2"));
     assertEquals(2, compiled2.getMetadata().size());
     assertEquals("V2", compiled2.getMetadata().get("K2"));
 
-    HttpResponse compiled3 = HttpResponseMetadataHelper.updateMetadata(compiled2, 
+    HttpResponse compiled3 = HttpResponseMetadataHelper.updateMetadata(compiled2,
         ImmutableMap.<String, String>of("K", "V3"));
     assertEquals(2, compiled3.getMetadata().size());
     assertEquals("V3", compiled3.getMetadata().get("K"));
   }
-  
+
   @Test
   public void testHashCodeSimple() {
     HttpResponse local = new HttpResponseBuilder()
@@ -82,7 +82,7 @@ public class HttpResponseMetadataHelperTest {
     HttpResponseMetadataHelper metdataHelper = new HttpResponseMetadataHelper();
     HttpResponse compiled = HttpResponseMetadataHelper.updateHash(resp, metdataHelper);
     assertEquals(metadataSize, compiled.getMetadata().size());
-    assertEquals(hash, compiled.getMetadata().get(HttpResponseMetadataHelper.DATA_HASH));    
+    assertEquals(hash, compiled.getMetadata().get(HttpResponseMetadataHelper.DATA_HASH));
   }
-  
+
 }

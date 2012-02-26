@@ -31,9 +31,9 @@ public class AuthInfoUtilTest extends Assert {
   public void testToken() throws Exception {
     HttpServletRequest req = new FakeHttpServletRequest();
     SecurityToken token = new FakeGadgetToken();
-    
+
     AuthInfoUtil.setSecurityTokenForRequest(req, token);
-    
+
     assertEquals(token, AuthInfoUtil.getSecurityTokenFromRequest(req));
   }
 

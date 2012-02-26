@@ -44,7 +44,7 @@ public class ScriptConcatContentRewriter extends DomWalker.Rewriter {
   private final Executor executor;
   private final RequestPipeline requestPipeline;
   private final HttpCache cache;
-  
+
   @Inject
   public ScriptConcatContentRewriter(ConcatUriManager concatUriManager,
                                      ContentRewriterFeature.Factory featureConfigFactory,
@@ -57,7 +57,7 @@ public class ScriptConcatContentRewriter extends DomWalker.Rewriter {
     this.cache = cache;
     this.requestPipeline = requestPipeline;
   }
-  
+
   @Override
   protected List<Visitor> makeVisitors(Gadget context, Uri gadgetUri) {
     ContentRewriterFeature.Config config = featureConfigFactory.get(context.getSpec());

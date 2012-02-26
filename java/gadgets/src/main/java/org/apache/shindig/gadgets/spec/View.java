@@ -160,12 +160,12 @@ public class View implements RequestAuthenticationInfo {
     content = substituter.substituteString(view.content);
     base = view.base;
     href = base.resolve(substituter.substituteUri(view.href));
-    
+
     // Facilitates type=url support of dual-schema endpoints.
     if (view.getType() == ContentType.URL && view.href.getScheme() == null) {
       href = new UriBuilder(href).setScheme(null).toUri();
     }
-    
+
     Map<String, String> attributes = Maps.newHashMap();
     for (Map.Entry<String, String> entry : view.attributes.entrySet()) {
       attributes.put(entry.getKey(), substituter.substituteString(entry.getValue()));

@@ -57,7 +57,7 @@ public class JsonContainerConfig extends ExpressionContainerConfig {
   public JsonContainerConfig(@Named("shindig.containers.default") String containers,
                              @Nullable @Named("shindig.host") String host,
                              @Nullable @Named("shindig.port") String port,
-                             @Nullable @Named("shindig.contextroot") String contextRoot,                           
+                             @Nullable @Named("shindig.contextroot") String contextRoot,
                              Expressions expressions)
       throws ContainerConfigException {
     super(expressions);
@@ -66,7 +66,7 @@ public class JsonContainerConfig extends ExpressionContainerConfig {
 
   /**
    * Creates a new configuration from a JSON Object, for use in testing.
-   * @throws ContainerConfigException 
+   * @throws ContainerConfigException
    */
   public JsonContainerConfig(JSONObject json, Expressions expressions) throws ContainerConfigException {
     super(expressions);

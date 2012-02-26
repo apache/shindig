@@ -30,7 +30,7 @@ public class CajaSocialMarkupHtmlParserTest extends AbstractSocialMarkupHtmlPars
   protected GadgetHtmlParser makeParser() {
     return new CajaHtmlParser(new ParseModule.DOMImplementationProvider().get());
   }
-  
+
   @Test
   @Override
   @Ignore("Look into treating DOMException in Caja parser as Error not Warning")

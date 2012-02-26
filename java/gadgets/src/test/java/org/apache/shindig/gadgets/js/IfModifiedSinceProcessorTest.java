@@ -49,7 +49,7 @@ public class IfModifiedSinceProcessorTest {
     response = new JsResponseBuilder();
     processor = new IfModifiedSinceProcessor();
   }
-  
+
   @Test
   public void testDoesNothingAndContinuesProcessingWhenHeaderIsAbsent() throws Exception {
     EasyMock.expect(request.isInCache()).andReturn(false);

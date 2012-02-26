@@ -50,17 +50,17 @@ public class DefaultMultipartFormParser implements MultipartFormParser {
     } catch (FileUploadException e) {
       UnknownServiceException use = new UnknownServiceException("File upload error.");
       use.initCause(e);
-      throw use; 
+      throw use;
     }
   }
-  
+
   private Collection<FormDataItem> convertToFormData(List<FileItem> fileItems) {
-    List<FormDataItem> formDataItems = 
+    List<FormDataItem> formDataItems =
         Lists.newArrayListWithCapacity(fileItems.size());
     for (FileItem item : fileItems) {
       formDataItems.add(new CommonsFormDataItem(item));
     }
-    
+
     return formDataItems;
   }
 

@@ -70,7 +70,7 @@ public class UserPrefSubstituterTest extends Assert {
             return prefs;
         }
     };
-    
+
     new UserPrefSubstituter().addSubstitutions(substituter, context, spec);
 
     assertEquals(DEFAULT_VALUE,
@@ -91,7 +91,7 @@ public class UserPrefSubstituterTest extends Assert {
             return prefs;
         }
     };
-    
+
     new UserPrefSubstituter().addSubstitutions(substituter, context, spec);
     assertEquals(ESCAPED_USER_VALUE,
         substituter.getSubstitution(Type.USER_PREF, USER_NAME));

@@ -37,7 +37,7 @@ public final class TemplateResource {
   public static TemplateResource newJavascriptResource(String javascript, TemplateLibrary library) {
     return new TemplateResource(javascript, Type.JAVASCRIPT, library.isSafe());
   }
-  
+
   /**
    * Create a CSS resource.
    * @param style the CSS content
@@ -64,7 +64,7 @@ public final class TemplateResource {
   public boolean isSafe() {
     return isSafe;
   }
-  
+
   @Override
   public String toString() {
     return "<" + type + '>' + content + "</" + type + '>';

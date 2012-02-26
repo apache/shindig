@@ -40,7 +40,7 @@ public class HtmlSerializationTest {
     doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
     GadgetHtmlParser neko = new NekoSimplifiedHtmlParser(
             new ParseModule.DOMImplementationProvider().get());
-    
+
     GadgetHtmlParser caja = new CajaHtmlParser(
             new ParseModule.DOMImplementationProvider().get());
 
@@ -62,14 +62,14 @@ public class HtmlSerializationTest {
         + "  </li></ul>"
         + "</script>"
         + "</body></html>";
-    
+
     for(GadgetHtmlParser parser : parsers) {
       Document doc = parser.parseDom(markup);
       String result = HtmlSerialization.serialize(doc);
       assertEquals(markup, result);
     }
   }
-  
+
   @Test
   public void testSerializeHtml() throws Exception {
     String markup = "<!DOCTYPE html>\n"
@@ -81,7 +81,7 @@ public class HtmlSerializationTest {
         + "</osx:NavigateToApp>\n"
         + "</div>"
         + "</body></html>";
-    
+
     for(GadgetHtmlParser parser : parsers) {
       Document doc = parser.parseDom(markup);
       String result = HtmlSerialization.serialize(doc);

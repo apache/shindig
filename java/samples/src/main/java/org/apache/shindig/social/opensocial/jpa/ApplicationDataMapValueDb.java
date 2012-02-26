@@ -59,14 +59,14 @@ public class ApplicationDataMapValueDb implements DbObject {
   @ManyToOne(targetEntity=ApplicationDataMapDb.class)
   @JoinColumn(name="application_datamap_id", referencedColumnName="oid")
   protected ApplicationDataMapDb applicationDataMap;
-  
+
   /**
    * Each entry has a name
    */
   @Basic
   @Column(name="name", length=255)
   protected String name;
-  
+
   /**
    * Each entry has a value (4K limit to size)
    */

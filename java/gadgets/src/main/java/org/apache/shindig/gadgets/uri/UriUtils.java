@@ -44,7 +44,7 @@ public final class UriUtils {
   private static final Logger LOG = Logger.getLogger(classname, MessageKeys.MESSAGES);
 
   private UriUtils() {}
-  
+
   /**
    * Enum of disallowed response headers that should not be passed on as is to
    * the user. The webserver serving out the response should be responsible
@@ -142,7 +142,7 @@ public final class UriUtils {
    * @param setHeaders If true, then setHeader method of HttpServletResponse is
    *   called, otherwise addHeader is called for every header.
    * @param disallowedResponseHeaders Disallowed response headers to omit from the response
-   *   returned to the user. 
+   *   returned to the user.
    * @throws IOException In case the http response was not successful.
    */
   public static void copyResponseHeadersAndStatusCode(
@@ -203,7 +203,7 @@ public final class UriUtils {
     for (Map.Entry<String, List<String>> inHeader : origRequest.getHeaders().entrySet()) {
       String header = inHeader.getKey();
       List<String> headerValues = inHeader.getValue();
-      
+
       if (headerValues != null && !headerValues.isEmpty() &&
           isValidHeaderName(header) &&
           !allDisallowedHeaders.contains(header.toLowerCase())) {

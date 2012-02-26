@@ -28,7 +28,7 @@ import org.apache.shindig.gadgets.render.RenderingResults;
 import org.apache.shindig.gadgets.uri.IframeUriManager;
 import org.apache.shindig.gadgets.uri.UriStatus;
 import org.apache.shindig.gadgets.uri.UriCommon.Param;
- 
+
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
 
@@ -62,7 +62,7 @@ public class GadgetRenderingServlet extends InjectedServlet {
     checkInitialized();
     this.renderer = renderer;
   }
-  
+
   @Inject
   public void setIframeUriManager(IframeUriManager iframeUriManager) {
     checkInitialized();
@@ -112,7 +112,7 @@ public class GadgetRenderingServlet extends InjectedServlet {
   /**
    * Implementations that extend this class are strongly discouraged from overriding this method.
    * To customize the behavior please override the hook methods for each of the
-   * RenderingResults.Status enum values instead. 
+   * RenderingResults.Status enum values instead.
    */
   protected void postGadgetRendering(PostGadgetRenderingParams params) throws IOException {
     switch (params.getResults().getStatus()) {

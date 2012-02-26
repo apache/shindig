@@ -25,14 +25,14 @@ import org.apache.shindig.gadgets.servlet.OAuth2CallbackServlet;
  * providers on behalf of the gadgets it is proxying requests for. An OAuth 2.0
  * consumer needs to permanently store gadgets it has collected, and retrieve
  * the appropriate tokens when proxying a request for a gadget.
- * 
+ *
  * Access and Refresh {@link OAuth2Token} may be store in memory or pesisted out
  * to a file system or database.
- * 
+ *
  * OAuth2Store implementors are responsible for handling the gadgeturi,
  * serviceName, user, scope mappings in the manor most effective for their
  * environment.
- * 
+ *
  * {@link OAuth2Accessor} storage should be cluster safe so it can be referenced
  * by {@link OAuth2CallbackServlet}
  */
@@ -40,9 +40,9 @@ public interface OAuth2Store {
 
   /**
    * Clears any in-memory caching of OAuth2Accessors or Tokens.
-   * 
+   *
    * @return <code>true</code> if the clear succeeded
-   * 
+   *
    * @throws GadgetException
    *           if the clear could not happen
    */
@@ -51,7 +51,7 @@ public interface OAuth2Store {
   /**
    * Creates, but does not store, an {@link OAuth2Token}. The token can then be
    * initialized and stored.
-   * 
+   *
    * @return a new {@link OAuth2Token}
    */
   public OAuth2Token createToken();
@@ -60,7 +60,7 @@ public interface OAuth2Store {
    * Given an index, see {@link OAuth2Store.getOAuth2AccessorIndex}, the store
    * will return the {@link OAuth2Accessor} if it exists in storage but will not
    * create a new one.
-   * 
+   *
    * @param index
    *          {@link Integer} index of the accessor to get
    * @return the {@link OAuth2Accessor} or <code>null</code> if it cannot be
@@ -71,7 +71,7 @@ public interface OAuth2Store {
   /**
    * Will look for an accessor with the supplied mapping and return it. If one
    * is not already stored a new one will be created and stored.
-   * 
+   *
    * @param gadgetUri
    *          {@link String} URI of the gadget issuing the request
    * @param serviceName
@@ -90,7 +90,7 @@ public interface OAuth2Store {
 
   /**
    * Takes an accessor mapping and turns it into an {@link Integer} index.
-   * 
+   *
    * @param gadgetUri
    *          {@link String} URI of the gadget issuing the request
    * @param serviceName
@@ -107,7 +107,7 @@ public interface OAuth2Store {
 
   /**
    * Gets a token, if it exists, from the store.
-   * 
+   *
    * @param gadgetUri
    *          {@link String} URI of the gadget issuing the request
    * @param serviceName
@@ -129,7 +129,7 @@ public interface OAuth2Store {
 
   /**
    * Cues the store to clear it's current state and reload from persistence.
-   * 
+   *
    * @return
    * @throws GadgetException
    */
@@ -137,7 +137,7 @@ public interface OAuth2Store {
 
   /**
    * Removes an {@link OAuth2Accessor} from the store.
-   * 
+   *
    * @param accessor
    *          to remove
    * @return the accessor that was removed, or <code>null</code> if the accessor
@@ -147,7 +147,7 @@ public interface OAuth2Store {
 
   /**
    * Removes an {@link OAuth2Token} from the store.
-   * 
+   *
    * @param token
    *          to remove
    * @return the token that was removed, or <code>null</code> if the token was
@@ -159,7 +159,7 @@ public interface OAuth2Store {
 
   /**
    * Either inserts updates an {@link OAuth2Token} in the store.
-   * 
+   *
    * @param token
    *          to store
    * @throws GadgetException
@@ -169,7 +169,7 @@ public interface OAuth2Store {
 
   /**
    * Either inserts updates an {@link OAuth2Accessor} in the store.
-   * 
+   *
    * @param accessor
    *          to store
    */

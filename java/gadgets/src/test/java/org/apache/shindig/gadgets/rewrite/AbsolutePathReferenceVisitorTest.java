@@ -206,12 +206,12 @@ public class AbsolutePathReferenceVisitorTest extends DomWalkerTestBase {
     Element lcValidRelative = elem(lcTag, validAttr, RELATIVE_URI.toString());
     assertEquals(VisitStatus.MODIFY, getVisitStatus(lcValidRelative));
     assertEquals(RELATIVE_RESOLVED_URI.toString(), lcValidRelative.getAttribute(validAttr));
-    
+
     Element lcValidPathRelative = elem(lcTag, validAttr, PATH_RELATIVE_URI.toString());
     assertEquals(VisitStatus.MODIFY, getVisitStatus(lcValidPathRelative));
     assertEquals(PATH_RELATIVE_RESOLVED_URI.toString(),
         lcValidPathRelative.getAttribute(validAttr));
-    
+
     // uppercase, same
     Element ucValidRelative = elem(ucTag, validAttr, RELATIVE_URI.toString());
     assertEquals(VisitStatus.MODIFY, getVisitStatus(ucValidRelative));
@@ -226,23 +226,23 @@ public class AbsolutePathReferenceVisitorTest extends DomWalkerTestBase {
     Element lcValidInvalid = elem(lcTag, validAttr, INVALID_URI_STRING);
     assertEquals(VisitStatus.BYPASS, getVisitStatus(lcValidRelative));
     assertEquals(INVALID_URI_STRING, lcValidInvalid.getAttribute(validAttr));
-    
+
     // lowercase, correct attrib, absolute URL
     Element lcValidAbsolute = elem(lcTag, validAttr, ABSOLUTE_URI.toString());
     assertEquals(VisitStatus.BYPASS, getVisitStatus(lcValidAbsolute));
     assertEquals(ABSOLUTE_URI.toString(), lcValidAbsolute.getAttribute(validAttr));
-    
+
     // lowercase, invalid attrib, relative-possible URL
     Element lcInvalidRelative = elem(lcTag, invalidAttr, RELATIVE_URI.toString());
     assertEquals(VisitStatus.BYPASS, getVisitStatus(lcInvalidRelative));
     assertEquals(RELATIVE_URI.toString(), lcInvalidRelative.getAttribute(invalidAttr));
-      
+
     // lowercase, valid attrib, absolute (JS) URL
     Element lcValidJs = elem(lcTag, validAttr, JS_URI_STR);
     assertEquals(VisitStatus.BYPASS, getVisitStatus(lcValidJs));
     assertEquals(JS_URI_STR, lcValidJs.getAttribute(validAttr));
   }
-  
+
   private VisitStatus getVisitStatus(Node node) throws Exception {
     return visitorForAllTags().visit(gadget(), node);
   }

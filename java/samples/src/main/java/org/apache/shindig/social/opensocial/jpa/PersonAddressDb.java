@@ -31,7 +31,7 @@ import javax.persistence.Table;
  *
  */
 /*
- * This object connects to a single Address, and to a single organization, 
+ * This object connects to a single Address, and to a single organization,
  * defining the organizations relationship with the address
  */
 @Entity
@@ -41,11 +41,11 @@ public class PersonAddressDb extends AddressDb {
   @Basic
   @Column(name="primary_address")
   private Boolean primary;
-  
+
   @ManyToOne(targetEntity=PersonDb.class)
   @JoinColumn(name="person_id", referencedColumnName="oid")
   private Person person;
-  
+
   @Basic
   @Column(name="type", length=255)
   private String type;

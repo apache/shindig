@@ -46,7 +46,7 @@ public class JsRequestBuilderTest {
   private static final String HOST_HEADER_KEY = "Host";
   private static final String IMS_HEADER_KEY = "If-Modified-Since";
   private static final String HOST = "localhost";
-  
+
   private IMocksControl control;
   private JsUriManager jsUriManager;
   private JsUri jsUri;
@@ -62,7 +62,7 @@ public class JsRequestBuilderTest {
     request = control.createMock(HttpServletRequest.class);
     registry = control.createMock(FeatureRegistry.class);
     builder = new JsRequestBuilder(jsUriManager, registry);
-    
+
     EasyMock.expect(request.getScheme()).andReturn("http");
     EasyMock.expect(request.getServerPort()).andReturn(80);
     EasyMock.expect(request.getServerName()).andReturn("HOST");
@@ -109,7 +109,7 @@ public class JsRequestBuilderTest {
     }
     control.verify();
   }
-  
+
   @Test
   public void testCreateRequestComputesDeps() throws Exception {
     List<String> requested = Lists.newArrayList("req1", "req2");
@@ -129,7 +129,7 @@ public class JsRequestBuilderTest {
     JsRequest jsRequest = builder.build(request);
     assertSame(jsUri, jsRequest.getJsUri());
     assertEquals(HOST, jsRequest.getHost());
-    
+
     List<String> allMatch =
         Lists.newArrayList("dep-s1", "dep1", "dep2", "dep-s2", "load1", "load2", "req1", "req2");
     assertEquals(allMatch, jsRequest.getAllFeatures());
@@ -137,11 +137,11 @@ public class JsRequestBuilderTest {
     List<String> loadedMatch =
         Lists.newArrayList("dep-s1", "dep-s2", "load1", "load2");
     assertEquals(loadedMatch, jsRequest.getLoadedFeatures());
-    
+
     List<String> newMatch =
         Lists.newArrayList("dep1", "dep2", "req1", "req2");
     assertEquals(newMatch, jsRequest.getNewFeatures());
-    
+
     // Verify calls at the end, since they're made lazily in the context of .getFeatures() calls.
     control.verify();
   }

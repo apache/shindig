@@ -39,13 +39,13 @@ public class JsRequestBuilder {
   @Inject
   public JsRequestBuilder(JsUriManager jsUriManager,
                           FeatureRegistry registry) {
-    this.jsUriManager = jsUriManager; 
+    this.jsUriManager = jsUriManager;
     this.registry = registry;
   }
-  
+
   /**
    * Builds a {@link JsRequest} instance from the given request object.
-   * 
+   *
    * @param request The originating HTTP request object.
    * @return The corresponding JsRequest object.
    * @throws GadgetException If there was a problem parsing the URI.

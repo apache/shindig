@@ -61,7 +61,7 @@ public class FunctionsTest extends Assert {
   public void testDefaultBinding() throws Exception {
     Injector injector = Guice.createInjector();
     functions = injector.getInstance(Functions.class);
-    
+
     Method toJson = functions.resolveFunction("osx", "parseJson");
     Object o = toJson.invoke(null, "{a : 1}");
     assertTrue(o instanceof JSONObject);
@@ -73,13 +73,13 @@ public class FunctionsTest extends Assert {
     Expressions expressions = Expressions.forTesting(functions);
     ELContext context = expressions.newELContext();
     ValueExpression expression = expressions.parse("${other:bonjour()}", String.class);
-    
+
     assertEquals("French hello", expression.getValue(context));
-    
+
     expression = expressions.parse("${test:add(1, 2)}", Integer.class);
     assertEquals(3, expression.getValue(context));
   }
-  
+
   /**
    * Static function, should be exposed under two names.
    */

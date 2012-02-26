@@ -25,7 +25,7 @@ import org.apache.shindig.gadgets.oauth.OAuthStore.ConsumerInfo;
  * OAuth related data accessor
  */
 public class AccessorInfo {
-  
+
   public static enum HttpMethod {
     GET,
     POST
@@ -36,14 +36,14 @@ public class AccessorInfo {
     POST_BODY,
     URI_QUERY
   }
-  
+
   private final OAuthAccessor accessor;
   private final ConsumerInfo consumer;
   private final HttpMethod httpMethod;
   private final OAuthParamLocation paramLocation;
   private String sessionHandle;
   private long tokenExpireMillis;
-  
+
   public AccessorInfo(OAuthAccessor accessor, ConsumerInfo consumer, HttpMethod httpMethod,
       OAuthParamLocation paramLocation, String sessionHandle, long tokenExpireMillis) {
     this.accessor = accessor;
@@ -61,7 +61,7 @@ public class AccessorInfo {
   public OAuthAccessor getAccessor() {
     return accessor;
   }
-  
+
   public ConsumerInfo getConsumer() {
     return consumer;
   }
@@ -73,7 +73,7 @@ public class AccessorInfo {
   public String getSessionHandle() {
     return sessionHandle;
   }
-  
+
   public void setSessionHandle(String sessionHandle) {
     this.sessionHandle = sessionHandle;
   }
@@ -81,7 +81,7 @@ public class AccessorInfo {
   public long getTokenExpireMillis() {
     return tokenExpireMillis;
   }
-  
+
   public void setTokenExpireMillis(long tokenExpireMillis) {
     this.tokenExpireMillis = tokenExpireMillis;
   }

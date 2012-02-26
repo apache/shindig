@@ -364,7 +364,7 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
     }
     OAuthMessage msg = new OAuthMessage(null, null, null);
     msg.addParameter("oauth_problem", code);
-    msg.addParameter("oauth_problem_advice", text);    
+    msg.addParameter("oauth_problem_advice", text);
     return new HttpResponseBuilder()
         .setHttpStatusCode(rc)
         .addHeader("WWW-Authenticate", msg.getAuthorizationHeader("realm"))
@@ -421,10 +421,10 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
         }
       }
     }
-    
+
     // Return the lot
     info.message = new OAuthMessage(method, parsed.getLocation(), params);
-    
+
     // Check for trusted parameters
     if (checkTrustedParams) {
       if (!"foo".equals(OAuthUtil.getParameter(info.message, "oauth_magic"))) {
@@ -442,7 +442,7 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
       }
       trustedParamCount += 4;
     }
-    
+
     return info;
   }
 
@@ -506,7 +506,7 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
 
   /**
    * Used to fake a browser visit to approve a token.
-   * 
+   *
    * @return a redirect URL, which may or may not include an oauth verifier
    */
   public String browserVisit(String url) throws Exception {
@@ -584,7 +584,7 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
     } else if (state == null) {
       return makeOAuthProblemReport(OAuth.Problems.TOKEN_REJECTED,
           "Unknown request token", HttpResponse.SC_UNAUTHORIZED);
-    }   
+    }
     if (rejectExtraParams) {
       String extra = hasExtraParams(info.message);
       if (extra != null) {
@@ -723,12 +723,12 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
     }
     return resp.create();
   }
-  
+
   private void validateMessage(OAuthAccessor accessor, MessageInfo info, boolean tokenEndpoint)
       throws OAuthException, IOException, URISyntaxException {
     OAuthValidator validator = new FakeTimeOAuthValidator();
     validator.validateMessage(info.message,accessor);
-    
+
     String bodyHash = info.message.getParameter("oauth_body_hash");
     if (tokenEndpoint && bodyHash != null) {
       throw new RuntimeException("Can't have body hash on token endpoints");
@@ -753,12 +753,12 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
           throw new RuntimeException("oauth_body_hash mismatch");
         }
     }
-    
+
     // Most OAuth service providers are much laxer than this about checking nonces (rapidly
     // changing server-side state scales badly), but we are very strict in test cases.
     String nonceKey = info.message.getConsumerKey() + ','
         + info.message.getParameter("oauth_nonce");
-    
+
     CachedObject<OAuthMessage> previousMessage = nonceCache.getElement(nonceKey);
     if (previousMessage != null) {
       throw new RuntimeException("Reused nonce, old message = " + previousMessage.obj
@@ -780,7 +780,7 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
         .setResponseString("bad request")
         .create();
   }
-  
+
   private HttpResponse handleEchoUrl(HttpRequest request) throws Exception {
     String query = request.getUri().getQuery();
     if (query.contains("add_oauth_token")) {
@@ -795,7 +795,7 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
   public void setConsumersThrottled(boolean throttled) {
     this.throttled = throttled;
   }
-  
+
   public void setConsumerUnauthorized(boolean unauthorized) {
     this.unauthorized = unauthorized;
   }

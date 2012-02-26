@@ -92,7 +92,7 @@ public class UserId {
     if (o == this) {
       return true;
     }
-    
+
     if (!(o instanceof UserId)) {
       return false;
     }

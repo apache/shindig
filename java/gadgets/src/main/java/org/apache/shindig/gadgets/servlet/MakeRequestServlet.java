@@ -39,7 +39,7 @@ import com.google.inject.Inject;
 public class MakeRequestServlet extends InjectedServlet {
 
   private static final long serialVersionUID = -8298705081500283786L;
-  
+
   private transient MakeRequestHandler makeRequestHandler;
 
   @Inject

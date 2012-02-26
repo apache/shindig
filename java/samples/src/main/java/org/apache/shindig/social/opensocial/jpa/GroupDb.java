@@ -74,10 +74,10 @@ public class GroupDb implements DbObject {
    * There are many members of a group.
    */
   @ManyToMany(targetEntity = PersonDb.class)
-  @JoinTable(name = "membership", 
-      joinColumns = 
-        @JoinColumn(name = "group_id", referencedColumnName = "oid"), 
-      inverseJoinColumns = 
+  @JoinTable(name = "membership",
+      joinColumns =
+        @JoinColumn(name = "group_id", referencedColumnName = "oid"),
+      inverseJoinColumns =
         @JoinColumn(name = "person_id", referencedColumnName = "oid"))
   protected List<Person> members;
 

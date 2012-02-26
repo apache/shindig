@@ -19,12 +19,12 @@
 package org.apache.shindig.common.logging.i18n;
 
 /**
- * Unique [key, value] pairs for i18n logging messages. 
+ * Unique [key, value] pairs for i18n logging messages.
  * The key is used as message key input in the log method and its value matched the key specified in the localized resource.properties file
  */
 public interface MessageKeys {
 	public static final String MESSAGES = "org.apache.shindig.common.logging.i18n.resource";
-	
+
 	//AuthenticationServletFilter
 	public static final String ERROR_PARSING_SECURE_TOKEN = "errorParsingSecureToken";
 	//XmlUtil
@@ -52,8 +52,8 @@ public interface MessageKeys {
 	//XSDValidator
 	public static final String RESOLVE_RESOURCE="resolveResource";
 	public static final String FAILED_TO_VALIDATE="failedToValidate";
-	
-	
+
+
 	//FeatureResourceLoader
 	public static final String MISSING_FILE="missingFile";
 	public static final String UNABLE_RETRIEVE_LIB="unableRetrieveLib";
@@ -70,7 +70,7 @@ public interface MessageKeys {
 	public static final String LOAD_KEY_FILE_FROM="loadKeyFileFrom";
 	public static final String COULD_NOT_LOAD_KEY_FILE="couldNotLoadKeyFile";
 	public static final String COULD_NOT_LOAD_SIGN_KEY="couldNotLoadSignedKey";
-	public static final String FAILED_TO_INIT="failedToInit";	
+	public static final String FAILED_TO_INIT="failedToInit";
 	//OauthRequest
 	public static final String OAUTH_FETCH_FATAL_ERROR="oauthFetchFatalError";
 	public static final String BOGUS_EXPIRED="bogusExpired";
@@ -78,7 +78,7 @@ public interface MessageKeys {
 	public static final String OAUTH_FETCH_UNEXPECTED_ERROR="oauthFetchUnexpectedError";
 	public static final String UNAUTHENTICATED_OAUTH="unauthenticatedOauth";
 	public static final String INVALID_OAUTH="invalidOauth";
-	//CajaCssSanitizer	
+	//CajaCssSanitizer
 	public static final String FAILED_TO_PARSE="failedToParse";
 	public static final String UNABLE_TO_CONVERT_SCRIPT="unableToConvertScript";
 	//PipelineExecutor
@@ -126,7 +126,7 @@ public interface MessageKeys {
 	public static final String RETRIEVE_REFERENCE="retrieveReference";
 	public static final String UNABLE_TO_CAJOLE="unableToCajole";
 	//ConcatProxyServlet
-	public static final String CONCAT_PROXY_REQUEST_FAILED="concatProxyRequestFailed"; 
+	public static final String CONCAT_PROXY_REQUEST_FAILED="concatProxyRequestFailed";
 	//GadgetRenderingServlet
 	public static final String MALFORMED_TTL_VALUE="malformedTtlValue";
 	//ProxyServlet
@@ -138,7 +138,7 @@ public interface MessageKeys {
 	//UriUtils
 	public static final String SKIP_ILLEGAL_HEADER="skipIllegalHeader";
 	//AbstractSpecFactory
-	public static final String UPDATE_SPEC_FAILURE_USE_CACHE_VERSION="updateSpecFailureUseCacheVersion"; 
+	public static final String UPDATE_SPEC_FAILURE_USE_CACHE_VERSION="updateSpecFailureUseCacheVersion";
 	public static final String UPDATE_SPEC_FAILURE_APPLY_NEG_CACHE="updateSpecFailureApplyNegCache";
 	//HashLockedDomainService
 	public static final String NO_LOCKED_DOMAIN_CONFIG="noLockedDomainConfig";

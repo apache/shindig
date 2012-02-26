@@ -165,7 +165,7 @@ public class CollectionOptions {
     if (o == this) {
       return true;
     }
-    
+
     if (!(o instanceof CollectionOptions)) {
       return false;
     }

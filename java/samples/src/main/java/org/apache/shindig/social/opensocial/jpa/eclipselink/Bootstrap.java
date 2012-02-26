@@ -49,7 +49,7 @@ import javax.persistence.Persistence;
 import javax.persistence.spi.PersistenceUnitTransactionType;
 
 /**
- * 
+ *
  */
 public class Bootstrap {
 
@@ -130,7 +130,7 @@ public class Bootstrap {
 
   /**
    * @param unitName
-   * 
+   *
    * @return
    */
   public EntityManager getEntityManager(String unitName) {

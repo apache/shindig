@@ -40,10 +40,10 @@ import javax.servlet.http.HttpServletResponseWrapper;
  * A class for generating and managing ETags for improved caching.
  *
  * Objects of this class have two modes: batching mode and streaming mode.
- * 
+ *
  * In batching mode, the response body is stored in a buffer and, at the end,
  * its ETag is calculated and everything is written to the output at once.
- * 
+ *
  * In streaming mode, however, the response body is output as it's received
  * from the servlet, and no ETag is calculated.
  */
@@ -90,7 +90,7 @@ public class ETaggingHttpResponse extends HttpServletResponseWrapper {
 
   /**
    * {@inheritDoc}
-   * 
+   *
    * The response object is also switched to streaming mode.
    */
   @Override
@@ -142,7 +142,7 @@ public class ETaggingHttpResponse extends HttpServletResponseWrapper {
 
   /**
    * Outputs the response body.
-   * 
+   *
    * In batching mode, it outputs the full contents of the buffer with its
    * corresponding ETag, or a NOT_MODIFIED response if the ETag matches the
    * request's "If-None-Match" header.

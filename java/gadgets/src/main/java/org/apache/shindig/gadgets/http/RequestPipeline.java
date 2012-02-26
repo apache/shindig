@@ -28,7 +28,7 @@ import com.google.inject.ImplementedBy;
  *
  * NOTE: When using cache, please ensure that you are checking response.isStrictNoCache() before
  * serving out. Because cache may have private contents, even though marked stale.
- * @see {AbstractHttpCache} for details. 
+ * @see {AbstractHttpCache} for details.
  */
 @ImplementedBy(DefaultRequestPipeline.class)
 public interface RequestPipeline {

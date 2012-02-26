@@ -29,7 +29,7 @@ import java.util.List;
 
 /**
  * Data about a JavaScript request.
- * 
+ *
  * This class is instantiated via {@link JsRequestBuilder}.
  */
 public class JsRequest {
@@ -48,7 +48,7 @@ public class JsRequest {
     this.inCache = inCache;
     this.registry = registry;
   }
- 
+
   /**
    * @return this request's {@link JsUri}.
    */
@@ -69,7 +69,7 @@ public class JsRequest {
   public boolean isInCache() {
     return inCache;
   }
-  
+
   /**
    * @return All features encapsulated by this request, including deps, in dep order.
    */
@@ -77,15 +77,15 @@ public class JsRequest {
     initFeaturesLists();
     return allFeatures;
   }
-  
+
   /**
    * @return Features to be newly returned by this request (all - loaded), in dep order.
    */
   public List<String> getNewFeatures() {
     initFeaturesLists();
-    return newFeatures;    
+    return newFeatures;
   }
-  
+
   /**
    * @return Full list of all features previously loaded before this request, in dep order.
    */
@@ -93,7 +93,7 @@ public class JsRequest {
     initFeaturesLists();
     return loadedFeatures;
   }
-  
+
   private void initFeaturesLists() {
     if (allFeatures == null) {
       // Lazy-initialize these, to avoid computation where not needed.

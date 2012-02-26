@@ -41,11 +41,11 @@ public class HttpUtilTest {
 
   public static final FakeTimeSource timeSource = new FakeTimeSource();
   public static final long testStartTime = timeSource.currentTimeMillis();
-  
+
   static {
     HttpUtil.setTimeSource(timeSource);
   }
-  
+
   private HttpServletResponse mockResponse = EasyMock.createMock(HttpServletResponse.class);
   private HttpServletResponseRecorder recorder = new HttpServletResponseRecorder(mockResponse);
 
@@ -61,7 +61,7 @@ public class HttpUtilTest {
 
     checkCacheControlHeaders(testStartTime, recorder, HttpUtil.getDefaultTtl(), true);
   }
-  
+
   @Test
   public void testSetCachingHeadersAllowProxy() {
     HttpUtil.setCachingHeaders(recorder, false);
@@ -87,7 +87,7 @@ public class HttpUtilTest {
     HttpUtil.setCachingHeaders(recorder, 0);
     checkCacheControlHeaders(testStartTime, recorder, 0, true);
   }
-  
+
   @Test
   public void testSetNoCche() {
     HttpUtil.setNoCache(recorder);
@@ -142,5 +142,5 @@ public class HttpUtilTest {
       }
     }
   }
-  
+
 }

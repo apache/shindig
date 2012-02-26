@@ -75,7 +75,7 @@ public class RendererTest {
     containerConfig = new FakeContainerConfig();
     renderer = new Renderer(processor, htmlRenderer, containerConfig, lockedDomainService);
   }
-  
+
   private GadgetContext makeContext(final String view) {
     return makeContext(view, null, null);
   }
@@ -114,7 +114,7 @@ public class RendererTest {
     assertEquals(RenderingResults.Status.MUST_REDIRECT, results.getStatus());
     assertEquals(TYPE_URL_HREF, results.getRedirect());
   }
-  
+
   @Test
   public void renderTypeUrlRequiresCajaIncompatible() {
     processor.setGadgetData(GADGET_CAJA);
@@ -122,14 +122,14 @@ public class RendererTest {
     assertEquals(RenderingResults.Status.ERROR, results.getStatus());
     assertEquals(HttpServletResponse.SC_BAD_REQUEST, results.getHttpStatusCode());
   }
-  
+
   @Test
   public void renderTypeUrlCajaParamIncompatible() {
     RenderingResults results = renderer.render(makeContext("url", null, "1"));
     assertEquals(RenderingResults.Status.ERROR, results.getStatus());
     assertEquals(HttpServletResponse.SC_BAD_REQUEST, results.getHttpStatusCode());
   }
-  
+
   @Test
   public void renderTypeUrlSanitizedIncompatible() {
     RenderingResults results = renderer.render(makeContext("url", "1", null));
@@ -143,7 +143,7 @@ public class RendererTest {
     RenderingResults results = renderer.render(makeContext("html"));
     assertEquals(RenderingResults.Status.ERROR, results.getStatus());
     assertEquals("foo", results.getErrorMessage());
-    assertEquals(HttpServletResponse.SC_FORBIDDEN, results.getHttpStatusCode());    
+    assertEquals(HttpServletResponse.SC_FORBIDDEN, results.getHttpStatusCode());
   }
 
   @Test
@@ -152,7 +152,7 @@ public class RendererTest {
     RenderingResults results = renderer.render(makeContext("html"));
     assertEquals(RenderingResults.Status.ERROR, results.getStatus());
     assertEquals("four-oh-four", results.getErrorMessage());
-    assertEquals(HttpServletResponse.SC_NOT_FOUND, results.getHttpStatusCode());    
+    assertEquals(HttpServletResponse.SC_NOT_FOUND, results.getHttpStatusCode());
   }
 
   @Test
@@ -245,7 +245,7 @@ public class RendererTest {
       super(null, null, null, null, null);
       this.gadgetData = GADGET;
     }
-    
+
     public void setGadgetData(String gadgetData) {
       this.gadgetData = gadgetData;
     }

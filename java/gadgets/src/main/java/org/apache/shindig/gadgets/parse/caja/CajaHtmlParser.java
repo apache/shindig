@@ -54,7 +54,7 @@ public class CajaHtmlParser extends GadgetHtmlParser {
   public CajaHtmlParser(DOMImplementation documentFactory) {
     super(documentFactory);
   }
-  
+
   public CajaHtmlParser(DOMImplementation documentFactory,
       HtmlSerializer serializer) {
     super(documentFactory, serializer);
@@ -63,7 +63,7 @@ public class CajaHtmlParser extends GadgetHtmlParser {
   @Override
   protected Document parseDomImpl(String source) throws GadgetException {
     DocumentFragment fragment = parseFragmentImpl(source);
-    
+
     // TODO: remove parseDomImpl() altogether; only have subclasses
     // support parseFragmentImpl() with base class cleaning up.
     Document document = fragment.getOwnerDocument();
@@ -87,16 +87,16 @@ public class CajaHtmlParser extends GadgetHtmlParser {
         beforeHtml.add(child);
       }
     }
-    
+
     if (html == null) {
       html = document.createElement("html");
     }
-    
+
     prependToNode(html, beforeHtml);
-    
+
     // Ensure document.getDocumentElement() is html node.
     document.appendChild(html);
-    
+
     return document;
   }
 
@@ -132,15 +132,15 @@ public class CajaHtmlParser extends GadgetHtmlParser {
     // with request-scoped retrieval of this same data.
     return InputSource.UNKNOWN;
   }
-  
+
   protected MessageQueue makeMessageQueue() {
     return new SimpleMessageQueue();
   }
-  
+
   protected boolean needsDebugData() {
     return false;
   }
-  
+
   private DomParser getDomParser(String source, final MessageQueue mq) throws ParseException {
     InputSource is = getInputSource();
     HtmlLexer lexer = new HtmlLexer(CharProducer.Factory.fromString(source, is));
@@ -150,7 +150,7 @@ public class CajaHtmlParser extends GadgetHtmlParser {
 
     // OpenSocial Tempates need to be parsed as XML since tags can be self-closing.
     final boolean asXml =
-        (source.startsWith(OSML_DATA_START) || source.startsWith(OSML_TEMPLATE_START)); 
+        (source.startsWith(OSML_DATA_START) || source.startsWith(OSML_TEMPLATE_START));
     DomParser parser = new DomParser(tokenQueue, asXml, mq);
     parser.setDomImpl(documentFactory);
     parser.setNeedsDebugData(needsDebugData);

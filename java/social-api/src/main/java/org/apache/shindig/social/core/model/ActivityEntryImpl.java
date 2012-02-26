@@ -28,7 +28,7 @@ import org.apache.shindig.social.opensocial.model.MediaLink;
  * A simple bean implementation of an ActivityStream Entry.
  */
 public class ActivityEntryImpl extends ExtendableBeanImpl implements ActivityEntry {
-  
+
   private static final long serialVersionUID = 1L;
   private ActivityObject actor;
   private String content;
@@ -50,7 +50,7 @@ public class ActivityEntryImpl extends ExtendableBeanImpl implements ActivityEnt
    * Create a new empty ActivityEntry
    */
   public ActivityEntryImpl() { }
-  
+
   public ActivityObject getActor() {
     return actor;
   }
@@ -170,7 +170,7 @@ public class ActivityEntryImpl extends ExtendableBeanImpl implements ActivityEnt
     this.updated = updated;
     put("updated", updated);
   }
-  
+
   /** {@inheritDoc} */
   public String getUrl() {
     return url;
@@ -203,7 +203,7 @@ public class ActivityEntryImpl extends ExtendableBeanImpl implements ActivityEnt
     this.openSocial = openSocial;
     put("openSocial", openSocial);
   }
-  
+
   /** {@inheritDoc} */
   public ExtendableBean getExtensions() {
     return extensions;
@@ -217,9 +217,9 @@ public class ActivityEntryImpl extends ExtendableBeanImpl implements ActivityEnt
 
   /**
    * Sorts ActivityEntries in ascending order based on publish date.
-   * 
+   *
    * @param that is the ActivityEntry to compare to this ActivityEntry
-   * 
+   *
    * @return int represents how the ActivityEntries compare
    */
   public int compareTo(ActivityEntry that) {

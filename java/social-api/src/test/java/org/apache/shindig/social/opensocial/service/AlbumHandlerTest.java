@@ -43,7 +43,7 @@ public class AlbumHandlerTest extends EasyMockTestCase {
   private FakeGadgetToken token;
   protected HandlerRegistry registry;
   private BeanJsonConverter converter;
-  
+
   @Before
   public void setUp() throws Exception {
     token = new FakeGadgetToken();

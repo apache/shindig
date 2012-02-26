@@ -23,7 +23,7 @@ import com.google.common.collect.Maps;
 
 /**
  * Wraps OAuth 2.0 response elements including headers and body parameters.
- * 
+ *
  * TODO (Eric): document this class, including bodyReturned
  */
 public class OAuth2NormalizedResponse {
@@ -32,7 +32,7 @@ public class OAuth2NormalizedResponse {
   private Map<String, String> respParams;
   private int status;
   private boolean bodyReturned;
-  
+
   private static final String ERROR = "error";
   private static final String ERROR_DESCRIPTION = "error_description";
   private static final String ERROR_URI = "error_uri";

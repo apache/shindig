@@ -133,7 +133,7 @@ public abstract class AbstractSpecFactory<T> {
     if (response.getHttpStatusCode() != HttpResponse.SC_OK) {
       int retcode = response.getHttpStatusCode();
       if (retcode == HttpResponse.SC_INTERNAL_SERVER_ERROR) {
-        // Convert external "internal error" to gateway error: 
+        // Convert external "internal error" to gateway error:
         retcode = HttpResponse.SC_BAD_GATEWAY;
       }
       throw new GadgetException(GadgetException.Code.FAILED_TO_RETRIEVE_CONTENT,
@@ -232,7 +232,7 @@ public abstract class AbstractSpecFactory<T> {
       }
     }
   }
-  
+
   protected static class SpecRetrievalFailedException extends GadgetException {
     SpecRetrievalFailedException(Uri specUri, int code) {
       super(GadgetException.Code.FAILED_TO_RETRIEVE_CONTENT,

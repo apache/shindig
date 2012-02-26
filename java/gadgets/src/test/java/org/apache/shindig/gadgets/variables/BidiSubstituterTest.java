@@ -54,18 +54,18 @@ public class BidiSubstituterTest extends Assert {
 
   private void assertSubstitutions(String direction,
       String startEdge, String endEdge, String dir, String reverseDir) throws Exception {
-    String xml = 
+    String xml =
         "<Module><ModulePrefs title=''>" +
         "  <Locale language_direction='" + direction + "' />" +
         "</ModulePrefs>" +
         "<Content />" +
         "</Module>";
-    
+
     GadgetSpec spec = new GadgetSpec(Uri.parse("#"), xml);
     GadgetContext context = new GadgetContext();
 
-    BidiSubstituter substituter = new BidiSubstituter(new FakeMessageBundleFactory());  
-      
+    BidiSubstituter substituter = new BidiSubstituter(new FakeMessageBundleFactory());
+
     Substitutions substitutions = new Substitutions();
     substituter.addSubstitutions(substitutions, context, spec);
 

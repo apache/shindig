@@ -64,13 +64,13 @@ public class RestfulCollection<T> {
   }
 
   /**
-   * Helper constructor for un-paged collection, 
+   * Helper constructor for un-paged collection,
    * Use {@link #RestfulCollection(java.util.List, int, int, int)} in paginated context
    */
   public RestfulCollection(List<T> entry, int startIndex, int totalResults) {
     this(entry, startIndex, totalResults, entry.size());
   }
-  
+
   public List<T> getEntry() {
     return entry;
   }

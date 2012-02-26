@@ -105,7 +105,7 @@ public final class HttpUtil {
       response.setHeader(header.one, header.two);
     }
   }
-  
+
   public static List<Pair<String, String>> getCachingHeadersToSet(int ttl, boolean noProxy) {
     List<Pair<String, String>> cachingHeaders = Lists.newArrayListWithExpectedSize(3);
     cachingHeaders.add(Pair.of("Expires",
@@ -121,7 +121,7 @@ public final class HttpUtil {
         cachingHeaders.add(Pair.of("Cache-Control", "public,max-age=" + Integer.toString(ttl)));
       }
     }
-    
+
     return cachingHeaders;
   }
 

@@ -81,8 +81,8 @@ public class FeatureTest extends Assert {
     assertTrue(params.get("foobar").isEmpty());
     assertNull(feature.getParam("foobar"));
   }
-  
-  
+
+
   @Test
   public void testViews() throws Exception {
     String xml = "<Require feature=\"foo\" views=\"view1\">" +
@@ -91,7 +91,7 @@ public class FeatureTest extends Assert {
     Set<String> views = feature.getViews();
     assertTrue(views.size() == 1);
     assertTrue(views.contains("view1"));
-    
+
     xml = "<Require feature=\"foo\" views=\"view1, view2\">" +
     "</Require>";
 		feature = new Feature(XmlUtil.parse(xml));
@@ -99,7 +99,7 @@ public class FeatureTest extends Assert {
 		assertTrue(views.size() == 2);
 		assertTrue(views.contains("view1"));
 		assertTrue(views.contains("view2"));
-		
+
     xml = "<Require feature=\"foo\">" +
     "</Require>";
 		feature = new Feature(XmlUtil.parse(xml));

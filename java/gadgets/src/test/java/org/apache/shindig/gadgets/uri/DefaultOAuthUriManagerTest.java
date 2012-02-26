@@ -33,7 +33,7 @@ import org.junit.Test;
 public class DefaultOAuthUriManagerTest {
   private static final String CONTAINER = "container";
   private static final String HOST = "www.host.com";
-  
+
   @Test
   public void noConfigValueConfigured() throws Exception {
     ContainerConfig config = mockConfig(null);
@@ -50,7 +50,7 @@ public class DefaultOAuthUriManagerTest {
     assertEquals(value, manager.makeOAuthCallbackUri(CONTAINER, HOST).toString());
     verify(config);
   }
-  
+
   @Test
   public void oauthUriWithHostSubstitution() throws Exception {
     String value = "http://%host%/oauth/callback";
@@ -60,7 +60,7 @@ public class DefaultOAuthUriManagerTest {
         manager.makeOAuthCallbackUri(CONTAINER, HOST).toString());
     verify(config);
   }
-  
+
   private ContainerConfig mockConfig(String tplVal) {
     ContainerConfig config = createMock(ContainerConfig.class);
     expect(config.getString(CONTAINER, DefaultOAuthUriManager.OAUTH_GADGET_CALLBACK_URI_PARAM))
@@ -68,7 +68,7 @@ public class DefaultOAuthUriManagerTest {
     replay(config);
     return config;
   }
-  
+
   private DefaultOAuthUriManager makeManager(ContainerConfig config) {
     return new DefaultOAuthUriManager(config);
   }

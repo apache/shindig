@@ -81,13 +81,13 @@ public class DefaultJsProcessorRegistryTest {
     registry.process(request, response);
     control.verify();
   }
-  
+
   @Test
   public void testProcessorStopsProcessingWhenItReturnsFalse() throws Exception {
     EasyMock.expect(processor1.process(request, response)).andReturn(false);
     EasyMock.expect(processor3.process(request, response)).andReturn(true);
     control.replay();
     registry.process(request, response);
-    control.verify();    
+    control.verify();
   }
 }

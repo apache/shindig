@@ -40,7 +40,7 @@ public class JsResponseBuilder {
   private boolean proxyCacheable;
   private final StringBuilder rawExterns;
   private final List<String> externs;
-  
+
   public JsResponseBuilder() {
     jsCode = Lists.newLinkedList();
     statusCode = HttpServletResponse.SC_OK;
@@ -261,7 +261,7 @@ public class JsResponseBuilder {
     }
     return result;
   }
-  
+
   private boolean canAddContent(JsContent jsContent) {
     return jsContent.get().length() > 0;
   }

@@ -43,7 +43,7 @@ public class HttpResponseMetadataHelper {
   //class name for logging purpose
   private static final String classname = HttpResponseMetadataHelper.class.getName();
   private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
- 
+
   /**
    * Return a copy of input response with additional metadata values.
    * @param response source response
@@ -56,7 +56,7 @@ public class HttpResponseMetadataHelper {
     for (Map.Entry<String, String> val : values.entrySet()) {
       metadata.put(val.getKey(), val.getValue());
     }
-    return new HttpResponseBuilder(response).setMetadata(metadata).create();    
+    return new HttpResponseBuilder(response).setMetadata(metadata).create();
   }
 
   /**
@@ -73,11 +73,11 @@ public class HttpResponseMetadataHelper {
       // Should not happen
       if (LOG.isLoggable(Level.INFO)) {
         LOG.logp(Level.INFO, classname, "getHash", MessageKeys.ERROR_GETTING_MD5);
-      } 
+      }
     }
     return null;
   }
-  
+
   public static HttpResponse updateHash(HttpResponse response, HttpResponseMetadataHelper helper) {
     if (helper != null) {
       String hash = helper.getHash(response);

@@ -26,7 +26,7 @@ import org.w3c.dom.NodeList;
 
 /**
  * Information about an OAuth service that a gadget wants to use.
- * 
+ *
  * Instances are immutable.
  */
 public class OAuthService extends BaseOAuthService {

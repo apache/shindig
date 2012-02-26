@@ -46,7 +46,7 @@ import org.apache.shindig.social.core.oauth2.OAuth2Types.ResponseType;
 
 /**
  * Normalizes an OAuth 2.0 request by extracting OAuth 2.0 related fields.
- * 
+ *
  * TODO (Eric): implement scope handling.
  */
 public class OAuth2NormalizedRequest extends HashMap<String, Object> {
@@ -55,7 +55,7 @@ public class OAuth2NormalizedRequest extends HashMap<String, Object> {
   private HttpServletRequest httpReq = null;
   private static final Pattern FORM_URL_REGEX = Pattern
       .compile("application/(x-www-)?form-url(-)?encoded");
-  
+
   //class name for logging purpose
   private static final String classname = OAuth2NormalizedRequest.class.getName();
   private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);

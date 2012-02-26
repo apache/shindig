@@ -37,7 +37,7 @@ public class StyleTagExtractorContentRewriter extends DomWalker.Rewriter {
   private final ContentRewriterFeature.Factory featureConfigFactory;
   private final ProxyUriManager proxyUriManager;
   private final CssResponseRewriter cssRewriter;
-  
+
   @Inject
   public StyleTagExtractorContentRewriter(ContentRewriterFeature.Factory featureConfigFactory,
       ProxyUriManager proxyUriManager, CssResponseRewriter cssRewriter) {
@@ -45,7 +45,7 @@ public class StyleTagExtractorContentRewriter extends DomWalker.Rewriter {
     this.proxyUriManager = proxyUriManager;
     this.cssRewriter = cssRewriter;
   }
-  
+
   @Override
   protected List<Visitor> makeVisitors(Gadget context, Uri gadgetUri) {
     ContentRewriterFeature.Config config = featureConfigFactory.get(context.getSpec());

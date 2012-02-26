@@ -37,7 +37,7 @@ public class ProcessingException extends Exception {
     super(message, t);
     statusCode = httpStatusCode;
   }
-  
+
   public int getHttpStatusCode() {
     return statusCode;
   }
