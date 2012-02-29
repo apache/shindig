@@ -24,22 +24,30 @@
 CommonContainer['views'] = CommonContainer['views'] || {};
 
 /**
- * Method will be called to create the DOM element to place the Gadget Site in.
+ * Method will be called to create the DOM element to place the Gadget
+ * Site in.
  *
- * @param {object} gadgetMetadata
- *          gadget meta data for the gadget being opened in
+ * @param {Object}
+ *          metadata: Gadget meta data for the gadget being opened in
  *          this GadgetSite.
- * @param {string=} opt_view
- *          Optional parameter, the view that indicates the type of
- *          GadgetSite.
- * @param {string=} opt_viewTarget
- *          Optional parameter, the view target indicates where
- *          to open the gadget.
- * @return {object} The DOM element to place the GadgetSite in.
+ * @param {Element}
+ *          rel: The element to which opt_coordinates values are
+ *          relative.
+ * @param {string=}
+ *          opt_view: Optional parameter, the view that indicates the
+ *          type of GadgetSite.
+ * @param {string=}
+ *          opt_viewTarget: Optional parameter, the view target indicates
+ *          where to open the gadget.
+ * @param {Object=}
+ *          opt_coordinates: Object containing the desired absolute
+ *          positioning css parameters (top|bottom|left|right) with
+ *          appropriate values. All values are relative to the calling
+ *          gadget.
+ * @return {Object} The DOM element to place the GadgetSite in.
  */
-
-CommonContainer.views.createElementForGadget = function(gadgetMetadata,
-        opt_view, opt_viewTarget) {
+CommonContainer.views.createElementForGadget = function(metadata, rel, opt_view, opt_viewTarget,
+        opt_coordinates) {
 
   var surfaceView = 'default';
   var viewTarget = 'default';
@@ -53,30 +61,39 @@ CommonContainer.views.createElementForGadget = function(gadgetMetadata,
 
   switch (viewTarget) {
     case 'tab':
-      return openInNewTab(gadgetMetadata);
+      return openInNewTab(metadata);
       break;
     case 'dialog':
-      return openInDialog(false, surfaceView, true, gadgetMetadata);
+      return openInDialog(false, surfaceView, true, metadata);
       break;
     case 'modalDialog':
-      return openInDialog(true, surfaceView, true, gadgetMetadata);
+      return openInDialog(true, surfaceView, true, metadata);
       break;
     default:
-      return openInDialog(false, surfaceView, true, gadgetMetadata);
+      return openInDialog(false, surfaceView, true, metadata);
   }
 };
 
 
 
 /**
- * Method will be called to create the DOM element to place the UrlSite in.
+ * Method will be called to create the DOM element to place the UrlSite
+ * in.
  *
- * @param {string=} opt_viewTarget
- *          Optional parameter, the view target to open. If not
+ * @param {Element}
+ *          rel: The element to which opt_coordinates values are
+ *          relative.
+ * @param {string=}
+ *          opt_view: Optional parameter, the view to open. If not
  *          included the container should use its default view.
+ * @param {Object=}
+ *          opt_coordinates: Object containing the desired absolute
+ *          positioning css parameters (top|bottom|left|right) with
+ *          appropriate values. All values are relative to the calling
+ *          gadget.
  * @return {Object} The DOM element to place the UrlSite object in.
  */
-CommonContainer.views.createElementForUrl = function(opt_viewTarget) {
+CommonContainer.views.createElementForUrl = function(rel, opt_viewTarget, opt_coordinates) {
   var viewTarget = 'dialog';
 
   if (typeof opt_viewTarget != 'undefined') {
@@ -147,17 +164,21 @@ function openInDialog(modaldialog, view, isGadget, opt_gadgetMetadata) {
 
   document.getElementById('content').appendChild(dialog);
   if (isGadget) {
+    var id = 'dialog_' + dialog_counter;
     // use jquery to create the dialog
-    $('#dialog_' + dialog_counter).dialog({
+    $('#' + id).dialog({
       resizable: false,
       width: dialog_width, // height will be auto
       modal: modaldialog, // set modal: true or false
-      close: function(ev, ui) {
-        var iframeid = document.getElementById('dialog_' + dialog_counter).
-            getElementsByTagName('iframe')[0].id;
-        var site = CommonContainer.getGadgetSiteByIframeId_(iframeid);
-        CommonContainer.closeGadget(site);
-        $(this).remove();
+      beforeClose: function(ev, ui) {
+        var dialogDiv = $('#' + id + ' iframe');
+        if(dialogDiv.length) {
+          //Means the user most likely clicked the 'x' in the dialog chrome
+          //If they clicked the OK or Cancel buttons in the dialog than the gadget
+          //iFrame would have already been removed from the DOM
+          var site = CommonContainer.getGadgetSiteByIframeId_(dialogDiv[0].id);
+          CommonContainer.closeGadget(site);
+        }
       }
     });
     return dialog;

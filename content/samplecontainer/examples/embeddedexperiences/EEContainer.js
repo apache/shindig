@@ -26,32 +26,44 @@ $(document).ready(function() {
 
 
 //Initiate the common container code and register any RPC listeners for embedded experiences
-var CommonContainer = new osapi.container.Container({});
+var config = {};
+config[osapi.container.ContainerConfig.RENDER_DEBUG] = '1';
+var CommonContainer = new osapi.container.Container(config);
 CommonContainer.init = new function() {
 
-  CommonContainer.views.createElementForEmbeddedExperience = function(opt_viewTarget, opt_coordinates, opt_rel) {
-    if(opt_viewTarget == 'FLOAT' && opt_coordinates && opt_rel) {
-      var offset = $(opt_rel).offset();
-
+  CommonContainer.views.createElementForEmbeddedExperience = function(rel, opt_gadgetInfo,
+          opt_viewTarget, opt_coordinates){
+    if(opt_gadgetInfo && !opt_gadgetInfo.error) {
+      var title = opt_gadgetInfo.modulePrefs.title;
+      if(title) {
+        $('#title').html(opt_gadgetInfo.modulePrefs.title);
+      }
+    }
+    var top = $(rel).offset().top,
+      left =  $(rel).offset().left;
+    if(opt_viewTarget == 'FLOAT' && opt_coordinates) {
       $('#preview').css({
-        top: (offset.top + opt_coordinates.top) +'px',
-        left: (offset.left + opt_coordinates.left) + 'px',
+        top: (top + opt_coordinates.top) + 'px',
+        left: (left + opt_coordinates.left) + 'px',
+        'margin-top': '0px',
         position: 'absolute'
       });
     }
     else {
       $('#preview').css({
+        'margin-top': top +'px',
         top: 'auto',
         left: 'auto',
         position: 'static'
       });
     }
 
-    return $('#preview').get(0);
+    return $('#previewSite').get(0);
   };
 
   CommonContainer.views.destroyElement = function(site) {
     CommonContainer.ee.close(site);
+    $('#title').html('');
   };
 }
 
@@ -81,14 +93,15 @@ function closeCurrentGadget() {
   if (currentEESite)
     CommonContainer.ee.close(currentEESite);
 
-  var preview = $('#preview').get(0);
-  var previewChildren = preview.childNodes;
+  var previewSite = $('#previewSite').get(0);
+  var previewChildren = previewSite.childNodes;
   if (previewChildren.length > 0) {
     var iframe = previewChildren[0];
     var iframeId = iframe.getAttribute('id');
     var site = CommonContainer.getGadgetSiteByIframeId_(iframeId);
     CommonContainer.ee.close(site);
   }
+  $('#title').html('');
 }
 
 /**

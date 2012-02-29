@@ -99,8 +99,13 @@
             var coordinates = $('#photo' + index).offset();
             coordinates.left = coordinates.left + $('#photo' + index).width();
 
-            var navigateCallback = function(site, metadata){currentSite = site; console.log("Nagivate callback");};
-            var returnCallback = function(returnValue){console.log("Return Value: " + returnValue);};
+            var navigateCallback = function(site, metadata){
+              currentSite = site;
+              console.log("Nagivate callback");
+            };
+            var returnCallback = function(returnValue){
+              console.log("Return Value: " + returnValue);
+            };
             gadgets.views.openEmbeddedExperience(returnCallback, navigateCallback, eeDataModel, {
               'viewTarget' : index == 0 ? 'preview' : 'FLOAT',
               'coordinates' : coordinates

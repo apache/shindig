@@ -305,7 +305,7 @@ function MediaUI(social) {
     var viewTarget = 'dialog';
 
     function navigateCallback(site) {
-      console.log('navigateCallback ');
+      gadgets.log('navigateCallback ');
     }
     gadgets.views.openUrl(url, navigateCallback, viewTarget);
 
@@ -342,7 +342,7 @@ function MediaUI(social) {
     }
 
     function navigateCallback(site, metadata) {
-      console.log('navigateCallback');
+      gadgets.log('navigateCallback');
     }
 
     var viewParams = {'data': album};
@@ -362,8 +362,8 @@ function MediaUI(social) {
 
     function resultCallback(result) {
       if (result != null) {
-        console.log('container width = ' + result.width);
-        console.log('container height = ' + result.height);
+        gadgets.log('container width = ' + result.width);
+        gadgets.log('container height = ' + result.height);
       }
     }
     // Just an example to show how to use the getContainerDimensions API,
@@ -372,20 +372,19 @@ function MediaUI(social) {
     gadgets.window.getContainerDimensions(resultCallback);
 
     function callback(newMediaItem) {
-      var albumId = mediaItem == null ? album.id : mediaItem.albumId;
-
-      social.updateMediaItem(viewer.id, albumId, mediaItem.id, newMediaItem,
+      if(newMediaItem) {
+        var albumId = mediaItem == null ? album.id : mediaItem.albumId;
+        social.updateMediaItem(viewer.id, albumId, mediaItem.id, newMediaItem,
           function(response) {
-            // publish("org.apache.shindig.mediaItem.updated", newMediaItem);
-            social.getMediaItemsByAlbum(viewer.id, album.id,
-                function(response) {
-                  renderMediaItems(album, response.list);
-                });
-          });
+            social.getMediaItemsByAlbum(viewer.id, album.id, function(response) {
+              renderMediaItems(album, response.list);
+            });
+        });
+      }
     }
 
     function navigateCallback(site, metadata) {
-      console.log('navigateCallback');
+      gadgets.log('navigateCallback');
     }
 
     var viewParams = {'data': {'album': album, 'mediaItem': mediaItem}};
@@ -405,7 +404,7 @@ function MediaUI(social) {
     if (confirm("Delete '" + album.title + "'?")) {
       social.deleteAlbum(viewer.id, album.id, function(response) {
         publish('org.apache.shindig.album.deleted', album);
-        console.log('delete album response: ' + JSON.stringify(response));
+        gadgets.log('delete album response: ' + JSON.stringify(response));
         renderAlbumsByUser(viewer.id);
       });
     }
@@ -420,7 +419,7 @@ function MediaUI(social) {
       social.deleteMediaItem(viewer.id, albumId, mediaItem.id,
           function(response) {
             publish('org.apache.shindig.mediaItem.deleted', mediaItem);
-            console.log('delete mediaItem response: ' +
+            gadgets.log('delete mediaItem response: ' +
                     JSON.stringify(response));
             social.getMediaItemsByAlbum(viewer.id, albumId, function(response) {
               renderMediaItems(album, response.list);

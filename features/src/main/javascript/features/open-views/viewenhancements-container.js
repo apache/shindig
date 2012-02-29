@@ -56,7 +56,9 @@
           returnValue = returnValueMap[id],
           resultCallback = resultCallbackMap[id];
 
-      if (resultCallback) {
+      //Checking the truthiness of resultCallback is bad because 0 is a value value
+      //check whether it is undefined
+      if (typeof resultCallback !== 'undefined') {
         if (site.ownerId_) {
           gadgets.rpc.call(site.ownerId_, 'gadgets.views.deliverResult', null,
             resultCallback, returnValue
@@ -104,10 +106,10 @@
    */
   function openGadget(rpcArgs, resultCallback, opt_params) {
 
-    var navigateCallback = this.callback,
-        siteOwnerId = this.f,
+    var navigateCallback = rpcArgs.callback,
+        siteOwnerId = rpcArgs.f,
         gadgetUrl = '',
-        orig_site = context.getGadgetSiteByIframeId_(this.f);
+        orig_site = context.getGadgetSiteByIframeId_(rpcArgs.f);
 
     if ((typeof orig_site != 'undefined') &&
             (typeof orig_site.getActiveSiteHolder() != 'undefined')) {
@@ -118,8 +120,7 @@
     var view = '',
         viewTarget = '',
         viewParams = {},
-        coordinates,
-        rel;
+        coordinates;
     if (opt_params) {
       if (opt_params.view)
         view = opt_params.view;
@@ -129,10 +130,10 @@
         viewParams = opt_params.viewParams;
       if(opt_params.coordinates) {
         coordinates = opt_params.coordinates;
-        rel = context.getGadgetSiteByIframeId_(this.f).getActiveSiteHolder()
-          .getIframeElement();
       }
     }
+    var rel = context.getGadgetSiteByIframeId_(rpcArgs.f).getActiveSiteHolder()
+    .getIframeElement();
     context.preloadGadget(gadgetUrl, function(result) {
       /*
        * result[gadgetUrl] : metadata
@@ -153,7 +154,7 @@
       var renderParams = {},
            site = context.newGadgetSite(
 	     context.views.createElementForGadget(
-               metadata, view, viewTarget, coordinates, rel
+               metadata, rel, view, viewTarget, coordinates
              )
            );
 
@@ -209,14 +210,13 @@
    *              discretion.
    */
   function openEE(rpcArgs, resultCallback, dataModel, opt_params) {
-    var navigateCallback = this.callback,
-        siteOwnerId = this.f,
+    var navigateCallback = rpcArgs.callback,
+        siteOwnerId = rpcArgs.f,
         gadgetUrl = dataModel.gadget;
-    var navigateEE = function() {
+    var navigateEE = function(opt_metadata) {
       var viewTarget = '',
           viewParams = {},
-          coordinates,
-          rel;
+          coordinates;
       if (opt_params) {
         if (opt_params.viewTarget)
 	        viewTarget = opt_params.viewTarget;
@@ -224,13 +224,13 @@
           viewParams = opt_params.viewParams;
         if (opt_params.coordinates) {
           coordinates = opt_params.coordinates;
-          rel = context.getGadgetSiteByIframeId_(siteOwnerId).getActiveSiteHolder()
-            .getIframeElement();
         }
       }
+      var rel = context.getGadgetSiteByIframeId_(siteOwnerId).getActiveSiteHolder()
+      .getIframeElement();
 
       var element = context.views.createElementForEmbeddedExperience(
-        viewTarget, coordinates, rel
+        rel, opt_metadata, viewTarget, coordinates
       );
 
       var gadgetRenderParams = {};
@@ -276,7 +276,7 @@
             return;
           }
         }
-        navigateEE();
+        navigateEE(result[gadgetUrl]);
       });
     } else {
       navigateEE();
@@ -309,13 +309,10 @@
    * @returns {string} The ID of the site created, if a callback was registered.
    */
   function openUrl(rpcArgs, url, opt_viewTarget, opt_coordinates) {
-    var rel;
-    if (opt_coordinates) {
-      rel = context.getGadgetSiteByIframeId_(this.f).getActiveSiteHolder()
+    var rel = context.getGadgetSiteByIframeId_(rpcArgs.f).getActiveSiteHolder()
         .getIframeElement();
-    }
     var content_div = context.views.createElementForUrl(
-      opt_viewTarget, opt_coordinates, rel
+      rel, opt_viewTarget, opt_coordinates
     );
 
     var site = context.newUrlSite(content_div);
@@ -328,7 +325,7 @@
 
     // record who opened this site, so that if they use the siteId to close it later,
     // we don't inadvertently allow other gadgets to guess the id and close the site.
-    site.ownerId_ = this.f;
+    site.ownerId_ = rpcArgs.f;
     return site.getId();
   }
 
@@ -342,7 +339,7 @@
    */
   function close(rpcArgs, opt_site) {
     // opt_site may be 0, do not do a truthy test on the value.
-    var orig_site = context.getGadgetSiteByIframeId_(this.f),
+    var orig_site = context.getGadgetSiteByIframeId_(rpcArgs.f),
         site = typeof(opt_site) != 'undefined' && opt_site != null ?
           context.getSiteById(opt_site) : orig_site;
 
@@ -350,7 +347,7 @@
       return;
     }
 
-    if (site == orig_site || site.ownerId_ == this.f) {
+    if (site == orig_site || site.ownerId_ == rpcArgs.f) {
       // The provided method must ultimately call container.closeGadget(site);
       context.views.destroyElement(site);
     }
@@ -366,7 +363,7 @@
    */
   function setReturnValue(rpcArgs, returnValue) {
     var site;
-    if (site = context.getGadgetSiteByIframeId_(this.f)) {
+    if (site = context.getGadgetSiteByIframeId_(rpcArgs.f)) {
       returnValueMap[site.getId()] = returnValue;
     }
   }
@@ -394,6 +391,9 @@
        * @param {Object}
        *          metadata: Gadget meta data for the gadget being opened in
        *          this GadgetSite.
+       * @param {Element}
+       *          rel: The element to which opt_coordinates values are
+       *          relative.
        * @param {string=}
        *          opt_view: Optional parameter, the view that indicates the
        *          type of GadgetSite.
@@ -405,13 +405,10 @@
        *          positioning css parameters (top|bottom|left|right) with
        *          appropriate values. All values are relative to the calling
        *          gadget.
-       * @param {Element=}
-       *          opt_rel: The element to which opt_coordinates values are
-       *          relative.
        * @return {Object} The DOM element to place the GadgetSite in.
        */
-      'createElementForGadget' : function(metadata, opt_view, opt_viewTarget,
-          opt_coordinates, opt_rel) {
+      'createElementForGadget' : function(metadata, rel, opt_view, opt_viewTarget,
+          opt_coordinates) {
         console.log('container need to define createElementForGadget function');
       },
 
@@ -419,23 +416,25 @@
        * Method will be called to create the DOM element to place the embedded
        * experience in.
        *
+       *@param {Element}
+       *          rel: The element to which opt_coordinates values are
+       *          relative.
+       * @param {Object}
+       *          opt_gadgetInfo: Info for the gadget embedded experience,
+       *          if the data model contains a gadget URL.
        * @param {string=}
        *          opt_viewTarget:  Optional parameter, the view target indicates
        *          where to open.
-       *
        * @param {Object=}
        *          opt_coordinates: Object containing the desired absolute
        *          positioning css parameters (top|bottom|left|right) with
        *          appropriate values. All values are relative to the calling
        *          gadget.
-       * @param {Element=}
-       *          opt_rel: The element to which opt_coordinates values are
-       *          relative.
        * @return {Object} The DOM element to place the embedded experience in.
        */
 
-      'createElementForEmbeddedExperience' : function(opt_viewTarget,
-          opt_coordinates, opt_rel) {
+      'createElementForEmbeddedExperience' : function(rel, opt_gadgetInfo, opt_viewTarget,
+          opt_coordinates) {
         console.log('container need to define ' +
             'createElementForEmbeddedExperience function');
       },
@@ -444,6 +443,9 @@
        * Method will be called to create the DOM element to place the UrlSite
        * in.
        *
+       * @param {Element}
+       *          rel: The element to which opt_coordinates values are
+       *          relative.
        * @param {string=}
        *          opt_view: Optional parameter, the view to open. If not
        *          included the container should use its default view.
@@ -452,14 +454,10 @@
        *          positioning css parameters (top|bottom|left|right) with
        *          appropriate values. All values are relative to the calling
        *          gadget.
-       * @param {Element=}
-       *          opt_rel: The element to which opt_coordinates values are
-       *          relative.
        * @return {Object} The DOM element to place the UrlSite object in.
        */
 
-      'createElementForUrl' : function(opt_viewTarget, opt_coordinates,
-          opt_rel) {
+      'createElementForUrl' : function(rel, opt_viewTarget, opt_coordinates) {
         console.log('container need to define createElementForUrl function');
       },
 
