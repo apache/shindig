@@ -139,8 +139,8 @@ osapi.container.Container = function(opt_config) {
   this.tokenRefreshTimer_ = null;
 
   var self = this;
-  window[osapi.container.CallbackType.GADGET_ON_LOAD] = function(gadgetUrl){
-      self.applyLifecycleCallbacks_(osapi.container.CallbackType.ON_RENDER, gadgetUrl);
+  window[osapi.container.CallbackType.GADGET_ON_LOAD] = function(gadgetUrl, siteId){
+      self.applyLifecycleCallbacks_(osapi.container.CallbackType.ON_RENDER, gadgetUrl, siteId);
   };
 
   this.initializeMixins_();
@@ -211,7 +211,7 @@ osapi.container.Container.prototype.navigateGadget = function(
     finishNavigate = function(preferences) {
       renderParams[RenderParam.USER_PREFS] = preferences;
       self.applyLifecycleCallbacks_(osapi.container.CallbackType.ON_BEFORE_NAVIGATE,
-              gadgetUrl);
+              gadgetUrl, site.getId());
       // TODO: Lifecycle, add ability for current gadget to cancel nav.
       site.navigateTo(gadgetUrl, viewParams, renderParams, function(gadgetInfo) {
         // TODO: Navigate to error screen on primary gadget load failure
@@ -820,17 +820,16 @@ osapi.container.Container.prototype.refreshTokens_ = function() {
 
 /**
  * invokes methods on the gadget lifecycle callback registered with the
- * container.
+ * container.  The callback will be passed the remainder of the arguments after methodName.
  * @param {string} methodName of the callback method to be called.
- * @param {Object} data to be passed to the callback method.
  * @private
  */
-osapi.container.Container.prototype.applyLifecycleCallbacks_ = function(
-    methodName, data) {
+osapi.container.Container.prototype.applyLifecycleCallbacks_ = function(methodName) {
+  var args = Array.prototype.slice.call(arguments, 1);
   for (name in this.gadgetLifecycleCallbacks_) {
     var method = this.gadgetLifecycleCallbacks_[name][methodName];
     if (method) {
-      method(data);
+      method.apply(null, args);
     }
   }
 };

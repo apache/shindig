@@ -129,7 +129,7 @@ osapi.container.SiteHolder.prototype.createIframeAttributeMap = function(url, ov
         height: renderParams[osapi.container.RenderParam.HEIGHT],
         width: renderParams[osapi.container.RenderParam.WIDTH],
         onload: this.onLoad_ ?
-                ('window.' + this.onLoad_ + "('" + this.getUrl() + "');") : undef
+                ('window.' + this.onLoad_ + "('" + this.getUrl() + "', '" + this.site_.getId() + "');") : undef
       };
    if (overrides) {
      for(var i in overrides) {
