@@ -179,7 +179,7 @@ IoTest.prototype.testNoMethod_disableRefresh = function() {
   var req = new fakeXhr.Expectation("POST", "http://example.com/json");
   this.setStandardArgs(req, true);
   req.setBodyArg("url", "http://target.example.com/somepage");
-  req.setBodyArg("refresh", null);
+  req.setBodyArg("refresh", "0");
   req.setHeader("Content-Type", "application/x-www-form-urlencoded");
 
   var resp = this.makeFakeResponse(

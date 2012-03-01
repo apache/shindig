@@ -443,8 +443,12 @@ gadgets.io = function() {
               null, 'GET', params, processResponse);
 
         } else {
+          var extraparams = gadgets.io.encodeValues(paramData);
+          if (httpMethod === 'GET' && refreshInterval == 0) {
+            extraparams = extraparams + "&refresh=0";
+          }
           makeXhrRequest(url, proxyUrl, callback,
-              gadgets.io.encodeValues(paramData), 'POST', params,
+              extraparams, 'POST', params,
               processResponse);
         }
       }
