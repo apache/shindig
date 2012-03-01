@@ -560,8 +560,7 @@ public class BasicOAuth2Request implements OAuth2Request {
       BasicOAuth2Request.LOG.log("responseCode = {0}", responseCode);
     }
 
-    if ((responseCode >= HttpResponse.SC_BAD_REQUEST)
-            && (responseCode < HttpResponse.SC_INTERNAL_SERVER_ERROR)) {
+    if (responseCode == HttpResponse.SC_UNAUTHORIZED) {
       if (accessToken != null) {
         try {
           this.store.removeToken(accessToken);
