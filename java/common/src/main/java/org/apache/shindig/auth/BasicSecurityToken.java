@@ -48,14 +48,6 @@ public class BasicSecurityToken extends AbstractSecurityToken {
     return false;
   }
 
-  public String getActiveUrl() {
-    String activeUrl = super.getActiveUrl();
-    if (activeUrl == null) {
-      throw new UnsupportedOperationException("No active URL available");
-    }
-    return activeUrl;
-  }
-
   /* (non-Javadoc)
    * @see org.apache.shindig.auth.AbstractSecurityToken#getSupportedKeys()
    *

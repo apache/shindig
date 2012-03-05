@@ -50,7 +50,7 @@ public class BlobCrypterSecurityTokenTest {
     crypter.timeSource = timeSource;
   }
 
-  @Test(expected=UnsupportedOperationException.class)
+  @Test
   public void testNullValues() throws Exception {
     BlobCrypterSecurityToken t = new BlobCrypterSecurityToken(CONTAINER, DOMAIN, null, null);
     String token = t.getContainer() + ":" + crypter.wrap(t.toMap());
@@ -67,9 +67,7 @@ public class BlobCrypterSecurityTokenTest {
     assertNull(t2.getTrustedJson(), t2.getTrustedJson());
     assertNull(t2.getUpdatedToken(), t2.getUpdatedToken());
     assertEquals(CONTAINER, t2.getContainer());
-
-    // expect an exception
-    t2.getActiveUrl();
+    assertNull(t2.getActiveUrl(), t2.getActiveUrl());
   }
 
   @Test

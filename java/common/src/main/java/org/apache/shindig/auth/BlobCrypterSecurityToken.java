@@ -60,14 +60,6 @@ public class BlobCrypterSecurityToken extends AbstractSecurityToken {
     return false;
   }
 
-  public String getActiveUrl() {
-    String activeUrl = super.getActiveUrl();
-    if (activeUrl == null) {
-      throw new UnsupportedOperationException("No active URL available");
-    }
-    return activeUrl;
-  }
-
   // Legacy value for signed fetch, opensocial 0.8 prefers opensocial_app_url
   @Override
   public String getAppId() {
@@ -79,13 +71,8 @@ public class BlobCrypterSecurityToken extends AbstractSecurityToken {
   }
 
   public static BlobCrypterSecurityToken fromToken(SecurityToken token) {
-    String activeUrl = null;
-    try {
-      activeUrl = token.getActiveUrl();
-    } catch (UnsupportedOperationException e) {}
-
-    BlobCrypterSecurityToken interpretedToken = new BlobCrypterSecurityToken(
-        token.getContainer(), token.getDomain(), activeUrl, null);
+    BlobCrypterSecurityToken interpretedToken = new BlobCrypterSecurityToken(token.getContainer(),
+        token.getDomain(), token.getActiveUrl(), null);
     interpretedToken
         .setAppId(token.getAppId())
         .setAppUrl(token.getAppUrl())

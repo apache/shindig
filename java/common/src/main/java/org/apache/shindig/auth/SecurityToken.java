@@ -94,13 +94,12 @@ public interface SecurityToken {
   boolean isAnonymous();
 
   /**
-   * @return the URL being used by the current request
+   * @return the URL being used by the current request and null if not specified.
    *
    * The returned URL must contain at least protocol, host, and port.
    *
    * The returned URL may contain path or query parameters.
    *
-   * @throws UnsupportedOperationException if the URL is not available.
    */
   String getActiveUrl();
 }
