@@ -146,13 +146,6 @@ public class FilteredLoggerTest {
     final ResourceBundle result = fixture.getResourceBundle();
 
     Assert.assertNotNull(result);
-    final String description = result.getString(OAuth2Error.FETCH_PROBLEM.getErrorCode());
-    Assert.assertEquals("executing OAuth2Request.fetch() : {0}", description);
-
-    Assert.assertNotNull(result);
-    final String explanation = result.getString(OAuth2Error.FETCH_PROBLEM.getErrorCode()
-        + ".explanation");
-    Assert.assertEquals("An error occurred issuing the OAuth2 request.", explanation);
   }
 
   @Test

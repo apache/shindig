@@ -31,22 +31,6 @@ public class OAuth2RequestExceptionTest {
     final OAuth2RequestException result = new OAuth2RequestException(error, errorText, cause);
 
     Assert.assertNotNull(result);
-    Assert
-        .assertEquals(
-            "org.apache.shindig.gadgets.oauth2.OAuth2Request encountered a problem :  adding client authentication : ",
-            result.getErrorText());
-    Assert
-        .assertEquals(
-            "org.apache.shindig.gadgets.oauth2.OAuth2Request encountered a problem :  adding client authentication : ",
-            result.getMessage());
-    Assert
-        .assertEquals(
-            "[AUTHENTICATION_PROBLEM,org.apache.shindig.gadgets.oauth2.OAuth2Request encountered a problem :  adding client authentication : ]",
-            result.toString());
-    Assert
-        .assertEquals(
-            "org.apache.shindig.gadgets.oauth2.OAuth2Request encountered a problem :  adding client authentication : ",
-            result.getLocalizedMessage());
   }
 
   @Test
@@ -58,49 +42,9 @@ public class OAuth2RequestExceptionTest {
 
     Assert.assertNotNull(result);
     Assert.assertEquals("authentication_problem", result.getErrorCode());
-    Assert.assertEquals("Could not add authentication headers to the request.",
-        result.getErrorExplanation());
     Assert.assertEquals("AUTHENTICATION_PROBLEM", result.name());
     Assert.assertEquals(2, result.ordinal());
     Assert.assertEquals("AUTHENTICATION_PROBLEM", result.toString());
   }
 
-  @Test
-  public void testGetErrorText_1() throws Exception {
-    final OAuth2RequestException fixture = new OAuth2RequestException(
-        OAuth2Error.AUTHENTICATION_PROBLEM, "", new Throwable());
-
-    final String result = fixture.getErrorText();
-
-    Assert
-        .assertEquals(
-            "org.apache.shindig.gadgets.oauth2.OAuth2Request encountered a problem :  adding client authentication : ",
-            result);
-  }
-
-  @Test
-  public void testGetMessage_1() throws Exception {
-    final OAuth2RequestException fixture = new OAuth2RequestException(
-        OAuth2Error.AUTHENTICATION_PROBLEM, "", new Throwable());
-
-    final String result = fixture.getMessage();
-
-    Assert
-        .assertEquals(
-            "org.apache.shindig.gadgets.oauth2.OAuth2Request encountered a problem :  adding client authentication : ",
-            result);
-  }
-
-  @Test
-  public void testToString_1() throws Exception {
-    final OAuth2RequestException fixture = new OAuth2RequestException(
-        OAuth2Error.AUTHENTICATION_PROBLEM, "", new Throwable());
-
-    final String result = fixture.toString();
-
-    Assert
-        .assertEquals(
-            "[AUTHENTICATION_PROBLEM,org.apache.shindig.gadgets.oauth2.OAuth2Request encountered a problem :  adding client authentication : ]",
-            result);
-  }
 }

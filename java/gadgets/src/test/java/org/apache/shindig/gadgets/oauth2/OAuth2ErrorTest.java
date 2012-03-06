@@ -31,24 +31,5 @@ public class OAuth2ErrorTest {
     Assert.assertEquals("authentication_problem", result);
   }
 
-  @Test
-  public void testGetErrorDescription_1() throws Exception {
-    final OAuth2Error fixture = OAuth2Error.AUTHENTICATION_PROBLEM;
 
-    final String result = fixture.getErrorDescription();
-
-    Assert
-        .assertEquals(
-            "org.apache.shindig.gadgets.oauth2.OAuth2Request encountered a problem :  adding client authentication : {0}",
-            result);
-  }
-
-  @Test
-  public void testGetErrorExplanation_1() throws Exception {
-    final OAuth2Error fixture = OAuth2Error.AUTHENTICATION_PROBLEM;
-
-    final String result = fixture.getErrorExplanation();
-
-    Assert.assertEquals("Could not add authentication headers to the request.", result);
-  }
 }

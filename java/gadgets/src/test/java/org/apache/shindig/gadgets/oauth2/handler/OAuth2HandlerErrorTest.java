@@ -72,8 +72,6 @@ public class OAuth2HandlerErrorTest {
 
     Assert.assertNotNull(result);
     Assert.assertEquals("authentication_problem", result.getErrorCode());
-    Assert.assertEquals("Could not add authentication headers to the request.",
-        result.getErrorExplanation());
     Assert.assertEquals("AUTHENTICATION_PROBLEM", result.name());
     Assert.assertEquals(2, result.ordinal());
     Assert.assertEquals("AUTHENTICATION_PROBLEM", result.toString());
