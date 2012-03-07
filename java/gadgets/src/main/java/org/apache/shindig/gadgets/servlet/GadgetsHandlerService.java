@@ -261,7 +261,7 @@ public class GadgetsHandlerService {
   }
   /**
    * Create security token
-   * @param request token paramaters (gadget, owner and viewer)
+   * @param request token parameters (gadget, owner and viewer)
    * @return Security token
    * @throws SecurityTokenException
    */
@@ -288,7 +288,7 @@ public class GadgetsHandlerService {
 
     if (moduleId != null) {
       tokenData = convertAuthContext(authContext, request.getContainer(),
-          request.getUrl().toString(), moduleId);
+          request.getUrl().toString(), moduleId, request.getUrl().toString());
       token = securityTokenCodec.encodeToken(tokenData);
     }
 
@@ -523,17 +523,17 @@ public class GadgetsHandlerService {
 
   private SecurityToken convertAuthContext(GadgetsHandlerApi.AuthContext authContext,
       String container, String url) {
-    return convertAuthContext(authContext, container, url, 0);
+    return convertAuthContext(authContext, container, url, 0, url);
   }
 
   private SecurityToken convertAuthContext(GadgetsHandlerApi.AuthContext authContext,
-      String container, String url, long moduleId) {
+      String container, String url, long moduleId, String activeUrl) {
     if (authContext == null) {
       return null;
     }
     return beanDelegator.createDelegator(authContext, SecurityToken.class,
         ImmutableMap.<String, Object>of("container", container,
-            "appid", url, "appurl", url, "moduleId", moduleId));
+            "appid", url, "appurl", url, "moduleId", moduleId, "activeurl", activeUrl));
   }
 
   public GadgetsHandlerApi.BaseResponse createErrorResponse(Uri uri, Exception e,
