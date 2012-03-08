@@ -735,7 +735,7 @@
           // if gadget site has not been registered yet
           // the gadget needs to be rendered
           var gadgetSites = registry.getGadgetSites(actionId);
-          if (!gadgetSites) {
+          if (!gadgetSites || (gadgetSites.length === 0)) {
             var gadgetUrl = registry.getUrl(actionId);
             pendingActions[actionId] = {
               selection: opt_selection || container_.selection.getSelection()
