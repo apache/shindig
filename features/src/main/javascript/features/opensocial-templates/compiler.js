@@ -582,7 +582,7 @@ os.processTextContent_ = function(fromNode, toNode) {
     var substitution = os.parseAttribute_(fromNode.firstChild.data);
     if (toNode.nodeName == 'SCRIPT') {
       toNode.text = os.trimWhitespaceForIE_(fromNode.firstChild.data, true, true);
-    } if (substitution) {
+    } else if (substitution) {
       toNode.setAttribute(ATT_content, substitution);
     } else {
       toNode.appendChild(document.createTextNode(
