@@ -69,7 +69,7 @@
       notifySelection(selection);
     });
     context.rpcRegister('gadgets.selection.register', function(rpcArgs) {
-      listeningGadgets[this.f] = 1;
+      listeningGadgets[rpcArgs.f] = 1;
     });
 
     return /** @scope gadgets.selection */ {
