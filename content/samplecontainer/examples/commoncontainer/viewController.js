@@ -105,20 +105,22 @@ $(function() {
     };
 
     getNewGadgetElement = function(result, gadgetURL){
+      result[gadgetURL] = result[gadgetURL] || {};
       var gadgetSiteString = "$(this).closest(\'.portlet\').find(\'.portlet-content\').data(\'gadgetSite\')";
       var viewItems = '';
-      var gadgetViews = result[gadgetURL].views;
+      var gadgetViews = result[gadgetURL].views || {};
       for (var aView in gadgetViews) {
         viewItems = viewItems + '<li><a href="#" onclick="navigateView(' + gadgetSiteString + ',' + '\'' + gadgetURL + '\'' + ',' + '\'' + aView + '\'' + '); return false;">' + aView + '</a></li>';
       }
       var newGadgetSite = gadgetTemplate;
       newGadgetSite = newGadgetSite.replace(/(gadget-site)/g, '$1-' + curId);
       siteToTitleMap['gadget-site-' + curId] = 'gadget-title-' + curId;
+      var gadgetTitle = (result[gadgetURL] && result[gadgetURL]['modulePrefs'] && result[gadgetURL]['modulePrefs'].title) || 'Title not set';
       $(newGadgetSite).appendTo($('#gadgetArea')).addClass('ui-widget ui-widget-content ui-helper-clearfix ui-corner-all')
       .find('.portlet-header')
       .addClass('ui-widget-header ui-corner-all')
       .text('')
-      .append('<span id="gadget-title-' + curId + '">' + result[gadgetURL]['modulePrefs'].title + '</span>' +
+      .append('<span id="gadget-title-' + curId + '">' + gadgetTitle + '</span>' +
               '<ul id="viewsDropdown">' +
              '<li class="li-header">' +
                '<a href="#" class="hidden"><span id="dropdownIcon" class="ui-icon ui-icon-triangle-1-s"></span></a>' +
@@ -136,6 +138,7 @@ $(function() {
 
     //create a gadget with navigation tool bar header enabling gadget collapse, expand, remove, navigate to view actions.
     buildGadget = function(result,gadgetURL){
+      result = result || {};
       var element =  getNewGadgetElement(result, gadgetURL);
       $(element).data('gadgetSite', CommonContainer.renderGadget(gadgetURL, curId));
 
@@ -160,8 +163,8 @@ $(function() {
 		    return true;
 	});
 
-	//  Load single gadgets entered by user
-	$('#addGadget').click(function() {
+	//  Preload then add a single gadget entered by user
+	$('#preloadAndAddGadget').click(function() {
 		CommonContainer.preloadGadget(newGadgetUrl.val(), function(result) {
 		  for (var gadgetURL in result) {
 		    if(!result[gadgetURL].error) {
@@ -176,6 +179,33 @@ $(function() {
 
 		return true;
 	});
+
+	 //  Preload a single gadget entered by user (don't add it to the page)
+  $('#preloadGadget').click(function() {
+    CommonContainer.preloadGadget(newGadgetUrl.val(), function(result) {
+      for (var gadgetURL in result) {
+        if(!result[gadgetURL].error) {
+          //buildGadget(result, gadgetURL);
+          curId++;
+        }
+      }
+
+        //Clear Values
+        newGadgetUrl.val('');
+    });
+
+    return true;
+  });
+
+	//  Add a single gadget entered by user (no preloading)
+	 $('#addGadget').click(function() {
+	        buildGadget({}, newGadgetUrl.val());
+	        curId++;
+
+	        //Clear Values
+	        newGadgetUrl.val('');
+	        return true;
+	    });
 
 	//  Load the select collection of gadgets and render them the gadget test area
 	$('#addGadgets').click(function() {

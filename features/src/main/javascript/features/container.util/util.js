@@ -144,18 +144,6 @@ osapi.container.util.isEmptyJson = function(json) {
   return true;
 };
 
-
-/**
- * Put up a warning message to console.
- * @param {String} message to warn with.
- */
-osapi.container.util.warn = function(message) {
-  if (console && console.warn) {
-    console.warn(message);
-  }
-};
-
-
 /**
  * @return {number} current time in ms.
  */

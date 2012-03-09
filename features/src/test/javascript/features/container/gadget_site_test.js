@@ -42,8 +42,8 @@ GadgetSiteTest.prototype.setUp = function() {
   };
 
   this.util_warn_value = null;
-  this.util_warn_func = osapi.container.util.warn;
-  osapi.container.util.warn = function(value) {
+  this.util_warn_func = gadgets.warn;
+  gadgets.warn = function(value) {
     self.util_warn_value = value;
   };
 
@@ -54,7 +54,7 @@ GadgetSiteTest.prototype.setUp = function() {
 
 GadgetSiteTest.prototype.tearDown = function() {
   osapi.container.util.getCurrentTimeMs = this.util_getCurrentTimeMs_func;
-  osapi.container.util.warn = this.util_warn_func;
+  gadgets.warn = this.util_warn_func;
   delete window[this.NAVIGATE_CALLBACK];
 };
 
