@@ -152,11 +152,10 @@
       }
 
       var renderParams = {},
-           site = context.newGadgetSite(
-	     context.views.createElementForGadget(
-               metadata, rel, view, viewTarget, coordinates
-             )
-           );
+          elem = context.views.createElementForGadget(
+            metadata, rel, view, viewTarget, coordinates, orig_site
+          ),
+          site = context.newGadgetSite(elem);
 
       site.ownerId_ = siteOwnerId;
 
@@ -226,11 +225,11 @@
           coordinates = opt_params.coordinates;
         }
       }
-      var rel = context.getGadgetSiteByIframeId_(siteOwnerId).getActiveSiteHolder()
-      .getIframeElement();
+      var orig_site = context.getGadgetSiteByIframeId_(siteOwnerId),
+          rel = orig_site.getActiveSiteHolder().getIframeElement();
 
       var element = context.views.createElementForEmbeddedExperience(
-        rel, opt_metadata, viewTarget, coordinates
+        rel, opt_metadata, viewTarget, coordinates, orig_site
       );
 
       var gadgetRenderParams = {};
@@ -309,10 +308,10 @@
    * @returns {string} The ID of the site created, if a callback was registered.
    */
   function openUrl(rpcArgs, url, opt_viewTarget, opt_coordinates) {
-    var rel = context.getGadgetSiteByIframeId_(rpcArgs.f).getActiveSiteHolder()
-        .getIframeElement();
+    var orig_site = context.getGadgetSiteByIframeId_(rpcArgs.f),
+        rel = orig_site.getActiveSiteHolder().getIframeElement();
     var content_div = context.views.createElementForUrl(
-      rel, opt_viewTarget, opt_coordinates
+      rel, opt_viewTarget, opt_coordinates, orig_site
     );
 
     var site = context.newUrlSite(content_div);
@@ -405,10 +404,12 @@
        *          positioning css parameters (top|bottom|left|right) with
        *          appropriate values. All values are relative to the calling
        *          gadget.
+       * @param {osapi.container.Site} parentSite
+       *          The site opening the gadget view.
        * @return {Object} The DOM element to place the GadgetSite in.
        */
       'createElementForGadget' : function(metadata, rel, opt_view, opt_viewTarget,
-          opt_coordinates) {
+          opt_coordinates, parentSite) {
         console.log('container need to define createElementForGadget function');
       },
 
@@ -430,11 +431,13 @@
        *          positioning css parameters (top|bottom|left|right) with
        *          appropriate values. All values are relative to the calling
        *          gadget.
+       * @param {osapi.container.Site} parentSite
+       *          The site opening the EE.
        * @return {Object} The DOM element to place the embedded experience in.
        */
 
       'createElementForEmbeddedExperience' : function(rel, opt_gadgetInfo, opt_viewTarget,
-          opt_coordinates) {
+          opt_coordinates, parentSite) {
         console.log('container need to define ' +
             'createElementForEmbeddedExperience function');
       },
@@ -454,10 +457,12 @@
        *          positioning css parameters (top|bottom|left|right) with
        *          appropriate values. All values are relative to the calling
        *          gadget.
+       * @param {osapi.container.Site} parentSite
+       *          The site opening the url.
        * @return {Object} The DOM element to place the UrlSite object in.
        */
 
-      'createElementForUrl' : function(rel, opt_viewTarget, opt_coordinates) {
+      'createElementForUrl' : function(rel, opt_viewTarget, opt_coordinates, parentSite) {
         console.log('container need to define createElementForUrl function');
       },
 
