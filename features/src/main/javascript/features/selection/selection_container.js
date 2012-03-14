@@ -68,8 +68,10 @@
     context.rpcRegister('gadgets.selection.set', function(rpcArgs, selection) {
       notifySelection(selection);
     });
+
     context.rpcRegister('gadgets.selection.register', function(rpcArgs) {
       listeningGadgets[rpcArgs.f] = 1;
+      return _selection;
     });
 
     return /** @scope gadgets.selection */ {

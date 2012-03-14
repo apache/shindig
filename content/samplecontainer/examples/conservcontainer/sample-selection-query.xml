@@ -18,37 +18,24 @@
  * under the License.
 -->
 <Module>
-  <ModulePrefs title="Sample Selection Listener" height="250">
-    <Require feature="selection"></Require>
+  <ModulePrefs title="Sample Selection Query" height="250">
+    <Require feature="selection"/>
   </ModulePrefs>
   <Content type="html"><![CDATA[
     <style>
       #output {
         word-wrap: break-word;
-        overflow-y: auto;
       }
     </style>
     <script>
-      function selectionListener(/*Array*/ selection) {
-        var output = document.getElementById("output");
-        output.innerHTML = 'selection: '
-         + gadgets.util.escapeString('' + gadgets.json.stringify(selection))
-         + '<br/>' + output.innerHTML;
-      }
-
-      function addListener() {
-        gadgets.selection.addListener(selectionListener);
-        document.getElementById("output").innerHTML = "Selection listener added...";
-      }
-
-      function removeListener() {
-        gadgets.selection.removeListener(selectionListener);
-        document.getElementById("output").innerHTML = "";
+      function querySelection() {
+        var selection = gadgets.selection.getSelection();
+        document.getElementById("output").innerHTML = 'selection: '
+         + gadgets.util.escapeString('' + gadgets.json.stringify(selection)) + '<br/>';
       }
     </script>
     <div>
-      <input type="button" value="Add Selection Listener" onclick="addListener()"/>
-      <input type="button" value="Remove Selection Listener" onclick="removeListener()"/>
+      <input type="button" value="Query Current Selection" onclick="querySelection()"/>
     </div>
     <div id="output"></div>
   ]]></Content>

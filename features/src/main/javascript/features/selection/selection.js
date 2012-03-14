@@ -30,6 +30,18 @@ gadgets['selection'] = function() {
   var listeners,
       currentSelection;
 
+  function addListener(listener) {
+    if (!listeners) {
+      listeners  = [];
+      gadgets.rpc.call('..', 'gadgets.selection.register', function(selection) {
+        currentSelection = selection;
+      });
+    }
+    if (typeof listener === 'function') {
+      listeners.push(listener); // add the listener to the list
+    }
+  }
+
   gadgets.util.registerOnLoadHandler(function() {
     gadgets.rpc.register('gadgets.selection.selectionChanged', function(selection) {
       currentSelection = selection;
@@ -37,6 +49,10 @@ gadgets['selection'] = function() {
         listeners[i](selection);
       }
     });
+
+    // Start watching selection.
+    // TODO: change getSelection api to be async so we don't need to do this.
+    addListener(function(){});
   });
 
   return /** @scope gadgets.selection */ {
@@ -61,15 +77,7 @@ gadgets['selection'] = function() {
      * Registers a listener for selection.
      * @param {function} listener The listener to remove.
      */
-    addListener: function(listener) {
-      if (!listeners) {
-        listeners  = [];
-        gadgets.rpc.call('..', 'gadgets.selection.register');
-      }
-      if (typeof listener === 'function') {
-        listeners.push(listener); // add the listener to the list
-      }
-    },
+    addListener: addListener,
 
     /**
      * Removes a listener for selection.

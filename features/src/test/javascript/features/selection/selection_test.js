@@ -79,10 +79,10 @@ SelectionTest.inherits(TestCase);
 
   SelectionTest.prototype.testGadgetAddSelectionListener = function() {
     var container = new osapi.container.Container({});
-    var callback = function() {
-    };
-    gadgets.selection.addListener(callback);
-    this.assertRpcCalled("..", "gadgets.selection.register");
+    gadgets.selection.addListener(function(){});
+    this.assertRpcCalled("..", "gadgets.selection.register", function(){});
+    gadgets.selection.addListener(function(){});
+    this.assertNoRpcCalled();
   };
 
   /**
