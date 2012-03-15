@@ -764,7 +764,7 @@ if (!window['gadgets']['rpc']) { // make lib resilient to double-inclusion
      * <li> If "parent" is omitted, you MUST call this method with targetId '..'
      *    and the second param set to the parent URL.
      * <li> If "rpctoken" is omitted, but the container set an authToken manually
-     *    for this frame, you MUST pass that ID (however acquired) as the 2nd param
+     *    for this frame, you MUST pass that ID (however acquired) as the 3rd param
      *    to this method.
      * </ol>
      *
