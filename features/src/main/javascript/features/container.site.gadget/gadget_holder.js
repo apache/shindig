@@ -164,13 +164,11 @@ osapi.container.GadgetHolder.prototype.doNormalIframeHtml_ = function() {
   var uri = this.getIframeUrl_();
   this.el_.innerHTML = this.createIframeHtml(uri);
 
-  // Set up RPC channel. RPC relay url is on gmodules, relative to base of the
-  // container. Assumes container has set up forwarding to gmodules at /gadgets.
+  // Set up RPC channel.
   var iframeUri = shindig.uri(uri);
   var relayUri = shindig.uri()
       .setSchema(iframeUri.getSchema())
       .setAuthority(iframeUri.getAuthority())
-      //.setPath('/test1/gadgets/files/container/rpc_relay.html');
       .setPath(this.relayPath_);
   gadgets.rpc.setupReceiver(this.iframeId_, relayUri.toString(),
       iframeUri.getFP('rpctoken'));
