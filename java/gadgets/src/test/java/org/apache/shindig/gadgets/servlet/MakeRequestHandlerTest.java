@@ -94,13 +94,58 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
   private void expectPostAndReturnBody(AuthType authType, String postData, String response)
       throws Exception {
     HttpRequest req = new HttpRequest(REQUEST_URL).setMethod("POST")
-        .setPostBody(REQUEST_BODY.getBytes("UTF-8"))
+        .setPostBody(postData.getBytes("UTF-8"))
         .setAuthType(authType)
         .addHeader("Content-Type", "application/x-www-form-urlencoded");
     expect(pipeline.execute(req)).andReturn(new HttpResponse(response));
     expect(request.getParameter(MakeRequestHandler.METHOD_PARAM)).andReturn("POST");
     expect(request.getParameter(MakeRequestHandler.POST_DATA_PARAM))
-        .andReturn(REQUEST_BODY);
+        .andReturn(postData);
+  }
+
+  private void expectPutAndReturnBody(String putData, String response) throws Exception {
+    expectPutAndReturnBody(AuthType.NONE, putData, response);
+  }
+
+  private void expectPutAndReturnBody(AuthType authType, String putData, String response)
+          throws Exception {
+    HttpRequest req = new HttpRequest(REQUEST_URL).setMethod("PUT")
+        .setPostBody(putData.getBytes("UTF-8"))
+        .setAuthType(authType);
+    expect(pipeline.execute(req)).andReturn(new HttpResponse(response));
+    expect(request.getParameter(MakeRequestHandler.METHOD_PARAM)).andReturn("PUT");
+    expect(request.getParameter(MakeRequestHandler.POST_DATA_PARAM))
+        .andReturn(putData);
+  }
+
+  private void expectDeleteAndReturnBody(String response) throws Exception {
+    expectDeleteAndReturnBody(AuthType.NONE, response);
+  }
+
+  private void expectDeleteAndReturnBody(AuthType authType, String response) throws Exception {
+    HttpRequest req = new HttpRequest(REQUEST_URL).setMethod("DELETE").setAuthType(authType);
+    expect(pipeline.execute(req)).andReturn(new HttpResponse(response));
+    expect(request.getParameter(MakeRequestHandler.METHOD_PARAM)).andReturn("DELETE");
+  }
+
+  private void expectHead() throws Exception {
+    expectHead(AuthType.NONE);
+  }
+
+  private void expectHead(AuthType authType) throws Exception {
+    HttpRequest req = new HttpRequest(REQUEST_URL).setMethod("HEAD").setAuthType(authType);
+    expect(pipeline.execute(req)).andReturn(new HttpResponse(""));
+    expect(request.getParameter(MakeRequestHandler.METHOD_PARAM)).andReturn("HEAD");
+  }
+
+  private void expectPatchAndReturnBody(String response) throws Exception {
+    expectPatchAndReturnBody(AuthType.NONE, response);
+  }
+
+  private void expectPatchAndReturnBody(AuthType authType, String response) throws Exception {
+    HttpRequest req = new HttpRequest(REQUEST_URL).setMethod("PATCH").setAuthType(authType);
+    expect(pipeline.execute(req)).andReturn(new HttpResponse(response));
+    expect(request.getParameter(MakeRequestHandler.METHOD_PARAM)).andReturn("PATCH");
   }
 
   private JSONObject extractJsonFromResponse() throws JSONException {
@@ -249,6 +294,59 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
 
     assertEquals(HttpResponse.SC_OK, results.getInt("rc"));
     assertEquals(RESPONSE_BODY, results.get("body"));
+    assertTrue(rewriter.responseWasRewritten());
+  }
+
+  @Test
+  public void testPutRequest() throws Exception {
+    expect(request.getParameter(MakeRequestHandler.METHOD_PARAM)).andReturn("PUT");
+    expectPutAndReturnBody(REQUEST_BODY, RESPONSE_BODY);
+    replay();
+
+    handler.fetch(request, recorder);
+    JSONObject results = extractJsonFromResponse();
+
+    assertEquals(HttpResponse.SC_OK, results.getInt("rc"));
+    assertEquals(RESPONSE_BODY, results.get("body"));
+    assertTrue(rewriter.responseWasRewritten());
+  }
+
+  @Test
+  public void testDeleteRequest() throws Exception {
+    expect(request.getParameter(MakeRequestHandler.METHOD_PARAM)).andReturn("DELETE");
+    expectDeleteAndReturnBody("");
+    replay();
+
+    handler.fetch(request, recorder);
+    JSONObject results = extractJsonFromResponse();
+
+    assertEquals(HttpResponse.SC_OK, results.getInt("rc"));
+    assertTrue(rewriter.responseWasRewritten());
+  }
+
+  @Test
+  public void testHeadRequest() throws Exception {
+    expect(request.getParameter(MakeRequestHandler.METHOD_PARAM)).andReturn("HEAD");
+    expectHead();
+    replay();
+
+    handler.fetch(request, recorder);
+    JSONObject results = extractJsonFromResponse();
+
+    assertEquals(HttpResponse.SC_OK, results.getInt("rc"));
+    assertTrue(rewriter.responseWasRewritten());
+  }
+
+  @Test
+  public void testPatchRequest() throws Exception {
+    expect(request.getParameter(MakeRequestHandler.METHOD_PARAM)).andReturn("PATCH");
+    expectPatchAndReturnBody("");
+    replay();
+
+    handler.fetch(request, recorder);
+    JSONObject results = extractJsonFromResponse();
+
+    assertEquals(HttpResponse.SC_OK, results.getInt("rc"));
     assertTrue(rewriter.responseWasRewritten());
   }
 

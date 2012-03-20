@@ -240,7 +240,7 @@ public class MakeRequestHandler implements ContainerConfig.ConfigObserver {
     HttpRequest req = new HttpRequest(url).setMethod(getParameter(request, METHOD_PARAM, "GET"))
             .setContainer(container).setGadget(gadgetUri);
 
-    if ("POST".equals(req.getMethod())) {
+    if ("POST".equals(req.getMethod()) || "PUT".equals(req.getMethod())) {
       setPostData(container, request, req);
     }
 
@@ -264,7 +264,8 @@ public class MakeRequestHandler implements ContainerConfig.ConfigObserver {
     if ("POST".equals(req.getMethod()) && req.getHeader("Content-Type") == null) {
       req.addHeader("Content-Type", "application/x-www-form-urlencoded");
     } else if ("1".equals(getParameter(request, MULTI_PART_FORM_POST, null))) {
-      // We need the entire header from the original request because it comes with a boundry value we need to reuse.
+      // We need the entire header from the original request because it comes with a boundary value
+      // we need to reuse.
       req.addHeader("Content-Type", request.getHeader("Content-Type"));
     }
 
@@ -307,7 +308,8 @@ public class MakeRequestHandler implements ContainerConfig.ConfigObserver {
    * Set http request post data according to servlet request. It uses header encoding if available,
    * and defaulted to utf8 Override the function if different behavior is needed.
    */
-  protected void setPostData(String container, HttpServletRequest request, HttpRequest req) throws GadgetException {
+  protected void setPostData(String container, HttpServletRequest request, HttpRequest req)
+          throws GadgetException {
     if (maxPostSizes.get(container) < request.getContentLength()) {
       throw new GadgetException(GadgetException.Code.POST_TOO_LARGE, "Posted data too large.",
           HttpResponse.SC_REQUEST_ENTITY_TOO_LARGE);
@@ -333,7 +335,8 @@ public class MakeRequestHandler implements ContainerConfig.ConfigObserver {
       throw new GadgetException(Code.HTML_PARSE_ERROR, e, HttpResponse.SC_BAD_REQUEST);
     } catch (IOException e) {
       // Something went wrong reading the request data.
-      // TODO: perhaps also support a max post size and enforce it by throwing and catching exceptions here.
+      // TODO: perhaps also support a max post size and enforce it by throwing and catching
+      // exceptions here.
       throw new GadgetException(Code.INTERNAL_SERVER_ERROR, e, HttpResponse.SC_BAD_REQUEST);
     }
   }
