@@ -18,28 +18,30 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
+import static org.junit.Assert.assertEquals;
+
+import java.util.List;
+import java.util.Map;
+
+import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.config.ContainerConfig;
+import org.apache.shindig.gadgets.Gadget;
+import org.apache.shindig.gadgets.http.HttpRequest;
+import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.http.HttpResponseBuilder;
+import org.apache.shindig.gadgets.rewrite.ResponseRewriterList.RewriteFlow;
+import org.junit.Test;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Provider;
 import com.google.inject.util.Providers;
 
-import org.apache.shindig.common.uri.Uri;
-import org.apache.shindig.config.ContainerConfig;
-import org.apache.shindig.gadgets.http.HttpRequest;
-import org.apache.shindig.gadgets.http.HttpResponse;
-import org.apache.shindig.gadgets.http.HttpResponseBuilder;
-import org.apache.shindig.gadgets.rewrite.ResponseRewriterList.RewriteFlow;
-import static org.junit.Assert.assertEquals;
-import org.junit.Test;
-
-import java.util.List;
-import java.util.Map;
-
 /**
  * Tests for ContextAwareRegistryTest.
  */
-public class ContextAwareRegistryTest {
+public class ContextAwareRegistryTest extends RewriterTestBase {
   private ContextAwareRegistry contextAwareRegistry;
   public static final String TEST_CONTAINER = "test";
   public static final String DUMMY_CONTAINER = "dummy";
@@ -50,9 +52,10 @@ public class ContextAwareRegistryTest {
       this.val = val;
     }
 
-    public void rewrite(HttpRequest request, HttpResponseBuilder response)
-        throws RewritingException {
+    public void rewrite(HttpRequest request, HttpResponseBuilder response, Gadget gadget)
+            throws RewritingException {
       response.addHeader("helloo", val);
+      response.addHeader("gadget", val);
     }
   }
 
@@ -136,9 +139,45 @@ public class ContextAwareRegistryTest {
     req.setContainer(TEST_CONTAINER);
     HttpResponseBuilder builder = new HttpResponseBuilder();
     HttpResponse resp = contextAwareRegistry.rewriteHttpResponse(
-        req, builder.create());
+        req, builder.create(), null);
 
     List<String> headers = Lists.newArrayList(resp.getHeaders("helloo"));
+    assertEquals(2, headers.size());
+    assertEquals("helo", headers.get(0));
+    assertEquals("buffalo", headers.get(1));
+  }
+
+  @Test
+  public void testRewriteResponseGadget() throws Exception {
+    Gadget gadget = mockGadget();
+    control.replay();
+    final Map<RewritePath, Provider<List<ResponseRewriter>>> rewritePathToList = Maps.newHashMap();
+
+    List<ResponseRewriter> list = ImmutableList.<ResponseRewriter>of(
+        new TestRewriter("helo"), new TestRewriter("buffalo"));
+    List<ResponseRewriter> emptyList = ImmutableList.of();
+
+    addBindingForRewritePath(TEST_CONTAINER, RewriteFlow.ACCELERATE,
+                             Providers.of(list), rewritePathToList);
+    addBindingForRewritePath(TEST_CONTAINER, RewriteFlow.DEFAULT,
+                             Providers.of(emptyList), rewritePathToList);
+
+    // Test container present and flow present.
+    contextAwareRegistry = new ContextAwareRegistry(
+        null, RewriteFlow.ACCELERATE, Providers.of(rewritePathToList));
+
+    HttpRequest req = new HttpRequest(Uri.parse("http://www.example.org/"));
+    req.setContainer(TEST_CONTAINER);
+    HttpResponseBuilder builder = new HttpResponseBuilder();
+    HttpResponse resp = contextAwareRegistry.rewriteHttpResponse(
+        req, builder.create(), gadget);
+
+    List<String> headers = Lists.newArrayList(resp.getHeaders("helloo"));
+    assertEquals(2, headers.size());
+    assertEquals("helo", headers.get(0));
+    assertEquals("buffalo", headers.get(1));
+
+    headers = Lists.newArrayList(resp.getHeaders("gadget"));
     assertEquals(2, headers.size());
     assertEquals("helo", headers.get(0));
     assertEquals("buffalo", headers.get(1));

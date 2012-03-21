@@ -86,7 +86,8 @@ public class CajaResponseRewriter implements ResponseRewriter {
     this.requestPipeline = requestPipeline;
   }
 
-  public void rewrite(HttpRequest req, HttpResponseBuilder resp) throws RewritingException {
+  public void rewrite(HttpRequest req, HttpResponseBuilder resp, Gadget gadget)
+          throws RewritingException {
     if (!req.isCajaRequested()) { return; }
 
     // Only accept Javascript for now

@@ -111,7 +111,7 @@ public class ImageRewriterTest extends Assert {
     HttpRequest request = getMockRequest(width, height, quality, noExpand);
 
     mockControl.replay();
-    rewriter.rewrite(request, response);
+    rewriter.rewrite(request, response, null);
     mockControl.verify();
 
     assertEquals(targetContentType, response.getHeader(CONTENT_TYPE_HEADER));
@@ -134,7 +134,7 @@ public class ImageRewriterTest extends Assert {
     HttpResponseBuilder response = getImageResponse(CONTENT_TYPE_PNG, bytes);
     int originalContentLength = response.getContentLength();
 
-    rewriter.rewrite(new HttpRequest(Uri.parse("some.png")), response);
+    rewriter.rewrite(new HttpRequest(Uri.parse("some.png")), response, null);
     assertEquals(HttpResponse.SC_OK, response.getHttpStatusCode());
     assertTrue(response.getContentLength() < originalContentLength);
   }
@@ -145,7 +145,7 @@ public class ImageRewriterTest extends Assert {
     HttpResponseBuilder response = getImageResponse(CONTENT_TYPE_BOGUS, bytes);
     int originalContentLength = response.getContentLength();
 
-    rewriter.rewrite(new HttpRequest(Uri.parse("some.junk")), response);
+    rewriter.rewrite(new HttpRequest(Uri.parse("some.junk")), response, null);
     assertEquals(HttpResponse.SC_OK, response.getHttpStatusCode());
     assertEquals(response.getContentLength(), originalContentLength);
   }
@@ -153,7 +153,7 @@ public class ImageRewriterTest extends Assert {
   @Test
   public void testRewriteInvalidImageContentWithValidMime() throws Exception {
     HttpResponseBuilder response = getImageResponse(CONTENT_TYPE_PNG, "This is not a PNG".getBytes());
-    rewriter.rewrite(new HttpRequest(Uri.parse("some.junk")), response);
+    rewriter.rewrite(new HttpRequest(Uri.parse("some.junk")), response, null);
 
     assertEquals(HttpResponse.SC_UNSUPPORTED_MEDIA_TYPE, response.getHttpStatusCode());
     assertEquals(CONTENT_TYPE_AND_MIME_MISMATCH, response.create().getResponseAsString());
@@ -162,7 +162,7 @@ public class ImageRewriterTest extends Assert {
   @Test
   public void testRewriteInvalidImageContentWithValidFileExtn() throws Exception {
     HttpResponseBuilder response = getImageResponse(CONTENT_TYPE_BOGUS, "This is not an image".getBytes());
-    rewriter.rewrite(new HttpRequest(Uri.parse("some.png")), response);
+    rewriter.rewrite(new HttpRequest(Uri.parse("some.png")), response, null);
 
     assertEquals(HttpResponse.SC_UNSUPPORTED_MEDIA_TYPE, response.getHttpStatusCode());
     assertEquals(CONTENT_TYPE_AND_EXTENSION_MISMATCH,
@@ -174,7 +174,7 @@ public class ImageRewriterTest extends Assert {
     HttpResponseBuilder response = getImageResponse(CONTENT_TYPE_GIF,
         getImageBytes("org/apache/shindig/gadgets/rewrite/image/animated.gif"));
     int changesBefore = response.getNumChanges();
-    rewriter.rewrite(new HttpRequest(Uri.parse("animated.gif")), response);
+    rewriter.rewrite(new HttpRequest(Uri.parse("animated.gif")), response, null);
     assertEquals(changesBefore, response.getNumChanges());
   }
 
@@ -182,7 +182,7 @@ public class ImageRewriterTest extends Assert {
   public void testRewriteUnAnimatedGIF() throws Exception {
     HttpResponseBuilder response = getImageResponse(CONTENT_TYPE_GIF,
         getImageBytes("org/apache/shindig/gadgets/rewrite/image/large.gif"));
-    rewriter.rewrite(new HttpRequest(Uri.parse("large.gif")), response);
+    rewriter.rewrite(new HttpRequest(Uri.parse("large.gif")), response, null);
     assertEquals(CONTENT_TYPE_PNG, response.getHeader(CONTENT_TYPE_HEADER));
   }
 
@@ -278,7 +278,7 @@ public class ImageRewriterTest extends Assert {
     HttpResponseBuilder response = getImageResponse(CONTENT_TYPE_GIF, getImageBytes(HUGE_IMAGE));
     HttpRequest request = getMockRequest(120, 60, null, false);
     mockControl.replay();
-    rewriter.rewrite(request, response);
+    rewriter.rewrite(request, response, null);
     mockControl.verify();
     assertEquals(HttpResponse.SC_FORBIDDEN, response.getHttpStatusCode());
   }
@@ -289,7 +289,7 @@ public class ImageRewriterTest extends Assert {
     HttpResponseBuilder response = getImageResponse(CONTENT_TYPE_GIF, imageBytes);
     HttpRequest request = getMockRequest(null, null, null, false);
     mockControl.replay();
-    rewriter.rewrite(request, response);
+    rewriter.rewrite(request, response, null);
     mockControl.verify();
     assertEquals(HttpResponse.SC_OK, response.getHttpStatusCode());
     assertTrue(Arrays.equals(imageBytes, IOUtils.toByteArray(response.getContentBytes())));

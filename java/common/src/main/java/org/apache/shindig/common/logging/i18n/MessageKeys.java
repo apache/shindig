@@ -129,6 +129,8 @@ public interface MessageKeys {
 	public static final String CONCAT_PROXY_REQUEST_FAILED="concatProxyRequestFailed";
 	//GadgetRenderingServlet
 	public static final String MALFORMED_TTL_VALUE="malformedTtlValue";
+	//HttpRequestHandler
+	public static final String GADGET_CREATION_ERROR="gadgetCreationError";
 	//ProxyServlet
 	public static final String EMBEDED_IMG_WRONG_DOMAIN="embededImgWrongDomain";
 	//RpcServlet

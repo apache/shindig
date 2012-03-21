@@ -134,7 +134,7 @@ public class DefaultRequestPipeline implements RequestPipeline {
 
     if (!fetchedResponse.isError() && !request.getIgnoreCache() && request.getCacheTtl() != 0) {
       try {
-        fetchedResponse = responseRewriterRegistry.rewriteHttpResponse(request, fetchedResponse);
+        fetchedResponse = responseRewriterRegistry.rewriteHttpResponse(request, fetchedResponse, null);
       } catch (RewritingException e) {
         throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, e, e.getHttpStatusCode());
       }

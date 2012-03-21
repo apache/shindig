@@ -87,7 +87,7 @@ public class AccelHandler {
     if (errorResponse == null) {
       // No error. Lets rewrite the content.
       try {
-        results = contentRewriterRegistry.rewriteHttpResponse(req, results);
+        results = contentRewriterRegistry.rewriteHttpResponse(req, results, null);
       } catch (RewritingException e) {
         logger.log(Level.WARNING, "Rewriting failed, serving original results", e);
         // In case of exception continue using original results.

@@ -17,8 +17,10 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
-import com.google.common.base.Joiner;
-import com.google.inject.util.Providers;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
 import org.apache.shindig.common.PropertiesModule;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
@@ -32,19 +34,20 @@ import org.apache.shindig.gadgets.http.RequestPipeline;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
 import org.apache.shindig.gadgets.parse.ParseModule;
 import org.apache.shindig.gadgets.parse.nekohtml.NekoSimplifiedHtmlParser;
+import org.apache.shindig.gadgets.spec.Feature;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
+import org.apache.shindig.gadgets.spec.ModulePrefs;
+import org.easymock.EasyMock;
+import org.easymock.IMocksControl;
+import org.junit.Before;
 
+import com.google.common.base.Joiner;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.util.Modules;
-
-import org.easymock.EasyMock;
-import org.easymock.IMocksControl;
-import org.junit.Before;
-
-import java.util.Set;
+import com.google.inject.util.Providers;
 
 /**
  * Base class for testing content rewriting functionality
@@ -93,6 +96,39 @@ public abstract class RewriterTestBase {
 
   protected Class<? extends GadgetHtmlParser> getParserClass() {
     return NekoSimplifiedHtmlParser.class;
+  }
+
+  public Gadget mockGadget() {
+    return mockGadget(new ArrayList<Feature>(), MOCK_CONTAINER, SPEC_URL.toString());
+  }
+
+  public Gadget mockGadget(List<Feature> allFeatures, String container, String gadgetUrl) {
+    Gadget mockGadget = control.createMock(Gadget.class);
+    GadgetContext mockContext = mockGadgetContext(container);
+    GadgetSpec mockSpec = mockGadgetSpec(allFeatures, gadgetUrl);
+    EasyMock.expect(mockGadget.getContext()).andReturn(mockContext).anyTimes();
+    EasyMock.expect(mockGadget.getSpec()).andReturn(mockSpec).anyTimes();
+    return mockGadget;
+  }
+
+  private GadgetContext mockGadgetContext(String container) {
+    GadgetContext mockContext = control.createMock(GadgetContext.class);
+    EasyMock.expect(mockContext.getContainer()).andReturn(container).anyTimes();
+    return mockContext;
+  }
+
+  private GadgetSpec mockGadgetSpec(List<Feature> allFeatures, String gadgetUrl) {
+    GadgetSpec mockSpec = control.createMock(GadgetSpec.class);
+    ModulePrefs mockPrefs = mockModulePrefs(allFeatures);
+    EasyMock.expect(mockSpec.getUrl()).andReturn(Uri.parse(gadgetUrl)).anyTimes();
+    EasyMock.expect(mockSpec.getModulePrefs()).andReturn(mockPrefs).anyTimes();
+    return mockSpec;
+  }
+
+  private ModulePrefs mockModulePrefs(List<Feature> features) {
+    ModulePrefs mockPrefs = control.createMock(ModulePrefs.class);
+    EasyMock.expect(mockPrefs.getAllFeatures()).andReturn(features).anyTimes();
+    return mockPrefs;
   }
 
   public static GadgetSpec createSpecWithRewrite(String include, String exclude, String expires,

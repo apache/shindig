@@ -163,7 +163,7 @@ public class MakeRequestHandler implements ContainerConfig.ConfigObserver {
     // Rewrite the response
     if (contentRewriterRegistry != null) {
       try {
-        results = contentRewriterRegistry.rewriteHttpResponse(rcr, results);
+        results = contentRewriterRegistry.rewriteHttpResponse(rcr, results, gadget);
       } catch (RewritingException e) {
         throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, e,
                 e.getHttpStatusCode());

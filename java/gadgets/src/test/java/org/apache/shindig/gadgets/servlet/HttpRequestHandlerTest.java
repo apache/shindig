@@ -22,10 +22,14 @@ import static org.easymock.EasyMock.capture;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.reportMatcher;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.shindig.common.EasyMockTestCase;
 import org.apache.shindig.common.JsonAssert;
@@ -34,15 +38,22 @@ import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.AuthType;
 import org.apache.shindig.gadgets.FeedProcessor;
 import org.apache.shindig.gadgets.FeedProcessorImpl;
+import org.apache.shindig.gadgets.Gadget;
+import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.http.RequestPipeline;
 import org.apache.shindig.gadgets.oauth.OAuthArguments;
+import org.apache.shindig.gadgets.process.ProcessingException;
+import org.apache.shindig.gadgets.process.Processor;
 import org.apache.shindig.gadgets.rewrite.CaptureRewriter;
 import org.apache.shindig.gadgets.rewrite.DefaultResponseRewriterRegistry;
 import org.apache.shindig.gadgets.rewrite.ResponseRewriter;
 import org.apache.shindig.gadgets.rewrite.ResponseRewriterRegistry;
+import org.apache.shindig.gadgets.spec.Feature;
+import org.apache.shindig.gadgets.spec.GadgetSpec;
+import org.apache.shindig.gadgets.spec.ModulePrefs;
 import org.apache.shindig.protocol.DefaultHandlerRegistry;
 import org.apache.shindig.protocol.HandlerExecutionListener;
 import org.apache.shindig.protocol.HandlerRegistry;
@@ -51,6 +62,7 @@ import org.apache.shindig.protocol.RpcHandler;
 import org.apache.shindig.protocol.conversion.BeanJsonConverter;
 import org.apache.shindig.protocol.multipart.FormDataItem;
 import org.easymock.Capture;
+import org.easymock.EasyMock;
 import org.easymock.IArgumentMatcher;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -78,6 +90,11 @@ public class HttpRequestHandlerTest extends EasyMockTestCase {
   private final CaptureRewriter rewriter = new CaptureRewriter();
   private final ResponseRewriterRegistry rewriterRegistry
       = new DefaultResponseRewriterRegistry(Arrays.<ResponseRewriter>asList(rewriter), null);
+  private final Processor mockProcessor = mock(Processor.class);
+  private final GadgetContext mockContext = mock(GadgetContext.class);
+  private final GadgetSpec mockSpec = mock(GadgetSpec.class);
+  private final ModulePrefs mockPrefs = mock(ModulePrefs.class);
+  private final Gadget mockGadget = mock(Gadget.class);
 
   private HandlerRegistry registry;
 
@@ -91,6 +108,27 @@ public class HttpRequestHandlerTest extends EasyMockTestCase {
         }
   };
 
+  private void mockGadget(List<Feature> allFeatures, String container, String gadgetUrl) {
+    mockGadgetContext(container);
+    mockGadgetSpec(allFeatures, gadgetUrl);
+    EasyMock.expect(mockGadget.getContext()).andReturn(mockContext).anyTimes();
+    EasyMock.expect(mockGadget.getSpec()).andReturn(mockSpec).anyTimes();
+  }
+
+  private void mockGadgetContext(String container) {
+    EasyMock.expect(mockContext.getContainer()).andReturn(container).anyTimes();
+  }
+
+  private void mockGadgetSpec(List<Feature> allFeatures, String gadgetUrl) {
+    mockModulePrefs(allFeatures);
+    EasyMock.expect(mockSpec.getUrl()).andReturn(Uri.parse(gadgetUrl)).anyTimes();
+    EasyMock.expect(mockSpec.getModulePrefs()).andReturn(mockPrefs).anyTimes();
+  }
+
+  private void mockModulePrefs(List<Feature> features) {
+    EasyMock.expect(mockPrefs.getAllFeatures()).andReturn(features).anyTimes();
+  }
+
   @Before
   public void setUp() throws Exception {
     token = new FakeGadgetToken();
@@ -99,11 +137,56 @@ public class HttpRequestHandlerTest extends EasyMockTestCase {
     Injector injector = Guice.createInjector();
     converter = new BeanJsonConverter(injector);
 
-    HttpRequestHandler handler = new HttpRequestHandler(pipeline, rewriterRegistry, feedProcessorProvider);
+    HttpRequestHandler handler = new HttpRequestHandler(pipeline, rewriterRegistry, feedProcessorProvider,
+            mockProcessor);
     registry = new DefaultHandlerRegistry(injector, converter,
         new HandlerExecutionListener.NoOpHandler());
     registry.addHandlers(ImmutableSet.<Object>of(handler));
     builder = new HttpResponseBuilder().setResponseString("CONTENT");
+  }
+
+  @Test
+  public void testGetWithValidGadget() throws Exception {
+    JSONObject request = new JSONObject("{method:http.get, id:req1, params : {"
+            + "href:'http://www.example.org/somecontent'"
+            + "}}");
+    HttpRequest httpRequest = new HttpRequest(Uri.parse("http://www.example.org/somecontent"));
+    httpRequest.setMethod("GET");
+    mockGadget(new ArrayList<Feature>(), "default","http://www.example.com/gadget.xml");
+    expect(pipeline.execute(eqRequest(httpRequest))).andReturn(builder.create()).anyTimes();
+    expect(mockProcessor.process(EasyMock.isA(GadgetContext.class))).andReturn(mockGadget);
+
+    replay();
+    RpcHandler operation = registry.getRpcHandler(request);
+
+    HttpRequestHandler.HttpApiResponse httpApiResponse =
+            (HttpRequestHandler.HttpApiResponse)operation.execute(emptyFormItems, token, converter).get();
+    verify();
+
+    JsonAssert.assertJsonEquals("{ headers : {}, status : 200, content : 'CONTENT' }}",
+            converter.convertToString(httpApiResponse));
+  }
+
+  @Test
+  public void testGetWithValidGadgeWithProcessorExceptiont() throws Exception {
+    JSONObject request = new JSONObject("{method:http.get, id:req1, params : {"
+            + "href:'http://www.example.org/somecontent'"
+            + "}}");
+    HttpRequest httpRequest = new HttpRequest(Uri.parse("http://www.example.org/somecontent"));
+    httpRequest.setMethod("GET");
+    expect(pipeline.execute(eqRequest(httpRequest))).andReturn(builder.create()).anyTimes();
+    expect(mockProcessor.process(EasyMock.isA(GadgetContext.class))).andThrow(
+            new ProcessingException("error", HttpServletResponse.SC_BAD_REQUEST)).anyTimes();
+
+    replay();
+    RpcHandler operation = registry.getRpcHandler(request);
+
+    HttpRequestHandler.HttpApiResponse httpApiResponse =
+            (HttpRequestHandler.HttpApiResponse)operation.execute(emptyFormItems, token, converter).get();
+    verify();
+
+    JsonAssert.assertJsonEquals("{ headers : {}, status : 200, content : 'CONTENT' }}",
+            converter.convertToString(httpApiResponse));
   }
 
   @Test

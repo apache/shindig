@@ -29,10 +29,6 @@ public class CaptureRewriter implements ResponseRewriter, GadgetRewriter {
   private boolean rewroteView = false;
   private boolean rewroteResponse = false;
 
-  public void rewrite(HttpRequest request, HttpResponseBuilder original) {
-    rewroteResponse = true;
-  }
-
   public boolean responseWasRewritten() {
     return rewroteResponse;
   }
@@ -43,5 +39,9 @@ public class CaptureRewriter implements ResponseRewriter, GadgetRewriter {
 
   public boolean viewWasRewritten() {
     return rewroteView;
+  }
+
+  public void rewrite(HttpRequest request, HttpResponseBuilder response, Gadget gadget) {
+    rewroteResponse = true;
   }
 }

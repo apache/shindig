@@ -33,10 +33,12 @@ import org.apache.sanselan.Sanselan;
 import org.apache.sanselan.common.byteSources.ByteSourceInputStream;
 import org.apache.shindig.common.logging.i18n.MessageKeys;
 import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.rewrite.ResponseRewriter;
+import org.apache.shindig.gadgets.rewrite.RewritingException;
 import org.apache.shindig.gadgets.rewrite.image.BaseOptimizer.ImageIOOutputter;
 import org.apache.shindig.gadgets.rewrite.image.BaseOptimizer.ImageOutputter;
 import org.apache.shindig.gadgets.uri.UriCommon.Param;
@@ -274,78 +276,78 @@ public class BasicImageRewriter implements ResponseRewriter {
     }
   }
 
-  public void rewrite(HttpRequest request, HttpResponseBuilder response) {
-    if (request == null || response == null) return;
+   public void rewrite(HttpRequest request, HttpResponseBuilder response, Gadget gadget) {
+     if (request == null || response == null) return;
 
-    Uri uri = request.getUri();
-    if (null == uri) return;
+     Uri uri = request.getUri();
+     if (null == uri) return;
 
-    try {
-       // If the path or MIME type don't match, continue
-      if (!isSupportedImageResult(response, uri)) {
-        return;
-      }
+     try {
+        // If the path or MIME type don't match, continue
+       if (!isSupportedImageResult(response, uri)) {
+         return;
+       }
 
-      // Content header checking is fast so this is fine to do for every response.
-      ImageFormat imageFormat = Sanselan
-          .guessFormat(new ByteSourceInputStream(response.getContentBytes(), uri.getPath()));
+       // Content header checking is fast so this is fine to do for every response.
+       ImageFormat imageFormat = Sanselan
+           .guessFormat(new ByteSourceInputStream(response.getContentBytes(), uri.getPath()));
 
-      if (imageFormat == ImageFormat.IMAGE_FORMAT_UNKNOWN) {
-        enforceUnreadableImageRestrictions(uri, response);
-        return;
-      }
+       if (imageFormat == ImageFormat.IMAGE_FORMAT_UNKNOWN) {
+         enforceUnreadableImageRestrictions(uri, response);
+         return;
+       }
 
-      ImageInfo imageInfo = Sanselan.getImageInfo(response.getContentBytes(), uri.getPath());
+       ImageInfo imageInfo = Sanselan.getImageInfo(response.getContentBytes(), uri.getPath());
 
-      Boolean resizeRequested = isResizeRequested(request, response, imageInfo);
+       Boolean resizeRequested = isResizeRequested(request, response, imageInfo);
 
-      // Return in case image can't be rewriten.
-      if (!canRewrite(request, response, imageInfo, resizeRequested)) {
-        return;
-      }
+       // Return in case image can't be rewriten.
+       if (!canRewrite(request, response, imageInfo, resizeRequested)) {
+         return;
+       }
 
-      JpegImageUtils.JpegImageParams jpegImageParams = null;
-      if (imageFormat == ImageFormat.IMAGE_FORMAT_JPEG) {
-        jpegImageParams = JpegImageUtils.getJpegImageData(response.getContentBytes(), uri.getPath());
-      }
+       JpegImageUtils.JpegImageParams jpegImageParams = null;
+       if (imageFormat == ImageFormat.IMAGE_FORMAT_JPEG) {
+         jpegImageParams = JpegImageUtils.getJpegImageData(response.getContentBytes(), uri.getPath());
+       }
 
-      // Step#1: Read the image using appropriate readers for the corresponding image format.
-      BufferedImage image = readImage(imageFormat, response);
+       // Step#1: Read the image using appropriate readers for the corresponding image format.
+       BufferedImage image = readImage(imageFormat, response);
 
-      // Proceed to Resize in case image can be resized.
-      if (resizeRequested) {
-        // Step#2: Get the Resize Data
-        ImageResizeData resizeData = getResizeData(request, response, image, imageInfo);
+       // Proceed to Resize in case image can be resized.
+       if (resizeRequested) {
+         // Step#2: Get the Resize Data
+         ImageResizeData resizeData = getResizeData(request, response, image, imageInfo);
 
-        if (resizeData != null) {
-          // Step#3: Resize (Scale+Stretch) Image using Java AWT Graphics2D package.
-          image = resizeImage(image, resizeData.getWidth(), resizeData.getHeight(),
-              resizeData.getWidthDelta(), resizeData.getHeightDelta());
+         if (resizeData != null) {
+           // Step#3: Resize (Scale+Stretch) Image using Java AWT Graphics2D package.
+           image = resizeImage(image, resizeData.getWidth(), resizeData.getHeight(),
+               resizeData.getWidthDelta(), resizeData.getHeightDelta());
 
-          // Step#4: Convert the image format (MIME_TYPE) using javax.imageio package.
-          updateResponse(response, image);
-        }
-      }
+           // Step#4: Convert the image format (MIME_TYPE) using javax.imageio package.
+           updateResponse(response, image);
+         }
+       }
 
-      // Step#5: Optimize the supported image formats viz PNG, GIF, JPG & BMP using 'BaseOptimizer'
-      // and it's subclass implementations for the above four formats.
-      applyOptimizer(response, imageFormat, jpegImageParams, image, config);
-    } catch (IOException ioe) {
-      if (LOG.isLoggable(Level.WARNING)) {
-        LOG.logp(Level.WARNING, classname, "rewrite", MessageKeys.IO_ERROR_REWRITING_IMG, new Object[] {request.toString(),ioe.getMessage()});
-      }
-    } catch (RuntimeException re) {
-      // This is safe to recover from and necessary because the ImageIO/Sanselan calls can
-      // throw a very wide variety of exceptions
-      if (LOG.isLoggable(Level.INFO)) {
-        LOG.logp(Level.INFO, classname, "rewrite", MessageKeys.UNKNOWN_ERROR_REWRITING_IMG, new Object[] {request.toString(),re.getMessage()});
-      }
-    } catch (ImageReadException ire) {
-      if (LOG.isLoggable(Level.INFO)) {
-        LOG.logp(Level.INFO, classname, "rewrite", MessageKeys.FAILED_TO_READ_IMG, new Object[] {request.toString(),ire.getMessage()});
-      }
-    }
-  }
+       // Step#5: Optimize the supported image formats viz PNG, GIF, JPG & BMP using 'BaseOptimizer'
+       // and it's subclass implementations for the above four formats.
+       applyOptimizer(response, imageFormat, jpegImageParams, image, config);
+     } catch (IOException ioe) {
+       if (LOG.isLoggable(Level.WARNING)) {
+         LOG.logp(Level.WARNING, classname, "rewrite", MessageKeys.IO_ERROR_REWRITING_IMG, new Object[] {request.toString(),ioe.getMessage()});
+       }
+     } catch (RuntimeException re) {
+       // This is safe to recover from and necessary because the ImageIO/Sanselan calls can
+       // throw a very wide variety of exceptions
+       if (LOG.isLoggable(Level.INFO)) {
+         LOG.logp(Level.INFO, classname, "rewrite", MessageKeys.UNKNOWN_ERROR_REWRITING_IMG, new Object[] {request.toString(),re.getMessage()});
+       }
+     } catch (ImageReadException ire) {
+       if (LOG.isLoggable(Level.INFO)) {
+         LOG.logp(Level.INFO, classname, "rewrite", MessageKeys.FAILED_TO_READ_IMG, new Object[] {request.toString(),ire.getMessage()});
+       }
+     }
+   }
 
   /**
    * If the image is resized, the request needs to change so that the optimizer can

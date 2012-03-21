@@ -18,12 +18,16 @@
  */
 package org.apache.shindig.gadgets.render;
 
-import com.google.common.base.Strings;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.apache.sanselan.ImageFormat;
 import org.apache.sanselan.ImageReadException;
 import org.apache.sanselan.Sanselan;
 import org.apache.sanselan.common.byteSources.ByteSourceInputStream;
 import org.apache.shindig.common.logging.i18n.MessageKeys;
+import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
@@ -33,10 +37,7 @@ import org.apache.shindig.gadgets.rewrite.DomWalker;
 import org.apache.shindig.gadgets.rewrite.ResponseRewriter;
 import org.apache.shindig.gadgets.uri.ProxyUriManager;
 
-import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
+import com.google.common.base.Strings;
 import com.google.inject.Inject;
 
 /**
@@ -63,7 +64,7 @@ public class SanitizingResponseRewriter implements ResponseRewriter {
     this.proxyUriManager = proxyUriManager;
   }
 
-  public void rewrite(HttpRequest request, HttpResponseBuilder resp) {
+  public void rewrite(HttpRequest request, HttpResponseBuilder resp, Gadget gadget) {
     // Content fetched through the proxy can stipulate that it must be sanitized.
     if (request.isSanitizationRequested() &&
         featureConfigFactory.get(request).shouldRewriteURL(request.getUri().toString())) {

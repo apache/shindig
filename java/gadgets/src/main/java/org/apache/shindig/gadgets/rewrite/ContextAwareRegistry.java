@@ -22,6 +22,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.Provider;
 
 import org.apache.shindig.config.ContainerConfig;
+import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
@@ -50,18 +51,6 @@ public class ContextAwareRegistry implements ResponseRewriterRegistry {
     this.htmlParser = htmlParser;
   }
 
-  public HttpResponse rewriteHttpResponse(HttpRequest req, HttpResponse resp)
-      throws RewritingException {
-    HttpResponseBuilder builder = new HttpResponseBuilder(htmlParser, resp);
-
-    for (ResponseRewriter rewriter : getResponseRewriters(req.getContainer())) {
-      rewriter.rewrite(req, builder);
-    }
-
-    // Returns the original HttpResponse if no changes have been made.
-    return builder.create();
-  }
-
   /**
    * Returns the list of response rewriters for the given container. Falls back
    * to the default container if no rewriters are present for the given
@@ -82,5 +71,16 @@ public class ContextAwareRegistry implements ResponseRewriterRegistry {
 
     return rewriterListProvider != null ? rewriterListProvider.get() :
                                           ImmutableList.<ResponseRewriter>of();
+  }
+
+  public HttpResponse rewriteHttpResponse(HttpRequest req, HttpResponse resp,
+          Gadget gadget) throws RewritingException {
+    HttpResponseBuilder builder = new HttpResponseBuilder(htmlParser, resp);
+    for (ResponseRewriter rewriter : getResponseRewriters(req.getContainer())) {
+      rewriter.rewrite(req, builder, gadget);
+    }
+
+    // Returns the original HttpResponse if no changes have been made.
+    return builder.create();
   }
 }

@@ -25,6 +25,7 @@ import com.google.common.collect.Maps;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.config.BasicContainerConfig;
 import org.apache.shindig.config.ContainerConfig;
+import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
@@ -76,8 +77,8 @@ public class HtmlAccelServletTest extends ServletTestFixture {
       contentToRewrite = s;
     }
     @Override
-    public void rewrite(HttpRequest request, HttpResponseBuilder original) {
-      super.rewrite(request, original);
+    public void rewrite(HttpRequest request, HttpResponseBuilder original, Gadget gadget) {
+      super.rewrite(request, original, gadget);
       if (!Strings.isNullOrEmpty(contentToRewrite)) {
         original.setResponse(contentToRewrite.getBytes());
       }
@@ -405,8 +406,8 @@ public class HtmlAccelServletTest extends ServletTestFixture {
   @Test
   public void testReturnOriginalResponseIfRewritingFails() throws Exception {
     ResponseRewriter throwingRewriter = new ResponseRewriter() {
-      public void rewrite(HttpRequest request, HttpResponseBuilder response)
-          throws RewritingException {
+      public void rewrite(HttpRequest request, HttpResponseBuilder response, Gadget gadget)
+              throws RewritingException {
         response.setContent(REWRITE_CONTENT);
         throw new RewritingException("", 404);
       }

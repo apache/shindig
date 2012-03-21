@@ -237,7 +237,7 @@ public class ConcatProxyServlet extends InjectedServlet {
             if (contentRewriterRegistry != null) {
               try {
                 httpResp = contentRewriterRegistry.rewriteHttpResponse(requestCxt.getHttpReq(),
-                        httpResp);
+                        httpResp, null);
               } catch (RewritingException e) {
                 throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, e,
                         e.getHttpStatusCode());

@@ -120,7 +120,7 @@ public class ProxyHandler {
 
     if (contentRewriterRegistry != null) {
       try {
-        results = contentRewriterRegistry.rewriteHttpResponse(rcr, results);
+        results = contentRewriterRegistry.rewriteHttpResponse(rcr, results, null);
       } catch (RewritingException e) {
         // Throw exception if the RETURN_ORIGINAL_CONTENT_ON_ERROR param is not
         // set to "true" or the error is irrecoverable from.

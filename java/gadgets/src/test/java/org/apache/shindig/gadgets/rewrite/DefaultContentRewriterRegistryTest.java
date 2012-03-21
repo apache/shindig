@@ -22,6 +22,7 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
@@ -54,7 +55,7 @@ public class DefaultContentRewriterRegistryTest extends BaseRewriterTestCase {
     HttpRequest request = new HttpRequest(SPEC_URL);
     HttpResponse response = new HttpResponse(body);
 
-    HttpResponse rewritten = registry.rewriteHttpResponse(request, response);
+    HttpResponse rewritten = registry.rewriteHttpResponse(request, response, null);
 
     assertTrue("First rewriter not invoked.", rewriters.get(0).responseWasRewritten());
     assertTrue("Second rewriter not invoked.", rewriters.get(1).responseWasRewritten());
@@ -72,8 +73,8 @@ public class DefaultContentRewriterRegistryTest extends BaseRewriterTestCase {
   public void testNoDecodeHttpResponseForUnRewriteableMimeTypes() throws Exception {
     List<ResponseRewriter> rewriters = Lists.newArrayList();
     rewriters.add(new ResponseRewriter() {
-      public void rewrite(HttpRequest request, HttpResponseBuilder response)
-          throws RewritingException {
+      public void rewrite(HttpRequest request, HttpResponseBuilder response, Gadget gadget)
+              throws RewritingException {
         // Do nothing.
       }
     });
@@ -83,7 +84,7 @@ public class DefaultContentRewriterRegistryTest extends BaseRewriterTestCase {
     EasyMock.expect(req.getRewriteMimeType()).andStubReturn("unknown");
 
     control.replay();
-    HttpResponse rewritten = registry.rewriteHttpResponse(req, fakeResponse.create());
+    HttpResponse rewritten = registry.rewriteHttpResponse(req, fakeResponse.create(), null);
     // Assert that response is untouched
     assertSame(rewritten, fakeResponse.create());
     control.verify();

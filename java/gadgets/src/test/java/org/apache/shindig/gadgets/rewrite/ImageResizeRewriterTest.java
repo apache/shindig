@@ -124,7 +124,7 @@ public class ImageResizeRewriterTest {
     HttpResponseBuilder builder = new HttpResponseBuilder(parser, resp);
 
     EasyMock.replay(config, featureConfig, factory);
-    rewriter.rewrite(req, builder);
+    rewriter.rewrite(req, builder, null);
     assertEquals(StringUtils.deleteWhitespace(expected),
                  StringUtils.deleteWhitespace(builder.getContent()));
     EasyMock.verify(config, featureConfig, factory);

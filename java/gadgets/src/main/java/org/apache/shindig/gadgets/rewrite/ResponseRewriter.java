@@ -17,6 +17,8 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
+import org.apache.shindig.common.Nullable;
+import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 
@@ -26,5 +28,14 @@ import org.apache.shindig.gadgets.http.HttpResponseBuilder;
  * @since 2.0.0
  */
 public interface ResponseRewriter {
-  public void rewrite(HttpRequest request, HttpResponseBuilder response) throws RewritingException;
+
+  /**
+   * Rewrites the response.
+   * @param request  The request that was made.
+   * @param response The response generated as a result of the request.
+   * @param gadget The gadget that made the request.  This parameter may be null.
+   * @throws RewritingException Thrown if something went wrong when rewriting the response.
+   */
+  public void rewrite(HttpRequest request, HttpResponseBuilder response, @Nullable Gadget gadget)
+          throws RewritingException;
 }

@@ -18,38 +18,45 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.JsonProperty;
+import org.apache.shindig.common.logging.i18n.MessageKeys;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.gadgets.AuthType;
 import org.apache.shindig.gadgets.FeedProcessor;
+import org.apache.shindig.gadgets.Gadget;
+import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.RequestPipeline;
 import org.apache.shindig.gadgets.oauth.OAuthArguments;
 import org.apache.shindig.gadgets.oauth2.OAuth2Arguments;
+import org.apache.shindig.gadgets.process.ProcessingException;
+import org.apache.shindig.gadgets.process.Processor;
 import org.apache.shindig.gadgets.rewrite.ResponseRewriterList.RewriteFlow;
 import org.apache.shindig.gadgets.rewrite.ResponseRewriterRegistry;
 import org.apache.shindig.gadgets.rewrite.RewriterRegistry;
 import org.apache.shindig.gadgets.rewrite.RewritingException;
+import org.apache.shindig.gadgets.uri.UriCommon.Param;
 import org.apache.shindig.protocol.BaseRequestItem;
 import org.apache.shindig.protocol.Operation;
 import org.apache.shindig.protocol.ProtocolException;
 import org.apache.shindig.protocol.Service;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
-
-import javax.servlet.http.HttpServletResponse;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
@@ -101,18 +108,24 @@ public class HttpRequestHandler {
 
   static final Set<String> BAD_HEADERS = ImmutableSet.of("HOST", "ACCEPT-ENCODING");
 
+  private static final String CLASSNAME = HttpRequestHandler.class.getName();
+  private static final Logger LOG = Logger.getLogger(CLASSNAME, MessageKeys.MESSAGES);
+
   private final RequestPipeline requestPipeline;
   private final ResponseRewriterRegistry contentRewriterRegistry;
   private final Provider<FeedProcessor> feedProcessorProvider;
+  private final Processor processor;
 
   @Inject
   public HttpRequestHandler(RequestPipeline requestPipeline,
       @RewriterRegistry(rewriteFlow = RewriteFlow.DEFAULT)
       ResponseRewriterRegistry contentRewriterRegistry,
-      Provider<FeedProcessor> feedProcessorProvider) {
+      Provider<FeedProcessor> feedProcessorProvider,
+      Processor processor) {
     this.requestPipeline = requestPipeline;
     this.contentRewriterRegistry = contentRewriterRegistry;
     this.feedProcessorProvider = feedProcessorProvider;
+    this.processor = processor;
   }
 
 
@@ -168,7 +181,7 @@ public class HttpRequestHandler {
    * @param requestItem TODO
    */
   private HttpApiResponse execute(String method, HttpApiRequest httpApiRequest,
-      BaseRequestItem requestItem) {
+      final BaseRequestItem requestItem) {
     if (httpApiRequest.href == null) {
       throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST, "href parameter is missing");
     }
@@ -192,7 +205,7 @@ public class HttpRequestHandler {
       }
 
       // Extract the gadget URI from the request or the security token
-      Uri gadgetUri = getGadgetUri(requestItem.getToken(), httpApiRequest);
+      final Uri gadgetUri = getGadgetUri(requestItem.getToken(), httpApiRequest);
       if (gadgetUri == null) {
         throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST,
             "Gadget URI not specified in request");
@@ -239,10 +252,48 @@ public class HttpRequestHandler {
         req.setCacheTtl(httpApiRequest.refreshInterval);
       }
 
+      final HttpRequest request = req;
       HttpResponse results = requestPipeline.execute(req);
+      GadgetContext context = new GadgetContext() {
+        @Override
+        public Uri getUrl() {
+          return gadgetUri;
+        }
+
+        @Override
+        public String getParameter(String key) {
+          return request.getParam(key);
+        }
+
+        @Override
+        public boolean getIgnoreCache() {
+          return request.getIgnoreCache();
+        }
+
+        @Override
+        public String getContainer() {
+          return requestItem.getToken().getContainer();
+        }
+
+        @Override
+        public boolean getDebug() {
+          return "1".equalsIgnoreCase(getParameter(Param.DEBUG.getKey()));
+        }
+      };
       // TODO: os:HttpRequest and Preload do not use the content rewriter.
       // Should we really do so here?
-      results = contentRewriterRegistry.rewriteHttpResponse(req, results);
+      try {
+        Gadget gadget = processor.process(context);
+        results = contentRewriterRegistry.rewriteHttpResponse(req, results, gadget);
+      } catch (ProcessingException e) {
+        //If there is an error creating the gadget object just rewrite the content without
+        //the gadget object.  This will result in any content rewrite params not being
+        //honored, but its better than the request failing all together.
+        if(LOG.isLoggable(Level.WARNING)) {
+          LOG.logp(Level.WARNING, CLASSNAME, "execute", MessageKeys.GADGET_CREATION_ERROR, e);
+        }
+        results = contentRewriterRegistry.rewriteHttpResponse(req, results, null);
+      }
 
       HttpApiResponse httpApiResponse = new HttpApiResponse(results,
           transformBody(httpApiRequest, results),

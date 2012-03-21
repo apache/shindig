@@ -114,7 +114,7 @@ public class ProxyHandlerTest extends EasyMockTestCase {
       }
 
       @Override
-      public void rewrite(HttpRequest request, HttpResponseBuilder builder)
+      public void rewrite(HttpRequest request, HttpResponseBuilder builder, Gadget gadget)
           throws RewritingException {
         stringBuilder.append("exceptionThrown");
         throw new RewritingException("sad", 404);

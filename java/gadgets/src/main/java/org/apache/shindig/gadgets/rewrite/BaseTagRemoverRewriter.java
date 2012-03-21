@@ -54,10 +54,13 @@ public class BaseTagRemoverRewriter implements GadgetRewriter, ResponseRewriter 
     mc.documentChanged();
   }
 
-  public void rewrite(HttpRequest request, HttpResponseBuilder response) {
+  public void rewrite(HttpRequest request, HttpResponseBuilder response, Gadget gadget)
+          throws RewritingException {
     if (RewriterUtils.isHtml(request, response)) {
-      Gadget context = DomWalker.makeGadget(request);
-      rewrite(context, response);
+      if(gadget == null) {
+        gadget = DomWalker.makeGadget(request);
+      }
+      rewrite(gadget, response);
     }
   }
 }

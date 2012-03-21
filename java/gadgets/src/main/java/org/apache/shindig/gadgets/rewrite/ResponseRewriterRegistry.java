@@ -17,6 +17,7 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
+import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 
@@ -35,9 +36,10 @@ public interface ResponseRewriterRegistry {
    * using the registered rewriters.
    * @param req Request object for context.
    * @param resp Original response object.
+   * @param gadget Gadget that may have been making the request.
    * @return Rewritten response object, or resp if not modified.
    * @throws RewritingException In case of errors.
    */
-  HttpResponse rewriteHttpResponse(HttpRequest req, HttpResponse resp)
+  HttpResponse rewriteHttpResponse(HttpRequest req, HttpResponse resp, Gadget gadget)
     throws RewritingException;
 }

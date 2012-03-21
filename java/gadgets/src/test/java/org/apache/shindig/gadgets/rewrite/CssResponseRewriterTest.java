@@ -17,14 +17,18 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
+import static org.junit.Assert.assertEquals;
+
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.util.List;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.config.BasicContainerConfig;
 import org.apache.shindig.config.ContainerConfig;
+import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
@@ -35,11 +39,9 @@ import org.easymock.EasyMock;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.util.List;
-
-import static org.junit.Assert.assertEquals;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 
 /**
  * Tests for CssResponseRewriter.
@@ -106,8 +108,7 @@ public class CssResponseRewriterTest extends RewriterTestBase {
     };
   }
 
-  @Test
-  public void testCssBasic() throws Exception {
+  private void testCssBasic(Gadget gadget) throws Exception {
     String content = IOUtils.toString(this.getClass().getClassLoader().
         getResourceAsStream("org/apache/shindig/gadgets/rewrite/rewritebasic.css"));
     String expected = IOUtils.toString(this.getClass().getClassLoader().
@@ -118,14 +119,26 @@ public class CssResponseRewriterTest extends RewriterTestBase {
 
     HttpResponseBuilder response = new HttpResponseBuilder().setHeader("Content-Type", "text/css")
         .setResponseString(content);
-    rewriter.rewrite(request, response);
+
+    rewriter.rewrite(request, response, gadget);
 
     assertEquals(StringUtils.deleteWhitespace(expected),
         StringUtils.deleteWhitespace(response.getContent()));
   }
 
   @Test
-  public void testCssBasicNoOverrideExpires() throws Exception {
+  public void testCssBasicGadget() throws Exception {
+    Gadget gadget = mockGadget();
+    control.replay();
+    testCssBasic(gadget);
+  }
+
+  @Test
+  public void testCssBasicNoGadget() throws Exception {
+    testCssBasic(null);
+  }
+
+  private void testCssBasicNoOverrideExpires(Gadget gadget) throws Exception {
     String content = IOUtils.toString(this.getClass().getClassLoader().
         getResourceAsStream("org/apache/shindig/gadgets/rewrite/rewritebasic.css"));
     String expected = IOUtils.toString(this.getClass().getClassLoader().
@@ -137,14 +150,26 @@ public class CssResponseRewriterTest extends RewriterTestBase {
 
     HttpResponseBuilder response = new HttpResponseBuilder().setHeader("Content-Type", "text/css")
       .setResponseString(content);
-    rewriterNoOverrideExpires.rewrite(request, response);
+
+    rewriterNoOverrideExpires.rewrite(request, response, gadget);
 
     assertEquals(StringUtils.deleteWhitespace(expected),
         StringUtils.deleteWhitespace(response.getContent()));
   }
 
   @Test
-  public void testCssBasicNoCache() throws Exception {
+  public void testCssBasicNoOverrideExpiresGadget() throws Exception {
+    Gadget gadget = mockGadget();
+    control.replay();
+    testCssBasicNoOverrideExpires(gadget);
+  }
+
+  @Test
+  public void testCssBasicNoOverrideExpiresNoGadget() throws Exception {
+    testCssBasicNoOverrideExpires(null);
+  }
+
+  private void testCssBasicNoCache(Gadget gadget) throws Exception {
     String content = IOUtils.toString(this.getClass().getClassLoader().
         getResourceAsStream("org/apache/shindig/gadgets/rewrite/rewritebasic.css"));
     String expected = IOUtils.toString(this.getClass().getClassLoader().
@@ -157,14 +182,26 @@ public class CssResponseRewriterTest extends RewriterTestBase {
 
     HttpResponseBuilder response = new HttpResponseBuilder().setHeader("Content-Type", "text/css")
       .setResponseString(content);
-    rewriter.rewrite(request, response);
+
+    rewriter.rewrite(request, response, gadget);
 
     assertEquals(StringUtils.deleteWhitespace(expected),
         StringUtils.deleteWhitespace(response.getContent()));
   }
 
   @Test
-  public void testCssWithContainerProxy() throws Exception {
+  public void testCssBasicNoCacheGadget() throws Exception {
+    Gadget gadget = mockGadget();
+    control.replay();
+    testCssBasicNoCache(gadget);
+  }
+
+  @Test
+  public void testCssBasicNoCacheNoGadget() throws Exception {
+    testCssBasicNoCache(null);
+  }
+
+  private void testCssWithContainerProxy(Gadget gadget) throws Exception {
     String content = IOUtils.toString(this.getClass().getClassLoader().
         getResourceAsStream("org/apache/shindig/gadgets/rewrite/rewritebasic.css"));
     String expected = IOUtils.toString(this.getClass().getClassLoader().
@@ -182,38 +219,64 @@ public class CssResponseRewriterTest extends RewriterTestBase {
     HttpResponseBuilder response = new HttpResponseBuilder().setHeader("Content-Type", "text/css")
       .setResponseString(content);
 
-    rewriter.rewrite(request, response);
+    rewriter.rewrite(request, response, gadget);
 
     assertEquals(StringUtils.deleteWhitespace(expected),
         StringUtils.deleteWhitespace(response.getContent()));
   }
 
   @Test
-  public void testNoRewriteUnknownMimeType() throws Exception {
+  public void testCssWithContainerProxyGadget() throws Exception {
+    Gadget gadget = mockGadget();
+    control.replay();
+    testCssWithContainerProxy(gadget);
+  }
+
+  @Test
+  public void testCssWithContainerProxyNoGadget() throws Exception {
+    testCssWithContainerProxy(null);
+  }
+
+  private void testNoRewriteUnknownMimeType(Gadget gadget) throws Exception {
     HttpRequest req = control.createMock(HttpRequest.class);
     EasyMock.expect(req.getRewriteMimeType()).andReturn("unknown");
     control.replay();
     int changesBefore = fakeResponse.getNumChanges();
-    rewriter.rewrite(req, fakeResponse);
+
+    rewriter.rewrite(req, fakeResponse, gadget);
     assertEquals(changesBefore, fakeResponse.getNumChanges());
     control.verify();
   }
 
-  private void validateRewritten(String content, Uri base, String expected) throws Exception {
+  @Test
+  public void testNoRewriteUnknownMimeTypeGadget() throws Exception {
+    Gadget gadget = mockGadget();
+    testNoRewriteUnknownMimeType(gadget);
+  }
+
+  @Test
+  public void testNoRewriteUnknownMimeTypeNoGadget() throws Exception {
+    testNoRewriteUnknownMimeType(null);
+  }
+
+  private void validateRewritten(String content, Uri base, String expected, Gadget gadget) throws Exception {
     HttpResponseBuilder response = new HttpResponseBuilder().setHeader("Content-Type", "text/css");
     response.setContent(content);
     HttpRequest request = new HttpRequest(base);
-    rewriter.rewrite(request, response);
+    if(gadget == null) {
+      rewriter.rewrite(request, response, gadget);
+    } else {
+      rewriter.rewrite(request, response, gadget);
+    }
     assertEquals(StringUtils.deleteWhitespace(expected),
         StringUtils.deleteWhitespace(response.getContent()));
   }
 
-  private void validateRewritten(String content, String expected) throws Exception {
-    validateRewritten(content, dummyUri, expected);
+  private void validateRewritten(String content, String expected, Gadget gadget) throws Exception {
+    validateRewritten(content, dummyUri, expected, gadget);
   }
 
-  @Test
-  public void testUrlDeclarationRewrite() throws Exception {
+  public void testUrlDeclarationRewrite(Gadget gadget) throws Exception {
     String original =
         "div {list-style-image:url('http://a.b.com/bullet.gif');list-style-position:outside;margin:5px;padding:0}\n" +
          ".someid {background-image:url(http://a.b.com/bigimg.png);float:right;width:165px;height:23px;margin-top:4px;margin-left:5px}";
@@ -226,9 +289,20 @@ public class CssResponseRewriterTest extends RewriterTestBase {
             + "&gadget=http%3A%2F%2Fwww.w3c.org&debug=0&nocache=0"
             + "&url=http%3A%2F%2Fa.b.com%2Fbigimg.png');\n"
             + "float:right;width:165px;height:23px;margin-top:4px;margin-left:5px}";
-    validateRewritten(original, rewritten);
+    validateRewritten(original, rewritten, gadget);
   }
 
+  @Test
+  public void testUrlDeclarationRewriteGadget() throws Exception {
+    Gadget gadget = mockGadget();
+    control.replay();
+    testUrlDeclarationRewrite(gadget);
+  }
+
+  @Test
+  public void testUrlDeclarationRewriteNoGadget() throws Exception {
+    testUrlDeclarationRewrite(null);
+  }
   @Test
   public void testExtractImports() throws Exception {
     String original = " @import url(www.example.org/some.css);\n" +

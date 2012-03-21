@@ -17,6 +17,7 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
+import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
@@ -48,12 +49,12 @@ public class DefaultResponseRewriterRegistry implements ResponseRewriterRegistry
   }
 
   /** {@inheritDoc} */
-  public HttpResponse rewriteHttpResponse(HttpRequest req, HttpResponse resp)
-      throws RewritingException {
+  public HttpResponse rewriteHttpResponse(HttpRequest req, HttpResponse resp, Gadget gadget)
+          throws RewritingException {
     HttpResponseBuilder builder = new HttpResponseBuilder(htmlParser, resp);
 
     for (ResponseRewriter rewriter : rewriters) {
-      rewriter.rewrite(req, builder);
+      rewriter.rewrite(req, builder, gadget);
     }
 
     // Returns the original HttpResponse if no changes have been made.

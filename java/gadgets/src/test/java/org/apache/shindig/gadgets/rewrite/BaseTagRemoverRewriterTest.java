@@ -18,35 +18,37 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
+import static org.junit.Assert.assertEquals;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.parse.ParseModule;
 import org.apache.shindig.gadgets.parse.caja.CajaHtmlParser;
-import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
 
 /**
  * Test case for BaseTagRemoverRewriter.
  */
-public class BaseTagRemoverRewriterTest {
+public class BaseTagRemoverRewriterTest extends RewriterTestBase {
   BaseTagRemoverRewriter rewriter;
 
   CajaHtmlParser parser;
   ParseModule.DOMImplementationProvider domImpl;
 
   @Before
-  public void setUp() {
+  public void setUp() throws Exception {
+    super.setUp();
     rewriter = new BaseTagRemoverRewriter();
     domImpl = new ParseModule.DOMImplementationProvider();
     parser = new CajaHtmlParser(domImpl.get());
   }
 
-  @Test
-  public void testRemoveBaseTag() throws Exception {
+  public void testRemoveBaseTag(Gadget gadget) throws Exception {
     String content = "<html><head><base href='http://www.ppq.com/'>"
                      + "</head><body>"
                      + "<img src='/img1.png'>"
@@ -64,14 +66,25 @@ public class BaseTagRemoverRewriterTest {
         .create();
     HttpResponseBuilder builder = new HttpResponseBuilder(parser, resp);
 
-    rewriter.rewrite(req, builder);
+    rewriter.rewrite(req, builder, gadget);
 
     assertEquals(StringUtils.deleteWhitespace(expected),
                  StringUtils.deleteWhitespace(builder.getContent()));
   }
 
   @Test
-  public void testNoBaseTag() throws Exception {
+  public void testRemoveBaseTagGadget() throws Exception {
+    Gadget gadget = mockGadget();
+    control.replay();
+    testRemoveBaseTag(gadget);
+  }
+
+  @Test
+  public void testRemoveBaseTagNoGadget() throws Exception {
+    testRemoveBaseTag(null);
+  }
+
+  public void testNoBaseTag(Gadget gadget) throws Exception {
     String content = "<html><head>"
                      + "</head><body>"
                      + "<img src='/img1.png'>"
@@ -89,14 +102,25 @@ public class BaseTagRemoverRewriterTest {
         .create();
     HttpResponseBuilder builder = new HttpResponseBuilder(parser, resp);
 
-    rewriter.rewrite(req, builder);
+    rewriter.rewrite(req, builder, gadget);
 
     assertEquals(StringUtils.deleteWhitespace(expected),
                  StringUtils.deleteWhitespace(builder.getContent()));
   }
 
   @Test
-  public void testContentTypeString() throws Exception {
+  public void testNoBaseTagGadget() throws Exception {
+    Gadget gadget = mockGadget();
+    control.replay();
+    testNoBaseTag(gadget);
+  }
+
+  @Test
+  public void testNoBaseTagNoGadget() throws Exception {
+    testNoBaseTag(null);
+  }
+
+  public void testContentTypeString(Gadget gadget) throws Exception {
     String content = "Hello world. My name is gagan<html><head>"
                      + "<base href='http://hello.com/'></head><body>"
                      + "<img src='/img1.png'>"
@@ -114,14 +138,25 @@ public class BaseTagRemoverRewriterTest {
         .create();
     HttpResponseBuilder builder = new HttpResponseBuilder(parser, resp);
 
-    rewriter.rewrite(req, builder);
+    rewriter.rewrite(req, builder, gadget);
 
     assertEquals(StringUtils.deleteWhitespace(expected),
                  StringUtils.deleteWhitespace(builder.getContent()));
   }
 
   @Test
-  public void testContentTypeXml() throws Exception {
+  public void testContentTypeStringGadget() throws Exception {
+    Gadget gadget = mockGadget();
+    control.replay();
+    testContentTypeString(gadget);
+  }
+
+  @Test
+  public void testContentTypeStringNoGadget() throws Exception {
+    testContentTypeString(null);
+  }
+
+  public void testContentTypeXml(Gadget gadget) throws Exception {
     String content = "Hello world. My name is gagan<html><head>"
                      + "<base href='http://hello.com/'></head><body>"
                      + "<img src='/img1.png'>"
@@ -139,9 +174,21 @@ public class BaseTagRemoverRewriterTest {
         .create();
     HttpResponseBuilder builder = new HttpResponseBuilder(parser, resp);
 
-    rewriter.rewrite(req, builder);
+    rewriter.rewrite(req, builder, gadget);
 
     assertEquals(StringUtils.deleteWhitespace(expected),
                  StringUtils.deleteWhitespace(builder.getContent()));
+  }
+
+  @Test
+  public void testContentTypeXmlGadget() throws Exception {
+    Gadget gadget = mockGadget();
+    control.replay();
+    testContentTypeString(gadget);
+  }
+
+  @Test
+  public void testContentTypeXmlNoGadget() throws Exception {
+    testContentTypeString(null);
   }
 }

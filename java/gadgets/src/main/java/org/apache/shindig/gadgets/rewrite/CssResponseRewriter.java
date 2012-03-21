@@ -22,6 +22,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shindig.common.logging.i18n.MessageKeys;
 import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpRequest;
@@ -72,7 +73,8 @@ public class CssResponseRewriter implements ResponseRewriter {
     this.rewriterFeatureFactory = rewriterFeatureFactory;
   }
 
-  public void rewrite(HttpRequest request, HttpResponseBuilder original) throws RewritingException {
+  public void rewrite(HttpRequest request, HttpResponseBuilder original, Gadget gadget)
+          throws RewritingException {
     ContentRewriterFeature.Config config = rewriterFeatureFactory.get(request);
     if (!RewriterUtils.isCss(request, original)) {
       return;
