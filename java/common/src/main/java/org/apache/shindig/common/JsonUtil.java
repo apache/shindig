@@ -47,7 +47,7 @@ public final class JsonUtil {
           ImmutableMap.Builder<String,Method> methods = ImmutableMap.builder();
 
           for (Method method : clazz.getMethods()) {
-            if (method.getParameterTypes().length == 0) {
+            if (method.getParameterTypes().length == 0 && !method.isSynthetic()) {
               String name = getPropertyName(method);
               if (name != null) {
                 methods.put(name, method);

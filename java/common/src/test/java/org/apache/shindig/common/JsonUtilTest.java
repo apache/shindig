@@ -61,4 +61,22 @@ public class JsonUtilTest {
     assertNull(JsonUtil.getProperty(pojo, "class"));
     assertNull(JsonUtil.getProperty(pojo, "declaringClass"));
   }
+
+  private class DuplicateBase<type> {
+    public type getValue() {
+      return null;
+    }
+  }
+
+  private class Duplicate extends DuplicateBase<String> {
+    public String getValue() {
+      return "duplicate";
+    }
+  }
+
+  @Test
+  public void duplicateMethodPojo() throws Exception {
+    Duplicate pojo = new Duplicate();
+    assertEquals("duplicate", JsonUtil.getProperty(pojo, "value"));
+  }
 }
