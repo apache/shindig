@@ -57,7 +57,7 @@ import com.google.javascript.jscomp.CompilationLevel;
 import com.google.javascript.jscomp.Compiler;
 import com.google.javascript.jscomp.CompilerOptions;
 import com.google.javascript.jscomp.JSError;
-import com.google.javascript.jscomp.JSSourceFile;
+import com.google.javascript.jscomp.SourceFile;
 import com.google.javascript.jscomp.Result;
 import com.google.javascript.jscomp.SourceMap;
 
@@ -78,7 +78,7 @@ public class ClosureJsCompiler implements JsCompiler {
 
   private final DefaultJsCompiler defaultCompiler;
   private final Cache<String, JsResponse> cache;
-  private final List<JSSourceFile> defaultExterns;
+  private final List<SourceFile> defaultExterns;
   private final String compileLevel;
   private final CompilerOptions compilerOptions;
 
@@ -87,7 +87,7 @@ public class ClosureJsCompiler implements JsCompiler {
       @Named("shindig.closure.compile.level") String level) {
     this.cache = cacheProvider.createCache(CACHE_NAME);
     this.defaultCompiler = defaultCompiler;
-    List<JSSourceFile> externs = null;
+    List<SourceFile> externs = null;
     try {
       externs = Collections.unmodifiableList(CommandLineRunner.getDefaultExterns());
     } catch(IOException e) {
@@ -190,8 +190,8 @@ public class ClosureJsCompiler implements JsCompiler {
 
     CompilerOptions options = getCompilerOptions(jsUri);
 
-    List<JSSourceFile> allExterns = Lists.newArrayList();
-    allExterns.add(JSSourceFile.fromCode("externs", externs));
+    List<SourceFile> allExterns = Lists.newArrayList();
+    allExterns.add(SourceFile.fromCode("externs", externs));
     if (defaultExterns != null) {
       allExterns.addAll(defaultExterns);
     }
@@ -263,17 +263,17 @@ public class ClosureJsCompiler implements JsCompiler {
     return false;
   }
 
-  private List<JSSourceFile> convertToJsSource(Iterable<JsContent> content) {
+  private List<SourceFile> convertToJsSource(Iterable<JsContent> content) {
     Map<String, Integer> sourceMap = Maps.newHashMap();
-    List<JSSourceFile> sources = Lists.newLinkedList();
+    List<SourceFile> sources = Lists.newLinkedList();
     for (JsContent src : content) {
-      sources.add(JSSourceFile.fromCode(getUniqueSrc(src.getSource(), sourceMap), src.get()));
+      sources.add(SourceFile.fromCode(getUniqueSrc(src.getSource(), sourceMap), src.get()));
     }
     return sources;
   }
 
   // Return a unique string to represent the inbound "source" parameter.
-  // Closure Compiler errors out when two JSSourceFiles with the same name are
+  // Closure Compiler errors out when two SourceFiles with the same name are
   // provided, so this method tracks the currently-used source names (in the
   // provided sourceMap) and ensures that a unique name is returned.
   private static String getUniqueSrc(String source, Map<String, Integer> sourceMap) {
