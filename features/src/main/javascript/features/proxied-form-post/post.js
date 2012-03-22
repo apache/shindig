@@ -59,7 +59,7 @@
     }
 
     try {
-      var doc = iframe.contentDocument || iframe.document,
+      var doc = iframe.contentDocument || iframe.contentWindow.document || iframe.document,
           data = doc.getElementsByTagName('textarea')[0].value;
     } catch (e) {}
     var xhrobj = {
