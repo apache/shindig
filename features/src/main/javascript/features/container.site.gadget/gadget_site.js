@@ -16,13 +16,11 @@
  * specific language governing permissions and limitations under the License.
  */
 
-
 /**
  * @fileoverview This manages rendering of gadgets in a place holder, within an
  * HTML element in the container. The API for this is low-level. Use the
  * container APIs to work with gadget sites.
  */
-
 
 /**
  * @param {osapi.container.Container} container The container that hosts this gadget site.
@@ -85,6 +83,7 @@ osapi.container.GadgetSite = function(container, service, args) {
 
   this.onConstructed();
 };
+
 osapi.container.GadgetSite.prototype = new osapi.container.Site;
 
 /**
