@@ -133,10 +133,6 @@ osapi.container.Site.prototype.setHeight = function(value) {
  * Closes this site.
  */
 osapi.container.Site.prototype.close = function() {
-  if (this.el_ && this.el_.firstChild) {
-    this.el_.removeChild(this.el_.firstChild);
-  }
-
   var holder = this.getActiveSiteHolder();
   holder && holder.dispose();
 };

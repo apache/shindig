@@ -47,6 +47,7 @@ osapi.container.UrlHolder.prototype = new osapi.container.SiteHolder;
  * @inheridDoc
  */
 osapi.container.UrlHolder.prototype.dispose = function() {
+  osapi.container.SiteHolder.prototype.dispose.call(this); // super.dispose();
   this.url_ = null;
 };
 

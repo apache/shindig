@@ -366,14 +366,12 @@ osapi.container.GadgetSite.prototype.updateSecurityToken_ =
  * @inheritDoc
  */
 osapi.container.GadgetSite.prototype.close = function() {
-  osapi.container.Site.prototype.close.call(this); // super.close();
-  if (this.loadingGadgetEl_ && this.loadingGadgetEl_.firstChild) {
-    this.loadingGadgetEl_.removeChild(this.loadingGadgetEl_.firstChild);
+  if (this.loadingGadgetHolder_) {
+    this.loadingGadgetHolder_.dispose();
   }
-
-  // dispose of our other holder.
-  var holder = this.getActiveSiteHolder();
-  holder && holder.dispose();
+  if (this.currentGadgetHolder_) {
+    this.currentGadgetHolder_.dispose();
+  }
 };
 
 /**

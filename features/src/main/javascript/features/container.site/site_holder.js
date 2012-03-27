@@ -139,15 +139,17 @@ osapi.container.SiteHolder.prototype.createIframeAttributeMap = function(url, ov
    return params;
 };
 
-//Abstract methods
-
 /**
  * Disposes the gadget holder and performs cleanup of any holder state.
  * @abstract
  */
 osapi.container.SiteHolder.prototype.dispose = function() {
-  throw new Error("This method must be implemented by a subclass.");
+  if (this.el_ && this.el_.firstChild) {
+    this.el_.removeChild(this.el_.firstChild);
+  }
 };
+
+//Abstract methods
 
 /**
  * Gets the iFrame element itself.

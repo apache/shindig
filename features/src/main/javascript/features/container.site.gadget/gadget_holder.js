@@ -81,6 +81,7 @@ osapi.container.GadgetHolder.prototype.getGadgetInfo = function() {
  * @inheritDoc
  */
 osapi.container.GadgetHolder.prototype.dispose = function() {
+  osapi.container.SiteHolder.prototype.dispose.call(this); // super.dispose();
   this.gadgetInfo_ = null;
 };
 
@@ -129,8 +130,7 @@ osapi.container.GadgetHolder.prototype.setSecurityToken = function(value) {
  * @param {Object} viewParams Look at osapi.container.ViewParam.
  * @param {Object} renderParams Look at osapi.container.RenderParam.
  */
-osapi.container.GadgetHolder.prototype.render = function(
-    gadgetInfo, viewParams, renderParams) {
+osapi.container.GadgetHolder.prototype.render = function(gadgetInfo, viewParams, renderParams) {
   this.iframeId_ = osapi.container.GadgetHolder.IFRAME_ID_PREFIX_ +
       this.site_.getId();
   this.gadgetInfo_ = gadgetInfo;

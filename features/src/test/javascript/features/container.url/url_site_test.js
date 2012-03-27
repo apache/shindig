@@ -91,6 +91,7 @@ UrlSiteTest.prototype.testClose = function() {
     "urlEl" : el
   };
   var site = new osapi.container.UrlSite(null, null, args);
+  site.render("http://example.com", {});
   site.close();
   this.assertEquals("removedFirstChild", el.firstChild);
 }
