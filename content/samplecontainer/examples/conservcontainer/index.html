@@ -125,17 +125,20 @@
 		     }
 
 		     function select(id) {
-		     	if (selected_id != null) {
-		     		unselect = selected_id;
-		     		selected_id = null;
-		     		unhighlight(unselect);
-		     	}
-		     	selected_id = id;
-		     	element = document.getElementById("person_"+id);
-				element.style.background = "#CCC";
+		     	 if (selected_id != null) {
+		     		 unselect = selected_id;
+		     		 selected_id = null;
+		     		 unhighlight(unselect);
+		     	 }
+		     	 selected_id = id;
+		     	 element = document.getElementById("person_"+id);
+				   element.style.background = "#CCC";
 				
-				// set selection
-				setSelection([allPeople[id]]);
+				   // set selection
+				   setSelection([{
+				     type: 'opensocial.Person',
+				     dataObject: allPeople[id]
+				   }]);
 		     }
 
 		     function render(data) {
@@ -181,7 +184,7 @@
 		     }
 		
 		     function initData() {
-		       var fields = ['id','age','name','gender','profileUrl','thumbnailUrl'];
+		       var fields = ['id', 'displayName', 'age','name','gender','profileUrl','thumbnailUrl'];
 		       var batch = osapi.newBatch();
 		       batch.add('viewer', osapi.people.getViewer({sortBy:'name',fields:fields}));
 		       batch.add('viewerFriends', osapi.people.getViewerFriends({sortBy:'name',fields:fields}));
