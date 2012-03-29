@@ -351,10 +351,9 @@ osapi.container.GadgetSite.prototype.rpcCall = function(
  * @param {Object} renderParams Look at osapi.container.RenderParam.
  * @private
  */
-osapi.container.GadgetSite.prototype.updateSecurityToken_ =
-    function(gadgetInfo, renderParams) {
+osapi.container.GadgetSite.prototype.updateSecurityToken_ = function(gadgetInfo, renderParams) {
   var url = osapi.container.util.buildTokenRequestUrl(gadgetInfo['url'], this.moduleId_),
-      tokenInfo = this.service_.getCachedGadgetToken(url);
+    tokenInfo = this.service_.getCachedGadgetToken(url);
 
   if (tokenInfo) {
     var token = tokenInfo[osapi.container.TokenResponse.TOKEN];
