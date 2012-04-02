@@ -115,8 +115,8 @@ public class CajaContentRewriter implements GadgetRewriter {
     } else {
       this.moduleCache = cacheProvider.createCache(CAJOLED_MODULES);
     }
-    if (LOG.isLoggable(Level.INFO)) {
-      LOG.logp(Level.INFO, CLASS_NAME, "CajaContentRewriter", MessageKeys.CAJOLED_CACHE_CREATED,
+    if (LOG.isLoggable(Level.FINE)) {
+      LOG.logp(Level.FINE, CLASS_NAME, "CajaContentRewriter", MessageKeys.CAJOLED_CACHE_CREATED,
                new Object[] {moduleCache});
     }
     this.requestPipeline = requestPipeline;
