@@ -353,7 +353,7 @@
       }
     }
     return response;
-  };
+  }
 
   /**
    * Container handling of an action that has been programmatically added via
@@ -377,7 +377,7 @@
         delete pendingActions[actionId];
       }
     }
-  };
+  }
 
   /**
    * Adds the action to the action registry, and renders the action in the
@@ -411,7 +411,7 @@
         }
       }
     }
-  };
+  }
 
   /**
    * Removes the action from the action registry, and removes the action from
@@ -441,7 +441,7 @@
         }
       }
     }
-  };
+  }
 
   /**
    * A map of all listeners.
@@ -497,7 +497,7 @@
         }
       }
     }
-  };
+  }
 
   /**
    * Fix list of actions from actions contributions to check if it has been wrapped with <actions>
@@ -522,7 +522,7 @@
      actions = "<actions>" + actions + "</actions>";
     }
     return actions;
-  };
+  }
 
   /**
    * Callback for loading actions after gadget has been preloaded.
