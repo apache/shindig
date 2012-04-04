@@ -337,17 +337,17 @@
       dom.validateOnParse = false;
       dom.resolveExternals = false;
       if (!dom.loadXML(xmlString)) {
-        response['errors'].push('500 Failed to parse XML');
-        response['rc'] = 500;
+        response.errors = "500 Failed to parse XML";
+        response.rc = 500;
       } else {
         response['data'] = dom;
       }
     } else {
       var parser = new DOMParser();
-      dom = parser.parseFromString(xmlString, 'text/xml');
+      dom = parser.parseFromString(xmlString, 'application/xml');
       if ('parsererror' === dom.documentElement.nodeName) {
-        response['errors'].push('500 Failed to parse XML');
-        response['rc'] = 500;
+        response.errors = "500 Failed to parse XML";
+        response.rc = 500;
       } else {
         response['data'] = dom;
       }
@@ -500,6 +500,31 @@
   };
 
   /**
+   * Fix list of actions from actions contributions to check if it has been wrapped with <actions>
+   * tag to avoid DOM parser error.
+   *
+   * @param {string} actionsContributionsParam the string containing the action tags
+   * @return {string} the corrected actions list wrapped with <actions> tag to avoid DOM parser error.
+   */
+  function fixActionContributions(actionsContributionsParam) {
+    var actions = actionsContributionsParam;
+    if(typeof actions !== 'string') {
+      actions = actions.toString();
+    }
+
+    // cleanup the newlines and extra spaces
+    actions = actions.replace(/\n/g, '');
+    actions = actions.replace(/\s+</g, '<');
+    actions = actions.replace(/>\s+/g, '>');
+
+    // check if actions content is wrapped with <actions> tag
+    if (actions.indexOf("<actions>") === -1) {
+     actions = "<actions>" + actions + "</actions>";
+    }
+    return actions;
+  };
+
+  /**
    * Callback for loading actions after gadget has been preloaded.
    *
    * @param {Object}
@@ -522,8 +547,12 @@
         continue; // bail
       }
 
+      // fix action-contributions param until OpenSocial specs change is implemented:
+      // http://code.google.com/p/opensocial-resources/issues/detail?id=1264
+      desc = fixActionContributions(desc);
+
       var domResponse = createDom(desc);
-      if (!domResponse || domResponse['errors']) {
+      if (!domResponse || domResponse.errors) {
         continue; // bail
       }
 

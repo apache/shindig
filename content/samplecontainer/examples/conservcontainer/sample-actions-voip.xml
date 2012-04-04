@@ -23,11 +23,9 @@
     <Require feature="open-views"/>
     <Require feature="actions">
       <Param name="action-contributions"><![CDATA[
-        <actions>
-          <action id="org-samplevoip-chatwithperson" dataType="opensocial.Person" label="Chat" tooltip="Chat" />
-          <action id="org-samplevoip-callbyperson" dataType="opensocial.Person" label="Call" tooltip="Call" />
-          <action id="org-samplevoip-globalcall" path="container/navigationLinks" label="VOIP Call" tooltip="Call using VOIP" />
-        </actions>
+        <action id="org-samplevoip-chatwithperson" dataType="opensocial.Person" label="Chat" tooltip="Chat" />
+        <action id="org-samplevoip-callbyperson" dataType="opensocial.Person" label="Call" tooltip="Call" />
+        <action id="org-samplevoip-globalcall" path="container/navigationLinks" label="VOIP Call" tooltip="Call using VOIP" />
       ]]></Param>
     </Require>
     <Optional feature="settitle"/>
