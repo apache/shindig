@@ -137,8 +137,7 @@ public class AbsolutePathReferenceVisitor implements Visitor {
           return null;
         }
       }
-      Attr attr = (Attr) node.getAttributes().getNamedItem(
-          resourceTags.get(nodeName));
+      Attr attr = (Attr) node.getAttributes().getNamedItem(resourceTags.get(nodeName));
       String nodeUri = attr != null ? attr.getValue() : null;
       if (!Strings.isNullOrEmpty(nodeUri)) {
         return attr;
