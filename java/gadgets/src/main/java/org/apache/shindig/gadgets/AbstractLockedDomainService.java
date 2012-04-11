@@ -62,7 +62,7 @@ public abstract class AbstractLockedDomainService implements LockedDomainService
   protected static final String LOCKED_DOMAIN_REQUIRED_KEY = "gadgets.uri.iframe.lockedDomainRequired";
 
   protected static final String LOCKED_DOMAIN_FEATURE = "locked-domain";
-  protected final boolean enabled;
+  private final boolean enabled;
 
   protected final Map<String, Boolean> required;
   private boolean lockSecurityTokens = false;
@@ -125,7 +125,7 @@ public abstract class AbstractLockedDomainService implements LockedDomainService
    * @see org.apache.shindig.gadgets.LockedDomainService#isSafeForOpenProxy(java .lang.String)
    */
   public boolean isSafeForOpenProxy(String host) {
-    if (this.enabled) {
+    if (isEnabled()) {
       return !isHostUsingLockedDomain(host);
     }
     return true;

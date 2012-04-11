@@ -116,7 +116,7 @@ public class HashLockedDomainService extends AbstractLockedDomainService {
   @Override
   public String getLockedDomainForGadget(Gadget gadget, String container) throws GadgetException {
     container = getContainer(container);
-    if (this.enabled && !isExcludedFromLockedDomain(gadget, container)) {
+    if (isEnabled() && !isExcludedFromLockedDomain(gadget, container)) {
       if (isGadgetReqestingLocking(gadget) || isDomainLockingEnforced(container)) {
         return getLockedDomain(gadget, container);
       }
@@ -133,7 +133,7 @@ public class HashLockedDomainService extends AbstractLockedDomainService {
    */
   private String getLockedDomainPrefix(Gadget gadget) throws GadgetException {
     String ret = "";
-    if (this.enabled) {
+    if (isEnabled()) {
       ret = this.ldGen.getLockedDomainPrefix(getLockedDomainParticipants(gadget));
     }
     // Lower-case to prevent casing from being relevant.
@@ -143,7 +143,7 @@ public class HashLockedDomainService extends AbstractLockedDomainService {
   @Override
   public boolean isGadgetValidForHost(String host, Gadget gadget, String container) {
     container = getContainer(container);
-    if (this.enabled) {
+    if (isEnabled()) {
       if (isGadgetReqestingLocking(gadget) || isHostUsingLockedDomain(host)
               || isDomainLockingEnforced(container)) {
         String neededHost;
@@ -163,7 +163,7 @@ public class HashLockedDomainService extends AbstractLockedDomainService {
 
   @Override
   public boolean isHostUsingLockedDomain(String host) {
-    if (this.enabled) {
+    if (isEnabled()) {
       for (String suffix : this.lockedSuffixes.values()) {
         if (host.endsWith(suffix)) {
           return true;
