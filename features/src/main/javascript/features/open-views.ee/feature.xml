@@ -17,8 +17,23 @@ KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 -->
 <feature>
-  <name>open-views</name>
-  <dependency>open-views.ee</dependency>
-  <dependency>open-views.gadget</dependency>
-  <dependency>open-views.url</dependency>
+  <name>open-views.ee</name>
+  <dependency>open-views.common</dependency>
+  <dependency>open-views.results</dependency>
+  <dependency>container.site.gadget</dependency>
+  <dependency>container.site.url</dependency>
+  <dependency>embedded-experiences</dependency>
+  <gadget>
+    <script src="open-views-ee-gadget.js"/>
+    <api>
+      <exports type="js">gadgets.views.openEmbeddedExperience</exports>
+      <uses type="rpc">gadgets.views.openEmbeddedExperience</uses>
+    </api>
+  </gadget>
+  <container>
+    <script src="open-views-ee-container.js"/>
+    <api>
+      <exports type="rpc">gadgets.views.openEmbeddedExperience</exports>
+    </api>
+  </container>
 </feature>

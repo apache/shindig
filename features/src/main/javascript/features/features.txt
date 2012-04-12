@@ -77,6 +77,11 @@ features/opensocial-jsonrpc/feature.xml
 features/opensocial-reference/feature.xml
 features/opensocial-templates/feature.xml
 features/open-views/feature.xml
+features/open-views.common/feature.xml
+features/open-views.ee/feature.xml
+features/open-views.gadget/feature.xml
+features/open-views.results/feature.xml
+features/open-views.url/feature.xml
 features/osapi.base/feature.xml
 features/osapi/feature.xml
 features/osml/feature.xml

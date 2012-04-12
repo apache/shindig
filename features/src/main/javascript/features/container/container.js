@@ -392,7 +392,17 @@ osapi.container.Container.prototype.onConstructed = function(opt_config) {};
  * @param {function} func to call when creating the namespace.
  */
 osapi.container.Container.addMixin = function(namespace, func) {
-   osapi.container.Container.prototype.mixins_[namespace] = func;
+  var mixins = osapi.container.Container.prototype.mixins_;
+
+  if (mixins[namespace]) {
+    var orig = mixins[namespace];
+    mixins[namespace] = function(container) {
+      orig.call(this, container);
+      return func.call(this, container);
+    };
+  } else {
+    mixins[namespace] = func;
+  }
 };
 
 

@@ -179,9 +179,17 @@
                 <source>opensearch/opensearch.js</source>
                 <source>embeddedexperiences/constant.js</source>
                 <source>embeddedexperiences/embedded_experiences_container.js</source>
-                <source>open-views/viewenhancements-container.js</source>
-                <source>open-views/viewenhancements.js</source>
                 <source>proxied-form-post/post.js</source>
+                <source>open-views.common/open-views-common-container.js</source>
+                <source>open-views.common/open-views-common-gadget.js</source>
+                <source>open-views.url/open-views-url-container.js</source>
+                <source>open-views.url/open-views-url-gadget.js</source>
+                <source>open-views.gadget/open-views-gadget-container.js</source>
+                <source>open-views.gadget/open-views-gadget-gadget.js</source>
+                <source>open-views.ee/open-views-ee-container.js</source>
+                <source>open-views.ee/open-views-ee-gadget.js</source>
+                <source>open-views.results/open-views-results-container.js</source>
+                <source>open-views.results/open-views-results-gadget.js</source>
               </sources>
               <testSourceDirectory>${basedir}/src/test/javascript/features</testSourceDirectory>
               <testSuites>

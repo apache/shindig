@@ -17,8 +17,25 @@ KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 -->
 <feature>
-  <name>open-views</name>
-  <dependency>open-views.ee</dependency>
-  <dependency>open-views.gadget</dependency>
-  <dependency>open-views.url</dependency>
+  <name>open-views.common</name>
+  <dependency>globals</dependency>
+  <dependency>rpc</dependency>
+  <dependency>container</dependency>
+  <dependency>views</dependency>
+  <gadget>
+    <script src="open-views-common-gadget.js"/>
+    <api>
+      <exports type="js">gadgets.views.close</exports>
+      <exports type="js">gadgets.window.getContainerDimensions</exports>
+      <uses type="rpc">gadgets.views.close</uses>
+      <uses type="rpc">gadgets.window.getContainerDimensions</uses>
+    </api>
+  </gadget>
+  <container>
+    <script src="open-views-common-container.js"/>
+    <api>
+      <exports type="rpc">gadgets.views.close</exports>
+      <exports type="rpc">gadgets.window.getContainerDimensions</exports>
+    </api>
+  </container>
 </feature>
