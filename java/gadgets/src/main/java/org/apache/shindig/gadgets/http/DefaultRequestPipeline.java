@@ -106,6 +106,12 @@ public class DefaultRequestPipeline implements RequestPipeline {
     return fetchedResponse;
   }
 
+  /**
+   * Normalizing the HttpRequest object to verify the validity of the request.
+   *
+   * @param request
+   * @throws GadgetException
+   */
   protected void normalizeProtocol(HttpRequest request) throws GadgetException {
     // Normalize the protocol part of the URI
     if (request.getUri().getScheme()== null) {
@@ -121,6 +127,13 @@ public class DefaultRequestPipeline implements RequestPipeline {
     }
   }
 
+  /**
+   * Check the HttpRequest object has already allow caching and if do try to get it from cache.
+   * Override this if you want to add additional logic to get response for the request from cache.
+   *
+   * @param request
+   * @return HttpResponse object which either the cached response or null
+   */
   protected HttpResponse checkCachedResponse(HttpRequest request) {
     HttpResponse cachedResponse;
     if (!request.getIgnoreCache()) {
@@ -131,6 +144,14 @@ public class DefaultRequestPipeline implements RequestPipeline {
     return cachedResponse;
   }
 
+  /**
+   * Fetch the response from the network using the right fetcher
+   * Override this if you need to extend the current behavior of supported auth type.
+   *
+   * @param request
+   * @return  HttpResponse object fetched from network
+   * @throws GadgetException
+   */
   protected HttpResponse fetchResponse(HttpRequest request) throws GadgetException {
     HttpResponse fetchedResponse;
     switch (request.getAuthType()) {
@@ -150,8 +171,20 @@ public class DefaultRequestPipeline implements RequestPipeline {
     return fetchedResponse;
   }
 
+  /**
+   * Attempt to "fix" the response by checking its validity and adding additional metadata
+   * Override this if you need to add more processing to the HttpResponse before being cached and
+   * returned.
+   *
+   * @param request
+   * @param fetchedResponse
+   * @param invalidatedResponse
+   * @param staleResponse
+   * @return HttpResponse object that has been updated with some metadata tags.
+   * @throws GadgetException
+   */
   protected HttpResponse fixFetchedResponse(HttpRequest request, HttpResponse fetchedResponse,
-      HttpResponse invalidatedResponse, HttpResponse staleResponse) throws GadgetException {
+      @Nullable HttpResponse invalidatedResponse, @Nullable HttpResponse staleResponse) throws GadgetException {
     if (fetchedResponse.isError() && invalidatedResponse != null) {
       // Use the invalidated cached response if it is not stale. We don't update its
       // mark so it remains invalidated
@@ -183,6 +216,16 @@ public class DefaultRequestPipeline implements RequestPipeline {
     return fetchedResponse;
   }
 
+  /**
+   * Cache the HttpResponse object before being returned to caller.
+   * The default implementation also invalidate the response object by marking it as valid so the
+   * next request can detect if it has been invalidated.
+   * Override this if you need to add additional processing to cache the response.
+   *
+   * @param request
+   * @param fetchedResponse
+   * @return HttpResponse object that has been updated with some metadata tags.
+   */
   protected HttpResponse cacheFetchedResponse(HttpRequest request, HttpResponse fetchedResponse) {
     if (!request.getIgnoreCache()) {
       // Mark the response with invalidation information prior to caching
