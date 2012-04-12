@@ -78,30 +78,60 @@ public class DefaultRequestPipeline implements RequestPipeline {
 
   public HttpResponse execute(HttpRequest request) throws GadgetException {
     normalizeProtocol(request);
+
+    HttpResponse cachedResponse = checkCachedResponse(request);
+
     HttpResponse invalidatedResponse = null;
     HttpResponse staleResponse = null;
 
-    if (!request.getIgnoreCache()) {
-      HttpResponse cachedResponse = httpCache.getResponse(request);
-      // Note that we don't remove invalidated entries from the cache as we want them to be
-      // available in the event of a backend fetch failure.
-      // Note that strict no-cache entries are dummy responses and should not be used.
-      if (cachedResponse != null && !cachedResponse.isStrictNoCache()) {
-        if (!cachedResponse.isStale()) {
-          if(invalidationService.isValid(request, cachedResponse)) {
-            return cachedResponse;
-          } else {
-            invalidatedResponse = cachedResponse;
-          }
+    // Note that we don't remove invalidated entries from the cache as we want them to be
+    // available in the event of a backend fetch failure.
+    // Note that strict no-cache entries are dummy responses and should not be used.
+    if (cachedResponse != null && !cachedResponse.isStrictNoCache()) {
+      if (!cachedResponse.isStale()) {
+        if (invalidationService.isValid(request, cachedResponse)) {
+          return cachedResponse;
         } else {
-          if (!cachedResponse.isError()) {
-            // Remember good but stale cached response, to be served if server unavailable
-            staleResponse = cachedResponse;
-          }
+          invalidatedResponse = cachedResponse;
+        }
+      } else {
+        if (!cachedResponse.isError()) {
+          // Remember good but stale cached response, to be served if server unavailable
+          staleResponse = cachedResponse;
         }
       }
     }
+    HttpResponse fetchedResponse = fetchResponse(request);
+    fetchedResponse = fixFetchedResponse(request, fetchedResponse, invalidatedResponse, staleResponse);
+    return fetchedResponse;
+  }
 
+  protected void normalizeProtocol(HttpRequest request) throws GadgetException {
+    // Normalize the protocol part of the URI
+    if (request.getUri().getScheme()== null) {
+      throw new GadgetException(GadgetException.Code.INVALID_PARAMETER,
+          "Url " + request.getUri().toString() + " does not include scheme",
+          HttpResponse.SC_BAD_REQUEST);
+    } else if (!"http".equals(request.getUri().getScheme()) &&
+        !"https".equals(request.getUri().getScheme())) {
+      throw new GadgetException(GadgetException.Code.INVALID_PARAMETER,
+          "Invalid request url scheme in url: " + Utf8UrlCoder.encode(request.getUri().toString()) +
+            "; only \"http\" and \"https\" supported.",
+            HttpResponse.SC_BAD_REQUEST);
+    }
+  }
+
+  protected HttpResponse checkCachedResponse(HttpRequest request) {
+    HttpResponse cachedResponse;
+    if (!request.getIgnoreCache()) {
+      cachedResponse = httpCache.getResponse(request);
+    } else {
+      cachedResponse = null;
+    }
+    return cachedResponse;
+  }
+
+  protected HttpResponse fetchResponse(HttpRequest request) throws GadgetException {
     HttpResponse fetchedResponse;
     switch (request.getAuthType()) {
       case NONE:
@@ -117,7 +147,11 @@ public class DefaultRequestPipeline implements RequestPipeline {
       default:
         return HttpResponse.error();
     }
+    return fetchedResponse;
+  }
 
+  protected HttpResponse fixFetchedResponse(HttpRequest request, HttpResponse fetchedResponse,
+      HttpResponse invalidatedResponse, HttpResponse staleResponse) throws GadgetException {
     if (fetchedResponse.isError() && invalidatedResponse != null) {
       // Use the invalidated cached response if it is not stale. We don't update its
       // mark so it remains invalidated
@@ -142,6 +176,14 @@ public class DefaultRequestPipeline implements RequestPipeline {
 
     // Set response hash value in metadata (used for url versioning)
     fetchedResponse = HttpResponseMetadataHelper.updateHash(fetchedResponse, metadataHelper);
+
+    // cache the fetched response if possible
+    fetchedResponse = cacheFetchedResponse(request, fetchedResponse);
+
+    return fetchedResponse;
+  }
+
+  protected HttpResponse cacheFetchedResponse(HttpRequest request, HttpResponse fetchedResponse) {
     if (!request.getIgnoreCache()) {
       // Mark the response with invalidation information prior to caching
       if (fetchedResponse.getCacheTtl() > 0) {
@@ -149,22 +191,8 @@ public class DefaultRequestPipeline implements RequestPipeline {
       }
       httpCache.addResponse(request, fetchedResponse);
     }
-    return fetchedResponse;
-  }
 
-  protected void normalizeProtocol(HttpRequest request) throws GadgetException {
-    // Normalize the protocol part of the URI
-    if (request.getUri().getScheme()== null) {
-      throw new GadgetException(GadgetException.Code.INVALID_PARAMETER,
-          "Url " + request.getUri().toString() + " does not include scheme",
-          HttpResponse.SC_BAD_REQUEST);
-    } else if (!"http".equals(request.getUri().getScheme()) &&
-        !"https".equals(request.getUri().getScheme())) {
-      throw new GadgetException(GadgetException.Code.INVALID_PARAMETER,
-          "Invalid request url scheme in url: " + Utf8UrlCoder.encode(request.getUri().toString()) +
-            "; only \"http\" and \"https\" supported.",
-            HttpResponse.SC_BAD_REQUEST);
-    }
+    return fetchedResponse;
   }
 
   /**

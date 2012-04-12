@@ -58,7 +58,7 @@ GadgetHolderTest.prototype.testNew = function() {
 GadgetHolderTest.prototype.testRenderWithoutRenderParams = function() {
   var element = {};
   var gadgetInfo = {
-      'iframeUrls' : {'default' : 'http://shindig/gadgets/ifr?url=gadget.xml'},
+      'iframeUrls' : {'default' : 'http://shindig/gadgets/ifr?url=gadget.xml#rpctoken=1234'},
       'url' : 'gadget.xml'
   };
   this.setupGadgetsRpcSetupReceiver();
@@ -79,14 +79,14 @@ GadgetHolderTest.prototype.testRenderWithoutRenderParams = function() {
       ' id="__gadget_123"' +
       ' name="__gadget_123"' +
       ' src="http://shindig/gadgets/ifr?url=gadget.xml&debug=0&nocache=0&testmode=0' +
-          '&view=default&parent=http%3A//container.com&mid=0"' +
+          '&view=default&parent=http%3A//container.com&mid=0#rpctoken=1234"' +
       ' ></iframe>',
       element.innerHTML);
 };
 
 GadgetHolderTest.prototype.testRenderWithRenderRequests = function() {
   var gadgetInfo = {
-      'iframeUrls' : {'default' : 'http://shindig/gadgets/ifr?url=gadget.xml'},
+      'iframeUrls' : {'default' : 'http://shindig/gadgets/ifr?url=gadget.xml#rpctoken=1234'},
       'url' : 'gadget.xml'
   };
   var renderParams = {
@@ -120,7 +120,7 @@ GadgetHolderTest.prototype.testRenderWithRenderRequests = function() {
       ' width="222"' +
       ' name="__gadget_123"' +
       ' src="http://shindig/gadgets/ifr?url=gadget.xml&debug=1&nocache=1&testmode=1' +
-          '&view=default&libs=caja&caja=1&parent=http%3A//container.com&mid=0"' +
+          '&view=default&libs=caja&caja=1&parent=http%3A//container.com&mid=0#rpctoken=1234"' +
       ' ></iframe>',
       element.innerHTML);
 };

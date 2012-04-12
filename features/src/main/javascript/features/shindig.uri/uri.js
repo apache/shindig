@@ -149,6 +149,12 @@ shindig.uri = (function() {
 
     function parseParams(str) {
       var params = [];
+      // When the string is empty, split returns an array containing one empty string,
+      // rather than an empty array.
+      if(str === "") {
+        return params;
+      }
+
       var pairs = str.split('&');
       for (var i = 0, j = pairs.length; i < j; ++i) {
         var kv = pairs[i].split('=');

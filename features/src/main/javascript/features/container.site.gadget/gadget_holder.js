@@ -261,6 +261,12 @@ osapi.container.GadgetHolder.prototype.getIframeUrl_ = function() {
     uri.setFP('view-params', gadgetParamText);
   }
 
+  // add rpctoken fragment to support flash transport if not in the uri
+  if(typeof(uri.getFP('rpctoken')) === 'undefined' ) {
+    var rpcToken = (0x7FFFFFFF * Math.random()) | 0;
+    uri.setFP('rpctoken', rpcToken);
+  }
+
   return uri.toString();
 };
 

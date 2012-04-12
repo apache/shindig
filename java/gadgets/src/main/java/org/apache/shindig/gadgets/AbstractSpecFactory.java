@@ -136,10 +136,7 @@ public abstract class AbstractSpecFactory<T> {
         // Convert external "internal error" to gateway error:
         retcode = HttpResponse.SC_BAD_GATEWAY;
       }
-      throw new GadgetException(GadgetException.Code.FAILED_TO_RETRIEVE_CONTENT,
-                                "Unable to retrieve spec for " + query.specUri + ". HTTP error " +
-                                response.getHttpStatusCode(),
-                                retcode);
+      throw new SpecRetrievalFailedException(query.specUri, retcode);
     }
 
     try {
@@ -217,6 +214,10 @@ public abstract class AbstractSpecFactory<T> {
       try {
         T newSpec = fetchFromNetwork(query);
         cache.addElement(query.specUri, newSpec, refresh);
+      } catch (SpecRetrievalFailedException se) {
+        if (LOG.isLoggable(Level.INFO)) {
+          LOG.logp(Level.INFO, classname, "SpecUpdater", MessageKeys.UPDATE_SPEC_FAILURE_APPLY_NEG_CACHE, new Object[] {query.specUri});
+        }
       } catch (GadgetException e) {
         if (old != null) {
           if (LOG.isLoggable(Level.INFO)) {
