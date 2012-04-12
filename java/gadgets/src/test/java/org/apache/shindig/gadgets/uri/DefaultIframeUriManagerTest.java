@@ -59,6 +59,8 @@ import com.google.common.collect.Maps;
 public class DefaultIframeUriManagerTest extends UriManagerTestBase {
   private static final String LD_PREFIX = "locked";
   private static final String IFRAME_PATH = "/gadgets/ifr";
+  private static final String JS_HOST = "//server.com";
+  private static final String JS_PATH = "/gadgets/js";
   private static final String LD_SUFFIX = ".lockeddomain.com";
   private static final String LD_SUFFIX_ALT = ".altld.com";
   private static final String UNLOCKED_DOMAIN = "unlockeddomain.com";
@@ -374,7 +376,7 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
     assertEquals(VIEW, uri.getQueryParameter(Param.VIEW.getKey()));
     assertEquals(LANG, uri.getQueryParameter(Param.LANG.getKey()));
     assertEquals(COUNTRY, uri.getQueryParameter(Param.COUNTRY.getKey()));
-    assertEquals("rpc:setprefs", uri.getQueryParameter(Param.LIBS.getKey()));
+    assertEquals(JS_HOST + JS_PATH + "/rpc:setprefs" + DefaultJsUriManager.JS_SUFFIX, uri.getQueryParameter(Param.LIBS.getKey()));
     assertEquals("1", uri.getQueryParameter(Param.DEBUG.getKey()));
     assertEquals("1", uri.getQueryParameter(Param.NO_CACHE.getKey()));
     assertEquals("1", uri.getQueryParameter(Param.SANITIZE.getKey()));
@@ -399,7 +401,7 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
     assertEquals(VIEW, urlGadgetUri.getQueryParameter(Param.VIEW.getKey()));
     assertEquals(LANG, urlGadgetUri.getQueryParameter(Param.LANG.getKey()));
     assertEquals(COUNTRY, urlGadgetUri.getQueryParameter(Param.COUNTRY.getKey()));
-    assertEquals("rpc:setprefs", urlGadgetUri.getQueryParameter(Param.LIBS.getKey()));
+    assertEquals(JS_HOST + JS_PATH + "/rpc:setprefs" + DefaultJsUriManager.JS_SUFFIX, urlGadgetUri.getQueryParameter(Param.LIBS.getKey()));
     assertEquals("1", urlGadgetUri.getQueryParameter(Param.DEBUG.getKey()));
     assertEquals("1", urlGadgetUri.getQueryParameter(Param.NO_CACHE.getKey()));
     assertEquals("1", urlGadgetUri.getQueryParameter(Param.SANITIZE.getKey()));
@@ -952,6 +954,8 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
                     .put(ContainerConfig.CONTAINER_KEY, CONTAINER)
                     .put(IFRAME_BASE_PATH_KEY, IFRAME_PATH)
                     .put(UNLOCKED_DOMAIN_KEY, UNLOCKED_DOMAIN)
+                    .put(DefaultJsUriManager.JS_HOST_PARAM, JS_HOST)
+                     .put(DefaultJsUriManager.JS_PATH_PARAM, JS_PATH)
                     .build())
                 .commit();
 
@@ -1018,6 +1022,8 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
             .<String, Object>builder()
             .put(ContainerConfig.CONTAINER_KEY, ContainerConfig.DEFAULT_CONTAINER)
             .put(LOCKED_DOMAIN_SUFFIX_KEY, LD_SUFFIX)
+            .put(DefaultJsUriManager.JS_HOST_PARAM, JS_HOST)
+            .put(DefaultJsUriManager.JS_PATH_PARAM, JS_PATH)
             .build())
         .addContainer(ImmutableMap
             .<String, Object>builder()
@@ -1027,12 +1033,16 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
             .put(UNLOCKED_DOMAIN_KEY, UNLOCKED_DOMAIN_CONFIG_VALUE)
             .put(SECURITY_TOKEN_ALWAYS_KEY, alwaysToken)
             .put(LOCKED_DOMAIN_REQUIRED_KEY, ldRequired)
+            .put(DefaultJsUriManager.JS_HOST_PARAM, JS_HOST)
+            .put(DefaultJsUriManager.JS_PATH_PARAM, JS_PATH)
             .build())
         .addContainer(ImmutableMap
             .<String, Object>builder()
             .put(ContainerConfig.CONTAINER_KEY, altContainer)
             .put(ContainerConfig.PARENT_KEY, CONTAINER)
             .put(LOCKED_DOMAIN_SUFFIX_KEY, LD_SUFFIX_ALT)
+            .put(DefaultJsUriManager.JS_HOST_PARAM, JS_HOST)
+            .put(DefaultJsUriManager.JS_PATH_PARAM, JS_PATH)
             .build())
         .commit();
     LockedDomainService ldService = new HashLockedDomainService(config, enabled, prefixGen);

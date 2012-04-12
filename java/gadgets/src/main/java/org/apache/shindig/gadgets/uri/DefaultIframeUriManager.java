@@ -101,7 +101,7 @@ public class DefaultIframeUriManager implements IframeUriManager {
       // A. type=url. Initializes all except standard parameters.
       uri = new UriBuilder(view.getHref());
 
-      addExtrasForTypeUrl(uri, gadget);
+      addExtrasForTypeUrl(uri, gadget, container);
 
     } else {
       // B. Others, aka. type=html and html_sanitized.
@@ -252,9 +252,26 @@ public class DefaultIframeUriManager implements IframeUriManager {
     return null;
   }
 
-  protected void addExtrasForTypeUrl(UriBuilder uri, Gadget gadget) {
+  protected void addExtrasForTypeUrl(UriBuilder uri, Gadget gadget, String container) {
     Set<String> features = gadget.getViewFeatures().keySet();
-    addParam(uri, Param.LIBS.getKey(), DefaultJsUriManager.addJsLibs(features), false, false);
+    String jsHost = getReqVal(container, DefaultJsUriManager.JS_HOST_PARAM);
+    String jsPathBase = getReqVal(container, DefaultJsUriManager.JS_PATH_PARAM);
+
+    UriBuilder jsuri = null;
+    if (features.size() > 0) {
+      // We somewhat cheat in that jsHost may contain protocol/scheme as well.
+      jsuri = new UriBuilder(Uri.parse(jsHost));
+
+      // Add JS info to path and set it in URI.
+      StringBuilder builder = new StringBuilder(jsPathBase);
+      if (!jsPathBase.endsWith("/")) {
+        builder.append('/');
+      }
+      builder.append(DefaultJsUriManager.addJsLibs(features));
+      builder.append(DefaultJsUriManager.JS_SUFFIX);
+      jsuri.setPath(builder.toString());
+    }
+    addParam(uri, Param.LIBS.getKey(), jsuri == null ? "" : jsuri.toString(), false, false);
   }
 
   protected void addExtras(UriBuilder uri, Gadget gadget) {
