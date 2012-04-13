@@ -183,4 +183,10 @@ public interface RequestItem {
    * @param obj an object
    */
   void setAttribute(String val, Object obj);
+
+  /**
+   * Get the list of parameter names for this request object.
+   * @return A set of Parameter Names.
+   */
+   Set<String> getParameterNames();
 }

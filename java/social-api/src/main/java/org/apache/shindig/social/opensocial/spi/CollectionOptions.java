@@ -17,13 +17,19 @@
  */
 package org.apache.shindig.social.opensocial.spi;
 
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.shindig.protocol.RequestItem;
 import org.apache.shindig.protocol.model.FilterOperation;
 import org.apache.shindig.protocol.model.SortOrder;
 
 import com.google.common.base.Objects;
-
-import java.util.Date;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 /**
  * Data structure representing many of the RPC/REST requests we receive.
@@ -38,6 +44,19 @@ public class CollectionOptions {
   private int max;
   private Date updatedSince;
 
+  private Map<String, String> optionalParameters;
+  private static final String[] predefinedParameters= {
+      RequestItem.COUNT,
+      RequestItem.FIELDS,
+      RequestItem.FILTER_BY,
+      RequestItem.FILTER_OPERATION,
+      RequestItem.FILTER_VALUE,
+      RequestItem.SORT_BY,
+      RequestItem.SORT_ORDER,
+      RequestItem.START_INDEX,
+      "userId",
+      "groupId"
+    };
   public CollectionOptions() {}
 
   public CollectionOptions(RequestItem request) {
@@ -49,6 +68,13 @@ public class CollectionOptions {
     this.setFirst(request.getStartIndex());
     this.setMax(request.getCount());
     this.setUpdatedSince(request.getUpdatedSince());
+    Set<String> parameterNames = Sets.newHashSet(request.getParameterNames());
+    parameterNames.removeAll(Arrays.asList(predefinedParameters));
+    Map<String, String> optionalParameters = Maps.newHashMap();
+    for (String parameter : parameterNames) {
+      optionalParameters.put(parameter, request.getParameter(parameter));
+    }
+    this.setOptionalParameters(optionalParameters);
   }
   /**
    * This sortBy can be any field of the object being sorted or the special js sort of topFriends.
@@ -185,4 +211,13 @@ public class CollectionOptions {
     return Objects.hashCode(this.sortBy, this.sortOrder, this.filter,
         this.filterOperation, this.filterValue, this.first, this.max);
   }
+
+  public Map<String, String> getOptionalParameter() {
+    return this.optionalParameters;
+  }
+
+  private void setOptionalParameters(Map<String, String> optionalParameters) {
+    this.optionalParameters = optionalParameters;
+  }
+
 }

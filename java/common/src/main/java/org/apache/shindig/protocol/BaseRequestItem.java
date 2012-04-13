@@ -325,4 +325,8 @@ public class BaseRequestItem implements RequestItem {
       getAttributeMap().put(val, obj);
     }
   }
+
+  public Set<String> getParameterNames() {
+    return this.parameters.keySet();
+  }
 }
