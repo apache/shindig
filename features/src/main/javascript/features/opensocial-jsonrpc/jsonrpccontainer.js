@@ -192,7 +192,8 @@ var JsonRpcRequestItem = function(rpc, opt_processData) {
               ') and response id(' + response.id + ') do not match';
         }
 
-        var rawData = response.result || response.data;
+        // A false response may be valid, careful with truthiness here.
+        var rawData = typeof(response.result) != 'undefined' ? response.result : response.data;
         var error = response.error;
         var errorMessage = '';
 
