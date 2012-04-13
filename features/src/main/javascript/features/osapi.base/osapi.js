@@ -89,7 +89,8 @@ osapi._BoundCall.prototype.execute = function(callback) {
   batch.add(this.method, this);
   batch.execute(function(batchResult) {
     if (batchResult.error) {
-      feralCallback.call(that, batchResult.error);
+      // Forward the error back.
+      feralCallback.call(that, { error: batchResult.error });
     } else {
       feralCallback.call(that, batchResult[that.method]);
     }
