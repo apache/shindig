@@ -1,22 +1,24 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements. See the NOTICE file distributed with this
- * work for additional information regarding copyright ownership. The ASF
- * licenses this file to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.apache.shindig.gadgets.oauth2;
 
-import java.util.Set;
+import com.google.inject.Inject;
 
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.GadgetException.Code;
@@ -24,11 +26,10 @@ import org.apache.shindig.gadgets.oauth2.logger.FilteredLogger;
 import org.apache.shindig.gadgets.oauth2.persistence.OAuth2Cache;
 import org.apache.shindig.gadgets.oauth2.persistence.OAuth2CacheException;
 import org.apache.shindig.gadgets.oauth2.persistence.OAuth2Client;
-import org.apache.shindig.gadgets.oauth2.persistence.OAuth2Encrypter;
 import org.apache.shindig.gadgets.oauth2.persistence.OAuth2PersistenceException;
 import org.apache.shindig.gadgets.oauth2.persistence.OAuth2Persister;
 
-import com.google.inject.Inject;
+import java.util.Set;
 
 /**
  * see {@link OAuth2Store}
@@ -43,7 +44,7 @@ import com.google.inject.Inject;
 public class BasicOAuth2Store implements OAuth2Store {
   private final static String LOG_CLASS = BasicOAuth2Store.class.getName();
   private static final FilteredLogger LOG = FilteredLogger
-      .getFilteredLogger(BasicOAuth2Store.LOG_CLASS);
+          .getFilteredLogger(BasicOAuth2Store.LOG_CLASS);
 
   private final OAuth2Cache cache;
   private final String globalRedirectUri;
@@ -51,7 +52,7 @@ public class BasicOAuth2Store implements OAuth2Store {
 
   @Inject
   public BasicOAuth2Store(final OAuth2Cache cache, final OAuth2Persister persister,
-      final String globalRedirectUri) {
+          final String globalRedirectUri) {
     this.cache = cache;
     this.persister = persister;
     this.globalRedirectUri = globalRedirectUri;
@@ -101,11 +102,11 @@ public class BasicOAuth2Store implements OAuth2Store {
   }
 
   public OAuth2Client getClient(final String gadgetUri, final String serviceName)
-      throws GadgetException {
+          throws GadgetException {
     final boolean isLogging = BasicOAuth2Store.LOG.isLoggable();
     if (isLogging) {
       BasicOAuth2Store.LOG.entering(BasicOAuth2Store.LOG_CLASS, "getClient", new Object[] {
-          gadgetUri, serviceName });
+              gadgetUri, serviceName });
     }
 
     final Integer index = this.cache.getClientIndex(gadgetUri, serviceName);
@@ -131,7 +132,7 @@ public class BasicOAuth2Store implements OAuth2Store {
           BasicOAuth2Store.LOG.log("Error loading OAuth2 client ", e);
         }
         throw new GadgetException(Code.OAUTH_STORAGE_ERROR, "Error loading OAuth2 client "
-            + serviceName, e);
+                + serviceName, e);
       }
     }
 
@@ -158,11 +159,11 @@ public class BasicOAuth2Store implements OAuth2Store {
   }
 
   public OAuth2Accessor getOAuth2Accessor(final String gadgetUri, final String serviceName,
-      final String user, final String scope) throws GadgetException {
+          final String user, final String scope) throws GadgetException {
     final boolean isLogging = BasicOAuth2Store.LOG.isLoggable();
     if (isLogging) {
       BasicOAuth2Store.LOG.entering(BasicOAuth2Store.LOG_CLASS, "getOAuth2Accessor", new Object[] {
-          gadgetUri, serviceName, user, scope });
+              gadgetUri, serviceName, user, scope });
     }
 
     final Integer index = this.cache.getOAuth2AccessorIndex(gadgetUri, serviceName, user, scope);
@@ -174,12 +175,12 @@ public class BasicOAuth2Store implements OAuth2Store {
 
       if (client != null) {
         final OAuth2Token accessToken = this.getToken(gadgetUri, serviceName, user, scope,
-            OAuth2Token.Type.ACCESS);
+                OAuth2Token.Type.ACCESS);
         final OAuth2Token refreshToken = this.getToken(gadgetUri, serviceName, user, scope,
-            OAuth2Token.Type.REFRESH);
+                OAuth2Token.Type.REFRESH);
 
         final BasicOAuth2Accessor newAccessor = new BasicOAuth2Accessor(gadgetUri, serviceName,
-            user, scope, client.isAllowModuleOverride(), this, this.globalRedirectUri);
+                user, scope, client.isAllowModuleOverride(), this, this.globalRedirectUri);
         newAccessor.setAccessToken(accessToken);
         newAccessor.setAuthorizationUrl(client.getAuthorizationUrl());
         newAccessor.setClientAuthenticationType(client.getClientAuthenticationType());
@@ -206,30 +207,33 @@ public class BasicOAuth2Store implements OAuth2Store {
   }
 
   public Integer getOAuth2AccessorIndex(final String gadgetUri, final String serviceName,
-      final String user, final String scope) {
+          final String user, final String scope) {
     return this.cache.getOAuth2AccessorIndex(gadgetUri, serviceName, user, scope);
   }
 
   public OAuth2Token getToken(final String gadgetUri, final String serviceName, final String user,
-      final String scope, final OAuth2Token.Type type) throws GadgetException {
+          final String scope, final OAuth2Token.Type type) throws GadgetException {
 
     final boolean isLogging = BasicOAuth2Store.LOG.isLoggable();
     if (isLogging) {
       BasicOAuth2Store.LOG.entering(BasicOAuth2Store.LOG_CLASS, "getToken", new Object[] {
-          gadgetUri, serviceName, user, scope, type });
+              gadgetUri, serviceName, user, scope, type });
     }
 
-    final Integer index = this.cache.getTokenIndex(gadgetUri, serviceName, user, scope, type);
+    final String processedGadgetUri = this.getGadgetUri(gadgetUri, serviceName);
+
+    final Integer index = this.cache.getTokenIndex(processedGadgetUri, serviceName, user, scope,
+            type);
     OAuth2Token token = this.cache.getToken(index);
     if (token == null) {
       try {
-        token = this.persister.findToken(gadgetUri, serviceName, user, scope, type);
+        token = this.persister.findToken(processedGadgetUri, serviceName, user, scope, type);
         if (token != null) {
           this.cache.storeToken(token);
         }
       } catch (final OAuth2PersistenceException e) {
         throw new GadgetException(Code.OAUTH_STORAGE_ERROR, "Error loading OAuth2 token " + index,
-            e);
+                e);
       }
     }
 
@@ -285,7 +289,7 @@ public class BasicOAuth2Store implements OAuth2Store {
 
     if (accessor != null) {
       final Integer index = this.cache.getOAuth2AccessorIndex(accessor.getGadgetUri(),
-          accessor.getServiceName(), accessor.getUser(), accessor.getScope());
+              accessor.getServiceName(), accessor.getUser(), accessor.getScope());
       return this.cache.removeOAuth2Accessor(index);
     }
 
@@ -308,7 +312,7 @@ public class BasicOAuth2Store implements OAuth2Store {
       }
 
       return this.removeToken(token.getGadgetUri(), token.getServiceName(), token.getUser(),
-          token.getScope(), token.getType());
+              token.getScope(), token.getType());
     }
 
     if (isLogging) {
@@ -319,19 +323,23 @@ public class BasicOAuth2Store implements OAuth2Store {
   }
 
   public OAuth2Token removeToken(final String gadgetUri, final String serviceName,
-      final String user, final String scope, final OAuth2Token.Type type) throws GadgetException {
+          final String user, final String scope, final OAuth2Token.Type type)
+          throws GadgetException {
 
     final boolean isLogging = BasicOAuth2Store.LOG.isLoggable();
     if (isLogging) {
       BasicOAuth2Store.LOG.entering(BasicOAuth2Store.LOG_CLASS, "removeToken", new Object[] {
-          gadgetUri, serviceName, user, scope, type });
+              gadgetUri, serviceName, user, scope, type });
     }
 
-    final Integer index = this.cache.getTokenIndex(gadgetUri, serviceName, user, scope, type);
+    final String processedGadgetUri = this.getGadgetUri(gadgetUri, serviceName);
+
+    final Integer index = this.cache.getTokenIndex(processedGadgetUri, serviceName, user, scope,
+            type);
     try {
       final OAuth2Token token = this.cache.removeToken(index);
       if (token != null) {
-        this.persister.removeToken(gadgetUri, serviceName, user, scope, type);
+        this.persister.removeToken(processedGadgetUri, serviceName, user, scope, type);
       }
 
       if (isLogging) {
@@ -344,15 +352,15 @@ public class BasicOAuth2Store implements OAuth2Store {
         BasicOAuth2Store.LOG.log("Error loading OAuth2 token ", e);
       }
       throw new GadgetException(Code.OAUTH_STORAGE_ERROR, "Error loading OAuth2 token "
-          + serviceName, e);
+              + serviceName, e);
     }
   }
 
   public static boolean runImport(final OAuth2Persister source, final OAuth2Persister target,
-      final boolean clean) {
+          final boolean clean) {
     if (BasicOAuth2Store.LOG.isLoggable()) {
       BasicOAuth2Store.LOG.entering(BasicOAuth2Store.LOG_CLASS, "runImport", new Object[] { source,
-          target, clean });
+              target, clean });
     }
 
     // No import for default persistence
@@ -366,9 +374,16 @@ public class BasicOAuth2Store implements OAuth2Store {
     }
 
     if (token != null) {
+      final String gadgetUri = token.getGadgetUri();
+      final String serviceName = token.getServiceName();
+
+      final String processedGadgetUri = this.getGadgetUri(gadgetUri, serviceName);
+
+      token.setGadgetUri(processedGadgetUri);
+
       final Integer index = this.cache.getTokenIndex(token);
-      final OAuth2Token existingToken = this.getToken(token.getGadgetUri(), token.getServiceName(),
-          token.getUser(), token.getScope(), token.getType());
+      final OAuth2Token existingToken = this.getToken(processedGadgetUri, token.getServiceName(),
+              token.getUser(), token.getScope(), token.getType());
       try {
         if (existingToken == null) {
           this.persister.insertToken(token);
@@ -382,13 +397,13 @@ public class BasicOAuth2Store implements OAuth2Store {
           BasicOAuth2Store.LOG.log("Error storing OAuth2 token " + index, e);
         }
         throw new GadgetException(Code.OAUTH_STORAGE_ERROR, "Error storing OAuth2 token " + index,
-            e);
+                e);
       } catch (final OAuth2PersistenceException e) {
         if (isLogging) {
           BasicOAuth2Store.LOG.log("Error storing OAuth2 token " + index, e);
         }
         throw new GadgetException(Code.OAUTH_STORAGE_ERROR, "Error storing OAuth2 token " + index,
-            e);
+                e);
       }
     }
 
@@ -408,5 +423,18 @@ public class BasicOAuth2Store implements OAuth2Store {
     if (isLogging) {
       BasicOAuth2Store.LOG.exiting(BasicOAuth2Store.LOG_CLASS, "storeOAuth2Accessor");
     }
+  }
+
+  protected String getGadgetUri(final String gadgetUri, final String serviceName)
+          throws GadgetException {
+    String ret = gadgetUri;
+    final OAuth2Client client = this.getClient(ret, serviceName);
+    if (client != null) {
+      if (client.isSharedToken()) {
+        ret = client.getClientId() + ':' + client.getServiceName();
+      }
+    }
+
+    return ret;
   }
 }

@@ -1,27 +1,27 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements. See the NOTICE file distributed with this
- * work for additional information regarding copyright ownership. The ASF
- * licenses this file to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.apache.shindig.gadgets.oauth2.persistence.sample;
 
-import java.io.IOException;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
+import com.google.caja.util.Maps;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 
 import org.apache.shindig.common.Nullable;
 import org.apache.shindig.common.servlet.Authority;
@@ -37,17 +37,19 @@ import org.apache.shindig.gadgets.oauth2.persistence.OAuth2EncryptionException;
 import org.apache.shindig.gadgets.oauth2.persistence.OAuth2PersistenceException;
 import org.apache.shindig.gadgets.oauth2.persistence.OAuth2Persister;
 import org.apache.shindig.gadgets.oauth2.persistence.OAuth2TokenPersistence;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.google.caja.util.Maps;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-import com.google.inject.name.Named;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
 /**
- * Persistence implementation that reads <code>config/oauth2.json</code> on
- * startup
+ * Persistence implementation that reads <code>config/oauth2.json</code> on startup
  *
  */
 @Singleton
@@ -77,20 +79,20 @@ public class JSONOAuth2Persister implements OAuth2Persister {
 
   private final static String LOG_CLASS = JSONOAuth2Persister.class.getName();
   private static final FilteredLogger LOG = FilteredLogger
-      .getFilteredLogger(JSONOAuth2Persister.LOG_CLASS);
+          .getFilteredLogger(JSONOAuth2Persister.LOG_CLASS);
 
   @Inject
   public JSONOAuth2Persister(final OAuth2Encrypter encrypter, final Authority authority,
-      final String globalRedirectUri,
-      @Nullable @Named("shindig.contextroot") final String contextRoot)
-      throws OAuth2PersistenceException {
+          final String globalRedirectUri, @Nullable
+          @Named("shindig.contextroot")
+          final String contextRoot) throws OAuth2PersistenceException {
     this.encrypter = encrypter;
     this.authority = authority;
     this.globalRedirectUri = globalRedirectUri;
     this.contextRoot = contextRoot;
     try {
       this.configFile = new JSONObject(
-          JSONOAuth2Persister.getJSONString(JSONOAuth2Persister.OAUTH2_CONFIG));
+              JSONOAuth2Persister.getJSONString(JSONOAuth2Persister.OAUTH2_CONFIG));
     } catch (final Exception e) {
       if (JSONOAuth2Persister.LOG.isLoggable()) {
         JSONOAuth2Persister.LOG.log("OAuth2PersistenceException", e);
@@ -100,8 +102,9 @@ public class JSONOAuth2Persister implements OAuth2Persister {
   }
 
   public JSONOAuth2Persister(final OAuth2Encrypter encrypter, final Authority authority,
-      final String globalRedirectUri,
-      @Nullable @Named("shindig.contextroot") final String contextRoot, final JSONObject configFile) {
+          final String globalRedirectUri, @Nullable
+          @Named("shindig.contextroot")
+          final String contextRoot, final JSONObject configFile) {
     this.encrypter = encrypter;
     this.authority = authority;
     this.globalRedirectUri = globalRedirectUri;
@@ -113,29 +116,34 @@ public class JSONOAuth2Persister implements OAuth2Persister {
     return new OAuth2TokenPersistence(this.encrypter);
   }
 
-  public static OAuth2Client findClient(@SuppressWarnings("unused") final Integer index) {
+  public static OAuth2Client findClient(@SuppressWarnings("unused")
+  final Integer index) {
     return null;
   }
 
   public OAuth2Client findClient(final String providerName, final String gadgetUri)
-      throws OAuth2PersistenceException {
+          throws OAuth2PersistenceException {
     return null;
   }
 
-  public static OAuth2Provider findProvider(@SuppressWarnings("unused") final Integer index) {
+  public static OAuth2Provider findProvider(@SuppressWarnings("unused")
+  final Integer index) {
     return null;
   }
 
-  public static OAuth2Provider findProvider(@SuppressWarnings("unused") final String providerName) {
+  public static OAuth2Provider findProvider(@SuppressWarnings("unused")
+  final String providerName) {
     return null;
   }
 
-  public static OAuth2Token findToken(@SuppressWarnings("unused") final Integer index) {
+  public static OAuth2Token findToken(@SuppressWarnings("unused")
+  final Integer index) {
     return null;
   }
 
   public OAuth2Token findToken(final String providerName, final String gadgetUri,
-      final String user, final String scope, final Type type) throws OAuth2PersistenceException {
+          final String user, final String scope, final Type type)
+                  throws OAuth2PersistenceException {
     return null;
   }
 
@@ -173,6 +181,10 @@ public class JSONOAuth2Persister implements OAuth2Persister {
         final String clientId = settings.getString(OAuth2Message.CLIENT_ID);
         final String typeS = settings.optString(JSONOAuth2Persister.TYPE, null);
         String grantType = settings.optString(OAuth2Message.GRANT_TYPE, null);
+        final String sharedToken = settings.optString(OAuth2Message.SHARED_TOKEN, "false");
+        if ("true".equalsIgnoreCase(sharedToken)) {
+          client.setSharedToken(true);
+        }
 
         try {
           client.setEncryptedSecret(secret.getBytes("UTF-8"));
@@ -216,7 +228,8 @@ public class JSONOAuth2Persister implements OAuth2Persister {
     final Set<OAuth2Client> ret = new HashSet<OAuth2Client>(gadgetBindings.size());
     for (final OAuth2GadgetBinding binding : gadgetBindings.values()) {
       final String clientName = binding.getClientName();
-      final OAuth2Client client = internalMap.get(clientName);
+      final OAuth2Client cachedClient = internalMap.get(clientName);
+      final OAuth2Client client = cachedClient.clone();
       client.setGadgetUri(binding.getGadgetUri());
       client.setServiceName(binding.getGadgetServiceName());
       client.setAllowModuleOverride(binding.isAllowOverride());
@@ -231,7 +244,7 @@ public class JSONOAuth2Persister implements OAuth2Persister {
 
     try {
       final JSONObject bindings = this.configFile
-          .getJSONObject(JSONOAuth2Persister.GADGET_BINDGINGS);
+              .getJSONObject(JSONOAuth2Persister.GADGET_BINDGINGS);
       for (final Iterator<?> i = bindings.keys(); i.hasNext();) {
         final String gadgetUriS = (String) i.next();
         String gadgetUri = null;
@@ -247,12 +260,12 @@ public class JSONOAuth2Persister implements OAuth2Persister {
           final JSONObject settings = binding.getJSONObject(gadgetServiceName);
           final String clientName = settings.getString(JSONOAuth2Persister.CLIENT_NAME);
           final boolean allowOverride = settings
-              .getBoolean(JSONOAuth2Persister.ALLOW_MODULE_OVERRIDE);
+                  .getBoolean(JSONOAuth2Persister.ALLOW_MODULE_OVERRIDE);
           final OAuth2GadgetBinding gadgetBinding = new OAuth2GadgetBinding(gadgetUri,
-              gadgetServiceName, clientName, allowOverride);
+                  gadgetServiceName, clientName, allowOverride);
 
           ret.put(gadgetBinding.getGadgetUri() + ':' + gadgetBinding.getGadgetServiceName(),
-              gadgetBinding);
+                  gadgetBinding);
         }
       }
 
@@ -276,12 +289,12 @@ public class JSONOAuth2Persister implements OAuth2Persister {
         final JSONObject provider = providers.getJSONObject(providerName);
         final JSONObject endpoints = provider.getJSONObject(JSONOAuth2Persister.ENDPOINTS);
 
-        final String clientAuthenticationType = provider
-            .optString(JSONOAuth2Persister.CLIENT_AUTHENTICATION,
+        final String clientAuthenticationType = provider.optString(
+                JSONOAuth2Persister.CLIENT_AUTHENTICATION,
                 JSONOAuth2Persister.NO_CLIENT_AUTHENTICATION);
 
         final boolean authorizationHeader = provider.optBoolean(
-            JSONOAuth2Persister.AUTHORIZATION_HEADER, false);
+                JSONOAuth2Persister.AUTHORIZATION_HEADER, false);
 
         final boolean urlParameter = provider.optBoolean(JSONOAuth2Persister.URL_PARAMETER, false);
 
@@ -326,13 +339,14 @@ public class JSONOAuth2Persister implements OAuth2Persister {
     return Collections.emptySet();
   }
 
-  public static boolean removeToken(@SuppressWarnings("unused") final Integer index) {
+  public static boolean removeToken(@SuppressWarnings("unused")
+  final Integer index) {
     // does nothing
     return false;
   }
 
   public boolean removeToken(final String providerName, final String gadgetUri, final String user,
-      final String scope, final Type type) {
+          final String scope, final Type type) {
     return false;
   }
 

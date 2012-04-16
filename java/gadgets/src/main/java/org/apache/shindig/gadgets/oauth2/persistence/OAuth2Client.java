@@ -48,6 +48,7 @@ public class OAuth2Client implements Serializable {
   private String tokenUrl;
   private OAuth2Accessor.Type type = OAuth2Accessor.Type.UNKNOWN;
   private boolean urlParameter;
+  private boolean sharedToken = false;
 
   @Inject
   public OAuth2Client(final OAuth2Encrypter encrypter) {
@@ -75,6 +76,9 @@ public class OAuth2Client implements Serializable {
         return false;
       }
     } else if (!this.serviceName.equals(other.serviceName)) {
+      return false;
+    }
+    if (this.sharedToken != other.sharedToken) {
       return false;
     }
     return true;
@@ -170,6 +174,10 @@ public class OAuth2Client implements Serializable {
     return this.authorizationHeader;
   }
 
+  public boolean isSharedToken() {
+    return this.sharedToken;
+  }
+
   public boolean isUrlParameter() {
     return this.urlParameter;
   }
@@ -220,6 +228,10 @@ public class OAuth2Client implements Serializable {
     this.serviceName = serviceName;
   }
 
+  public void setSharedToken(final boolean sharedToken) {
+    this.sharedToken = sharedToken;
+  }
+
   public void setTokenUrl(final String tokenUrl) {
     this.tokenUrl = tokenUrl;
   }
@@ -239,6 +251,31 @@ public class OAuth2Client implements Serializable {
         + this.gadgetUri + " , clientId = " + this.clientId + " , grantType = " + this.grantType
         + " , type = " + this.type.name() + " , grantType = " + this.grantType + " , tokenUrl = "
         + this.tokenUrl + " , authorizationUrl = " + this.authorizationUrl
-        + " , this.clientAuthenticationType = " + this.clientAuthenticationType;
+        + " , this.clientAuthenticationType = " + this.clientAuthenticationType
+        + " , this.sharedToken = " + this.sharedToken;
+  }
+
+  @Override
+  public OAuth2Client clone() {
+    final OAuth2Client ret = new OAuth2Client(this.encrypter);
+    ret.setAllowModuleOverride(this.allowModuleOverride);
+    ret.setAuthorizationHeader(this.authorizationHeader);
+    ret.setAuthorizationUrl(authorizationUrl);
+    ret.setClientAuthenticationType(this.clientAuthenticationType);
+    ret.setClientId(this.clientId);
+    try {
+    ret.setClientSecret(this.clientSecret);
+      } catch (OAuth2EncryptionException e) {
+    }
+    ret.setGadgetUri(this.gadgetUri);
+    ret.setGrantType(this.grantType);
+    ret.setRedirectUri(this.redirectUri);
+    ret.setServiceName(this.serviceName);
+    ret.setSharedToken(this.sharedToken);
+    ret.setTokenUrl(this.tokenUrl);
+    ret.setType(this.type);
+    ret.setUrlParameter(this.urlParameter);
+
+    return ret;
   }
 }

@@ -71,6 +71,7 @@ public interface OAuth2Message {
   public final static String RESPONSE_TYPE = "response_type";
   public final static String SCOPE = "scope";
   public final static String SERVER_ERROR = "server_error";
+  public final static String SHARED_TOKEN = "sharedToken";
   public final static String STANDARD_AUTH_TYPE = "STANDARD";
   public final static String STATE = "state";
   public final static String TEMPORARILY_UNAVAILABLE = "temporarily_unavailable";

@@ -28,13 +28,25 @@
  * to attain the information necessary to complete the OAuth 2.0 request       *
  *                                                                             *
  *                                                                             *
- ******************************************************************************* 
+ *******************************************************************************
 */
 {
    "gadgetBindings" : {
       "%origin%%contextRoot%/samplecontainer/examples/oauth2/oauth2_google.xml" : {
          "googleAPI" : {
             "clientName"          : "googleApi_client1",
+            "allowModuleOverride" : "true"
+         }
+      },
+      "%origin%%contextRoot%/samplecontainer/examples/oauth2/oauth2_google_shared1.xml" : {
+         "googleAPI" : {
+            "clientName"          : "googleApi_shared_client",
+            "allowModuleOverride" : "true"
+         }
+      },
+      "%origin%%contextRoot%/samplecontainer/examples/oauth2/oauth2_google_shared2.xml" : {
+         "googleAPI" : {
+            "clientName"          : "googleApi_shared_client",
             "allowModuleOverride" : "true"
          }
       },
@@ -62,8 +74,7 @@
             "allowModuleOverride" : "true"
           }
       }
-   },   
-   
+   },
    "clients" : {
       "googleApi_client1" : {
          "providerName"  : "googleAPI",
@@ -71,9 +82,18 @@
          "type"          : "confidential",
          "grant_type"    : "code",
          "client_id"     : "YOUR_GOOGLE_APP_ID",
-         "client_secret" : "YOUR_GOOGLE_APP_SECRET"
+         "client_secret" : "YOUR_GOOGLE_APP_SECRET",
+         "sharedToken"   : "false"
       },
-      
+      "googleApi_shared_client" : {
+         "providerName"  : "googleAPI",
+         "redirect_uri"  : "%origin%%contextRoot%/gadgets/oauth2callback",
+         "type"          : "confidential",
+         "grant_type"    : "code",
+         "client_id"     : "YOUR_GOOGLE_APP_ID",
+         "client_secret" : "YOUR_GOOGLE_APP_SECRET",
+         "sharedToken"   : "true"
+      },
       "facebook_client1" : {
          "providerName"  : "facebook",
          "redirect_uri"  : "%origin%%contextRoot%/gadgets/oauth2callback",
@@ -82,7 +102,6 @@
          "client_id"     : "YOUR_FACEBOOK_APP_ID",
          "client_secret" : "YOUR_FACEBOOK_APP_SECRET"
       },
-
       "wl_client1" : {
          "providerName"  : "wlProvider",
          "type"          : "confidential",
@@ -104,31 +123,27 @@
          "grant_type"    : "code",
          "client_id"     : "testClientCredentialsClient",
          "client_secret" : "clientCredentialsClient_secret"
-      }            
-      
+      }
    },
-   
    "providers" : {
       "googleAPI" : {
-        "client_authentication" : "STANDARD",   
-        "usesAuthorizationHeader" : "false",    
+        "client_authentication" : "STANDARD",
+        "usesAuthorizationHeader" : "false",
         "usesUrlParameter" : "true",
         "endpoints" : {
             "authorizationUrl"  : "https://accounts.google.com/o/oauth2/auth",
             "tokenUrl"          : "https://accounts.google.com/o/oauth2/token"
         }
       },
-      
       "facebook" : {
          "client_authentication" : "STANDARD",
         "usesAuthorizationHeader" : "false",
-        "usesUrlParameter" : "true",       
+        "usesUrlParameter" : "true",
         "endpoints" : {
             "authorizationUrl"   : "https://www.facebook.com/dialog/oauth",
             "tokenUrl"           : "https://graph.facebook.com/oauth/access_token"
         }
       },
-      
       "wlProvider" : {
          "client_authentication" : "STANDARD",
          "usesAuthorizationHeader" : "false",
@@ -138,7 +153,6 @@
             "tokenUrl"           : "https://oauth.live.com/token"
          }
       },
-  
       "shindigOAuth2Provider" : {
          "client_authentication" : "Basic",
          "usesAuthorizationHeader" : "true",
