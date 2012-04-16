@@ -93,61 +93,117 @@ public class DefaultIframeUriManager implements IframeUriManager {
     return buildUri(view, gadget);
   }
 
+  // The overridable entrance method to build URI for the gadget iframe URI.
+  // Implementors should not override this method if not necessary but instead override the builder
+  // methods for different parts of the URI.
   protected Uri buildUri(View view, Gadget gadget) {
     UriBuilder uri;
     GadgetContext context = gadget.getContext();
     String container = context.getContainer();
+
+    // Create UriBuilder based on different types of View
     if (View.ContentType.URL.equals(view.getType())) {
-      // A. type=url. Initializes all except standard parameters.
-      uri = new UriBuilder(view.getHref());
-
-      addExtrasForTypeUrl(uri, gadget, container);
-
+      uri = this.processUriForUrlTypeView(view, gadget);
     } else {
-      // B. Others, aka. type=html and html_sanitized.
-      uri = new UriBuilder();
+      uri = this.processUriForHtmlTypeView(view, gadget);
+    }
 
-      // 1. Set base path.
-      uri.setPath(getReqVal(container, IFRAME_BASE_PATH_KEY));
+    boolean useTpl = tplSignal != null ? tplSignal.useTemplates() : DEFAULT_USE_TEMPLATES;
 
-      // 2. Set host/authority.
-      String ldDomain;
-      try {
-        ldDomain = ldService.getLockedDomainForGadget(gadget, container);
-      } catch (GadgetException e) {
-        throw new RuntimeException(e);
-      }
-      String host = "//" +
+    // Add required/default parameters for the gadget iframe uri
+    this.addDefaultUriParameters(uri, gadget, view, useTpl);
+
+    // Add all UserPrefs
+    this.addAllUserPrefs(uri, gadget, view, useTpl);
+
+    // Add the version to provide caching if needed
+    if (versioner != null) {
+      // Added on the query string, obviously not templated.
+      addParam(uri, Param.VERSION.getKey(),
+          versioner.version(gadget.getSpec().getUrl(), container), false, false);
+    }
+
+    // Handle addition of security token to the URI param
+    if (wantsSecurityToken(gadget)) {
+      boolean securityTokenOnQuery = isTokenNeededForRendering(gadget);
+
+      String securityToken = generateSecurityToken(gadget);
+      addParam(uri, Param.SECURITY_TOKEN.getKey(), securityToken, securityToken == null,
+          !securityTokenOnQuery);
+    }
+
+    // Overridable method to allow additional parameters
+    addExtras(uri, gadget);
+
+    return uri.toUri();
+  }
+
+  // Overrideable method to add extra logic for URL type gadget view
+  protected UriBuilder processUriForUrlTypeView(View view, Gadget gadget) {
+    // A. type=url. Initializes all except standard parameters.
+    UriBuilder uri = new UriBuilder(view.getHref());
+
+    String container = gadget.getContext().getContainer();
+    addExtrasForTypeUrl(uri, gadget, container);
+    return uri;
+  }
+
+  // Overrideable method to add extra logic for HTML type gadget view
+  protected UriBuilder processUriForHtmlTypeView(View view, Gadget gadget) {
+    // B. Others, aka. type=html and html_sanitized.
+    UriBuilder uri = new UriBuilder();
+
+    GadgetContext context = gadget.getContext();
+    String container = context.getContainer();
+
+    // 1. Set base path.
+    uri.setPath(getReqVal(container, IFRAME_BASE_PATH_KEY));
+
+    // 2. Set host/authority.
+    String ldDomain;
+    try {
+      ldDomain = ldService.getLockedDomainForGadget(gadget, container);
+    } catch (GadgetException e) {
+      throw new RuntimeException(e);
+    }
+    String host = "//" +
         (ldDomain == null ? getReqVal(container, UNLOCKED_DOMAIN_KEY) : ldDomain);
 
-      Uri gadgetUri = Uri.parse(host);
-      if (gadgetUri.getAuthority() == null
-              && gadgetUri.getScheme() == null
-              && gadgetUri.getPath().equals(host)) {
-        // This is for backwards compatibility with unlocked domains like
-        // "unlockeddomain.com"
-        gadgetUri = Uri.parse("//" + host);
-      }
-
-      // 3. Set the scheme.
-      if (StringUtils.isBlank(gadgetUri.getScheme())) {
-        uri.setScheme(getScheme(gadget, container));
-      } else {
-        uri.setScheme(gadgetUri.getScheme());
-      }
-
-      // 4. Set the authority.
-      uri.setAuthority(gadgetUri.getAuthority());
-
-      // 5. Add the URL.
-      uri.addQueryParameter(Param.URL.getKey(), context.getUrl().toString());
+    Uri gadgetUri = Uri.parse(host);
+    if (gadgetUri.getAuthority() == null
+        && gadgetUri.getScheme() == null
+        && gadgetUri.getPath().equals(host)) {
+      // This is for backwards compatibility with unlocked domains like
+      // "unlockeddomain.com"
+      gadgetUri = Uri.parse("//" + host);
     }
+
+    // 3. Set the scheme.
+    if (StringUtils.isBlank(gadgetUri.getScheme())) {
+      uri.setScheme(getScheme(gadget, container));
+    } else {
+      uri.setScheme(gadgetUri.getScheme());
+    }
+
+    // 4. Set the authority.
+    uri.setAuthority(gadgetUri.getAuthority());
+
+    // 5. Add the URL.
+    uri.addQueryParameter(Param.URL.getKey(), context.getUrl().toString());
+
+    return uri;
+  }
+
+  // Overrideable method to add extra logic default gadget URI parameters
+  protected void addDefaultUriParameters(UriBuilder uri, Gadget gadget, View view,
+      boolean useTpl) {
+    GadgetContext context = gadget.getContext();
+    String container = context.getContainer();
 
     // Add container, whose input derived other components of the URI.
     uri.addQueryParameter(Param.CONTAINER.getKey(), container);
 
     // Add remaining non-url standard parameters, in templated or filled form.
-    boolean useTpl = tplSignal != null ? tplSignal.useTemplates() : DEFAULT_USE_TEMPLATES;
     addParam(uri, Param.VIEW.getKey(), view.getName(), useTpl, false);
     addParam(uri, Param.LANG.getKey(), context.getLocale().getLanguage(), useTpl, false);
     addParam(uri, Param.COUNTRY.getKey(), context.getLocale().getCountry(), useTpl, false);
@@ -157,8 +213,13 @@ public class DefaultIframeUriManager implements IframeUriManager {
     if (context.getCajoled()) {
       addParam(uri, Param.CAJOLE.getKey(), "1", useTpl, false);
     }
+  }
 
-    // Add all UserPrefs
+  // Overrideable method to add extra logic to append user preferences. The default implementation
+  // will simply read from the gadget spec for inline user prefs.
+  protected void addAllUserPrefs(UriBuilder uri, Gadget gadget, View view, boolean useTpl) {
+    GadgetContext context = gadget.getContext();
+
     UserPrefs prefs = context.getUserPrefs();
     for (UserPref up : gadget.getSpec().getUserPrefs().values()) {
       String name = up.getName();
@@ -170,25 +231,9 @@ public class DefaultIframeUriManager implements IframeUriManager {
       boolean upInFragment = !view.needsUserPrefSubstitution();
       addParam(uri, UriCommon.USER_PREF_PREFIX + up.getName(), data, useTpl, upInFragment);
     }
-
-    if (versioner != null) {
-      // Added on the query string, obviously not templated.
-      addParam(uri, Param.VERSION.getKey(),
-          versioner.version(gadget.getSpec().getUrl(), container), false, false);
-    }
-
-    if (wantsSecurityToken(gadget)) {
-      boolean securityTokenOnQuery = isTokenNeededForRendering(gadget);
-
-      String securityToken = generateSecurityToken(gadget);
-      addParam(uri, Param.SECURITY_TOKEN.getKey(), securityToken, securityToken == null,
-          !securityTokenOnQuery);
-    }
-
-    addExtras(uri, gadget);
-
-    return uri.toUri();
   }
+
+  // *** Start overrideable methods to handle generation of security token for the gadget URI ***
 
   protected String generateSecurityToken(Gadget gadget) {
     // Find a security token in the context
@@ -217,6 +262,8 @@ public class DefaultIframeUriManager implements IframeUriManager {
   protected boolean isTokenNeededForRendering(Gadget gadget) {
     return true;
   }
+
+  // *** End overrideable methods to handle generation of security token for the gadget URI ***
 
   public UriStatus validateRenderingUri(Uri inUri) {
     UriBuilder uri = new UriBuilder(inUri);
