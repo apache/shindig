@@ -48,7 +48,7 @@ osapi.container.Container.addMixin('views', function(container) {
    * @returns {string} The ID of the site created, if a callback was registered.
    */
   container.rpcRegister('gadgets.views.openUrl', function (rpcArgs, url, opt_viewTarget, opt_coordinates) {
-    var orig_site = context.getGadgetSiteByIframeId_(rpcArgs.f),
+    var orig_site = container.getGadgetSiteByIframeId_(rpcArgs.f),
       rel = orig_site.getActiveSiteHolder().getIframeElement();
 
     var content_div = self.createElementForUrl(rel, opt_viewTarget, opt_coordinates, orig_site);
