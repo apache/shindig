@@ -18,8 +18,8 @@ details.
 * guice 2.0->3.0
 * htmlunit 2.8->2.9 
 * nekohtml 1.9.14->1.9.15
-* xstream 1.3.1->1.4.2
 * slf4j 1.5.11->1.6.1
+* xstream 1.3.1->1.4.2
 
 FROM 1.0.x TO 2.0.x
 ===================
