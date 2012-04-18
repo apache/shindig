@@ -466,11 +466,10 @@ public class MakeRequestHandler implements ContainerConfig.ConfigObserver {
       Collection<String> removed) {
     for (String container : changed) {
       Integer maxPostSize = config.getInt(container, MAX_POST_SIZE_KEY);
-      if (maxPostSize == null) {
+      if (maxPostSize == 0) {
         maxPostSize = MAX_POST_SIZE_DEFAULT;
-      } else {
-        maxPostSizes.put(container, maxPostSize);
       }
+      maxPostSizes.put(container, maxPostSize);
     }
     for (String container : removed) {
       maxPostSizes.remove(container);
