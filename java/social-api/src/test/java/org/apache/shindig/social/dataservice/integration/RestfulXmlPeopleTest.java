@@ -513,12 +513,15 @@ public class RestfulXmlPeopleTest extends AbstractLargeRestfulTests {
     assertEquals("0", result.get("startIndex").get(0));
 
     // The users should be in alphabetical order
-    Map<String, List<Node>> entryOne = childNodesToNodeMap(resultNodes.get("entry").get(0));
+    List<Node> listNodes = resultNodes.get("list");
+    Map<String, List<Node>> listNodesChildMap = childNodesToNodeMap(listNodes.get(0));
+    List<Node> entries = listNodesChildMap.get("entry");
 
+    Map<String, List<Node>> entryOne = childNodesToNodeMap(entries.get(0));
     assertPerson(childNodesToNodeMap(entryOne.get("person").get(0)),
         "george.doe", "George Doe");
 
-    Map<String, List<Node>> entryTwo = childNodesToNodeMap(resultNodes.get("entry").get(1));
+    Map<String, List<Node>> entryTwo = childNodesToNodeMap(entries.get(1));
     assertPerson(childNodesToNodeMap(entryTwo.get("person").get(0)),
         "jane.doe", "Jane Doe");
   }
@@ -548,7 +551,11 @@ public class RestfulXmlPeopleTest extends AbstractLargeRestfulTests {
     assertEquals("3", result.get("totalResults").get(0));
     assertEquals("0", result.get("startIndex").get(0));
 
-    Map<String, List<Node>> entryOne = childNodesToNodeMap(resultNodes.get("entry").get(0));
+    List<Node> listNodes = resultNodes.get("list");
+    Map<String, List<Node>> listNodesChildMap = childNodesToNodeMap(listNodes.get(0));
+    List<Node> entries = listNodesChildMap.get("entry");
+
+    Map<String, List<Node>> entryOne = childNodesToNodeMap(entries.get(0));
 
     assertPerson(childNodesToNodeMap(entryOne.get("person").get(0)),
         "george.doe", "George Doe");
@@ -569,7 +576,11 @@ public class RestfulXmlPeopleTest extends AbstractLargeRestfulTests {
     assertEquals("3", result.get("totalResults").get(0));
     assertEquals("1", result.get("startIndex").get(0));
 
-    Map<String, List<Node>> entryTwo = childNodesToNodeMap(resultNodes.get("entry").get(0));
+    listNodes = resultNodes.get("list");
+    listNodesChildMap = childNodesToNodeMap(listNodes.get(0));
+    entries = listNodesChildMap.get("entry");
+
+    Map<String, List<Node>> entryTwo = childNodesToNodeMap(entries.get(0));
     assertPerson(childNodesToNodeMap(entryTwo.get("person").get(0)),
         "jane.doe", "Jane Doe");
   }

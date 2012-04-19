@@ -116,7 +116,7 @@ public class RestfulXmlActivityTest extends AbstractLargeRestfulTests {
    *           if test encounters an error
    */
   @Test
-  public void testGetActivitiesJson() throws Exception {
+  public void testGetActivitiesXml() throws Exception {
     String resp = getResponse("/activities/john.doe/@self", "GET", "xml",
         "application/xml");
     XSDValidator.validateOpenSocial(resp);
@@ -124,7 +124,7 @@ public class RestfulXmlActivityTest extends AbstractLargeRestfulTests {
 
     assertEquals("0", xp.evaluate("/:response/:startIndex", XMLUnit.buildTestDocument(resp)));
     assertEquals("1", xp.evaluate("/:response/:totalResults", XMLUnit.buildTestDocument(resp)));
-    NodeList nl = xp.getMatchingNodes("/:response/:entry/:activity", XMLUnit.buildTestDocument(resp));
+    NodeList nl = xp.getMatchingNodes("/:response/:list/:entry/:activity", XMLUnit.buildTestDocument(resp));
 
     assertEquals(1, nl.getLength());
 
@@ -175,7 +175,7 @@ public class RestfulXmlActivityTest extends AbstractLargeRestfulTests {
    *           if test encounters an error
    */
   @Test
-  public void testGetFriendsActivitiesJson() throws Exception {
+  public void testGetFriendsActivitiesXml() throws Exception {
     String resp = getResponse("/activities/john.doe/@friends", "GET", "xml",
         "application/xml");
 
@@ -183,7 +183,7 @@ public class RestfulXmlActivityTest extends AbstractLargeRestfulTests {
 
     assertEquals("0", xp.evaluate("/:response/:startIndex", XMLUnit.buildTestDocument(resp)));
     assertEquals("2", xp.evaluate("/:response/:totalResults", XMLUnit.buildTestDocument(resp)));
-    NodeList nl = xp.getMatchingNodes("/:response/:entry", XMLUnit.buildTestDocument(resp));
+    NodeList nl = xp.getMatchingNodes("/:response/:list/:entry", XMLUnit.buildTestDocument(resp));
 
     assertEquals(2, nl.getLength());
   }
@@ -212,7 +212,7 @@ public class RestfulXmlActivityTest extends AbstractLargeRestfulTests {
 
     assertEquals("0", xp.evaluate("/:response/:startIndex", XMLUnit.buildTestDocument(resp)));
     assertEquals("2", xp.evaluate("/:response/:totalResults", XMLUnit.buildTestDocument(resp)));
-    NodeList nl = xp.getMatchingNodes("/:response/:entry/:activity", XMLUnit.buildTestDocument(resp));
+    NodeList nl = xp.getMatchingNodes("/:response/:list/:entry/:activity", XMLUnit.buildTestDocument(resp));
 
     assertEquals(2, nl.getLength());
 

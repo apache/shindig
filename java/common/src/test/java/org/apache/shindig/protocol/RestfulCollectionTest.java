@@ -30,15 +30,15 @@ public class RestfulCollectionTest extends Assert {
     RestfulCollection<String> collection
         = new RestfulCollection<String>(Lists.<String>newArrayList());
 
-    List<String> entry = Lists.newArrayList("banana");
+    List<String> entryList = Lists.newArrayList("banana");
     int startIndex = 5;
     int totalResults = 8675309;
 
-    collection.setEntry(entry);
+    collection.setList(entryList);
     collection.setStartIndex(startIndex);
     collection.setTotalResults(totalResults);
 
-    assertEquals(entry, collection.getEntry());
+    assertEquals(entryList, collection.getList());
     assertEquals(startIndex, collection.getStartIndex());
     assertEquals(totalResults, collection.getTotalResults());
   }
@@ -48,7 +48,7 @@ public class RestfulCollectionTest extends Assert {
     List<String> entry = Lists.newArrayList("banana", "who");
     RestfulCollection<String> collection = new RestfulCollection<String>(entry);
 
-    assertEquals(entry, collection.getEntry());
+    assertEquals(entry, collection.getList());
     assertEquals(0, collection.getStartIndex());
     assertEquals(entry.size(), collection.getTotalResults());
     assertEquals(entry.size(), collection.getItemsPerPage());
@@ -58,7 +58,7 @@ public class RestfulCollectionTest extends Assert {
     int resultsPerPage = 1;
     collection = new RestfulCollection<String>(entry, startIndex, totalResults, resultsPerPage);
 
-    assertEquals(entry, collection.getEntry());
+    assertEquals(entry, collection.getList());
     assertEquals(startIndex, collection.getStartIndex());
     assertEquals(totalResults, collection.getTotalResults());
     assertEquals(resultsPerPage, collection.getItemsPerPage());

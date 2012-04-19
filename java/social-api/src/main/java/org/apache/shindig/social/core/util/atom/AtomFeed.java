@@ -65,7 +65,7 @@ public class AtomFeed {
     } else if (obj instanceof RestfulCollection<?>) {
       RestfulCollection<?> r = (RestfulCollection<?>) obj;
       entry = Lists.newArrayList();
-      List<?> entryList = r.getEntry();
+      List<?> entryList = r.getList();
       for (Object o : entryList) {
         entry.add(new AtomEntry(o));
       }

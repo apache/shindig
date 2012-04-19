@@ -80,11 +80,13 @@ public class RestfullCollectionConverter extends AbstractCollectionConverter {
     writer.endNode();
 
     // TODO: resolve if entry is the container or the name of the object.
-    for (Object o : collection.getEntry()) {
+    writer.startNode("list");
+    for (Object o : collection.getList()) {
       writer.startNode("entry");
       writeItem(o, context, writer);
       writer.endNode();
     }
+    writer.endNode();
   }
 
   /**

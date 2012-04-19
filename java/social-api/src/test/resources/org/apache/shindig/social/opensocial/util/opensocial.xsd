@@ -44,8 +44,8 @@
     </xs:choice>
   </xs:complexType>
 
-  <!-- update for OpenSocial 1.1 XSD -->
-  <!-- (see http://opensocial-resources.googlecode.com/svn/spec/1.1/Core-API-Server.xml#XML_format_XSD) -->
+  <!-- update for OpenSocial latest XSD -->
+  <!-- (see http://opensocial-resources.googlecode.com/svn/spec/trunk/Core-API-Server.xml#XML_format_XSD) -->
   <xs:group name="collection">
     <xs:sequence>
       <xs:element minOccurs="0" name="itemsPerPage" type="xs:int"/>
@@ -54,13 +54,19 @@
       <xs:element minOccurs="0" name="filtered" type="xs:boolean"/>
       <xs:element minOccurs="0" name="sorted" type="xs:boolean"/>
       <xs:element minOccurs="0" name="updatedSince" type="xs:boolean"/>
-      <xs:element name="entry" type="tns:Entry" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="list" type="tns:CollectionList" />
     </xs:sequence>
   </xs:group>
 
   <xs:complexType name="InvalidationKeys">
     <xs:sequence>
       <xs:element name="invalidationKey" type="xs:string" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="CollectionList" >
+    <xs:sequence>
+      <xs:element name="entry" type="tns:Entry" minOccurs="0" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
 
@@ -71,7 +77,6 @@
       <xs:element minOccurs="0" name="group" type="tns:Group" />
     </xs:choice>
   </xs:complexType>
-
     
   <xs:complexType name="Activity">
     <xs:choice minOccurs="0" maxOccurs="unbounded">

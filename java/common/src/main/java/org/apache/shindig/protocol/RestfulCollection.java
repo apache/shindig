@@ -23,7 +23,7 @@ import java.util.List;
  * Data structure representing a Rest response.
  */
 public class RestfulCollection<T> {
-  private List<T> entry;
+  private List<T> list;
   private int startIndex;
   private int totalResults;
   private int itemsPerPage;
@@ -49,15 +49,15 @@ public class RestfulCollection<T> {
   /**
    * Create a paginated collection response.
    *
-   * @param entry paginated entries
+   * @param list paginated entries
    * @param startIndex the index corresponding to the first element of {entry}
    * @param totalResults the total size of the resultset
    * @param itemsPerPage the size of the pagination, generally set to the user-specified count parameter. Clamped to the totalResults size automatically
    *
    * @since 1.1-BETA4
    */
-  public RestfulCollection(List<T> entry, int startIndex, int totalResults, int itemsPerPage) {
-    this.entry = entry;
+  public RestfulCollection(List<T> list, int startIndex, int totalResults, int itemsPerPage) {
+    this.list = list;
     this.startIndex = startIndex;
     this.totalResults = totalResults;
     this.itemsPerPage = Math.min(itemsPerPage, totalResults);
@@ -71,12 +71,12 @@ public class RestfulCollection<T> {
     this(entry, startIndex, totalResults, entry.size());
   }
 
-  public List<T> getEntry() {
-    return entry;
+  public List<T> getList() {
+    return list;
   }
 
-  public void setEntry(List<T> entry) {
-    this.entry = entry;
+  public void setList(List<T> list) {
+    this.list = list;
   }
 
   public int getStartIndex() {

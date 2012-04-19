@@ -275,7 +275,7 @@ public class JsonRpcServlet extends ApiServlet {
         Map<String, Object> map = Maps.newHashMap();
         RestfulCollection<?> collection = (RestfulCollection<?>) response;
         // Return sublist info
-        if (collection.getTotalResults() != collection.getEntry().size()) {
+        if (collection.getTotalResults() != collection.getList().size()) {
           map.put("startIndex", collection.getStartIndex());
           map.put("itemsPerPage", collection.getItemsPerPage());
         }
@@ -291,7 +291,7 @@ public class JsonRpcServlet extends ApiServlet {
         if (!collection.isSorted())
           map.put("sorted", collection.isUpdatedSince());
 
-        map.put("list", collection.getEntry());
+        map.put("list", collection.getList());
         addResult(result, map);
       } else {
         addResult(result, response);

@@ -464,7 +464,7 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
     assertEquals(3, result.getInt("totalResults"));
     assertEquals(0, result.getInt("startIndex"));
 
-    JSONArray people = result.getJSONArray("entry");
+    JSONArray people = result.getJSONArray("list");
 
     // The users should be in alphabetical order
     assertPerson(people.getJSONObject(0), "george.doe", "George Doe");
@@ -488,7 +488,7 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
     assertEquals(3, result.getInt("totalResults"));
     assertEquals(0, result.getInt("startIndex"));
 
-    JSONArray people = result.getJSONArray("entry");
+    JSONArray people = result.getJSONArray("list");
     assertPerson(people.getJSONObject(0), "george.doe", "George Doe");
 
     // Get the second page
@@ -500,7 +500,7 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
     assertEquals(3, result.getInt("totalResults"));
     assertEquals(1, result.getInt("startIndex"));
 
-    people = result.getJSONArray("entry");
+    people = result.getJSONArray("list");
     assertPerson(people.getJSONObject(0), "jane.doe", "Jane Doe");
   }
 

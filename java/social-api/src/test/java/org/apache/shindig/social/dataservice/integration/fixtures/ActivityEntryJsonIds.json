@@ -1,33 +1,33 @@
 {
    "startIndex":0,
    "totalResults":2,
-   "entry":[
+   "list":[
       {
-		"id": "activity1",
-		"title": "John shared new photos with you",
-	    "published": "2011-02-10T15:04:55Z",
-	    "actor": {
-	      "url": "http://example.org/john",
-	      "objectType" : "person",
-	      "id": "john.doe",
-	      "image": {
-	        "url": "http://example.org/john/image",
-	        "width": 250,
-	        "height": 250
-	      },
-	      "displayName": "John Doe"
-	    },
-	    "verb": "post",
-	    "object" : {
-	      "url": "http://example.org/blog/2011/02/entry",
-	      "id": "object1"
-	    },
-	    "target" : {
-	      "url": "http://example.org/blog/",
-	      "objectType": "blog",
-	      "id": "target1",
-	      "displayName": "John's Blog"
-	    },
+        "id": "activity1",
+        "title": "John shared new photos with you",
+          "published": "2011-02-10T15:04:55Z",
+          "actor": {
+            "url": "http://example.org/john",
+            "objectType" : "person",
+            "id": "john.doe",
+            "image": {
+              "url": "http://example.org/john/image",
+              "width": 250,
+              "height": 250
+            },
+            "displayName": "John Doe"
+          },
+          "verb": "post",
+          "object" : {
+            "url": "http://example.org/blog/2011/02/entry",
+            "id": "object1"
+          },
+          "target" : {
+            "url": "http://example.org/blog/",
+            "objectType": "blog",
+            "id": "target1",
+            "displayName": "John's Blog"
+          },
           "openSocial":{
           "embed" : {
             "gadget" : "http://localhost:8080/samplecontainer/examples/embeddedexperiences/PhotoList.xml",
@@ -46,9 +46,8 @@
      	    }
           }
         }
-
-	  }, {
-	  	"id": "activity2",
+      }, {
+	  	  "id": "activity2",
         "published": "2011-03-10T15:04:55Z",
         "generator": {
           "url": "http://example.org/activities-app"

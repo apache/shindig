@@ -42,7 +42,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.google.common.collect.ImmutableMap;
@@ -143,8 +142,8 @@ public class JsonDbOpensocialServiceTest extends Assert {
     assertNotNull(responseItem);
     assertEquals(4, responseItem.getTotalResults());
     // Test a couple of users
-    assertEquals("john.doe", responseItem.getEntry().get(0).getId());
-    assertEquals("jane.doe", responseItem.getEntry().get(1).getId());
+    assertEquals("john.doe", responseItem.getList().get(0).getId());
+    assertEquals("jane.doe", responseItem.getList().get(1).getId());
   }
 
   @Test
@@ -164,8 +163,8 @@ public class JsonDbOpensocialServiceTest extends Assert {
     assertNotNull(responseItem);
     assertEquals(4, responseItem.getTotalResults());
     // Test a couple of users
-    assertEquals("john.doe", responseItem.getEntry().get(0).getId());
-    assertEquals("jane.doe", responseItem.getEntry().get(1).getId());
+    assertEquals("john.doe", responseItem.getList().get(0).getId());
+    assertEquals("jane.doe", responseItem.getList().get(1).getId());
   }
 
   @Test

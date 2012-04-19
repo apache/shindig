@@ -60,7 +60,7 @@ public final class FutureUtil {
 
       private T getFirstFromCollection(RestfulCollection<T> collection) {
         if (collection.getTotalResults() > 0) {
-          return collection.getEntry().get(0);
+          return collection.getList().get(0);
         }
 
         return null;

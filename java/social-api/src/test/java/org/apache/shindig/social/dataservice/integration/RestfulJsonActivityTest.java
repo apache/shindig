@@ -79,7 +79,7 @@ public class RestfulJsonActivityTest extends AbstractLargeRestfulTests {
 
     assertEquals(1, result.getInt("totalResults"));
     assertEquals(0, result.getInt("startIndex"));
-    assertActivitiesEqual(johnsActivity, result.getJSONArray("entry").getJSONObject(0));
+    assertActivitiesEqual(johnsActivity, result.getJSONArray("list").getJSONObject(0));
   }
 
   /**
@@ -129,7 +129,7 @@ public class RestfulJsonActivityTest extends AbstractLargeRestfulTests {
     assertEquals(2, result.getInt("totalResults"));
     assertEquals(0, result.getInt("startIndex"));
 
-    JSONArray activities = result.getJSONArray("entry");
+    JSONArray activities = result.getJSONArray("list");
     int newActivityIndex = 0;
     if (activities.getJSONObject(0).has("id")) {
       newActivityIndex = 1;
