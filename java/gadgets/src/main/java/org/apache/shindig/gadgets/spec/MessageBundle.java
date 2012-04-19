@@ -169,7 +169,7 @@ public class MessageBundle {
                                         new XmlException(e));
         }
       }
-      messages.put(name, sw.toString().trim());
+      messages.put(name, sw.toString());
     }
 
     return ImmutableMap.copyOf(messages);
