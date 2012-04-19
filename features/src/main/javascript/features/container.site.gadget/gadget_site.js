@@ -175,6 +175,9 @@ osapi.container.GadgetSite.prototype.navigateTo = function(
     if (gadgetInfo.error) {
       var message = ['Failed to navigate for gadget ', gadgetUrl, '.'].join('');
       gadgets.warn(message);
+
+      message = ['Detailed error: ', gadgetInfo.error.code || '', ' ', gadgetInfo.error.message || ''].join('');
+      gadgets.log(message);
     } else {
       var moduleId = renderParams[osapi.container.RenderParam.MODULE_ID] || 0;
       self.setModuleId_(gadgetUrl, moduleId, function() {

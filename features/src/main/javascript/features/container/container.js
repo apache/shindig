@@ -439,7 +439,11 @@ osapi.container.Container.prototype.initializeMixins_ = function() {
 osapi.container.Container.prototype.addPreloadGadgets_ = function(response) {
   for (var id in response) {
     if (response[id].error) {
-      gadgets.warn(['Failed to preload gadget ', id, '.'].join(''));
+      var message = ['Failed to preload gadget ', id, '.'].join('');
+      gadgets.warn(message);
+
+      message = ['Detailed error: ', response[id].error.code || '', ' ', response[id].error.message || ''].join('');
+      gadgets.log(message);
     } else {
       this.addPreloadedGadgetUrl_(id);
       if (response[id][osapi.container.MetadataResponse.NEEDS_TOKEN_REFRESH]) {
