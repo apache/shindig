@@ -96,7 +96,7 @@ public class PersonServiceDbTest {
     RestfulCollection<Person> peopleCollection = result.get();
     assertEquals(3, peopleCollection.getTotalResults());
     assertEquals(0, peopleCollection.getStartIndex());
-    List<Person> people = peopleCollection.getEntry();
+    List<Person> people = peopleCollection.getList();
     // The users should be in alphabetical order
     SpiTestUtil.assertPersonEquals(people.get(0), "george.doe", "George Doe");
     SpiTestUtil.assertPersonEquals(people.get(1), "jane.doe", "Jane Doe");
@@ -117,7 +117,7 @@ public class PersonServiceDbTest {
     RestfulCollection<Person> peopleCollection = result.get();
     assertEquals(3, peopleCollection.getTotalResults());
     assertEquals(0, peopleCollection.getStartIndex());
-    List<Person> people = peopleCollection.getEntry();
+    List<Person> people = peopleCollection.getList();
     SpiTestUtil.assertPersonEquals(people.get(0), "george.doe", "George Doe");
 
     // Get second friend of john.doe
@@ -126,7 +126,7 @@ public class PersonServiceDbTest {
     peopleCollection = result.get();
     assertEquals(3, peopleCollection.getTotalResults());
     assertEquals(1, peopleCollection.getStartIndex());
-    people = peopleCollection.getEntry();
+    people = peopleCollection.getList();
     SpiTestUtil.assertPersonEquals(people.get(0), "jane.doe", "Jane Doe");
   }
 

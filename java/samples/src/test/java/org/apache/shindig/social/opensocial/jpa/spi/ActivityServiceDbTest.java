@@ -82,7 +82,7 @@ public class ActivityServiceDbTest {
     RestfulCollection<Activity> activityCollection = result.get();
     assertEquals(1, activityCollection.getTotalResults());
     assertEquals(0, activityCollection.getStartIndex());
-    SpiTestUtil.assertActivityEquals(activityCollection.getEntry().get(0), testActivity);
+    SpiTestUtil.assertActivityEquals(activityCollection.getList().get(0), testActivity);
   }
 
   @Test
@@ -106,7 +106,7 @@ public class ActivityServiceDbTest {
     RestfulCollection<Activity> activityCollection = result.get();
     assertEquals(2, activityCollection.getTotalResults());
     assertEquals(0, activityCollection.getStartIndex());
-    activity = activityCollection.getEntry().get(1);
+    activity = activityCollection.getList().get(1);
     assertEquals(activity.getTitle(), title);
     assertEquals(activity.getBody(), body);
   }
