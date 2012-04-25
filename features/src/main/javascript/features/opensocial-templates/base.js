@@ -239,8 +239,13 @@ os.createNodeAccessor_ = function(node) {
  * @private
  */
 os.gadgetPrefs_ = null;
-if (window['gadgets'] && window['gadgets']['Prefs']) {
-  os.gadgetPrefs_ = new window['gadgets']['Prefs']();
+os.getGadgetPrefs = function() {
+  if(os.gadgetPrefs === null) {
+    if (window['gadgets'] && window['gadgets']['Prefs']) {
+      os.gadgetPrefs_ = new window['gadgets']['Prefs']();
+    }
+  }
+  return os.gadgetPrefs_;
 }
 
 /**
@@ -251,7 +256,7 @@ if (window['gadgets'] && window['gadgets']['Prefs']) {
  * found, or not in the gadgets environment.
  */
 os.getPrefMessage = function(key) {
-  if (!os.gadgetPrefs_) {
+  if (!os.getGadgetPrefs()) {
     return null;
   }
   return os.gadgetPrefs_.getMsg(key);

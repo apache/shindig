@@ -858,7 +858,7 @@ os.wrapIdentifiersInToken = function(token, opt_default) {
   // TODO: This is inefficient for times when the message contains no markup -
   // such cases should be optimized.
   if (token.substring(0, os.VAR_msg.length + 1) == (os.VAR_msg + '.') &&
-      os.gadgetPrefs_) {
+      os.getGadgetPrefs()) {
     var key = token.split('.')[1];
     var msg = os.getPrefMessage(key) || '';
     return os.parseAttribute_(msg) || os.transformLiteral_(msg);
