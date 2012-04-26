@@ -286,7 +286,7 @@ public class FeatureResourceLoader {
       if (fetcher != null && now > (lastLoadTryMs + (60 * 1000))) {
         lastLoadTryMs = now;
         try {
-          HttpRequest request = new HttpRequest(uri);
+          HttpRequest request = new HttpRequest(uri).setInternalRequest(true);
           HttpResponse response = fetcher.fetch(request);
           if (response.getHttpStatusCode() == HttpResponse.SC_OK) {
             content = response.getResponseAsString();

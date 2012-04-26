@@ -21,7 +21,10 @@ package org.apache.shindig.gadgets;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.replay;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
+import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.cache.CacheProvider;
 import org.apache.shindig.common.cache.LruCacheProvider;
 import org.apache.shindig.common.cache.SoftExpiringCache;
@@ -271,6 +274,22 @@ public class DefaultGadgetSpecFactoryTest {
 
     assertEquals(10, capturingPipeline.request.getCacheTtl());
   }
+
+  @Test
+  public void specRequestMarkedWithAnonymousToken() throws Exception {
+    CapturingPipeline capturingPipeline = new CapturingPipeline();
+
+    GadgetSpecFactory factory = new DefaultGadgetSpecFactory(
+        new CountingExecutor(), capturingPipeline, cacheProvider, 10000);
+
+    factory.getGadgetSpec(createContext(SPEC_URL, false));
+
+    SecurityToken st = capturingPipeline.request.getSecurityToken();
+    assertNotNull(st);
+    assertTrue( st.isAnonymous() );
+    assertEquals( SPEC_URL.toString(), st.getAppUrl() );
+  }
+
 
   @Test(expected = GadgetException.class)
   public void badFetchThrows() throws Exception {

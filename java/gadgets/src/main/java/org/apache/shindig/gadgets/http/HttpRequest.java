@@ -95,6 +95,7 @@ public class HttpRequest {
   private AuthType authType;
 
   private String rewriteMimeType;
+  private boolean internalRequest;
 
   /**
    * Construct a new request for the given uri.
@@ -127,6 +128,7 @@ public class HttpRequest {
     authType = request.authType;
     rewriteMimeType = request.rewriteMimeType;
     followRedirects = request.followRedirects;
+    internalRequest = request.internalRequest;
   }
 
   public HttpRequest setMethod(String method) {
@@ -498,6 +500,27 @@ public class HttpRequest {
    */
   public String getRewriteMimeType() {
     return rewriteMimeType;
+  }
+
+  /**
+   * @return true if this is an internal request, false otherwise
+   */
+  public boolean isInternalRequest() {
+    return internalRequest;
+  }
+
+  /**
+   * An internal request is one created by the server to satisfy global server requirements.
+   * Examples are retrieving the RPC methods, loading features, or rewriting requests pulling in
+   * external content (that are driven back through the proxy to be completed).  SecurityTokens would typically
+   * refer to a gadget as the source of the request, whereas the server initiated requests are occurring on behalf
+   * of the server, and not on behalf of a specific gadget.
+   * @param internalRequest Marks the request object as internal.
+   * @return HttpRequest A self-reference
+   */
+  public HttpRequest setInternalRequest(boolean internalRequest) {
+    this.internalRequest = internalRequest;
+    return this;
   }
 
   @Override

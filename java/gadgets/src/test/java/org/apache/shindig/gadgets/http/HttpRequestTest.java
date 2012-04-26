@@ -117,7 +117,8 @@ public class HttpRequestTest {
         .setSecurityToken(new AnonymousSecurityToken())
         .setOAuthArguments(oauthArguments)
         .setAuthType(AuthType.OAUTH)
-        .setFollowRedirects(false);
+        .setFollowRedirects(false)
+        .setInternalRequest(true);
 
     HttpRequest request2 = new HttpRequest(request).setUri(Uri.parse("http://example.org/foo"));
 
@@ -135,5 +136,6 @@ public class HttpRequestTest {
         request2.getOAuthArguments().getSignViewer());
     assertEquals(AuthType.OAUTH, request.getAuthType());
     assertFalse(request.getFollowRedirects());
+    assertTrue(request.isInternalRequest());
   }
 }

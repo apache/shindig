@@ -28,9 +28,11 @@ import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.config.JsonContainerConfig;
 import org.apache.shindig.expressions.Expressions;
 import org.apache.shindig.expressions.Functions;
+import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 
 import org.easymock.EasyMock;
 import org.json.JSONArray;
@@ -147,4 +149,39 @@ public class DefaultServiceFetcherTest extends EasyMockTestCase {
     Multimap<String, String> multimap = fetcher.getServicesForContainer("badcontainer", "dontcare");
     assertEquals(0, multimap.size());
   }
+
+  @Test
+  public void testReadConfigRequestMarkedInternal() throws Exception {
+    JSONObject config = createConfig();
+    config.getJSONObject("default").
+        getJSONObject(DefaultServiceFetcher.GADGETS_FEATURES_CONFIG)
+        .getJSONObject(DefaultServiceFetcher.OSAPI_FEATURE_CONFIG)
+        .put(DefaultServiceFetcher.OSAPI_BASE_ENDPOINTS, new JSONArray(ImmutableList.of(endPoint1)));
+
+    JsonContainerConfig containerConfig =
+        new JsonContainerConfig(config,
+            Expressions.forTesting(new Functions()));
+    CapturingHttpFetcher httpFetcher = new CapturingHttpFetcher();
+    fetcher = new DefaultServiceFetcher(containerConfig, httpFetcher);
+    Multimap<String, String> services = fetcher.getServicesForContainer("default", "dontcare");
+    assertEquals(configuredServices, services);
+    assertNotNull( httpFetcher.request );
+    assertTrue( httpFetcher.request.isInternalRequest() );
+  }
+
+  static class CapturingHttpFetcher implements HttpFetcher {
+
+    public HttpRequest request;
+
+    public CapturingHttpFetcher() {
+    }
+
+    @Override
+    public HttpResponse fetch(HttpRequest request) throws GadgetException {
+      this.request = request;
+      return new HttpResponseBuilder().setHttpStatusCode( HttpResponse.SC_OK )
+                                      .setResponseString( "{\"result\":[]}" ).create();
+    }
+  }
+
 }

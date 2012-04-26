@@ -656,14 +656,45 @@ public class HttpRequestHandlerTest extends EasyMockTestCase {
         converter.convertToString(httpApiResponse));
   }
 
+  @Test
+  public void testSimpleGetVerifySecurityTokenPresent() throws Exception {
+    JSONObject request = new JSONObject("{method:http.get, id:req1, params : {"
+        + "href:'http://www.example.org/somecontent'"
+        + "}}");
+    HttpRequest httpRequest = new HttpRequest(Uri.parse("http://www.example.org/somecontent"));
+    httpRequest.setMethod("GET");
+    httpRequest.setSecurityToken( token );
+
+    // check to make sure that the security token is being passed through to the pipeline, and not
+    // stripped because this is not an auth request
+
+    expect(pipeline.execute(eqRequest2(httpRequest))).andReturn(builder.create()).anyTimes();
+
+    replay();
+    RpcHandler operation = registry.getRpcHandler(request);
+
+    HttpRequestHandler.HttpApiResponse httpApiResponse =
+        (HttpRequestHandler.HttpApiResponse)operation.execute(emptyFormItems, token, converter).get();
+    verify();
+
+    JsonAssert.assertJsonEquals("{ headers : {}, status : 200, content : 'CONTENT' }}",
+        converter.convertToString(httpApiResponse));
+  }
+
+
   private static HttpRequest eqRequest(HttpRequest request) {
     reportMatcher(new RequestMatcher(request));
     return null;
   }
 
+  private static HttpRequest eqRequest2(HttpRequest request) {
+    reportMatcher(new RequestMatcherWithToken(request));
+    return null;
+  }
+
   private static class RequestMatcher implements IArgumentMatcher {
 
-    private final HttpRequest req;
+    protected final HttpRequest req;
 
     public RequestMatcher(HttpRequest request) {
       this.req = request;
@@ -683,4 +714,19 @@ public class HttpRequestHandlerTest extends EasyMockTestCase {
           match.getHeaders().equals(req.getHeaders()));
     }
   }
+
+  private static class RequestMatcherWithToken extends RequestMatcher {
+
+    public RequestMatcherWithToken(HttpRequest request) {
+      super(request);
+    }
+
+    public boolean matches(Object obj) {
+      HttpRequest match = (HttpRequest)obj;
+      return super.matches(obj) &&
+          match.getSecurityToken() != null &&
+          match.getSecurityToken().equals( req.getSecurityToken() );
+    }
+  }
+
 }

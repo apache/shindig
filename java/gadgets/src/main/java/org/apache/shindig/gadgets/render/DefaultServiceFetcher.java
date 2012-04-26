@@ -134,7 +134,7 @@ public class DefaultServiceFetcher {
 
   private Set<String> retrieveServices(String endpoint) {
     Uri url = Uri.parse(endpoint + "?method=" + SYSTEM_LIST_METHODS_METHOD);
-    HttpRequest request = new HttpRequest(url);
+    HttpRequest request = new HttpRequest(url).setInternalRequest(true);
     try {
       HttpResponse response = fetcher.fetch(request);
       if (response.getHttpStatusCode() == HttpResponse.SC_OK) {

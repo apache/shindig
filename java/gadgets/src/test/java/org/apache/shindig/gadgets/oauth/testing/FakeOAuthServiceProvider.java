@@ -22,6 +22,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 import net.oauth.OAuth;
+import net.oauth.OAuth.Parameter;
 import net.oauth.OAuthAccessor;
 import net.oauth.OAuthConsumer;
 import net.oauth.OAuthException;
@@ -29,16 +30,12 @@ import net.oauth.OAuthMessage;
 import net.oauth.OAuthServiceProvider;
 import net.oauth.OAuthValidator;
 import net.oauth.SimpleOAuthValidator;
-import net.oauth.OAuth.Parameter;
 import net.oauth.signature.RSA_SHA1;
-
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.io.IOUtils;
 
 import org.apache.shindig.auth.OAuthConstants;
 import org.apache.shindig.auth.OAuthUtil;
 import org.apache.shindig.auth.OAuthUtil.SignatureType;
+import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.cache.LruCache;
 import org.apache.shindig.common.cache.SoftExpiringCache;
 import org.apache.shindig.common.cache.SoftExpiringCache.CachedObject;
@@ -53,13 +50,17 @@ import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.oauth.AccessorInfo.OAuthParamLocation;
 
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.io.IOUtils;
+
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 public class FakeOAuthServiceProvider implements HttpFetcher {
@@ -212,6 +213,8 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
 
   private int trustedParamCount;
 
+  private SecurityToken expectedRequestSecurityToken;
+
   public FakeOAuthServiceProvider(TimeSource clock) {
     this.clock = clock;
     OAuthServiceProvider provider = new OAuthServiceProvider(
@@ -279,6 +282,17 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
     String url = request.getUri().toString();
     try {
       if (url.startsWith(REQUEST_TOKEN_URL)) {
+        if (request.getSecurityToken() == null) {
+          throw new RuntimeException("Security token should not be null" );
+        }
+        if (!request.getSecurityToken().isAnonymous()) {
+          throw new RuntimeException("Expected an anonymous security token" );
+        }
+        if (expectedRequestSecurityToken != null) {
+          if (!expectedRequestSecurityToken.getAppUrl().equals( request.getSecurityToken().getAppUrl() )) {
+            throw new RuntimeException("Security token AppUrl mismatch" );
+          }
+        }
         ++requestTokenCount;
         return handleRequestTokenUrl(request);
       } else if (url.startsWith(ACCESS_TOKEN_URL)) {
@@ -849,5 +863,9 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
 
   public int getTrustedParamCount() {
     return trustedParamCount;
+  }
+
+  public void setExpectedRequestSecurityToken( SecurityToken requestSecurityToken ) {
+    this.expectedRequestSecurityToken = requestSecurityToken;
   }
 }

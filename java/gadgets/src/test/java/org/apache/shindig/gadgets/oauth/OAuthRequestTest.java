@@ -287,6 +287,7 @@ public class OAuthRequestTest {
   private MakeRequestClient makeNonSocialClient(String owner, String viewer, String gadget)
       throws Exception {
     SecurityToken securityToken = getSecurityToken(owner, viewer, gadget);
+    serviceProvider.setExpectedRequestSecurityToken( securityToken );
     MakeRequestClient client = new MakeRequestClient(securityToken, fetcherConfig, serviceProvider,
         FakeGadgetSpecFactory.SERVICE_NAME);
     client.getBaseArgs().setSignOwner(true);
@@ -298,6 +299,7 @@ public class OAuthRequestTest {
   private MakeRequestClient makeStrictNonSocialClient(String owner, String viewer, String gadget)
       throws Exception {
     SecurityToken securityToken = getSecurityToken(owner, viewer, gadget);
+    serviceProvider.setExpectedRequestSecurityToken( securityToken );
     return new MakeRequestClient(securityToken, fetcherConfig, serviceProvider,
         FakeGadgetSpecFactory.SERVICE_NAME);
   }
@@ -305,6 +307,7 @@ public class OAuthRequestTest {
   private MakeRequestClient makeSocialOAuthClient(String owner, String viewer, String gadget)
       throws Exception {
     SecurityToken securityToken = getSecurityToken(owner, viewer, gadget);
+    serviceProvider.setExpectedRequestSecurityToken( securityToken );
     MakeRequestClient client = new MakeRequestClient(securityToken, fetcherConfig, serviceProvider,
         FakeGadgetSpecFactory.SERVICE_NAME);
     client.getBaseArgs().setUseToken(UseToken.IF_AVAILABLE);
@@ -314,6 +317,7 @@ public class OAuthRequestTest {
   private MakeRequestClient makeSignedFetchClient(String owner, String viewer, String gadget)
       throws Exception {
     SecurityToken securityToken = getSecurityToken(owner, viewer, gadget);
+    serviceProvider.setExpectedRequestSecurityToken( securityToken );
     MakeRequestClient client = new MakeRequestClient(securityToken, fetcherConfig, serviceProvider,
         null);
     client.setBaseArgs(client.makeSignedFetchArguments());

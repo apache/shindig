@@ -131,8 +131,11 @@ public class MockUtils {
     }
   }
 
-  static class DummyHttpFetcher implements HttpFetcher {
+  public static class DummyHttpFetcher implements HttpFetcher {
+    public HttpRequest request;
+
     public HttpResponse fetch(final HttpRequest request) throws GadgetException {
+      this.request = request;
       final HttpResponseBuilder builder = new HttpResponseBuilder();
       builder.setStrictNoCache();
       builder.setHttpStatusCode(HttpResponse.SC_OK);
@@ -314,7 +317,7 @@ public class MockUtils {
     return MockUtils.encrypter;
   }
 
-  protected static HttpFetcher getDummyFecther() throws Exception {
+  protected static HttpFetcher getDummyFetcher() throws Exception {
     return new DummyHttpFetcher();
   }
 

@@ -187,7 +187,8 @@ public class CajaResponseRewriter implements ResponseRewriter {
 
         HttpRequest request = new HttpRequest(resourceUri)
                 .setContainer(req.getContainer())
-                .setGadget(req.getGadget());
+                .setGadget(req.getGadget())
+                .setInternalRequest( true );
 
         try {
           HttpResponse response = requestPipeline.execute(request);

@@ -29,6 +29,8 @@ import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.http.HttpRequest;
+import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.RequestPipeline;
 import org.apache.shindig.gadgets.parse.DefaultHtmlSerializer;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
@@ -48,6 +50,7 @@ import java.util.List;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.replay;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNotNull;
 
 public class CajaContentRewriterTest extends RewriterTestBase {
   private List<GadgetHtmlParser> parsers;
@@ -148,6 +151,35 @@ public class CajaContentRewriterTest extends RewriterTestBase {
     assertUrlRewritten("ins", "cite", uri, unproxied);
   }
 
+
+  // Fails due to non-existent mail classes referenced in caja
+  // @Test
+  public void testIncludedURLRequestMarkedInternal() throws Exception {
+    CacheProvider lru = new LruCacheProvider(3);
+    DefaultHtmlSerializer defaultSerializer = new DefaultHtmlSerializer();
+    CapturingPipeline pipeline = new CapturingPipeline();
+    rewriter = new CajaContentRewriter(lru, pipeline, defaultSerializer, proxyUriManager) {
+      @Override
+      protected PluginCompiler makePluginCompiler(PluginMeta m, MessageQueue q) {
+        BuildInfo bi = EasyMock.createNiceMock(BuildInfo.class);
+        expect(bi.getBuildInfo()).andReturn("bi").anyTimes();
+        expect(bi.getBuildTimestamp()).andReturn("0").anyTimes();
+        expect(bi.getBuildVersion()).andReturn("0").anyTimes();
+        expect(bi.getCurrentTime()).andReturn(0L).anyTimes();
+        replay(bi);
+        return new PluginCompiler(bi, m, q);
+      }
+    };
+
+    // we don't really care what the result looks like, we just want to check the issued request
+    String markup = "<script type=\"text/javascript\" src=\"http://www.example.com/scripts/scriptFile.js\"></script>";
+    String expected = "";
+    testMarkup( markup, expected );
+
+    assertNotNull( pipeline.request );
+    assertTrue( pipeline.request.isInternalRequest() );
+  }
+
   private void testMarkup(String markup, String expected) throws GadgetException{
     testMarkup(markup, expected, null);
   }
@@ -192,4 +224,14 @@ public class CajaContentRewriterTest extends RewriterTestBase {
     replay(context, gadget);
     return gadget;
   }
+
+  private static class CapturingPipeline implements RequestPipeline {
+    HttpRequest request;
+
+    public HttpResponse execute(HttpRequest request) {
+      this.request = request;
+      return new HttpResponse("");
+    }
+  }
+
 }

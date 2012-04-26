@@ -18,6 +18,23 @@
  */
 package org.apache.shindig.gadgets.oauth2.handler;
 
+import com.google.inject.Provider;
+
+import org.apache.shindig.auth.SecurityToken;
+import org.apache.shindig.gadgets.http.HttpFetcher;
+import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.oauth2.MockUtils;
+import org.apache.shindig.gadgets.oauth2.OAuth2Accessor;
+import org.apache.shindig.gadgets.oauth2.OAuth2Error;
+import org.apache.shindig.gadgets.oauth2.OAuth2Message;
+import org.apache.shindig.gadgets.oauth2.OAuth2Store;
+import org.apache.shindig.gadgets.oauth2.OAuth2Token;
+
+import org.easymock.EasyMock;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -35,21 +52,6 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import org.apache.shindig.gadgets.http.HttpFetcher;
-import org.apache.shindig.gadgets.http.HttpResponse;
-import org.apache.shindig.gadgets.oauth2.MockUtils;
-import org.apache.shindig.gadgets.oauth2.OAuth2Accessor;
-import org.apache.shindig.gadgets.oauth2.OAuth2Error;
-import org.apache.shindig.gadgets.oauth2.OAuth2Message;
-import org.apache.shindig.gadgets.oauth2.OAuth2Store;
-import org.apache.shindig.gadgets.oauth2.OAuth2Token;
-import org.easymock.EasyMock;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-
-import com.google.inject.Provider;
-
 public class CodeAuthorizationResponseHandlerTest extends MockUtils {
 
   private static CodeAuthorizationResponseHandler carh;
@@ -60,7 +62,7 @@ public class CodeAuthorizationResponseHandlerTest extends MockUtils {
     CodeAuthorizationResponseHandlerTest.store = MockUtils.getDummyStore();
     CodeAuthorizationResponseHandlerTest.carh = new CodeAuthorizationResponseHandler(
         MockUtils.getDummyMessageProvider(), MockUtils.getDummyClientAuthHandlers(),
-        MockUtils.getDummyTokenEndpointResponseHandlers(), MockUtils.getDummyFecther());
+        MockUtils.getDummyTokenEndpointResponseHandlers(), MockUtils.getDummyFetcher());
   }
 
   @Test
@@ -165,6 +167,42 @@ public class CodeAuthorizationResponseHandlerTest extends MockUtils {
     Assert.assertNotNull(refreshToken);
     Assert.assertEquals("yyy", new String(refreshToken.getSecret(), "UTF-8"));
   }
+
+  @Test
+  public void testHandleRequest_verifyAnonymousTokenOnRequest() throws Exception {
+    MockUtils.DummyHttpFetcher fetcher = (MockUtils.DummyHttpFetcher)MockUtils.getDummyFetcher();
+    CodeAuthorizationResponseHandler fixture = new CodeAuthorizationResponseHandler(
+        MockUtils.getDummyMessageProvider(), MockUtils.getDummyClientAuthHandlers(),
+        MockUtils.getDummyTokenEndpointResponseHandlers(), fetcher);
+    final OAuth2Accessor accessor = MockUtils.getOAuth2Accessor_Redirecting();
+    final HttpServletRequest request = new DummyHttpServletRequest();
+
+    final OAuth2HandlerError result = fixture.handleRequest(accessor, request);
+
+    Assert.assertNull(result);
+
+    final OAuth2Token accessToken = CodeAuthorizationResponseHandlerTest.store.getToken(
+        accessor.getGadgetUri(), accessor.getServiceName(), accessor.getUser(),
+        accessor.getScope(), OAuth2Token.Type.ACCESS);
+    Assert.assertNotNull(accessToken);
+    Assert.assertEquals("xxx", new String(accessToken.getSecret(), "UTF-8"));
+    Assert.assertEquals(OAuth2Message.BEARER_TOKEN_TYPE, accessToken.getTokenType());
+    Assert.assertTrue(accessToken.getExpiresAt() > 1000);
+
+    final OAuth2Token refreshToken = CodeAuthorizationResponseHandlerTest.store.getToken(
+        accessor.getGadgetUri(), accessor.getServiceName(), accessor.getUser(),
+        accessor.getScope(), OAuth2Token.Type.REFRESH);
+    Assert.assertNotNull(refreshToken);
+    Assert.assertEquals("yyy", new String(refreshToken.getSecret(), "UTF-8"));
+
+    Assert.assertNotNull( fetcher.request );
+
+    SecurityToken st = fetcher.request.getSecurityToken();
+    Assert.assertNotNull( st );
+    Assert.assertTrue( st.isAnonymous() );
+    Assert.assertEquals( accessor.getGadgetUri(), st.getAppUrl() );
+  }
+
 
   @Test
   public void testHandleResponse_1() throws Exception {

@@ -20,6 +20,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.shindig.auth.AnonymousSecurityToken;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.oauth2.OAuth2Accessor;
@@ -84,10 +85,6 @@ public class ClientCredentialsGrantTypeHandler implements GrantRequestHandler {
               "completeAuthorizationUrl is null", null);
     }
 
-    final HttpRequest request = new HttpRequest(Uri.parse(completeAuthorizationUrl));
-    request.setMethod("GET");
-    request.setHeader("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
-
     if (accessor == null) {
       throw new OAuth2RequestException(ClientCredentialsGrantTypeHandler.ERROR, "accessor is null",
               null);
@@ -102,6 +99,11 @@ public class ClientCredentialsGrantTypeHandler implements GrantRequestHandler {
       throw new OAuth2RequestException(ClientCredentialsGrantTypeHandler.ERROR,
               "grant type is not client_credentials", null);
     }
+
+    final HttpRequest request = new HttpRequest(Uri.parse(completeAuthorizationUrl));
+    request.setMethod("GET");
+    request.setHeader("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
+    request.setSecurityToken( new AnonymousSecurityToken( "", 0L, accessor.getGadgetUri(), 0L ));
 
     for (final ClientAuthenticationHandler clientAuthenticationHandler : this.clientAuthenticationHandlers) {
       if (clientAuthenticationHandler.geClientAuthenticationType().equalsIgnoreCase(

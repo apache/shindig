@@ -17,17 +17,18 @@
  */
 package org.apache.shindig.gadgets.features;
 
-import com.google.common.collect.Maps;
-
 import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.replay;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+
+import com.google.common.collect.Maps;
 
 import org.apache.shindig.common.Pair;
 import org.apache.shindig.common.uri.Uri;
@@ -241,6 +242,20 @@ public class FeatureResourceLoaderTest {
     assertTrue(resource.isExternal());
   }
 
+  @Test
+  public void loadRequestMarkedInternal() throws Exception {
+    String theUrl = "http://apache.org/resource.js";
+    Uri uri = Uri.parse(theUrl);
+    Map<String, String> attribs = Maps.newHashMap();
+    attribs.put( "inline", "true" );
+    CapturingHttpFetcher fetcher = new CapturingHttpFetcher();
+    FeatureResourceLoader frLoader = new TestFeatureResourceLoader(fetcher, timeSource, new DefaultFeatureFileSystem());
+    FeatureResource resource = frLoader.load(uri, attribs);
+    assertEquals(URL_JS, resource.getContent());
+    assertNotNull( fetcher.request );
+    assertTrue( fetcher.request.isInternalRequest() );
+  }
+
   private Pair<Uri, File> makeFile(String suffix, String content) throws Exception {
     File tmpFile = File.createTempFile("restmp", suffix);
     return makeFile(tmpFile, content);
@@ -265,5 +280,20 @@ public class FeatureResourceLoaderTest {
                                  .setResponseString(content).create();
     expect(fetcher.fetch(eq(req))).andReturn(resp);
     replay(fetcher);
+  }
+
+  static class CapturingHttpFetcher implements HttpFetcher
+  {
+    public HttpRequest request;
+
+    public CapturingHttpFetcher() {
+    }
+
+    @Override
+    public HttpResponse fetch(HttpRequest request) throws GadgetException {
+      this.request = request;
+      return new HttpResponseBuilder().setHttpStatusCode( HttpResponse.SC_OK )
+                                      .setResponseString( URL_JS ).create();
+    }
   }
 }

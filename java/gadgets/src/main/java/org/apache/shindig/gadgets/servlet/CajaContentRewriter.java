@@ -288,7 +288,7 @@ public class CajaContentRewriter implements GadgetRewriter {
         }
         Uri resourceUri = gadgetUri.resolve(Uri.fromJavaUri(ref.getUri()));
         HttpRequest request =
-            new HttpRequest(resourceUri).setContainer(container).setGadget(gadgetUri);
+            new HttpRequest(resourceUri).setContainer(container).setGadget(gadgetUri).setInternalRequest( true );
         try {
           HttpResponse response = requestPipeline.execute(request);
           byte[] responseBytes = IOUtils.toByteArray(response.getResponse());

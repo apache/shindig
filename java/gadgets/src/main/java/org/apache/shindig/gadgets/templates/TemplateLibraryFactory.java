@@ -18,6 +18,7 @@
  */
 package org.apache.shindig.gadgets.templates;
 
+import org.apache.shindig.auth.AnonymousSecurityToken;
 import org.apache.shindig.common.cache.Cache;
 import org.apache.shindig.common.cache.CacheProvider;
 import org.apache.shindig.common.uri.Uri;
@@ -55,7 +56,7 @@ public class TemplateLibraryFactory {
   }
 
   public TemplateLibrary loadTemplateLibrary(GadgetContext context, Uri uri) throws GadgetException {
-    HttpRequest request = new HttpRequest(uri);
+    HttpRequest request = new HttpRequest(uri).setSecurityToken( new AnonymousSecurityToken( "", 0L, context.getUrl().toString(), 0L ));
     // 5 minute TTL.
     request.setCacheTtl(300);
     HttpResponse response = pipeline.execute(request);

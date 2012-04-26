@@ -30,6 +30,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.shindig.auth.AnonymousSecurityToken;
 import org.apache.shindig.auth.OAuthConstants;
 import org.apache.shindig.auth.OAuthUtil;
 import org.apache.shindig.common.crypto.Crypto;
@@ -361,6 +362,8 @@ public class OAuthRequest {
     if (accessorInfo.getHttpMethod() == HttpMethod.POST) {
       request.setHeader("Content-Type", OAuth.FORM_ENCODED);
     }
+
+    request.setSecurityToken( new AnonymousSecurityToken( "", 0L, this.realRequest.getSecurityToken().getAppUrl(), 0L));
     return request;
   }
 

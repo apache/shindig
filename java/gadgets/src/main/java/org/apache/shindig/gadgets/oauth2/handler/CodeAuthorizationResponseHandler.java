@@ -22,6 +22,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.shindig.auth.AnonymousSecurityToken;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpFetcher;
@@ -218,6 +219,7 @@ public class CodeAuthorizationResponseHandler implements AuthorizationEndpointRe
     final HttpRequest request = new HttpRequest(Uri.parse(tokenUrl));
     request.setMethod("POST");
     request.setHeader("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
+    request.setSecurityToken( new AnonymousSecurityToken( "", 0L, accessor.getGadgetUri(), 0L ));
 
     for (final ClientAuthenticationHandler clientAuthenticationHandler : this.clientAuthenticationHandlers) {
       if (clientAuthenticationHandler.geClientAuthenticationType().equalsIgnoreCase(

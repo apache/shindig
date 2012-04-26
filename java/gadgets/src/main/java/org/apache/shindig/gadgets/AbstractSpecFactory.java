@@ -18,6 +18,7 @@
  */
 package org.apache.shindig.gadgets;
 
+import org.apache.shindig.auth.AnonymousSecurityToken;
 import org.apache.shindig.common.cache.Cache;
 import org.apache.shindig.common.cache.SoftExpiringCache;
 import org.apache.shindig.common.logging.i18n.MessageKeys;
@@ -123,7 +124,8 @@ public abstract class AbstractSpecFactory<T> {
     HttpRequest request = new HttpRequest(query.specUri)
         .setIgnoreCache(query.ignoreCache)
         .setGadget(query.gadgetUri)
-        .setContainer(query.container);
+        .setContainer(query.container)
+        .setSecurityToken( new AnonymousSecurityToken("", 0L, query.gadgetUri.toString(), 0L));
 
     // Since we don't allow any variance in cache time, we should just force the cache time
     // globally. This ensures propagation to shared caches when this is set.

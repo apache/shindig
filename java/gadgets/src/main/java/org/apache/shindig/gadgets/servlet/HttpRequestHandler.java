@@ -217,18 +217,16 @@ public class HttpRequestHandler {
         req.setAuthType(AuthType.parse(httpApiRequest.authz));
       }
 
+      req.setSecurityToken(requestItem.getToken());
+
       final AuthType authType = req.getAuthType();
       if (authType != AuthType.NONE) {
         if (authType == AuthType.OAUTH2) {
-          req.setSecurityToken(requestItem.getToken());
-
           Map<String, String> authSettings = getAuthSettings(requestItem);
           OAuth2Arguments oauth2Args = new OAuth2Arguments(req.getAuthType(), authSettings);
 
           req.setOAuth2Arguments(oauth2Args);
         } else {
-          req.setSecurityToken(requestItem.getToken());
-
           Map<String, String> authSettings = getAuthSettings(requestItem);
           OAuthArguments oauthArgs = new OAuthArguments(req.getAuthType(), authSettings);
           oauthArgs.setSignOwner(httpApiRequest.signOwner);
