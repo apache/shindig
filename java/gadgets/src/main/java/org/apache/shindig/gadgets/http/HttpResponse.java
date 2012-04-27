@@ -407,6 +407,9 @@ public final class HttpResponse implements Externalizable {
    * @return True if this result is stale.
    */
   public boolean isStale() {
+    if(getCacheControlMaxAge() == 0) {
+      return true;
+    }
     return getCacheTtl() <= 0;
   }
 
