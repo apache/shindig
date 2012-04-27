@@ -17,17 +17,43 @@ KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
 -->
+
+<!--
+  The one and only cache manager for Shindig.
+
+  Allot a modest amount of heap to be shared by all caches.
+
+  By default none of the caches will persist or overflow to disk.
+
+  Statistics are turned on for every cache by default.  This affects cache performance.
+  To turn stats off you can use shindig.cache.ehcache.jmx.stats in shindig.properties.
+
+  See http://ehcache.org/ehcache.xsd for more information on valid configuration.
+-->
 <ehcache xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:noNamespaceSchemaLocation="ehcache.xsd" updateCheck="false">
+  xsi:noNamespaceSchemaLocation="ehcache.xsd"
+  updateCheck="false"
+  maxBytesLocalHeap="50m"
+  name="ShindigCM">
+
+  <!--
+    The directory where any caches configured as diskPersistent or overflowToDisk
+    will end up.
+  -->
+  <diskStore path="java.io.tmpdir"/>
+
+  <!-- Default sizeOfPolicy for computing the size of cache elements in memory -->
+  <sizeOfPolicy maxDepth="1000" maxDepthExceededBehavior="abort"/>
+
 
   <!--
     Mandatory Default Cache configuration. These settings will be applied to caches
     created programmatically using CacheManager.add(String cacheName).
-    
+
     The defaultCache has an implicit name "default" which is a reserved cache name.
   -->
   <defaultCache
-    maxElementsInMemory="1000"
+    statistics="true"
     eternal="false"
     timeToIdleSeconds="300"
     timeToLiveSeconds="600"
@@ -40,14 +66,14 @@ under the License.
     allow us to cache the objects indefinitely when using an LFU or LRU cache.
   -->
   <cache name="gadgetSpecs"
-    maxElementsInMemory="1000"
+    statistics="true"
     eternal="true"
     overflowToDisk="false"
     diskPersistent="false"
     memoryStoreEvictionPolicy="LFU"/>
 
   <cache name="messageBundles"
-    maxElementsInMemory="1000"
+    statistics="true"
     eternal="true"
     overflowToDisk="false"
     diskPersistent="false"
@@ -55,7 +81,7 @@ under the License.
 
   <!-- Used to cache parsed HTML DOMs based on their content -->
   <cache name="parsedDocuments"
-    maxElementsInMemory="1000"
+    statistics="true"
     eternal="true"
     overflowToDisk="false"
     diskPersistent="false"
@@ -63,18 +89,20 @@ under the License.
 
   <!-- Used to cache parsed CSS DOMs based on their content -->
   <cache name="parsedCss"
-    maxElementsInMemory="1000"
+    statistics="true"
     eternal="true"
     overflowToDisk="false"
     diskPersistent="false"
     memoryStoreEvictionPolicy="LFU"/>
 
-  <!-- 
+  <!--
     This configuration is only suitable for a modest sized HTTP cache.
     You should configure a shared cache for production use.
+    Give this cache 30% of the local heap by default.
   -->
   <cache name="httpResponses"
-    maxElementsInMemory="10000"
+    maxBytesLocalHeap="30%"
+    statistics="true"
     eternal="true"
     overflowToDisk="false"
     diskPersistent="false"
@@ -82,19 +110,33 @@ under the License.
 
   <!-- Used to cache parsed expressions based on their content -->
   <cache name="expressions"
-    maxElementsInMemory="1000"
+    statistics="true"
     eternal="true"
     overflowToDisk="false"
     diskPersistent="false"
     memoryStoreEvictionPolicy="LFU"/>
 
-  <!-- Used to cache cajoled documents based on their content -->
-  <cache name="cajoledDocuments"
-    maxElementsInMemory="1000"
+  <!-- Used to cache cajoled modules based on their content -->
+  <cache name="cajoledModules"
+    statistics="true"
     eternal="false"
     timeToIdleSeconds="300"
     timeToLiveSeconds="600"
     overflowToDisk="false"
     diskPersistent="false"
     memoryStoreEvictionPolicy="LFU"/>
+
+  <!-- Used to cache Gadget Feature JS -->
+  <cache name="FeatureJsCache"
+    statistics="true"
+    eternal="true"
+    overflowToDisk="false"
+    diskPersistent="false"
+    memoryStoreEvictionPolicy="LFU">
+    <!--
+      The elements stored in this cache are complex and the default sizeOfPolicy
+      is insufficient
+    -->
+    <sizeOfPolicy maxDepth="5000" maxDepthExceededBehavior="abort"/>
+  </cache>
 </ehcache>

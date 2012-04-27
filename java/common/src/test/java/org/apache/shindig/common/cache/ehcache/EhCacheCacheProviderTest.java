@@ -35,7 +35,10 @@ public class EhCacheCacheProviderTest {
   @BeforeClass
   public static void setup() throws Exception {
     defaultProvider = new EhCacheCacheProvider(
-        "res://org/apache/shindig/common/cache/ehcache/ehcacheConfig.xml", true, true,
+        "res://org/apache/shindig/common/cache/ehcache/ehcacheConfig.xml",
+        "org/apache/shindig/common/cache/ehcache/SizeOfFilter.txt",
+        true,
+        true,
         new GuiceServletContextListener.CleanupHandler());
   }
 

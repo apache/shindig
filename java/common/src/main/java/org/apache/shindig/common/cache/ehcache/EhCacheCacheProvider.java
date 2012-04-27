@@ -41,20 +41,46 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Cache interface based on ehcache
+ * Cache interface based on ehcache.
+ *
  * @see <a href="http://www.ehcache.org">http://www.ehcache.org</a>
  */
-public class EhCacheCacheProvider implements CacheProvider, GuiceServletContextListener.CleanupCapable {
+public class EhCacheCacheProvider implements CacheProvider,
+        GuiceServletContextListener.CleanupCapable {
   private static final Logger LOG = Logger.getLogger(EhCacheCacheProvider.class.getName());
   private final CacheManager cacheManager;
   private final ConcurrentMap<String, Cache<?, ?>> caches = new MapMaker().makeMap();
 
+  /**
+   * @param configPath
+   *          the path to the EhCache configuration file
+   * @param filterPath
+   *          the path to the EhCache SizeOf engine filter file
+   * @param jmxEnabled
+   *          true if JMX should be enabled for EhCache, false otherwise
+   * @param withCacheStats
+   *          true if cache statistics should be enabled globally, false otherwise
+   * @param cleanupHandler
+   *          cleanup handler with which to register to ensure proper cache shutdown via
+   *          {@link #cleanup()}
+   * @throws IOException
+   *           if there was an issue parsing the given configuration
+   */
   @Inject
   public EhCacheCacheProvider(@Named("shindig.cache.ehcache.config") String configPath,
+                              @Named("shindig.cache.ehcache.sizeof.filter") String filterPath,
                               @Named("shindig.cache.ehcache.jmx.enabled") boolean jmxEnabled,
                               @Named("shindig.cache.ehcache.jmx.stats") boolean withCacheStats,
                               GuiceServletContextListener.CleanupHandler cleanupHandler)
       throws IOException {
+    // TODO: Setting this system property is currently the only way to hook in our own filter
+    // https://jira.terracotta.org/jira/browse/EHC-938
+    // https://jira.terracotta.org/jira/browse/EHC-924
+    // Remove res:// and file:// prefixes.  EhCache can't understand them.
+    String normalizedFilterPath = filterPath.replaceFirst(ResourceLoader.RESOURCE_PREFIX, "");
+    normalizedFilterPath = normalizedFilterPath.replaceFirst(ResourceLoader.FILE_PREFIX, "");
+    System.getProperties().put("net.sf.ehcache.sizeof.filter", normalizedFilterPath);
+
     cacheManager = new CacheManager(getConfiguration(configPath));
     create(jmxEnabled, withCacheStats);
     cleanupHandler.register(this);
@@ -62,18 +88,21 @@ public class EhCacheCacheProvider implements CacheProvider, GuiceServletContextL
 
   /**
    * Read the cache configuration from the specified resource.
-   * This function is intended to be overrideable to allow for programmatic
-   * cache configuration.
+   *
+   * This function is intended to be overrideable to allow for programmatic cache configuration.
+   *
    * @param configPath
-   * @return Configuration
+   *          the path to the configuration file
+   * @return Configuration the configuration object parsed from the configuration file
    * @throws IOException
+   *           if there was an error parsing the given configuration
    */
   protected Configuration getConfiguration(String configPath) throws IOException {
     InputStream configStream = ResourceLoader.open(configPath);
     return ConfigurationFactory.parseConfiguration(configStream);
   }
 
-  public void create(boolean jmxEnabled, boolean withCacheStats) {
+  private void create(boolean jmxEnabled, boolean withCacheStats) {
     if (jmxEnabled) {
       // register the cache manager with JMX
       MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
@@ -82,12 +111,15 @@ public class EhCacheCacheProvider implements CacheProvider, GuiceServletContextL
   }
 
   /**
-   * perform a shutdown
+   * Perform a shutdown of the underlying cache manager.
    */
   public void cleanup() {
     cacheManager.shutdown();
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @SuppressWarnings("unchecked")
   public <K, V> Cache<K, V> createCache(String name) {
     if (!caches.containsKey(Preconditions.checkNotNull(name))) {

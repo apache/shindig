@@ -27,11 +27,23 @@ import net.sf.ehcache.Element;
 
 /**
  * Produces a cache configured from ehcache.
+ *
+ * @param <K> the type of key used to cache elements
+ * @param <V> the type of element stored in this cache
  */
 public class EhConfiguredCache<K, V> implements Cache<K, V> {
 
   private net.sf.ehcache.Cache cache;
 
+  /**
+   * Create a new EhCache cache with the given name for the given cache manager if one does not
+   * already exist.
+   *
+   * @param cacheName
+   *          the name to use for the cache
+   * @param cacheManager
+   *          the cache manager in which to create the cache
+   */
   public EhConfiguredCache(String cacheName, CacheManager cacheManager) {
     synchronized (cacheManager) {
       cache = cacheManager.getCache(Preconditions.checkNotNull(cacheName));
@@ -45,10 +57,16 @@ public class EhConfiguredCache<K, V> implements Cache<K, V> {
     }
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public void addElement(K key, V value) {
     cache.put(new Element(key, value));
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @SuppressWarnings("unchecked")
   public V getElement(K key) {
     Element cacheElement = cache.get(key);
@@ -58,6 +76,9 @@ public class EhConfiguredCache<K, V> implements Cache<K, V> {
     return null;
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @SuppressWarnings("unchecked")
   public V removeElement(K key) {
     Object value = getElement(key);
@@ -65,9 +86,15 @@ public class EhConfiguredCache<K, V> implements Cache<K, V> {
     return (V) value;
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public long getCapacity() {
-    return cache.getCacheConfiguration().getMaxElementsInMemory() +
-        cache.getCacheConfiguration().getMaxElementsOnDisk();
+    // EhCache returns 0 to represent an unbounded cache, where the Cache interface expects -1
+    // EhCache also returns 0 when using resource pooling as a count-based capacity does not apply
+    long totalCapacity = cache.getCacheConfiguration().getMaxEntriesLocalHeap()
+            + cache.getCacheConfiguration().getMaxEntriesLocalDisk();
+    return totalCapacity == 0 ? -1 : totalCapacity;
   }
 
   /**
