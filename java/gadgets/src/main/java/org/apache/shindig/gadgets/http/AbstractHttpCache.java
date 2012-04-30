@@ -103,7 +103,7 @@ public abstract class AbstractHttpCache implements HttpCache {
     return null;
   }
 
-  public boolean addResponse(HttpRequest request, HttpResponse response) {
+  public HttpResponse addResponse(HttpRequest request, HttpResponse response) {
     HttpResponseBuilder responseBuilder;
     boolean storeStrictNoCacheResources = (refetchStrictNoCacheAfterMs >= 0);
     if (isCacheable(request, response, storeStrictNoCacheResources)) {
@@ -113,7 +113,7 @@ public abstract class AbstractHttpCache implements HttpCache {
         responseBuilder = new HttpResponseBuilder(response);
       }
     } else {
-      return false;
+      return null;
     }
     int forcedTtl = request.getCacheTtl();
     if (forcedTtl != -1) {
@@ -122,7 +122,7 @@ public abstract class AbstractHttpCache implements HttpCache {
     response = responseBuilder.create();
     String keyString = createKey(request);
     addResponseImpl(keyString, response);
-    return true;
+    return response; // cached and possibly modified
   }
 
   @VisibleForTesting

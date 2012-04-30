@@ -114,7 +114,6 @@ IoTest.prototype.setArg = function(req, inBody, name, value) {
 };
 
 IoTest.prototype.setStandardArgs = function(req, inBody) {
-  this.setArg(req, inBody, "refresh", "3600");
   this.setArg(req, inBody, "st", "");
   this.setArg(req, inBody, "contentType", "TEXT");
   this.setArg(req, inBody, "authz", "");
@@ -176,11 +175,10 @@ IoTest.prototype.testNoMethod_nonDefaultRefresh = function() {
 };
 
 IoTest.prototype.testNoMethod_disableRefresh = function() {
-  var req = new fakeXhr.Expectation("POST", "http://example.com/json");
-  this.setStandardArgs(req, true);
-  req.setBodyArg("url", "http://target.example.com/somepage");
-  req.setBodyArg("refresh", "0");
-  req.setHeader("Content-Type", "application/x-www-form-urlencoded");
+  var req = new fakeXhr.Expectation("GET", "http://example.com/json");
+  this.setStandardArgs(req, false);
+  req.setQueryArg("url", "http://target.example.com/somepage");
+  req.setQueryArg("refresh", "0");
 
   var resp = this.makeFakeResponse(
       "{ 'http://target.example.com/somepage' : { 'body' : 'some data', 'rc' : 200 }}");

@@ -23,6 +23,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNotNull;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
@@ -309,10 +310,10 @@ public class AbstractHttpCacheTest {
     HttpResponse response = new HttpResponse("normal");
     String key = cache.createKey(request);
 
-    assertTrue("response should have been cached", cache.addResponse(request, response));
+    assertNotNull("response should have been cached", cache.addResponse(request, response));
     assertEquals(response, cache.map.get(key));
 
-    assertTrue("response should have been cached",
+    assertNotNull("response should have been cached",
                extendedStrictNoCacheTtlCache.addResponse(request, response));
     assertEquals(response, extendedStrictNoCacheTtlCache.map.get(key));
   }
@@ -323,10 +324,10 @@ public class AbstractHttpCacheTest {
         .setIgnoreCache(true);
     HttpResponse response = new HttpResponse("does not matter");
 
-    assertFalse("response should not have been cached", cache.addResponse(request, response));
+    assertNull("response should not have been cached", cache.addResponse(request, response));
     assertEquals(0, cache.map.size());
 
-    assertFalse("response should not have been cached",
+    assertNull("response should not have been cached",
                 extendedStrictNoCacheTtlCache.addResponse(request, response));
     assertEquals(0, extendedStrictNoCacheTtlCache.map.size());
   }
@@ -337,10 +338,10 @@ public class AbstractHttpCacheTest {
     HttpResponse response = new HttpResponseBuilder().setStrictNoCache().create();
     String key = cache.createKey(request);
 
-    assertFalse(cache.addResponse(request, response));
+    assertNull(cache.addResponse(request, response));
     assertEquals(0, cache.map.size());
 
-    assertTrue("response should have been cached",
+    assertNotNull("response should have been cached",
                extendedStrictNoCacheTtlCache.addResponse(request, response));
     assertEquals(
         extendedStrictNoCacheTtlCache.buildStrictNoCacheHttpResponse(response).create(),
@@ -352,10 +353,10 @@ public class AbstractHttpCacheTest {
     HttpRequest request = new HttpRequest(DEFAULT_URI);
     HttpResponse response = new HttpResponseBuilder().setHttpStatusCode(HttpResponse.SC_NOT_MODIFIED).create();
 
-    assertFalse(cache.addResponse(request, response));
+    assertNull(cache.addResponse(request, response));
     assertEquals(0, cache.map.size());
 
-    assertFalse(extendedStrictNoCacheTtlCache.addResponse(request, response));
+    assertNull(extendedStrictNoCacheTtlCache.addResponse(request, response));
     assertEquals(0, extendedStrictNoCacheTtlCache.map.size());
   }
 
@@ -365,10 +366,10 @@ public class AbstractHttpCacheTest {
         .setMethod("POST");
     HttpResponse response = new HttpResponse("does not matter");
 
-    assertFalse(cache.addResponse(request, response));
+    assertNull(cache.addResponse(request, response));
     assertEquals(0, cache.map.size());
 
-    assertFalse(extendedStrictNoCacheTtlCache.addResponse(request, response));
+    assertNull(extendedStrictNoCacheTtlCache.addResponse(request, response));
     assertEquals(0, extendedStrictNoCacheTtlCache.map.size());
   }
 
@@ -380,10 +381,10 @@ public class AbstractHttpCacheTest {
     HttpResponse response = new HttpResponse("normal");
     String key = cache.createKey(request);
 
-    assertTrue(cache.addResponse(request, response));
+    assertNotNull(cache.addResponse(request, response));
     assertEquals(response, cache.map.get(key));
 
-    assertTrue(extendedStrictNoCacheTtlCache.addResponse(request, response));
+    assertNotNull(extendedStrictNoCacheTtlCache.addResponse(request, response));
     assertEquals(response, extendedStrictNoCacheTtlCache.map.get(key));
   }
 
@@ -395,11 +396,11 @@ public class AbstractHttpCacheTest {
     String key = cache.createKey(request);
     HttpResponse response = new HttpResponse("result");
 
-    assertTrue(cache.addResponse(request, response));
+    assertNotNull(cache.addResponse(request, response));
 
     assertEquals("public,max-age=10", cache.map.get(key).getHeader("Cache-Control"));
 
-    assertTrue(extendedStrictNoCacheTtlCache.addResponse(request, response));
+    assertNotNull(extendedStrictNoCacheTtlCache.addResponse(request, response));
     assertEquals("public,max-age=10",
                  extendedStrictNoCacheTtlCache.map.get(key).getHeader("Cache-Control"));
   }
@@ -415,11 +416,11 @@ public class AbstractHttpCacheTest {
         .setStrictNoCache()
         .create();
 
-    assertTrue(cache.addResponse(request, response));
+    assertNotNull(cache.addResponse(request, response));
 
     assertEquals("public,max-age=10", cache.map.get(key).getHeader("Cache-Control"));
 
-    assertTrue(extendedStrictNoCacheTtlCache.addResponse(request, response));
+    assertNotNull(extendedStrictNoCacheTtlCache.addResponse(request, response));
     assertEquals("public,max-age=10",
                  extendedStrictNoCacheTtlCache.map.get(key).getHeader("Cache-Control"));
   }
@@ -431,11 +432,11 @@ public class AbstractHttpCacheTest {
     String key = cache.createKey(request);
     HttpResponse response = new HttpResponse("no headers");
 
-    assertTrue(cache.addResponse(request, response));
+    assertNotNull(cache.addResponse(request, response));
 
     assertEquals("no headers", cache.map.get(key).getResponseAsString());
 
-    assertTrue(extendedStrictNoCacheTtlCache.addResponse(request, response));
+    assertNotNull(extendedStrictNoCacheTtlCache.addResponse(request, response));
     assertEquals("no headers", extendedStrictNoCacheTtlCache.map.get(key).getResponseAsString());
   }
 

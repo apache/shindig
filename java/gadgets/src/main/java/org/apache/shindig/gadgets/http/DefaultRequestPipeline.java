@@ -232,7 +232,10 @@ public class DefaultRequestPipeline implements RequestPipeline {
       if (fetchedResponse.getCacheTtl() > 0) {
         fetchedResponse = invalidationService.markResponse(request, fetchedResponse);
       }
-      httpCache.addResponse(request, fetchedResponse);
+      HttpResponse cached = httpCache.addResponse(request, fetchedResponse);
+      if (cached != null) {
+        fetchedResponse = cached; // possibly modified response.
+      }
     }
 
     return fetchedResponse;

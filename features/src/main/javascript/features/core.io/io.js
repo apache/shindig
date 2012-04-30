@@ -367,11 +367,6 @@ gadgets.io = function() {
       if (params['AUTHORIZATION'] && params['AUTHORIZATION'] !== 'NONE') {
         auth = params['AUTHORIZATION'].toLowerCase();
         st = shindig.auth.getSecurityToken();
-      } else {
-        // Unauthenticated GET requests are cacheable
-        if (httpMethod === 'GET' && typeof refreshInterval == 'undefined') {
-          refreshInterval = 3600;
-        }
       }
 
       // Include owner information?
@@ -433,20 +428,16 @@ gadgets.io = function() {
 
       // FIXME -- processResponse is not used in call
       if (!respondWithPreload(paramData, params, callback)) {
-        if (httpMethod === 'GET' && refreshInterval > 0) {
-          // this content should be cached
-          // Add paramData to the URL
-          var extraparams = '?refresh=' + refreshInterval + '&' +
-              gadgets.io.encodeValues(paramData);
+        if (httpMethod == 'GET' && typeof(refreshInterval) != 'undefined') {
+            paramData['refresh'] = refreshInterval; // gadget requested cache override.
+        }
 
+        if (httpMethod === 'GET' && !paramData['authz']) {
+          var extraparams = '?' + gadgets.io.encodeValues(paramData);
           makeXhrRequest(url, proxyUrl + extraparams, callback,
               null, 'GET', params, processResponse);
-
         } else {
           var extraparams = gadgets.io.encodeValues(paramData);
-          if (httpMethod === 'GET' && refreshInterval == 0) {
-            extraparams = extraparams + "&refresh=0";
-          }
           makeXhrRequest(url, proxyUrl, callback,
               extraparams, 'POST', params,
               processResponse);

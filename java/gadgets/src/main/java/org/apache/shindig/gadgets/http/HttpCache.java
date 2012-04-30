@@ -32,9 +32,9 @@ public interface HttpCache {
   /**
    * Add a request/response pair to the cache.
    *
-   * @return true if the response was cached, false if the response was not cached.
+   * @return The response that was cached, null otherwise.
    */
-  boolean addResponse(HttpRequest request, HttpResponse response);
+  HttpResponse addResponse(HttpRequest request, HttpResponse response);
 
   HttpResponse removeResponse(HttpRequest key);
 

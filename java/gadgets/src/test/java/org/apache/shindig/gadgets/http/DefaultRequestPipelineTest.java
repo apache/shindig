@@ -324,10 +324,10 @@ public class DefaultRequestPipelineTest {
 
     protected FakeHttpCache() {}
 
-    public boolean addResponse(HttpRequest request, HttpResponse response) {
+    public HttpResponse addResponse(HttpRequest request, HttpResponse response) {
       writeCount++;
       data.put(request.getUri(), response);
-      return true;
+      return response;
     }
 
     public HttpResponse getResponse(HttpRequest request) {
