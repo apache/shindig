@@ -76,37 +76,42 @@ osapi.container.Container.addMixin('views', function(container) {
       var orig_site = container.getGadgetSiteByIframeId_(siteOwnerId),
           rel = orig_site.getActiveSiteHolder().getIframeElement();
 
+      function callback(element) {
+        var gadgetRenderParams = {};
+        gadgetRenderParams[osapi.container.RenderParam.VIEW] =
+            osapi.container.ee.RenderParam.EMBEDDED;
+        gadgetRenderParams[osapi.container.RenderParam.WIDTH] = '100%';
+        gadgetRenderParams[osapi.container.RenderParam.HEIGHT] = '100%';
+
+        var urlRenderParams = {};
+        urlRenderParams[osapi.container.RenderParam.WIDTH] = '100%';
+        urlRenderParams[osapi.container.RenderParam.HEIGHT] = '100%';
+
+        var eeRenderParams = {};
+        eeRenderParams[osapi.container.ee.RenderParam.GADGET_RENDER_PARAMS] =
+            gadgetRenderParams;
+        eeRenderParams[osapi.container.ee.RenderParam.URL_RENDER_PARAMS] =
+            urlRenderParams;
+        eeRenderParams[osapi.container.ee.RenderParam.GADGET_VIEW_PARAMS] =
+            viewParams;
+
+        container.ee.navigate(element, dataModel, eeRenderParams, function(site, result) {
+          site.ownerId_ = siteOwnerId;
+          if (result) {
+            self.resultCallbacks_[site.getId()] = resultCallback;
+          }
+          if (navigateCallback) {
+            navigateCallback([site.getId(), result]);
+          }
+        });
+      }
+
       var element = self.createElementForEmbeddedExperience(
-        rel, opt_metadata, viewTarget, coordinates, orig_site
+        rel, opt_metadata, viewTarget, coordinates, orig_site, callback
       );
-
-      var gadgetRenderParams = {};
-      gadgetRenderParams[osapi.container.RenderParam.VIEW] =
-          osapi.container.ee.RenderParam.EMBEDDED;
-      gadgetRenderParams[osapi.container.RenderParam.WIDTH] = '100%';
-      gadgetRenderParams[osapi.container.RenderParam.HEIGHT] = '100%';
-
-      var urlRenderParams = {};
-      urlRenderParams[osapi.container.RenderParam.WIDTH] = '100%';
-      urlRenderParams[osapi.container.RenderParam.HEIGHT] = '100%';
-
-      var eeRenderParams = {};
-      eeRenderParams[osapi.container.ee.RenderParam.GADGET_RENDER_PARAMS] =
-          gadgetRenderParams;
-      eeRenderParams[osapi.container.ee.RenderParam.URL_RENDER_PARAMS] =
-          urlRenderParams;
-      eeRenderParams[osapi.container.ee.RenderParam.GADGET_VIEW_PARAMS] =
-          viewParams;
-
-      container.ee.navigate(element, dataModel, eeRenderParams, function(site, result) {
-        site.ownerId_ = siteOwnerId;
-        if (result) {
-          self.resultCallbacks_[site.getId()] = resultCallback;
-        }
-        if (navigateCallback) {
-          navigateCallback([site.getId(), result]);
-        }
-      });
+      if (element) {
+        callback(element);
+      }
     };
 
     if(gadgetUrl) {
@@ -133,7 +138,8 @@ osapi.container.Container.addMixin('views', function(container) {
 
   /**
    * Method will be called to create the DOM element to place the embedded
-   * experience in.
+   * experience in. An implementation must either return an element or call
+   * the provided callback asynchronously, but not both.
    *
    *@param {Element}
    *          rel: The element to which opt_coordinates values are
@@ -151,10 +157,12 @@ osapi.container.Container.addMixin('views', function(container) {
    *          gadget.
    * @param {osapi.container.Site} parentSite
    *          The site opening the EE.
+   * @param {function(element)} opt_callback
+   *          A callback to asynchronously provide the result of the createElement call.
    * @return {Object} The DOM element to place the embedded experience in.
    */
   this.createElementForEmbeddedExperience = function(rel, opt_gadgetInfo, opt_viewTarget,
-      opt_coordinates, parentSite) {
+      opt_coordinates, parentSite, opt_callback) {
     console.log('container needs to define createElementForEmbeddedExperience function');
   };
 });

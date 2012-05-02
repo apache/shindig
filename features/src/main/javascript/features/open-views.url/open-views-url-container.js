@@ -51,24 +51,31 @@ osapi.container.Container.addMixin('views', function(container) {
     var orig_site = container.getGadgetSiteByIframeId_(rpcArgs.f),
       rel = orig_site.getActiveSiteHolder().getIframeElement();
 
-    var content_div = self.createElementForUrl(rel, opt_viewTarget, opt_coordinates, orig_site);
-    var site = container.newUrlSite(content_div);
+    function callback(content_div) {
+      var site = container.newUrlSite(content_div);
 
-    var renderParams = {}; // (height, width, class,userPrefsObject)
-    renderParams[osapi.container.RenderParam.WIDTH] = '100%';
-    renderParams[osapi.container.RenderParam.HEIGHT] = '100%';
+      var renderParams = {}; // (height, width, class,userPrefsObject)
+      renderParams[osapi.container.RenderParam.WIDTH] = '100%';
+      renderParams[osapi.container.RenderParam.HEIGHT] = '100%';
 
-    container.navigateUrl(site, url, renderParams);
+      container.navigateUrl(site, url, renderParams);
 
-    // record who opened this site, so that if they use the siteId to close it later,
-    // we don't inadvertently allow other gadgets to guess the id and close the site.
-    site.ownerId_ = rpcArgs.f;
-    return site.getId();
+      // record who opened this site, so that if they use the siteId to close it later,
+      // we don't inadvertently allow other gadgets to guess the id and close the site.
+      site.ownerId_ = rpcArgs.f;
+      rpcArgs.callback([site.getId()]);
+    };
+
+    var content_div = self.createElementForUrl(rel, opt_viewTarget, opt_coordinates, orig_site, callback);
+    if (content_div) {
+      callback(content_div);
+    }
   });
 
   /**
    * Method will be called to create the DOM element to place the UrlSite
-   * in.
+   * in. An implementation must either return an element or call
+   * the provided callback asynchronously, but not both.
    *
    * @param {Element}
    *          rel: The element to which opt_coordinates values are
@@ -83,9 +90,11 @@ osapi.container.Container.addMixin('views', function(container) {
    *          gadget.
    * @param {osapi.container.Site} parentSite
    *          The site opening the url.
+   * @param {function(element)} opt_callback
+   *          A callback to asynchronously provide the result of the createElement call.
    * @return {Object} The DOM element to place the UrlSite object in.
    */
-  this.createElementForUrl = function(rel, opt_viewTarget, opt_coordinates, parentSite) {
+  this.createElementForUrl = function(rel, opt_viewTarget, opt_coordinates, parentSite, opt_callback) {
     console.log('container needs to define createElementForUrl function');
   };
 });

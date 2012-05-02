@@ -104,34 +104,41 @@ osapi.container.Container.addMixin('views', function(container) {
         }
       }
 
-      var renderParams = {},
-          elem = self.createElementForGadget(
-            metadata, rel, view, viewTarget, coordinates, orig_site
-          ),
-          site = container.newGadgetSite(elem);
+      function callback(elem) {
+        var renderParams = {},
+            site = container.newGadgetSite(elem);
 
-      site.ownerId_ = siteOwnerId;
+        site.ownerId_ = siteOwnerId;
 
-      if ((typeof view != 'undefined') && view !== '') {
-        renderParams[osapi.container.RenderParam.VIEW] = view;
+        if ((typeof view != 'undefined') && view !== '') {
+          renderParams[osapi.container.RenderParam.VIEW] = view;
+        }
+        renderParams[osapi.container.RenderParam.WIDTH] = '100%';
+        renderParams[osapi.container.RenderParam.HEIGHT] = '100%';
+
+        container.navigateGadget(site, gadgetUrl, viewParams, renderParams, function(metadata) {
+          if (metadata) {
+            self.resultCallbacks_[site.getId()] = resultCallback;
+          }
+          if (navigateCallback) {
+            navigateCallback([site.getId(), metadata]);
+          }
+        });
       }
-      renderParams[osapi.container.RenderParam.WIDTH] = '100%';
-      renderParams[osapi.container.RenderParam.HEIGHT] = '100%';
 
-      container.navigateGadget(site, gadgetUrl, viewParams, renderParams, function(metadata) {
-        if (metadata) {
-          self.resultCallbacks_[site.getId()] = resultCallback;
-        }
-        if (navigateCallback) {
-          navigateCallback([site.getId(), metadata]);
-        }
-      });
+      var elem = self.createElementForGadget(
+        metadata, rel, view, viewTarget, coordinates, orig_site, callback
+      );
+      if (elem) {
+        callback(elem);
+      }
     });
   });
 
   /**
    * Method will be called to create the DOM element to place the Gadget
-   * Site in.
+   * Site in. An implementation must either return an element or call
+   * the provided callback asynchronously, but not both.
    *
    * @param {Object}
    *          metadata: Gadget meta data for the gadget being opened in
@@ -152,10 +159,12 @@ osapi.container.Container.addMixin('views', function(container) {
    *          gadget.
    * @param {osapi.container.Site} parentSite
    *          The site opening the gadget view.
+   * @param {function(element)} opt_callback
+   *          A callback to asynchronously provide the result of the createElement call.
    * @return {Object} The DOM element to place the GadgetSite in.
    */
   this.createElementForGadget = function(metadata, rel, opt_view, opt_viewTarget,
-      opt_coordinates, parentSite) {
+      opt_coordinates, parentSite, opt_callback) {
     console.log('container needs to define createElementForGadget function');
   };
 });
