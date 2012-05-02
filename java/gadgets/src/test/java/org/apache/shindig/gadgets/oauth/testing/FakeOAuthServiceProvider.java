@@ -282,20 +282,11 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
     String url = request.getUri().toString();
     try {
       if (url.startsWith(REQUEST_TOKEN_URL)) {
-        if (request.getSecurityToken() == null) {
-          throw new RuntimeException("Security token should not be null" );
-        }
-        if (!request.getSecurityToken().isAnonymous()) {
-          throw new RuntimeException("Expected an anonymous security token" );
-        }
-        if (expectedRequestSecurityToken != null) {
-          if (!expectedRequestSecurityToken.getAppUrl().equals( request.getSecurityToken().getAppUrl() )) {
-            throw new RuntimeException("Security token AppUrl mismatch" );
-          }
-        }
+        checkSecurityToken(request);
         ++requestTokenCount;
         return handleRequestTokenUrl(request);
       } else if (url.startsWith(ACCESS_TOKEN_URL)) {
+        checkSecurityToken(request);
         ++accessTokenCount;
         return handleAccessTokenUrl(request);
       } else if (url.startsWith(RESOURCE_URL)){
@@ -312,6 +303,20 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
       throw new RuntimeException("Problem with request for URL " + url, e);
     }
     throw new RuntimeException("Unexpected request for " + url);
+  }
+
+  private void checkSecurityToken(HttpRequest request) {
+    if (request.getSecurityToken() == null) {
+      throw new RuntimeException("Security token should not be null" );
+    }
+    if (!request.getSecurityToken().isAnonymous()) {
+      throw new RuntimeException("Expected an anonymous security token" );
+    }
+    if (expectedRequestSecurityToken != null) {
+      if (!expectedRequestSecurityToken.getAppUrl().equals( request.getSecurityToken().getAppUrl() )) {
+        throw new RuntimeException("Security token AppUrl mismatch" );
+      }
+    }
   }
 
   private HttpResponse handleRequestTokenUrl(HttpRequest request)

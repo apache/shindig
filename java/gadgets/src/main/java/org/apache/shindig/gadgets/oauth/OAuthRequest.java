@@ -740,6 +740,7 @@ public class OAuthRequest {
     Uri accessTokenUri = Uri.parse(accessor.consumer.serviceProvider.accessTokenURL);
     HttpRequest request = new HttpRequest(accessTokenUri);
     request.setMethod(accessorInfo.getHttpMethod().toString());
+    request.setSecurityToken( new AnonymousSecurityToken( "", 0L, this.realRequest.getSecurityToken().getAppUrl(), 0L));
     if (accessorInfo.getHttpMethod() == HttpMethod.POST) {
       request.setHeader("Content-Type", OAuth.FORM_ENCODED);
     }
