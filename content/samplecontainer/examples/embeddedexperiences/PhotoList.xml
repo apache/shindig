@@ -54,15 +54,9 @@
      <script type="text/javascript">
 
          var currentSite;
-
-         function initAlbum(){
-             opensocial.data.getDataContext().registerListener('org.opensocial.ee.context', function(key){
-                 createAlbumHTML(opensocial.data.getDataContext().getDataSet(key));
-             });
-         };
          var context;
          function createAlbumHTML(context){
-             this.context=context;
+             window.context=context;
              var photos = context.photoUrls;
              var result = "";
              for(var i = 0; i < photos.length; i++){
@@ -72,8 +66,9 @@
              $('#header').html(context.albumName);
              $('#album').html(result);
          };
-
-         gadgets.util.registerOnLoadHandler(initAlbum);
+         gadgets.util.registerOnLoadHandler(function() {
+           gadgets.ee.registerContextListener(createAlbumHTML);
+         });
 
          function showPreviewPhoto(index, eeGadget) {
 

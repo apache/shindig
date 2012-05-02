@@ -20,64 +20,58 @@
 <Module>
 	<ModulePrefs title="Photo Album Viewer" description="View Photos From An Album" height="400" width="650">
 		<Require feature="embedded-experiences"></Require>
-        <Require feature="dynamic-height"></Require>
         <Require feature="open-views"></Require>
 	</ModulePrefs>
 	<Content type="html" view="embedded, default">
    <![CDATA[
-   	 <style type="text/css">
-		.photo {
-			float: left;
-			margin-left: 20px;
-			margin-right: 20px;
-			margin-bottom: 70px;
-			maring-top: 20px;
-			padding: 2px 2px 2px 2px;
-			border: 1px solid black;
-		}
-		
-		#wrapper{
-			border: 1px solid black;
-		}
-		
-		#header{
-			font-size: 120%;
-			padding: 10px 10px 10px 10px;
-			color: #0F67A1;
-		}     	
-		
-		.clear{
-			clear: both;
-		} 	
+     <style type="text/css">
+       .photo {
+         float: left;
+         margin-left: 20px;
+         margin-right: 20px;
+         margin-bottom: 70px;
+         maring-top: 20px;
+         padding: 2px 2px 2px 2px;
+         border: 1px solid black;
+       }
+
+       #wrapper {
+         border: 1px solid black;
+       }
+
+       #header {
+         font-size: 120%;
+         padding: 10px 10px 10px 10px;
+         color: #0F67A1;
+       }
+
+       .clear {
+         clear: both;
+       }
      </style>
 
 
-     <script type="text/javascript">     	
-     	function initAlbum(){
-     		opensocial.data.getDataContext().registerListener('org.opensocial.ee.context', function(key){
-     			createAlbumHTML(opensocial.data.getDataContext().getDataSet(key));
-     		});
-     	}
-     	
-     	function createAlbumHTML(context){
-     	    var photos = context.photoUrls;
-     		var result = "";
-     		for(var i = 0; i < photos.length; i++){
-     			result = result + '<div class="photo"><img src="' + photos[i] + '"/></div>';
-     		}
-     		document.getElementById('header').innerHTML = context.albumName;
-     		document.getElementById("album").innerHTML = result;
-            gadgets.views.setReturnValue("Rendered Album");
-     	}
-     	
-     	gadgets.util.registerOnLoadHandler(initAlbum);
-   	 </script>
+     <script type="text/javascript">
+       function createAlbumHTML(context){
+         var photos = context.photoUrls;
+         var result = '';
+         for(var i = 0; i < photos.length; i++){
+           result = result + '<div class="photo"><img src="' + gadgets.io.getProxyUrl(photos[i]) + '"/></div>';
+         }
+         document.getElementById('header').innerHTML = context.albumName;
+         document.getElementById('album').innerHTML = result;
+         gadgets.views.setReturnValue('Rendered Album');
+       }
+       gadgets.util.registerOnLoadHandler(function() {
+         gadgets.ee.registerContextListener(createAlbumHTML);
+       });
+     </script>
 
-	 <div id="wrapper">
-	 	<div id="header"></div>
-	 	<div id="album"></div>
-	 	<div class="clear"/>
-	 </div>
+     <div id="wrapper">
+       <div id="header"></div>
+       <div id="album"></div>
+       <div class="clear"/>
+     </div>
   ]]>
 	</Content>
 </Module>

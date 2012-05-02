@@ -25,6 +25,7 @@ specific language governing permissions and limitations under the License.
     <gadget>
         <script src="embedded_experiences_gadgets.js" />
         <api>
+          <exports type="js">gadgets.ee.registerContextListener</exports>
           <exports type="rpc">ee_set_context</exports>
           <uses type="rpc">ee_gadget_rendered</uses>
         </api>
