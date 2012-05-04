@@ -284,7 +284,7 @@ public class JsonDbOpensocialServiceTest extends Assert {
     RestfulCollection<ActivityEntry> responseItem = db.getActivityEntries(
         ImmutableSet.of(JOHN_DOE), SELF_GROUP, APP_ID, Collections.<String>emptySet(), null,
         new FakeGadgetToken()).get();
-    assertSame(2, responseItem.getTotalResults());
+    assertSame(3, responseItem.getTotalResults());
   }
 
   @Test
@@ -292,7 +292,7 @@ public class JsonDbOpensocialServiceTest extends Assert {
     RestfulCollection<ActivityEntry> responseItem = db.getActivityEntries(
         ImmutableSet.of(CANON_USER, JOHN_DOE), SELF_GROUP, APP_ID, Collections.<String>emptySet(), null,
         new FakeGadgetToken()).get();
-    assertSame(2, responseItem.getTotalResults());
+    assertSame(3, responseItem.getTotalResults());
   }
 
   @Test

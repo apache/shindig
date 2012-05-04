@@ -76,7 +76,7 @@ osapi.container.Container.addMixin('views', function(container) {
       var orig_site = container.getGadgetSiteByIframeId_(siteOwnerId),
           rel = orig_site.getActiveSiteHolder().getIframeElement();
 
-      function callback(element) {
+      function callback(element, opt_containerContext) {
         var gadgetRenderParams = {};
         gadgetRenderParams[osapi.container.RenderParam.VIEW] =
             osapi.container.ee.RenderParam.EMBEDDED;
@@ -103,14 +103,16 @@ osapi.container.Container.addMixin('views', function(container) {
           if (navigateCallback) {
             navigateCallback([site.getId(), result]);
           }
-        });
+        }, opt_containerContext);
       }
 
       var element = self.createElementForEmbeddedExperience(
         rel, opt_metadata, viewTarget, coordinates, orig_site, callback
       );
+
+      var containerContext = self.getContainerAssociatedContext(dataModel, opt_metadata);
       if (element) {
-        callback(element);
+        callback(element, containerContext);
       }
     };
 
@@ -135,9 +137,8 @@ osapi.container.Container.addMixin('views', function(container) {
     }
   });
 
-
   /**
-   * Method will be called to create the DOM element to place the embedded
+   * This function will be called to create the DOM element to place the embedded
    * experience in. An implementation must either return an element or call
    * the provided callback asynchronously, but not both.
    *
@@ -165,4 +166,18 @@ osapi.container.Container.addMixin('views', function(container) {
       opt_coordinates, parentSite, opt_callback) {
     console.log('container needs to define createElementForEmbeddedExperience function');
   };
+
+  /**
+   * This function will be called to inject additional context when opening gadget in EE mode.
+   *
+   * @param {Object} dataModel: The embedded experiences data model.
+   * @param {Object} opt_gadgetInfo: Info for the gadget embedded experience,
+   *                 if the data model contains a gadget URL.
+   * @return {Object} Additional context need to be passed by container.
+   */
+  this.getContainerAssociatedContext = function(dataModel, opt_gadgetInfo) {
+    console.log('container needs to define getContainerAssociatedContext function');
+    return {};
+  }
+
 });

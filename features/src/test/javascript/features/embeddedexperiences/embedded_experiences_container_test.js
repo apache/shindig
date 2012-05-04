@@ -73,6 +73,75 @@ EEContainerTest.prototype.testNavigateGadget = function() {
 
 };
 
+EEContainerTest.prototype.testNavigateGadgetWithAssociatedContext = function() {
+      this.setupGadgetsRpcRegister();
+      var container = new osapi.container.Container({});
+
+      var eeDataModel =
+        {'gadget' : 'http://example.com/gadget.xml', 'context' : {'label' : '123'}};
+
+      var container_context = {'associatedContext' : {'id': "123abc",
+                                                      'type': 'opensocial.ActivityEntry',
+                                                      'objectReference' : {}}};
+
+      this.setupGadgetSite(1, {}, null);
+      this.setupPreload();
+      container.ee.navigate({}, eeDataModel, {}, function() {}, container_context);
+
+      // verify
+      var renderParamDataModel = this.site_navigateTo_renderParams['eeDataModel'];
+      this.assertEquals('http://example.com/gadget.xml', renderParamDataModel.gadget);
+      var expectedContext = {"openSocial": {"associatedContext":{"id":"123abc","type":"opensocial.ActivityEntry","objectReference":{}}}, "label":"123"};
+      this.assertEquals(expectedContext, renderParamDataModel.context);
+};
+
+
+EEContainerTest.prototype.testNavigateGadgetWithPreferredExperience = function() {
+      this.setupGadgetsRpcRegister();
+      var container = new osapi.container.Container({});
+      var eeDataModel =
+        {'gadget' : 'http://example.com/gadget.xml', 'context' : {'label' : '123'},
+          'preferredExperience' : {'target' : {'type' : 'gadget','view' : 'my-ee-view', 'viewTarget' : 'DIALOG'},
+          'display' : {'type' : 'link', 'text' : 'Click me to say Hello World'}}};
+
+      this.setupGadgetSite(1, {}, null);
+      this.setupPreload();
+      container.ee.navigate({}, eeDataModel, {});
+
+      // verify
+      var renderParamDataModel = this.site_navigateTo_renderParams['eeDataModel'];
+      this.assertEquals({"label":"123"}, renderParamDataModel.context);
+      this.assertEquals('my-ee-view', this.site_navigateTo_renderParams['view']);
+
+};
+
+EEContainerTest.prototype.testGadgetNavigateWithCustomEENavigation = function() {
+      this.setupGadgetsRpcRegister();
+      var customEENavigate = function(dataModel) {
+        customNavigate = true;
+        if(dataModel.gadget)
+          return 'gadget';
+        else
+          return 'url';
+      };
+      var customNavigate = false;
+
+      var container = new osapi.container.Container({'GET_EE_NAVIGATION_TYPE' : customEENavigate});
+      var eeDataModel = {'gadget' : 'http://example.com/gadget.xml', 'context' : '123'};
+
+      this.setupGadgetSite(1, {}, null);
+      this.setupPreload();
+      container.ee.navigate({}, eeDataModel, {});
+
+      // verify
+      this.assertTrue(customNavigate);
+      var renderParamDataModel = this.site_navigateTo_renderParams['eeDataModel'];
+      this.assertEquals('http://example.com/gadget.xml', renderParamDataModel.gadget);
+      this.assertEquals('123', renderParamDataModel.context);
+      this.assertEquals('embedded', this.site_navigateTo_renderParams['view']);
+      this.assertEquals('http://example.com/gadget.xml', this.site_navigateTo_gadgetUrl);
+};
+
 EEContainerTest.prototype.setupGadgetsRpcRegister = function() {
       gadgets.rpc = {
         register: function() {

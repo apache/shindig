@@ -64,14 +64,14 @@ gadgets['ee'] = gadgets['ee'] || {};
    *        A function to be called when the listener is set.
    */
   gadgets.ee.registerContextListener = function(listener) {
-	//Add the listener regardless
-	contextListeners.push(listener);
+    //Add the listener regardless
+    contextListeners.push(listener);
 
-	//It could be that the context was already set before the gadget called this function
-	//so see if we have a context object in the data context and if we do call the listener
-	//back right away
-	if(isContextSet) {
-	  listener(opensocial.data.getDataContext().getDataSet('org.opensocial.ee.context'));
-	}
+    //It could be that the context was already set before the gadget called this function
+    //so see if we have a context object in the data context and if we do call the listener
+    //back right away
+    if(isContextSet) {
+      listener(opensocial.data.getDataContext().getDataSet('org.opensocial.ee.context'));
+    }
   };
 }());

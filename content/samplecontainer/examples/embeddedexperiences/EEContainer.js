@@ -125,30 +125,57 @@ function onAccordionChange(stream, event, ui) {
           'height' : 400,
           'width' : 650
       };
-      CommonContainer.ee.navigate(eeElement, embed,
-        {'urlRenderParams' : urlRenderingParams}, function(site, metaData) {
-          console.log('Embedded Experiences callback called');
-          console.log(gadgets.json.stringify(metaData));
-          currentEESite = site;
-        }
-      );
+
+      // Add additional container context
+      var containerContext = {};
+      containerContext.associatedContext = {"id" : entry.id , "type" : "opensocial.ActivityEntry",
+          "objectReference" : entry};
+
+      CommonContainer.ee.navigate(eeElement, embed, {'urlRenderParams' : urlRenderingParams},
+         function(site, metaData) {
+           console.log('Embedded Experiences callback called');
+           console.log(gadgets.json.stringify(metaData));
+           currentEESite = site;
+         }, containerContext);
     }
   }
-
-
 }
 
 /**
  * Called for each activity entry and adds the necessary HTML to the page.
+ * Check if preferredExperience is added to the EE model and set title accordingly.
  * @param i the item in the activity stream we are currently rendering.
  * @param entry the activity stream entry json.
  * @return void.
  */
 function createAccordianEntry(i, entry) {
-  var result = '<h3 id=' + i + '><a href="#">' + entry.title + '</a></h3><div>';
+  var title = entry.title;
+
+  // Lets try to see if the activity entry has preferredExperience extension.
+  var extensions = entry.openSocial;
+  if(extensions) {
+    var embed = extensions.embed;
+    if(embed && embed.preferredExperience) {
+      var linkText = getPreferredExperienceLinkText(embed[osapi.container.ee.PreferredExperience]);
+      if(linkText) {
+        title = linkText;
+      }
+    }
+  }
+  var result = '<h3 id=' + i + '><a href="#">' + title + '</a></h3><div>';
   if (entry.body)
     result = result + '<p>' + entry.body + '</p>';
   result = result + '<div id="ee' + i + '"></div></div>';
 
   $('#accordion').append(result);
+}
+
+function getPreferredExperienceLinkText(preferredExperience) {
+  if(preferredExperience && preferredExperience.target) {
+    if(preferredExperience.display.type !== 'link') {
+      return null;
+    }
+    var linkText = preferredExperience.display.text;
+    return linkText;
+  }
 }

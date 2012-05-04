@@ -63,7 +63,7 @@ public class RestfulJsonActivityEntryTest extends AbstractLargeRestfulTests{
     // First delete activity1, then retrieve & test
     getResponse("/activitystreams/john.doe/@self/1/activity1", "DELETE", null, ContentTypes.OUTPUT_JSON_CONTENT_TYPE);
     String resp = getResponse("/activitystreams/john.doe/@self/1", "GET", null, ContentTypes.OUTPUT_JSON_CONTENT_TYPE);
-    String expected = TestUtils.loadTestFixture(FIXTURE_LOC + "ActivityEntryJsonDelete.json");;
+    String expected = TestUtils.loadTestFixture(FIXTURE_LOC + "ActivityEntryJsonDelete.json");
     assertTrue(TestUtils.jsonsEqual(expected, resp));
   }
 
