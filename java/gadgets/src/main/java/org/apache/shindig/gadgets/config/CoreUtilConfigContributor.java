@@ -23,10 +23,12 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.common.collect.Lists;
+
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.admin.GadgetAdminStore;
 import org.apache.shindig.gadgets.features.FeatureRegistry;
+import org.apache.shindig.gadgets.rewrite.TemplateRewriter;
 import org.apache.shindig.gadgets.spec.Feature;
 
 import com.google.common.collect.Maps;
@@ -41,8 +43,6 @@ import com.google.inject.Singleton;
  */
 @Singleton
 public class CoreUtilConfigContributor implements ConfigContributor {
-  private static final String TEMPLATES_FEATURE_NAME = "opensocial-templates";
-  private static final String REQUIRE_LIBRARY_PARAM = "requireLibrary";
 
   private final FeatureRegistry registry;
   private final GadgetAdminStore gadgetAdminStore;
@@ -73,8 +73,8 @@ public class CoreUtilConfigContributor implements ConfigContributor {
       for (String paramName : feature.getParams().keySet()) {
         Collection<String> paramValues = feature.getParams().get(paramName);
         // Resolve the template URL to convert relative URL to absolute URL relative to gadget URL.
-        if (TEMPLATES_FEATURE_NAME.equals(feature.getName())
-            && REQUIRE_LIBRARY_PARAM.equals(paramName)) {
+        if (TemplateRewriter.TEMPLATES_FEATURE_NAME.equals(feature.getName())
+            && TemplateRewriter.REQUIRE_LIBRARY_PARAM.equals(paramName)) {
           if (paramValues.size() == 1) {
             Uri paramUri = Uri.parse(paramValues.iterator().next().trim());
             paramUri = gadget.getContext().getUrl().resolve(paramUri);

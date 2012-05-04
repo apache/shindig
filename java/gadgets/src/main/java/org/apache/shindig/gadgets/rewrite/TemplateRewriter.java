@@ -78,11 +78,11 @@ public class TemplateRewriter implements GadgetRewriter {
   public static final String TEMPLATES_FEATURE_NAME = "opensocial-templates";
   public static final String OSML_FEATURE_NAME = "osml";
 
+  /** Specifies what template libraries to load */
+  public static final String REQUIRE_LIBRARY_PARAM = "requireLibrary";
+
   /** Set to true to block auto-processing of templates */
   static final String DISABLE_AUTO_PROCESSING_PARAM = "disableAutoProcessing";
-
-  /** Specifies what template libraries to load */
-  static final String REQUIRE_LIBRARY_PARAM = "requireLibrary";
 
   /** Enable client support? **/
   static final String CLIENT_SUPPORT_PARAM = "client";
