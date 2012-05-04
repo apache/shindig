@@ -22,6 +22,8 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.common.collect.Lists;
+import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.admin.GadgetAdminStore;
 import org.apache.shindig.gadgets.features.FeatureRegistry;
@@ -39,6 +41,8 @@ import com.google.inject.Singleton;
  */
 @Singleton
 public class CoreUtilConfigContributor implements ConfigContributor {
+  private static final String TEMPLATES_FEATURE_NAME = "opensocial-templates";
+  private static final String REQUIRE_LIBRARY_PARAM = "requireLibrary";
 
   private final FeatureRegistry registry;
   private final GadgetAdminStore gadgetAdminStore;
@@ -49,7 +53,6 @@ public class CoreUtilConfigContributor implements ConfigContributor {
     this.registry = registry;
     this.gadgetAdminStore = gadgetAdminStore;
   }
-
 
   /** {@inheritDoc} */
   public void contribute(Map<String, Object> config, Gadget gadget) {
@@ -69,10 +72,29 @@ public class CoreUtilConfigContributor implements ConfigContributor {
       Map<String, Object> paramFeaturesInConfig = Maps.newHashMap();
       for (String paramName : feature.getParams().keySet()) {
         Collection<String> paramValues = feature.getParams().get(paramName);
-        if (paramValues.size() == 1) {
-          paramFeaturesInConfig.put(paramName, paramValues.iterator().next());
+        // Resolve the template URL to convert relative URL to absolute URL relative to gadget URL.
+        if (TEMPLATES_FEATURE_NAME.equals(feature.getName())
+            && REQUIRE_LIBRARY_PARAM.equals(paramName)) {
+          Uri abURI = null;
+          if (paramValues.size() == 1) {
+            abURI = Uri.parse(paramValues.iterator().next().trim());
+            abURI = gadget.getContext().getUrl().resolve(abURI);
+            paramFeaturesInConfig.put(paramName, abURI.toString());
+          } else {
+            Collection<String> abReqLibs = Lists.newArrayList();
+            for (String libraryUrl : paramValues) {
+              abURI = Uri.parse(libraryUrl.trim());
+              abURI = gadget.getContext().getUrl().resolve(abURI);
+              abReqLibs.add(abURI.toString());
+            }
+            paramFeaturesInConfig.put(paramName, abReqLibs);
+          }
         } else {
-          paramFeaturesInConfig.put(paramName, paramValues);
+          if (paramValues.size() == 1) {
+            paramFeaturesInConfig.put(paramName, paramValues.iterator().next());
+          } else {
+            paramFeaturesInConfig.put(paramName, paramValues);
+          }
         }
       }
 

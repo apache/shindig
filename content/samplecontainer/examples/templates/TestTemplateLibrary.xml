@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Templates xmlns:foo="http://foo.com/">
+  <Namespace prefix="foo" url="http://foo.com/"/>
+  <Template tag="foo:HelloWorld">
+    <div>Hello World from template library with relative url!</div>
+  </Template>
+</Templates>
