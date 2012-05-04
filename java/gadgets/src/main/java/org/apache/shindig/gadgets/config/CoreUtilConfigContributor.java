@@ -75,17 +75,16 @@ public class CoreUtilConfigContributor implements ConfigContributor {
         // Resolve the template URL to convert relative URL to absolute URL relative to gadget URL.
         if (TEMPLATES_FEATURE_NAME.equals(feature.getName())
             && REQUIRE_LIBRARY_PARAM.equals(paramName)) {
-          Uri abURI = null;
           if (paramValues.size() == 1) {
-            abURI = Uri.parse(paramValues.iterator().next().trim());
-            abURI = gadget.getContext().getUrl().resolve(abURI);
-            paramFeaturesInConfig.put(paramName, abURI.toString());
+            Uri paramUri = Uri.parse(paramValues.iterator().next().trim());
+            paramUri = gadget.getContext().getUrl().resolve(paramUri);
+            paramFeaturesInConfig.put(paramName, paramUri.toString());
           } else {
             Collection<String> abReqLibs = Lists.newArrayList();
             for (String libraryUrl : paramValues) {
-              abURI = Uri.parse(libraryUrl.trim());
-              abURI = gadget.getContext().getUrl().resolve(abURI);
-              abReqLibs.add(abURI.toString());
+              Uri paramUri = Uri.parse(libraryUrl.trim());
+              paramUri = gadget.getContext().getUrl().resolve(paramUri);
+              abReqLibs.add(paramUri.toString());
             }
             paramFeaturesInConfig.put(paramName, abReqLibs);
           }
