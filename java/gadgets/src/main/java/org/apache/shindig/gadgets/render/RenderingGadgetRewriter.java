@@ -96,6 +96,7 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
   private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
 
   protected static final String DEFAULT_CSS =
+      "html,body{height:100%;width:100%;overflow:auto;}" +
       "body,td,div,span,p{font-family:arial,sans-serif;}" +
       "a {color:#0000cc;}a:visited {color:#551a8b;}" +
       "a:active {color:#ff0000;}" +
