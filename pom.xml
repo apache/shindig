@@ -171,60 +171,6 @@
       </roles>
     </developer>
     <developer>
-      <id>chabotc</id>
-      <name>Chris Chabot</name>
-      <email>chabotc@apache.org</email>
-      <organization>ASF</organization>
-      <roles>
-        <role>PMC Member</role>
-      </roles>
-    </developer>
-    <developer>
-      <id>dbentley</id>
-      <name>Daniel Bentley</name>
-      <email>dbentley@apache.org</email>
-      <organization>ASF</organization>
-      <roles>
-        <role>PMC Member</role>
-      </roles>
-    </developer>
-    <developer>
-      <id>doll</id>
-      <name>Cassie Doll</name>
-      <email>doll@apache.org</email>
-      <organization>ASF</organization>
-      <roles>
-        <role>PMC Member</role>
-      </roles>
-    </developer>
-    <developer>
-      <id>dpeterson</id>
-      <name>Dan Peterson</name>
-      <email>dpeterson@apache.org</email>
-      <organization>ASF</organization>
-      <roles>
-        <role>PMC Member</role>
-      </roles>
-    </developer>
-    <developer>
-      <id>etnu</id>
-      <name>Kevin Brown</name>
-      <email>etnu@apache.org</email>
-      <organization>ASF</organization>
-      <roles>
-        <role>PMC Member</role>
-      </roles>
-    </developer>
-    <developer>
-      <id>ieb</id>
-      <name>Ian Boston</name>
-      <email>ieb@apache.org</email>
-      <organization>ASF</organization>
-      <roles>
-        <role>Emeritus Mentor</role>
-      </roles>
-    </developer>
-    <developer>
       <id>evan</id>
       <name>Evan Gilbert</name>
       <email>evan@apache.org</email>
@@ -261,54 +207,9 @@
       </roles>
     </developer>
     <developer>
-      <id>sgala</id>
-      <name>Santiago Gala</name>
-      <email>sgala@hisitech.com</email>
-      <organization>ASF</organization>
-      <roles>
-       <role>Emeritus Mentor</role>
-      </roles>
-    </developer>
-    <developer>
-      <id>lryan</id>
-      <name>Louis Ryan</name>
-      <email>lryan@apache.org</email>
-      <organization>ASF</organization>
-      <roles>
-        <role>PMC Member</role>
-      </roles>
-    </developer>
-    <developer>
-      <id>martint</id>
-      <name>Martin Traverso</name>
-      <email>martint@apache.org</email>
-      <organization>ASF</organization>
-      <roles>
-        <role>PMC Member</role>
-      </roles>
-    </developer>
-    <developer>
-      <id>vsiveton</id>
-      <name>Vincent Siveton</name>
-      <email>vsiveton@apache.org</email>
-      <organization>ASF</organization>
-      <roles>
-        <role>PMC Member</role>
-      </roles>
-    </developer>
-    <developer>
       <id>zhen</id>
       <name>Zhen Wang</name>
       <email>zhen@apache.org</email>
-      <organization>ASF</organization>
-      <roles>
-        <role>PMC Member</role>
-      </roles>
-    </developer>
-    <developer>
-      <id>awiner</id>
-      <name>Adam Winer</name>
-      <email>awiner@apache.org</email>
       <organization>ASF</organization>
       <roles>
         <role>PMC Member</role>
@@ -443,15 +344,6 @@
       </roles>
     </developer>
     <developer>
-      <id>gstein</id>
-      <name>Greg Stein</name>
-      <email>gstein@apache.org</email>
-      <organization>ASF</organization>
-      <roles>
-        <role>Emeritus Mentor</role>
-      </roles>
-    </developer>
-    <developer>
       <id>sylvain</id>
       <name>Sylvain Wallez</name>
       <email>sylvain@apache.org</email>
@@ -478,17 +370,45 @@
         <role>Mentor</role>
       </roles>
     </developer>
+    <!--Committers-->
+
+    <!--Emeritus-->
     <developer>
-      <id>dharkness</id>
-      <name>David Harkness</name>
-      <email>dharkness@apache.org</email>
+      <id>gstein</id>
+      <name>Greg Stein</name>
+      <email>gstein@apache.org</email>
+      <organization>ASF</organization>
+      <roles>
+        <role>Emeritus Mentor</role>
+      </roles>
+    </developer>
+    <developer>
+      <id>sgala</id>
+      <name>Santiago Gala</name>
+      <email>sgala@hisitech.com</email>
+      <organization>ASF</organization>
+      <roles>
+       <role>Emeritus Mentor</role>
+      </roles>
+    </developer>
+    <developer>
+      <id>ieb</id>
+      <name>Ian Boston</name>
+      <email>ieb@apache.org</email>
+      <organization>ASF</organization>
+      <roles>
+        <role>Emeritus Mentor</role>
+      </roles>
+    </developer>
+    <developer>
+      <id>awiner</id>
+      <name>Adam Winer</name>
+      <email>awiner@apache.org</email>
       <organization>ASF</organization>
       <roles>
         <role>Emeritus</role>
       </roles>
     </developer>
-    <!--Committers-->
-    <!--Emeritus-->
     <developer>
       <id>henning</id>
       <name>Henning Schmiedehausen</name>
@@ -498,19 +418,100 @@
         <role>Emeritus</role>
       </roles>
     </developer>
+    <developer>
+      <id>chabotc</id>
+      <name>Chris Chabot</name>
+      <email>chabotc@apache.org</email>
+      <organization>ASF</organization>
+      <roles>
+        <role>Emeritus</role>
+      </roles>
+    </developer>
+    <developer>
+      <id>dbentley</id>
+      <name>Daniel Bentley</name>
+      <email>dbentley@apache.org</email>
+      <organization>ASF</organization>
+      <roles>
+        <role>Emeritus</role>
+      </roles>
+    </developer>
+    <developer>
+      <id>doll</id>
+      <name>Cassie Doll</name>
+      <email>doll@apache.org</email>
+      <organization>ASF</organization>
+      <roles>
+        <role>Emeritus</role>
+      </roles>
+    </developer>
+    <developer>
+      <id>dpeterson</id>
+      <name>Dan Peterson</name>
+      <email>dpeterson@apache.org</email>
+      <organization>ASF</organization>
+      <roles>
+        <role>Emeritus</role>
+      </roles>
+    </developer>
+    <developer>
+      <id>etnu</id>
+      <name>Kevin Brown</name>
+      <email>etnu@apache.org</email>
+      <organization>ASF</organization>
+      <roles>
+        <role>Emeritus</role>
+      </roles>
+    </developer>
+    <developer>
+      <id>lryan</id>
+      <name>Louis Ryan</name>
+      <email>lryan@apache.org</email>
+      <organization>ASF</organization>
+      <roles>
+        <role>Emeritus</role>
+      </roles>
+    </developer>
+    <developer>
+      <id>martint</id>
+      <name>Martin Traverso</name>
+      <email>martint@apache.org</email>
+      <organization>ASF</organization>
+      <roles>
+        <role>Emeritus</role>
+      </roles>
+    </developer>
+    <developer>
+      <id>vsiveton</id>
+      <name>Vincent Siveton</name>
+      <email>vsiveton@apache.org</email>
+      <organization>ASF</organization>
+      <roles>
+        <role>Emeritus</role>
+      </roles>
+    </developer>
+    <developer>
+      <id>dharkness</id>
+      <name>David Harkness</name>
+      <email>dharkness@apache.org</email>
+      <organization>ASF</organization>
+      <roles>
+        <role>Emeritus</role>
+      </roles>
+    </developer>
   </developers>
 
-      <modules>
-        <module>features</module>
-        <module>java/common</module>
-        <module>java/gadgets</module>
-        <module>java/social-api</module>
-        <module>java/sample-container</module>
-        <module>java/server-resources</module>
-        <module>java/server-dependencies</module>
-        <module>java/server</module>
-        <module>extras</module>
-      </modules>
+  <modules>
+    <module>features</module>
+    <module>java/common</module>
+    <module>java/gadgets</module>
+    <module>java/social-api</module>
+    <module>java/sample-container</module>
+    <module>java/server-resources</module>
+    <module>java/server-dependencies</module>
+    <module>java/server</module>
+    <module>extras</module>
+  </modules>
 
 
   <!-- ====================================================================== -->
