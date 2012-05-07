@@ -55,7 +55,7 @@ specific language governing permissions and limitations under the License.
             <exports type="js">osapi.container.ee.AssociatedContext.ID</exports>
             <exports type="js">osapi.container.ee.AssociatedContext.TYPE</exports>
             <exports type="js">osapi.container.ee.AssociatedContext.OBJECT_REFERENCE</exports>
-            <exports type="js">osapi.container.ee.ContainerConfig.GET_EE_TYPE</exports>
+            <exports type="js">osapi.container.ee.ContainerConfig.GET_EE_NAVIGATION_TYPE</exports>
             <exports type="rpc">ee_gadget_rendered</exports>
         </api>
     </container>
