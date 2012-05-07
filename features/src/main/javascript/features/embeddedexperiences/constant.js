@@ -47,8 +47,8 @@ osapi.container.ee.DataModel = {
     CONTEXT: 'context',
     GADGET: 'gadget',
     URL: 'url',
-    PREVIEW_IMAGE_DATA: 'previewImageData',
     PREVIEW_IMAGE: 'previewImage',
+    PREVIEW_IMAGE_DATA: 'previewImageData',
     PREFERRED_EXPERIENCE: 'preferredExperience'
 };
 
@@ -61,7 +61,7 @@ osapi.container.ee.PreferredExperience = {
     DISPLAY: 'display',
     TYPE: 'type',
     VIEW: 'view',
-    VIEW_TARGET: 'viewTarget',
+    VIEW_TARGET: 'viewTarget'
 };
 
 /**

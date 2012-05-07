@@ -42,6 +42,11 @@ specific language governing permissions and limitations under the License.
             <exports type="js">osapi.container.ee.RenderParam.URL_RENDER_PARAMS</exports>
             <exports type="js">osapi.container.ee.RenderParam.DATA_MODEL</exports>
             <exports type="js">osapi.container.ee.RenderParam.EMBEDDED</exports>
+            <exports type="js">osapi.container.ee.DataModel.CONTEXT</exports>
+            <exports type="js">osapi.container.ee.DataModel.GADGET</exports>
+            <exports type="js">osapi.container.ee.DataModel.URL</exports>
+            <exports type="js">osapi.container.ee.DataModel.PREVIEW_IMAGE</exports>
+            <exports type="js">osapi.container.ee.DataModel.PREVIEW_IMAGE_DATA</exports>
             <exports type="js">osapi.container.ee.DataModel.PREFERRED_EXPERIENCE</exports>
             <exports type="js">osapi.container.ee.PreferredExperience.TARGET</exports>
             <exports type="js">osapi.container.ee.PreferredExperience.DISPLAY</exports>
