@@ -180,7 +180,8 @@
        */
       'navigate' : function(element, dataModel, renderParams, opt_callback, opt_containerContext) {
         var preferredEE = null;
-        if (context.config_ && context.config_[ee_containerconfig.GET_EE_NAVIGATION_TYPE]) {
+        if (!!context.config_ && !!context.config_[ee_containerconfig.GET_EE_NAVIGATION_TYPE] &&
+            (typeof context.config_[ee_containerconfig.GET_EE_NAVIGATION_TYPE] === 'function')) {
           preferredEE =
             context.config_[ee_containerconfig.GET_EE_NAVIGATION_TYPE].call(context, dataModel);
         }
