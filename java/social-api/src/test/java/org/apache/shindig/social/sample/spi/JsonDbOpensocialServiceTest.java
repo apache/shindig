@@ -22,6 +22,7 @@ import java.util.Collections;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.shindig.auth.AnonymousSecurityToken;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.protocol.DataCollection;
@@ -30,6 +31,8 @@ import org.apache.shindig.protocol.RestfulCollection;
 import org.apache.shindig.protocol.model.FilterOperation;
 import org.apache.shindig.protocol.model.SortOrder;
 import org.apache.shindig.social.SocialApiTestsGuiceModule;
+import org.apache.shindig.social.core.model.NameImpl;
+import org.apache.shindig.social.core.model.PersonImpl;
 import org.apache.shindig.social.opensocial.model.Activity;
 import org.apache.shindig.social.opensocial.model.ActivityEntry;
 import org.apache.shindig.social.opensocial.model.Person;
@@ -37,12 +40,11 @@ import org.apache.shindig.social.opensocial.spi.CollectionOptions;
 import org.apache.shindig.social.opensocial.spi.GroupId;
 import org.apache.shindig.social.opensocial.spi.PersonService;
 import org.apache.shindig.social.opensocial.spi.UserId;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -58,6 +60,7 @@ public class JsonDbOpensocialServiceTest extends Assert {
   private static final UserId CANON_USER = new UserId(UserId.Type.userId, "canonical");
   private static final UserId JOHN_DOE = new UserId(UserId.Type.userId, "john.doe");
   private static final UserId JANE_DOE = new UserId(UserId.Type.userId, "jane.doe");
+  private static final UserId ANONYMOUS = new UserId(UserId.Type.userId, AnonymousSecurityToken.ANONYMOUS_ID);
 
   private static final GroupId SELF_GROUP = new GroupId(GroupId.Type.self, null);
   private static final String APP_ID = "1";
@@ -81,6 +84,14 @@ public class JsonDbOpensocialServiceTest extends Assert {
     assertNotNull("Canonical user has no name", person.getName());
     assertNotNull("Canonical user has no thumbnail",
         person.getThumbnailUrl());
+  }
+
+  @Test
+  public void testGetAnonymousUser() throws Exception {
+    Person person = db.getPerson(ANONYMOUS, Person.Field.DEFAULT_FIELDS, token).get();
+    assertEquals("-1", person.getId());
+    assertEquals("Anonymous", person.getName().getFormatted());
+    assertEquals("Anonymous", person.getNickname());
   }
 
   @Test

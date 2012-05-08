@@ -17,6 +17,7 @@
  */
 package org.apache.shindig.social.opensocial.service;
 
+import org.apache.shindig.auth.AnonymousSecurityToken;
 import org.apache.shindig.common.EasyMockTestCase;
 import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.common.util.ImmediateFuture;
@@ -69,6 +70,7 @@ public class PersonHandlerTest extends EasyMockTestCase {
 
   private static final Set<UserId> JOHN_DOE =
       ImmutableSet.of(new UserId(UserId.Type.userId, "john.doe"));
+  private static final UserId ANONYMOUS = new UserId(UserId.Type.userId, AnonymousSecurityToken.ANONYMOUS_ID);
 
   private static CollectionOptions DEFAULT_OPTIONS = new CollectionOptions();
   protected ContainerConfig containerConfig;
@@ -210,6 +212,21 @@ public class PersonHandlerTest extends EasyMockTestCase {
 
     Person data = new PersonImpl();
     expect(personService.getPerson(eq(JOHN_DOE.iterator().next()),
+        eq(DEFAULT_FIELDS), eq(token))).andReturn(ImmediateFuture.newInstance(data));
+
+    replay();
+    assertEquals(data, operation.execute(Maps.<String, String[]>newHashMap(),
+        null, token, converter).get());
+    verify();
+  }
+
+  @Test
+  public void testHandleAnonymousUser() throws Exception {
+    String path = "/people/-1";
+    RestHandler operation = registry.getRestHandler(path, "GET");
+
+    Person data = new PersonImpl();
+    expect(personService.getPerson(eq(ANONYMOUS),
         eq(DEFAULT_FIELDS), eq(token))).andReturn(ImmediateFuture.newInstance(data));
 
     replay();

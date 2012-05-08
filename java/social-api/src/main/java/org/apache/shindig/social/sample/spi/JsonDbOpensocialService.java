@@ -29,6 +29,7 @@ import java.util.concurrent.Future;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.shindig.auth.AnonymousSecurityToken;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.servlet.Authority;
 import org.apache.shindig.common.util.ImmediateFuture;
@@ -38,6 +39,8 @@ import org.apache.shindig.protocol.ProtocolException;
 import org.apache.shindig.protocol.RestfulCollection;
 import org.apache.shindig.protocol.conversion.BeanConverter;
 import org.apache.shindig.protocol.model.SortOrder;
+import org.apache.shindig.social.core.model.NameImpl;
+import org.apache.shindig.social.core.model.PersonImpl;
 import org.apache.shindig.social.opensocial.model.Activity;
 import org.apache.shindig.social.opensocial.model.ActivityEntry;
 import org.apache.shindig.social.opensocial.model.Album;
@@ -136,6 +139,11 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
    * db["activityEntries"] -> Map<Person.Id, Array<ActivityEntry>>
    */
   private static final String ACTIVITYSTREAMS_TABLE = "activityEntries";
+
+  /**
+   * Anonymous name.
+   */
+  private static final String ANONYMOUS_NAME = "Anonymous";
 
   private Authority authority;
 
@@ -361,6 +369,13 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
   /** {@inheritDoc} */
   public Future<Person> getPerson(UserId id, Set<String> fields, SecurityToken token)
       throws ProtocolException {
+    if (id != null && AnonymousSecurityToken.ANONYMOUS_ID.equals(id.getUserId())) {
+      Person anonymous = new PersonImpl();
+      anonymous.setId(AnonymousSecurityToken.ANONYMOUS_ID);
+      anonymous.setName(new NameImpl(ANONYMOUS_NAME));
+      anonymous.setNickname(ANONYMOUS_NAME);
+      return ImmediateFuture.newInstance(anonymous);
+    }
     try {
       JSONArray people = db.getJSONArray(PEOPLE_TABLE);
 

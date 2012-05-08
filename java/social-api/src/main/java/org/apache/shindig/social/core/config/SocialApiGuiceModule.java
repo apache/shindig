@@ -64,10 +64,6 @@ public class SocialApiGuiceModule extends AbstractModule {
     bind(ParameterFetcher.class).annotatedWith(Names.named("DataServiceServlet"))
         .to(DataServiceServletFetcher.class);
 
-    bind(Boolean.class)
-        .annotatedWith(Names.named(AnonymousAuthenticationHandler.ALLOW_UNAUTHENTICATED))
-        .toInstance(Boolean.TRUE);
-
     bind(XStreamConfiguration.class).to(XStream081Configuration.class);
     bind(BeanConverter.class).annotatedWith(Names.named("shindig.bean.converter.xml")).to(
         BeanXStreamConverter.class);

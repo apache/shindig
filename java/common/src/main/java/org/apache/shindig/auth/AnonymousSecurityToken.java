@@ -27,6 +27,12 @@ import org.apache.shindig.config.ContainerConfig;
  * A special class of Token representing the anonymous viewer/owner
  */
 public class AnonymousSecurityToken extends AbstractSecurityToken implements SecurityToken {
+
+  /**
+   * The user ID for anonymous users.
+   */
+  public static final String ANONYMOUS_ID = "-1";
+
   private static final EnumSet<Keys> MAP_KEYS = EnumSet.of(
     Keys.OWNER, Keys.VIEWER, Keys.APP_URL, Keys.MODULE_ID, Keys.EXPIRES, Keys.TRUSTED_JSON
   );
@@ -41,8 +47,8 @@ public class AnonymousSecurityToken extends AbstractSecurityToken implements Sec
 
   public AnonymousSecurityToken(String container, Long moduleId, String appUrl, Long expiresAt) {
     setContainer(container).setModuleId(moduleId).setAppUrl(appUrl).setExpiresAt(expiresAt)
-      .setOwnerId("-1")
-      .setViewerId("-1")
+      .setOwnerId(ANONYMOUS_ID)
+      .setViewerId(ANONYMOUS_ID)
       .setDomain("*")
       .setTrustedJson("");
   }
