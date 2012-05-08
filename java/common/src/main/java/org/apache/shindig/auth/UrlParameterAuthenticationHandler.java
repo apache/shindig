@@ -20,7 +20,10 @@ package org.apache.shindig.auth;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
+
 import net.oauth.OAuth;
+
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Enumeration;
 import java.util.Map;
@@ -100,6 +103,14 @@ public class UrlParameterAuthenticationHandler implements AuthenticationHandler 
             token = m.group(1);
           }
         }
+      }
+    }
+
+    // no token yet, see if it was attached as a header
+    if (StringUtils.isEmpty(token)) {
+      String t = request.getHeader( "X-Shindig-ST" );
+      if (StringUtils.isNotBlank(t)) {
+        token = t;
       }
     }
 

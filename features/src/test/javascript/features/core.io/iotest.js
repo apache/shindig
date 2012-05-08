@@ -128,6 +128,7 @@ IoTest.prototype.setStandardArgs = function(req, inBody) {
   this.setArg(req, inBody, "numEntries", "3");
   this.setArg(req, inBody, "postData", "");
   this.setArg(req, inBody, "httpMethod", "GET");
+  req.setHeader( 'X-Shindig-ST', shindig.auth.getSecurityToken() );
 };
 
 IoTest.prototype.makeFakeResponse = function(text, rc) {

@@ -211,7 +211,7 @@ public class MakeRequestHandler implements ContainerConfig.ConfigObserver {
               + Param.URL.getKey() + " parameter", HttpResponse.SC_BAD_REQUEST);
     }
 
-    SecurityToken token = AuthInfoUtil.getSecurityTokenFromRequest(request);
+    final SecurityToken token = AuthInfoUtil.getSecurityTokenFromRequest(request);
     String container = null;
     Uri gadgetUri = null;
     if ("1".equals(getParameter(request, MULTI_PART_FORM_POST, null))) {
@@ -291,13 +291,15 @@ public class MakeRequestHandler implements ContainerConfig.ConfigObserver {
     AuthType auth = AuthType.parse(getParameter(request, AUTHZ_PARAM, null));
     req.setAuthType(auth);
     if (auth != AuthType.NONE) {
+      req.setSecurityToken(extractAndValidateToken(request));
       if (auth == AuthType.OAUTH2) {
-        req.setSecurityToken(extractAndValidateToken(request));
         req.setOAuth2Arguments(new OAuth2Arguments(request));
       } else {
-        req.setSecurityToken(extractAndValidateToken(request));
         req.setOAuthArguments(new OAuthArguments(auth, request));
       }
+    } else {
+      // if not authenticated, set the token that we received
+      req.setSecurityToken(token);
     }
 
     ServletUtil.setXForwardedForHeader(request, req);

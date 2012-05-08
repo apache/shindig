@@ -257,22 +257,25 @@ gadgets.io = function() {
       xhr.onreadystatechange = gadgets.util.makeClosure(
           null, processResponseFunction, realUrl, callback, params, xhr);
     }
+
+    if (typeof opt_headers === 'string') {
+      // This turned out to come directly from a public API, so we need to
+      // keep compatibility...
+      contentType = opt_headers;
+      opt_headers = {};
+    }
+    var headers = opt_headers || {};
+
     if (paramData !== null) {
       var contentTypeHeader = 'Content-Type';
       var contentType = 'application/x-www-form-urlencoded';
-      if (typeof opt_headers === 'string') {
-        // This turned out to come directly from a public API, so we need to
-        // keep compatibility...
-        contentType = opt_headers;
-        opt_headers = {};
-      }
-      var headers = opt_headers || {};
       if (!headers[contentTypeHeader]) headers[contentTypeHeader] = contentType;
-
-      for (var headerName in headers) {
-        xhr.setRequestHeader(headerName, headers[headerName]);
-      }
     }
+
+    for (var headerName in headers) {
+      xhr.setRequestHeader(headerName, headers[headerName]);
+    }
+
     xhr.send(paramData);
   }
 
@@ -424,6 +427,10 @@ gadgets.io = function() {
         }
       }
 
+      var opt_headers = {
+        'X-Shindig-ST' : shindig.auth.getSecurityToken()
+      };
+
       var proxyUrl = config['jsonProxyUrl'].replace('%host%', document.location.host);
 
       // FIXME -- processResponse is not used in call
@@ -435,12 +442,12 @@ gadgets.io = function() {
         if (httpMethod === 'GET' && !paramData['authz']) {
           var extraparams = '?' + gadgets.io.encodeValues(paramData);
           makeXhrRequest(url, proxyUrl + extraparams, callback,
-              null, 'GET', params, processResponse);
+              null, 'GET', params, processResponse, opt_headers);
         } else {
           var extraparams = gadgets.io.encodeValues(paramData);
           makeXhrRequest(url, proxyUrl, callback,
               extraparams, 'POST', params,
-              processResponse);
+              processResponse, opt_headers);
         }
       }
     },
