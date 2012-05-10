@@ -58,14 +58,17 @@ GadgetHolderTest.prototype.testNew = function() {
 GadgetHolderTest.prototype.testRenderWithoutRenderParams = function() {
   var element = {};
   var gadgetInfo = {
-      'iframeUrls' : {'default' : 'http://shindig/gadgets/ifr?url=gadget.xml#rpctoken=1234'},
+      'iframeUrls' : {'default' : 'http://shindig/gadgets/ifr?url=gadget.xml&lang=en&country=US#rpctoken=1234'},
       'url' : 'gadget.xml'
   };
   this.setupGadgetsRpcSetupReceiver();
   var element = {
     id: '123'
   };
-  var site = new osapi.container.GadgetSite(null, null, {gadgetEl: element});
+  var service = {};
+  service.getCountry = function(){return "ZH";};
+  service.getLanguage = function(){return "cn"};
+  var site = new osapi.container.GadgetSite(null, service, {gadgetEl: element});
   var holder = new osapi.container.GadgetHolder(site, element, '__gadgetOnLoad');
   holder.render(gadgetInfo, {}, {'view' : 'default'});
   this.assertEquals('<iframe' +
@@ -78,7 +81,7 @@ GadgetHolderTest.prototype.testRenderWithoutRenderParams = function() {
       ' vspace="0"' +
       ' id="__gadget_123"' +
       ' name="__gadget_123"' +
-      ' src="http://shindig/gadgets/ifr?url=gadget.xml&debug=0&nocache=0&testmode=0' +
+      ' src="http://shindig/gadgets/ifr?url=gadget.xml&lang=en&country=US&debug=0&nocache=0&testmode=0' +
           '&view=default&parent=http%3A//container.com&mid=0#rpctoken=1234"' +
       ' ></iframe>',
       element.innerHTML);
@@ -86,7 +89,7 @@ GadgetHolderTest.prototype.testRenderWithoutRenderParams = function() {
 
 GadgetHolderTest.prototype.testRenderWithRenderRequests = function() {
   var gadgetInfo = {
-      'iframeUrls' : {'default' : 'http://shindig/gadgets/ifr?url=gadget.xml#rpctoken=1234'},
+      'iframeUrls' : {'default' : 'http://shindig/gadgets/ifr?url=gadget.xml&lang=%lang%&country=%country%#rpctoken=1234'},
       'url' : 'gadget.xml'
   };
   var renderParams = {
@@ -103,7 +106,10 @@ GadgetHolderTest.prototype.testRenderWithRenderRequests = function() {
   var element = {
     id: '123'
   };
-  var site = new osapi.container.GadgetSite(null, null, {gadgetEl: element, moduleId: 123});
+  var service = {};
+  service.getCountry = function(){return "US";};
+  service.getLanguage = function(){return "en"};
+  var site = new osapi.container.GadgetSite(null, service, {gadgetEl: element, moduleId: 123});
   var holder = new osapi.container.GadgetHolder(site, element, '__gadgetOnLoad');
   holder.render(gadgetInfo, {}, renderParams);
   this.assertEquals('<iframe' +
@@ -119,7 +125,7 @@ GadgetHolderTest.prototype.testRenderWithRenderRequests = function() {
       ' id="__gadget_123"' +
       ' width="222"' +
       ' name="__gadget_123"' +
-      ' src="http://shindig/gadgets/ifr?url=gadget.xml&debug=1&nocache=1&testmode=1' +
+      ' src="http://shindig/gadgets/ifr?url=gadget.xml&lang=en&country=US&debug=1&nocache=1&testmode=1' +
           '&view=default&libs=caja&caja=1&parent=http%3A//container.com&mid=0#rpctoken=1234"' +
       ' ></iframe>',
       element.innerHTML);

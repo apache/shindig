@@ -266,7 +266,15 @@ osapi.container.GadgetHolder.prototype.getIframeUrl_ = function() {
     var rpcToken = (0x7FFFFFFF * Math.random()) | 0;
     uri.setFP('rpctoken', rpcToken);
   }
-
+  var lang = this.site_.service_.getLanguage();
+  var country = this.site_.service_.getCountry();
+  var templateLang = uri.getQP('lang'), templateCountry = uri.getQP('country');
+  if(templateLang.indexOf('%') != -1){
+    uri.setQP('lang', lang);
+  }
+  if(templateCountry.indexOf('%') != -1){
+    uri.setQP('country', country);
+  }
   return uri.toString();
 };
 
