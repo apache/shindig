@@ -1,22 +1,26 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements. See the NOTICE file distributed with this
- * work for additional information regarding copyright ownership. The ASF
- * licenses this file to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.apache.shindig.gadgets.oauth2;
 
 import com.google.common.collect.Maps;
+
+import org.apache.shindig.common.servlet.Authority;
 
 import java.util.Map;
 
@@ -25,8 +29,7 @@ import java.util.Map;
  * see {@link OAuth2Accessor}
  */
 public class BasicOAuth2Accessor implements OAuth2Accessor {
-  private static final long serialVersionUID = 3347883060790082094L;
-
+  private static final long serialVersionUID = 2050065428260384933L;
   private OAuth2Token accessToken;
   private final boolean allowModuleOverrides;
   private boolean authorizationHeader;
@@ -41,18 +44,25 @@ public class BasicOAuth2Accessor implements OAuth2Accessor {
   private String errorUri;
   private final String gadgetUri;
   private final String globalRedirectUri;
+  private final transient Authority authority;
+  private final transient String contextRoot;
   private String grantType;
   private boolean redirecting;
   private String redirectUri;
   private OAuth2Token refreshToken;
   private final String scope;
   private final String serviceName;
-  private final String state;
+  private transient OAuth2CallbackState state;
   private String tokenUrl;
   private Type type;
   private boolean urlParameter;
   private final String user;
   private Map<String, String> additionalRequestParams;
+  private String[] allowedDomains;
+
+  public BasicOAuth2Accessor() {
+    this(null, null, null, null, false, null, null, null, null);
+  }
 
   BasicOAuth2Accessor(final Throwable exception, final OAuth2Error error,
           final String contextMessage, final String errorUri) {
@@ -64,6 +74,8 @@ public class BasicOAuth2Accessor implements OAuth2Accessor {
     this.user = null;
     this.gadgetUri = null;
     this.globalRedirectUri = null;
+    this.authority = null;
+    this.contextRoot = null;
     this.allowModuleOverrides = false;
     this.additionalRequestParams = Maps.newHashMap();
     this.setErrorResponse(exception, error, contextMessage, errorUri);
@@ -89,6 +101,8 @@ public class BasicOAuth2Accessor implements OAuth2Accessor {
     this.user = accessor.getUser();
     this.allowModuleOverrides = false;
     this.globalRedirectUri = null;
+    this.authority = null;
+    this.contextRoot = null;
     this.errorResponse = accessor.isErrorResponse();
     this.redirecting = accessor.isRedirecting();
     this.error = accessor.getError();
@@ -96,18 +110,29 @@ public class BasicOAuth2Accessor implements OAuth2Accessor {
     this.errorException = accessor.getErrorException();
     this.errorUri = accessor.getErrorUri();
     this.additionalRequestParams = Maps.newHashMap();
+    this.allowedDomains = accessor.getAllowedDomains();
   }
 
   public BasicOAuth2Accessor(final String gadgetUri, final String serviceName, final String user,
           final String scope, final boolean allowModuleOverrides, final OAuth2Store store,
-          final String globalRedirectUri) {
+          final String globalRedirectUri, final Authority authority, final String contextRoot) {
     this.gadgetUri = gadgetUri;
     this.serviceName = serviceName;
     this.user = user;
     this.scope = scope;
     this.allowModuleOverrides = allowModuleOverrides;
     this.globalRedirectUri = globalRedirectUri;
-    this.state = store.getOAuth2AccessorIndex(gadgetUri, serviceName, user, scope).toString();
+    if (store != null) {
+      this.state = new OAuth2CallbackState(store.getStateCrypter());
+    } else {
+      this.state = new OAuth2CallbackState();
+    }
+    this.state.setGadgetUri(gadgetUri);
+    this.state.setServiceName(serviceName);
+    this.state.setUser(user);
+    this.state.setScope(scope);
+    this.authority = authority;
+    this.contextRoot = contextRoot;
     this.errorResponse = false;
     this.redirecting = false;
     this.additionalRequestParams = Maps.newHashMap();
@@ -158,9 +183,17 @@ public class BasicOAuth2Accessor implements OAuth2Accessor {
   }
 
   public String getRedirectUri() {
-    if ((this.redirectUri == null) || (this.redirectUri.length() == 0)) {
-      return this.globalRedirectUri;
+    if (this.redirectUri == null || this.redirectUri.length() == 0) {
+      String redirectUri2 = this.globalRedirectUri;
+      if (this.authority != null) {
+        redirectUri2 = redirectUri2.replace("%authority%", this.authority.getAuthority());
+        redirectUri2 = redirectUri2.replace("%contextRoot%", this.contextRoot);
+        redirectUri2 = redirectUri2.replace("%origin%", this.authority.getOrigin());
+      }
+
+      this.redirectUri = redirectUri2;
     }
+
     return this.redirectUri;
   }
 
@@ -180,7 +213,10 @@ public class BasicOAuth2Accessor implements OAuth2Accessor {
     return this.serviceName;
   }
 
-  public String getState() {
+  public OAuth2CallbackState getState() {
+    if (this.state == null) {
+      return new OAuth2CallbackState(null);
+    }
     return this.state;
   }
 
@@ -233,14 +269,14 @@ public class BasicOAuth2Accessor implements OAuth2Accessor {
   }
 
   public boolean isValid() {
-    return (this.grantType != null);
+    return this.grantType != null;
   }
 
   public void setAccessToken(final OAuth2Token accessToken) {
     this.accessToken = accessToken;
   }
 
-  public void setAuthorizationHeader(boolean authorizationHeader) {
+  public void setAuthorizationHeader(final boolean authorizationHeader) {
     this.authorizationHeader = authorizationHeader;
   }
 
@@ -260,8 +296,8 @@ public class BasicOAuth2Accessor implements OAuth2Accessor {
     this.clientSecret = clientSecret;
   }
 
-  public void setErrorResponse(Throwable exception, OAuth2Error error, String contextMessage,
-          String errorUri) {
+  public void setErrorResponse(final Throwable exception, final OAuth2Error error,
+          final String contextMessage, final String errorUri) {
     this.errorResponse = true;
     this.errorException = exception;
     if (error != null) {
@@ -271,7 +307,7 @@ public class BasicOAuth2Accessor implements OAuth2Accessor {
     }
   }
 
-  public void setErrorUri(String errorUri) {
+  public void setErrorUri(final String errorUri) {
     this.errorUri = errorUri;
   }
 
@@ -279,7 +315,7 @@ public class BasicOAuth2Accessor implements OAuth2Accessor {
     this.grantType = grantType;
   }
 
-  public void setRedirecting(boolean redirecting) {
+  public void setRedirecting(final boolean redirecting) {
     this.redirecting = redirecting;
   }
 
@@ -291,7 +327,7 @@ public class BasicOAuth2Accessor implements OAuth2Accessor {
     this.refreshToken = refreshToken;
   }
 
-  public void setAdditionalRequestParams(Map<String, String> additionalRequestParams) {
+  public void setAdditionalRequestParams(final Map<String, String> additionalRequestParams) {
     this.additionalRequestParams = additionalRequestParams;
   }
 
@@ -303,7 +339,15 @@ public class BasicOAuth2Accessor implements OAuth2Accessor {
     this.type = type;
   }
 
-  public void setUrlParameter(boolean urlParameter) {
+  public void setUrlParameter(final boolean urlParameter) {
     this.urlParameter = urlParameter;
+  }
+
+  public void setAllowedDomains(final String[] allowedDomains) {
+    this.allowedDomains = allowedDomains;
+  }
+
+  public String[] getAllowedDomains() {
+    return this.allowedDomains;
   }
 }

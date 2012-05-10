@@ -427,7 +427,7 @@ public class MakeRequestHandler implements ContainerConfig.ConfigObserver {
    * Sets cache control headers for the response.
    */
   @SuppressWarnings("boxing")
-  protected static void setResponseHeaders(HttpServletRequest request,
+  protected void setResponseHeaders(HttpServletRequest request,
           HttpServletResponse response, HttpResponse results) throws GadgetException {
     int refreshInterval = 0;
     if (results.isStrictNoCache()

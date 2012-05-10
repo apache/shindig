@@ -23,6 +23,8 @@ import com.google.inject.Provider;
 
 import org.apache.shindig.auth.AbstractSecurityToken;
 import org.apache.shindig.auth.SecurityToken;
+import org.apache.shindig.common.crypto.BasicBlobCrypter;
+import org.apache.shindig.common.crypto.BlobCrypter;
 import org.apache.shindig.common.crypto.BlobExpiredException;
 import org.apache.shindig.common.servlet.Authority;
 import org.apache.shindig.common.uri.Uri;
@@ -61,31 +63,26 @@ import java.util.List;
 import java.util.Map;
 
 public class MockUtils {
-  protected final static String ACCESS_SECRET = "accessSecret";
-  protected final static Integer ACCESS_TOKEN_INDEX = new Integer(760896043);
-  protected final static Integer ACCESSOR_INDEX1 = new Integer(574006657);
-  protected final static Integer ACCESSOR_INDEX2 = new Integer(-1907922677);
-  protected final static String AUTHORIZE_URL = "http://www.example.com/authorize";
-  protected final static Integer BAD_INDEX = new Integer(0);
-  protected final static String CLIENT_ID1 = "clientId1";
-  protected final static String CLIENT_ID2 = "clientId2";
-  protected final static Integer CLIENT_INDEX1 = new Integer(1588412934);
-  protected final static Integer CLIENT_INDEX2 = new Integer(1295009927);
-  protected final static String CLIENT_SECRET1 = "clientSecret1";
-  protected final static String CLIENT_SECRET2 = "clientSecret2";
-  protected final static Map<String, String> EMPTY_MAP = Collections.emptyMap();
-  protected final static OAuth2Encrypter encrypter = new DummyEncrypter();
-  protected final static String GADGET_URI1 = "http://www.example.com/1";
-  protected final static String GADGET_URI2 = "http://www.example.com/2";
-  protected final static String MAC_SECRET = "mac_secret";
-  protected final static String REDIRECT_URI = "https://www.example.com/gadgets/oauth2callback";
-  protected final static String REFRESH_SECRET = "refreshSecret";
-  protected final static Integer REFRESH_TOKEN_INDEX = new Integer(81037012);
-  protected final static String SCOPE = "testScope";
-  protected final static String SERVICE_NAME = "serviceName";
-  protected final static String STATE = "1234";
-  protected final static String TOKEN_URL = "http://www.example.com/token";
-  protected final static String USER = "testUser";
+  protected static final String ACCESS_SECRET = "accessSecret";
+  protected static final String AUTHORIZE_URL = "http://www.example.com/authorize";
+  protected static final String CLIENT_ID1 = "clientId1";
+  protected static final String CLIENT_ID2 = "clientId2";
+  protected static final String CLIENT_SECRET1 = "clientSecret1";
+  protected static final String CLIENT_SECRET2 = "clientSecret2";
+  protected static final Map<String, String> EMPTY_MAP = Collections.emptyMap();
+  protected static final OAuth2Encrypter encrypter = new DummyEncrypter();
+  protected static final BlobCrypter stateCrypter = new DummyStateCrypter();
+  protected static final String GADGET_URI1 = "http://www.example.com/1";
+  protected static final String GADGET_URI2 = "http://www.example.com/2";
+  protected static final String MAC_SECRET = "mac_secret";
+  protected static final String REDIRECT_URI = "https://www.example.com/gadgets/oauth2callback";
+  protected static final String REFRESH_SECRET = "refreshSecret";
+  protected static final Integer REFRESH_TOKEN_INDEX = new Integer(81037012);
+  protected static final String SCOPE = "testScope";
+  protected static final String SERVICE_NAME = "serviceName";
+  protected static final String STATE = "1234";
+  protected static final String TOKEN_URL = "http://www.example.com/token";
+  protected static final String USER = "testUser";
 
   protected static OAuth2Store dummyStore = null;
 
@@ -100,6 +97,12 @@ public class MockUtils {
 
     public String getScheme() {
       return "scheme";
+    }
+  }
+
+  static class DummyStateCrypter extends BasicBlobCrypter {
+    public DummyStateCrypter() {
+      super("xxxxxxxxxxxxxxxx");
     }
   }
 
@@ -124,7 +127,7 @@ public class MockUtils {
   }
 
   static class DummyHostProvider implements Provider<Authority> {
-    private final static Authority authority = new DummyAuthority();
+    private static final Authority authority = new DummyAuthority();
 
     public Authority get() {
       return DummyHostProvider.authority;
@@ -140,8 +143,7 @@ public class MockUtils {
       builder.setStrictNoCache();
       builder.setHttpStatusCode(HttpResponse.SC_OK);
       builder.setHeader("Content-Type", "application/json");
-      builder
-          .setContent("{\"access_token\"=\"xxx\",\"token_type\"=\"Bearer\",\"expires_in\"=\"1\",\"refresh_token\"=\"yyy\",\"example_parameter\"=\"example_value\"}");
+      builder.setContent("{\"access_token\":\"xxx\",\"token_type\":\"Bearer\",\"expires_in\":\"1\",\"refresh_token\":\"yyy\",\"example_parameter\":\"example_value\"}");
       return builder.create();
     }
   }
@@ -154,37 +156,42 @@ public class MockUtils {
 
   static class DummySecurityToken extends AbstractSecurityToken {
 
-    public DummySecurityToken(String ownerId, String viewerId, String appUrl) {
-      setOwnerId(ownerId);
-      setViewerId(viewerId);
-      setAppUrl(appUrl);
+    public DummySecurityToken(final String ownerId, final String viewerId, final String appUrl) {
+      this.setOwnerId(ownerId);
+      this.setViewerId(viewerId);
+      this.setAppUrl(appUrl);
     }
 
+    @Override
     public String getAppId() {
       return "";
     }
 
+    @Override
     public String getDomain() {
       return "";
     }
 
+    @Override
     public String getContainer() {
       return "";
     }
 
+    @Override
     public long getModuleId() {
       return 0;
     }
 
+    @Override
     public Long getExpiresAt() {
       return 0L;
     }
 
-    public boolean isExpired(int maxAge) {
+    public boolean isExpired(final int maxAge) {
       return false;
     }
 
-    public AbstractSecurityToken enforceNotExpired(int maxAge) throws BlobExpiredException {
+    public AbstractSecurityToken enforceNotExpired(final int maxAge) throws BlobExpiredException {
       return this;
     }
 
@@ -196,6 +203,7 @@ public class MockUtils {
       return "";
     }
 
+    @Override
     public String getTrustedJson() {
       return "";
     }
@@ -204,21 +212,23 @@ public class MockUtils {
       return false;
     }
 
+    @Override
     public String getActiveUrl() {
-      return getAppUrl();
+      return this.getAppUrl();
     }
 
+    @Override
     protected EnumSet<Keys> getMapKeys() {
       return EnumSet.noneOf(Keys.class);
     }
   }
 
   static class DummyGadgetSpecFactory implements GadgetSpecFactory {
-    private final static String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?><Module><ModulePrefs title=\"\"><OAuth2><Service name=\"serviceName\" scope=\"testScope\"></Service></OAuth2></ModulePrefs><Content type=\"html\"></Content></Module>";
+    private static final String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?><Module><ModulePrefs title=\"\"><OAuth2><Service name=\"serviceName\" scope=\"testScope\"></Service></OAuth2></ModulePrefs><Content type=\"html\"></Content></Module>";
 
     public GadgetSpec getGadgetSpec(final GadgetContext context) throws GadgetException {
       final Uri contextUri = context.getUrl();
-      if ((contextUri != null) && (contextUri.toString().equals(MockUtils.GADGET_URI1))) {
+      if (contextUri != null && contextUri.toString().equals(MockUtils.GADGET_URI1)) {
         return new GadgetSpec(context.getUrl(), DummyGadgetSpecFactory.xml);
       }
 
@@ -243,7 +253,7 @@ public class MockUtils {
 
   protected static OAuth2TokenPersistence getAccessToken() throws Exception {
     final OAuth2TokenPersistence accessToken = new OAuth2TokenPersistence(
-        MockUtils.getDummyEncrypter());
+            MockUtils.getDummyEncrypter());
     MockUtils.setTokenCommons(accessToken);
     accessToken.setType(OAuth2Token.Type.ACCESS);
     return accessToken;
@@ -251,7 +261,7 @@ public class MockUtils {
 
   protected static OAuth2TokenPersistence getBadMacToken() throws Exception {
     final OAuth2TokenPersistence accessToken = new OAuth2TokenPersistence(
-        MockUtils.getDummyEncrypter());
+            MockUtils.getDummyEncrypter());
     MockUtils.setTokenCommons(accessToken);
     accessToken.setMacAlgorithm(OAuth2Message.HMAC_SHA_256);
     accessToken.setMacExt("1 2 3");
@@ -313,6 +323,10 @@ public class MockUtils {
     return ret;
   }
 
+  protected static BlobCrypter getDummyStateCrypter() {
+    return MockUtils.stateCrypter;
+  }
+
   protected static OAuth2Encrypter getDummyEncrypter() {
     return MockUtils.encrypter;
   }
@@ -332,7 +346,7 @@ public class MockUtils {
   protected static JSONOAuth2Persister getDummyPersister() throws Exception {
     final JSONObject configFile = new JSONObject(MockUtils.getJSONString());
     return new JSONOAuth2Persister(MockUtils.getDummyEncrypter(), MockUtils.getDummyAuthority(),
-        MockUtils.REDIRECT_URI, "xxx", configFile);
+            MockUtils.REDIRECT_URI, "xxx", configFile);
   }
 
   protected static GadgetSpecFactory getDummySpecFactory() {
@@ -340,7 +354,7 @@ public class MockUtils {
   }
 
   protected static SecurityToken getDummySecurityToken(final String ownerId, final String viewerId,
-      final String appUrl) {
+          final String appUrl) {
     return new DummySecurityToken(ownerId, viewerId, appUrl);
   }
 
@@ -348,7 +362,10 @@ public class MockUtils {
     if (MockUtils.dummyStore == null) {
       final OAuth2Cache cache = new InMemoryCache();
       final OAuth2Persister persister = MockUtils.getDummyPersister();
-      MockUtils.dummyStore = MockUtils.getDummyStore(cache, persister, MockUtils.REDIRECT_URI);
+      final OAuth2Encrypter encrypter = MockUtils.getDummyEncrypter();
+      final BlobCrypter stateCrypter = MockUtils.getDummyStateCrypter();
+      MockUtils.dummyStore = MockUtils.getDummyStore(cache, persister, encrypter,
+              MockUtils.REDIRECT_URI, null, null, stateCrypter);
     }
 
     MockUtils.dummyStore.clearCache();
@@ -358,17 +375,20 @@ public class MockUtils {
   }
 
   protected static OAuth2Store getDummyStore(final OAuth2Cache cache,
-      final OAuth2Persister persister, final String globalRedirectUri) {
-    final OAuth2Store store = new BasicOAuth2Store(cache, persister, globalRedirectUri);
+          final OAuth2Persister persister, final OAuth2Encrypter encrypter,
+          final String globalRedirectUri, final Authority authority, final String contextRoot,
+          final BlobCrypter stateCrypter) {
+    final OAuth2Store store = new BasicOAuth2Store(cache, persister, encrypter, globalRedirectUri,
+            authority, contextRoot, stateCrypter);
 
     return store;
   }
 
   protected static List<TokenEndpointResponseHandler> getDummyTokenEndpointResponseHandlers()
-      throws Exception {
+          throws Exception {
     final List<TokenEndpointResponseHandler> ret = new ArrayList<TokenEndpointResponseHandler>(1);
     ret.add(new TokenAuthorizationResponseHandler(MockUtils.getDummyMessageProvider(), MockUtils
-        .getDummyStore()));
+            .getDummyStore()));
     return ret;
   }
 
@@ -378,7 +398,7 @@ public class MockUtils {
 
   protected static OAuth2TokenPersistence getMacToken() throws Exception {
     final OAuth2TokenPersistence accessToken = new OAuth2TokenPersistence(
-        MockUtils.getDummyEncrypter());
+            MockUtils.getDummyEncrypter());
 
     MockUtils.setTokenCommons(accessToken);
     accessToken.setMacAlgorithm(OAuth2Message.HMAC_SHA_1);
@@ -393,10 +413,12 @@ public class MockUtils {
   private static BasicOAuth2Accessor getOAuth2AccessorCommon() throws Exception {
     final OAuth2Cache cache = new InMemoryCache();
     final OAuth2Persister persister = MockUtils.getDummyPersister();
-    final OAuth2Store store = MockUtils.getDummyStore(cache, persister, MockUtils.REDIRECT_URI);
+    final OAuth2Encrypter encrypter = MockUtils.getDummyEncrypter();
+    final OAuth2Store store = MockUtils.getDummyStore(cache, persister, encrypter,
+            MockUtils.REDIRECT_URI, null, null, MockUtils.stateCrypter);
     final BasicOAuth2Accessor accessor = new BasicOAuth2Accessor(MockUtils.GADGET_URI1,
-        MockUtils.SERVICE_NAME, MockUtils.USER, MockUtils.SCOPE, true, store,
-        MockUtils.REDIRECT_URI);
+            MockUtils.SERVICE_NAME, MockUtils.USER, MockUtils.SCOPE, true, store,
+            MockUtils.REDIRECT_URI, null, null);
 
     accessor.setAccessToken(MockUtils.getAccessToken());
     accessor.setAuthorizationUrl(MockUtils.AUTHORIZE_URL);
@@ -424,7 +446,7 @@ public class MockUtils {
 
   protected static OAuth2Accessor getOAuth2Accessor_Error() {
     final OAuth2Accessor accessor = new BasicOAuth2Accessor(null,
-        OAuth2Error.GET_OAUTH2_ACCESSOR_PROBLEM, "test contextMessage", null);
+            OAuth2Error.GET_OAUTH2_ACCESSOR_PROBLEM, "test contextMessage", null);
 
     return accessor;
   }
@@ -474,10 +496,12 @@ public class MockUtils {
   protected static OAuth2Accessor getOAuth2Accessor_ClientCredentialsRedirecting() throws Exception {
     final OAuth2Cache cache = new InMemoryCache();
     final OAuth2Persister persister = MockUtils.getDummyPersister();
-    final OAuth2Store store = MockUtils.getDummyStore(cache, persister, MockUtils.REDIRECT_URI);
+    final OAuth2Encrypter encrypter = MockUtils.getDummyEncrypter();
+    final OAuth2Store store = MockUtils.getDummyStore(cache, persister, encrypter,
+            MockUtils.REDIRECT_URI, null, null, MockUtils.stateCrypter);
     final BasicOAuth2Accessor accessor = new BasicOAuth2Accessor(MockUtils.GADGET_URI1,
-        MockUtils.SERVICE_NAME, MockUtils.USER, MockUtils.SCOPE, true, store,
-        MockUtils.REDIRECT_URI);
+            MockUtils.SERVICE_NAME, MockUtils.USER, MockUtils.SCOPE, true, store,
+            MockUtils.REDIRECT_URI, null, null);
 
     accessor.setGrantType(OAuth2Message.CLIENT_CREDENTIALS);
     accessor.setRedirecting(Boolean.TRUE);
@@ -487,7 +511,7 @@ public class MockUtils {
 
   protected static OAuth2TokenPersistence getRefreshToken() throws Exception {
     final OAuth2TokenPersistence refreshToken = new OAuth2TokenPersistence(
-        MockUtils.getDummyEncrypter());
+            MockUtils.getDummyEncrypter());
     refreshToken.setExpiresAt(1L);
     refreshToken.setGadgetUri(MockUtils.GADGET_URI1);
     refreshToken.setIssuedAt(0L);
@@ -504,8 +528,8 @@ public class MockUtils {
     return refreshToken;
   }
 
-  protected static String loadFile(String path) throws IOException {
-    InputStream is = MockUtils.class.getClassLoader().getResourceAsStream(path);
-    return IOUtils.toString(is,"UTF-8");
+  protected static String loadFile(final String path) throws IOException {
+    final InputStream is = MockUtils.class.getClassLoader().getResourceAsStream(path);
+    return IOUtils.toString(is, "UTF-8");
   }
 }

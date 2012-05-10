@@ -1,38 +1,39 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements. See the NOTICE file distributed with this
- * work for additional information regarding copyright ownership. The ASF
- * licenses this file to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.apache.shindig.gadgets.oauth2.persistence;
 
-import java.io.Serializable;
+import com.google.inject.Inject;
 
 import org.apache.shindig.gadgets.oauth2.OAuth2Accessor;
 import org.apache.shindig.gadgets.oauth2.OAuth2Message;
 
-import com.google.inject.Inject;
+import java.io.Serializable;
+import java.util.Arrays;
 
 /**
  * Data class for client data stored in persistence.
  *
- * Uses the injected {@link OAuth2Encrypter} protect the client_secret in the
- * persistence store.
+ * Uses the injected {@link OAuth2Encrypter} protect the client_secret in the persistence store.
  *
  */
 public class OAuth2Client implements Serializable {
-  private static final long serialVersionUID = -6090033505867216220L;
-
+  private static final long serialVersionUID = -7374658882342619184L;
   private boolean allowModuleOverride;
   private boolean authorizationHeader;
   private String authorizationUrl;
@@ -40,7 +41,7 @@ public class OAuth2Client implements Serializable {
   private String clientId;
   private byte[] clientSecret;
   private byte[] encryptedSecret;
-  private transient final OAuth2Encrypter encrypter;
+  private final transient OAuth2Encrypter encrypter;
   private String gadgetUri;
   private String grantType = OAuth2Message.NO_GRANT_TYPE;
   private String redirectUri;
@@ -49,6 +50,11 @@ public class OAuth2Client implements Serializable {
   private OAuth2Accessor.Type type = OAuth2Accessor.Type.UNKNOWN;
   private boolean urlParameter;
   private boolean sharedToken = false;
+  private String[] allowedDomains = new String[] {};
+
+  public OAuth2Client() {
+    this(null);
+  }
 
   @Inject
   public OAuth2Client(final OAuth2Encrypter encrypter) {
@@ -159,7 +165,7 @@ public class OAuth2Client implements Serializable {
 
   @Override
   public int hashCode() {
-    if ((this.serviceName != null) && (this.gadgetUri != null)) {
+    if (this.serviceName != null && this.gadgetUri != null) {
       return (this.serviceName + ':' + this.gadgetUri).hashCode();
     }
 
@@ -186,7 +192,7 @@ public class OAuth2Client implements Serializable {
     this.allowModuleOverride = alllowModuleOverride;
   }
 
-  public void setAuthorizationHeader(boolean authorizationHeader) {
+  public void setAuthorizationHeader(final boolean authorizationHeader) {
     this.authorizationHeader = authorizationHeader;
   }
 
@@ -204,12 +210,16 @@ public class OAuth2Client implements Serializable {
 
   public void setClientSecret(final byte[] secret) throws OAuth2EncryptionException {
     this.clientSecret = secret;
-    this.encryptedSecret = this.encrypter.encrypt(secret);
+    if (this.encrypter != null) {
+      this.encryptedSecret = this.encrypter.encrypt(secret);
+    }
   }
 
   public void setEncryptedSecret(final byte[] encryptedSecret) throws OAuth2EncryptionException {
     this.encryptedSecret = encryptedSecret;
-    this.clientSecret = this.encrypter.decrypt(encryptedSecret);
+    if (this.encrypter != null) {
+      this.clientSecret = this.encrypter.decrypt(encryptedSecret);
+    }
   }
 
   public void setGadgetUri(final String gadgetUri) {
@@ -240,19 +250,38 @@ public class OAuth2Client implements Serializable {
     this.type = type;
   }
 
-  public void setUrlParameter(boolean urlParameter) {
+  public void setUrlParameter(final boolean urlParameter) {
     this.urlParameter = urlParameter;
+  }
+
+  /**
+   * sets the domains of allowed resource servers
+   *
+   * @param allowedDomains
+   */
+  public void setAllowedDomains(final String[] allowedDomains) {
+    this.allowedDomains = allowedDomains;
+  }
+
+  /**
+   * gets the domains of allowed resource servers
+   *
+   * @return allowed domains
+   */
+  public String[] getAllowedDomains() {
+    return this.allowedDomains;
   }
 
   @Override
   public String toString() {
     return "org.apache.shindig.gadgets.oauth2.persistence.sample.OAuth2ClientImpl: serviceName = "
-        + this.serviceName + " , redirectUri = " + this.redirectUri + " , gadgetUri = "
-        + this.gadgetUri + " , clientId = " + this.clientId + " , grantType = " + this.grantType
-        + " , type = " + this.type.name() + " , grantType = " + this.grantType + " , tokenUrl = "
-        + this.tokenUrl + " , authorizationUrl = " + this.authorizationUrl
-        + " , this.clientAuthenticationType = " + this.clientAuthenticationType
-        + " , this.sharedToken = " + this.sharedToken;
+            + this.serviceName + " , redirectUri = " + this.redirectUri + " , gadgetUri = "
+            + this.gadgetUri + " , clientId = " + this.clientId + " , grantType = "
+            + this.grantType + " , type = " + this.type.name() + " , grantType = " + this.grantType
+            + " , tokenUrl = " + this.tokenUrl + " , authorizationUrl = " + this.authorizationUrl
+            + " , this.clientAuthenticationType = " + this.clientAuthenticationType
+            + " , this.sharedToken = " + this.sharedToken + ", this.allowedDomains = "
+            + Arrays.asList(this.allowedDomains);
   }
 
   @Override
@@ -260,12 +289,13 @@ public class OAuth2Client implements Serializable {
     final OAuth2Client ret = new OAuth2Client(this.encrypter);
     ret.setAllowModuleOverride(this.allowModuleOverride);
     ret.setAuthorizationHeader(this.authorizationHeader);
-    ret.setAuthorizationUrl(authorizationUrl);
+    ret.setAuthorizationUrl(this.authorizationUrl);
     ret.setClientAuthenticationType(this.clientAuthenticationType);
     ret.setClientId(this.clientId);
     try {
-    ret.setClientSecret(this.clientSecret);
-      } catch (OAuth2EncryptionException e) {
+      ret.setClientSecret(this.clientSecret);
+    } catch (final OAuth2EncryptionException e) {
+      // no op
     }
     ret.setGadgetUri(this.gadgetUri);
     ret.setGrantType(this.grantType);
@@ -275,6 +305,7 @@ public class OAuth2Client implements Serializable {
     ret.setTokenUrl(this.tokenUrl);
     ret.setType(this.type);
     ret.setUrlParameter(this.urlParameter);
+    ret.setAllowedDomains(this.getAllowedDomains());
 
     return ret;
   }

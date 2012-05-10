@@ -1,18 +1,20 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements. See the NOTICE file distributed with this
- * work for additional information regarding copyright ownership. The ASF
- * licenses this file to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.apache.shindig.gadgets.oauth2;
 
@@ -22,161 +24,158 @@ import javax.servlet.http.HttpServletRequest;
 
 /**
  *
- * Interface representing an OAuth2Message parser that is injected into the
- * {@link OAuth2Request} layer.
+ * Interface representing an OAuth2Message parser that is injected into the {@link OAuth2Request}
+ * layer.
  *
  * It also contains the OAuth 2.0 constants.
  *
- * With the simplicity of the OAuth 2.0 client it is unlikely that another
- * version of this class will need to be injected, but it can be with
+ * With the simplicity of the OAuth 2.0 client it is unlikely that another version of this class
+ * will need to be injected, but it can be with
  * <code>com.google.inject.Provider<OAuth2Message></code>
  *
  */
 public interface OAuth2Message {
-  public final static String ACCESS_DENIED = "access_denied";
-  public final static String ACCESS_TOKEN = "access_token";
-  public final static String AUTHORIZATION = "code";
-  public final static String AUTHORIZATION_CODE = "authorization_code";
-  public final static String AUTHORIZATION_HEADER = "Authorization";
-  public final static String BASIC_AUTH_TYPE = "Basic";
-  public final static String BEARER_TOKEN_TYPE = "Bearer";
-  public final static String BODYHASH = "bodyhash";
-  public final static String CLIENT_CREDENTIALS = "client_credentials";
-  public final static String CLIENT_ID = "client_id";
-  public final static String CLIENT_SECRET = "client_secret";
-  public final static String CONFIDENTIAL_CLIENT_TYPE = "confidential";
-  public final static String ERROR = "error";
-  public final static String ERROR_DESCRIPTION = "error_description";
-  public final static String ERROR_URI = "error_uri";
-  public final static String EXPIRES_IN = "expires_in";
-  public final static String GRANT_TYPE = "grant_type";
-  public final static String HMAC_SHA_1 = "hmac-sha-1";
-  public final static String HMAC_SHA_256 = "hmac-sha-256";
-  public final static String ID = "id";
-  public final static String INVALID_CLIENT = "invalid_client";
-  public final static String INVALID_GRANT = "invalid_grant";
-  public final static String INVALID_REQUEST = "invalid_request";
-  public final static String INVALID_SCOPE = "invalid_scope";
-  public final static String MAC = "mac";
-  public final static String MAC_ALGORITHM = "algorithm";
-  public final static String MAC_EXT = "ext";
-  public final static String MAC_HEADER = "MAC";
-  public final static String MAC_SECRET = "secret";
-  public final static String MAC_TOKEN_TYPE = "mac";
-  public final static String NO_GRANT_TYPE = "NONE";
-  public final static String NONCE = "nonce";
-  public final static String PUBLIC_CLIENT_TYPE = "public";
-  public final static String REDIRECT_URI = "redirect_uri";
-  public final static String REFRESH_TOKEN = "refresh_token";
-  public final static String RESPONSE_TYPE = "response_type";
-  public final static String SCOPE = "scope";
-  public final static String SERVER_ERROR = "server_error";
-  public final static String SHARED_TOKEN = "sharedToken";
-  public final static String STANDARD_AUTH_TYPE = "STANDARD";
-  public final static String STATE = "state";
-  public final static String TEMPORARILY_UNAVAILABLE = "temporarily_unavailable";
-  public final static String TOKEN_RESPONSE = "token";
-  public final static String TOKEN_TYPE = "token_type";
-  public final static String UNAUTHORIZED_CLIENT = "authorized_client";
-  public final static String UNSUPPORTED_GRANT_TYPE = "unsupported_grant_type";
-  public final static String UNSUPPORTED_RESPONSE_TYPE = "unsupported_response_type";
+  String ACCESS_DENIED = "access_denied";
+  String ACCESS_TOKEN = "access_token";
+  String AUTHORIZATION = "code";
+  String AUTHORIZATION_CODE = "authorization_code";
+  String AUTHORIZATION_HEADER = "Authorization";
+  String BASIC_AUTH_TYPE = "Basic";
+  String BEARER_TOKEN_TYPE = "Bearer";
+  String BODYHASH = "bodyhash";
+  String CLIENT_CREDENTIALS = "client_credentials";
+  String CLIENT_ID = "client_id";
+  String CLIENT_SECRET = "client_secret";
+  String CONFIDENTIAL_CLIENT_TYPE = "confidential";
+  String ERROR = "error";
+  String ERROR_DESCRIPTION = "error_description";
+  String ERROR_URI = "error_uri";
+  String EXPIRES_IN = "expires_in";
+  String GRANT_TYPE = "grant_type";
+  String HMAC_SHA_1 = "hmac-sha-1";
+  String HMAC_SHA_256 = "hmac-sha-256";
+  String ID = "id";
+  String INVALID_CLIENT = "invalid_client";
+  String INVALID_GRANT = "invalid_grant";
+  String INVALID_REQUEST = "invalid_request";
+  String INVALID_SCOPE = "invalid_scope";
+  String MAC = "mac";
+  String MAC_ALGORITHM = "algorithm";
+  String MAC_EXT = "ext";
+  String MAC_HEADER = "MAC";
+  String MAC_SECRET = "secret";
+  String MAC_TOKEN_TYPE = "mac";
+  String NO_GRANT_TYPE = "NONE";
+  String NONCE = "nonce";
+  String PUBLIC_CLIENT_TYPE = "public";
+  String REDIRECT_URI = "redirect_uri";
+  String REFRESH_TOKEN = "refresh_token";
+  String RESPONSE_TYPE = "response_type";
+  String SCOPE = "scope";
+  String SERVER_ERROR = "server_error";
+  String SHARED_TOKEN = "sharedToken";
+  String STANDARD_AUTH_TYPE = "STANDARD";
+  String STATE = "state";
+  String TEMPORARILY_UNAVAILABLE = "temporarily_unavailable";
+  String TOKEN_RESPONSE = "token";
+  String TOKEN_TYPE = "token_type";
+  String UNAUTHORIZED_CLIENT = "authorized_client";
+  String UNSUPPORTED_GRANT_TYPE = "unsupported_grant_type";
+  String UNSUPPORTED_RESPONSE_TYPE = "unsupported_response_type";
 
   /**
    * After a message is parsed it may contain an access token.
    *
    * @return the access_token in the message
    */
-  public String getAccessToken();
+  String getAccessToken();
 
   /**
-   * If this is an Authorization Code flow this method will return the
-   * authorization_code from the message.
+   * If this is an Authorization Code flow this method will return the authorization_code from the
+   * message.
    *
    * @return authorization_code in the message
    */
-  public String getAuthorization();
+  String getAuthorization();
 
   /**
-   * <code>null</code> error indicates the message parsed cleanly and the
-   * service provider did not return an error.
+   * <code>null</code> error indicates the message parsed cleanly and the service provider did not
+   * return an error.
    *
    * @return the error from the service provider
    */
-  public OAuth2Error getError();
+  OAuth2Error getError();
 
   /**
    *
    * @return the optional error_description from the service provider
    */
-  public String getErrorDescription();
+  String getErrorDescription();
 
   /**
    *
    * @return the optional error_uri from the service provider
    */
-  public String getErrorUri();
+  String getErrorUri();
 
   /**
    *
    * @return "expires_in" parameter in the message
    */
-  public String getExpiresIn();
+  String getExpiresIn();
 
   /**
-   * The MAC Algorithm
-   * http://tools.ietf.org/html/draft-hammer-oauth-v2-mac-token-05#section-5
+   * The MAC Algorithm http://tools.ietf.org/html/draft-hammer-oauth-v2-mac-token-05#section-5
    *
    * @return
    */
-  public String getMacAlgorithm();
+  String getMacAlgorithm();
 
   /**
-   * The MAC Secret
-   * http://tools.ietf.org/html/draft-hammer-oauth-v2-mac-token-05#section-5
+   * The MAC Secret http://tools.ietf.org/html/draft-hammer-oauth-v2-mac-token-05#section-5
    *
    * @return
    */
-  public String getMacSecret();
+  String getMacSecret();
 
   /**
    *
    * @return a general {@link Map} of all parameters in the message
    */
-  public Map<String, String> getParameters();
+  Map<String, String> getParameters();
 
   /**
    *
    * @return the "refresh_token" in the message
    */
-  public String getRefreshToken();
+  String getRefreshToken();
 
   /**
    *
    * @return the optional state string in the message
    */
-  public String getState();
+  String getState();
 
   /**
    *
    * @return the "token_type" type in the message
    */
-  public String getTokenType();
+  String getTokenType();
 
   /**
-   * Additional properties that went unparsed (i.e. aren't part of the core
-   * OAuth2, Bearer Token or MAC Token specs.
+   * Additional properties that went unparsed (i.e. aren't part of the core OAuth2, Bearer Token or
+   * MAC Token specs.
    *
    * @return
    */
-  public Map<String, String> getUnparsedProperties();
+  Map<String, String> getUnparsedProperties();
 
   /**
-   * Populates an OAuth2Message from a query fragment. Not very useful in
-   * shindig.
+   * Populates an OAuth2Message from a query fragment. Not very useful in shindig.
    *
    * @param fragment
    */
-  public void parseFragment(String fragment);
+  void parseFragment(String fragment);
 
   /**
    * Populates an OAuth2Message from a JSON response body.
@@ -184,7 +183,7 @@ public interface OAuth2Message {
    * @param jsonString
    *          returned from token endpoint request
    */
-  public void parseJSON(String jsonString);
+  void parseJSON(String jsonString);
 
   /**
    * Populates an OAuth2Message from a URL query string.
@@ -192,7 +191,7 @@ public interface OAuth2Message {
    * @param queryString
    *          from redirect_uri called by servcie provider
    */
-  public void parseQuery(String queryString);
+  void parseQuery(String queryString);
 
   /**
    * Populates an OAuth2Message from the entire {@link HttpServletRequest}
@@ -201,23 +200,23 @@ public interface OAuth2Message {
    * @param request
    *          to parse
    */
-  public void parseRequest(HttpServletRequest request);
+  void parseRequest(HttpServletRequest request);
 
   /**
    *
    * @param error
    */
-  public void setError(OAuth2Error error);
+  void setError(OAuth2Error error);
 
   /**
    *
    * @param errorDescription
    */
-  public void setErrorDescription(String errorDescription);
+  void setErrorDescription(String errorDescription);
 
   /**
    *
    * @param errorUri
    */
-  public void setErrorUri(String errorUri);
+  void setErrorUri(String errorUri);
 }

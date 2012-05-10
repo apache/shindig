@@ -18,6 +18,8 @@
  */
 package org.apache.shindig.gadgets.oauth2.handler;
 
+import com.google.inject.Provider;
+
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.oauth2.MockUtils;
@@ -26,11 +28,10 @@ import org.apache.shindig.gadgets.oauth2.OAuth2Error;
 import org.apache.shindig.gadgets.oauth2.OAuth2Message;
 import org.apache.shindig.gadgets.oauth2.OAuth2Store;
 import org.apache.shindig.gadgets.oauth2.OAuth2Token;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import com.google.inject.Provider;
 
 public class TokenAuthorizationResponseHandlerTest extends MockUtils {
   private static TokenAuthorizationResponseHandler tarh;
@@ -42,14 +43,14 @@ public class TokenAuthorizationResponseHandlerTest extends MockUtils {
     TokenAuthorizationResponseHandlerTest.store = MockUtils.getDummyStore();
 
     TokenAuthorizationResponseHandlerTest.tarh = new TokenAuthorizationResponseHandler(
-        oauth2MessageProvider, TokenAuthorizationResponseHandlerTest.store);
+            oauth2MessageProvider, TokenAuthorizationResponseHandlerTest.store);
   }
 
   @Test
   public void testTokenAuthorizationResponseHandler_1() throws Exception {
     Assert.assertNotNull(TokenAuthorizationResponseHandlerTest.tarh);
     Assert.assertTrue(TokenEndpointResponseHandler.class
-        .isInstance(TokenAuthorizationResponseHandlerTest.tarh));
+            .isInstance(TokenAuthorizationResponseHandlerTest.tarh));
   }
 
   @Test
@@ -58,7 +59,7 @@ public class TokenAuthorizationResponseHandlerTest extends MockUtils {
     final HttpResponse response = new HttpResponse();
 
     final boolean result = TokenAuthorizationResponseHandlerTest.tarh.handlesResponse(accessor,
-        response);
+            response);
     Assert.assertFalse(result);
   }
 
@@ -68,7 +69,7 @@ public class TokenAuthorizationResponseHandlerTest extends MockUtils {
     final HttpResponse response = null;
 
     final boolean result = TokenAuthorizationResponseHandlerTest.tarh.handlesResponse(accessor,
-        response);
+            response);
     Assert.assertFalse(result);
   }
 
@@ -78,7 +79,7 @@ public class TokenAuthorizationResponseHandlerTest extends MockUtils {
     final HttpResponse response = new HttpResponse();
 
     final boolean result = TokenAuthorizationResponseHandlerTest.tarh.handlesResponse(accessor,
-        response);
+            response);
     Assert.assertTrue(result);
   }
 
@@ -88,7 +89,7 @@ public class TokenAuthorizationResponseHandlerTest extends MockUtils {
     final HttpResponse response = new HttpResponse();
 
     final OAuth2HandlerError result = TokenAuthorizationResponseHandlerTest.tarh.handleResponse(
-        accessor, response);
+            accessor, response);
     Assert.assertNotNull(result);
     Assert.assertEquals(null, result.getCause());
     Assert.assertEquals(OAuth2Error.TOKEN_RESPONSE_PROBLEM, result.getError());
@@ -101,7 +102,7 @@ public class TokenAuthorizationResponseHandlerTest extends MockUtils {
     final HttpResponse response = null;
 
     final OAuth2HandlerError result = TokenAuthorizationResponseHandlerTest.tarh.handleResponse(
-        accessor, response);
+            accessor, response);
     Assert.assertNotNull(result);
     Assert.assertEquals(null, result.getCause());
     Assert.assertEquals(OAuth2Error.TOKEN_RESPONSE_PROBLEM, result.getError());
@@ -116,7 +117,7 @@ public class TokenAuthorizationResponseHandlerTest extends MockUtils {
     final HttpResponse response = builder.create();
 
     final OAuth2HandlerError result = TokenAuthorizationResponseHandlerTest.tarh.handleResponse(
-        accessor, response);
+            accessor, response);
 
     Assert.assertNotNull(result);
     Assert.assertEquals(null, result.getCause());
@@ -130,26 +131,25 @@ public class TokenAuthorizationResponseHandlerTest extends MockUtils {
     final HttpResponseBuilder builder = new HttpResponseBuilder().setStrictNoCache();
     builder.setHttpStatusCode(HttpResponse.SC_OK);
     builder.setHeader("Content-Type", "text/plain");
-    builder
-        .setContent("access_token=xxx&token_type=Bearer&expires=1&refresh_token=yyy&example_parameter=example_value");
+    builder.setContent("access_token=xxx&token_type=Bearer&expires=1&refresh_token=yyy&example_parameter=example_value");
     final HttpResponse response = builder.create();
 
     final OAuth2HandlerError result = TokenAuthorizationResponseHandlerTest.tarh.handleResponse(
-        accessor, response);
+            accessor, response);
 
     Assert.assertNull(result);
 
     final OAuth2Token accessToken = TokenAuthorizationResponseHandlerTest.store.getToken(
-        accessor.getGadgetUri(), accessor.getServiceName(), accessor.getUser(),
-        accessor.getScope(), OAuth2Token.Type.ACCESS);
+            accessor.getGadgetUri(), accessor.getServiceName(), accessor.getUser(),
+            accessor.getScope(), OAuth2Token.Type.ACCESS);
     Assert.assertNotNull(accessToken);
     Assert.assertEquals("xxx", new String(accessToken.getSecret(), "UTF-8"));
     Assert.assertEquals(OAuth2Message.BEARER_TOKEN_TYPE, accessToken.getTokenType());
     Assert.assertTrue(accessToken.getExpiresAt() > 1000);
 
     final OAuth2Token refreshToken = TokenAuthorizationResponseHandlerTest.store.getToken(
-        accessor.getGadgetUri(), accessor.getServiceName(), accessor.getUser(),
-        accessor.getScope(), OAuth2Token.Type.REFRESH);
+            accessor.getGadgetUri(), accessor.getServiceName(), accessor.getUser(),
+            accessor.getScope(), OAuth2Token.Type.REFRESH);
     Assert.assertNotNull(refreshToken);
     Assert.assertEquals("yyy", new String(refreshToken.getSecret(), "UTF-8"));
   }
@@ -160,26 +160,25 @@ public class TokenAuthorizationResponseHandlerTest extends MockUtils {
     final HttpResponseBuilder builder = new HttpResponseBuilder().setStrictNoCache();
     builder.setHttpStatusCode(HttpResponse.SC_OK);
     builder.setHeader("Content-Type", "application/json");
-    builder
-        .setContent("{\"access_token\"=\"xxx\",\"token_type\"=\"Bearer\",\"expires_in\"=\"1\",\"refresh_token\"=\"yyy\",\"example_parameter\"=\"example_value\"}");
+    builder.setContent("{\"access_token\":\"xxx\",\"token_type\":\"Bearer\",\"expires_in\":\"1\",\"refresh_token\":\"yyy\",\"example_parameter\":\"example_value\"}");
     final HttpResponse response = builder.create();
 
     final OAuth2HandlerError result = TokenAuthorizationResponseHandlerTest.tarh.handleResponse(
-        accessor, response);
+            accessor, response);
 
     Assert.assertNull(result);
 
     final OAuth2Token accessToken = TokenAuthorizationResponseHandlerTest.store.getToken(
-        accessor.getGadgetUri(), accessor.getServiceName(), accessor.getUser(),
-        accessor.getScope(), OAuth2Token.Type.ACCESS);
+            accessor.getGadgetUri(), accessor.getServiceName(), accessor.getUser(),
+            accessor.getScope(), OAuth2Token.Type.ACCESS);
     Assert.assertNotNull(accessToken);
     Assert.assertEquals("xxx", new String(accessToken.getSecret(), "UTF-8"));
     Assert.assertEquals(OAuth2Message.BEARER_TOKEN_TYPE, accessToken.getTokenType());
     Assert.assertTrue(accessToken.getExpiresAt() > 1000);
 
     final OAuth2Token refreshToken = TokenAuthorizationResponseHandlerTest.store.getToken(
-        accessor.getGadgetUri(), accessor.getServiceName(), accessor.getUser(),
-        accessor.getScope(), OAuth2Token.Type.REFRESH);
+            accessor.getGadgetUri(), accessor.getServiceName(), accessor.getUser(),
+            accessor.getScope(), OAuth2Token.Type.REFRESH);
     Assert.assertNotNull(refreshToken);
     Assert.assertEquals("yyy", new String(refreshToken.getSecret(), "UTF-8"));
   }
@@ -193,7 +192,7 @@ public class TokenAuthorizationResponseHandlerTest extends MockUtils {
     final HttpResponse response = builder.create();
 
     final OAuth2HandlerError result = TokenAuthorizationResponseHandlerTest.tarh.handleResponse(
-        accessor, response);
+            accessor, response);
 
     Assert.assertNotNull(result);
     Assert.assertEquals(null, result.getCause());

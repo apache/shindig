@@ -1,26 +1,28 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements. See the NOTICE file distributed with this
- * work for additional information regarding copyright ownership. The ASF
- * licenses this file to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.apache.shindig.gadgets.oauth2.persistence;
 
-import java.util.Collection;
-
 import org.apache.shindig.gadgets.oauth2.OAuth2Accessor;
-import org.apache.shindig.gadgets.oauth2.OAuth2Store;
+import org.apache.shindig.gadgets.oauth2.OAuth2CallbackState;
 import org.apache.shindig.gadgets.oauth2.OAuth2Token;
+
+import java.util.Collection;
 
 /**
  * Used by {@link OAuth2Store} to cache OAuth2 data.
@@ -29,6 +31,13 @@ import org.apache.shindig.gadgets.oauth2.OAuth2Token;
  *
  */
 public interface OAuth2Cache {
+  /**
+   * Clears all cached {@link OAuth2Client}s.
+   *
+   * @throws OAuth2CacheException
+   */
+  void clearAccessors() throws OAuth2CacheException;
+
   /**
    * Clears all cached {@link OAuth2Client}s.
    *
@@ -44,97 +53,63 @@ public interface OAuth2Cache {
   void clearTokens() throws OAuth2CacheException;
 
   /**
-   * Find an {@link OAuth2Client} by {@link Integer} index.
+   * Find an {@link OAuth2Client}.
    *
-   * @param index
+   * @param gadgetUri
+   * @param serviceName
    * @return OAuth2Client
    */
-  OAuth2Client getClient(Integer index);
+  OAuth2Client getClient(String gadgetUri, String serviceName);
 
   /**
-   * Generate an {@link OAuth2Client} index for the given mapping.
+   * Find an {@link OAuth2Accessor} by state.
    *
-   * @param gadgetUri
-   * @param serviceName
-   * @return client index
-   */
-  Integer getClientIndex(String gadgetUri, String serviceName);
-
-  /**
-   * Find an {@link OAuth2Accessor} by index.
-   *
-   * @param index
+   * @param state
    * @return OAuth2Accessor
    */
-  OAuth2Accessor getOAuth2Accessor(Integer index);
-
-  /**
-   * Generate in index for an {@link OAuth2Accessor} by the given parameters.
-   *
-   * @param gadgetUri
-   * @param serviceName
-   * @param user
-   * @param scope
-   * @return index for the OAuth2Accessor
-   */
-  Integer getOAuth2AccessorIndex(String gadgetUri, String serviceName, String user, String scope);
+  OAuth2Accessor getOAuth2Accessor(OAuth2CallbackState state);
 
   /**
    * Find an {@link OAuth2Token} based on index
-   *
-   * @param index
-   * @return an OAuth2Token
-   */
-  OAuth2Token getToken(Integer index);
-
-  /**
-   * Returns the {@link Integer} index for the given {@link OAuth2Token}.
-   *
-   * @param token
-   * @return index of the OAuth2Token
-   */
-  Integer getTokenIndex(OAuth2Token token);
-
-  /**
-   * Generate index for {@link OAuth2Token} based on parameters
    *
    * @param gadgetUri
    * @param serviceName
    * @param user
    * @param scope
    * @param type
-   * @return index of OAuth2Token
+   * @return an OAuth2Token
    */
-  Integer getTokenIndex(String gadgetUri, String serviceName, String user, String scope,
-      OAuth2Token.Type type);
+  OAuth2Token getToken(String gadgetUri, String serviceName, String user, String scope,
+          OAuth2Token.Type type);
 
   /**
-   * Removes the {@link OAuth2Client} from the cache.
-   *
-   * @param index
-   * @return the removed client, or <code>null</code> if none was found
-   * @throws OAuth2CacheException
+   * @return true if the cache has already been primed. (presumably by another node.)
    */
-  OAuth2Client removeClient(Integer index) throws OAuth2CacheException;
+  boolean isPrimed();
 
   /**
-   * Removes the given {@link OAuth2Accessor} from the cache.
+   * Remove the given client;
    *
-   * @param index
-   * @return the removed {@link OAuth2Accessor} or <code>null</code> if none was
-   *         found
+   * @param client
+   * @return the client that was removed, or <code>null</code> if removal failed
    */
-  OAuth2Accessor removeOAuth2Accessor(Integer index);
+  OAuth2Client removeClient(OAuth2Client client);
 
   /**
-   * Removes the given {@link OAuth2Token} from the cache.
+   * Remove the given accessor.
    *
-   * @param index
-   * @return the removed {@link OAuth2Token} or <code>null</code> if none was
-   *         found
-   * @throws OAuth2CacheException
+   * @param accessor
+   * @return the accessor that was removed, or <code>null</code> if removal failed
    */
-  OAuth2Token removeToken(Integer index) throws OAuth2CacheException;
+  OAuth2Accessor removeOAuth2Accessor(OAuth2Accessor accessor);
+
+  /**
+   * Remove the given token;
+   *
+   * @param token
+   * @return the token that was removed, or <code>null</code> if removal failed
+   */
+  OAuth2Token removeToken(OAuth2Token token);
 
   /**
    * Stores the given client.
@@ -143,7 +118,7 @@ public interface OAuth2Cache {
    * @param client
    * @throws OAuth2CacheException
    */
-  Integer storeClient(OAuth2Client client) throws OAuth2CacheException;
+  void storeClient(OAuth2Client client) throws OAuth2CacheException;
 
   /**
    * Store all clients in the collection.
@@ -158,12 +133,12 @@ public interface OAuth2Cache {
    *
    * @param accessor
    */
-  Integer storeOAuth2Accessor(OAuth2Accessor accessor);
+  void storeOAuth2Accessor(OAuth2Accessor accessor);
 
   /**
-   * Stores the given token and returns it's index.
+   * Stores the given token.
    */
-  Integer storeToken(OAuth2Token token) throws OAuth2CacheException;
+  void storeToken(OAuth2Token token) throws OAuth2CacheException;
 
   /**
    * Stores all tokens in the collection.

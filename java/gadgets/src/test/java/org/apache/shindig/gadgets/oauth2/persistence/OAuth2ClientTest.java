@@ -55,7 +55,7 @@ public class OAuth2ClientTest extends MockUtils {
     Assert.assertEquals(false, result.isUrlParameter());
     Assert
     .assertEquals(
-        "org.apache.shindig.gadgets.oauth2.persistence.sample.OAuth2ClientImpl: serviceName = null , redirectUri = null , gadgetUri = null , clientId = null , grantType = NONE , type = UNKNOWN , grantType = NONE , tokenUrl = null , authorizationUrl = null , this.clientAuthenticationType = null , this.sharedToken = false",
+        "org.apache.shindig.gadgets.oauth2.persistence.sample.OAuth2ClientImpl: serviceName = null , redirectUri = null , gadgetUri = null , clientId = null , grantType = NONE , type = UNKNOWN , grantType = NONE , tokenUrl = null , authorizationUrl = null , this.clientAuthenticationType = null , this.sharedToken = false, this.allowedDomains = []",
         result.toString());
   }
 

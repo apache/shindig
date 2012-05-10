@@ -18,21 +18,24 @@
  */
 package org.apache.shindig.gadgets.oauth2.persistence.sample;
 
-import java.util.Collection;
-import java.util.HashSet;
-
 import org.apache.shindig.gadgets.oauth2.BasicOAuth2Accessor;
 import org.apache.shindig.gadgets.oauth2.MockUtils;
 import org.apache.shindig.gadgets.oauth2.OAuth2Accessor;
+import org.apache.shindig.gadgets.oauth2.OAuth2CallbackState;
 import org.apache.shindig.gadgets.oauth2.OAuth2Message;
 import org.apache.shindig.gadgets.oauth2.OAuth2Store;
 import org.apache.shindig.gadgets.oauth2.OAuth2Token;
+import org.apache.shindig.gadgets.oauth2.OAuth2Token.Type;
 import org.apache.shindig.gadgets.oauth2.persistence.OAuth2Cache;
 import org.apache.shindig.gadgets.oauth2.persistence.OAuth2Client;
 import org.apache.shindig.gadgets.oauth2.persistence.OAuth2TokenPersistence;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.Collection;
+import java.util.HashSet;
 
 public class InMemoryCacheTest extends MockUtils {
 
@@ -56,127 +59,81 @@ public class InMemoryCacheTest extends MockUtils {
 
   @Test
   public void testClearClients_1() throws Exception {
-    Assert.assertNotNull(this.cache.getClient(MockUtils.CLIENT_INDEX1));
+    Assert.assertNotNull(this.cache.getClient(MockUtils.GADGET_URI1, MockUtils.SERVICE_NAME));
 
     this.cache.clearClients();
 
-    Assert.assertNull(this.cache.getClient(MockUtils.CLIENT_INDEX1));
+    Assert.assertNull(this.cache.getClient(MockUtils.GADGET_URI1, MockUtils.SERVICE_NAME));
   }
 
   @Test
   public void testClearTokens_1() throws Exception {
-    Assert.assertNotNull(this.cache.getToken(MockUtils.ACCESS_TOKEN_INDEX));
+    Assert.assertNotNull(this.cache.getToken(MockUtils.GADGET_URI1, MockUtils.SERVICE_NAME,
+            MockUtils.USER, MockUtils.SCOPE, Type.ACCESS));
 
     this.cache.clearTokens();
 
-    Assert.assertNull(this.cache.getToken(MockUtils.ACCESS_TOKEN_INDEX));
+    Assert.assertNull(this.cache.getToken(MockUtils.GADGET_URI1, MockUtils.SERVICE_NAME,
+            MockUtils.USER, MockUtils.SCOPE, Type.ACCESS));
   }
 
   @Test
   public void testGetClient_1() throws Exception {
-    final OAuth2Client result = this.cache.getClient(MockUtils.CLIENT_INDEX1);
+    final OAuth2Client result = this.cache.getClient(MockUtils.GADGET_URI1, MockUtils.SERVICE_NAME);
 
     Assert.assertNotNull(result);
     Assert.assertEquals(MockUtils.CLIENT_ID1, result.getClientId());
-  }
-
-  @Test
-  public void testGetClientIndex_1() throws Exception {
-
-    final Integer result = this.cache.getClientIndex(MockUtils.GADGET_URI1, MockUtils.SERVICE_NAME);
-
-    Assert.assertNotNull(result);
-    Assert.assertEquals(MockUtils.CLIENT_INDEX1, result);
   }
 
   @Test
   public void testGetOAuth2Accessor_1() throws Exception {
-    final OAuth2Accessor result = this.cache.getOAuth2Accessor(MockUtils.ACCESSOR_INDEX1);
+    final OAuth2Accessor accessor = MockUtils.getOAuth2Accessor_Code();
+
+    final OAuth2CallbackState state = new OAuth2CallbackState(MockUtils.getDummyStateCrypter());
+    state.setGadgetUri(accessor.getGadgetUri());
+    state.setServiceName(accessor.getServiceName());
+    state.setUser(accessor.getUser());
+    state.setScope(accessor.getScope());
+
+    final OAuth2Accessor result = this.cache.getOAuth2Accessor(state);
 
     Assert.assertNotNull(result);
     Assert.assertEquals(MockUtils.CLIENT_ID1, result.getClientId());
   }
 
   @Test
-  public void testGetOAuth2Accessor_2() throws Exception {
-    final OAuth2Accessor result = this.cache.getOAuth2Accessor(null);
-
-    Assert.assertNull(result);
-  }
-
-  @Test
   public void testGetOAuth2Accessor_3() throws Exception {
-    final OAuth2Accessor result = this.cache.getOAuth2Accessor(MockUtils.BAD_INDEX);
+    final OAuth2CallbackState state = new OAuth2CallbackState(MockUtils.getDummyStateCrypter());
+    state.setGadgetUri("BAD");
+    state.setServiceName("BAD");
+    state.setUser("BAD");
+    state.setScope("BAD");
+    final OAuth2Accessor result = this.cache.getOAuth2Accessor(state);
 
     Assert.assertNull(result);
-  }
-
-  @Test
-  public void testGetOAuth2AccessorIndex_1() throws Exception {
-
-    final Integer result = this.cache.getOAuth2AccessorIndex(MockUtils.GADGET_URI1,
-        MockUtils.SERVICE_NAME, MockUtils.USER, MockUtils.SCOPE);
-
-    Assert.assertNotNull(result);
-    Assert.assertEquals(MockUtils.ACCESSOR_INDEX1, result);
   }
 
   @Test
   public void testGetToken_1() throws Exception {
-    final OAuth2Token result = this.cache.getToken(MockUtils.ACCESS_TOKEN_INDEX);
+    final OAuth2Token result = this.cache.getToken(MockUtils.GADGET_URI1, MockUtils.SERVICE_NAME,
+            MockUtils.USER, MockUtils.SCOPE, Type.ACCESS);
 
     Assert.assertNotNull(result);
     Assert.assertEquals(MockUtils.ACCESS_SECRET, new String(result.getSecret(), "UTF-8"));
   }
 
   @Test
-  public void testGetTokenMockUtilsIndex_1() throws Exception {
-    final Integer result = this.cache.getTokenIndex(MockUtils.getAccessToken());
-
-    Assert.assertNotNull(result);
-    Assert.assertEquals(MockUtils.ACCESS_TOKEN_INDEX, result);
-  }
-
-  @Test
-  public void testGetTokenIndex_2() throws Exception {
-
-    final OAuth2Token token = null;
-
-    final Integer result = this.cache.getTokenIndex(token);
-
-    Assert.assertNull(result);
-  }
-
-  @Test
-  public void testGetTokenIndex_3() throws Exception {
-
-    final Integer result = this.cache.getTokenIndex(MockUtils.GADGET_URI1, MockUtils.SERVICE_NAME,
-        MockUtils.USER, MockUtils.SCOPE, OAuth2Token.Type.ACCESS);
-
-    Assert.assertNotNull(result);
-    Assert.assertEquals(MockUtils.ACCESS_TOKEN_INDEX, result);
-  }
-
-  @Test
   public void testRemoveClient_1() throws Exception {
 
-    OAuth2Client result = this.cache.getClient(MockUtils.CLIENT_INDEX1);
+    OAuth2Client result = this.cache.getClient(MockUtils.GADGET_URI1, MockUtils.SERVICE_NAME);
 
     Assert.assertNotNull(result);
 
-    result = this.cache.removeClient(MockUtils.CLIENT_INDEX1);
+    result = this.cache.removeClient(result);
 
     Assert.assertNotNull(result);
 
-    result = this.cache.removeClient(MockUtils.CLIENT_INDEX1);
-
-    Assert.assertNull(result);
-  }
-
-  @Test
-  public void testRemoveOAuth2Accessor_1() throws Exception {
-
-    final OAuth2Accessor result = this.cache.removeOAuth2Accessor(MockUtils.BAD_INDEX);
+    result = this.cache.removeClient(result);
 
     Assert.assertNull(result);
   }
@@ -184,15 +141,16 @@ public class InMemoryCacheTest extends MockUtils {
   @Test
   public void testRemoveToken_1() throws Exception {
 
-    OAuth2Token result = this.cache.getToken(MockUtils.ACCESS_TOKEN_INDEX);
+    OAuth2Token result = this.cache.getToken(MockUtils.GADGET_URI1, MockUtils.SERVICE_NAME,
+            MockUtils.USER, MockUtils.SCOPE, Type.ACCESS);
 
     Assert.assertNotNull(result);
 
-    result = this.cache.removeToken(MockUtils.ACCESS_TOKEN_INDEX);
+    result = this.cache.removeToken(result);
 
     Assert.assertNotNull(result);
 
-    result = this.cache.removeToken(MockUtils.ACCESS_TOKEN_INDEX);
+    result = this.cache.removeToken(result);
 
     Assert.assertNull(result);
 
@@ -205,25 +163,13 @@ public class InMemoryCacheTest extends MockUtils {
     client.setGadgetUri("xxx");
     client.setServiceName("yyy");
 
-    final Integer result = this.cache.storeClient(client);
+    this.cache.storeClient(client);
 
-    Assert.assertEquals(909248813, result.intValue());
-
-    client = this.cache.getClient(result);
+    client = this.cache.getClient(client.getGadgetUri(), client.getServiceName());
 
     Assert.assertNotNull(client);
     Assert.assertEquals("xxx", client.getGadgetUri());
     Assert.assertEquals("yyy", client.getServiceName());
-  }
-
-  @Test
-  public void testStoreClient_2() throws Exception {
-
-    final OAuth2Client client = null;
-
-    final Integer result = this.cache.storeClient(client);
-
-    Assert.assertNull(result);
   }
 
   @Test
@@ -237,20 +183,25 @@ public class InMemoryCacheTest extends MockUtils {
 
     this.cache.storeClients(clients);
 
-    Assert.assertNotNull(this.cache.getClient(MockUtils.CLIENT_INDEX1));
-    Assert.assertNotNull(this.cache.getClient(MockUtils.CLIENT_INDEX2));
+    Assert.assertNotNull(this.cache.getClient(MockUtils.GADGET_URI1, MockUtils.SERVICE_NAME));
+    Assert.assertNotNull(this.cache.getClient(MockUtils.GADGET_URI2, MockUtils.SERVICE_NAME));
   }
 
   @Test
   public void testStoreOAuth2Accessor_1() throws Exception {
-    final OAuth2Store store = MockUtils.getDummyStore(this.cache, null, null);
-    OAuth2Accessor accessor = new BasicOAuth2Accessor("XXX", "YYY", "ZZZ", "", false, store, "AAA");
+    final OAuth2Store store = MockUtils.getDummyStore(this.cache, null, null, null, null, null,
+            null);
+    OAuth2Accessor accessor = new BasicOAuth2Accessor("XXX", "YYY", "ZZZ", "", false, store, "AAA",
+            null, null);
 
-    final Integer result = this.cache.storeOAuth2Accessor(accessor);
+    this.cache.storeOAuth2Accessor(accessor);
 
-    Assert.assertEquals(-1664180105, result.intValue());
-
-    accessor = this.cache.getOAuth2Accessor(result);
+    final OAuth2CallbackState state = new OAuth2CallbackState(MockUtils.getDummyStateCrypter());
+    state.setGadgetUri(accessor.getGadgetUri());
+    state.setServiceName(accessor.getServiceName());
+    state.setUser(accessor.getUser());
+    state.setScope(accessor.getScope());
+    accessor = this.cache.getOAuth2Accessor(state);
 
     Assert.assertNotNull(accessor);
     Assert.assertEquals("XXX", accessor.getGadgetUri());
@@ -259,17 +210,6 @@ public class InMemoryCacheTest extends MockUtils {
     Assert.assertEquals("", accessor.getScope());
     Assert.assertEquals(false, accessor.isAllowModuleOverrides());
     Assert.assertEquals("AAA", accessor.getRedirectUri());
-    Assert.assertEquals("-1664180105", accessor.getState());
-  }
-
-  @Test
-  public void testStoreOAuth2Accessor_2() throws Exception {
-
-    final OAuth2Accessor accessor = null;
-
-    final Integer result = this.cache.storeOAuth2Accessor(accessor);
-
-    Assert.assertEquals(null, result);
   }
 
   @Test
@@ -287,11 +227,10 @@ public class InMemoryCacheTest extends MockUtils {
     token.setType(OAuth2Token.Type.ACCESS);
     token.setUser("zzz");
 
-    final Integer result = this.cache.storeToken(token);
+    this.cache.storeToken(token);
 
-    Assert.assertEquals(460203885, result.intValue());
-
-    token = this.cache.getToken(result);
+    token = this.cache.getToken(token.getGadgetUri(), token.getServiceName(), token.getUser(),
+            token.getScope(), token.getType());
 
     Assert.assertNotNull(token);
     Assert.assertEquals("xxx", token.getGadgetUri());
@@ -309,26 +248,24 @@ public class InMemoryCacheTest extends MockUtils {
   }
 
   @Test
-  public void testStoreToken_2() throws Exception {
-
-    final OAuth2Token token = null;
-
-    final Integer result = this.cache.storeToken(token);
-
-    Assert.assertEquals(null, result);
-  }
-
-  @Test
   public void testStoreTokens_1() throws Exception {
     this.cache.clearTokens();
 
     final Collection<OAuth2Token> tokens = new HashSet<OAuth2Token>(2);
-    tokens.add(MockUtils.getAccessToken());
-    tokens.add(MockUtils.getRefreshToken());
+
+    final OAuth2Token accessToken = MockUtils.getAccessToken();
+    final OAuth2Token refreshToken = MockUtils.getRefreshToken();
+
+    tokens.add(accessToken);
+    tokens.add(refreshToken);
 
     this.cache.storeTokens(tokens);
 
-    Assert.assertNotNull(this.cache.getToken(MockUtils.ACCESS_TOKEN_INDEX));
-    Assert.assertNotNull(this.cache.getToken(MockUtils.REFRESH_TOKEN_INDEX));
+    Assert.assertNotNull(this.cache.getToken(accessToken.getGadgetUri(),
+            accessToken.getServiceName(), accessToken.getUser(), accessToken.getScope(),
+            accessToken.getType()));
+    Assert.assertNotNull(this.cache.getToken(refreshToken.getGadgetUri(),
+            refreshToken.getServiceName(), refreshToken.getUser(), refreshToken.getScope(),
+            refreshToken.getType()));
   }
 }

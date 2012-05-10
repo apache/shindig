@@ -19,15 +19,20 @@
 package org.apache.shindig.gadgets.oauth2;
 
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 
+import org.apache.shindig.common.crypto.BlobCrypter;
+import org.apache.shindig.common.servlet.Authority;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.GadgetException.Code;
 import org.apache.shindig.gadgets.oauth2.logger.FilteredLogger;
 import org.apache.shindig.gadgets.oauth2.persistence.OAuth2Cache;
 import org.apache.shindig.gadgets.oauth2.persistence.OAuth2CacheException;
 import org.apache.shindig.gadgets.oauth2.persistence.OAuth2Client;
+import org.apache.shindig.gadgets.oauth2.persistence.OAuth2Encrypter;
 import org.apache.shindig.gadgets.oauth2.persistence.OAuth2PersistenceException;
 import org.apache.shindig.gadgets.oauth2.persistence.OAuth2Persister;
+import org.apache.shindig.gadgets.oauth2.persistence.OAuth2TokenPersistence;
 
 import java.util.Set;
 
@@ -42,24 +47,37 @@ import java.util.Set;
  *
  */
 public class BasicOAuth2Store implements OAuth2Store {
-  private final static String LOG_CLASS = BasicOAuth2Store.class.getName();
+  private static final String LOG_CLASS = BasicOAuth2Store.class.getName();
   private static final FilteredLogger LOG = FilteredLogger
           .getFilteredLogger(BasicOAuth2Store.LOG_CLASS);
 
   private final OAuth2Cache cache;
   private final String globalRedirectUri;
+  private final Authority authority;
+  private final String contextRoot;
   private final OAuth2Persister persister;
+  private final OAuth2Encrypter encrypter;
+  private final BlobCrypter stateCrypter;
 
   @Inject
   public BasicOAuth2Store(final OAuth2Cache cache, final OAuth2Persister persister,
-          final String globalRedirectUri) {
+          final OAuth2Encrypter encrypter, final String globalRedirectUri,
+          final Authority authority, final String contextRoot,
+          @Named(OAuth2FetcherConfig.OAUTH2_STATE_CRYPTER)
+          final BlobCrypter stateCrypter) {
     this.cache = cache;
     this.persister = persister;
     this.globalRedirectUri = globalRedirectUri;
+    this.authority = authority;
+    this.contextRoot = contextRoot;
+    this.encrypter = encrypter;
+    this.stateCrypter = stateCrypter;
     if (BasicOAuth2Store.LOG.isLoggable()) {
       BasicOAuth2Store.LOG.log("this.cache = {0}", this.cache);
       BasicOAuth2Store.LOG.log("this.persister = {0}", this.persister);
       BasicOAuth2Store.LOG.log("this.globalRedirectUri = {0}", this.globalRedirectUri);
+      BasicOAuth2Store.LOG.log("this.encrypter = {0}", this.encrypter);
+      BasicOAuth2Store.LOG.log("this.stateCrypter = {0}", this.stateCrypter);
     }
   }
 
@@ -72,6 +90,7 @@ public class BasicOAuth2Store implements OAuth2Store {
     try {
       this.cache.clearClients();
       this.cache.clearTokens();
+      this.cache.clearAccessors();
     } catch (final OAuth2PersistenceException e) {
       if (isLogging) {
         BasicOAuth2Store.LOG.log("Error clearing OAuth2 cache", e);
@@ -92,7 +111,7 @@ public class BasicOAuth2Store implements OAuth2Store {
       BasicOAuth2Store.LOG.entering(BasicOAuth2Store.LOG_CLASS, "createToken");
     }
 
-    final OAuth2Token ret = this.persister.createToken();
+    final OAuth2Token ret = this.internalCreateToken();
 
     if (isLogging) {
       BasicOAuth2Store.LOG.exiting(BasicOAuth2Store.LOG_CLASS, "clearCache", ret);
@@ -109,13 +128,7 @@ public class BasicOAuth2Store implements OAuth2Store {
               gadgetUri, serviceName });
     }
 
-    final Integer index = this.cache.getClientIndex(gadgetUri, serviceName);
-
-    if (isLogging) {
-      BasicOAuth2Store.LOG.log("index = {0}", index);
-    }
-
-    OAuth2Client client = this.cache.getClient(index);
+    OAuth2Client client = this.cache.getClient(gadgetUri, serviceName);
 
     if (isLogging) {
       BasicOAuth2Store.LOG.log("client from cache = {0}", client);
@@ -143,13 +156,13 @@ public class BasicOAuth2Store implements OAuth2Store {
     return client;
   }
 
-  public OAuth2Accessor getOAuth2Accessor(final Integer index) {
+  public OAuth2Accessor getOAuth2Accessor(final OAuth2CallbackState state) {
     final boolean isLogging = BasicOAuth2Store.LOG.isLoggable();
     if (isLogging) {
-      BasicOAuth2Store.LOG.entering(BasicOAuth2Store.LOG_CLASS, "getOAuth2Accessor", index);
+      BasicOAuth2Store.LOG.entering(BasicOAuth2Store.LOG_CLASS, "getOAuth2Accessor", state);
     }
 
-    final OAuth2Accessor ret = this.cache.getOAuth2Accessor(index);
+    final OAuth2Accessor ret = this.cache.getOAuth2Accessor(state);
 
     if (isLogging) {
       BasicOAuth2Store.LOG.exiting(BasicOAuth2Store.LOG_CLASS, "getOAuth2Accessor", ret);
@@ -166,11 +179,15 @@ public class BasicOAuth2Store implements OAuth2Store {
               gadgetUri, serviceName, user, scope });
     }
 
-    final Integer index = this.cache.getOAuth2AccessorIndex(gadgetUri, serviceName, user, scope);
+    final OAuth2CallbackState state = new OAuth2CallbackState(this.stateCrypter);
+    state.setGadgetUri(gadgetUri);
+    state.setServiceName(serviceName);
+    state.setUser(user);
+    state.setScope(scope);
 
-    OAuth2Accessor ret = this.cache.getOAuth2Accessor(index);
+    OAuth2Accessor ret = this.cache.getOAuth2Accessor(state);
 
-    if ((ret == null) || (!ret.isValid())) {
+    if (ret == null || !ret.isValid()) {
       final OAuth2Client client = this.getClient(gadgetUri, serviceName);
 
       if (client != null) {
@@ -180,7 +197,8 @@ public class BasicOAuth2Store implements OAuth2Store {
                 OAuth2Token.Type.REFRESH);
 
         final BasicOAuth2Accessor newAccessor = new BasicOAuth2Accessor(gadgetUri, serviceName,
-                user, scope, client.isAllowModuleOverride(), this, this.globalRedirectUri);
+                user, scope, client.isAllowModuleOverride(), this, this.globalRedirectUri,
+                this.authority, this.contextRoot);
         newAccessor.setAccessToken(accessToken);
         newAccessor.setAuthorizationUrl(client.getAuthorizationUrl());
         newAccessor.setClientAuthenticationType(client.getClientAuthenticationType());
@@ -193,6 +211,7 @@ public class BasicOAuth2Store implements OAuth2Store {
         newAccessor.setRefreshToken(refreshToken);
         newAccessor.setTokenUrl(client.getTokenUrl());
         newAccessor.setType(client.getType());
+        newAccessor.setAllowedDomains(client.getAllowedDomains());
         ret = newAccessor;
 
         this.storeOAuth2Accessor(ret);
@@ -206,11 +225,6 @@ public class BasicOAuth2Store implements OAuth2Store {
     return ret;
   }
 
-  public Integer getOAuth2AccessorIndex(final String gadgetUri, final String serviceName,
-          final String user, final String scope) {
-    return this.cache.getOAuth2AccessorIndex(gadgetUri, serviceName, user, scope);
-  }
-
   public OAuth2Token getToken(final String gadgetUri, final String serviceName, final String user,
           final String scope, final OAuth2Token.Type type) throws GadgetException {
 
@@ -222,9 +236,7 @@ public class BasicOAuth2Store implements OAuth2Store {
 
     final String processedGadgetUri = this.getGadgetUri(gadgetUri, serviceName);
 
-    final Integer index = this.cache.getTokenIndex(processedGadgetUri, serviceName, user, scope,
-            type);
-    OAuth2Token token = this.cache.getToken(index);
+    OAuth2Token token = this.cache.getToken(processedGadgetUri, serviceName, user, scope, type);
     if (token == null) {
       try {
         token = this.persister.findToken(processedGadgetUri, serviceName, user, scope, type);
@@ -232,8 +244,7 @@ public class BasicOAuth2Store implements OAuth2Store {
           this.cache.storeToken(token);
         }
       } catch (final OAuth2PersistenceException e) {
-        throw new GadgetException(Code.OAUTH_STORAGE_ERROR, "Error loading OAuth2 token " + index,
-                e);
+        throw new GadgetException(Code.OAUTH_STORAGE_ERROR, "Error loading OAuth2 token", e);
       }
     }
 
@@ -248,6 +259,13 @@ public class BasicOAuth2Store implements OAuth2Store {
     final boolean isLogging = BasicOAuth2Store.LOG.isLoggable();
     if (isLogging) {
       BasicOAuth2Store.LOG.entering(BasicOAuth2Store.LOG_CLASS, "init");
+    }
+
+    if (this.cache.isPrimed()) {
+      if (isLogging) {
+        BasicOAuth2Store.LOG.exiting(BasicOAuth2Store.LOG_CLASS, "init", false);
+      }
+      return false;
     }
 
     this.clearCache();
@@ -288,9 +306,7 @@ public class BasicOAuth2Store implements OAuth2Store {
     final OAuth2Accessor ret = null;
 
     if (accessor != null) {
-      final Integer index = this.cache.getOAuth2AccessorIndex(accessor.getGadgetUri(),
-              accessor.getServiceName(), accessor.getUser(), accessor.getScope());
-      return this.cache.removeOAuth2Accessor(index);
+      return this.cache.removeOAuth2Accessor(accessor);
     }
 
     if (isLogging) {
@@ -333,17 +349,17 @@ public class BasicOAuth2Store implements OAuth2Store {
     }
 
     final String processedGadgetUri = this.getGadgetUri(gadgetUri, serviceName);
-
-    final Integer index = this.cache.getTokenIndex(processedGadgetUri, serviceName, user, scope,
-            type);
+    OAuth2Token token = this.getToken(processedGadgetUri, serviceName, user, scope, type);
     try {
-      final OAuth2Token token = this.cache.removeToken(index);
       if (token != null) {
-        this.persister.removeToken(processedGadgetUri, serviceName, user, scope, type);
-      }
+        token = this.cache.removeToken(token);
+        if (token != null) {
+          this.persister.removeToken(processedGadgetUri, serviceName, user, scope, type);
+        }
 
-      if (isLogging) {
-        BasicOAuth2Store.LOG.exiting(BasicOAuth2Store.LOG_CLASS, "removeToken", token);
+        if (isLogging) {
+          BasicOAuth2Store.LOG.exiting(BasicOAuth2Store.LOG_CLASS, "removeToken", token);
+        }
       }
 
       return token;
@@ -381,29 +397,26 @@ public class BasicOAuth2Store implements OAuth2Store {
 
       token.setGadgetUri(processedGadgetUri);
 
-      final Integer index = this.cache.getTokenIndex(token);
       final OAuth2Token existingToken = this.getToken(processedGadgetUri, token.getServiceName(),
               token.getUser(), token.getScope(), token.getType());
       try {
         if (existingToken == null) {
           this.persister.insertToken(token);
         } else {
-          this.cache.removeToken(index);
+          this.cache.removeToken(existingToken);
           this.persister.updateToken(token);
         }
         this.cache.storeToken(token);
       } catch (final OAuth2CacheException e) {
         if (isLogging) {
-          BasicOAuth2Store.LOG.log("Error storing OAuth2 token " + index, e);
+          BasicOAuth2Store.LOG.log("Error storing OAuth2 token", e);
         }
-        throw new GadgetException(Code.OAUTH_STORAGE_ERROR, "Error storing OAuth2 token " + index,
-                e);
+        throw new GadgetException(Code.OAUTH_STORAGE_ERROR, "Error storing OAuth2 token", e);
       } catch (final OAuth2PersistenceException e) {
         if (isLogging) {
-          BasicOAuth2Store.LOG.log("Error storing OAuth2 token " + index, e);
+          BasicOAuth2Store.LOG.log("Error storing OAuth2 token", e);
         }
-        throw new GadgetException(Code.OAUTH_STORAGE_ERROR, "Error storing OAuth2 token " + index,
-                e);
+        throw new GadgetException(Code.OAUTH_STORAGE_ERROR, "Error storing OAuth2 token", e);
       }
     }
 
@@ -436,5 +449,13 @@ public class BasicOAuth2Store implements OAuth2Store {
     }
 
     return ret;
+  }
+
+  protected OAuth2Token internalCreateToken() {
+    return new OAuth2TokenPersistence(this.encrypter);
+  }
+
+  public BlobCrypter getStateCrypter() {
+    return this.stateCrypter;
   }
 }

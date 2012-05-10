@@ -1,24 +1,35 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements. See the NOTICE file distributed with this
- * work for additional information regarding copyright ownership. The ASF
- * licenses this file to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.apache.shindig.gadgets.oauth2;
 
-import java.util.List;
+import com.google.inject.AbstractModule;
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.google.inject.Singleton;
+import com.google.inject.name.Named;
+import com.google.inject.name.Names;
 
 import org.apache.shindig.common.Nullable;
+import org.apache.shindig.common.crypto.BasicBlobCrypter;
+import org.apache.shindig.common.crypto.BlobCrypter;
+import org.apache.shindig.common.crypto.Crypto;
+import org.apache.shindig.common.logging.i18n.MessageKeys;
 import org.apache.shindig.common.servlet.Authority;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpFetcher;
@@ -34,11 +45,12 @@ import org.apache.shindig.gadgets.oauth2.persistence.OAuth2PersistenceException;
 import org.apache.shindig.gadgets.oauth2.persistence.OAuth2Persister;
 import org.apache.shindig.gadgets.oauth2.persistence.sample.JSONOAuth2Persister;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Inject;
-import com.google.inject.Provider;
-import com.google.inject.Singleton;
-import com.google.inject.name.Named;
+import org.apache.commons.lang3.StringUtils;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
+import java.util.logging.Level;
 
 /**
  * Injects the default OAuth2 implementation for {@link BasicOAuth2Request} and
@@ -73,7 +85,8 @@ public class OAuth2Module extends AbstractModule {
             final List<GrantRequestHandler> grantRequestHandlers,
             final List<ResourceRequestHandler> resourceRequestHandlers,
             final List<TokenEndpointResponseHandler> tokenEndpointResponseHandlers,
-            @Named(OAuth2Module.SEND_TRACE_TO_CLIENT) final boolean sendTraceToClient,
+            @Named(OAuth2Module.SEND_TRACE_TO_CLIENT)
+            final boolean sendTraceToClient,
             final OAuth2RequestParameterGenerator requestParameterGenerator) {
       this.config = config;
       this.fetcher = fetcher;
@@ -101,22 +114,17 @@ public class OAuth2Module extends AbstractModule {
     private final BasicOAuth2Store store;
 
     @Inject
-    public OAuth2StoreProvider(
-            @Named(OAuth2Module.OAUTH2_REDIRECT_URI) final String globalRedirectUri,
-            @Named(OAuth2Module.OAUTH2_IMPORT) final boolean importFromConfig,
-            @Named(OAuth2Module.OAUTH2_IMPORT_CLEAN) final boolean importClean,
-            final Authority authority, final OAuth2Cache cache, final OAuth2Persister persister,
-            final OAuth2Encrypter encrypter,
-            @Nullable @Named("shindig.contextroot") final String contextRoot) {
+    public OAuth2StoreProvider(@Named(OAuth2Module.OAUTH2_REDIRECT_URI)
+    final String globalRedirectUri, @Named(OAuth2Module.OAUTH2_IMPORT)
+    final boolean importFromConfig, @Named(OAuth2Module.OAUTH2_IMPORT_CLEAN)
+    final boolean importClean, final Authority authority, final OAuth2Cache cache,
+            final OAuth2Persister persister, final OAuth2Encrypter encrypter, @Nullable
+            @Named("shindig.contextroot")
+            final String contextRoot, @Named(OAuth2FetcherConfig.OAUTH2_STATE_CRYPTER)
+            final BlobCrypter stateCrypter) {
 
-      String redirectUri = globalRedirectUri;
-      if (authority != null) {
-        redirectUri = redirectUri.replace("%authority%", authority.getAuthority());
-        redirectUri = redirectUri.replace("%contextRoot%", contextRoot);
-        redirectUri = redirectUri.replace("%origin%", authority.getOrigin());
-      }
-
-      this.store = new BasicOAuth2Store(cache, persister, redirectUri);
+      this.store = new BasicOAuth2Store(cache, persister, encrypter, globalRedirectUri, authority,
+              contextRoot, stateCrypter);
 
       if (importFromConfig) {
         try {
@@ -144,10 +152,45 @@ public class OAuth2Module extends AbstractModule {
     }
   }
 
+  @Singleton
+  public static class OAuth2CrypterProvider implements Provider<BlobCrypter> {
+
+    private final BlobCrypter crypter;
+
+    @Inject
+    public OAuth2CrypterProvider(@Named("shindig.signing.oauth2.state-key")
+    final String stateCrypterPath) throws IOException {
+      if (StringUtils.isBlank(stateCrypterPath)) {
+        OAuth2Module.LOG.log(Level.INFO,
+                "Using random key for OAuth2 client-side state encryption", new Object[] {});
+        if (OAuth2Module.LOG.isLoggable(Level.INFO)) {
+          OAuth2Module.LOG.log(Level.INFO, "OAuth2CrypterProvider constructor",
+                  MessageKeys.USING_RANDOM_KEY);
+        }
+        this.crypter = new BasicBlobCrypter(
+                Crypto.getRandomBytes(BasicBlobCrypter.MASTER_KEY_MIN_LEN));
+      } else {
+        if (OAuth2Module.LOG.isLoggable(Level.INFO)) {
+          OAuth2Module.LOG.log(Level.INFO, "OAuth2CrypterProvider constructor",
+                  new Object[] { stateCrypterPath });
+        }
+        this.crypter = new BasicBlobCrypter(new File(stateCrypterPath));
+      }
+    }
+
+    public BlobCrypter get() {
+      return this.crypter;
+    }
+  }
+
   @Override
   protected void configure() {
     this.bind(OAuth2Store.class).toProvider(OAuth2StoreProvider.class);
     this.bind(OAuth2Request.class).toProvider(OAuth2RequestProvider.class);
     this.bind(OAuth2RequestParameterGenerator.class).to(BasicOAuth2RequestParameterGenerator.class);
+    // Used for encrypting client-side OAuth2 state.
+    this.bind(BlobCrypter.class)
+            .annotatedWith(Names.named(OAuth2FetcherConfig.OAUTH2_STATE_CRYPTER))
+            .toProvider(OAuth2CrypterProvider.class);
   }
 }

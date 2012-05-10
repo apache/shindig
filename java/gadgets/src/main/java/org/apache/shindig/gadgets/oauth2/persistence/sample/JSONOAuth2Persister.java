@@ -38,10 +38,12 @@ import org.apache.shindig.gadgets.oauth2.persistence.OAuth2PersistenceException;
 import org.apache.shindig.gadgets.oauth2.persistence.OAuth2Persister;
 import org.apache.shindig.gadgets.oauth2.persistence.OAuth2TokenPersistence;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -69,6 +71,7 @@ public class JSONOAuth2Persister implements OAuth2Persister {
   private static final String TOKEN_URL = "tokenUrl";
   private static final String TYPE = "type";
   private static final String URL_PARAMETER = "usesUrlParameter";
+  private static final String ALLOWED_DOMAINS = "allowedDomains";
 
   private final JSONObject configFile;
   private final String contextRoot;
@@ -77,7 +80,7 @@ public class JSONOAuth2Persister implements OAuth2Persister {
 
   private final Authority authority;
 
-  private final static String LOG_CLASS = JSONOAuth2Persister.class.getName();
+  private static final String LOG_CLASS = JSONOAuth2Persister.class.getName();
   private static final FilteredLogger LOG = FilteredLogger
           .getFilteredLogger(JSONOAuth2Persister.LOG_CLASS);
 
@@ -142,8 +145,7 @@ public class JSONOAuth2Persister implements OAuth2Persister {
   }
 
   public OAuth2Token findToken(final String providerName, final String gadgetUri,
-          final String user, final String scope, final Type type)
-                  throws OAuth2PersistenceException {
+          final String user, final String scope, final Type type) throws OAuth2PersistenceException {
     return null;
   }
 
@@ -198,11 +200,11 @@ public class JSONOAuth2Persister implements OAuth2Persister {
           redirectUri = redirectUri.replace("%authority%", this.authority.getAuthority());
           redirectUri = redirectUri.replace("%contextRoot%", this.contextRoot);
           redirectUri = redirectUri.replace("%origin%", this.authority.getOrigin());
-
+          redirectUri = redirectUri.replace("%scheme", this.authority.getScheme());
         }
         client.setRedirectUri(redirectUri);
 
-        if ((grantType == null) || (grantType.length() == 0)) {
+        if (grantType == null || grantType.length() == 0) {
           grantType = OAuth2Message.AUTHORIZATION;
         }
 
@@ -215,6 +217,15 @@ public class JSONOAuth2Persister implements OAuth2Persister {
           type = OAuth2Accessor.Type.PUBLIC;
         }
         client.setType(type);
+
+        final JSONArray dArray = settings.optJSONArray(JSONOAuth2Persister.ALLOWED_DOMAINS);
+        if (dArray != null) {
+          final ArrayList<String> domains = new ArrayList<String>();
+          for (int i = 0; i < dArray.length(); i++) {
+            domains.add(dArray.optString(i));
+          }
+          client.setAllowedDomains(domains.toArray(new String[0]));
+        }
 
         internalMap.put(clientName, client);
       }
@@ -252,6 +263,7 @@ public class JSONOAuth2Persister implements OAuth2Persister {
           gadgetUri = gadgetUriS.replace("%authority%", this.authority.getAuthority());
           gadgetUri = gadgetUri.replace("%contextRoot%", this.contextRoot);
           gadgetUri = gadgetUri.replace("%origin%", this.authority.getOrigin());
+          gadgetUri = gadgetUri.replace("%scheme%", this.authority.getScheme());
         }
 
         final JSONObject binding = bindings.getJSONObject(gadgetUriS);
@@ -300,18 +312,19 @@ public class JSONOAuth2Persister implements OAuth2Persister {
 
         String authorizationUrl = endpoints.optString(JSONOAuth2Persister.AUTHORIZATION_URL, null);
 
-        if ((this.authority != null) && (authorizationUrl != null)) {
+        if (this.authority != null && authorizationUrl != null) {
           authorizationUrl = authorizationUrl.replace("%authority%", this.authority.getAuthority());
           authorizationUrl = authorizationUrl.replace("%contextRoot%", this.contextRoot);
           authorizationUrl = authorizationUrl.replace("%origin%", this.authority.getOrigin());
-
+          authorizationUrl = authorizationUrl.replace("%scheme%", this.authority.getScheme());
         }
 
         String tokenUrl = endpoints.optString(JSONOAuth2Persister.TOKEN_URL, null);
-        if ((this.authority != null) && (tokenUrl != null)) {
+        if (this.authority != null && tokenUrl != null) {
           tokenUrl = tokenUrl.replace("%authority%", this.authority.getAuthority());
           tokenUrl = tokenUrl.replace("%contextRoot%", this.contextRoot);
           tokenUrl = tokenUrl.replace("%origin%", this.authority.getOrigin());
+          tokenUrl = tokenUrl.replace("%scheme%", this.authority.getScheme());
         }
 
         final OAuth2Provider oauth2Provider = new OAuth2Provider();

@@ -1,26 +1,26 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements. See the NOTICE file distributed with this
- * work for additional information regarding copyright ownership. The ASF
- * licenses this file to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.apache.shindig.gadgets.oauth2.handler;
 
-import java.io.UnsupportedEncodingException;
-import java.util.List;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
+import com.google.common.collect.Maps;
+import com.google.inject.Inject;
+import com.google.inject.Provider;
 
 import org.apache.shindig.auth.AnonymousSecurityToken;
 import org.apache.shindig.common.uri.Uri;
@@ -34,9 +34,11 @@ import org.apache.shindig.gadgets.oauth2.OAuth2Message;
 import org.apache.shindig.gadgets.oauth2.OAuth2Utils;
 import org.apache.shindig.gadgets.oauth2.logger.FilteredLogger;
 
-import com.google.common.collect.Maps;
-import com.google.inject.Inject;
-import com.google.inject.Provider;
+import java.io.UnsupportedEncodingException;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  *
@@ -45,9 +47,9 @@ import com.google.inject.Provider;
  * Handles the "code" flow
  */
 public class CodeAuthorizationResponseHandler implements AuthorizationEndpointResponseHandler {
-  private final static String LOG_CLASS = CodeAuthorizationResponseHandler.class.getName();
+  private static final String LOG_CLASS = CodeAuthorizationResponseHandler.class.getName();
   private static final FilteredLogger LOG = FilteredLogger
-      .getFilteredLogger(CodeAuthorizationResponseHandler.LOG_CLASS);
+          .getFilteredLogger(CodeAuthorizationResponseHandler.LOG_CLASS);
 
   private final List<ClientAuthenticationHandler> clientAuthenticationHandlers;
   private final HttpFetcher fetcher;
@@ -56,9 +58,9 @@ public class CodeAuthorizationResponseHandler implements AuthorizationEndpointRe
 
   @Inject
   public CodeAuthorizationResponseHandler(final Provider<OAuth2Message> oauth2MessageProvider,
-      final List<ClientAuthenticationHandler> clientAuthenticationHandlers,
-      final List<TokenEndpointResponseHandler> tokenEndpointResponseHandlers,
-      final HttpFetcher fetcher) {
+          final List<ClientAuthenticationHandler> clientAuthenticationHandlers,
+          final List<TokenEndpointResponseHandler> tokenEndpointResponseHandlers,
+          final HttpFetcher fetcher) {
     this.oauth2MessageProvider = oauth2MessageProvider;
     this.clientAuthenticationHandlers = clientAuthenticationHandlers;
     this.tokenEndpointResponseHandlers = tokenEndpointResponseHandlers;
@@ -66,25 +68,25 @@ public class CodeAuthorizationResponseHandler implements AuthorizationEndpointRe
 
     if (CodeAuthorizationResponseHandler.LOG.isLoggable()) {
       CodeAuthorizationResponseHandler.LOG.log("this.oauth2MessageProvider = {0}",
-          this.oauth2MessageProvider);
+              this.oauth2MessageProvider);
       CodeAuthorizationResponseHandler.LOG.log("this.clientAuthenticationHandlers = {0}",
-          this.clientAuthenticationHandlers);
+              this.clientAuthenticationHandlers);
       CodeAuthorizationResponseHandler.LOG.log("this.tokenEndpointResponseHandlers = {0}",
-          this.tokenEndpointResponseHandlers);
+              this.tokenEndpointResponseHandlers);
       CodeAuthorizationResponseHandler.LOG.log("this.fetcher = {0}", this.fetcher);
     }
   }
 
   private static String getAuthorizationBody(final OAuth2Accessor accessor,
-      final String authorizationCode) throws UnsupportedEncodingException {
+          final String authorizationCode) throws UnsupportedEncodingException {
     final boolean isLogging = CodeAuthorizationResponseHandler.LOG.isLoggable();
     if (isLogging) {
       if (authorizationCode != null) {
         CodeAuthorizationResponseHandler.LOG.entering(CodeAuthorizationResponseHandler.LOG_CLASS,
-            "getAuthorizationBody", "non-null authorizationCode");
+                "getAuthorizationBody", "non-null authorizationCode");
       } else {
         CodeAuthorizationResponseHandler.LOG.entering(CodeAuthorizationResponseHandler.LOG_CLASS,
-            "getAuthorizationBody", null);
+                "getAuthorizationBody", null);
       }
     }
 
@@ -104,20 +106,20 @@ public class CodeAuthorizationResponseHandler implements AuthorizationEndpointRe
     queryParams.put(OAuth2Message.CLIENT_SECRET, secret);
 
     // add any additional parameters
-    for (Map.Entry<String, String> entry : accessor.getAdditionalRequestParams().entrySet()) {
+    for (final Map.Entry<String, String> entry : accessor.getAdditionalRequestParams().entrySet()) {
       queryParams.put(entry.getKey(), entry.getValue());
     }
 
     ret = OAuth2Utils.buildUrl(ret, queryParams, null);
 
     final char firstChar = ret.charAt(0);
-    if ((firstChar == '?') || (firstChar == '&')) {
+    if (firstChar == '?' || firstChar == '&') {
       ret = ret.substring(1);
     }
 
     if (isLogging) {
       CodeAuthorizationResponseHandler.LOG.exiting(CodeAuthorizationResponseHandler.LOG_CLASS,
-          "getAuthorizationBody");
+              "getAuthorizationBody");
     }
     return ret;
   }
@@ -127,11 +129,11 @@ public class CodeAuthorizationResponseHandler implements AuthorizationEndpointRe
   }
 
   public OAuth2HandlerError handleRequest(final OAuth2Accessor accessor,
-      final HttpServletRequest request) {
+          final HttpServletRequest request) {
     final boolean isLogging = CodeAuthorizationResponseHandler.LOG.isLoggable();
     if (isLogging) {
       CodeAuthorizationResponseHandler.LOG.entering(CodeAuthorizationResponseHandler.LOG_CLASS,
-          "handleRequest", new Object[] { accessor, (request != null) });
+              "handleRequest", new Object[] { accessor, request != null });
     }
 
     OAuth2HandlerError ret = null;
@@ -142,10 +144,10 @@ public class CodeAuthorizationResponseHandler implements AuthorizationEndpointRe
       ret = new OAuth2HandlerError(OAuth2Error.AUTHORIZATION_CODE_PROBLEM, "request is null", null);
     } else if (!accessor.isValid() || accessor.isErrorResponse() || !accessor.isRedirecting()) {
       ret = new OAuth2HandlerError(OAuth2Error.AUTHORIZATION_CODE_PROBLEM, "accessor is invalid",
-          null);
+              null);
     } else if (!accessor.getGrantType().equalsIgnoreCase(OAuth2Message.AUTHORIZATION)) {
       ret = new OAuth2HandlerError(OAuth2Error.AUTHORIZATION_CODE_PROBLEM,
-          "grant_type is not code", null);
+              "grant_type is not code", null);
     }
 
     if (ret == null) {
@@ -157,25 +159,25 @@ public class CodeAuthorizationResponseHandler implements AuthorizationEndpointRe
       } catch (final Exception e) {
         if (CodeAuthorizationResponseHandler.LOG.isLoggable()) {
           CodeAuthorizationResponseHandler.LOG.log(
-              "Exception exchanging authorization code for access_token", e);
+                  "Exception exchanging authorization code for access_token", e);
         }
         ret = new OAuth2HandlerError(OAuth2Error.AUTHORIZATION_CODE_PROBLEM,
-            "Exception exchanging authorization code for access_token", e);
+                "Exception exchanging authorization code for access_token", e);
       }
     }
 
     if (isLogging) {
       CodeAuthorizationResponseHandler.LOG.exiting(CodeAuthorizationResponseHandler.LOG_CLASS,
-          "handleRequest", ret);
+              "handleRequest", ret);
     }
 
     return ret;
   }
 
   public OAuth2HandlerError handleResponse(final OAuth2Accessor accessor,
-      final HttpResponse response) {
+          final HttpResponse response) {
     return new OAuth2HandlerError(OAuth2Error.AUTHORIZATION_CODE_PROBLEM,
-        "doesn't handle responses", null);
+            "doesn't handle responses", null);
   }
 
   public boolean handlesRequest(final OAuth2Accessor accessor, final HttpServletRequest request) {
@@ -198,36 +200,43 @@ public class CodeAuthorizationResponseHandler implements AuthorizationEndpointRe
   }
 
   private OAuth2HandlerError setAuthorizationCode(final String authorizationCode,
-      final OAuth2Accessor accessor) {
+          final OAuth2Accessor accessor) {
 
     final boolean isLogging = CodeAuthorizationResponseHandler.LOG.isLoggable();
     if (isLogging) {
       if (authorizationCode != null) {
         CodeAuthorizationResponseHandler.LOG.entering(CodeAuthorizationResponseHandler.LOG_CLASS,
-            "setAuthorizationCode", new Object[] { "non-null authorizationCode", accessor });
+                "setAuthorizationCode", new Object[] { "non-null authorizationCode", accessor });
       } else {
         CodeAuthorizationResponseHandler.LOG.entering(CodeAuthorizationResponseHandler.LOG_CLASS,
-            "setAuthorizationCode", new Object[] { null, accessor });
+                "setAuthorizationCode", new Object[] { null, accessor });
       }
     }
 
     OAuth2HandlerError ret = null;
 
     final String tokenUrl = CodeAuthorizationResponseHandler.getCompleteTokenUrl(accessor
-        .getTokenUrl());
+            .getTokenUrl());
 
     final HttpRequest request = new HttpRequest(Uri.parse(tokenUrl));
     request.setMethod("POST");
     request.setHeader("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
-    request.setSecurityToken( new AnonymousSecurityToken( "", 0L, accessor.getGadgetUri(), 0L ));
+    request.setSecurityToken(new AnonymousSecurityToken("", 0L, accessor.getGadgetUri(), 0L));
 
-    for (final ClientAuthenticationHandler clientAuthenticationHandler : this.clientAuthenticationHandlers) {
-      if (clientAuthenticationHandler.geClientAuthenticationType().equalsIgnoreCase(
-          accessor.getClientAuthenticationType())) {
-        final OAuth2HandlerError error = clientAuthenticationHandler.addOAuth2Authentication(
-            request, accessor);
-        if (error != null) {
-          ret = error;
+    if (!isUriAllowed(request.getUri(), accessor.getAllowedDomains())) {
+      ret = new OAuth2HandlerError(OAuth2Error.AUTHORIZATION_CODE_PROBLEM,
+              "Exception exchanging authorization code for access_token - domain not allowed", null);
+    }
+
+    if (ret == null) {
+      for (final ClientAuthenticationHandler clientAuthenticationHandler : this.clientAuthenticationHandlers) {
+        if (clientAuthenticationHandler.geClientAuthenticationType().equalsIgnoreCase(
+                accessor.getClientAuthenticationType())) {
+          final OAuth2HandlerError error = clientAuthenticationHandler.addOAuth2Authentication(
+                  request, accessor);
+          if (error != null) {
+            ret = error;
+          }
         }
       }
     }
@@ -235,15 +244,15 @@ public class CodeAuthorizationResponseHandler implements AuthorizationEndpointRe
     if (ret == null) {
       try {
         final byte[] body = CodeAuthorizationResponseHandler.getAuthorizationBody(accessor,
-            authorizationCode).getBytes("UTF-8");
+                authorizationCode).getBytes("UTF-8");
         request.setPostBody(body);
       } catch (final UnsupportedEncodingException e) {
         if (CodeAuthorizationResponseHandler.LOG.isLoggable()) {
           CodeAuthorizationResponseHandler.LOG.log(
-              "UnsupportedEncodingException getting authorization body", e);
+                  "UnsupportedEncodingException getting authorization body", e);
         }
         ret = new OAuth2HandlerError(OAuth2Error.AUTHORIZATION_CODE_PROBLEM,
-            "error getting authorization body", e);
+                "error getting authorization body", e);
       }
 
       HttpResponse response = null;
@@ -254,16 +263,16 @@ public class CodeAuthorizationResponseHandler implements AuthorizationEndpointRe
           CodeAuthorizationResponseHandler.LOG.log("error exchanging code for access_token", e);
         }
         ret = new OAuth2HandlerError(OAuth2Error.AUTHORIZATION_CODE_PROBLEM,
-            "error exchanging code for access_token", e);
+                "error exchanging code for access_token", e);
       }
 
-      if ((ret == null) && (response != null)) {
+      if (ret == null && response != null) {
         if (response.getHttpStatusCode() != HttpResponse.SC_OK) {
           final OAuth2Message msg = this.oauth2MessageProvider.get();
           msg.parseJSON(response.getResponseAsString());
           if (msg.getError() != null) {
             ret = new OAuth2HandlerError(msg.getError(), "error exchanging code for access_token",
-                null);
+                    null);
           }
         }
 
@@ -283,9 +292,30 @@ public class CodeAuthorizationResponseHandler implements AuthorizationEndpointRe
 
     if (isLogging) {
       CodeAuthorizationResponseHandler.LOG.exiting(CodeAuthorizationResponseHandler.LOG_CLASS,
-          "setAuthorizationCode", ret);
+              "setAuthorizationCode", ret);
     }
 
     return ret;
+  }
+
+  private static boolean isUriAllowed(final Uri uri, final String[] allowedDomains) {
+    if (allowedDomains == null || allowedDomains.length == 0) {
+      // if white list is not specified, allow client to access any domain
+      return true;
+    }
+    String host = uri.getAuthority();
+    final int pos = host.indexOf(':');
+    if (pos != -1) {
+      host = host.substring(0, pos);
+    }
+    for (String domain : allowedDomains) {
+      if (domain != null) {
+        domain = domain.trim();
+        if (domain.startsWith(".") && host.endsWith(domain) || domain.equals(host)) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 }

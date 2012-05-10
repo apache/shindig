@@ -40,7 +40,8 @@
          "type"          : "confidential",
          "grant_type"    : "code",
          "client_id"     : "clientId1",
-         "client_secret" : "dmjfouTfdsfu2"
+         "client_secret" : "dmjfouTfdsfu2",
+         "allowedDomains": ["example.com", "ibm.com"]
       },
       
       "client2" : {

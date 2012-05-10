@@ -690,7 +690,7 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
     HttpResponse results = new HttpResponseBuilder().create();
     replay();
 
-    MakeRequestHandler.setResponseHeaders(request, recorder, results);
+    handler.setResponseHeaders(request, recorder, results);
 
     // Just verify that they were set. Specific values are configurable.
     assertNotNull("Expires header not set", recorder.getHeader("Expires"));
@@ -703,7 +703,7 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
     HttpResponse results = new HttpResponseBuilder()
         .create();
     replay();
-    MakeRequestHandler.setResponseHeaders(request, recorder, results);
+    handler.setResponseHeaders(request, recorder, results);
 
     assertEquals("application/octet-stream", recorder.getHeader("Content-Type"));
   }
@@ -717,7 +717,7 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
         .create();
     replay();
 
-    MakeRequestHandler.setResponseHeaders(request, recorder, results);
+    handler.setResponseHeaders(request, recorder, results);
 
     // Just verify that they were set. Specific values are configurable.
     assertNotNull("Expires header not set", recorder.getHeader("Expires"));
@@ -734,7 +734,7 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
 
     // not sure why but the following line seems to help this test past deterministically
     System.out.println("request started at " + HttpUtilTest.testStartTime);
-    MakeRequestHandler.setResponseHeaders(request, recorder, results);
+    handler.setResponseHeaders(request, recorder, results);
     HttpUtilTest.checkCacheControlHeaders(HttpUtilTest.testStartTime, recorder, 30, false);
     assertEquals("attachment;filename=p.txt", recorder.getHeader("Content-Disposition"));
   }
@@ -746,7 +746,7 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
     replay();
 
     try {
-      MakeRequestHandler.setResponseHeaders(request, recorder, results);
+      handler.setResponseHeaders(request, recorder, results);
     } catch (GadgetException e) {
       assertEquals(GadgetException.Code.INVALID_PARAMETER, e.getCode());
     }

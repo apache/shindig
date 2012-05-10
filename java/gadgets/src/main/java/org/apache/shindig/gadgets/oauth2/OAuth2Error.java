@@ -1,29 +1,30 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements. See the NOTICE file distributed with this
- * work for additional information regarding copyright ownership. The ASF
- * licenses this file to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.apache.shindig.gadgets.oauth2;
+
+import org.apache.shindig.gadgets.oauth2.logger.FilteredLogger;
 
 import java.text.MessageFormat;
 import java.util.ResourceBundle;
 
-import org.apache.shindig.gadgets.oauth2.logger.FilteredLogger;
-
 /**
- * Any time there's an error in the OAuth2 layer it's reported with an
- * OAuth2Error.
+ * Any time there's an error in the OAuth2 layer it's reported with an OAuth2Error.
  *
  * errorCode - should correspond to an OAuth2Message errorCode when appropriate.
  *
@@ -31,7 +32,7 @@ import org.apache.shindig.gadgets.oauth2.logger.FilteredLogger;
 public enum OAuth2Error {
   AUTHORIZATION_CODE_PROBLEM("authorization_code_problem"),
   AUTHORIZE_PROBLEM("authorize_problem"),
-  AUTHENTICATION_PROBLEM( "authentication_problem"),
+  AUTHENTICATION_PROBLEM("authentication_problem"),
   BEARER_TOKEN_PROBLEM("bearer_token_problem"),
   CALLBACK_PROBLEM("callback_problem"),
   CLIENT_CREDENTIALS_PROBLEM("client_credentials_problem"),
@@ -73,46 +74,46 @@ public enum OAuth2Error {
   private OAuth2Error(final String errorCode) {
     this.errorCode = errorCode;
     String header = OAuth2Request.class.getName() + " encountered a problem: ";
-    String _errorDescription = errorCode;
-    String _errorExplanation = errorCode;
+    String eDescription = errorCode;
+    String eExplanation = errorCode;
 
-    FilteredLogger LOG = null;
+    FilteredLogger log = null;
     try {
-      LOG = FilteredLogger.getFilteredLogger(OAuth2Error.class.getName());
-      final ResourceBundle resourceBundle = LOG.getResourceBundle();
+      log = FilteredLogger.getFilteredLogger("org.apache.shindig.gadgets.oauth2.OAuth2Error");
+      final ResourceBundle resourceBundle = log.getResourceBundle();
       if (resourceBundle != null) {
-        final String bundleHeader = resourceBundle.getString(OAuth2Error.MESSAGE_HEADER);
+        final String bundleHeader = resourceBundle.getString("message_header");
         if (bundleHeader != null) {
           header = MessageFormat.format(bundleHeader, OAuth2Request.class.getName());
         }
 
         final String bundleErrorDescription = resourceBundle.getString(this.errorCode);
         if ((bundleErrorDescription == null) || (bundleErrorDescription.length() == 0)) {
-          _errorDescription = header + this.errorCode;
+          eDescription = header + this.errorCode;
         } else {
-          _errorDescription = header + bundleErrorDescription;
+          eDescription = header + bundleErrorDescription;
         }
 
         final String bundleErrorExplanation = resourceBundle.getString(this.errorCode
-            + ".explanation");
+                + ".explanation");
         if ((bundleErrorExplanation == null) || (bundleErrorExplanation.length() == 0)) {
-          _errorExplanation = _errorDescription;
+          eExplanation = eDescription;
         } else {
-          _errorExplanation = bundleErrorExplanation;
+          eExplanation = bundleErrorExplanation;
         }
       }
     } catch (final Exception e) {
-      if (LOG != null) {
-        if (LOG.isLoggable()) {
-          LOG.log("error loading OAuth2Error messages", e);
+      if (log != null) {
+        if (log.isLoggable()) {
+          log.log("error loading OAuth2Error messages", e);
         }
       } else {
         e.printStackTrace();
       }
     }
 
-    this.errorDescription = _errorDescription;
-    this.errorExplanation = _errorExplanation;
+    this.errorDescription = eDescription;
+    this.errorExplanation = eExplanation;
   }
 
   public String getErrorCode() {

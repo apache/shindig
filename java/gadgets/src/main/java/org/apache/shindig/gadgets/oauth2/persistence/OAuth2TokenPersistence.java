@@ -16,23 +16,22 @@
  */
 package org.apache.shindig.gadgets.oauth2.persistence;
 
-import java.util.Map;
+import com.google.common.collect.Maps;
+import com.google.inject.Inject;
 
 import org.apache.shindig.gadgets.oauth2.OAuth2Error;
 import org.apache.shindig.gadgets.oauth2.OAuth2Message;
 import org.apache.shindig.gadgets.oauth2.OAuth2RequestException;
 import org.apache.shindig.gadgets.oauth2.OAuth2Token;
 
-import com.google.common.collect.Maps;
-import com.google.inject.Inject;
+import java.util.Map;
 
 /**
  * see {@link OAuth2Token}
- *
+ * 
  */
 public class OAuth2TokenPersistence implements OAuth2Token {
-  private static final long serialVersionUID = 6853969404389015886L;
-
+  private static final long serialVersionUID = -169781729667228661L;
   private byte[] encryptedMacSecret;
   private byte[] encryptedSecret;
   private transient final OAuth2Encrypter encrypter;
@@ -49,6 +48,10 @@ public class OAuth2TokenPersistence implements OAuth2Token {
   private String tokenType;
   private Type type;
   private String user;
+
+  public OAuth2TokenPersistence() {
+    this(null);
+  }
 
   @Inject
   public OAuth2TokenPersistence(final OAuth2Encrypter encrypter) {
@@ -154,7 +157,7 @@ public class OAuth2TokenPersistence implements OAuth2Token {
   }
 
   public String getTokenType() {
-    if ((this.tokenType == null) || (this.tokenType.length() == 0)) {
+    if (this.tokenType == null || this.tokenType.length() == 0) {
       this.tokenType = OAuth2Message.BEARER_TOKEN_TYPE;
     }
     return this.tokenType;
@@ -170,9 +173,9 @@ public class OAuth2TokenPersistence implements OAuth2Token {
 
   @Override
   public int hashCode() {
-    if ((this.serviceName != null) && (this.gadgetUri != null)) {
+    if (this.serviceName != null && this.gadgetUri != null) {
       return (this.serviceName + ':' + this.gadgetUri + ':' + this.user + ':' + this.scope + ':' + this.type)
-          .hashCode();
+              .hashCode();
     }
 
     return 0;
@@ -180,15 +183,19 @@ public class OAuth2TokenPersistence implements OAuth2Token {
 
   public void setEncryptedMacSecret(final byte[] encryptedSecret) throws OAuth2EncryptionException {
     this.encryptedMacSecret = encryptedSecret;
-    this.macSecret = this.encrypter.decrypt(encryptedSecret);
+    if (this.encrypter != null) {
+      this.macSecret = this.encrypter.decrypt(encryptedSecret);
+    }
   }
 
   public void setEncryptedSecret(final byte[] encryptedSecret) throws OAuth2EncryptionException {
     this.encryptedSecret = encryptedSecret;
-    this.secret = this.encrypter.decrypt(encryptedSecret);
+    if (this.encrypter != null) {
+      this.secret = this.encrypter.decrypt(encryptedSecret);
+    }
   }
 
-  public void setExpiresAt(long expiresAt) {
+  public void setExpiresAt(final long expiresAt) {
     this.expiresAt = expiresAt;
   }
 
@@ -196,25 +203,27 @@ public class OAuth2TokenPersistence implements OAuth2Token {
     this.gadgetUri = gadgetUri;
   }
 
-  public void setIssuedAt(long issuedAt) {
+  public void setIssuedAt(final long issuedAt) {
     this.issuedAt = issuedAt;
   }
 
-  public void setMacAlgorithm(String algorithm) {
+  public void setMacAlgorithm(final String algorithm) {
     this.macAlgorithm = algorithm;
   }
 
-  public void setMacExt(String macExt) {
+  public void setMacExt(final String macExt) {
     this.macExt = macExt;
   }
 
-  public void setMacSecret(byte[] secret) throws OAuth2RequestException {
+  public void setMacSecret(final byte[] secret) throws OAuth2RequestException {
     this.macSecret = secret;
-    try {
-      this.encryptedMacSecret = this.encrypter.encrypt(secret);
-    } catch (final OAuth2EncryptionException e) {
-      throw new OAuth2RequestException(OAuth2Error.SECRET_ENCRYPTION_PROBLEM,
-          "OAuth2TokenPersistence could not encrypt the mac secret", e);
+    if (this.encrypter != null) {
+      try {
+        this.encryptedMacSecret = this.encrypter.encrypt(secret);
+      } catch (final OAuth2EncryptionException e) {
+        throw new OAuth2RequestException(OAuth2Error.SECRET_ENCRYPTION_PROBLEM,
+                "OAuth2TokenPersistence could not encrypt the mac secret", e);
+      }
     }
   }
 
@@ -235,7 +244,7 @@ public class OAuth2TokenPersistence implements OAuth2Token {
       this.encryptedSecret = this.encrypter.encrypt(secret);
     } catch (final OAuth2EncryptionException e) {
       throw new OAuth2RequestException(OAuth2Error.SECRET_ENCRYPTION_PROBLEM,
-          "OAuth2TokenPersistence could not encrypt the token secret", e);
+              "OAuth2TokenPersistence could not encrypt the token secret", e);
     }
   }
 
@@ -258,8 +267,9 @@ public class OAuth2TokenPersistence implements OAuth2Token {
   @Override
   public String toString() {
     return "org.apache.shindig.gadgets.oauth2.persistence.sample.OAuth2TokenImpl: serviceName = "
-        + this.serviceName + " , user = " + this.user + " , gadgetUri = " + this.gadgetUri
-        + " , scope = " + this.scope + " , tokenType = " + this.getTokenType() + " , issuedAt = "
-        + this.issuedAt + " , expiresAt = " + this.expiresAt + " , type = " + this.type;
+            + this.serviceName + " , user = " + this.user + " , gadgetUri = " + this.gadgetUri
+            + " , scope = " + this.scope + " , tokenType = " + this.getTokenType()
+            + " , issuedAt = " + this.issuedAt + " , expiresAt = " + this.expiresAt + " , type = "
+            + this.type;
   }
 }
