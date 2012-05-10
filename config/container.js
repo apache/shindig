@@ -123,6 +123,9 @@
 // Default Js Uri config: also must be overridden.
 // gadgets.uri.js.host should be protocol relative.
 "gadgets.uri.js.host" : "//${Cur['default.domain.unlocked.server']}", // Use unlocked host for better caching.
+
+// If you change the js.path you will need to define window.__CONTAINER_SCRIPT_ID prior to loading the <script>
+// tag for container JavaScript into the DOM.
 "gadgets.uri.js.path" : "${CONTEXT_ROOT}/gadgets/js",
 
 // Default concat Uri config; used for testing.
