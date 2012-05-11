@@ -33,6 +33,7 @@ import org.apache.shindig.gadgets.js.DefaultJsProcessorRegistry;
 import org.apache.shindig.gadgets.js.DefaultJsServingPipeline;
 import org.apache.shindig.gadgets.js.GetJsContentProcessor;
 import org.apache.shindig.gadgets.js.IfModifiedSinceProcessor;
+import org.apache.shindig.gadgets.js.JsException;
 import org.apache.shindig.gadgets.js.JsLoadProcessor;
 import org.apache.shindig.gadgets.js.JsProcessor;
 import org.apache.shindig.gadgets.js.JsProcessorRegistry;
@@ -40,6 +41,7 @@ import org.apache.shindig.gadgets.js.JsRequest;
 import org.apache.shindig.gadgets.js.JsRequestBuilder;
 import org.apache.shindig.gadgets.js.JsResponse;
 import org.apache.shindig.gadgets.js.JsResponseBuilder;
+import org.apache.shindig.gadgets.js.JsServingPipeline;
 import org.apache.shindig.gadgets.uri.JsUriManager;
 import org.apache.shindig.gadgets.uri.JsUriManager.JsUri;
 import org.apache.shindig.gadgets.uri.UriStatus;
@@ -235,6 +237,28 @@ public class JsServletTest extends ServletTestFixture {
     assertEquals(HttpServletResponse.SC_OK, recorder.getHttpStatusCode());
     assertEquals(String.format(JsLoadProcessor.JSLOAD_JS_TPL, url + "&jsload=0"),
         recorder.getResponseAsString());
+    verify();
+  }
+
+  @Test
+  public void testJsServletGivesErrorWhenJsResponseHasError() throws Exception {
+    setUp(0);
+    JsProcessor errorProcessor = new JsProcessor(){
+      public boolean process(JsRequest jsRequest, JsResponseBuilder builder) throws JsException {
+        builder.setStatusCode(HttpServletResponse.SC_NOT_FOUND);
+        builder.addError("Something bad happened");
+        return false;
+      }};
+    JsProcessorRegistry jsProcessorRegistry = new DefaultJsProcessorRegistry(
+            ImmutableList.<JsProcessor> of(errorProcessor), ImmutableList.<JsProcessor> of());
+
+    JsServingPipeline pipeline = new DefaultJsServingPipeline(jsProcessorRegistry);
+    servlet.setJsServingPipeline(pipeline);
+    replay();
+
+    servlet.doGet(request, recorder);
+    assertEquals(HttpServletResponse.SC_NOT_FOUND, recorder.getHttpStatusCode());
+    assertEquals("Something bad happened", recorder.getResponseAsString());
     verify();
   }
 }
