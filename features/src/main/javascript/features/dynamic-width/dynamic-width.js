@@ -35,7 +35,7 @@ gadgets.window = gadgets.window || {};
 
   /**
    * Adjusts the gadget width
-   * 
+   *
    * @param {number=}
    *          opt_width An optional preferred width in pixels. If not specified, will attempt to fit
    *          the gadget to its content.
@@ -43,26 +43,8 @@ gadgets.window = gadgets.window || {};
    */
   gadgets.window.adjustWidth = function(opt_width) {
     opt_width = parseInt(opt_width, 10);
-    var widthAutoCalculated = false;
-    var viewportWidth = gadgets.window.getViewportDimensions().width;
     var newWidth = opt_width || gadgets.window.getWidth();
-    if (navigator.userAgent.indexOf('AppleWebKit') >= 0) {
-      viewportWidth++; // Adjust for 1px inaccuracy in Webkit browsers
-    }
-    var callback = null;
-
-    if (isNaN(opt_width) && viewportWidth >= newWidth) {
-      // Due to quirks in the width property, the auto-calculated width will
-      // never be smaller than the size of the viewport. In order to decrease
-      // the width to a fit size, we must first make the viewport too small (1px),
-      // then callback a function that increases the frame to the right width.
-      var savedWidth = newWidth;
-      callback = function() {
-        gadgets.window.adjustWidth(savedWidth);
-      };
-      newWidth = 1;
-    }
-    gadgets.rpc.call(null, 'resize_iframe_width', callback, newWidth);
+    gadgets.rpc.call(null, 'resize_iframe_width', null, newWidth);
   };
 }());
 

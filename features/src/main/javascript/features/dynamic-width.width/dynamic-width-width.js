@@ -36,33 +36,11 @@ gadgets.window = gadgets.window || {};
    * document.documentElement: - scrollWidth - offsetWidth - clientWidth These values differ
    * significantly between browsers and rendering modes. But there are patterns. It just takes a lot
    * of time and persistence to figure out.
-   * 
+   *
    * @return The width of the content within the iframe
    */
   gadgets.window.getWidth = function() {
-    var viewportWidth = gadgets.window.getViewportDimensions().width;
-    var body = document.body;
-    var docEl = document.documentElement;
-    if (document.compatMode === 'CSS1Compat' && docEl && docEl.scrollWidth) {
-      // In Strict mode:
-      // The inner content width is contained in either:
-      // document.documentElement.scrollWidth
-      // document.documentElement.offsetWidth
-      // Based on studying the values output by different browsers,
-      // use the value that's NOT equal to the viewport width found above.
-      return docEl.scrollWidth !== viewportWidth ? docEl.scrollWidth : docEl.offsetWidth;
-    } else if (body) {
-      var scrollWidth = body.scrollWidth;
-      var offsetWidth = body.offsetWidth;
-
-      // Detect whether the inner content width is bigger or smaller
-      // than the bounding box (viewport). If bigger, take the larger
-      // value. If smaller, take the smaller value.
-      if ((scrollWidth > viewportWidth) && (scrollWidth > offsetWidth)) {
-        return scrollWidth;
-      }
-      return offsetWidth;
-    }
+    return gadgets.window.getDimen();
   };
 
 }());
