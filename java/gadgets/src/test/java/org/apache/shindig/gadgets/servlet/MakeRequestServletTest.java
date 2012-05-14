@@ -77,9 +77,10 @@ public class MakeRequestServletTest extends ServletTestFixture {
   public void setUp() throws Exception {
     JSONObject config = new JSONObject('{' + ContainerConfig.DEFAULT_CONTAINER + ':' +
         "{'gadgets.container': ['default']," +
-         "'gadgets.features':{views:" +
-           "{aliased: {aliases: ['some-alias', 'alias']}}" +
-         "}}}");
+        "'gadgets.features':{views:" +
+        "{aliased: {aliases: ['some-alias', 'alias']}}" +
+        ",'core.io':" +
+        "{unparseableCruft :\"throw 1; < don't be evil' >\"}}}}");
 
     containerConfig = new JsonContainerConfig(config, Expressions.forTesting());
     Gadget gadget = mock(Gadget.class);
@@ -111,8 +112,9 @@ public class MakeRequestServletTest extends ServletTestFixture {
   private void assertResponseOk(int expectedStatus, String expectedBody) throws JSONException {
     if (recorder.getHttpStatusCode() == HttpServletResponse.SC_OK) {
       String body = recorder.getResponseAsString();
-      assertStartsWith(MakeRequestHandler.UNPARSEABLE_CRUFT, body);
-      body = body.substring(MakeRequestHandler.UNPARSEABLE_CRUFT.length());
+      String defaultCruftMsg = "throw 1; < don't be evil' >";
+      assertStartsWith(defaultCruftMsg, body);
+      body = body.substring(defaultCruftMsg.length());
       JSONObject object = new JSONObject(body);
       object = object.getJSONObject(REQUEST_URL.toString());
       assertEquals(expectedStatus, object.getInt("rc"));

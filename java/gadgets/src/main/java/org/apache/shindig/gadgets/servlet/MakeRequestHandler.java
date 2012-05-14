@@ -71,7 +71,6 @@ import com.google.inject.Singleton;
 @Singleton
 public class MakeRequestHandler implements ContainerConfig.ConfigObserver {
   // Relaxed visibility for ease of integration. Try to avoid relying on these.
-  public static final String UNPARSEABLE_CRUFT = "throw 1; < don't be evil' >";
   public static final String POST_DATA_PARAM = "postData";
   public static final String METHOD_PARAM = "httpMethod";
   public static final String HEADERS_PARAM = "headers";
@@ -84,8 +83,12 @@ public class MakeRequestHandler implements ContainerConfig.ConfigObserver {
   public static final String MAX_POST_SIZE_KEY = "gadgets.jsonProxyUrl.maxPostSize";
   public static final String MULTI_PART_FORM_POST = "MPFP";
   public static final String MULTI_PART_FORM_POST_IFRAME = "iframe";
+  public static final String GADGETS_FEATURES = "gadgets.features";
+  public static final String CORE_IO = "core.io";
+  public static final String UNPARSEABLE_CRUFT = "unparseableCruft";
   public static final int MAX_POST_SIZE_DEFAULT = 5 * 1024 * 1024; // 5 MiB
 
+  private final Map<String, String> unparseableCruftMsgs;
   private final RequestPipeline requestPipeline;
   private final ResponseRewriterRegistry contentRewriterRegistry;
   private final Provider<FeedProcessor> feedProcessorProvider;
@@ -109,6 +112,7 @@ public class MakeRequestHandler implements ContainerConfig.ConfigObserver {
     this.processor = processor;
     this.lockedDomainService = lockedDomainService;
     this.maxPostSizes = Maps.newConcurrentMap();
+    this.unparseableCruftMsgs = Maps.newConcurrentMap();
     config.addConfigObserver(this, true);
   }
 
@@ -182,12 +186,12 @@ public class MakeRequestHandler implements ContainerConfig.ConfigObserver {
     if ("1".equals(getParameter(request, MULTI_PART_FORM_POST_IFRAME, null))) {
       response.setContentType("text/html");
       out.write("<html><head></head><body><textarea>");
-      out.write(UNPARSEABLE_CRUFT);
+      out.write(this.unparseableCruftMsgs.get(container));
       out.write(output);
       out.write("</textarea></body></html>");
     } else {
       response.setContentType("application/json");
-      out.write(UNPARSEABLE_CRUFT + output);
+      out.write(this.unparseableCruftMsgs.get(container) + output);
     }
   }
 
@@ -472,9 +476,17 @@ public class MakeRequestHandler implements ContainerConfig.ConfigObserver {
         maxPostSize = MAX_POST_SIZE_DEFAULT;
       }
       maxPostSizes.put(container, maxPostSize);
+      Map<String, Map<String, String>> features = config.getMap(container, GADGETS_FEATURES);
+      if (features != null) {
+        Map<String, String> coreIO = (Map<String, String>) features.get(CORE_IO);
+        if (coreIO != null) {
+          unparseableCruftMsgs.put(container, coreIO.get(UNPARSEABLE_CRUFT));
+        }
+      }
     }
     for (String container : removed) {
       maxPostSizes.remove(container);
+      unparseableCruftMsgs.remove(container);
     }
   }
 }

@@ -40,14 +40,16 @@ IoTest.prototype.setUp = function() {
   document.scripts = [];
   gadgets.config.init({ "core.io" : {
       "proxyUrl" : "http://example.com/proxy?url=%url%&refresh=%refresh%&g=%gadget%&c=%container%",
-      "jsonProxyUrl" : "http://example.com/json" }});
+      "jsonProxyUrl" : "http://example.com/json",
+      "unparseableCruft" : "throw 1; < don't be evil' >"}});
   gadgets.io.preloaded_ = [];
 };
 
 IoTest.prototype.setSchemaless = function() {
   gadgets.config.init({ "core.io" : {
       "proxyUrl" : "//example.com/proxy?url=%url%&refresh=%refresh%&g=%gadget%&c=%container%",
-      "jsonProxyUrl" : "http://example.com/json" }});
+      "jsonProxyUrl" : "http://example.com/json",
+      "unparseableCruft" : "throw 1; < don't be evil' >"}});
   gadgets.io.preloaded_ = [];
 };
 

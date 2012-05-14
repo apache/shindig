@@ -118,8 +118,6 @@ gadgets.io = function() {
     callback(transformResponseData(params, data));
   }
 
-  var UNPARSEABLE_CRUFT = "throw 1; < don't be evil' >";
-
   /**
    * Handles XHR callback processing.
    *
@@ -134,6 +132,7 @@ gadgets.io = function() {
     }
     var txt = xobj['responseText'];
 
+    var UNPARSEABLE_CRUFT = config['unparseableCruft'];
     // remove unparseable cruft used to prevent cross-site script inclusion
     var offset = txt.indexOf(UNPARSEABLE_CRUFT) + UNPARSEABLE_CRUFT.length;
 

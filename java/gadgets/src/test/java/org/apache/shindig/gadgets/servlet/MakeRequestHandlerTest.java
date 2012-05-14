@@ -150,8 +150,9 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
 
   private JSONObject extractJsonFromResponse() throws JSONException {
     String body = recorder.getResponseAsString();
-    assertStartsWith(MakeRequestHandler.UNPARSEABLE_CRUFT, body);
-    body = body.substring(MakeRequestHandler.UNPARSEABLE_CRUFT.length());
+    String defaultCruftMsg = "throw 1; < don't be evil' >";
+    assertStartsWith(defaultCruftMsg, body);
+    body = body.substring(defaultCruftMsg.length());
     return new JSONObject(body).getJSONObject(REQUEST_URL.toString());
   }
 
@@ -164,9 +165,10 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
 
     JSONObject config = new JSONObject('{' + ContainerConfig.DEFAULT_CONTAINER + ':' +
         "{'gadgets.container': ['default']," +
-         "'gadgets.features':{views:" +
-           "{aliased: {aliases: ['some-alias', 'alias']}}" +
-         "}}}");
+        "'gadgets.features':{views:" +
+        "{aliased: {aliases: ['some-alias', 'alias']}}" +
+        ",'core.io':" +
+        "{unparseableCruft :\"throw 1; < don't be evil' >\"}}}}");
 
     containerConfig = new JsonContainerConfig(config, Expressions.forTesting());
     ldService = new HashLockedDomainService(containerConfig, false, new HashShaLockedDomainPrefixGenerator());
