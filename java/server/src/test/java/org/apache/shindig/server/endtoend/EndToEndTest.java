@@ -332,6 +332,22 @@ public class EndToEndTest {
     assertEquals("Hello world", paragraph.getTextContent().trim());
   }
 
+
+  @Test
+  public void testJavaScriptCompile() throws Exception {
+    // AllJsFilter will redirect to a url with all features being requested
+    webClient.setRedirectEnabled(true);
+
+    String containerJsUrl = EndToEndServer.SERVER_URL + "/gadgets/js/all-features-please.js?container=default&c=1";
+    String gadgetJsUrl = EndToEndServer.SERVER_URL + "/gadgets/js/all-features-please.js?container=default&c=0";
+
+    Page containerJsPage = webClient.getPage(containerJsUrl);
+    assertEquals(containerJsPage.getWebResponse().getStatusCode(), 200);
+
+    Page gadgetJsPage = webClient.getPage(gadgetJsUrl);
+    assertEquals(gadgetJsPage.getWebResponse().getStatusCode(), 200);
+  }
+
   @BeforeClass
   public static void setUpOnce() throws Exception {
     server = new EndToEndServer();

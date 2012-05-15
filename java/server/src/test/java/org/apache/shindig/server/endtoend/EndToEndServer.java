@@ -170,6 +170,8 @@ public class EndToEndServer {
     ServletHolder jsHolder = new ServletHolder(new JsServlet());
     context.addServlet(jsHolder, JS_BASE);
 
+    context.addFilter(AllJsFilter.class, JS_BASE, 0);
+
     // Attach MakeRequestServlet
     ServletHolder makeRequestHolder = new ServletHolder(new MakeRequestServlet());
     context.addServlet(makeRequestHolder, MAKE_REQUEST_BASE);
