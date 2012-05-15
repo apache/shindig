@@ -179,6 +179,8 @@ osapi.container.GadgetHolder.prototype.doNormalIframeHtml_ = function() {
  * @private
  */
 osapi.container.GadgetHolder.prototype.doOaaIframeHtml_ = function() {
+  //Remove any prior container for the iframe id from the OpenAjax hub prior to registering the new one
+  this.removeOaaContainer_(this.iframeId_);
   new OpenAjax.hub.IframeContainer(
       gadgets.pubsub2router.hub,
       this.iframeId_,
@@ -204,6 +206,20 @@ osapi.container.GadgetHolder.prototype.doOaaIframeHtml_ = function() {
         }
       }
   );
+};
+
+/**
+ * Removes the specified container from the registered pubsub2router hub
+ *
+ * @param {String} containerId the id of the container to remove from the hub
+ * @private
+ */
+osapi.container.GadgetHolder.prototype.removeOaaContainer_ = function(containerId) {
+    var container = gadgets.pubsub2router.hub.getContainer(containerId);
+    //Null is returned from the getContainer function per the OpenAjax spec if the container is not found
+    if(container) {
+        gadgets.pubsub2router.hub.removeContainer(container);
+    }
 };
 
 

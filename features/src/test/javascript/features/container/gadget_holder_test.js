@@ -33,11 +33,13 @@ GadgetHolderTest.prototype.setUp = function() {
   this.containerUri = window.__CONTAINER_URI;
   window.__CONTAINER_URI = shindig.uri('http://container.com');
   this.gadgetsRpc = gadgets.rpc;
+  this.pubsub2router = gadgets.pubsub2router;
 };
 
 GadgetHolderTest.prototype.tearDown = function() {
   window.__CONTAINER_URI = this.containerUri;
   gadgets.rpc = this.gadgetsRpc;
+  gadgets.pubsub2router = this.pubsub2router;
 };
 
 GadgetHolderTest.prototype.testNew = function() {
@@ -130,10 +132,47 @@ GadgetHolderTest.prototype.testRenderWithRenderRequests = function() {
       ' ></iframe>',
       element.innerHTML);
 };
+GadgetHolderTest.prototype.testRemoveOaContainer_exisiting = function() {
+    var hub = this.setupMockPubsub2router(true);
+    var holder = new osapi.container.GadgetHolder();
+    var answer = 42;
+    holder.removeOaaContainer_(answer);
+    this.assertEquals(answer, hub.getCallArgs().g.id);
+    this.assertEquals(answer, hub.getCallArgs().r.container.passedId);
+};
+GadgetHolderTest.prototype.testRemoveOaContainer_nonexisting = function() {
+    var hub = this.setupMockPubsub2router(false);
+    var holder = new osapi.container.GadgetHolder();
+    var answer = 42;
+    holder.removeOaaContainer_(answer);
+    this.assertEquals(answer, hub.getCallArgs().g.id);
+    this.assertEquals("undefined", typeof hub.getCallArgs().r.container);
+};
 
 GadgetHolderTest.prototype.setupGadgetsRpcSetupReceiver = function() {
   gadgets.rpc = {
     setupReceiver: function(iframeId, relayUri, rpcToken) {
     }
   };
+};
+
+GadgetHolderTest.prototype.setupMockPubsub2router = function(existing) {
+    gadgets.pubsub2router = {
+        hub:(function () {
+            var getArgs = {}, removeArgs = {};
+            return{
+                getContainer:function (id) {
+                    getArgs.id = id;
+                    return existing ? {passedId:id} : null;
+                },
+                removeContainer:function (container) {
+                    removeArgs.container = container;
+                },
+                getCallArgs:function () {
+                    return {g:getArgs, r:removeArgs}
+                }
+            }
+        })()
+    };
+    return gadgets.pubsub2router.hub;
 };
