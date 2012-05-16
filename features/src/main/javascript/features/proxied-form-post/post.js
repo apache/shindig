@@ -114,12 +114,12 @@
       auth = params['AUTHORIZATION'].toLowerCase();
     }
     // Include owner information?
-    if (typeof params['OWNER_SIGNED'] !== 'undefined') {
-      signOwner = params['OWNER_SIGNED'];
+    if (typeof params['SIGN_OWNER'] !== 'undefined') {
+      signOwner = params['SIGN_OWNER'];
     }
     // Include viewer information?
-    if (typeof params['VIEWER_SIGNED'] !== 'undefined') {
-      signViewer = params['VIEWER_SIGNED'];
+    if (typeof params['SIGN_VIEWER'] !== 'undefined') {
+      signViewer = params['SIGN_VIEWER'];
     }
 
     if (!url) {

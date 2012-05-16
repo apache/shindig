@@ -447,7 +447,7 @@ IoTest.prototype.testSignedGet_noViewerBoolean = function() {
   var resp = null;
   var params = {};
   params["AUTHORIZATION"] = "SIGNED";
-  params["VIEWER_SIGNED"] = false;
+  params[gadgets.io.RequestParameters.SIGN_VIEWER] = false;
   gadgets.io.makeRequest(
       "http://target.example.com/somepage",
       function(data) {
@@ -478,7 +478,7 @@ IoTest.prototype.testSignedGet_noViewerString = function() {
   var resp = null;
   var params = {};
   params["AUTHORIZATION"] = "SIGNED";
-  params["VIEWER_SIGNED"] = "false";
+  params[gadgets.io.RequestParameters.SIGN_VIEWER] = "false";
   gadgets.io.makeRequest(
       "http://target.example.com/somepage",
       function(data) {
@@ -509,8 +509,8 @@ IoTest.prototype.testSignedGet_withNoOwnerAndViewerString = function() {
   var resp = null;
   var params = {};
   params["AUTHORIZATION"] = "SIGNED";
-  params["VIEWER_SIGNED"] = "true";
-  params["OWNER_SIGNED"] = false;
+  params[gadgets.io.RequestParameters.SIGN_VIEWER] = "true";
+  params[gadgets.io.RequestParameters.SIGN_OWNER] = false;
   gadgets.io.makeRequest(
       "http://target.example.com/somepage",
       function(data) {

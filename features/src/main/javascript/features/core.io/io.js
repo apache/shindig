@@ -373,14 +373,14 @@ gadgets.io = function() {
 
       // Include owner information?
       var signOwner = true;
-      if (typeof params['OWNER_SIGNED'] !== 'undefined') {
-        signOwner = params['OWNER_SIGNED'];
+      if (typeof params['SIGN_OWNER'] !== 'undefined') {
+        signOwner = params['SIGN_OWNER'];
       }
 
       // Include viewer information?
       var signViewer = true;
-      if (typeof params['VIEWER_SIGNED'] !== 'undefined') {
-        signViewer = params['VIEWER_SIGNED'];
+      if (typeof params['SIGN_VIEWER'] !== 'undefined') {
+        signViewer = params['SIGN_VIEWER'];
       }
 
       var headers = params['HEADERS'] || {};
@@ -564,6 +564,8 @@ gadgets.io.RequestParameters = gadgets.util.makeEnum([
   'GET_SUMMARIES',
   'GET_FULL_HEADERS',
   'REFRESH_INTERVAL',
+  'SIGN_OWNER',
+  'SIGN_VIEWER',
   'OAUTH_SERVICE_NAME',
   'OAUTH_USE_TOKEN',
   'OAUTH_TOKEN_NAME',
