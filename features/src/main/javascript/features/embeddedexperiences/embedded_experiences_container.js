@@ -140,12 +140,12 @@
      * @return {String} The target type of EE data model preferredExperience or null if not set.
      */
     function getPreferredEE_(dataModel) {
-      if(dataModel[osapi.container.ee.DataModel.PREFERRED_EXPERIENCE]) {
-        var pe = dataModel[osapi.container.ee.DataModel.PREFERRED_EXPERIENCE];
-        if (pe[osapi.container.ee.PreferredExperience.TARGET]) {
-          var peTarget = pe[osapi.container.ee.PreferredExperience.TARGET];
-          if(peTarget && peTarget[osapi.container.ee.PreferredExperience.TYPE]) {
-            return peTarget[osapi.container.ee.PreferredExperience.TYPE];
+      if(dataModel[ee_data_model.PREFERRED_EXPERIENCE]) {
+        var pe = dataModel[ee_data_model.PREFERRED_EXPERIENCE];
+        if (pe[ee_pe.TARGET]) {
+          var peTarget = pe[ee_pe.TARGET];
+          if(peTarget && peTarget[ee_pe.TYPE]) {
+            return peTarget[ee_pe.TYPE];
           }
         }
       }
