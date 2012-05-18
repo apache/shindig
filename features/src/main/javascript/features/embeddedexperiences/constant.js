@@ -93,6 +93,15 @@ osapi.container.ee.TargetType = {
 };
 
 /**
+ * Parameters for EE model preferred experience display type.
+ * @enum {string}
+ */
+osapi.container.ee.DisplayType = {
+    IMAGE: 'image',
+    LINK: 'link'
+};
+
+/**
  * Additional config parameter when container support EE.
  */
 osapi.container.ee.ContainerConfig = {

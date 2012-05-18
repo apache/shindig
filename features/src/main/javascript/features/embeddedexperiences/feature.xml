@@ -55,6 +55,8 @@ specific language governing permissions and limitations under the License.
             <exports type="js">osapi.container.ee.PreferredExperience.VIEW_TARGET</exports>
             <exports type="js">osapi.container.ee.TargetType.GADGET</exports>
             <exports type="js">osapi.container.ee.TargetType.URL</exports>
+            <exports type="js">osapi.container.ee.DisplayType.IMAGE</exports>
+            <exports type="js">osapi.container.ee.DisplayType.LINK</exports>
             <exports type="js">osapi.container.ee.Context.ASSOCIATED_CONTEXT</exports>
             <exports type="js">osapi.container.ee.Context.OPENSOCIAL</exports>
             <exports type="js">osapi.container.ee.AssociatedContext.ID</exports>
