@@ -36,8 +36,8 @@
                     if(context.openSocial) {
                         var associatedContext = context.openSocial.associatedContext;
                         if(associatedContext) {
-                            document.getElementById('source').innerHTML = "<p>The source id is " + associatedContext.id + "</p>";
-                            document.getElementById('type').innerHTML = "<p>The source type is " + associatedContext.type + "</p>";
+                            document.getElementById('source').innerHTML = "<p>The associated context source id is " + associatedContext.id + "</p>";
+                            document.getElementById('type').innerHTML = "<p>The associated context source type is " + associatedContext.type + "</p>";
                             document.getElementById('target').innerHTML = "<p>The blog title is " + associatedContext.objectReference.target.displayName + "<p>";
                             document.getElementById('photo').innerHTML = "<p>The title of the new photo is " + associatedContext.objectReference.object.summary + "<p>";
                         }
