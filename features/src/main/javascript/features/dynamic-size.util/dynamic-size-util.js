@@ -36,7 +36,7 @@ gadgets.window = gadgets.window || {};
     } else {
       var style = elem.currentStyle;
     }
-    return attr ? style[attr] : style;
+    return attr && style ? style[attr] : style;
   }
 
   /**
