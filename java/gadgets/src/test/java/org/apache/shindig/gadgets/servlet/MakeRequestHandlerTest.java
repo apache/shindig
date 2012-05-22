@@ -797,4 +797,20 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
 
     assertEquals(ContainerConfig.DEFAULT_CONTAINER, MakeRequestHandler.getContainer(request));
   }
+
+  @Test
+  public void testUserAgent() throws Exception {
+    HttpRequest expected = new HttpRequest(REQUEST_URL).addHeader("User-Agent", "ua");
+    expect(pipeline.execute(expected)).andReturn(new HttpResponse(RESPONSE_BODY));
+    expect(request.getHeader("User-Agent")).andReturn("ua");
+    replay();
+
+    handler.fetch(request, recorder);
+    verify();
+
+    JSONObject results = extractJsonFromResponse();
+    assertEquals(HttpResponse.SC_OK, results.getInt("rc"));
+    assertEquals(RESPONSE_BODY, results.get("body"));
+    assertTrue(rewriter.responseWasRewritten());
+  }
 }

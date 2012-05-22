@@ -306,6 +306,13 @@ public class MakeRequestHandler implements ContainerConfig.ConfigObserver {
       req.setSecurityToken(token);
     }
 
+    if (req.getHeader("User-Agent") == null) {
+      final String userAgent = request.getHeader("User-Agent");
+      if (userAgent != null) {
+        req.setHeader("User-Agent", userAgent);
+      }
+    }
+
     ServletUtil.setXForwardedForHeader(request, req);
     return req;
   }
