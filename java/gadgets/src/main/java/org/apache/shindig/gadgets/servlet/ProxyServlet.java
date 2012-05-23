@@ -18,15 +18,23 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
-import org.apache.commons.io.IOUtils;
+import com.google.inject.Inject;
+
+import org.apache.shindig.auth.AuthInfoUtil;
+import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.logging.i18n.MessageKeys;
 import org.apache.shindig.common.servlet.InjectedServlet;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
+import org.apache.shindig.gadgets.AuthType;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.LockedDomainService;
 import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.oauth.OAuthArguments;
+import org.apache.shindig.gadgets.oauth2.OAuth2Arguments;
 import org.apache.shindig.gadgets.uri.ProxyUriManager;
+
+import org.apache.commons.io.IOUtils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -36,8 +44,6 @@ import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import com.google.inject.Inject;
 
 /**
  * Handles open proxy requests (used in rewriting and for URLs returned by gadgets.io.getProxyUrl).
@@ -96,6 +102,20 @@ public class ProxyServlet extends InjectedServlet {
     try {
       // Parse request uri:
       ProxyUriManager.ProxyUri proxyUri = proxyUriManager.process(reqUri);
+      SecurityToken st = AuthInfoUtil.getSecurityTokenFromRequest(request);
+      proxyUri.setSecurityToken(st);
+      // get gadget from security token
+      if(proxyUri.getGadget() == null) {
+        if(st != null && !st.isAnonymous()) {
+          proxyUri.setGadget(st.getAppUrl());
+        }
+      }
+      AuthType authType = proxyUri.getAuthType();
+      if(AuthType.OAUTH.equals(authType)) {
+        proxyUri.setOAuthArguments(new OAuthArguments(AuthType.OAUTH, request));
+      } else if(AuthType.OAUTH2.equals(authType)) {
+        proxyUri.setOAuth2Arguments(new OAuth2Arguments(request));
+      }
 
       // TODO: Consider removing due to redundant logic.
       String host = request.getHeader("Host");

@@ -61,6 +61,10 @@ public interface UriCommon {
     NO_EXPAND("no_expand"),
     FALLBACK_URL_PARAM("fallback_url"),
 
+    // proxy authz params:
+    OAUTH_SERVICE_NAME("OAUTH_SERVICE_NAME"),
+    AUTHZ("authz"),
+
     RETURN_ORIGINAL_CONTENT_ON_ERROR("rooe"),
     // The html tag which requested this proxy uri. For example, "script" when
     // "<script src='blah.js'></script>" is being proxied.

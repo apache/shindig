@@ -21,17 +21,25 @@ package org.apache.shindig.gadgets.servlet;
 import static junitx.framework.StringAssert.assertContains;
 import static org.easymock.EasyMock.expect;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-
 import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.gadgets.AuthType;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.LockedDomainService;
 import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.oauth.OAuthArguments;
+import org.apache.shindig.gadgets.oauth2.OAuth2Arguments;
 import org.apache.shindig.gadgets.uri.ProxyUriManager;
+import org.apache.shindig.gadgets.uri.ProxyUriManager.ProxyUri;
+
 import org.junit.Before;
 import org.junit.Test;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletResponse;
@@ -215,5 +223,65 @@ public class ProxyServletTest extends ServletTestFixture {
 
     assertEquals(HttpServletResponse.SC_BAD_REQUEST, recorder.getHttpStatusCode());
     assertContains("wrong domain", recorder.getResponseAsString());
+  }
+
+  @Test
+  public void testDoGetWithOAuth2() throws Exception {
+    Map<String, String> options = new HashMap<String, String>();
+    options.put("OAUTH_SERVICE_NAME", "example");
+    ProxyUriManager.ProxyUri proxyUri = new ProxyUri(-1, false, true, "default", "http://example.org/gadget.xml", REQUEST_URL);
+    proxyUri.setAuthType(AuthType.OAUTH2);
+
+    Uri uri = Uri.parse(BASIC_SYNTAX_URL + "&authz=oauth2&OAUTH_SERVICE_NAME=example&container=default&gadget=http://example.org/gadget.xml");
+    expect(proxyUriManager.process(uri)).andReturn(proxyUri);
+    expect(request.getScheme()).andReturn(uri.getScheme());
+    expect(request.getServerName()).andReturn(uri.getAuthority());
+    expect(request.getServerPort()).andReturn(80);
+    expect(request.getRequestURI()).andReturn(uri.getPath());
+    expect(request.getQueryString()).andReturn(uri.getQuery());
+    expect(request.getHeader("Host")).andReturn(uri.getAuthority());
+    expect(request.getParameter("OAUTH_SERVICE_NAME")).andReturn("example");
+    expect(request.getParameterNames()).andReturn(Collections.enumeration(options.keySet()));
+    expect(lockedDomainService.isSafeForOpenProxy(uri.getAuthority())).andReturn(true);
+
+    ProxyUriManager.ProxyUri pUri = new ProxyUri(-1, false, true, "default", "http://example.org/gadget.xml", REQUEST_URL);
+    pUri.setAuthType(AuthType.OAUTH2);
+    pUri.setOAuth2Arguments(new OAuth2Arguments(AuthType.OAUTH2, options));
+
+    expect(proxyHandler.fetch(pUri)).andReturn(new HttpResponse(RESPONSE_BODY));
+    replay();
+    servlet.doGet(request, recorder);
+    verify();
+    assertResponseOk(HttpResponse.SC_OK, RESPONSE_BODY);
+  }
+
+  @Test
+  public void testDoGetWithOAuth() throws Exception {
+    Map<String, String> options = new HashMap<String, String>();
+    options.put("OAUTH_SERVICE_NAME", "example");
+    ProxyUriManager.ProxyUri proxyUri = new ProxyUri(-1, false, true, "default", "http://example.org/gadget.xml", REQUEST_URL);
+    proxyUri.setAuthType(AuthType.OAUTH);
+
+    Uri uri = Uri.parse(BASIC_SYNTAX_URL + "&authz=oauth&OAUTH_SERVICE_NAME=example&container=default&gadget=http://example.org/gadget.xml");
+    expect(proxyUriManager.process(uri)).andReturn(proxyUri);
+    expect(request.getScheme()).andReturn(uri.getScheme());
+    expect(request.getServerName()).andReturn(uri.getAuthority());
+    expect(request.getServerPort()).andReturn(80);
+    expect(request.getRequestURI()).andReturn(uri.getPath());
+    expect(request.getQueryString()).andReturn(uri.getQuery());
+    expect(request.getHeader("Host")).andReturn(uri.getAuthority());
+    expect(request.getParameter("OAUTH_SERVICE_NAME")).andReturn("example");
+    expect(request.getParameterNames()).andReturn(Collections.enumeration(options.keySet()));
+    expect(lockedDomainService.isSafeForOpenProxy(uri.getAuthority())).andReturn(true);
+
+    ProxyUriManager.ProxyUri pUri = new ProxyUri(-1, false, true, "default", "http://example.org/gadget.xml", REQUEST_URL);
+    pUri.setAuthType(AuthType.OAUTH);
+    pUri.setOAuthArguments(new OAuthArguments(AuthType.OAUTH, options));
+
+    expect(proxyHandler.fetch(pUri)).andReturn(new HttpResponse(RESPONSE_BODY));
+    replay();
+    servlet.doGet(request, recorder);
+    verify();
+    assertResponseOk(HttpResponse.SC_OK, RESPONSE_BODY);
   }
 }

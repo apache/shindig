@@ -156,7 +156,7 @@
   "core.io" : {
     // Note: ${Cur['gadgets.uri.proxy.path']} is an open proxy. Be careful how you expose this!
     // Note: These urls should be protocol relative (start with //)
-    "proxyUrl" : "//${Cur['default.domain.unlocked.client']}${Cur['gadgets.uri.proxy.path']}?container=%container%&refresh=%refresh%&url=%url%%rewriteMime%",
+    "proxyUrl" : "//${Cur['default.domain.unlocked.client']}${Cur['gadgets.uri.proxy.path']}?container=%container%&refresh=%refresh%&url=%url%%authz%%rewriteMime%",
     "jsonProxyUrl" : "//${Cur['default.domain.locked.client']}${CONTEXT_ROOT}/gadgets/makeRequest",
     // Note: this setting MUST be supplied in every container config object, as there is no default if it is not supplied.
     "unparseableCruft" : "throw 1; < don't be evil' >"

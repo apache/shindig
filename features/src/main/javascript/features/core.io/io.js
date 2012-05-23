@@ -528,15 +528,28 @@ gadgets.io = function() {
       }
 
       var urlParams = gadgets.util.getUrlParameters();
+      var st = shindig.auth.getSecurityToken();
+      var authz = params[gadgets.io.RequestParameters.AUTHORIZATION];
+      var serviceName = params[gadgets.io.RequestParameters.OAUTH_SERVICE_NAME];
 
       var rewriteMimeParam =
           params['rewriteMime'] ? '&rewriteMime=' + encodeURIComponent(params['rewriteMime']) : '';
+      var authParam = '';
+      if(authz) {
+        if(authz == gadgets.io.AuthorizationType.OAUTH || authz == gadgets.io.AuthorizationType.OAUTH2) {
+          authParam = '&authz=' + authz.toLowerCase() + '&st=' + encodeURIComponent(st)
+            + '&OAUTH_SERVICE_NAME=' + encodeURIComponent(serviceName);
+        } else {
+          authParam = '&authz=' + authz.toLowerCase();
+        }
+      }
       var ret = proxyUrl.replace('%url%', encodeURIComponent(url)).
           replace('%host%', document.location.host).
           replace('%rawurl%', url).
           replace('%refresh%', encodeURIComponent(refresh)).
           replace('%gadget%', encodeURIComponent(urlParams['url'])).
           replace('%container%', encodeURIComponent(urlParams['container'] || urlParams['synd'] || 'default')).
+          replace('%authz%', authParam).
           replace('%rewriteMime%', rewriteMimeParam);
       if (ret.indexOf('//') == 0) {
         ret = window.location.protocol + ret;

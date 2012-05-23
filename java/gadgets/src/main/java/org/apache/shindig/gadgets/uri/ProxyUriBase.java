@@ -158,6 +158,10 @@ public class ProxyUriBase {
     return this;
   }
 
+  public ProxyUriBase setGadget(String gadget) {
+    this.gadget = gadget;
+    return this;
+  }
   public UriStatus getStatus() {
     return status;
   }

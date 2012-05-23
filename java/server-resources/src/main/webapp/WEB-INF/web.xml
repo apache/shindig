@@ -147,6 +147,7 @@
     <url-pattern>/social/*</url-pattern>
     <url-pattern>/gadgets/ifr</url-pattern>
     <url-pattern>/gadgets/makeRequest</url-pattern>
+    <url-pattern>/gadgets/proxy</url-pattern>
     <url-pattern>/gadgets/api/rpc/*</url-pattern>
     <url-pattern>/gadgets/api/rest/*</url-pattern>
     <url-pattern>/rpc/*</url-pattern>

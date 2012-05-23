@@ -22,14 +22,15 @@ import static org.easymock.EasyMock.capture;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.isA;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import com.google.common.base.Objects;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 
 import org.apache.shindig.common.EasyMockTestCase;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.util.FakeTimeSource;
 import org.apache.shindig.config.ContainerConfig;
+import org.apache.shindig.gadgets.AuthType;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.admin.GadgetAdminStore;
@@ -37,6 +38,8 @@ import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.http.RequestPipeline;
+import org.apache.shindig.gadgets.oauth.OAuthArguments;
+import org.apache.shindig.gadgets.oauth2.OAuth2Arguments;
 import org.apache.shindig.gadgets.rewrite.CaptureRewriter;
 import org.apache.shindig.gadgets.rewrite.DefaultResponseRewriterRegistry;
 import org.apache.shindig.gadgets.rewrite.DomWalker;
@@ -46,13 +49,15 @@ import org.apache.shindig.gadgets.rewrite.ResponseRewriterRegistry;
 import org.apache.shindig.gadgets.rewrite.RewritingException;
 import org.apache.shindig.gadgets.uri.ProxyUriManager;
 import org.apache.shindig.gadgets.uri.UriCommon.Param;
+
 import org.easymock.Capture;
 import org.easymock.EasyMock;
 import org.junit.Test;
 
-import com.google.common.base.Objects;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class ProxyHandlerTest extends EasyMockTestCase {
   private final static String GADGET = "http://some/gadget.xml";
@@ -468,6 +473,70 @@ public class ProxyHandlerTest extends EasyMockTestCase {
     HttpResponse proxyResp = proxyHandler.fetch(request);
     assertEquals(1234, proxyResp.getCacheTtl() / 1000);
     verify();
+  }
+
+  @Test
+  public void testWithOAuth2() throws Exception {
+    String url = "http://example.org/oauth2";
+    String domain = "example.org";
+    setupProxyRequestMock(domain, url, false, -1, null, null);
+    setupGadgetAdminMock(true);
+    Map<String, String> options = new HashMap<String, String>();
+    options.put("OAUTH_SERVICE_NAME", "example");
+    options.put("OAUTH_SCOPE", "scope1 scope2");
+    request.setAuthType(AuthType.OAUTH2);
+    request.setOAuth2Arguments(new OAuth2Arguments(AuthType.OAUTH2, options));
+
+    options = new HashMap<String, String>();
+    options.put("OAUTH_SERVICE_NAME", "example");
+    options.put("OAUTH_SCOPE", "scope1 scope2");
+    HttpRequest req = new HttpRequest(Uri.parse(url))
+        .setAuthType(AuthType.OAUTH2)
+        .setGadget(Uri.parse(""))
+        .setContainer("default")
+        .setOAuth2Arguments(new OAuth2Arguments(AuthType.OAUTH2, options));
+
+    HttpResponse resp = new HttpResponseBuilder()
+    .setResponseString("Hello")
+    .create();
+    expect(pipeline.execute(req)).andReturn(resp);
+
+    replay();
+    HttpResponse response = proxyHandler.fetch(request);
+    verify();
+
+    assertEquals("Hello", response.getResponseAsString());
+  }
+
+  @Test
+  public void testWithOAuth() throws Exception {
+    String url = "http://example.org/oauth2";
+    String domain = "example.org";
+    setupProxyRequestMock(domain, url, false, -1, null, null);
+    setupGadgetAdminMock(true);
+    Map<String, String> options = new HashMap<String, String>();
+    options.put("OAUTH_SERVICE_NAME", "example");
+    request.setAuthType(AuthType.OAUTH);
+    request.setOAuthArguments(new OAuthArguments(AuthType.OAUTH, options));
+
+    options = new HashMap<String, String>();
+    options.put("OAUTH_SERVICE_NAME", "example");
+    HttpRequest req = new HttpRequest(Uri.parse(url))
+        .setAuthType(AuthType.OAUTH)
+        .setGadget(Uri.parse(""))
+        .setContainer("default")
+        .setOAuthArguments(new OAuthArguments(AuthType.OAUTH, options));
+
+    HttpResponse resp = new HttpResponseBuilder()
+    .setResponseString("Hello")
+    .create();
+    expect(pipeline.execute(req)).andReturn(resp);
+
+    replay();
+    HttpResponse response = proxyHandler.fetch(request);
+    verify();
+
+    assertEquals("Hello", response.getResponseAsString());
   }
 
   private void expectMime(String expectedMime, String contentMime, String outputMime)

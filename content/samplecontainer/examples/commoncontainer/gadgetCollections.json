@@ -84,6 +84,11 @@
              "name" : "Test Gadget and Container Domain Configuration",
              "Description" : "Tests Gadget and Container domain configuration by trying to access container page information from within a gadget",
              "apps" : [ {"name" : "Domain Test", "url" : "/samplecontainer/examples/ContainerGadgetDomainTest.xml"} ]
+             },
+             {
+             "name" : "Sample gadget for context proxy with OAuth2",
+             "Description" : "Sample gadget that demonstrate use of context proxy to retrieve resources protected by OAuth2",
+             "apps" : [ {"name" : "oauth2_context_proxy", "url" : "/samplecontainer/examples/oauth2/oauth2_spring_proxy.xml"} ]
              }
          ]
 }

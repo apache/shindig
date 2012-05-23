@@ -53,6 +53,14 @@ IoTest.prototype.setSchemaless = function() {
   gadgets.io.preloaded_ = [];
 };
 
+IoTest.prototype.setOAuthSupportEnabled = function() {
+  gadgets.config.init({ "core.io" : {
+      "proxyUrl" : "http://example.com/proxy?url=%url%&refresh=%refresh%&g=%gadget%&c=%container%%authz%",
+      "jsonProxyUrl" : "http://example.com/json",
+      "unparseableCruft" : "throw 1; < don't be evil' >"}});
+  gadgets.io.preloaded_ = [];
+};
+
 IoTest.prototype.tearDown = function() {
   window.XMLHttpRequest = this.oldXMLHTTPRequest;
   shindig.xhrwrapper = this.oldXhrWrapper;
@@ -65,6 +73,17 @@ IoTest.prototype.testGetProxyUrl = function() {
           "&refresh=3600" +
           "&g=http%3a%2f%2fwww.gadget.com%2fgadget.xml" +
           "&c=foo",
+      proxied);
+};
+
+IoTest.prototype.testGetProxyUrl_OAuthSupportEnabled = function() {
+  this.setOAuthSupportEnabled();
+  var proxied = gadgets.io.getProxyUrl("http://target.example.com/image.gif", { 'AUTHORIZATION': "OAUTH2", 'OAUTH_SERVICE_NAME' : "some-service"});
+  this.assertEquals(
+      "http://example.com/proxy?url=http%3a%2f%2ftarget.example.com%2fimage.gif" +
+          "&refresh=3600" +
+          "&g=http%3a%2f%2fwww.gadget.com%2fgadget.xml" +
+          "&c=foo&authz=oauth2&st=authtoken&OAUTH_SERVICE_NAME=some-service",
       proxied);
 };
 

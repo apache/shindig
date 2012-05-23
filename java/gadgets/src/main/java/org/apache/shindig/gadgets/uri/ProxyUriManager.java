@@ -22,12 +22,16 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
 
+import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
+import org.apache.shindig.gadgets.AuthType;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.oauth.OAuthArguments;
+import org.apache.shindig.gadgets.oauth2.OAuth2Arguments;
 import org.apache.shindig.gadgets.uri.UriCommon.Param;
 
 import java.util.List;
@@ -53,6 +57,10 @@ public interface ProxyUriManager {
     private Integer resizeWidth;
     private Integer resizeQuality;
     private boolean resizeNoExpand;
+    private SecurityToken securityToken;
+    private AuthType authType;
+    private OAuth2Arguments oauth2Arguments;
+    private OAuthArguments oauthArguments;
 
     // If "true" then the original content should be returned to the user
     // instead of internal server errors.
@@ -68,6 +76,9 @@ public interface ProxyUriManager {
       if (AccelUriManager.CONTAINER.equals(gadget.getContext().getContainer())) {
         setReturnOriginalContentOnError(true);
       }
+      if(authType == null) {
+        authType = AuthType.NONE;
+      }
     }
 
     public ProxyUri(Integer refresh, boolean debug, boolean noCache,
@@ -76,6 +87,9 @@ public interface ProxyUriManager {
       this.resource = resource;
       if (AccelUriManager.CONTAINER.equals(container)) {
         setReturnOriginalContentOnError(true);
+      }
+      if(authType == null) {
+        authType = AuthType.NONE;
       }
     }
 
@@ -95,6 +109,18 @@ public interface ProxyUriManager {
     public String getHtmlTagContext() {
       return htmlTagContext;
     }
+    public SecurityToken getSecurityToken() {
+      return securityToken;
+    }
+    public AuthType getAuthType() {
+      return authType;
+    }
+    public OAuthArguments getOAuthArguments() {
+      return oauthArguments;
+    }
+    public OAuth2Arguments getOAuth2Arguments() {
+      return oauth2Arguments;
+    }
 
     @Override
     public boolean equals(Object obj) {
@@ -113,14 +139,18 @@ public interface ProxyUriManager {
           && Objects.equal(this.resizeQuality, objUri.resizeQuality)
           && Objects.equal(this.resizeNoExpand, objUri.resizeNoExpand)
           && Objects.equal(this.returnOriginalContentOnError, objUri.returnOriginalContentOnError)
-          && Objects.equal(this.htmlTagContext, objUri.htmlTagContext));
+          && Objects.equal(this.htmlTagContext, objUri.htmlTagContext)
+          && Objects.equal(this.securityToken, objUri.securityToken)
+          && Objects.equal(this.authType, objUri.authType))
+          && Objects.equal(this.oauthArguments, objUri.oauthArguments)
+          && Objects.equal(this.oauth2Arguments, objUri.oauth2Arguments);
     }
 
     @Override
     public int hashCode() {
       return Objects.hashCode(super.hashCode(), resource, fallbackUrl, resizeHeight,
               resizeWidth, resizeQuality, resizeNoExpand, returnOriginalContentOnError,
-              htmlTagContext);
+              htmlTagContext, securityToken, authType, oauthArguments, oauth2Arguments);
     }
 
     /* (non-Javadoc)
@@ -138,6 +168,7 @@ public interface ProxyUriManager {
         returnOriginalContentOnError = uri.getQueryParameter(
             Param.RETURN_ORIGINAL_CONTENT_ON_ERROR.getKey());
         htmlTagContext = uri.getQueryParameter(Param.HTML_TAG_CONTEXT.getKey());
+        authType = AuthType.parse(uri.getQueryParameter(Param.AUTHZ.getKey()));
       }
     }
 
@@ -151,6 +182,26 @@ public interface ProxyUriManager {
 
     public ProxyUri setFallbackUrl(String fallbackUrl) {
       this.fallbackUrl = fallbackUrl;
+      return this;
+    }
+
+    public ProxyUri setSecurityToken(SecurityToken securityToken) {
+      this.securityToken = securityToken;
+      return this;
+    }
+
+    public ProxyUri setAuthType(AuthType authType) {
+      this.authType = authType;
+      return this;
+    }
+
+    public ProxyUri setOAuthArguments(OAuthArguments oauthArgments) {
+      this.oauthArguments = oauthArgments;
+      return this;
+    }
+
+    public ProxyUri setOAuth2Arguments(OAuth2Arguments oauth2Arguments) {
+      this.oauth2Arguments = oauth2Arguments;
       return this;
     }
 
@@ -219,6 +270,13 @@ public interface ProxyUriManager {
       req.setParam(Param.RETURN_ORIGINAL_CONTENT_ON_ERROR.getKey(),
                    returnOriginalContentOnError);
       req.setParam(Param.HTML_TAG_CONTEXT.getKey(), htmlTagContext);
+      req.setSecurityToken(securityToken);
+      req.setAuthType(authType);
+      if(AuthType.OAUTH.equals(authType)) {
+        req.setOAuthArguments(oauthArguments);
+      } else if(AuthType.OAUTH2.equals(authType)) {
+        req.setOAuth2Arguments(oauth2Arguments);
+      }
       return req;
     }
 
