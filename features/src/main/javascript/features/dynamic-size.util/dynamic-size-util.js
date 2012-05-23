@@ -32,7 +32,7 @@ gadgets.window = gadgets.window || {};
    */
   function getElementComputedStyle(elem, attr) {
     if (window.getComputedStyle) {
-      var style = window.getComputedStyle(elem);
+      var style = window.getComputedStyle(elem, null);
     } else {
       var style = elem.currentStyle;
     }
