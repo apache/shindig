@@ -10,7 +10,7 @@ details.
 
 == Java Dependency Changes ==
 
-* closure-compiler (new) r1592
+* closure-compiler (new) r1918
 * commons-codec 1.5 -> 1.6
 * commons-lang to commons-lang3 3.1
 * ehcache  2.3.2 -> 2.5.2
