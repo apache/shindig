@@ -156,7 +156,7 @@ function createAccordianEntry(i, entry) {
   if(extensions) {
     var embed = extensions.embed;
     if(embed && embed.preferredExperience) {
-      var linkText = getPreferredExperienceLinkText(embed[osapi.container.ee.PreferredExperience]);
+      var linkText = getPreferredExperienceLinkText(embed[osapi.container.ee.DataModel.PREFERRED_EXPERIENCE]);
       if(linkText) {
         title = linkText;
       }
