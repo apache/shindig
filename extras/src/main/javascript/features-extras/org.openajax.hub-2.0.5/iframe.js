@@ -398,8 +398,12 @@ OpenAjax.hub.IframeContainer = function( hub, clientID, params )
         } else {
           iframe.onload = function(){window[params.IframeContainer.onGadgetLoad]();};
         }
-        iframe.src = params.IframeContainer.uri +
-                "#rpctoken=" + securityToken + tunnelText + idText;
+
+        var uri = params.IframeContainer.uri;
+        var hashIdx = uri.indexOf('#');
+        var joinToken = (hashIdx === -1)?'#':'&';
+
+        iframe.src = uri + joinToken + "rpctoken=" + securityToken + tunnelText + idText;
     }
 
     // If the relay iframe used by RPC has not been loaded yet, then we won't have unload protection
