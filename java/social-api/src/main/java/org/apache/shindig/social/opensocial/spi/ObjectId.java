@@ -23,7 +23,7 @@ import com.google.common.base.Objects;
 
 /**
  * ObjectId as defined by the OpenSocial 2.0.1 Spec
- * @see http://opensocial-resources.googlecode.com/svn/spec/2.0.1/Core-Data.xml#Object-Id
+ * @see "http://opensocial-resources.googlecode.com/svn/spec/2.0.1/Core-Data.xml#Object-Id"
  */
 public class ObjectId {
 
@@ -33,7 +33,7 @@ public class ObjectId {
    * This constructor allows for a LocalId to be passed in order
    * to create an ObjectId.
    *
-   * @param LocalId the localId used to create the ObjectId
+   * @param localId the localId used to create the ObjectId
    */
   public ObjectId(LocalId localId) {
     this.objectId = localId;
@@ -43,7 +43,7 @@ public class ObjectId {
    * This constructor allows for a GlobalId to be passed in order
    * to create an ObjectId.
    *
-   * @param GlobalId the globalId used to create the ObjectId
+   * @param globalId the globalId used to create the ObjectId
    */
   public ObjectId(GlobalId globalId) {
     this.objectId = globalId;
@@ -54,7 +54,7 @@ public class ObjectId {
    * to create an ObjectId. It will store it as a LocalId and
    * verify it as such.
    *
-   * @param String The id of the new LocalId that will be created
+   * @param id The id of the new LocalId that will be created
    * @throws IllegalArgumentException when the id provided could not be parsed
    *   into either a GlobalId or a LocalId
    */
@@ -67,7 +67,7 @@ public class ObjectId {
         this.objectId = new LocalId(id);
       } catch(IllegalArgumentException e2) {
         // Not either so throw exception
-	    throw new IllegalArgumentException("The provided ObjectId is not valid");
+	      throw new IllegalArgumentException("The provided ObjectId is not valid");
       }
 	}
   }

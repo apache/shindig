@@ -49,7 +49,7 @@ function OpenSocialWrapper() {
 		var batch = osapi.newBatch();
 		batch.add('viewerActivities', osapi.activities.get({userId: '@viewer', groupId: '@self'}));
 		batch.add('ownerActivities', osapi.activities.get({userId: '@owner', groupId: '@self'}));
-		batch.add('friendActivities', osapi.activities.get({userId: '@viewer', groupId: '@friend'}));
+		batch.add('friendActivities', osapi.activities.get({userId: '@viewer', groupId: '@friends'}));
 		batch.execute(callback);
 	}
 

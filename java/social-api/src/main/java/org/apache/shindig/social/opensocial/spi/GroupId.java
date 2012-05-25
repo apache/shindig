@@ -23,7 +23,7 @@ import com.google.common.base.Objects;
 
 /**
  * GroupId as defined by the OpenSocial 2.0.1 Spec
- * @see http://opensocial-resources.googlecode.com/svn/spec/2.0.1/Social-Data.xml#Group-Id
+ * @see "http://opensocial-resources.googlecode.com/svn/spec/2.0.1/Social-Data.xml#Group-Id"
  */
 public class GroupId {
 
