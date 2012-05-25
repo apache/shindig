@@ -1,116 +1,198 @@
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements. See the NOTICE file
+ * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
- * regarding copyright ownership. The ASF licenses this file
+ * regarding copyright ownership.  The ASF licenses this file
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
- * with the License. You may obtain a copy of the License at
+ * with the License.  You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied. See the License for the
- * specific language governing permissions and limitations under the License.
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
+
 package org.apache.shindig.social.opensocial.spi;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.base.Objects;
 
-import java.util.Map;
-
 /**
- * A group id used for grouping of people resources (as opposed to groups used by the GroupsHandler)
+ * GroupId as defined by the OpenSocial 2.0.1 Spec
+ * @see http://opensocial-resources.googlecode.com/svn/spec/2.0.1/Social-Data.xml#Group-Id
  */
 public class GroupId {
+
   public enum Type {
-    all, friends, self, deleted, groupId;
+    objectId  (0),
+    self      (1),
+    friends   (2),
+    all       (3);
 
-    /** A map of JSON strings to Type objects */
-    private static final Map<String, Type> jsonTypeMap;
+    private final int id;
+    Type(int id) { this.id = id; }
+    public int getValue() { return id; }
+  }
 
-    static {
-      ImmutableMap.Builder<String,Type> builder = ImmutableMap.builder();
-      for (Type type : Type.values()) {
-        builder.put('@' + type.name(), type);
+  // Can be of type ObjectId or a String that represents a GroupId.Type
+  private Object objectId;
+
+  /**
+   * If the given object is an objectId, create and store
+   * Else we need the string representation to store, including the "@"
+   *
+   * @param objectId Object
+   * @throws IllegalArgumentException
+   */
+  public GroupId(Object objectId) throws IllegalArgumentException {
+    if(objectId == null) {
+      this.objectId = new ObjectId("");
+    // If it is an objectId, store as is
+    } else if(objectId instanceof ObjectId) {
+      this.objectId = (ObjectId) objectId;
+    // Else it must be a string, store as such
+    } else {
+      if(getType(objectId).equals(Type.objectId)) {
+        this.objectId = new ObjectId(objectId.toString());
+      } else {
+        this.objectId = objectId.toString();
       }
-      jsonTypeMap = builder.build();
-    }
-    /**
-     * Return the Type enum value given a specific jsonType such as @all, @friends, etc.
-     *
-     * @param jsonType the type string to convert
-     * @return A Type Enum value or null if no value exists
-     **/
-    public static Type jsonValueOf(String jsonType) {
-       return jsonTypeMap.get(jsonType);
     }
   }
 
-  private Type type;
-  private String groupId;
-
-  public GroupId(Type type, String groupId) {
-    this.groupId = groupId;
-    this.type = type;
+  /**
+   * Backwards Compatibility.
+   *
+   * @param type
+   * @param objectId
+   * @throws IllegalArgumentException when the provided objectId is not valid
+   */
+  public GroupId(Type type, String objectId) throws IllegalArgumentException {
+    // If Type is an objectId, convert objectId to ObjectId and store
+    if(type.equals(Type.objectId)) {
+      this.objectId = new ObjectId(objectId);
+    // Else store the string representation of the type
+    } else {
+      this.objectId = typeToString(type);
+    }
   }
 
+  /**
+   * Convert a type to string
+   *
+   * @param type GroupId.Type to convert
+   * @return JSON string value
+   */
+  private String typeToString(Type type) {
+    if(type.equals(Type.all)) {
+      return "@all";
+    } else if(type.equals(Type.friends)) {
+      return "@friends";
+    } else {
+      return "@self";
+    }
+  }
+
+  /**
+   * Get the type of the stored objectId.
+   *
+   * @return GroupId.Type
+   */
   public Type getType() {
-    return type;
+    return getType(this.objectId);
   }
 
-  public String getGroupId() {
-    // Only valid for objects with type=groupId
-    return groupId;
-  }
-
-  public static GroupId fromJson(String jsonId) {
-    Type idSpecEnum = Type.jsonValueOf(jsonId);
-    if (idSpecEnum != null) {
-      return new GroupId(idSpecEnum, null);
+  /**
+   * Get the type of the given objectId.
+   *
+   * @return GroupId.Type
+   */
+  private Type getType(Object objectId) {
+	String type = parseType(objectId);
+    if(type.equals("self")) {
+      return Type.self;
+    } else if(type.equals("friends")) {
+      return Type.friends;
+    } else if(type.equals("all")) {
+      return Type.all;
+    } else {
+      return Type.objectId;
     }
-
-    return new GroupId(Type.groupId, jsonId);
   }
 
-  // These are overriden so that EasyMock doesn't throw a fit
+  /**
+   * Parse the type of the provided objectId.
+   *
+   * @param objectId Object to parse
+   * @return type String
+   */
+  private String parseType(Object objectId) {
+    if(objectId instanceof String) {
+      String o = (String) objectId;
+      // Remove the "@"
+      return o.substring(1, o.length());
+    } else {
+      return "";
+    }
+  }
+
+  /**
+   * Set the objectId with a String
+   *
+   * @param objectId String
+   * @throws IllegalArgumentException
+   */
+  public void setObjectId(String objectId) throws IllegalArgumentException {
+    if(getType(objectId).equals(Type.objectId)) {
+      this.objectId = new ObjectId(objectId);
+    } else {
+      this.objectId = objectId;
+    }
+  }
+
+  /**
+   * Get the objectId
+   *
+   * @return objectId Object
+   */
+  public Object getObjectId() {
+    return this.objectId;
+  }
+
+  /**
+   * Backwards compatibility.
+   *
+   * @param jsonId JSON string value of a GroupId
+   * @return GroupId
+   * @throws IllegalArgumentException
+   */
+  public static GroupId fromJson(String jsonId) throws IllegalArgumentException {
+    return new GroupId(jsonId);
+  }
+
   @Override
   public boolean equals(Object o) {
     if (o == this) {
       return true;
     }
-
     if (!(o instanceof GroupId)) {
       return false;
     }
-
     GroupId actual = (GroupId) o;
-    return this.type == actual.type && Objects.equal(this.groupId, actual.groupId);
+    return this.objectId.equals(actual.objectId);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(this.groupId, this.type);
+    return Objects.hashCode(this.objectId);
   }
 
   @Override
   public String toString() {
-      switch (type) {
-          case all:
-              return "ALL";
-          case deleted:
-              return "DELETE";
-          case friends:
-              return "FRIENDS";
-          case self:
-              return "SELF";
-          case groupId:
-              return "GROUPID(" + groupId + ')';
-          default:
-              return "UNKNOWN";
-      }
+    return this.objectId.toString();
   }
 }

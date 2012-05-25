@@ -174,7 +174,7 @@
 "sports" : ["frisbee","rugby"],
 "status" : "happy",
 "tags" : ["C#","JSON","template"],
-"thumbnailUrl" : "http://www.example.org/pic/?id=1",
+"thumbnailUrl" : "/samplecontainer/examples/nophoto.gif",
 "utcOffset" : "-8",
 "turnOffs" : ["lack of unit tests","cabbage"],
 "turnOns" : ["well document code"],
@@ -184,7 +184,7 @@
 "linkText" : "my profile",
 "type" : "Profile"
 },{
-"value" : "http://www.example.org/pic/?id=1",
+"value" : "/samplecontainer/examples/nophoto.gif",
 "linkText" : "my awesome picture",
 "type" : "Thumbnail"
 }]
@@ -604,9 +604,50 @@
 //
 // ----------------------------- Groups ---------------------------------------
 //
-"groups" : {
-"john.doe" :  ["1", "2", "3"],
-"george.doe" : ["13","14"]
+"groups":{
+    "canonical":[
+      {
+        "id":{
+          "value":"group0"
+        },
+        "title":"Group 0",
+        "description":"A group where the creater is also a member"
+      },
+      {
+        "id":{
+          "value":"group1"
+        },
+        "title":"Group 1",
+        "description":"A group where the creater is not a membber"
+      }
+    ],
+    "john.doe":[
+      {
+        "id":{
+          "value":"example.com:391nvf03381"
+        },
+        "title":"Group 2",
+        "description":"A group of people"
+      },
+      {
+        "id":{
+          "value":"example.com:390e3kd03"
+        },
+        "title":"Group 3",
+        "description":"Another group of people"
+      }
+    ]
+  },
+"groupMembers":{
+  "example.com:391nvf03381": [
+    "canonical",
+    "john.doe"
+  ],
+  "example.com:390e3kd03": [
+    "canonical",
+    "john.doe",
+    "jane.doe"
+  ]
 },
 //
 //---------------------------- Data For User Applications --------------------------------------------

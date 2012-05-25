@@ -194,7 +194,7 @@ public class SpiTestUtil {
     canonical.setSports(Lists.newArrayList("frisbee", "rugby"));
     canonical.setStatus("happy");
     canonical.setTags(Lists.newArrayList("C#", "JSON", "template"));
-    canonical.setThumbnailUrl("http://www.example.org/pic/?id=1");
+    canonical.setThumbnailUrl("/samplecontainer/examples/nophoto.gif");
     canonical.setUtcOffset(-8L);
     canonical.setTurnOffs(Lists.newArrayList("lack of unit tests", "cabbage"));
     canonical.setTurnOns(Lists.newArrayList("well document code"));
@@ -202,7 +202,7 @@ public class SpiTestUtil {
 
     canonical.setUrls(Lists.<Url>newArrayList(
         new UrlImpl("http://www.example.org/?id=1", "my profile", "Profile"),
-        new UrlImpl("http://www.example.org/pic/?id=1", "my awesome picture", "Thumbnail")));
+        new UrlImpl("/samplecontainer/examples/nophoto.gif", "my awesome picture", "Thumbnail")));
 
     return canonical;
   }

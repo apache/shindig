@@ -174,7 +174,7 @@
 "sports" : ["frisbee","rugby"],
 "status" : "happy",
 "tags" : ["C#","JSON","template"],
-"thumbnailUrl" : "http://www.example.org/pic/?id=1",
+"thumbnailUrl" : "/samplecontainer/examples/nophoto.gif",
 "utcOffset" : "-8",
 "turnOffs" : ["lack of unit tests","cabbage"],
 "turnOns" : ["well document code"],
@@ -184,7 +184,7 @@
 "linkText" : "my profile",
 "type" : "Profile"
 },{
-"value" : "http://www.example.org/pic/?id=1",
+"value" : "/samplecontainer/examples/nophoto.gif",
 "linkText" : "my awesome picture",
 "type" : "Thumbnail"
 }]

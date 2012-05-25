@@ -497,12 +497,12 @@ public class SpiDatabaseBootstrap {
 
     List<Url> urls = new ArrayList<Url>();
     urls.add(buildUrl("http://www.example.org/?id=1", "my profile", "Profile"));
-    urls.add(buildUrl("http://www.example.org/pic/?id=1", "my awesome picture", "Thumbnail"));
+    urls.add(buildUrl("/samplecontainer/examples/nophoto.gif", "my awesome picture", "Thumbnail"));
     person.setUrls(urls);
 
     List<ListField> photos = new ArrayList<ListField>();
     PhotoDb photo = new PhotoDb();
-    photo.setValue("http://www.example.org/pic/?id=1");
+    photo.setValue("/samplecontainer/examples/nophoto.gif");
     photo.setType("thumbnail");
     photos.add(photo);
     person.setPhotos(photos);

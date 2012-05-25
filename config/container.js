@@ -282,6 +282,7 @@
     "enableCaja" : false,
     "supportedFields" : {
        "person" : ["id", {"name" : ["familyName", "givenName", "unstructured"]}, "thumbnailUrl", "profileUrl"],
+       "group" : ["id", "title", "description"],
        "activity" : ["appId", "body", "bodyId", "externalId", "id", "mediaItems", "postedTime", "priority",
                      "streamFaviconUrl", "streamSourceUrl", "streamTitle", "streamUrl", "templateParams", "title",
                      "url", "userId"],

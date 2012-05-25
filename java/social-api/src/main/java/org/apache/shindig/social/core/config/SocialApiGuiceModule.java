@@ -1,25 +1,28 @@
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements. See the NOTICE file
+ * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
- * regarding copyright ownership. The ASF licenses this file
+ * regarding copyright ownership.  The ASF licenses this file
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
- * with the License. You may obtain a copy of the License at
+ * with the License.  You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied. See the License for the
- * specific language governing permissions and limitations under the License.
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 package org.apache.shindig.social.core.config;
 
 import java.util.List;
 import java.util.Set;
+
+import net.oauth.OAuthValidator;
 
 import org.apache.shindig.auth.AnonymousAuthenticationHandler;
 import org.apache.shindig.auth.AuthenticationHandler;
@@ -37,18 +40,17 @@ import org.apache.shindig.social.opensocial.service.ActivityHandler;
 import org.apache.shindig.social.opensocial.service.ActivityStreamHandler;
 import org.apache.shindig.social.opensocial.service.AlbumHandler;
 import org.apache.shindig.social.opensocial.service.AppDataHandler;
+import org.apache.shindig.social.opensocial.service.GroupHandler;
 import org.apache.shindig.social.opensocial.service.MediaItemHandler;
 import org.apache.shindig.social.opensocial.service.MessageHandler;
 import org.apache.shindig.social.opensocial.service.PersonHandler;
 
-import com.google.inject.Singleton;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.AbstractModule;
+import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
-
-import net.oauth.OAuthValidator;
 
 /**
  * Provides social api component injection. Implementor may want to replace this module if they need
@@ -77,7 +79,7 @@ public class SocialApiGuiceModule extends AbstractModule {
 
     Multibinder<Object> handlerBinder = Multibinder.newSetBinder(binder(), Object.class,
         Names.named("org.apache.shindig.handlers"));
-    for (Class handler : getHandlers()) {
+    for (Class<?> handler : getHandlers()) {
       handlerBinder.addBinding().toInstance(handler);
     }
 
@@ -87,10 +89,13 @@ public class SocialApiGuiceModule extends AbstractModule {
   /**
    * Hook to provide a Set of request handlers.  Subclasses may override
    * to add or replace additional handlers.
+   *
+   * @return Set<Class<?>> Set of handlers
    */
+  @SuppressWarnings("unchecked")
   protected Set<Class<?>> getHandlers() {
     return ImmutableSet.of(ActivityHandler.class, AppDataHandler.class,
             PersonHandler.class, MessageHandler.class, AlbumHandler.class,
-            MediaItemHandler.class, ActivityStreamHandler.class);
+            MediaItemHandler.class, ActivityStreamHandler.class, GroupHandler.class);
   }
 }

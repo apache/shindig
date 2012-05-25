@@ -16,7 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package org.apache.shindig.social.core.model;
+
+import java.util.Map;
 
 import org.apache.shindig.social.opensocial.model.Group;
 import org.apache.shindig.social.opensocial.spi.GroupId;
@@ -28,10 +31,11 @@ import org.apache.shindig.social.opensocial.spi.GroupId;
  */
 public class GroupImpl implements Group {
 
-  private GroupId groupId;
+  private GroupId id;
   private String title;
   private String description;
 
+  /** {@inheritDoc} */
   public String getTitle() {
     return title;
   }
@@ -41,6 +45,7 @@ public class GroupImpl implements Group {
     this.title = title;
   }
 
+  /** {@inheritDoc} */
   public String getDescription() {
     return description;
   }
@@ -51,11 +56,21 @@ public class GroupImpl implements Group {
   }
 
   /** {@inheritDoc} */
-  public void setId(GroupId groupId) {
-    this.groupId = groupId;
+  public void setId(Object id) throws IllegalArgumentException {
+    if(id instanceof String) {
+      this.id = new GroupId(id);
+    } else if(id instanceof GroupId) {
+      this.id = (GroupId) id;
+    // Coming from JSON
+    } else if(id instanceof Map) {
+      this.id = new GroupId(((Map) id).get("value"));
+    } else {
+      throw new IllegalArgumentException("The provided GroupId is not valid");
+    }
   }
 
-  public GroupId getId() {
-    return groupId;
+  /** {@inheritDoc} */
+  public String getId() {
+    return this.id.toString();
   }
 }

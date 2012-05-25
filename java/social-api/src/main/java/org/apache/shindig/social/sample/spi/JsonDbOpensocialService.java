@@ -1,19 +1,20 @@
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements. See the NOTICE file
+ * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
- * regarding copyright ownership. The ASF licenses this file
+ * regarding copyright ownership.  The ASF licenses this file
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
- * with the License. You may obtain a copy of the License at
+ * with the License.  You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied. See the License for the
- * specific language governing permissions and limitations under the License.
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 package org.apache.shindig.social.sample.spi;
@@ -44,6 +45,7 @@ import org.apache.shindig.social.core.model.PersonImpl;
 import org.apache.shindig.social.opensocial.model.Activity;
 import org.apache.shindig.social.opensocial.model.ActivityEntry;
 import org.apache.shindig.social.opensocial.model.Album;
+import org.apache.shindig.social.opensocial.model.Group;
 import org.apache.shindig.social.opensocial.model.MediaItem;
 import org.apache.shindig.social.opensocial.model.Message;
 import org.apache.shindig.social.opensocial.model.MessageCollection;
@@ -54,6 +56,7 @@ import org.apache.shindig.social.opensocial.spi.AlbumService;
 import org.apache.shindig.social.opensocial.spi.AppDataService;
 import org.apache.shindig.social.opensocial.spi.CollectionOptions;
 import org.apache.shindig.social.opensocial.spi.GroupId;
+import org.apache.shindig.social.opensocial.spi.GroupService;
 import org.apache.shindig.social.opensocial.spi.MediaItemService;
 import org.apache.shindig.social.opensocial.spi.MessageService;
 import org.apache.shindig.social.opensocial.spi.PersonService;
@@ -75,7 +78,7 @@ import com.google.inject.name.Named;
  */
 @Singleton
 public class JsonDbOpensocialService implements ActivityService, PersonService, AppDataService,
-    MessageService, AlbumService, MediaItemService, ActivityStreamService {
+    MessageService, AlbumService, MediaItemService, ActivityStreamService, GroupService {
 
   private static final Comparator<Person> NAME_COMPARATOR = new Comparator<Person>() {
     public int compare(Person person, Person person1) {
@@ -99,6 +102,16 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
    * db["people"] -> Array<Person>
    */
   private static final String PEOPLE_TABLE = "people";
+
+  /**
+   * db["groups"] -> Array<Group>
+   */
+  private static final String GROUPS_TABLE = "groups";
+
+  /**
+   * db["groupMembers"] -> Array<Person>
+   */
+  private static final String GROUP_MEMBERS_TABLE = "groupMembers";
 
   /**
    * db["activities"] -> Map<Person.Id, Array<Activity>>
@@ -575,6 +588,28 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
     }
   }
 
+  /** {@inheritDoc} */
+  public Future<RestfulCollection<Group>> getGroups(UserId userId,
+		CollectionOptions options, Set<String> fields, SecurityToken token)
+		throws ProtocolException {
+    List<Group> result = Lists.newArrayList();
+    String user = userId.getUserId(token);
+    try {
+      JSONArray groups = db.getJSONObject(GROUPS_TABLE).getJSONArray(user);
+
+      for (int i = 0; i < groups.length(); i++) {
+        JSONObject group = groups.getJSONObject(i);
+
+        Group groupObj = filterFields(group, fields, Group.class);
+        result.add(groupObj);
+      }
+    } catch (JSONException je) {
+      throw new ProtocolException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, je.getMessage(), je);
+    }
+
+    return ImmediateFuture.newInstance(new RestfulCollection<Group>(result));
+  }
+
   /**
    * {@inheritDoc}
    *
@@ -719,11 +754,18 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
     switch (group.getType()) {
     case all:
     case friends:
-    case groupId:
       if (db.getJSONObject(FRIEND_LINK_TABLE).has(userId)) {
         JSONArray friends = db.getJSONObject(FRIEND_LINK_TABLE).getJSONArray(userId);
         for (int i = 0; i < friends.length(); i++) {
           returnVal.add(friends.getString(i));
+        }
+      }
+      break;
+    case objectId:
+      if (db.getJSONObject(GROUP_MEMBERS_TABLE).has(group.toString())) {
+        JSONArray groupMembers = db.getJSONObject(GROUP_MEMBERS_TABLE).getJSONArray(group.toString());
+        for (int i = 0; i < groupMembers.length(); i++) {
+          returnVal.add(groupMembers.getString(i));
         }
       }
       break;

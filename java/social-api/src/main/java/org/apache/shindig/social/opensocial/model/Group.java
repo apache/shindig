@@ -16,12 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package org.apache.shindig.social.opensocial.model;
+
+import java.util.EnumSet;
+import java.util.Map;
+import java.util.Set;
 
 import org.apache.shindig.protocol.model.Exportablebean;
 import org.apache.shindig.social.core.model.GroupImpl;
-import org.apache.shindig.social.opensocial.spi.GroupId;
 
+import com.google.common.base.Functions;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
 import com.google.inject.ImplementedBy;
 
 /**
@@ -44,23 +51,44 @@ public interface Group {
     /**
      * Unique ID for this group Required.
      */
-    ID("Id"),
+    ID("id"),
+
     /**
      * Title of group Required.
      */
     TITLE("title"),
+
     /**
      * Description of group Optional.
      */
     DESCRIPTION("description");
 
     /**
-     * The json field that the instance represents.
+     * A Map to convert JSON string to Field representations.
+     */
+    private static final Map<String,Field> LOOKUP = Maps.uniqueIndex(
+        EnumSet.allOf(Field.class), Functions.toStringFunction());
+
+    /**
+     * The set of all fields.
+     */
+    public static final Set<String> ALL_FIELDS = LOOKUP.keySet();
+
+    /**
+     * The set of default fields returned fields.
+     */
+    public static final Set<String> DEFAULT_FIELDS = ImmutableSet.of(
+        ID.toString(),
+        TITLE.toString(),
+        DESCRIPTION.toString());
+
+    /**
+     * The JSON field that the instance represents.
      */
     private final String jsonString;
 
     /**
-     * create a field base on the a json element.
+     * Create a field base on the a JSON element.
      *
      * @param jsonString the name of the element
      */
@@ -69,30 +97,45 @@ public interface Group {
     }
 
     /**
-     * emit the field as a json element.
+     * Emit the field as a JSON element.
      *
      * @return the field name
      */
     @Override
     public String toString() {
-      return jsonString;
+      return this.jsonString;
+    }
+
+    /**
+     * Converts from a url string (usually passed in the fields= parameter) into the
+     * corresponding field enum.
+     *
+     * @param jsonString The string to translate.
+     * @return The corresponding group field.
+     */
+    public static Group.Field fromUrlString(String jsonString) {
+      return LOOKUP.get(jsonString);
     }
   }
 
   /**
-   * @return a groupId for this group
+   * Get ID of this group
+   *
+   * @return groupId for group
    */
-  GroupId getId();
+  String getId();
 
   /**
    * Set the default group id
    *
-   * @param id a valid GroupId
+   * @param id a valid GroupId representation
    */
-  void setId(GroupId id);
+  void setId(Object id);
 
   /**
-   * @return the title of the group
+   * Get title of this group
+   *
+   * @return title of the group
    */
   String getTitle();
 
@@ -104,7 +147,9 @@ public interface Group {
   void setTitle(String title);
 
   /**
-   * @return the description of this group
+   * Get the description of this group
+   *
+   * @return description of group
    */
   String getDescription();
 
