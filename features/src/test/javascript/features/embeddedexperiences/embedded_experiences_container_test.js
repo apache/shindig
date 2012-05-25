@@ -100,9 +100,9 @@ EEContainerTest.prototype.testNavigateGadgetWithPreferredExperience = function()
       this.setupGadgetsRpcRegister();
       var container = new osapi.container.Container({});
       var eeDataModel =
-        {'gadget' : 'http://example.com/gadget.xml', 'context' : {'label' : '123'},
+        {'gadget' : 'http://example.com/gadget.xml', 'context' : {'objectid' : '123'},
           'preferredExperience' : {'target' : {'type' : 'gadget','view' : 'my-ee-view', 'viewTarget' : 'DIALOG'},
-          'display' : {'type' : 'link', 'text' : 'Click me to say Hello World'}}};
+          'display' : {'type' : 'text', 'label' : 'Click me to say Hello World'}}};
 
       this.setupGadgetSite(1, {}, null);
       this.setupPreload();
@@ -110,7 +110,7 @@ EEContainerTest.prototype.testNavigateGadgetWithPreferredExperience = function()
 
       // verify
       var renderParamDataModel = this.site_navigateTo_renderParams['eeDataModel'];
-      this.assertEquals({"label":"123"}, renderParamDataModel.context);
+      this.assertEquals({"objectid":"123"}, renderParamDataModel.context);
       this.assertEquals('my-ee-view', this.site_navigateTo_renderParams['view']);
 
 };

@@ -98,7 +98,7 @@ osapi.container.ee.TargetType = {
  */
 osapi.container.ee.DisplayType = {
     IMAGE: 'image',
-    LINK: 'link'
+    TEXT: 'text'
 };
 
 /**

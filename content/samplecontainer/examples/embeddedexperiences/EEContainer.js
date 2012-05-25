@@ -171,11 +171,11 @@ function createAccordianEntry(i, entry) {
 }
 
 function getPreferredExperienceLinkText(preferredExperience) {
-  if(preferredExperience && preferredExperience.target) {
-    if(preferredExperience.display.type !== 'link') {
+  if(preferredExperience && preferredExperience.display) {
+    if(preferredExperience.display.type !== osapi.container.ee.DisplayType.TEXT) {
       return null;
     }
-    var linkText = preferredExperience.display.text;
+    var linkText = preferredExperience.display.label;
     return linkText;
   }
 }

@@ -222,7 +222,6 @@ public class FeatureRegistry {
     List<FeatureNode> featureNodes = transitive ?
         getTransitiveDeps(needed, unsupported) : getRequestedNodes(needed, unsupported);
 
-
     ImmutableList.Builder<FeatureBundle> bundlesBuilder =
         new ImmutableList.Builder<FeatureBundle>();
 

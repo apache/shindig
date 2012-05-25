@@ -470,7 +470,7 @@
       "provider": {
         "url": "http://example.org/activity-stream"
       },
-      "title": "John post new photo to his blog",
+      "title": "John posted a new photo to his blog",
       "actor": {
         "url": "http://example.org/john",
         "objectType": "person",
@@ -517,8 +517,8 @@
               "view": "embedded_canvas"
             },
             "display": {
-              "type": "link",
-              "text" : "Checkout new photo in John's blog"
+              "type": "text",
+              "label" : "Checkout new photo in John's blog"
             }
           }
         },

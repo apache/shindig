@@ -101,7 +101,7 @@
     }
   }, {
     "id": "activity3",
-    "title": "John post new photo to his blog",
+    "title": "John posted a new photo to his blog",
     "verb": "post",
     "target": {
       "id": "target3",
@@ -150,8 +150,8 @@
         },
         "preferredExperience": {
           "display": {
-            "type": "link",
-            "text": "Checkout new photo in John's blog"
+            "type": "text",
+            "label": "Checkout new photo in John's blog"
           },
           "target": {
             "type": "gadget",
