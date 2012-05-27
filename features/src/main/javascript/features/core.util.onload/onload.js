@@ -49,7 +49,11 @@ gadgets.util = gadgets.util || {};
     };
 
     for (var i = 0, j = onLoadHandlers.length; i < j; ++i) {
-      onLoadHandlers[i]();
+      try {
+        onLoadHandlers[i]();
+      } catch (ex) {
+        gadgets.warn("Could not fire onloadhandler "+ex.message);
+      }
     }
     onLoadHandlers = undefined;  // No need to hold these references anymore.
   };
