@@ -69,7 +69,7 @@ public class PropertiesModule extends AbstractModule {
    * If not set uses fixed value of "".
    * @return an context path as a string.
    */
-  private String getContextRoot() {
+  protected String getContextRoot() {
     return System.getProperty("shindig.contextroot") != null ? System.getProperty("shindig.contextroot") : "";
   }
 
