@@ -96,11 +96,12 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
   private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
 
   protected static final String DEFAULT_CSS =
-      "html,body{height:100%;width:100%;overflow:auto;}" +
       "body,td,div,span,p{font-family:arial,sans-serif;}" +
       "a {color:#0000cc;}a:visited {color:#551a8b;}" +
       "a:active {color:#ff0000;}" +
       "body{margin: 0px;padding: 0px;background-color:white;}";
+  protected static final String SCROLLING_CSS = 
+      "html,body{height:100%;width:100%;overflow:auto;}";
   static final String IS_GADGET_BEACON = "window['__isgadget']=true;";
   static final String INSERT_BASE_ELEMENT_KEY = "gadgets.insertBaseElement";
   static final String REWRITE_DOCTYPE_QNAME = "gadgets.doctype_qname";
@@ -182,13 +183,16 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
 
       // Insert new content before any of the existing children of the head element
       Node firstHeadChild = head.getFirstChild();
-
+      
+      Element injectedStyle = document.createElement("style");
+      injectedStyle.setAttribute("type", "text/css");
+      head.insertBefore(injectedStyle, firstHeadChild);
+      injectedStyle.appendChild(injectedStyle.getOwnerDocument().
+          createTextNode(SCROLLING_CSS));
+      
       // Only inject default styles if no doctype was specified.
       if (document.getDoctype() == null) {
-        Element defaultStyle = document.createElement("style");
-        defaultStyle.setAttribute("type", "text/css");
-        head.insertBefore(defaultStyle, firstHeadChild);
-        defaultStyle.appendChild(defaultStyle.getOwnerDocument().
+        injectedStyle.appendChild(injectedStyle.getOwnerDocument().
             createTextNode(DEFAULT_CSS));
       }
       // Override & insert DocType if Gadget is written for OpenSocial 2.0 or greater,
