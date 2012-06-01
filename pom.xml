@@ -792,6 +792,7 @@
                 <exclude>etc/eclipse/shindig.importorder</exclude>
                 <exclude>JsMin.php</exclude>
                 <exclude>**/content/**/*.json</exclude>
+                <exclude>**/content/**/*.swf</exclude>
                 <exclude>**/test/misc/rewriter*.css</exclude>
                 <exclude>**/test/misc/rewriter*.js</exclude>
                 <exclude>**/test/misc/*.html</exclude>
@@ -800,6 +801,8 @@
                 <exclude>**/site/src/site/resources/**</exclude>
                 <exclude>**/site/src/site/site.vm</exclude>
                 <exclude>**/site/generated_site/**</exclude>
+                <exclude>**/site/cms/trunk/content/bootstrap/**</exclude>
+                <exclude>**/site/cms/trunk/content/jquery/**</exclude>
                 <exclude>phpunit.xml.dist</exclude>
                 <exclude>BUILD-JAVA</exclude>
                 <exclude>COMMITTERS</exclude>
@@ -1311,6 +1314,7 @@
               <exclude>etc/eclipse/shindig.importorder</exclude>
               <exclude>JsMin.php</exclude>
               <exclude>**/content/**/*.json</exclude>
+              <exclude>**/content/**/*.swf</exclude>
               <exclude>**/test/misc/rewriter*.css</exclude>
               <exclude>**/test/misc/rewriter*.js</exclude>
               <exclude>**/test/misc/*.html</exclude>
@@ -1319,6 +1323,8 @@
               <exclude>**/site/src/site/resources/**</exclude>
               <exclude>**/site/src/site/site.vm</exclude>
               <exclude>**/site/generated_site/**</exclude>
+							<exclude>**/site/cms/trunk/content/bootstrap/**</exclude>
+              <exclude>**/site/cms/trunk/content/jquery/**</exclude>
               <exclude>phpunit.xml.dist</exclude>
               <exclude>BUILD-JAVA</exclude>
               <exclude>COMMITTERS</exclude>
