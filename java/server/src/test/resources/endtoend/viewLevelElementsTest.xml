@@ -20,7 +20,7 @@
 <Module>
   <ModulePrefs title="EndToEndTest">
     <Require feature="views" />
-    <Require feature="opensocial-0.8" views="blank"/>
+    <Require feature="opensocial" views="blank"/>
     <Require feature="osapi">
       <Param name="paramName">BAD_VALUE</Param>
     </Require>
@@ -48,7 +48,7 @@
               var expected = "GOOD_VALUE";
               assertTrue('Should be GOOD_VALUE', expected == params["paramName"]);
               assertTrue('Missing content-rewrite feature', gadgets.util.hasFeature("content-rewrite"));
-              assertTrue('Should not have opensocial-0.8 loaded', !gadgets.util.hasFeature("opensocial-0.8"));
+              assertTrue('Should not have opensocial loaded', !gadgets.util.hasFeature("opensocial"));
               finished();
            },
             

@@ -18,9 +18,6 @@
   under the License.
 -->
 <feature>
-  <name>opensocial-0.7</name>
-  <dependency>opensocial-0.8</dependency>
-  <gadget>
-    <script src="opensocial7to8.js"/>
-  </gadget>
+  <name>opensocial-2.0</name>
+  <dependency>opensocial</dependency>
 </feature>

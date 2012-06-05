@@ -19,7 +19,7 @@
 -->
 <Module>
   <ModulePrefs title="ACTIVITY" author_email="lipengage@gmail.com">
-    <Require feature="opensocial-0.8"></Require>
+    <Require feature="opensocial-1.0"></Require>
     <Require feature="dynamic-height"></Require>
   </ModulePrefs>
   <Content type="html">

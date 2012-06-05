@@ -36,7 +36,6 @@ class MockHtmlGadgetFactory extends GadgetFactory {
     return '<?xml version="1.0" encoding="UTF-8" ?>
 <Module>
   <ModulePrefs title="title">
-    <Require feature="opensocial-0.8" />
     <Require feature="dynamic-height" />
     <Require feature="flash" />
     <Require feature="minimessage" />

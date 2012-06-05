@@ -48,7 +48,6 @@ class GadgetFactoryTest extends \PHPUnit_Framework_TestCase {
             'rawxml' => '<?xml version="1.0" encoding="UTF-8" ?>
 <Module>
   <ModulePrefs title="title">
-    <Require feature="opensocial-0.8" />
     <Require feature="dynamic-height" />
     <Require feature="flash" />
     <Require feature="minimessage" />
@@ -75,7 +74,6 @@ class GadgetFactoryTest extends \PHPUnit_Framework_TestCase {
             'rawxml' => '<?xml version="1.0" encoding="UTF-8" ?>
 <Module>
   <ModulePrefs title="title">
-    <Require feature="opensocial-0.8" />
     <Require feature="dynamic-height" />
     <Require feature="flash" />
     <Require feature="minimessage" />
@@ -101,7 +99,6 @@ class GadgetFactoryTest extends \PHPUnit_Framework_TestCase {
             'rawxml' => '<?xml version="1.0" encoding="UTF-8" ?>
 <Module>
   <ModulePrefs title="title">
-    <Require feature="opensocial-0.8" />
     <Require feature="pubsub" views="canvas" />
     <Require feature="flash" views="canvas,profile" />
     <Optional feature="minimessage" />
@@ -119,7 +116,6 @@ class GadgetFactoryTest extends \PHPUnit_Framework_TestCase {
         $gadgetFactory = new GadgetFactory($context, $this->token);
         $gadget = $gadgetFactory->createGadget();
 
-        $this->assertTrue(in_array('opensocial-0.8', $gadget->features));
         $this->assertTrue(in_array('flash', $gadget->features));
         $this->assertTrue(in_array('minimessage', $gadget->features));
         $this->assertTrue(in_array('opensocial-data', $gadget->features));

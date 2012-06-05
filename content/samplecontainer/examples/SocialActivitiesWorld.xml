@@ -20,7 +20,6 @@
 <Module>
  <ModulePrefs title="Social Activities World"
               icon="http://localhost:8080/samplecontainer/examples/icon.png">
-   <Require feature="opensocial-0.7"/>
    <Require feature="settitle"/>
    <Require feature="dynamic-height"/>
  </ModulePrefs>

@@ -31,7 +31,6 @@
 		
 		<Icon>http://example.org/favicon.ico</Icon>
 		
-		<Require feature="opensocial-0.7" />
 		<Require feature="dynamic-height" />
 		<Require feature="views" />
 		<Require feature="tabs" />

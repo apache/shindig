@@ -20,7 +20,6 @@
 <Module>
   <ModulePrefs title="EndToEndTest">
     <Require feature="caja" />
-    <Require feature="opensocial-0.8" />
   </ModulePrefs>
   <Content type="html">
     <![CDATA[
