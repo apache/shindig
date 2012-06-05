@@ -76,7 +76,9 @@ osapi.container.Container.addMixin('views', function(container) {
       var orig_site = container.getGadgetSiteByIframeId_(siteOwnerId),
           rel = orig_site.getActiveSiteHolder().getIframeElement();
 
-      function callback(element, opt_containerContext) {
+      var opt_containerContext = self.getContainerAssociatedContext(dataModel, opt_metadata);
+
+      function callback(element) {
         var gadgetRenderParams = {};
         gadgetRenderParams[osapi.container.RenderParam.VIEW] =
             osapi.container.ee.RenderParam.EMBEDDED;
@@ -110,9 +112,8 @@ osapi.container.Container.addMixin('views', function(container) {
         rel, opt_metadata, viewTarget, coordinates, orig_site, callback
       );
 
-      var containerContext = self.getContainerAssociatedContext(dataModel, opt_metadata);
       if (element) {
-        callback(element, containerContext);
+        callback(element);
       }
     };
 
@@ -176,8 +177,7 @@ osapi.container.Container.addMixin('views', function(container) {
    * @return {Object} Additional context need to be passed by container.
    */
   this.getContainerAssociatedContext = function(dataModel, opt_gadgetInfo) {
-    console.log('container needs to define getContainerAssociatedContext function');
-    return {};
+    return null;
   }
 
 });
