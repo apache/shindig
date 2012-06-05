@@ -36,9 +36,7 @@
 osapi.container.GadgetSite = function(container, service, args) {
   var undef;
 
-  osapi.container.Site.call(this, container, service,
-    args['gadgetEl']
-  ); // call super
+  osapi.container.Site.call(this, container, service, args['gadgetEl']); // call super
 
   /**
    * @type {string}
@@ -283,10 +281,20 @@ osapi.container.GadgetSite.prototype.render = function(
     return;
   }
 
-  // Load into the double-buffer if there is one.
-  var el = this.loadingGadgetEl_ || this.el_;
-  this.loadingGadgetHolder_ = new osapi.container.GadgetHolder(this, el,
-          this.gadgetOnLoad_);
+  // Set the loading gadget holder:
+  // 1. If the gadget site already has currentGadgetHolder_ set and no loading element passed,
+  //    simply set the current gadget holder as the loading gadget holder.
+  // 2. Else, check if caller pass the loading gadget element. If it does then use it to create new
+  //    instance of osapi.container.GadgetHolder as the loading gadget holder.
+  if (this.currentGadgetHolder_ && !this.loadingGadgetEl_) {
+    this.loadingGadgetHolder_ = this.currentGadgetHolder_;
+    this.currentGadgetHolder_ = null;
+  }
+  else {
+    // Check if we are passed the loading gadget element
+    var el = this.loadingGadgetEl_ || this.el_;
+    this.loadingGadgetHolder_ = new osapi.container.GadgetHolder(this, el, this.gadgetOnLoad_);
+  }
 
   var localRenderParams = {};
   for (var key in renderParams) {

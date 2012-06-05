@@ -93,6 +93,15 @@ osapi.container.SiteHolder.prototype.getIframeId = function() {
 };
 
 /**
+ * Disposes the gadget holder and performs cleanup of any holder state.
+ */
+osapi.container.SiteHolder.prototype.dispose = function() {
+  if (this.el_ && this.el_.firstChild) {
+    this.el_.removeChild(this.el_.firstChild);
+  }
+};
+
+/**
  * Creates the iframe element source for this holder's iframe element.
  * @param {string} url The src url for the iframe.
  * @param {Object.<string, string>=} overrides A bag of iframe attribute overrides.
@@ -137,16 +146,6 @@ osapi.container.SiteHolder.prototype.createIframeAttributeMap = function(url, ov
      }
    }
    return params;
-};
-
-/**
- * Disposes the gadget holder and performs cleanup of any holder state.
- * @abstract
- */
-osapi.container.SiteHolder.prototype.dispose = function() {
-  if (this.el_ && this.el_.firstChild) {
-    this.el_.removeChild(this.el_.firstChild);
-  }
 };
 
 //Abstract methods
