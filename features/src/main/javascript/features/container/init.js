@@ -31,9 +31,10 @@
       scriptEl = document.getElementById(window.__CONTAINER_SCRIPT_ID);
     } else {
       var scriptEls = document.getElementsByTagName('script');
-      for(var i = 0; !scriptEls && i < scriptEls.length; i++) {
+      for(var i = 0; scriptEls && i < scriptEls.length; i++) {
         if(/.*gadgets\/js\/.*container.*[.]js.*[?&]c=1(&|$).*/.test(scriptEls[i].src)) {
           scriptEl = scriptEls[i];
+          break;
         }
       }
     }
