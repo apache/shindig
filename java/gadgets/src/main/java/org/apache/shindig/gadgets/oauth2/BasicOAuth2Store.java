@@ -397,7 +397,7 @@ public class BasicOAuth2Store implements OAuth2Store {
 
       token.setGadgetUri(processedGadgetUri);
 
-      final OAuth2Token existingToken = this.getToken(processedGadgetUri, token.getServiceName(),
+      final OAuth2Token existingToken = this.getToken(gadgetUri, token.getServiceName(),
               token.getUser(), token.getScope(), token.getType());
       try {
         if (existingToken == null) {
