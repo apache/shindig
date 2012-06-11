@@ -48,7 +48,6 @@ osapi.container.ee.DataModel = {
     GADGET: 'gadget',
     URL: 'url',
     PREVIEW_IMAGE: 'previewImage',
-    PREVIEW_IMAGE_DATA: 'previewImageData',
     PREFERRED_EXPERIENCE: 'preferredExperience'
 };
 
