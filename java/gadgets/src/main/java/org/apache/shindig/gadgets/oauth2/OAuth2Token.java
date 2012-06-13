@@ -39,14 +39,14 @@ public interface OAuth2Token extends Serializable {
   /**
    * Used for creating MAC token nonces
    *
-   * @return the time (in seconds) when the token was issued
+   * @return the time (in milliseconds) when the token was issued
    */
   long getIssuedAt();
 
   /**
    * issuedAt + expires_in or 0 if no expires_in was sent by server
    *
-   * @return the time (in seconds) when the token expires
+   * @return the time (in milliseconds) when the token expires
    */
   long getExpiresAt();
 

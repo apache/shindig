@@ -31,7 +31,8 @@ public class GroupId {
     objectId  (0),
     self      (1),
     friends   (2),
-    all       (3);
+    all       (3),
+    custom   (4);
 
     private final int id;
     Type(int id) { this.id = id; }
@@ -56,7 +57,7 @@ public class GroupId {
       this.objectId = (ObjectId) objectId;
     // Else it must be a string, store as such
     } else {
-      if(getType(objectId).equals(Type.objectId)) {
+      if(Type.objectId.equals(getType(objectId))) {
         this.objectId = new ObjectId(objectId.toString());
       } else {
         this.objectId = objectId.toString();
@@ -76,6 +77,9 @@ public class GroupId {
     if(type.equals(Type.objectId)) {
       this.objectId = new ObjectId(objectId);
     // Else store the string representation of the type
+    } else if(Type.custom.equals(type)){
+      //Custom @ id
+      this.objectId = objectId; 
     } else {
       this.objectId = typeToString(type);
     }
@@ -88,9 +92,9 @@ public class GroupId {
    * @return JSON string value
    */
   private String typeToString(Type type) {
-    if(type.equals(Type.all)) {
+    if(Type.all.equals(type)) {
       return "@all";
-    } else if(type.equals(Type.friends)) {
+    } else if(Type.friends.equals(type)) {
       return "@friends";
     } else {
       return "@self";
@@ -119,6 +123,10 @@ public class GroupId {
       return Type.friends;
     } else if(type.equals("all")) {
       return Type.all;
+    } else if(objectId instanceof String && ((String)objectId).startsWith("@")) {
+    	// Could be a custom @ id, and it certainly is not an object id
+    	// return null we don't know the type
+    	return Type.custom;
     } else {
       return Type.objectId;
     }
