@@ -19,6 +19,7 @@
 
 package org.apache.shindig.social.opensocial.spi;
 
+import org.apache.shindig.social.opensocial.spi.GroupId.Type;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -38,6 +39,10 @@ public class GroupIdTest extends Assert {
     GroupId group = GroupId.fromJson("superbia");
     assertEquals(GroupId.Type.objectId, group.getType());
     assertEquals("superbia", group.getObjectId().toString());
+
+    GroupId unknown = GroupId.fromJson("@foo");
+    assertEquals(Type.custom, unknown.getType());
+    assertEquals("@foo", unknown.getObjectId().toString());
   }
 
   @Test
@@ -51,6 +56,31 @@ public class GroupIdTest extends Assert {
 
     assertEquals(g1.getType(), g2.getType());
     assertEquals(g1.getObjectId().toString(), g2.getObjectId().toString());
+
+    GroupId g3 =  new GroupId("@foo");
+    assertEquals(Type.custom, g3.getType());
+    assertEquals("@foo", g3.getObjectId().toString());
+
+    GroupId g4 = new GroupId(Type.objectId, "example.com:195mg90a39v");
+    assertEquals(Type.objectId, g4.getType());
+    assertEquals("example.com:195mg90a39v", g4.getObjectId().toString());
+
+    GroupId g5 = new GroupId(Type.custom, "@foo");
+    assertEquals(Type.custom, g5.getType());
+    assertEquals("@foo", g5.getObjectId().toString());
+
+    GroupId g6 = new GroupId(Type.all, "something");
+    assertEquals(Type.all, g6.getType());
+    assertEquals("@all", g6.getObjectId().toString());
+
+    GroupId g7 = new GroupId(Type.self, null);
+    assertEquals(Type.self, g7.getType());
+    assertEquals("@self", g7.getObjectId().toString());
+
+    GroupId g8 = new GroupId(Type.friends, "bar");
+    assertEquals(Type.friends, g8.getType());
+    assertEquals("@friends", g8.getObjectId().toString());
+
   }
 
   @Test(expected=IllegalArgumentException.class)
