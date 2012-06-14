@@ -163,7 +163,7 @@ public class BlobCrypterSecurityTokenCodec implements SecurityTokenCodec, Contai
   public String encodeToken(SecurityToken token) throws SecurityTokenException {
     if (!token.getAuthenticationMode().equals(
             AuthenticationMode.SECURITY_TOKEN_URL_PARAMETER.name())) {
-      throw new SecurityTokenException("Can only encode BlobCrypterSecurityTokens");
+      throw new SecurityTokenException("Can only encode BlogCrypterSecurityTokens");
     }
 
     // Test code sends in real AbstractTokens, they have modified time sources in them so
