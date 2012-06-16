@@ -112,7 +112,7 @@ public class RestfulJsonActivityEntryTest extends AbstractLargeRestfulTests{
   @Test
   public void testGetActivityEntrySupportedFields() throws Exception {
     String resp = getResponse("/activitystreams/@supportedFields", "GET", null, ContentTypes.OUTPUT_JSON_CONTENT_TYPE);
-    String expected = TestUtils.loadTestFixture(FIXTURE_LOC + "ActivityStreamsSupportedFields.json");;
+    String expected = TestUtils.loadTestFixture(FIXTURE_LOC + "ActivityStreamsSupportedFields.json");
     assertTrue(TestUtils.jsonsEqual(expected, resp));
   }
 }
