@@ -49,7 +49,8 @@ public interface ActivityEntry extends Comparable<ActivityEntry>, ExtendableBean
     UPDATED("updated"),
     URL("url"),
     VERB("verb"),
-    OPENSOCIAL("openSocial");
+    OPENSOCIAL("openSocial"),
+    EXTENSIONS("extensions");
 
     // The name of the JSON element
     private final String jsonString;
