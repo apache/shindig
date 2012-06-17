@@ -32,6 +32,8 @@ import java.util.TreeMap;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.shindig.auth.AuthInfoUtil;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.servlet.HttpUtilTest;
@@ -60,6 +62,7 @@ import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 
 /**
@@ -149,11 +152,14 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
   }
 
   private JSONObject extractJsonFromResponse() throws JSONException {
-    String body = recorder.getResponseAsString();
+    return extractJsonFromResponse(recorder.getResponseAsString());
+  }
+
+  private JSONObject extractJsonFromResponse(String response) throws JSONException {
     String defaultCruftMsg = "throw 1; < don't be evil' >";
-    assertStartsWith(defaultCruftMsg, body);
-    body = body.substring(defaultCruftMsg.length());
-    return new JSONObject(body).getJSONObject(REQUEST_URL.toString());
+    assertStartsWith(defaultCruftMsg, response);
+    response = response.substring(defaultCruftMsg.length());
+    return new JSONObject(response).getJSONObject(REQUEST_URL.toString());
   }
 
   @Before
@@ -470,6 +476,29 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
     assertTrue("getSummaries not parsed correctly.", entry.has("Summary"));
     assertEquals(entrySummary, entry.getString("Summary"));
     assertTrue(rewriter.responseWasRewritten());
+  }
+
+  @Test
+  public void testMultiPartFormPostWithSpecialChars() throws Exception {
+    String body = "\u003c!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01//EN\" \"http://www.w3.org/TR/html4/strict.dtd\"\u003e"
+      + "<html><body>&quot;Hello, world!&quot;</body></html>";
+    expectGetAndReturnBody(body);
+
+    expect(request.getParameter(MakeRequestHandler.CONTENT_TYPE_PARAM)).andReturn("TEXT");
+    expect(request.getParameter(MakeRequestHandler.MULTI_PART_FORM_POST_IFRAME)).andReturn("1");
+    replay();
+
+    handler.fetch(request, recorder);
+    String response = recorder.getResponseAsString();
+    response = StringUtils.removeStart(response, MakeRequestHandler.IFRAME_RESPONSE_PREFIX);
+    response = StringUtils.removeEnd(response, MakeRequestHandler.IFRAME_RESPONSE_SUFFIX);
+    response = StringEscapeUtils.unescapeEcmaScript(response);
+    JSONObject result = extractJsonFromResponse(response);
+    assertEquals(
+      "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01//EN\" \"http://www.w3.org/TR/html4/strict.dtd\">"
+        + "<html><body>&quot;Hello, world!&quot;</body></html>",
+      result.get("body")
+    );
   }
 
   @Test
