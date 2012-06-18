@@ -125,28 +125,36 @@ osapi.container.Service.prototype.getGadgetMetadata = function(request, opt_call
     request['ids'] = uncachedUrls;
     request['language'] = this.getLanguage();
     request['country'] = this.getCountry();
-    this.updateContainerSecurityToken(function() {
-      osapi['gadgets']['metadata'](request).execute(function(response) {
-        // If response entirely fails, augment individual errors.
-        if (response['error']) {
-          for (var i = 0; i < request['ids'].length; i++) {
-            var id = request['ids'][i];
-            finalResponse[id] = { 'error' : response['error'] };
-          }
-
-        // Otherwise, cache response. Augment final response with server response.
-        } else {
-          var currentTimeMs = osapi.container.util.getCurrentTimeMs();
-          for (var id in response) {
-            var resp = response[id];
-            self.updateResponse_(resp, id, currentTimeMs);
-            self.cachedMetadatas_[id] = resp;
-            finalResponse[id] = resp;
-          }
+    this.updateContainerSecurityToken(function(error) {
+      if (error) {
+        for (var i = 0; i < request['ids'].length; i++) {
+          var id = request['ids'][i];
+          finalResponse[id] = { 'error' : error };
         }
-
         callback(finalResponse);
-      });
+      } else {
+        osapi['gadgets']['metadata'](request).execute(function(response) {
+          // If response entirely fails, augment individual errors.
+          if (response['error']) {
+            for (var i = 0; i < request['ids'].length; i++) {
+              var id = request['ids'][i];
+              finalResponse[id] = { 'error' : response['error'] };
+            }
+
+          // Otherwise, cache response. Augment final response with server response.
+          } else {
+            var currentTimeMs = osapi.container.util.getCurrentTimeMs();
+            for (var id in response) {
+              var resp = response[id];
+              self.updateResponse_(resp, id, currentTimeMs);
+              self.cachedMetadatas_[id] = resp;
+              finalResponse[id] = resp;
+            }
+          }
+
+          callback(finalResponse);
+        });
+      }
     });
   }
 };
@@ -243,11 +251,15 @@ osapi.container.Service.prototype.getGadgetToken = function(request, opt_callbac
   };
 
   // If we have a custom token fetch function, call it -- otherwise use the default
-  self.updateContainerSecurityToken(function() {
-    if (self.config_[osapi.container.ContainerConfig.GET_GADGET_TOKEN]) {
-      self.config_[osapi.container.ContainerConfig.GET_GADGET_TOKEN](request, tokenResponseCallback);
+  self.updateContainerSecurityToken(function(error) {
+    if (error) {
+      tokenResponseCallback({'error': error});
     } else {
-      osapi['gadgets']['token'](request).execute(tokenResponseCallback);
+      if (self.config_[osapi.container.ContainerConfig.GET_GADGET_TOKEN]) {
+        self.config_[osapi.container.ContainerConfig.GET_GADGET_TOKEN](request, tokenResponseCallback);
+      } else {
+        osapi['gadgets']['token'](request).execute(tokenResponseCallback);
+      }
     }
   });
 };
@@ -410,14 +422,14 @@ osapi.container.Service.prototype.getCountry = function() {
       callbacks = [];
 
 
-  function runCallbacks(callbacks) {
+  function runCallbacks(callbacks, error) {
     while (callbacks.length) {
-      callbacks.shift().call(null); // Window context
+      callbacks.shift().call(null, error); // Window context
     }
   }
 
   function refresh(fetch_once) {
-    fetching = true;
+    var self = this;
     if (containerTimeout) {
       clearTimeout(containerTimeout);
       containerTimeout = 0;
@@ -425,26 +437,30 @@ osapi.container.Service.prototype.getCountry = function() {
 
     var fetch = fetch_once || this.config_[osapi.container.ContainerConfig.GET_CONTAINER_TOKEN];
     if (fetch) {
-      var self = this;
-      fetch(function(token, ttl) { // token and ttl may be undefined in the case of an error
-        fetching = false;
+      if (!fetching) {
+        fetching = true;
+        fetch(function(token, ttl, error) { // token and ttl may be undefined in the case of an error
+          fetching = false;
 
-        // Use last known ttl if there was an error
-        containerTokenTTL = token ? (ttl * 1000 * 0.8) : containerTokenTTL;
-        if (containerTokenTTL) {
-          // Refresh again in 80% of the reported ttl
-          // Pass null in to closure because FF behaves un-expectedly when that param is not explicitly provided.
-          containerTimeout = setTimeout(gadgets.util.makeClosure(self, refresh, null), containerTokenTTL);
-        }
+          // Use last known ttl if there was an error
+          containerTokenTTL = typeof(ttl) == 'number' ? (ttl * 1000 * 0.8) : containerTokenTTL;
+          if (containerTokenTTL) {
+            // Refresh again in 80% of the reported ttl
+            // Pass null in to closure because FF behaves un-expectedly when that param is not explicitly provided.
+            containerTimeout = setTimeout(gadgets.util.makeClosure(self, refresh, null), containerTokenTTL);
+          }
 
-        if (token) {
-          // Looks like everything worked out...  let's update the token.
-          shindig.auth.updateSecurityToken(token);
-          lastRefresh =  osapi.container.util.getCurrentTimeMs();
-          // And then run all the callbacks waiting for this.
-          runCallbacks(callbacks);
-        }
-      });
+          if (token) {
+            // Looks like everything worked out...  let's update the token.
+            shindig.auth.updateSecurityToken(token);
+            lastRefresh =  osapi.container.util.getCurrentTimeMs();
+            // And then run all the callbacks waiting for this.
+            runCallbacks(callbacks);
+          } else if (error) {
+            runCallbacks(callbacks, error);
+          }
+        });
+      }
     } else {
       fetching = false;
       // Fail gracefully, container supplied no fetch function. Do not hold on to callbacks.
@@ -455,8 +471,11 @@ osapi.container.Service.prototype.getCountry = function() {
   /**
    * @see osapi.container.Container.prototype.updateContainerSecurityToken
    */
-  osapi.container.Service.prototype.updateContainerSecurityToken = function(callback, token, ttl) {
-    var now = osapi.container.util.getCurrentTimeMs(),
+  osapi.container.Service.prototype.updateContainerSecurityToken = function(callback, tokenOrWait, ttl) {
+    var undef,
+        now = osapi.container.util.getCurrentTimeMs(),
+        token = typeof(tokenOrWait) != 'boolean' && tokenOrWait || undef,
+        wait = typeof(tokenOrWait) == 'boolean' && tokenOrWait,
         needsRefresh = containerTokenTTL &&
             (fetching || token || !lastRefresh || now > lastRefresh + containerTokenTTL);
     if (needsRefresh) {
@@ -478,8 +497,14 @@ osapi.container.Service.prototype.getCountry = function() {
         refresh.call(this, function(result) {
           result(token, ttl);
         });
-      } else if (!fetching) {
-        // There's no fetch going on right now. We need to start one because the token needs a refresh
+      } else if (!fetching && !wait) {
+        // There's no fetch going on right now. Unless wait is true, we need to start one right away
+        // because the token needs a refresh.
+
+        // If wait is true, the callback really just wants a valid token. It may be called with an
+        // error for informational purposes, but it's likely the callback will simply queue up
+        // immediately if there was an error.  To avoid spamming the refresh method, we allow them to
+        // specify `wait` so that it can wait for success without forcing a fetch.
         refresh.call(this);
       }
     } else if (callback) {
