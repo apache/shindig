@@ -828,7 +828,7 @@ public class BasicOAuth2Request implements OAuth2Request {
         if (ret == null) {
           // response is not null..
           final int statusCode = response.getHttpStatusCode();
-          if (statusCode == HttpResponse.SC_UNAUTHORIZED) {
+          if ((statusCode == HttpResponse.SC_UNAUTHORIZED) || (statusCode == HttpResponse.SC_BAD_REQUEST)) {
             try {
               this.store.removeToken(accessor.getRefreshToken());
             } catch (final GadgetException e) {
