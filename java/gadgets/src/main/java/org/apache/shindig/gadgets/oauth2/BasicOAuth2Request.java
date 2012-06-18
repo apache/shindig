@@ -52,6 +52,8 @@ public class BasicOAuth2Request implements OAuth2Request {
   private static final FilteredLogger LOG = FilteredLogger
           .getFilteredLogger(BasicOAuth2Request.LOG_CLASS);
 
+  private static final short MAX_ATTEMPTS = 3;
+  
   private OAuth2Accessor internalAccessor;
 
   private OAuth2Arguments arguments;
@@ -81,6 +83,8 @@ public class BasicOAuth2Request implements OAuth2Request {
   private final boolean sendTraceToClient;
 
   private final OAuth2RequestParameterGenerator requestParameterGenerator;
+
+  private short attemptCounter = 0;
 
   /**
    * @param fetcherConfig
@@ -175,18 +179,20 @@ public class BasicOAuth2Request implements OAuth2Request {
           response = this.sendErrorResponse(null, OAuth2Error.FETCH_INIT_PROBLEM,
                   "accessor is null", "");
         } else {
-          accessor.setRedirecting(false);
+          synchronized (accessor) {
+            accessor.setRedirecting(false);
 
-          final Map<String, String> requestParams = this.requestParameterGenerator
-                  .generateParams(this.realRequest);
-          accessor.setAdditionalRequestParams(requestParams);
+            final Map<String, String> requestParams = this.requestParameterGenerator
+                    .generateParams(this.realRequest);
+            accessor.setAdditionalRequestParams(requestParams);
 
-          HttpResponseBuilder responseBuilder = null;
-          if (!accessor.isErrorResponse()) {
-            responseBuilder = this.attemptFetch(accessor);
+            HttpResponseBuilder responseBuilder = null;
+            if (!accessor.isErrorResponse()) {
+              responseBuilder = this.attemptFetch(accessor);
+            }
+
+            response = this.processResponse(accessor, responseBuilder);
           }
-
-          response = this.processResponse(accessor, responseBuilder);
         }
       }
     } catch (final Throwable t) {
@@ -228,6 +234,12 @@ public class BasicOAuth2Request implements OAuth2Request {
               new Object[] { accessor });
     }
 
+    this.attemptCounter++;
+
+    if (isLogging) {
+      BasicOAuth2Request.LOG.log("attempt number {0}", this.attemptCounter);
+    }
+
     HttpResponseBuilder ret = null;
 
     if (accessor.isErrorResponse()) {
@@ -236,7 +248,8 @@ public class BasicOAuth2Request implements OAuth2Request {
     } else {
       if (BasicOAuth2Request.haveAccessToken(accessor) != null) {
         // We have an access_token, use it and stop!
-        ret = this.fetchData(accessor);
+        // Don't try more than three times
+        ret = this.fetchData(accessor, this.attemptCounter > BasicOAuth2Request.MAX_ATTEMPTS);
       } else {
         // We don't have an access token, we need to try and get one.
         // First step see if we have a refresh token
@@ -493,7 +506,7 @@ public class BasicOAuth2Request implements OAuth2Request {
     return true;
   }
 
-  private HttpResponseBuilder fetchData(final OAuth2Accessor accessor) {
+  private HttpResponseBuilder fetchData(final OAuth2Accessor accessor, final boolean lastAttempt) {
     final boolean isLogging = BasicOAuth2Request.LOG.isLoggable();
     if (isLogging) {
       BasicOAuth2Request.LOG.entering(BasicOAuth2Request.LOG_CLASS, "fetchData", accessor);
@@ -502,7 +515,7 @@ public class BasicOAuth2Request implements OAuth2Request {
     HttpResponseBuilder ret = null;
 
     try {
-      final HttpResponse response = this.fetchFromServer(accessor, this.realRequest);
+      final HttpResponse response = this.fetchFromServer(accessor, this.realRequest, lastAttempt);
       if (response != null) {
         ret = new HttpResponseBuilder(response);
 
@@ -521,12 +534,12 @@ public class BasicOAuth2Request implements OAuth2Request {
     return ret;
   }
 
-  private HttpResponse fetchFromServer(final OAuth2Accessor accessor, final HttpRequest request)
-          throws OAuth2RequestException {
+  private HttpResponse fetchFromServer(final OAuth2Accessor accessor, final HttpRequest request,
+          final boolean lastAttempt) throws OAuth2RequestException {
     final boolean isLogging = BasicOAuth2Request.LOG.isLoggable();
     if (isLogging) {
       BasicOAuth2Request.LOG.entering(BasicOAuth2Request.LOG_CLASS, "fetchFromServer",
-              new Object[] { accessor, "only log request once" });
+              new Object[] { accessor, "only log request once", lastAttempt });
     }
 
     HttpResponse ret;
@@ -538,7 +551,6 @@ public class BasicOAuth2Request implements OAuth2Request {
       final long expiresAt = accessToken.getExpiresAt();
       if (expiresAt != 0) {
         if (currentTime >= expiresAt) {
-          accessToken = null;
           if (BasicOAuth2Request.LOG.isLoggable()) {
             BasicOAuth2Request.LOG.log("accessToken has expired at {0}", expiresAt);
           }
@@ -548,8 +560,11 @@ public class BasicOAuth2Request implements OAuth2Request {
             throw new OAuth2RequestException(OAuth2Error.MISSING_SERVER_RESPONSE,
                     "error removing access_token", null);
           }
+          accessToken = null;
           accessor.setAccessToken(null);
-          return null;
+          if (!lastAttempt) {
+            return null;
+          }
         }
       }
     }
@@ -559,7 +574,6 @@ public class BasicOAuth2Request implements OAuth2Request {
       final long expiresAt = refreshToken.getExpiresAt();
       if (expiresAt != 0) {
         if (currentTime >= expiresAt) {
-          refreshToken = null;
           if (BasicOAuth2Request.LOG.isLoggable()) {
             BasicOAuth2Request.LOG.log("refreshToken has expired at {0}", expiresAt);
           }
@@ -569,8 +583,11 @@ public class BasicOAuth2Request implements OAuth2Request {
             throw new OAuth2RequestException(OAuth2Error.MISSING_SERVER_RESPONSE,
                     "error removing refresh_token", null);
           }
+          refreshToken = null;
           accessor.setRefreshToken(null);
-          return null;
+          if (!lastAttempt) {
+            return null;
+          }
         }
       }
     }
@@ -629,7 +646,9 @@ public class BasicOAuth2Request implements OAuth2Request {
         accessor.setAccessToken(null);
       }
 
-      ret = null;
+      if (!lastAttempt) {
+        ret = null;
+      }
     }
 
     if (isLogging) {
