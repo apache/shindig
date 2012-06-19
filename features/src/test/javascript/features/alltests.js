@@ -105,6 +105,7 @@ if (!this.JsUtil) {
   eval(JsUtil.prototype.include(srcDir + '/osapi.base/batch.js'));
   eval(JsUtil.prototype.include(srcDir + '/osapi/jsonrpctransport.js'));
   eval(JsUtil.prototype.include(srcDir + '/osapi/peoplehelpers.js'));
+  eval(JsUtil.prototype.include(srcDir + '/gadgets.json.ext/json-xmltojson.js;));
   eval(JsUtil.prototype.include(testToolsDir + "/JsUnit.js"));
   eval(JsUtil.prototype.include(testToolsDir + '/testutils.js'));
   eval(JsUtil.prototype.include(testSrcDir + "/core/authtest.js"));
@@ -132,6 +133,7 @@ if (!this.JsUtil) {
   eval(JsUtil.prototype.include(testSrcDir + '/container/gadget_holder_test.js'));
   eval(JsUtil.prototype.include(testSrcDir + '/container/gadget_site_test.js'));
   eval(JsUtil.prototype.include(testSrcDir + '/container/container_test.js'));
+  eval(JsUtil.prototype.include(testSrcDir + '/json-xmltojson/jsonxmltojson-test.js'));
 }
 
 function AllTests() {

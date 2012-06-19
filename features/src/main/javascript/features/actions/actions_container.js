@@ -319,43 +319,6 @@
   };
 
   /**
-   * Utility function for converting a string representation of XML to a DOM
-   * object
-   *
-   * @param {String}
-   *          xmlString String representation of a valid XML object.
-   * @return {Object} response JSON object whose "data" field will contain the
-   *          DOM object, otherwise, the "errors" field will contain a string
-   *          description.
-   */
-  function createDom(xmlString) {
-    var response = {};
-    var dom;
-    if (typeof ActiveXObject != 'undefined') {
-      dom = new ActiveXObject('Microsoft.XMLDOM');
-      dom.async = false;
-      dom.validateOnParse = false;
-      dom.resolveExternals = false;
-      if (!dom.loadXML(xmlString)) {
-        response.errors = "500 Failed to parse XML";
-        response.rc = 500;
-      } else {
-        response['data'] = dom;
-      }
-    } else {
-      var parser = new DOMParser();
-      dom = parser.parseFromString(xmlString, 'application/xml');
-      if ('parsererror' === dom.documentElement.nodeName) {
-        response.errors = "500 Failed to parse XML";
-        response.rc = 500;
-      } else {
-        response['data'] = dom;
-      }
-    }
-    return response;
-  }
-
-  /**
    * Container handling of an action that has been programmatically added via
    * gadgets.actions.addAction() API
    *
@@ -551,12 +514,15 @@
       // http://code.google.com/p/opensocial-resources/issues/detail?id=1264
       desc = fixActionContributions(desc);
 
-      var domResponse = createDom(desc);
-      if (!domResponse || domResponse.errors) {
+      var dom;
+      try {
+        dom = opensocial.xmlutil.parseXML(desc);
+      } catch(ignore){}
+      if (!dom) {
         continue; // bail
       }
 
-      var jsonDesc = gadgets.json.xml.convertXmlToJson(domResponse['data']),
+      var jsonDesc = gadgets.json.xml.convertXmlToJson(dom),
           actionsJson = jsonDesc['actions'];
       if (!actionsJson) {
         continue; // bail

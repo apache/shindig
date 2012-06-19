@@ -57,7 +57,7 @@
          var context;
          function createAlbumHTML(context){
              window.context=context;
-             var photos = context.photoUrls;
+             var photos = [].concat(context.photoUrls);
              var result = "";
              for(var i = 0; i < photos.length; i++){
                  count = i+1;
@@ -71,26 +71,6 @@
          });
 
          function showPreviewPhoto(index, eeGadget) {
-
-            var eeDataModel = {
-                'gadget' : eeGadget,
-                'context' : {
-                  "albumName": context.albumName,
-                  "photoUrls": [context.photoUrls[index]]
-              }
-            };
-
-            // Test the use case of Url data model
-            if (index == context.photoUrls.length-1) {
-              eeDataModel = {
-                'url' : context.photoUrls[index],
-                'context' : {
-                  "albumName": context.albumName,
-                  "photoUrls": [context.photoUrls[index]]
-                }
-              };
-            }
-
             var coordinates = $('#photo' + index).offset();
             coordinates.left = coordinates.left + $('#photo' + index).width();
 
@@ -101,6 +81,27 @@
             var returnCallback = function(returnValue){
               console.log("Return Value: " + returnValue);
             };
+            
+            var eeDataModel;
+            // Test the use case of Url data model
+            if (index == context.photoUrls.length-1) {
+              eeDataModel =
+                  '<embed>'
+                +   '<url>' + context.photoUrls[index] + '</url>'
+                +   '<context>'
+                +     '<albumName>' + context.albumName + '</albumName>'
+                +     '<photoUrls>' + context.photoUrls[index] + '</photoUrls>'
+                +   '</context>'
+                + '</embed>';
+            } else {
+              eeDataModel = {
+                gadget: eeGadget,
+                context: {
+                  albumName: context.albumName,
+                  photoUrls: [context.photoUrls[index]]
+                }
+              };
+            }
             gadgets.views.openEmbeddedExperience(returnCallback, navigateCallback, eeDataModel, {
               'viewTarget' : index == 0 ? 'preview' : 'FLOAT',
               'coordinates' : coordinates

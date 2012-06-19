@@ -35,8 +35,9 @@ gadgets.views = gadgets.views || {};
  * @param {function}
  *          navigateCallback: Callback function to be called with the site and
  *          gadget metadata.
- * @param {function}
- *          dataModel: The embedded experiences data model.
+ * @param {Object|string}
+ *          dataModel: The embedded experiences data model object or the xml or
+ *          json string representation of that data model.
  * @param {Object}
  *          opt_params: These are optional parameters which can be used to
  *            open gadgets. The following parameters may be included in this

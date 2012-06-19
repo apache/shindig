@@ -22,6 +22,7 @@
   <dependency>globals</dependency>
   <dependency>rpc</dependency>
   <dependency>gadgets.json.ext</dependency>
+  <dependency>xmlutil</dependency>
   <gadget>
     <script src="actions.js"/>
     <script src="taming.js"/>

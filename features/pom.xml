@@ -214,6 +214,7 @@
                 <source>open-views.ee/open-views-ee-gadget.js</source>
                 <source>open-views.results/open-views-results-container.js</source>
                 <source>open-views.results/open-views-results-gadget.js</source>
+                <source>gadgets.json.ext/json-xmltojson.js</source>
               </sources>
               <testSourceDirectory>${basedir}/src/test/javascript/features</testSourceDirectory>
               <testSuites>

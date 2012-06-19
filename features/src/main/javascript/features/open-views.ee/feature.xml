@@ -23,6 +23,8 @@ specific language governing permissions and limitations under the License.
   <dependency>container.site.gadget</dependency>
   <dependency>container.site.url</dependency>
   <dependency>embedded-experiences</dependency>
+  <dependency>gadgets.json.ext</dependency>
+  <dependency>xmlutil</dependency>
   <gadget>
     <script src="open-views-ee-gadget.js"/>
     <api>

@@ -33,8 +33,9 @@ osapi.container.Container.addMixin('views', function(container) {
    *          resultCallback: Callback function id to be called when the embedded
    *          experience closes. The function will be called with the return
    *          value as a parameter.
-   * @param {Object}
-   *          dataModel: The embedded experiences data model.
+   * @param {Object|string}
+   *          dataModel: The embedded experiences data model object or the xml or
+   *          json string representation of that data model.
    * @param {Object}
    *          opt_params: These are optional parameters which can be used to
    *            open gadgets. The following parameters may be included in this
@@ -59,6 +60,21 @@ osapi.container.Container.addMixin('views', function(container) {
     var navigateCallback = rpcArgs.callback,
         siteOwnerId = rpcArgs.f,
         gadgetUrl = dataModel.gadget;
+
+    if (typeof(dataModel) == 'string') {
+      var match = new RegExp('^<(embed)>', 'i').exec(dataModel);
+      if (match && match[1]) {
+        try {
+          var parsed = gadgets.json.xml.convertXmlToJson(opensocial.xmlutil.parseXML(dataModel));
+          dataModel = parsed && parsed[match[1]] || dataModel;
+        } catch(ignore){}
+      } else {
+        try {
+          var parsed = gadgets.json.parse(dataModel);
+          dataModel = parsed || dataModel;
+        } catch(ignore){}
+      }
+    }
 
     var navigateEE = function(opt_metadata) {
       var viewTarget = '',

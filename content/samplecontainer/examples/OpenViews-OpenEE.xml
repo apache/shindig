@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Module specificationVersion="2.0">
+  <ModulePrefs title="OpenViews-OpenEE">
+    <Require feature="open-views"/>
+  </ModulePrefs>
+  <Content type="html"><![CDATA[
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+    <script type="text/javascript">
+      gadgets.util.registerOnLoadHandler(function() {
+	      $(document).ready(function(){
+	        $('input#xml').click(function(event) {
+	          var dataModel = '<embed><url>http://www.opensocial.org</url></embed>';
+	          gadgets.views.openEmbeddedExperience(null, null, dataModel);
+	        });
+	        $('input#obj').click(function(event) {
+	          var dataModel = {url:'http://www.opensocial.org'};
+	          gadgets.views.openEmbeddedExperience(null, null, dataModel);
+	        });
+	      });
+	    });
+    </script>
+    <body>
+      <input id="xml" type="button" value="Open EE with XMl"></input>
+      <input id="obj" type="button" value="Open EE with Object"></input>
+    </body>
+  ]]></Content>
+</Module>
