@@ -145,7 +145,12 @@
         if (pe[ee_pe.TARGET]) {
           var peTarget = pe[ee_pe.TARGET];
           if(peTarget && peTarget[ee_pe.TYPE]) {
-            return peTarget[ee_pe.TYPE];
+            var type = peTarget[ee_pe.TYPE];
+            if((osapi.container.ee.TargetType.URL === type && typeof dataModel.url !== 'undefined') ||
+                    (osapi.container.ee.TargetType.GADGET === type &&
+                            typeof dataModel.gadget !== 'undefined')) {
+              return type
+            }
           }
         }
       }
