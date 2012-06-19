@@ -1,6 +1,10 @@
 {
-  "totalResults": 3,
+  "itemsPerPage": 3,
+  "sorted": true,
   "startIndex": 0,
+  "totalResults": 3,
+  "filtered": true,
+  "updatedSince": true,
   "list": [{
     "id": "activity1",
     "title": "John shared new photos with you",
@@ -161,6 +165,5 @@
         "gadget": "http://localhost:8080/samplecontainer/examples/embeddedexperiences/BlogViewer.xml"
       }
     }
-  }],
-  "itemsPerPage": 3
+  }]
 }

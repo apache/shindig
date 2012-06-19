@@ -259,7 +259,7 @@ public class JsonRpcServlet extends ApiServlet {
     return dispatcher.getRpcHandler(rpc);
   }
 
-  Object getJSONResponse(String key, ResponseItem responseItem) {
+  protected Object getJSONResponse(String key, ResponseItem responseItem) {
     Map<String, Object> result = Maps.newHashMap();
     if (key != null) {
       result.put("id", key);
@@ -303,7 +303,7 @@ public class JsonRpcServlet extends ApiServlet {
   }
 
   /** Map of old-style error titles */
-  private static final Map<Integer, String> errorTitles = ImmutableMap.<Integer, String> builder()
+  protected static final Map<Integer, String> errorTitles = ImmutableMap.<Integer, String> builder()
      .put(HttpServletResponse.SC_NOT_IMPLEMENTED, "notImplemented")
      .put(HttpServletResponse.SC_UNAUTHORIZED, "unauthorized")
      .put(HttpServletResponse.SC_FORBIDDEN, "forbidden")
@@ -315,7 +315,7 @@ public class JsonRpcServlet extends ApiServlet {
   // TODO(doll): Refactor the responseItem so that the fields on it line up with this format.
   // Then we can use the general converter to output the response to the client and we won't
   // be harcoded to json.
-  private Object getErrorJson(ResponseItem responseItem) {
+  protected Object getErrorJson(ResponseItem responseItem) {
     Map<String, Object> error = new HashMap<String, Object>(2, 1);
     error.put("code", responseItem.getErrorCode());
 
@@ -347,12 +347,12 @@ public class JsonRpcServlet extends ApiServlet {
     servletResponse.setStatus(responseItem.getErrorCode());
   }
 
-  private void sendBadRequest(Throwable t, HttpServletResponse response) throws IOException {
+  protected void sendBadRequest(Throwable t, HttpServletResponse response) throws IOException {
     sendError(response, new ResponseItem(HttpServletResponse.SC_BAD_REQUEST,
         "Invalid input - " + t.getMessage()));
   }
 
-  private void sendJsonParseError(JSONException e, HttpServletResponse response) throws IOException {
+  protected void sendJsonParseError(JSONException e, HttpServletResponse response) throws IOException {
     sendError(response, new ResponseItem(HttpServletResponse.SC_BAD_REQUEST,
         "Invalid JSON - " + e.getMessage()));
   }

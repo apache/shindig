@@ -1,6 +1,10 @@
 {
-  "totalResults": 2,
+  "itemsPerPage": 2,
+  "sorted": true,
   "startIndex": 0,
+  "totalResults": 2,
+  "filtered": true,
+  "updatedSince": true,
   "list": [{
     "id": "activity2",
     "title": "John posted a new photo album.",
@@ -125,6 +129,5 @@
         "gadget": "http://localhost:8080/samplecontainer/examples/embeddedexperiences/BlogViewer.xml"
       }
     }
-  }],
-  "itemsPerPage": 2
+  }]
 }

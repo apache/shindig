@@ -1,6 +1,10 @@
 {
-   "startIndex":0,
-   "totalResults":2,
+   "itemsPerPage": 2,
+   "sorted": true,
+   "startIndex": 0,
+   "totalResults": 2,
+   "filtered": true,
+   "updatedSince": true,
    "list":[
       {
         "id": "activity1",
@@ -114,6 +118,5 @@
           }
         }
       }
-   ],
-   "itemsPerPage":2
+   ]
 }

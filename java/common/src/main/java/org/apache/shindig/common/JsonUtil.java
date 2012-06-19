@@ -21,6 +21,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
+import org.apache.commons.lang3.text.WordUtils;
 import org.json.JSONObject;
 
 import java.lang.reflect.InvocationTargetException;
@@ -102,7 +103,10 @@ public final class JsonUtil {
     if (property == null) {
       String name = method.getName();
       if (name.startsWith("get") && (!EXCLUDE_METHODS.contains(name))) {
-        return name.substring(3, 4).toLowerCase() + name.substring(4);
+        return WordUtils.uncapitalize(name.substring(3));
+      } else if (name.startsWith("is") && name.length() > 2 &&
+          Character.isUpperCase(name.charAt(2))) {
+        return WordUtils.uncapitalize(name.substring(2));
       }
       return null;
     } else {
