@@ -332,7 +332,14 @@ osapi.container.ContainerConfig = {
    *       var token, ttl, error = false;
    *       // Do work to set token and ttl values
    *       if (error) {
-   *         result();
+   *         var undef;
+   *         if (error.isFatal()) {
+   *           // Run all callbacks and let them know there was a horrible error.
+   *           // The container token is not valid, and probably won't be any time soon.
+   *           result(undef, 30, 'There was an error!');  // Try again for a miracle in 30 seconds.
+   *         } else {
+   *           result(undef, 15); // Call me again in 15 seconds, please
+   *         }
    *       } else {
    *         result(token, ttl);
    *       }

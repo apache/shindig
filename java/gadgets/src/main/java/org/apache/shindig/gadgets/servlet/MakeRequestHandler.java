@@ -28,6 +28,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shindig.auth.AuthInfoUtil;
 import org.apache.shindig.auth.SecurityToken;
@@ -87,6 +88,8 @@ public class MakeRequestHandler implements ContainerConfig.ConfigObserver {
   public static final String CORE_IO = "core.io";
   public static final String UNPARSEABLE_CRUFT = "unparseableCruft";
   public static final int MAX_POST_SIZE_DEFAULT = 5 * 1024 * 1024; // 5 MiB
+  public static final String IFRAME_RESPONSE_PREFIX = "<html><head></head><body><textarea></textarea><script type='text/javascript'>document.getElementsByTagName('TEXTAREA')[0].value='";
+  public static final String IFRAME_RESPONSE_SUFFIX = "';</script></body></html>";
 
   private final Map<String, String> unparseableCruftMsgs;
   private final RequestPipeline requestPipeline;
@@ -185,10 +188,10 @@ public class MakeRequestHandler implements ContainerConfig.ConfigObserver {
     PrintWriter out = response.getWriter();
     if ("1".equals(getParameter(request, MULTI_PART_FORM_POST_IFRAME, null))) {
       response.setContentType("text/html");
-      out.write("<html><head></head><body><textarea>");
-      out.write(this.unparseableCruftMsgs.get(container));
-      out.write(output);
-      out.write("</textarea></body></html>");
+      out.write(IFRAME_RESPONSE_PREFIX);
+      out.write(StringEscapeUtils.escapeEcmaScript(this.unparseableCruftMsgs.get(container)));
+      out.write(StringEscapeUtils.escapeEcmaScript(output));
+      out.write(IFRAME_RESPONSE_SUFFIX);
     } else {
       response.setContentType("application/json");
       out.write(this.unparseableCruftMsgs.get(container) + output);

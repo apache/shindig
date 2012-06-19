@@ -12,6 +12,8 @@
      "title",
      "updated",
      "url",
-     "verb"
+     "verb",
+     "openSocial",
+     "extensions"
    ]
 }

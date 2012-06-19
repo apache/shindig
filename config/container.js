@@ -287,7 +287,7 @@
                      "streamFaviconUrl", "streamSourceUrl", "streamTitle", "streamUrl", "templateParams", "title",
                      "url", "userId"],
        "activityEntry" : ["actor", "content", "generator", "icon", "id", "object", "published", "provider", "target",
-                          "title", "updated", "url", "verb"],
+                          "title", "updated", "url", "verb", "openSocial", "extensions"],
        "album" : ["id", "thumbnailUrl", "title", "description", "location", "ownerId"],
        "mediaItem" : ["album_id", "created", "description", "duration", "file_size", "id", "language", "last_updated",
                       "location", "mime_type", "num_comments", "num_views", "num_votes", "rating", "start_time",

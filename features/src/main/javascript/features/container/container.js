@@ -519,8 +519,11 @@ osapi.container.Container.prototype.getSiteById = function(siteId) {
  * unless the token is specified in the optional parameter, in which case the token will be
  * updated with the provided value immediately.
  *
- * @param {function=} callback Function to run when container token is valid.
- * @param {String=} token The containers new security token.
+ * @param {function(error)=} callback Function to run when refresh completes or is cancelled.
+ *          error will be undefined if there is no error.
+ * @param {String=|boolean} tokenOrWait
+ *          token The container's new security token.
+ *          wait If the callback should not trigger a token fetch.
  * @param {number=} ttl The token's ttl in seconds. If token is specified and ttl is 0,
  *   token refresh will be disabled.
  * @see osapi.container.ContainerConfig.GET_CONTAINER_TOKEN (constants.js)
@@ -539,14 +542,20 @@ osapi.container.Container.prototype.scheduleRefreshTokens_ = function(tokenTTL) 
       oldInterval = this.tokenRefreshInterval_,
       newInterval = tokenTTL ? this.setRefreshTokenInterval_(tokenTTL * 1000) : oldInterval,
       refresh = function() {
-        self.updateContainerSecurityToken(function() {
-          self.lastRefresh_ = osapi.container.util.getCurrentTimeMs();
-          // Schedule the next refresh.
-          self.tokenRefreshTimer_ = setTimeout(refresh, newInterval);
+        function callback(error) {
+          if (error) {
+            // try again, but don't force a refresh.
+            setTimeout(gadgets.util.makeClosure(self, self.updateContainerSecurityToken, callback, true), 1);
+          } else {
+            self.lastRefresh_ = osapi.container.util.getCurrentTimeMs();
+            // Schedule the next refresh.
+            self.tokenRefreshTimer_ = setTimeout(refresh, newInterval);
 
-          // Do this last so that if it ever errors, we maintain the refresh schedule.
-          self.refreshTokens_();
-        });
+            // Do this last so that if it ever errors, we maintain the refresh schedule.
+            self.refreshTokens_();
+          }
+        }
+        self.updateContainerSecurityToken(callback);
       };
 
   // If enabled, check to see if we no schedule or if the two intervals are different and update the schedule.

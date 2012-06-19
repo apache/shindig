@@ -289,7 +289,7 @@ public class JsonRpcServlet extends ApiServlet {
           map.put("updatedSince", collection.isUpdatedSince());
 
         if (!collection.isSorted())
-          map.put("sorted", collection.isUpdatedSince());
+          map.put("sorted", collection.isSorted());
 
         map.put("list", collection.getList());
         addResult(result, map);
