@@ -18,13 +18,24 @@
  */
 package org.apache.shindig.gadgets.render;
 
+import static org.apache.shindig.auth.AbstractSecurityToken.Keys.APP_URL;
+import static org.apache.shindig.auth.AbstractSecurityToken.Keys.OWNER;
+import static org.apache.shindig.auth.AbstractSecurityToken.Keys.VIEWER;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import static org.apache.shindig.auth.AnonymousSecurityToken.ANONYMOUS_ID;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.LinkedHashMultimap;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
+import com.google.inject.Inject;
+
+import org.apache.shindig.auth.BlobCrypterSecurityToken;
+import org.apache.shindig.auth.SecurityToken;
+import org.apache.shindig.auth.SecurityTokenCodec;
+import org.apache.shindig.auth.SecurityTokenException;
 import org.apache.shindig.common.logging.i18n.MessageKeys;
 import org.apache.shindig.common.servlet.Authority;
 import org.apache.shindig.common.uri.Uri;
@@ -33,16 +44,16 @@ import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.LinkedHashMultimap;
-import com.google.common.collect.Multimap;
-import com.google.inject.Inject;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Retrieves the rpc services for a container by fetching them from the container's
@@ -72,6 +83,7 @@ public class DefaultServiceFetcher {
   private final HttpFetcher fetcher;
 
   private Authority authority;
+  private SecurityTokenCodec codec;
 
   /** @param config Container Config for looking up endpoints */
   @Inject
@@ -83,6 +95,11 @@ public class DefaultServiceFetcher {
   @Inject(optional = true)
   public void setAuthority(Authority authority) {
     this.authority = authority;
+  }
+
+  @Inject
+  public void setSecurityTokenCodec(SecurityTokenCodec codec) {
+    this.codec = codec;
   }
 
   /**
@@ -116,7 +133,7 @@ public class DefaultServiceFetcher {
       if ( endpoint.startsWith("//") && authority != null ){
         endpointVal = authority.getScheme() + ':' + endpoint;
       }
-      endpointServices.putAll(endpoint, retrieveServices(endpointVal.replace("%host%", host)));
+      endpointServices.putAll(endpoint, retrieveServices(container, endpointVal.replace("%host%", host)));
     }
     return ImmutableMultimap.copyOf(endpointServices);
   }
@@ -132,10 +149,19 @@ public class DefaultServiceFetcher {
     return ImmutableList.of();
   }
 
-  private Set<String> retrieveServices(String endpoint) {
-    Uri url = Uri.parse(endpoint + "?method=" + SYSTEM_LIST_METHODS_METHOD);
-    HttpRequest request = new HttpRequest(url).setInternalRequest(true);
+  private Set<String> retrieveServices(String container, String endpoint) {
     try {
+      StringBuilder sb = new StringBuilder( 250 );
+      sb.append(endpoint).append( "?method=" + SYSTEM_LIST_METHODS_METHOD );
+      Map<String, String> parms = Maps.newHashMap();
+      parms.put( OWNER.getKey(), ANONYMOUS_ID );
+      parms.put( VIEWER.getKey(), ANONYMOUS_ID );
+      parms.put( APP_URL.getKey(), "0" );
+      SecurityToken token = new BlobCrypterSecurityToken(container, "*", "0", parms);
+      sb.append( "&st=" ).append( codec.encodeToken( token ));
+      Uri url = Uri.parse(sb.toString());
+      HttpRequest request = new HttpRequest(url).setInternalRequest(true);
+
       HttpResponse response = fetcher.fetch(request);
       if (response.getHttpStatusCode() == HttpResponse.SC_OK) {
         return getServicesFromJsonResponse(response.getResponseAsString());
@@ -143,6 +169,10 @@ public class DefaultServiceFetcher {
         if (LOG.isLoggable(Level.SEVERE)) {
           LOG.logp(Level.SEVERE, classname, "retrieveServices", MessageKeys.HTTP_ERROR_FETCHING, new Object[] {response.getHttpStatusCode(),endpoint});
         }
+      }
+    } catch (SecurityTokenException se) {
+      if (LOG.isLoggable(Level.SEVERE)) {
+        LOG.logp(Level.SEVERE, classname, "retrieveServices", MessageKeys.FAILED_TO_FETCH_SERVICE, new Object[] {endpoint,se.getMessage()});
       }
     } catch (GadgetException ge) {
       if (LOG.isLoggable(Level.SEVERE)) {

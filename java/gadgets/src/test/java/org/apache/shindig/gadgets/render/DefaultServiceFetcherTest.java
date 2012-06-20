@@ -23,6 +23,7 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
 
+import org.apache.shindig.auth.BasicSecurityTokenCodec;
 import org.apache.shindig.common.EasyMockTestCase;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.config.JsonContainerConfig;
@@ -36,8 +37,8 @@ import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 
 import org.easymock.EasyMock;
 import org.json.JSONArray;
-import org.json.JSONObject;
 import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -115,6 +116,7 @@ public class DefaultServiceFetcherTest extends EasyMockTestCase {
     EasyMock.expect(mockFetcher.fetch(EasyMock.isA(HttpRequest.class))).andReturn(
         new HttpResponse("")).anyTimes();
     replay();
+    fetcher.setSecurityTokenCodec( new BasicSecurityTokenCodec() );
     Multimap<String, String> services = fetcher.getServicesForContainer("default", "dontcare");
     verify();
     assertEquals(configuredServices, services);
@@ -136,6 +138,7 @@ public class DefaultServiceFetcherTest extends EasyMockTestCase {
         new HttpResponse(service2.toString()));
 
     replay();
+    fetcher.setSecurityTokenCodec( new BasicSecurityTokenCodec() );
     Multimap<String, String> services = fetcher.getServicesForContainer("default", "dontcare");
     verify();
     Multimap<String, String> mergedServices = LinkedHashMultimap.create(configuredServices);
@@ -163,6 +166,7 @@ public class DefaultServiceFetcherTest extends EasyMockTestCase {
             Expressions.forTesting(new Functions()));
     CapturingHttpFetcher httpFetcher = new CapturingHttpFetcher();
     fetcher = new DefaultServiceFetcher(containerConfig, httpFetcher);
+    fetcher.setSecurityTokenCodec( new BasicSecurityTokenCodec() );
     Multimap<String, String> services = fetcher.getServicesForContainer("default", "dontcare");
     assertEquals(configuredServices, services);
     assertNotNull( httpFetcher.request );
