@@ -20,6 +20,7 @@ package org.apache.shindig.gadgets.oauth2;
 
 import org.apache.shindig.common.crypto.BlobCrypter;
 import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.oauth2.persistence.OAuth2Client;
 import org.apache.shindig.gadgets.servlet.OAuth2CallbackServlet;
 
 /**
@@ -158,4 +159,24 @@ public interface OAuth2Store {
    *          to store
    */
   void storeOAuth2Accessor(OAuth2Accessor accessor);
+
+  /**
+   * Invalidate a cached client and force it to be reloaded from persistence.
+   *
+   * @param client
+   *          to be invalidated
+   *
+   * @return the client that was invalidated, or <code>null></code> if client could not be found
+   */
+  OAuth2Client invalidateClient(OAuth2Client client);
+
+  /**
+   * Invalidate a cached token and force it to be reloaded from persistence.
+   *
+   * @param token
+   *          to be invalidated
+   *
+   * @return the token that was invalidated, or <code>null</code> if token could not be found
+   */
+  OAuth2Token invalidateToken(OAuth2Token token);
 }

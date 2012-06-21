@@ -458,4 +458,12 @@ public class BasicOAuth2Store implements OAuth2Store {
   public BlobCrypter getStateCrypter() {
     return this.stateCrypter;
   }
+
+  public OAuth2Client invalidateClient(final OAuth2Client client) {
+    return this.cache.removeClient(client);
+  }
+
+  public OAuth2Token invalidateToken(final OAuth2Token token) {
+    return this.cache.removeToken(token);
+  }
 }
