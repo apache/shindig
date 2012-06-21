@@ -19,10 +19,8 @@ specific language governing permissions and limitations under the License.
 The javascript referenced here should be found in the caja jar.
 -->
 <feature>
-  <name>caja-debug</name>
-  <dependency>caja</dependency>
+  <name>es53-taming-frame.opt</name>
   <gadget>
-    <!-- debugging unsupported in this version -->
-    <!-- <script src="res://com/google/caja/cajita-debugmode.js"/> -->
+    <script src="res://com/google/caja/plugin/es53-taming-frame.opt.js"/>
   </gadget>
 </feature>

@@ -104,7 +104,7 @@ public class CajaContentRewriterTest extends RewriterTestBase {
   public void testCssExpression() throws Exception {
     String markup = "<div style='top:expression(alert(0), 0)'>test</div>";
     String expected =
-        "<div style=\"\">test</div>";
+        "<div>test</div>";
 
     List<String> messages = ImmutableList.of(
             "folding element html into parent",

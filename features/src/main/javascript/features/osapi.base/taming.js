@@ -30,7 +30,7 @@ tamings___.push(function(imports) {
     ]);
     return caja___.tame(batch);
   }
-  caja___.markTameAsFunction(newBatch, 'newBatch');
+  caja___.markFunction(newBatch, 'newBatch');
   caja___.tamesTo(osapi.newBatch, newBatch);
   caja___.whitelistCtors([
     [osapi, '_BoundCall', Object]

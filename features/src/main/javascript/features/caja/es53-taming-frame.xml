@@ -19,8 +19,8 @@ specific language governing permissions and limitations under the License.
 The javascript referenced here should be found in the caja jar.
 -->
 <feature>
-  <name>caja-guest-frame</name>
+  <name>es53-taming-frame</name>
   <gadget>
-    <script src="res://com/google/caja/plugin/es53-guest-frame.js"/>
+    <script src="res://com/google/caja/plugin/es53-taming-frame.js"/>
   </gadget>
 </feature>

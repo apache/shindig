@@ -22,14 +22,13 @@ specific language governing permissions and limitations under the License.
   <dependency>core.util.onload</dependency>
   <dependency>taming</dependency>
   <gadget>
+    <script src="res://com/google/caja/plugin/caja.js"/>
     <script src="taming.js"/>
     <api>
-      <exports type="js">caja___.getPendingScript</exports>
+      <exports type="js">caja___.getJSON</exports>
       <exports type="js">caja___.getTameGlobal</exports>
       <exports type="js">caja___.getUseless</exports>
-      <exports type="js">caja___.loadedGuestFrame</exports>
-      <exports type="js">caja___.loadedTamingFrame</exports>
-      <exports type="js">caja___.markTameAsFunction</exports>
+      <exports type="js">caja___.markFunction</exports>
       <exports type="js">caja___.start</exports>
       <exports type="js">caja___.tame</exports>
       <exports type="js">caja___.tamesTo</exports>

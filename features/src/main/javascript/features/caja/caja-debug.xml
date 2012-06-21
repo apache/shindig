@@ -19,8 +19,9 @@ specific language governing permissions and limitations under the License.
 The javascript referenced here should be found in the caja jar.
 -->
 <feature>
-  <name>caja-taming-frame</name>
+  <name>caja-debug</name>
+  <dependency>caja</dependency>
   <gadget>
-    <script src="res://com/google/caja/plugin/es53-taming-frame.js"/>
+    <!-- placeholder for backward compatibility -->
   </gadget>
 </feature>

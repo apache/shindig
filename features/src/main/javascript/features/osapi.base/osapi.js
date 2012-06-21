@@ -54,11 +54,11 @@ osapi._registerMethod = function(method, transport) {
 
   if (typeof tamings___ !== 'undefined') {
     var newTaming = function() {
-      caja___.markTameAsFunction(last[basename], method);
+      caja___.markFunction(last[basename], method);
     };
 
-    // Remove the old taming if we are replacing it, no sense in growing the array
-    // needlessly. This function (_registerMethod) gets called a lot.
+    // Remove the old taming if we are replacing it, no sense in growing the
+    // array needlessly. This function (_registerMethod) gets called a lot.
     if (old && old.__taming_index) {
       last[basename].__taming_index = old.__taming_index;
       tamings___[old.__taming_index] = newTaming;

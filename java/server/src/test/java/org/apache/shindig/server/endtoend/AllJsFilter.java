@@ -20,6 +20,7 @@ package org.apache.shindig.server.endtoend;
 
 import java.io.IOException;
 import java.util.Set;
+import java.util.HashSet;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -45,7 +46,15 @@ public class AllJsFilter extends InjectedFilter {
     try {
       FeatureRegistry registry = provider.get(null);
       Set<String> allFeatureNames = registry.getAllFeatureNames();
-      allFeatures = Joiner.on(':').join(allFeatureNames);
+
+      // TODO(felix8a): Temporary hack for caja
+      HashSet<String> someFeatureNames = new HashSet<String>(allFeatureNames);
+      someFeatureNames.remove("es53-guest-frame");
+      someFeatureNames.remove("es53-guest-frame.opt");
+      someFeatureNames.remove("es53-taming-frame");
+      someFeatureNames.remove("es53-taming-frame.opt");
+
+      allFeatures = Joiner.on(':').join(someFeatureNames);
     } catch (GadgetException e) {
       e.printStackTrace();
     }
