@@ -67,7 +67,7 @@ gadgets.window = gadgets.window || {};
       var children = elem.childNodes;
 
       /*
-       * Here, we are checking if we are a container that clips its overflow wit h
+       * Here, we are checking if we are a container that clips its overflow with
        * a specific height, because if so, we should ignore children
        */
 
