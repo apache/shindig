@@ -426,9 +426,9 @@ gadgets.io = function() {
         }
       }
 
-      var opt_headers = {
-        'X-Shindig-ST' : shindig.auth.getSecurityToken()
-      };
+      // Security token may have been set above
+      st = st || shindig.auth.getSecurityToken();
+      var opt_headers = st ? { 'X-Shindig-ST' : st } : {};
 
       var proxyUrl = config['jsonProxyUrl'].replace('%host%', document.location.host);
 
