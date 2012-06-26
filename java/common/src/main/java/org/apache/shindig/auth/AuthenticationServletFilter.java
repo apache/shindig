@@ -116,15 +116,11 @@ public class AuthenticationServletFilter extends InjectedFilter {
         }
       }
       if (iae.getRedirect() != null) {
-        resp.sendRedirect(iae.getRedirect());
+        onRedirect(req, resp, iae);
       } else {
         // Set auth header
         setAuthHeader(authHeader, resp);
-
-        // For now append the cause message if set, this allows us to send any underlying oauth errors
-        String message = (cause==null) ? iae.getMessage() : iae.getMessage() + cause.getMessage();
-
-        resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, message);
+        onError(req, resp, iae);
       }
     }
   }
@@ -135,6 +131,44 @@ public class AuthenticationServletFilter extends InjectedFilter {
    */
   protected String getRealm(HttpServletRequest request) {
     return realm;
+  }
+
+  /**
+   * Override this to perform extra error processing. Headers will have already been set on the
+   * response.
+   *
+   * @param req
+   *          the current http request for this filter
+   * @param resp
+   *          the current http response for this filter
+   * @param iae
+   *          the exception that caused the error path
+   * @throws IOException
+   */
+  protected void onError(HttpServletRequest req, HttpServletResponse resp,
+          AuthenticationHandler.InvalidAuthenticationException iae) throws IOException {
+    Throwable cause = iae.getCause();
+
+    // For now append the cause message if set, this allows us to send any underlying oauth errors
+    String message = (cause == null) ? iae.getMessage() : iae.getMessage() + cause.getMessage();
+    resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, message);
+  }
+
+  /**
+   * Override this to perform extra processing on redirect. Headers will have already been set on
+   * the response.
+   *
+   * @param req
+   *          the current http request for this filter
+   * @param resp
+   *          the current http response for this filter
+   * @param iae
+   *          the exception that caused the redirect path
+   * @throws IOException
+   */
+  protected void onRedirect(HttpServletRequest req, HttpServletResponse resp,
+          AuthenticationHandler.InvalidAuthenticationException iae) throws IOException {
+    resp.sendRedirect(iae.getRedirect());
   }
 
   private void setAuthHeader(@Nullable String authHeader, HttpServletResponse response) {
