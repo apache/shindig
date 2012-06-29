@@ -18,13 +18,16 @@
  */
 package org.apache.shindig.gadgets.oauth2.persistence;
 
-import java.util.Map;
+import static org.junit.Assert.assertArrayEquals;
 
 import org.apache.shindig.gadgets.oauth2.MockUtils;
 import org.apache.shindig.gadgets.oauth2.OAuth2Message;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.Map;
 
 public class OAuth2TokenPersistenceTest extends MockUtils {
   private static OAuth2TokenPersistence accessToken;
@@ -564,24 +567,30 @@ public class OAuth2TokenPersistenceTest extends MockUtils {
 
   @Test
   public void testSetSecret_2() throws Exception {
-    final OAuth2TokenPersistence fixture = new OAuth2TokenPersistence(MockUtils.getDummyEncrypter());
+    final OAuth2TokenPersistence fixture = new OAuth2TokenPersistence();
     fixture.setServiceName("");
-    fixture.setEncryptedSecret(new byte[] {});
     fixture.setUser("");
     fixture.setType(org.apache.shindig.gadgets.oauth2.OAuth2Token.Type.ACCESS);
     fixture.setIssuedAt(1L);
-    fixture.setEncryptedMacSecret(new byte[] {});
     fixture.setMacAlgorithm("");
     fixture.setScope("");
     fixture.setExpiresAt(1L);
-    fixture.setMacSecret(new byte[] {});
-    fixture.setSecret(new byte[] {});
     fixture.setGadgetUri("");
     fixture.setMacExt("");
     fixture.setTokenType("");
-    final byte[] secret = new byte[] {};
 
-    fixture.setSecret(secret);
+    byte[] secret = "abcdef".getBytes();
+    fixture.setEncryptedSecret( secret );
+    assertArrayEquals(secret, fixture.getSecret());
+    fixture.setEncryptedMacSecret(secret);
+    assertArrayEquals(secret, fixture.getMacSecret());
+
+    byte[] secret2 = "zyxwvu".getBytes();
+    fixture.setSecret( secret2 );
+    assertArrayEquals( secret2, fixture.getEncryptedSecret() );
+    fixture.setMacSecret( secret2 );
+    assertArrayEquals( secret2, fixture.getEncryptedMacSecret() );
+
   }
 
   @Test

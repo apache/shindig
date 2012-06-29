@@ -183,16 +183,12 @@ public class OAuth2TokenPersistence implements OAuth2Token {
 
   public void setEncryptedMacSecret(final byte[] encryptedSecret) throws OAuth2EncryptionException {
     this.encryptedMacSecret = encryptedSecret;
-    if (this.encrypter != null) {
-      this.macSecret = this.encrypter.decrypt(encryptedSecret);
-    }
+    this.macSecret = this.encrypter == null ? encryptedSecret : this.encrypter.decrypt(encryptedSecret);
   }
 
   public void setEncryptedSecret(final byte[] encryptedSecret) throws OAuth2EncryptionException {
     this.encryptedSecret = encryptedSecret;
-    if (this.encrypter != null) {
-      this.secret = this.encrypter.decrypt(encryptedSecret);
-    }
+    this.secret = this.encrypter == null ? encryptedSecret : this.encrypter.decrypt(encryptedSecret);
   }
 
   public void setExpiresAt(final long expiresAt) {
@@ -217,13 +213,11 @@ public class OAuth2TokenPersistence implements OAuth2Token {
 
   public void setMacSecret(final byte[] secret) throws OAuth2RequestException {
     this.macSecret = secret;
-    if (this.encrypter != null) {
-      try {
-        this.encryptedMacSecret = this.encrypter.encrypt(secret);
-      } catch (final OAuth2EncryptionException e) {
-        throw new OAuth2RequestException(OAuth2Error.SECRET_ENCRYPTION_PROBLEM,
-                "OAuth2TokenPersistence could not encrypt the mac secret", e);
-      }
+    try {
+      this.encryptedMacSecret = this.encrypter == null ? secret : this.encrypter.encrypt(secret);
+    } catch (final OAuth2EncryptionException e) {
+      throw new OAuth2RequestException(OAuth2Error.SECRET_ENCRYPTION_PROBLEM,
+              "OAuth2TokenPersistence could not encrypt the mac secret", e);
     }
   }
 
@@ -241,7 +235,7 @@ public class OAuth2TokenPersistence implements OAuth2Token {
   public void setSecret(final byte[] secret) throws OAuth2RequestException {
     this.secret = secret;
     try {
-      this.encryptedSecret = this.encrypter.encrypt(secret);
+      this.encryptedSecret = this.encrypter == null ? secret : this.encrypter.encrypt(secret);
     } catch (final OAuth2EncryptionException e) {
       throw new OAuth2RequestException(OAuth2Error.SECRET_ENCRYPTION_PROBLEM,
               "OAuth2TokenPersistence could not encrypt the token secret", e);
