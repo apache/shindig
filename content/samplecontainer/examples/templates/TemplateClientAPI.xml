@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Module>
+    <ModulePrefs title="TemplateClientAPI">
+        <Require feature="opensocial-templates">
+            <!-- This is required to be present to get access to the JavaScript -->
+            <Param name="client">true</Param>
+            <Param name="requireLibrary">TestTemplateLibrary.xml</Param>
+        </Require>
+        <Optional feature="content-rewrite">
+            <Param name="include-tags"></Param>
+        </Optional>
+    </ModulePrefs>
+    <Content type="html" view="home,profile">
+        <![CDATA[
+        <script type="text/os-template" xmlns:foomod="http://foo.com/module" tag="foomod:HelloWorldModule">
+            <div>Hello World Module</div>
+        </script>
+
+        <div>
+          <p>Simple test of gadget using template library with client API access</p>
+        </div>
+        <script type="text/os-template" xmlns:foo="http://foo.com/" xmlns:foomod="http://foo.com/module">
+          <p>
+            <div>Statically Defined from Module...</div><foomod:HelloWorldModule />
+            <div>Statically Defined from Template...</div><foo:HelloWorld />
+          </p>
+        </script><br/>
+
+        <div>Client Added from Module ...</div>
+        <div><div id='addheremod'/></div><br/>
+
+        <div>Client Added from Template ...</div>
+        <div><div id='addheretemplate'/></div><br/>
+
+        <script type="text/javascript">
+            function handleLoad() {
+                var template = os.getTemplate("foomod:HelloWorldModule");
+                if (template != undefined) {
+                    var placeholder = document.getElementById("addheremod");
+                    template.renderInto(placeholder);
+                } else {
+                    alert('Error: Inline Not Found (Module Defined) - This fails due to OnLoadHandler timing. '
+                        + 'This will succeed if you comment out the template library');
+                }
+
+                template = os.getTemplate("foo:HelloWorld");
+                if (template != undefined) {
+                    var placeholder = document.getElementById("addheretemplate");
+                    template.renderInto(placeholder);
+                } else {
+                    alert('Error: Inline Not Found (Template Defined)');
+                }
+            }
+            gadgets.util.registerOnLoadHandler(handleLoad);
+		</script>
+        ]]>
+    </Content>
+</Module>

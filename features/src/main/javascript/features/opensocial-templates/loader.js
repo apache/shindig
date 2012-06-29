@@ -226,8 +226,9 @@ os.Loader.processTemplateNode = function(node, opt_tag, opt_name) {
       throw Error('Namespace not registered: ' + tagParts[0] +
           ' while trying to define ' + tag);
     }
-    var template = os.compileXMLNode(node);
+    var template = os.compileXMLNode(node, tag);
     nsObj[tagParts[1]] = os.createTemplateCustomTag(template);
+    os.registerTemplate(template);
   } else if (name) {
     var template = os.compileXMLNode(node);
     template.id = name;
