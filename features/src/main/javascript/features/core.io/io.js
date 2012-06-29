@@ -51,14 +51,17 @@ gadgets.io = function() {
         shindig.xhrwrapper.createXHR) {
       return shindig.xhrwrapper.createXHR();
     } else if (typeof ActiveXObject != 'undefined') {
-      x = new ActiveXObject('Msxml2.XMLHTTP');
-      if (!x) {
-        x = new ActiveXObject('Microsoft.XMLHTTP');
-      }
-      return x;
+      try {
+        x = new ActiveXObject('Msxml2.XMLHTTP');
+        if (!x) {
+          x = new ActiveXObject('Microsoft.XMLHTTP');
+        }
+        return x;
+      } catch (e) {} // An exception will be thrown if ActiveX is disabled
     }
+
     // The second construct is for the benefit of jsunit...
-    else if (typeof XMLHttpRequest != 'undefined' || window.XMLHttpRequest) {
+    if (typeof XMLHttpRequest != 'undefined' || window.XMLHttpRequest) {
       return new window.XMLHttpRequest();
     }
     else throw ('no xhr available');
@@ -199,7 +202,16 @@ gadgets.io = function() {
           break;
         case 'DOM':
           var dom;
-          if (typeof ActiveXObject != 'undefined') {
+          if (typeof DOMParser != 'undefined') {
+            var parser = new DOMParser();
+            dom = parser.parseFromString(resp['text'], 'text/xml');
+            if ('parsererror' === dom.documentElement.nodeName) {
+              resp['errors'].push('500 Failed to parse XML');
+              resp['rc'] = 500;
+            } else {
+              resp['data'] = dom;
+            }
+          } else if (typeof ActiveXObject != 'undefined') {
             dom = new ActiveXObject('Microsoft.XMLDOM');
             dom.async = false;
             dom.validateOnParse = false;
@@ -211,14 +223,8 @@ gadgets.io = function() {
               resp['data'] = dom;
             }
           } else {
-            var parser = new DOMParser();
-            dom = parser.parseFromString(resp['text'], 'text/xml');
-            if ('parsererror' === dom.documentElement.nodeName) {
-              resp['errors'].push('500 Failed to parse XML');
-              resp['rc'] = 500;
-            } else {
-              resp['data'] = dom;
-            }
+            resp['errors'].push('500 Failed to parse XML because no DOM parser was available');
+            resp['rc'] = 500;
           }
           break;
         default:

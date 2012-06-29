@@ -356,6 +356,59 @@ IoTest.prototype.testPut = function() {
   this.assertEquals('some data', resp.text);
 };
 
+/**
+ * Tests using makeRequest on IE with ActiveX disabled, which results in ActiveXObject throwing an
+ * exception. We should then fall back to XMLHttpRequest.
+ *
+ * See https://issues.apache.org/jira/browse/SHINDIG-1808 for details.
+ */
+IoTest.prototype.testPut_IEActiveXDisabled = function() {
+  ActiveXObject = function() {
+    throw "error";
+  }
+
+  try {
+    this.testPut();
+  } finally {
+    ActiveXObject = undefined;
+  }
+};
+
+/**
+ * Tests using makeRequest on IE with ActiveX enabled, which results in an ActiveXObject being
+ * created instead of XMLHttpRequest.
+ */
+IoTest.prototype.testPut_IEActiveXEnabled = function() {
+  ActiveXObject = function() {
+    var xhrConstructor = this.fakeXhrs.getXhrConstructor();
+    return new xhrConstructor();
+  }
+
+  try {
+    this.testPut();
+  } finally {
+    ActiveXObject = undefined;
+  }
+};
+
+/**
+ * Tests using makeRequest if there is no available mechanism for performing XML HTTP requests.
+ */
+IoTest.prototype.testPut_NoXhrAvailable = function() {
+  var error = null;
+
+  window.XMLHttpRequest = undefined;
+  try {
+    this.testPut();
+  } catch (e) {
+    error = e;
+  } finally {
+    window.XMLHttpRequest = this.fakeXhrs.getXhrConstructor();
+  }
+
+  this.assertEquals('no xhr available', error);
+};
+
 IoTest.prototype.testPut_noBody = function() {
   var req = new fakeXhr.Expectation("POST", "http://example.com/json");
   this.setStandardArgs(req, true);
@@ -874,6 +927,152 @@ IoTest.prototype.testJson_malformed = function() {
         "CONTENT_TYPE" : "JSON"
       });
   this.assertEquals("500 Failed to parse JSON", resp.errors[0]);
+};
+
+/**
+ * Tests parsing XML if the DOMParser class is defined.
+ */
+IoTest.prototype.testDom_DomParserDefined = function() {
+  var req = new fakeXhr.Expectation("GET", "http://example.com/json");
+  this.setStandardArgs(req, false);
+  req.setQueryArg("url", "http://target.example.com/somepage");
+  req.setQueryArg("contentType", "DOM");
+
+  var body = '<data>some text</data>';
+  var resp = this.makeFakeResponse(gadgets.json.stringify(
+      { 'http://target.example.com/somepage' : {
+          'body' : body,
+          'rc' : 200
+         }
+      }));
+
+  this.fakeXhrs.expect(req, resp);
+
+  var test = this;
+  DOMParser = function() {
+    this.parseFromString = function(content, contentType) {
+      test.assertEquals(body, content);
+      test.assertEquals("text/xml", contentType);
+
+      return {documentElement: {nodeName: "data", text: "some text"}};
+    }
+  }
+
+  try {
+    var resp = null;
+    gadgets.io.makeRequest("http://target.example.com/somepage",
+        function(data) {
+          resp = data;
+        },
+        {
+          "CONTENT_TYPE" : "DOM"
+        });
+  } finally {
+    DOMParser = undefined;
+  }
+
+  this.assertEquals(200, resp.rc);
+  this.assertEquals("some text", resp.data.documentElement.text);
+};
+
+/**
+ * Tests parsing XML if the DOMParser and ActiveXObject classes are both defined - DOMParser
+ * should be used.
+ */
+IoTest.prototype.testDom_DomParserAndActiveXObjectDefined = function() {
+  ActiveXObject = function() {
+    if (type === "Microsoft.XMLDOM") {
+      throw "should not be called";
+    } else {
+      return new window.XMLHttpRequest();
+    }
+  };
+
+  try {
+    this.testDom_DomParserDefined();
+  } finally {
+    ActiveXObject = undefined;
+  }
+};
+
+/**
+ * Tests parsing XML if the ActiveXObject class is defined.
+ */
+IoTest.prototype.testDom_ActiveXObjectDefined = function() {
+  var req = new fakeXhr.Expectation("GET", "http://example.com/json");
+  this.setStandardArgs(req, false);
+  req.setQueryArg("url", "http://target.example.com/somepage");
+  req.setQueryArg("contentType", "DOM");
+
+  var body = '<data>some text</data>';
+  var resp = this.makeFakeResponse(gadgets.json.stringify(
+      { 'http://target.example.com/somepage' : {
+          'body' : body,
+          'rc' : 200
+         }
+      }));
+
+  this.fakeXhrs.expect(req, resp);
+
+  var test = this;
+  ActiveXObject = function(type) {
+    if (type === "Microsoft.XMLDOM") {
+      this.loadXML = function(content) {
+        test.assertEquals(body, content);
+
+        this.documentElement = {nodeName: "data", text: "some text"};
+        return true;
+      }
+    } else {
+      return new window.XMLHttpRequest();
+    }
+  }
+
+  try {
+    var resp = null;
+    gadgets.io.makeRequest("http://target.example.com/somepage",
+        function(data) {
+          resp = data;
+        },
+        {
+          "CONTENT_TYPE" : "DOM"
+        });
+  } finally {
+    ActiveXObject = undefined;
+  }
+
+  this.assertEquals(200, resp.rc);
+  this.assertEquals("some text", resp.data.documentElement.text);
+};
+
+/**
+ * Tests parsing XML if there is no available mechanism for doing so.
+ */
+IoTest.prototype.testDom_NoParser = function() {
+  var req = new fakeXhr.Expectation("GET", "http://example.com/json");
+  this.setStandardArgs(req, false);
+  req.setQueryArg("url", "http://target.example.com/somepage");
+  req.setQueryArg("contentType", "DOM");
+
+  var resp = this.makeFakeResponse(gadgets.json.stringify(
+      { 'http://target.example.com/somepage' : {
+          'body' : '<wrapper><text>some text</text></wrapper>',
+          'rc' : 200
+         }
+      }));
+
+  this.fakeXhrs.expect(req, resp);
+
+  var resp = null;
+  gadgets.io.makeRequest("http://target.example.com/somepage",
+      function(data) {
+        resp = data;
+      },
+      {
+        "CONTENT_TYPE" : "DOM"
+      });
+  this.assertEquals(500, resp.rc);
+  this.assertEquals(["500 Failed to parse XML because no DOM parser was available"], resp.errors);
 };
 
 IoTest.prototype.testPreload = function() {
