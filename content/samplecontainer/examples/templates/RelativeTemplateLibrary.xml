@@ -28,7 +28,7 @@
     <div>
       <p>Simple test of gadget using template library with relative path</p>
     </div>
-	<script type="text/os-template" xmlns:foo="http://foo.com/">
+	  <script type="text/os-template" xmlns:foo="http://foo.com/">
       <foo:HelloWorld />
     </script>
     ]]>
