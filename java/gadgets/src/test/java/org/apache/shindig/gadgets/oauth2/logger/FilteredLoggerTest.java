@@ -126,7 +126,7 @@ public class FilteredLoggerTest {
 
     final String result = FilteredLogger.filterSecrets(in);
 
-    Assert.assertEquals("REMOVED", result);
+    Assert.assertEquals("Authorization:REMOVED", result);
   }
 
   @Test
