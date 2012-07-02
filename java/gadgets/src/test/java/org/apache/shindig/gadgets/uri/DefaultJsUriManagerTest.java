@@ -229,6 +229,20 @@ public class DefaultJsUriManagerTest {
   }
 
   @Test
+  public void processPathWithEncodedSeparator() throws GadgetException {
+    String targetHost = "target-host.org";
+    ContainerConfig config = mockConfig("http://" + targetHost, "/gadgets/js");
+    TestDefaultJsUriManager manager = makeManager(config, null);
+    Uri testUri = Uri.parse("http://target-host.org/gadgets/js/feature%3Aanother?" +
+        Param.CONTAINER.getKey() + '=' + CONTAINER);
+    JsUri jsUri = manager.processExternJsUri(testUri);
+    assertFalse(manager.hadError());
+    assertEquals(jsUri.getStatus(), UriStatus.VALID_UNVERSIONED);
+    List<String> extern = Lists.newArrayList("feature", "another");
+    assertCollectionEquals(jsUri.getLibs(), extern);
+  }
+
+  @Test
   public void processPathSuffixNoJs() throws GadgetException {
     String targetHost = "target-host.org";
     ContainerConfig config = mockConfig("http://" + targetHost, "/gadgets/js");

@@ -26,6 +26,7 @@ import com.google.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
+import org.apache.shindig.common.util.Utf8UrlCoder;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.GadgetException.Code;
@@ -171,6 +172,8 @@ public class DefaultJsUriManager implements JsUriManager {
       issueUriFormatError("Unexpected: Js Uri has no path");
       return INVALID_URI;
     }
+    // Decode the path here because it is not automatically decoded when the Uri object is created.
+    path = Utf8UrlCoder.decode(path);
 
     int lastSlash = path.lastIndexOf('/');
     if (lastSlash != -1) {
