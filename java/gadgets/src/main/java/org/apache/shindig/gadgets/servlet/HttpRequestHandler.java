@@ -176,9 +176,6 @@ public class HttpRequestHandler {
 
   /**
    * Dispatch the request
-   *
-   * @param method HTTP method to execute
-   * @param requestItem TODO
    */
   private HttpApiResponse execute(String method, HttpApiRequest httpApiRequest,
       final BaseRequestItem requestItem) {
@@ -331,7 +328,7 @@ public class HttpRequestHandler {
     return authSettings;
   }
 
-
+  /** Helper method to normalize Uri that does not have scheme or empty path  */
   protected Uri normalizeUrl(Uri url) {
     if (url.getScheme() == null) {
       // Assume http
