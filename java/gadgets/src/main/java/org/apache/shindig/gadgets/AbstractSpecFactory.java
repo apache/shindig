@@ -46,7 +46,7 @@ public abstract class AbstractSpecFactory<T> {
   private final Class<T> clazz;
   private final ExecutorService executor;
   private final RequestPipeline pipeline;
-  final SoftExpiringCache<Uri, Object> cache;
+  final SoftExpiringCache<String, Object> cache;
   private final long refresh;
 
   /**
@@ -57,11 +57,11 @@ public abstract class AbstractSpecFactory<T> {
    * @param refresh the frequency at which to update specs, independent of cache expiration policy
    */
   public AbstractSpecFactory(Class<T> clazz, ExecutorService executor, RequestPipeline pipeline,
-      Cache<Uri, Object> cache, long refresh) {
+      Cache<String, Object> cache, long refresh) {
     this.clazz = clazz;
     this.executor = executor;
     this.pipeline = pipeline;
-    this.cache = new SoftExpiringCache<Uri, Object>(cache);
+    this.cache = new SoftExpiringCache<String, Object>(cache);
     this.refresh = refresh;
   }
 
@@ -75,14 +75,14 @@ public abstract class AbstractSpecFactory<T> {
   protected T getSpec(Query query) throws GadgetException {
     Object obj = null;
     if (!query.ignoreCache) {
-      SoftExpiringCache.CachedObject<Object> cached = cache.getElement(query.specUri);
+      SoftExpiringCache.CachedObject<Object> cached = cache.getElement(query.specUri.toString());
       if (cached != null) {
         obj = cached.obj;
         if (cached.isExpired) {
           // We write to the cache to avoid any race conditions with multiple writers.
           // This causes a double write, but that's better than a write per thread or synchronizing
           // this block.
-          cache.addElement(query.specUri, obj, refresh);
+          cache.addElement(query.specUri.toString(), obj, refresh);
           executor.execute(new SpecUpdater(query, obj));
         }
       }
@@ -105,7 +105,7 @@ public abstract class AbstractSpecFactory<T> {
         obj = e;
       }
       if (!bypassCache) {
-        cache.addElement(query.specUri, obj, refresh);
+        cache.addElement(query.specUri.toString(), obj, refresh);
       }
     }
 
@@ -215,7 +215,7 @@ public abstract class AbstractSpecFactory<T> {
     public void run() {
       try {
         T newSpec = fetchFromNetwork(query);
-        cache.addElement(query.specUri, newSpec, refresh);
+        cache.addElement(query.specUri.toString(), newSpec, refresh);
       } catch (SpecRetrievalFailedException se) {
         if (LOG.isLoggable(Level.INFO)) {
           LOG.logp(Level.INFO, classname, "SpecUpdater", MessageKeys.UPDATE_SPEC_FAILURE_APPLY_NEG_CACHE, new Object[] {query.specUri});
@@ -225,12 +225,12 @@ public abstract class AbstractSpecFactory<T> {
           if (LOG.isLoggable(Level.INFO)) {
             LOG.logp(Level.INFO, classname, "SpecUpdater", MessageKeys.UPDATE_SPEC_FAILURE_USE_CACHE_VERSION, new Object[] {query.specUri});
           }
-          cache.addElement(query.specUri, old, refresh);
+          cache.addElement(query.specUri.toString(), old, refresh);
         } else {
           if (LOG.isLoggable(Level.INFO)) {
             LOG.logp(Level.INFO, classname, "SpecUpdater", MessageKeys.UPDATE_SPEC_FAILURE_APPLY_NEG_CACHE, new Object[] {query.specUri});
           }
-          cache.addElement(query.specUri, e, refresh);
+          cache.addElement(query.specUri.toString(), e, refresh);
         }
       }
     }

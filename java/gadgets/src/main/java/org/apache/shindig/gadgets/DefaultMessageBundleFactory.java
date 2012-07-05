@@ -50,7 +50,7 @@ public class DefaultMessageBundleFactory extends AbstractSpecFactory<MessageBund
     super(MessageBundle.class, executor, pipeline, makeCache(cacheProvider), refresh);
   }
 
-  private static Cache<Uri, Object> makeCache(CacheProvider cacheProvider) {
+  private static Cache<String, Object> makeCache(CacheProvider cacheProvider) {
     return cacheProvider.createCache(CACHE_NAME);
   }
 

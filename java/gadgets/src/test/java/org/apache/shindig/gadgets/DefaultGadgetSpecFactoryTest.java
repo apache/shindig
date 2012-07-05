@@ -188,7 +188,7 @@ public class DefaultGadgetSpecFactoryTest {
     replay(pipeline);
 
     specFactory.cache.addElement(
-        SPEC_URL, new GadgetSpec(SPEC_URL, LOCAL_SPEC_XML), -1);
+        SPEC_URL.toString(), new GadgetSpec(SPEC_URL, LOCAL_SPEC_XML), -1);
 
     GadgetSpec spec = specFactory.getGadgetSpec(createContext(SPEC_URL, false));
 
@@ -232,8 +232,8 @@ public class DefaultGadgetSpecFactoryTest {
 
     specFactory.getGadgetSpec(createContext(SPEC_URL, true));
 
-    SoftExpiringCache.CachedObject<Object> inCache = specFactory.cache.getElement(SPEC_URL);
-    specFactory.cache.addElement(SPEC_URL, inCache.obj, -1);
+    SoftExpiringCache.CachedObject<Object> inCache = specFactory.cache.getElement(SPEC_URL.toString());
+    specFactory.cache.addElement(SPEC_URL.toString(), inCache.obj, -1);
 
     GadgetSpec spec = specFactory.getGadgetSpec(createContext(SPEC_URL, false));
 
@@ -255,8 +255,8 @@ public class DefaultGadgetSpecFactoryTest {
 
     specFactory.getGadgetSpec(createContext(SPEC_URL, true));
 
-    SoftExpiringCache.CachedObject<Object> inCache = specFactory.cache.getElement(SPEC_URL);
-    specFactory.cache.addElement(SPEC_URL, inCache.obj, -1);
+    SoftExpiringCache.CachedObject<Object> inCache = specFactory.cache.getElement(SPEC_URL.toString());
+    specFactory.cache.addElement(SPEC_URL.toString(), inCache.obj, -1);
 
     GadgetSpec spec = specFactory.getGadgetSpec(createContext(SPEC_URL, false));
 
@@ -349,7 +349,7 @@ public class DefaultGadgetSpecFactoryTest {
 
   @Test(expected = SpecParserException.class)
   public void negativeCachingEnforced() throws Exception {
-    specFactory.cache.addElement(SPEC_URL, new SpecParserException("broken"), 1000);
+    specFactory.cache.addElement(SPEC_URL.toString(), new SpecParserException("broken"), 1000);
     specFactory.getGadgetSpec(createContext(SPEC_URL, false));
   }
 

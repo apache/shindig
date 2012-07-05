@@ -52,7 +52,7 @@ public class DefaultGadgetSpecFactory extends AbstractSpecFactory<GadgetSpec>
     super(GadgetSpec.class, executor, pipeline, makeCache(cacheProvider), refresh);
   }
 
-  private static Cache<Uri, Object> makeCache(CacheProvider cacheProvider) {
+  private static Cache<String, Object> makeCache(CacheProvider cacheProvider) {
     return cacheProvider.createCache(CACHE_NAME);
   }
 
