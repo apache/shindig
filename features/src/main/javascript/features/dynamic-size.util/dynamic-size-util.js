@@ -17,8 +17,8 @@
  */
 
 /**
- * @fileoverview This library augments gadgets.window with functionality to get the frame's viewport
- *               dimensions.
+ * @fileoverview This library augments gadgets.window with functionality to get
+ *    the frame's viewport dimensions.
  */
 
 gadgets.window = gadgets.window || {};
@@ -87,7 +87,7 @@ gadgets.window = gadgets.window || {};
           if (!size) {
             size = getElementComputedStyle(elem, height ? 'height' : 'width');
           }
-          if (size.length > 0 && size != 'auto') {
+          if (size && size.length > 0 && size != 'auto') {
             // We can safely ignore the children of this element,
             // so move onto the next in the queue
             continue;
