@@ -126,7 +126,8 @@ if (!window['gadgets']['rpc']) { // make lib resilient to double-inclusion
     var passReferrerContents = null;
 
     // isGadget =~ isChild for the purposes of rpc (used only in setup).
-    var isChild = (window.top !== window.self);
+    var isChild = !!gadgets.util.getUrlParameters().parent &&
+      (window.top !== window.self);
 
     // Set the current rpc ID from window.name immediately, to prevent
     // shadowing of window.name by a "var name" declaration, or similar.
@@ -438,7 +439,7 @@ if (!window['gadgets']['rpc']) { // make lib resilient to double-inclusion
 
       var siblingId = parseSiblingId(id);
       if (siblingId) {
-        return window.top.frames[siblingId.id];
+        return window.frames[siblingId.id];
       }
 
       // Cast to a String to avoid an index lookup.
@@ -662,7 +663,6 @@ if (!window['gadgets']['rpc']) { // make lib resilient to double-inclusion
       passReferrerDirection = prParts[0] || 'none';
       passReferrerContents = prParts[1] || 'origin';
     }
-
 
     function setLegacyProtocolConfig(cfg) {
       if (isLegacyProtocolConfig(cfg)) {
