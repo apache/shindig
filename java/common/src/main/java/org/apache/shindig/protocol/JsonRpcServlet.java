@@ -282,14 +282,10 @@ public class JsonRpcServlet extends ApiServlet {
         // always put in totalResults
         map.put("totalResults", collection.getTotalResults());
 
-        if (!collection.isFiltered())
-          map.put("filtered", collection.isFiltered());
-
-        if (!collection.isUpdatedSince())
-          map.put("updatedSince", collection.isUpdatedSince());
-
-        if (!collection.isSorted())
-          map.put("sorted", collection.isSorted());
+        // always add metadata for collections
+        map.put("filtered", collection.isFiltered());
+        map.put("updatedSince", collection.isUpdatedSince());
+        map.put("sorted", collection.isSorted());
 
         map.put("list", collection.getList());
         addResult(result, map);
