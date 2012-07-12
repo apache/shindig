@@ -57,10 +57,10 @@ public class DefaultRpcServiceLookup implements RpcServiceLookup {
   @Inject
   public DefaultRpcServiceLookup(DefaultServiceFetcher fetcher,
       @Named("org.apache.shindig.serviceExpirationDurationMinutes")Long duration) {
-    containerServices = CacheBuilder.newBuilder()
+    this.containerServices = CacheBuilder.newBuilder()
         .expireAfterWrite(duration * 60, TimeUnit.SECONDS)
         .build();
-        this.fetcher = fetcher;
+    this.fetcher = fetcher;
   }
 
   /**
