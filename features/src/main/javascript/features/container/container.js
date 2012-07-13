@@ -821,18 +821,20 @@ osapi.container.Container.prototype.refreshTokens_ = function() {
       var site = self.sites_[siteId];
       if (site instanceof osapi.container.GadgetSite) {
         var holder = site.getActiveSiteHolder();
-        var gadgetInfo = self.service_.getCachedGadgetMetadata(holder.getUrl());
-        if (gadgetInfo[osapi.container.MetadataResponse.NEEDS_TOKEN_REFRESH]) {
-          var mid = site.getModuleId(),
-              url = osapi.container.util.buildTokenRequestUrl(holder.getUrl(), mid),
-              tokenInfo = response[url];
+        if (holder) {
+          var gadgetInfo = self.service_.getCachedGadgetMetadata(holder.getUrl());
+          if (gadgetInfo[osapi.container.MetadataResponse.NEEDS_TOKEN_REFRESH]) {
+            var mid = site.getModuleId(),
+                url = osapi.container.util.buildTokenRequestUrl(holder.getUrl(), mid),
+                tokenInfo = response[url];
 
-          if (tokenInfo.error) {
-            gadgets.warn(['Failed to get token for gadget ',
-                url, '.'].join(''));
-          } else {
-            gadgets.rpc.call(holder.getIframeId(), 'update_security_token', null,
-                tokenInfo[osapi.container.TokenResponse.TOKEN]);
+            if (tokenInfo.error) {
+              gadgets.warn(['Failed to get token for gadget ',
+                  url, '.'].join(''));
+            } else {
+              gadgets.rpc.call(holder.getIframeId(), 'update_security_token', null,
+                  tokenInfo[osapi.container.TokenResponse.TOKEN]);
+            }
           }
         }
       }
