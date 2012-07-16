@@ -30,24 +30,11 @@
 gadgets.window = gadgets.window || {};
 
 (function() {
-
-  /**
-   * Adjusts the gadget height
-   * @param {number=} opt_height An optional preferred height in pixels. If not
-   *     specified, will attempt to fit the gadget to its content.
-   * @member gadgets.window
-   */
-
   /**
    * Calculate inner content height is hard and different between
-   * browsers rendering in Strict vs. Quirks mode.  We use a combination of
-   * three properties within document.body and document.documentElement:
-   * - scrollHeight
-   * - offsetHeight
-   * - clientHeight
-   * These values differ significantly between browsers and rendering modes.
-   * But there are patterns.  It just takes a lot of time and persistence
-   * to figure out.
+   * browsers rendering in Strict vs. Quirks mode.
+   * Currently, Shindig is using algorithm to iterate to all elements in the
+   * body to extract the height property and CSS if available.
    */
   gadgets.window.getHeight = function() {
     return gadgets.window.getDimen(1);
