@@ -541,6 +541,8 @@
         // check if action already exists
         if (!registry.getItemById(actionClone.id)) {
           addAction(actionClone, url);
+        } else {
+          gadgets.warn(['Duplicated gadget action [', actionClone.id, '] detected, make sure the gadget actions have unique ids.'].join(''));
         }
       }
     }
