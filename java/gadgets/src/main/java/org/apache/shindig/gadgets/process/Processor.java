@@ -108,7 +108,7 @@ public class Processor {
       if (LOG.isLoggable(Level.INFO)) {
         LOG.logp(Level.INFO, classname, "process", MessageKeys.RENDER_NON_WHITELISTED_GADGET, new Object[] {url});
       }
-      throw new ProcessingException("The requested gadget is unavailable",
+      throw new ProcessingException("The requested gadget is not authorized for this container",
               HttpServletResponse.SC_FORBIDDEN);
     }
 
