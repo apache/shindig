@@ -363,7 +363,7 @@ public class OAuthRequest {
       request.setHeader("Content-Type", OAuth.FORM_ENCODED);
     }
 
-    request.setSecurityToken( new AnonymousSecurityToken( "", 0L, this.realRequest.getSecurityToken().getAppUrl(), 0L));
+    request.setSecurityToken( new AnonymousSecurityToken( "", 0L, this.realRequest.getSecurityToken().getAppUrl()));
     return request;
   }
 
@@ -740,7 +740,7 @@ public class OAuthRequest {
     Uri accessTokenUri = Uri.parse(accessor.consumer.serviceProvider.accessTokenURL);
     HttpRequest request = new HttpRequest(accessTokenUri);
     request.setMethod(accessorInfo.getHttpMethod().toString());
-    request.setSecurityToken( new AnonymousSecurityToken( "", 0L, this.realRequest.getSecurityToken().getAppUrl(), 0L));
+    request.setSecurityToken( new AnonymousSecurityToken( "", 0L, this.realRequest.getSecurityToken().getAppUrl()));
     if (accessorInfo.getHttpMethod() == HttpMethod.POST) {
       request.setHeader("Content-Type", OAuth.FORM_ENCODED);
     }

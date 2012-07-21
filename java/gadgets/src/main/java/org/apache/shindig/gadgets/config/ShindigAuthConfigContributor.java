@@ -66,8 +66,9 @@ public class ShindigAuthConfigContributor implements ConfigContributor {
 
   /** {@inheritDoc} */
   public void contribute(Map<String,Object> config, String container, String host) {
-    // Inject an anonymous security token TODO set TTL based on cachability of this JS?
-    SecurityToken containerToken = new AnonymousSecurityToken(container, 0L,"*", null);
+    // TODO: This currently will throw an exception when using BlobCrypterSecurityTokens...
+    // It seems to be ok for now, we need some good token cleanup.
+    SecurityToken containerToken = new AnonymousSecurityToken(container, 0L, "*");
     Map<String, String> authConfig = Maps.newHashMapWithExpectedSize(2);
 
     try {

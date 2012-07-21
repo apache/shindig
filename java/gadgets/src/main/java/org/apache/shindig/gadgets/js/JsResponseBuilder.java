@@ -85,6 +85,13 @@ public class JsResponseBuilder {
   }
 
   /**
+   * Prepends JS to the output.
+   */
+  public JsResponseBuilder prependJs(String content, String name, boolean noCompile) {
+    return prependJs(JsContent.fromText(content, name, noCompile));
+  }
+
+  /**
    * Insert a JS at a specific index.
    */
   public JsResponseBuilder insertJsAt(int index, JsContent jsContent) {
@@ -109,6 +116,13 @@ public class JsResponseBuilder {
    */
   public JsResponseBuilder appendJs(String content, String name) {
     return appendJs(JsContent.fromText(content, name));
+  }
+
+  /**
+   * Helper to append JS to the response w/ a name.
+   */
+  public JsResponseBuilder appendJs(String content, String name, boolean noCompile) {
+    return appendJs(JsContent.fromText(content, name, noCompile));
   }
 
   /**

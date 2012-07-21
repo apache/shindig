@@ -125,7 +125,7 @@ public abstract class AbstractSpecFactory<T> {
         .setIgnoreCache(query.ignoreCache)
         .setGadget(query.gadgetUri)
         .setContainer(query.container)
-        .setSecurityToken( new AnonymousSecurityToken("", 0L, query.gadgetUri.toString(), 0L));
+        .setSecurityToken( new AnonymousSecurityToken("", 0L, query.gadgetUri.toString()));
 
     // Since we don't allow any variance in cache time, we should just force the cache time
     // globally. This ensures propagation to shared caches when this is set.

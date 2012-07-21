@@ -30,22 +30,34 @@ public class JsContent {
   private final String source;
   private final FeatureBundle bundle;
   private final FeatureResource resource;
+  private final boolean noCompile;
 
   public static JsContent fromText(String content, String source) {
-    return new JsContent(content, source, null, null);
+    return new JsContent(content, source, null, null, false);
+  }
+
+  public static JsContent fromText(String content, String source,
+      boolean noCompile) {
+    return new JsContent(content, source, null, null, noCompile);
   }
 
   public static JsContent fromFeature(String content, String source,
       FeatureBundle bundle, FeatureResource resource) {
-    return new JsContent(content, source, bundle, resource);
+    return new JsContent(content, source, bundle, resource, false);
+  }
+
+  public static JsContent fromFeature(String content, String source,
+      FeatureBundle bundle, FeatureResource resource, boolean noCompile) {
+    return new JsContent(content, source, bundle, resource, noCompile);
   }
 
   private JsContent(String content, String source,
-      FeatureBundle bundle, FeatureResource resource) {
+      FeatureBundle bundle, FeatureResource resource, boolean noCompile) {
     this.content = content;
     this.source = source;
     this.bundle = bundle;
     this.resource = resource;
+    this.noCompile = noCompile;
   }
 
   public String get() {
@@ -62,5 +74,16 @@ public class JsContent {
 
   public FeatureResource getFeatureResource() {
     return resource;
+  }
+
+  /**
+   * This is usually only set to true for {@link JsProcessor} via {@link JsResponseBuilder}s
+   * that have dynamic output that is vulnerable to attacks where input variation
+   * would cause unique output.
+   *
+   * @return true if the content should not be run through an expensive compile
+   */
+  public boolean isNoCompile() {
+    return noCompile;
   }
 }

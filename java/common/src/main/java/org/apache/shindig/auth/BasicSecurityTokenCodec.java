@@ -52,17 +52,29 @@ public class BasicSecurityTokenCodec implements SecurityTokenCodec {
    * @return token with values separated by colons
    */
   public String encodeToken(SecurityToken token) {
-    BasicSecurityToken basicToken = new BasicSecurityToken();
-    basicToken.setExpires();  // Quick and dirty token expire calculation.
-    return Joiner.on(":").join(
+    Long expires = null;
+    if (token instanceof AbstractSecurityToken) {
+      ((AbstractSecurityToken) token).setExpires();
+      expires = token.getExpiresAt();
+    } else {
+      // Quick and dirty token expire calculation.
+      expires = new BasicSecurityToken().setExpires().getExpiresAt();
+    }
+
+    String encoded = Joiner.on(":").join(
         Utf8UrlCoder.encode(token.getOwnerId()),
         Utf8UrlCoder.encode(token.getViewerId()),
         Utf8UrlCoder.encode(token.getAppId()),
         Utf8UrlCoder.encode(token.getDomain()),
         Utf8UrlCoder.encode(token.getAppUrl()),
         Long.toString(token.getModuleId(), 10),
-        Utf8UrlCoder.encode(token.getContainer()),
-        Long.toString(basicToken.getExpiresAt(), 10));
+        Utf8UrlCoder.encode(token.getContainer()));
+
+    if (expires != null) {
+      encoded = Joiner.on(':').join(encoded, Long.toString(expires, 10));
+    }
+
+    return encoded;
   }
 
 

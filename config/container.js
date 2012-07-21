@@ -159,7 +159,10 @@
     "proxyUrl" : "//${Cur['default.domain.unlocked.client']}${Cur['gadgets.uri.proxy.path']}?container=%container%&refresh=%refresh%&url=%url%%authz%%rewriteMime%",
     "jsonProxyUrl" : "//${Cur['default.domain.locked.client']}${CONTEXT_ROOT}/gadgets/makeRequest",
     // Note: this setting MUST be supplied in every container config object, as there is no default if it is not supplied.
-    "unparseableCruft" : "throw 1; < don't be evil' >"
+    "unparseableCruft" : "throw 1; < don't be evil' >",
+
+    // This variable is needed during the config init to parse config augmentation
+    "jsPath" : "${Cur['gadgets.uri.js.path']}"
   },
   "views" : {
     "profile" : {
@@ -320,6 +323,9 @@
     "relayPath": "${CONTEXT_ROOT}/gadgets/files/container/rpc_relay.html",
 
     //Enables/Disables the RPC arbitrator functionality in the common container
-    "enableRpcArbitration": false
+    "enableRpcArbitration": false,
+
+    // This variable is needed during the container feature init.
+    "jsPath" : "${Cur['gadgets.uri.js.path']}"
   }
 }}

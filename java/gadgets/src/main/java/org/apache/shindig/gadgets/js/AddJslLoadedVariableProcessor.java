@@ -18,15 +18,19 @@
 
 package org.apache.shindig.gadgets.js;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.Sets;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.commons.lang3.StringEscapeUtils;
-import org.apache.shindig.gadgets.GadgetContext;
+import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.features.FeatureRegistry;
+import org.apache.shindig.gadgets.features.FeatureRegistryProvider;
 import org.apache.shindig.gadgets.uri.JsUriManager.JsUri;
 
-import java.util.Collection;
-import java.util.Set;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Sets;
+import com.google.inject.Inject;
 
 /**
  * Injects a global ___jsl.l variable with information about the JS request.
@@ -34,29 +38,45 @@ import java.util.Set;
  * Used when loading embedded JS configuration in core.config/config.js.
  */
 public class AddJslLoadedVariableProcessor implements JsProcessor {
+  private static final Logger LOG = Logger.getLogger(AddJslLoadedVariableProcessor.class.getName());
   private static final String CODE_ID = "[jsload-loaded-info]";
 
   @VisibleForTesting
   static final String TEMPLATE =
       "window['___jsl']['l'] = (window['___jsl']['l'] || []).concat(%s);";
 
-  public boolean process(JsRequest jsRequest, JsResponseBuilder builder) throws JsException {
-    JsUri jsUri = jsRequest.getJsUri();
-    if (!jsUri.isNohint()) {
-      Set<String> result = getBundleNames(jsUri, false);
-      result.removeAll(getBundleNames(jsUri, true));
-      String array = toArrayString(result);
-      builder.appendJs(String.format(TEMPLATE, array), CODE_ID);
-    }
-    return true;
+  private final FeatureRegistryProvider featureRegistryProvider;
+
+  @Inject
+  public AddJslLoadedVariableProcessor(FeatureRegistryProvider featureRegistryProvider) {
+    this.featureRegistryProvider = featureRegistryProvider;
   }
 
-  protected Set<String> getBundleNames(JsUri jsUri, boolean loaded) throws JsException {
-    GadgetContext ctx = new JsGadgetContext(jsUri);
-    Collection<String> libs = loaded ? jsUri.getLoadedLibs() : jsUri.getLibs();
-    Set<String> ret = Sets.newLinkedHashSet(); // ordered set for testability.
-    ret.addAll(libs);
-    return ret;
+  public boolean process(JsRequest jsRequest, JsResponseBuilder builder) throws JsException {
+    JsUri jsUri = jsRequest.getJsUri();
+
+    FeatureRegistry registry = null;
+    String repository = jsUri.getRepository();
+    try {
+      registry = featureRegistryProvider.get(jsUri.getRepository());
+    } catch (GadgetException e) {
+      if (LOG.isLoggable(Level.WARNING)) {
+        LOG.log(Level.WARNING, "No registry found for repository: " + repository, e);
+      }
+    }
+
+    if (registry != null && !jsUri.isNohint()) {
+      Set<String> allfeatures = registry.getAllFeatureNames();
+
+      Set<String> libs = Sets.newTreeSet();
+      libs.addAll(jsUri.getLibs());
+      libs.removeAll(jsUri.getLoadedLibs());
+      libs.retainAll(allfeatures);
+
+      String array = toArrayString(libs);
+      builder.appendJs(String.format(TEMPLATE, array), CODE_ID, true);
+    }
+    return true;
   }
 
   private String toArrayString(Set<String> bundles) {

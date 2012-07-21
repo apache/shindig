@@ -24,11 +24,18 @@ function ConfigTest(name) {
 ConfigTest.inherits(TestCase);
 
 ConfigTest.prototype.setUp = function() {
-  this.script1 = { nodeType: 3, src: "http://www.1.com/js/1.js", nodeValue: "{data:'value1'}" };
-  this.script2 = { nodeType: 3, src: "http://www.2.com/js/2.js", nodeValue: "{data:'value2'}" };
-  this.script3 = { nodeType: 3, src: "http://www.3.com/js/3.js", nodeValue: "{data:'value3'}" };
+  gadgets.config.clear();
+  this.script1 = { nodeType: 3, src: "http://www.1.com/js/1.js?c=0" };
+  this.script2 = { nodeType: 3, src: "http://www.2.com/js/2.js?c=1" };
+  this.script3 = { nodeType: 3, src: "http://www.3.com/js/3.js?blah&c=0" };
   document.scripts = [ this.script1, this.script2, this.script3 ];
   this.defaultConfig = {
+    'core.io': {
+      jsPath: '/js',
+      proxyUrl: '',
+      jsonProxyUrl: 'a',
+      unparseableCruft: ''
+    },
     testBasic: { data: "Hello, World!", untouched: "Goodbye" },
     testSecond: { foo: "Bar" }
   };
@@ -62,7 +69,15 @@ ConfigTest.prototype.testMultiple = function() {
     testMultiple1 = config.testMultiple;
   });
 
-  gadgets.config.init({testMultiple: {data: "Hello, World!"}});
+  gadgets.config.init({
+    'core.io': {
+      jsPath: '/js',
+      proxyUrl: '',
+      jsonProxyUrl: 'a',
+      unparseableCruft: ''
+    },
+    testMultiple: {data: "Hello, World!"}
+  });
 
   this.assertEquals("Hello, World!", testMultiple0.data);
   this.assertEquals("Hello, World!", testMultiple1.data);
@@ -101,7 +116,7 @@ ConfigTest.prototype.testFindScriptHintExact = function() {
     testListen = config;
   });
   this.script2.nodeValue = "data: 'Override'";
-  window["___jsl"] = { u: "http://www.2.com/js/2.js", f: [ "testBasic" ]};
+  window["___jsl"] = {f: [ "testBasic" ]};
   gadgets.config.init(this.defaultConfig);
   this.assertEquals("Override", testListen.testBasic.data);
   this.assertEquals("Goodbye", testListen.testBasic.untouched);
@@ -112,9 +127,9 @@ ConfigTest.prototype.testFindScriptHintPrefixMatch = function() {
   gadgets.config.register("testBasic", null, function(config) {
     testListen = config;
   });
-  this.script2.src = "http://www.2.com/js/2.js#hash=1";
+  this.script2.src += "#hash=1";
   this.script2.nodeValue = "testBasic: { data: 'Override' }, testSecond: [ 'difftype' ]";
-  window["___jsl"] = { u: "http://www.2.com/js/2.js", f: [ "testBasic", "testSecond" ]};
+  window["___jsl"] = {f: [ "testBasic", "testSecond" ]};
   gadgets.config.init(this.defaultConfig);
   this.assertEquals("Override", testListen.testBasic.data);
   this.assertEquals("Goodbye", testListen.testBasic.untouched);
@@ -143,6 +158,12 @@ ConfigTest.prototype.testUpdateMerge = function() {
     testListen = config;
   });
   gadgets.config.init({
+    'core.io': {
+      jsPath: '/js',
+      proxyUrl: '',
+      jsonProxyUrl: 'a',
+      unparseableCruft: ''
+    },
     one: { oneKey1: { oneSubkey1: "oneVal1" }, oneKey2: "data" },
     two: "twoVal1"
   });
@@ -172,6 +193,12 @@ ConfigTest.prototype.testUpdateBeforeInit = function() {
   });
   this.assertTrue(testListen === null);
   gadgets.config.init({
+    'core.io': {
+      jsPath: '/js',
+      proxyUrl: '',
+      jsonProxyUrl: 'a',
+      unparseableCruft: ''
+    },
     one: { oneKey1: { oneSubkey1: "overwrite" } }
   });
   this.assertEquals("overwrite", testListen.one.oneKey1.oneSubkey1);
@@ -186,6 +213,12 @@ ConfigTest.prototype.testMergeFromInlineConfig = function() {
   });
   window["___config"] = { one: { oneKey1: { oneSubkey1: "override" } } };
   gadgets.config.init({
+    'core.io': {
+      jsPath: '/js',
+      proxyUrl: '',
+      jsonProxyUrl: 'a',
+      unparseableCruft: ''
+    },
     one: { oneKey1: { oneSubkey1: "oneVal1" }, oneKey2: "data" },
     two: "twoVal1"
   });
@@ -201,7 +234,15 @@ ConfigTest.prototype.testValidator = function() {
     return true;
   }});
 
-  gadgets.config.init({testValidator: {data: "Hello, World!"}});
+  gadgets.config.init({
+    'core.io': {
+      jsPath: '/js',
+      proxyUrl: '',
+      jsonProxyUrl: 'a',
+      unparseableCruft: ''
+    },
+    testValidator: {data: "Hello, World!"}
+  });
 
   this.assertEquals("Hello, World!", validatorValue);
 };
@@ -219,7 +260,15 @@ ConfigTest.prototype.testValidatorMultiple = function() {
     return true;
   }});
 
-  gadgets.config.init({testValidator: {key0: "Hello, World!", key1: "Goodbye, World!"}});
+  gadgets.config.init({
+    'core.io': {
+      jsPath: '/js',
+      proxyUrl: '',
+      jsonProxyUrl: 'a',
+      unparseableCruft: ''
+    },
+    testValidator: {key0: "Hello, World!", key1: "Goodbye, World!"}
+  });
 
   this.assertEquals("Hello, World!", validatorValue0);
   this.assertEquals("Goodbye, World!", validatorValue1);
@@ -247,7 +296,15 @@ ConfigTest.prototype.testValidatorDisabled = function() {
     testValidatorDisabledConfig = config.testValidatorDisabled;
   });
 
-  gadgets.config.init({testValidatorDisabled: {data: "Hello, World!"}}, true);
+  gadgets.config.init({
+    'core.io': {
+      jsPath: '/js',
+      proxyUrl: '',
+      jsonProxyUrl: 'a',
+      unparseableCruft: ''
+    },
+    testValidatorDisabled: {data: "Hello, World!"}
+  }, true);
 
   this.assertEquals("Hello, World!", testValidatorDisabledConfig.data);
 };

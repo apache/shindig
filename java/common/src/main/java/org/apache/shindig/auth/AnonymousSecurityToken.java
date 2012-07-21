@@ -34,7 +34,7 @@ public class AnonymousSecurityToken extends AbstractSecurityToken implements Sec
   public static final String ANONYMOUS_ID = "-1";
 
   private static final EnumSet<Keys> MAP_KEYS = EnumSet.of(
-    Keys.OWNER, Keys.VIEWER, Keys.APP_URL, Keys.MODULE_ID, Keys.EXPIRES, Keys.TRUSTED_JSON
+    Keys.OWNER, Keys.VIEWER, Keys.APP_URL, Keys.MODULE_ID, Keys.TRUSTED_JSON
   );
 
   public AnonymousSecurityToken() {
@@ -42,11 +42,11 @@ public class AnonymousSecurityToken extends AbstractSecurityToken implements Sec
   }
 
   public AnonymousSecurityToken(String container) {
-    this(container, 0L, "", null);
+    this(container, 0L, "");
   }
 
-  public AnonymousSecurityToken(String container, Long moduleId, String appUrl, Long expiresAt) {
-    setContainer(container).setModuleId(moduleId).setAppUrl(appUrl).setExpiresAt(expiresAt)
+  public AnonymousSecurityToken(String container, Long moduleId, String appUrl) {
+    setContainer(container).setModuleId(moduleId).setAppUrl(appUrl)
       .setOwnerId(ANONYMOUS_ID)
       .setViewerId(ANONYMOUS_ID)
       .setDomain("*")
@@ -56,6 +56,18 @@ public class AnonymousSecurityToken extends AbstractSecurityToken implements Sec
   @Override
   public String getAppId() {
     return getAppUrl();
+  }
+
+  // Anon Security Tokens have no need to expire
+  @Override
+  protected AbstractSecurityToken setExpires() {
+    return this;
+  }
+
+  // Anon Security Tokens have no need to expire
+  @Override
+  protected AbstractSecurityToken setExpiresAt(Long expiresAt) {
+    return this;
   }
 
   public boolean isAnonymous() {

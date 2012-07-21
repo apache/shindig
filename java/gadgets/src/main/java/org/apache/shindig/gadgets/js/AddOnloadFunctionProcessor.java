@@ -76,7 +76,7 @@ public class AddOnloadFunctionProcessor implements JsProcessor {
     } else if (jsUri.isNohint()) {
       // "Second-stage" JS, which may have had a callback set by loader.
       // This type of JS doesn't create a hint, but does attempt to use one.
-      builder.appendJs(JSL_CALLBACK_JS, JSL_CODE_ID);
+      builder.appendJs(JSL_CALLBACK_JS, JSL_CODE_ID, true);
     }
     return true;
   }

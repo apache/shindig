@@ -20,9 +20,13 @@ package org.apache.shindig.gadgets.js;
 
 import static org.junit.Assert.assertEquals;
 
-import com.google.common.collect.ImmutableList;
+import java.util.List;
+import java.util.Set;
 
 import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.features.FeatureRegistry;
+import org.apache.shindig.gadgets.features.FeatureRegistryProvider;
 import org.apache.shindig.gadgets.uri.JsUriManager.JsUri;
 import org.apache.shindig.gadgets.uri.UriStatus;
 import org.easymock.EasyMock;
@@ -30,7 +34,8 @@ import org.easymock.IMocksControl;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.List;
+import com.google.common.collect.Sets;
+import com.google.common.collect.ImmutableList;
 
 /**
  * Tests for {@link AddJslLoadedVariableProcessor}.
@@ -50,13 +55,23 @@ public class AddJslLoadedVariableProcessorTest {
   private JsUri jsUri;
   private JsResponseBuilder response;
   private AddJslLoadedVariableProcessor processor;
+  private final FeatureRegistryProvider fregProvider = EasyMock.createMock(FeatureRegistryProvider.class);
+  private final FeatureRegistry freg = EasyMock.createMock(FeatureRegistry.class);
 
   @Before
-  public void setUp() {
+  public void setUp() throws GadgetException {
     control = EasyMock.createControl();
     request = control.createMock(JsRequest.class);
     response = new JsResponseBuilder();
-    processor = new AddJslLoadedVariableProcessor();
+    processor = new AddJslLoadedVariableProcessor(fregProvider);
+
+    EasyMock.reset(fregProvider, freg);
+    EasyMock.expect(fregProvider.get(EasyMock.anyObject(String.class))).andReturn(freg).anyTimes();
+
+    Set<String> required = Sets.newHashSet(REQ_LIBS);
+    EasyMock.expect(freg.getAllFeatureNames()).andReturn(required).anyTimes();
+
+    EasyMock.replay(fregProvider, freg);
   }
 
   @Test

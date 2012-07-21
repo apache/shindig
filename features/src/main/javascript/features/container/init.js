@@ -21,32 +21,31 @@
  * @fileoverview Initial configuration/boot-strapping work for common container
  * to operate. This includes setting up global environment variables.
  */
-(function() {
-  function initializeGlobalVars() {
-    window.__CONTAINER_URI = shindig.uri(window.location.href);
+gadgets.config.register('container', null, function(config) {
+  var jsPath = config.container.jsPath || null;
 
-    window.__API_URI = null;
-    var scriptEl = null;
-    if (window.__CONTAINER_SCRIPT_ID) {
-      scriptEl = document.getElementById(window.__CONTAINER_SCRIPT_ID);
-    } else {
-      var scriptEls = document.getElementsByTagName('script');
-      for(var i = 0; scriptEls && i < scriptEls.length; i++) {
-        if(/.*gadgets\/js\/.*container.*[.]js.*[?&]c=1(&|$).*/.test(scriptEls[i].src)) {
-          scriptEl = scriptEls[i];
-          break;
-        }
+  window.__CONTAINER_URI = shindig.uri(window.location.href);
+  window.__API_URI = null;
+  var scriptEl = null;
+  if (window.__CONTAINER_SCRIPT_ID) {
+    scriptEl = document.getElementById(window.__CONTAINER_SCRIPT_ID);
+  } else {
+    var scriptEls = document.getElementsByTagName('script');
+    for(var i = 0; scriptEls && i < scriptEls.length; i++) {
+      var src = scriptEls[i].src,
+          found = jsPath != null && src && src.indexOf(jsPath) || -1;
+      if(found != -1 && /.*container.*[.]js.*[?&]c=1(#|&|$).*/.test(src.substring(found + jsPath.length))) {
+        scriptEl = scriptEls[i];
+        break;
       }
     }
-
-    if (scriptEl) {
-      window.__API_URI = shindig.uri(scriptEl.src);
-      // In case script URI is relative, resolve (make absolute) with container.
-      window.__API_URI.resolve(window.__CONTAINER_URI);
-    }
-
-    window.__CONTAINER = window.__API_URI ? window.__API_URI.getQP('container') : 'default';
   }
 
-  initializeGlobalVars();
-})();
+  if (scriptEl) {
+    window.__API_URI = shindig.uri(scriptEl.src);
+    // In case script URI is relative, resolve (make absolute) with container.
+    window.__API_URI.resolve(window.__CONTAINER_URI);
+  }
+
+  window.__CONTAINER = window.__API_URI ? window.__API_URI.getQP('container') : 'default';
+}, false);

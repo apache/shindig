@@ -23,7 +23,9 @@ under the License.
 
   Allot a modest amount of heap to be shared by all caches.
 
-  By default none of the caches will persist or overflow to disk.
+  By default only the CompiledJs caches will overflow to disk.  No caches will persist
+  to disk by default as a development aid.  It is recommended that deployments tune
+  caches to their needs.
 
   Statistics are turned on for every cache by default.  This affects cache performance.
   To turn stats off you can use shindig.cache.ehcache.jmx.stats in shindig.properties.
@@ -59,6 +61,17 @@ under the License.
     timeToLiveSeconds="600"
     overflowToDisk="false"
     diskPersistent="false"
+    memoryStoreEvictionPolicy="LFU"/>
+
+  <!--
+    Compiled feature code, 10Mb disk overflow
+  -->
+  <cache name="CompiledJs"
+    statistics="true"
+    eternal="true"
+    overflowToDisk="true"
+    diskPersistent="false"
+    maxBytesLocalDisk="10m"
     memoryStoreEvictionPolicy="LFU"/>
 
   <!--

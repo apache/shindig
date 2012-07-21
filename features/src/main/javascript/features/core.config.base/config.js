@@ -60,6 +60,7 @@ gadgets.config = function() {
   var ___jsl;
   var components = {};
   var configuration = {};
+  var initialized = false;
 
   function foldConfig(origConfig, updConfig) {
     for (var key in updConfig) {
@@ -80,25 +81,30 @@ gadgets.config = function() {
   }
 
   function getLoadingScript() {
+    var jsPath = (configuration['core.io'] || {})['jsPath'] || null,
+        candidates = [],
+        n = 0;
+
     // Attempt to retrieve config augmentation from latest script node.
     var scripts = document.scripts || document.getElementsByTagName('script');
-    if (!scripts || scripts.length == 0) return null;
-    var scriptTag;
-    if (___jsl['u']) {
-      for (var i = 0; !scriptTag && i < scripts.length; ++i) {
-        var candidate = scripts[i];
-        if (candidate.src &&
-            candidate.src.indexOf(___jsl['u']) == 0) {
-          // Do indexOf test to allow for fragment info
-          scriptTag = candidate;
-        }
+    if (!scripts || scripts.length == 0) {
+      return candidates;
+    }
+
+    for (var i = 0; i < scripts.length; ++i) {
+      var src = scripts[i].src,
+          found = jsPath != null && src && src.indexOf(jsPath) || -1;
+      if (found != -1 && /.*[.]js.*[?&]c=[01](#|&|$).*/.test(src.substring(found + jsPath.length))) {
+        candidates[n++] = scripts[i];
       }
     }
-    if (!scriptTag) {
-      scriptTag = scripts[scripts.length - 1];
+    if (!candidates.length) {
+      var tag = scripts[scripts.length - 1];
+      if (tag.src) {
+        candidates[0] = tag;
+      }
     }
-    if (!scriptTag.src) return null;
-    return scriptTag;
+    return candidates;
   }
 
   function getInnerText(scriptNode) {
@@ -134,28 +140,30 @@ gadgets.config = function() {
   }
 
   function augmentConfig(baseConfig) {
-    var loadScript = getLoadingScript();
-    if (!loadScript) {
+    var scripts = getLoadingScript();
+    if (!scripts.length) {
       return;
     }
-    var scriptText = getInnerText(loadScript);
-    var configAugment = parseConfig(scriptText);
-    if (___jsl['f'] && ___jsl['f'].length == 1) {
-      // Single-feature load on current request.
-      // Augmentation adds to just this feature's config if
-      // "short-form" syntax is used ie. skipping top-level feature key.
-      var feature = ___jsl['f'][0];
-      if (!configAugment[feature]) {
-        var newConfig = {};
-        newConfig[___jsl['f'][0]] = configAugment;
-        configAugment = newConfig;
+    for (var i = 0; i < scripts.length; i++) {
+      var scriptText = getInnerText(scripts[i]);
+      var configAugment = parseConfig(scriptText);
+      if (___jsl['f'] && ___jsl['f'].length == 1) {
+        // Single-feature load on current request.
+        // Augmentation adds to just this feature's config if
+        // "short-form" syntax is used ie. skipping top-level feature key.
+        var feature = ___jsl['f'][0];
+        if (!configAugment[feature]) {
+          var newConfig = {};
+          newConfig[___jsl['f'][0]] = configAugment;
+          configAugment = newConfig;
+        }
       }
-    }
-    foldConfig(baseConfig, configAugment);
+      foldConfig(baseConfig, configAugment);
 
-    var globalConfig = window['___cfg'];
-    if (globalConfig) {
-      foldConfig(baseConfig, globalConfig);
+      var globalConfig = window['___cfg'];
+      if (globalConfig) {
+        foldConfig(baseConfig, globalConfig);
+      }
     }
   }
 
@@ -213,6 +221,10 @@ gadgets.config = function() {
         callback: opt_callback,
         callOnUpdate: opt_callOnUpdate
       });
+
+      if (initialized && opt_callback) {
+          opt_callback(configuration);
+      }
     },
 
     /**
@@ -268,6 +280,7 @@ gadgets.config = function() {
           component.callback(configuration);
         }
       });
+      initialized = true;
     },
 
     /**
@@ -292,6 +305,17 @@ gadgets.config = function() {
       for (var i = 0, j = callbacks.length; i < j; ++i) {
         callbacks[i](configuration);
       }
+    },
+
+    /**
+     * For testing
+     */
+    clear: function() {
+      gadgets.warn('This method is for testing.');
+      var undef;
+      ___jsl = undef;
+      configuration = {};
+      initialized = false;
     }
   };
 }();

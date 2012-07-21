@@ -103,7 +103,7 @@ public class ClientCredentialsGrantTypeHandler implements GrantRequestHandler {
     final HttpRequest request = new HttpRequest(Uri.parse(completeAuthorizationUrl));
     request.setMethod("GET");
     request.setHeader("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
-    request.setSecurityToken( new AnonymousSecurityToken( "", 0L, accessor.getGadgetUri(), 0L ));
+    request.setSecurityToken( new AnonymousSecurityToken( "", 0L, accessor.getGadgetUri()));
 
     for (final ClientAuthenticationHandler clientAuthenticationHandler : this.clientAuthenticationHandlers) {
       if (clientAuthenticationHandler.geClientAuthenticationType().equalsIgnoreCase(

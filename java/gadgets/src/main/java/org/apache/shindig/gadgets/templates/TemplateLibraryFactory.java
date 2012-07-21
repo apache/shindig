@@ -56,7 +56,7 @@ public class TemplateLibraryFactory {
   }
 
   public TemplateLibrary loadTemplateLibrary(GadgetContext context, Uri uri) throws GadgetException {
-    HttpRequest request = new HttpRequest(uri).setSecurityToken( new AnonymousSecurityToken( "", 0L, context.getUrl().toString(), 0L ));
+    HttpRequest request = new HttpRequest(uri).setSecurityToken( new AnonymousSecurityToken( "", 0L, context.getUrl().toString()));
     // 5 minute TTL.
     request.setCacheTtl(300);
     HttpResponse response = pipeline.execute(request);

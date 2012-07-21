@@ -221,7 +221,7 @@ public class CodeAuthorizationResponseHandler implements AuthorizationEndpointRe
     final HttpRequest request = new HttpRequest(Uri.parse(tokenUrl));
     request.setMethod("POST");
     request.setHeader("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
-    request.setSecurityToken(new AnonymousSecurityToken("", 0L, accessor.getGadgetUri(), 0L));
+    request.setSecurityToken(new AnonymousSecurityToken("", 0L, accessor.getGadgetUri()));
 
     if (!isUriAllowed(request.getUri(), accessor.getAllowedDomains())) {
       ret = new OAuth2HandlerError(OAuth2Error.AUTHORIZATION_CODE_PROBLEM,
