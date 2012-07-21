@@ -29,7 +29,7 @@ testConfig[osapi.container.ContainerConfig.RENDER_DEBUG] = '1';
 // the DefaultSecurityTokenCodec to let UrlParameterAuthenticationHandler create valid security token.
 // 10 seconds is fast, but this is mostly for demonstration purposes.
 testConfig[osapi.container.ContainerConfig.GET_CONTAINER_TOKEN] = function(callback) {
-  console.log('Updating container security token.');
+  gadgets.log('Updating container security token.');
   callback('john.doe:john.doe:appid:cont:url:0:default', 10);
 };
 
@@ -63,7 +63,7 @@ CommonContainer.init = function() {
     hub: CommonContainer.managedHub
   });
 
-  CommonContainer.rpcRegister('set_title', setTitleHandler);
+  CommonContainer.rpcRegister('set_title', window.setTitleHandler);
   CommonContainer.addGadgetLifecycleCallback('com.example.commoncontainer', lifecycle());
 
   try {

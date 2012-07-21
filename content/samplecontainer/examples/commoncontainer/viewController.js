@@ -99,12 +99,12 @@ $(function() {
     };
 
     //RPC handler for the set-title feature
-    setTitleHandler = function(rpcArgs, title) {
+    window.setTitleHandler = function(rpcArgs, title) {
       var titleId = siteToTitleMap[rpcArgs.gs.id_];
       $('#' + titleId).text(title);
     };
 
-    getNewGadgetElement = function(result, gadgetURL){
+    window.getNewGadgetElement = function(result, gadgetURL){
       result[gadgetURL] = result[gadgetURL] || {};
       var gadgetSiteString = "$(this).closest(\'.portlet\').find(\'.portlet-content\').data(\'gadgetSite\')";
       var viewItems = '';
@@ -137,9 +137,9 @@ $(function() {
     }
 
     //create a gadget with navigation tool bar header enabling gadget collapse, expand, remove, navigate to view actions.
-    buildGadget = function(result,gadgetURL){
+    window.buildGadget = function(result,gadgetURL){
       result = result || {};
-      var element =  getNewGadgetElement(result, gadgetURL);
+      var element =  window.getNewGadgetElement(result, gadgetURL);
       $(element).data('gadgetSite', CommonContainer.renderGadget(gadgetURL, curId));
 
        //determine which button was click and handle the appropriate event.
@@ -168,7 +168,7 @@ $(function() {
 		CommonContainer.preloadGadget(newGadgetUrl.val(), function(result) {
 		  for (var gadgetURL in result) {
 		    if(!result[gadgetURL].error) {
-			    buildGadget(result, gadgetURL);
+			    window.buildGadget(result, gadgetURL);
 			    curId++;
 		    }
 		  }
@@ -185,7 +185,7 @@ $(function() {
     CommonContainer.preloadGadget(newGadgetUrl.val(), function(result) {
       for (var gadgetURL in result) {
         if(!result[gadgetURL].error) {
-          //buildGadget(result, gadgetURL);
+          //window.buildGadget(result, gadgetURL);
           curId++;
         }
       }
@@ -199,7 +199,7 @@ $(function() {
 
 	//  Add a single gadget entered by user (no preloading)
 	 $('#addGadget').click(function() {
-	        buildGadget({}, newGadgetUrl.val());
+	        window.buildGadget({}, newGadgetUrl.val());
 	        curId++;
 
 	        //Clear Values
@@ -216,7 +216,7 @@ $(function() {
 		CommonContainer.preloadGadgets(testGadgets, function(result) {
 		  for (var gadgetURL in result) {
 		    if(!result[gadgetURL].error) {
-		      buildGadget(result, gadgetURL);
+		      window.buildGadget(result, gadgetURL);
 		      curId++;
 		    }
 		  }
@@ -230,7 +230,7 @@ $(function() {
 	  CommonContainer.preloadGadgets(eeUrl.val(), function(result) {
 	    for (var gadgetURL in result) {
 	      if(!result[gadgetURL].error) {
-	        var eeElement = getNewGadgetElement(result, gadgetURL);
+	        var eeElement = window.getNewGadgetElement(result, gadgetURL);
 
 	        var model = new Object();
 
@@ -240,7 +240,7 @@ $(function() {
 	        var params = [];
 	        params[osapi.container.ee.RenderParam.GADGET_RENDER_PARAMS] = {
 	            'height' : eeHeight.val(),
-	            'width' : eeWidth.val(),
+	            'width' : eeWidth.val()
 	        };
 	        var currentEESite = CommonContainer.ee.navigate(eeElement, model, params, null);
 	        curId++;

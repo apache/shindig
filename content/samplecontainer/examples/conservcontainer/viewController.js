@@ -69,7 +69,7 @@ $(function() {
 
   // Create a gadget with navigation tool bar header
   // enabling gadget collapse, expand and remove.
-  buildGadget = function(result,gadgetURL,lazyload) {
+  window.buildGadget = function(result,gadgetURL,lazyload) {
     var gadgetSiteString = "$(this).closest(\'.portlet\')." +
       "find(\'.portlet-content\').data(\'gadgetSite\')";
     var newGadgetSite = gadgetTemplate;
@@ -110,7 +110,7 @@ $(function() {
   addGadget = function(gadgetUrl, lazyload) {
     CommonContainer.preloadGadget(gadgetUrl, function(result) {
       for (var gadgetURL in result) {
-       buildGadget(result, gadgetURL, lazyload);
+       window.buildGadget(result, gadgetURL, lazyload);
        curId++;
       }
     });
