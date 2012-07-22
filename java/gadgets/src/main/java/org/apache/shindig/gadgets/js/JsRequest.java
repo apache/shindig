@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.shindig.gadgets.js;
 
 import org.apache.shindig.gadgets.features.FeatureRegistry;

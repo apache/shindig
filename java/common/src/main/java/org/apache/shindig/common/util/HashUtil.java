@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.shindig.common.util;
 
 import com.google.common.base.Preconditions;

@@ -35,9 +35,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * 
+ *
  * {@link OAuth2Cache} implementation using in-memory {@link HashMap}s.
- * 
+ *
  */
 @Singleton
 public class InMemoryCache extends MapCache {

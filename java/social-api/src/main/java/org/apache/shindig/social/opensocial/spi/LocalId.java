@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.shindig.social.opensocial.spi;
 
 import java.util.regex.Pattern;

@@ -53,7 +53,7 @@ public class BasicOAuth2Request implements OAuth2Request {
           .getFilteredLogger(BasicOAuth2Request.LOG_CLASS);
 
   private static final short MAX_ATTEMPTS = 3;
-  
+
   private OAuth2Accessor internalAccessor;
 
   private OAuth2Arguments arguments;

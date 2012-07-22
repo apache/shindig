@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.shindig.social.sample;
 
 import org.apache.shindig.social.core.oauth2.OAuth2DataService;

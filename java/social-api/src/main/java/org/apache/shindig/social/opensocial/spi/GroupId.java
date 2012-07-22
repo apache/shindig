@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.shindig.social.opensocial.spi;
 
 import com.google.common.base.Objects;
@@ -79,7 +78,7 @@ public class GroupId {
     // Else store the string representation of the type
     } else if(Type.custom.equals(type)){
       //Custom @ id
-      this.objectId = objectId; 
+      this.objectId = objectId;
     } else {
       this.objectId = typeToString(type);
     }

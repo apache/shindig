@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.shindig.config;
 
 import static org.apache.shindig.config.ContainerConfig.DEFAULT_CONTAINER;

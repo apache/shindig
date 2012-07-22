@@ -100,7 +100,7 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
       "a {color:#0000cc;}a:visited {color:#551a8b;}" +
       "a:active {color:#ff0000;}" +
       "body{margin: 0px;padding: 0px;background-color:white;}";
-  protected static final String SCROLLING_CSS = 
+  protected static final String SCROLLING_CSS =
       "html,body{height:100%;width:100%;overflow:auto;}";
   static final String IS_GADGET_BEACON = "window['__isgadget']=true;";
   static final String INSERT_BASE_ELEMENT_KEY = "gadgets.insertBaseElement";
@@ -183,13 +183,13 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
 
       // Insert new content before any of the existing children of the head element
       Node firstHeadChild = head.getFirstChild();
-      
+
       Element injectedStyle = document.createElement("style");
       injectedStyle.setAttribute("type", "text/css");
       head.insertBefore(injectedStyle, firstHeadChild);
       injectedStyle.appendChild(injectedStyle.getOwnerDocument().
           createTextNode(SCROLLING_CSS));
-      
+
       // Only inject default styles if no doctype was specified.
       if (document.getDoctype() == null) {
         injectedStyle.appendChild(injectedStyle.getOwnerDocument().

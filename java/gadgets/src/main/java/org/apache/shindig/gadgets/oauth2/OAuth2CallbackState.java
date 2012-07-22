@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.shindig.gadgets.oauth2;
 
 import com.google.common.collect.Maps;
@@ -77,7 +76,7 @@ public class OAuth2CallbackState implements Serializable {
     if (this.crypter != null) {
       ret = this.crypter.wrap(this.state.toMap());
     }
-    
+
     return ret;
   }
 
