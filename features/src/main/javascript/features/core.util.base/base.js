@@ -75,3 +75,15 @@ gadgets.util.makeEnum = function(values) {
   return obj;
 };
 
+/**
+ * Check if need to poll for Ajax ready state change to avoid browsers memory leak.
+ * The default implementation will check for IE7 browsers.
+ *
+ * @return true if we need to add polling to handle ready state change and false otherwise.
+ */
+gadgets.util.shouldPollXhrReadyStateChange = function() {
+  if (document.all && !document.querySelector) {
+    return true;
+  }
+  return false;
+}

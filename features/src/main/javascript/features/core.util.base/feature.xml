@@ -21,9 +21,11 @@
   <dependency>globals</dependency>
   <all>
     <script src="base.js"/>
+    <script src="taming.js" caja="1"/>
     <api>
       <exports type="js">gadgets.util.makeClosure</exports>
       <exports type="js">gadgets.util.makeEnum</exports>
+      <exports type="js">gadgets.util.shouldPollXhrReadyStateChange</exports>
     </api>
   </all>
 </feature>

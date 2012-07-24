@@ -162,7 +162,10 @@
     "unparseableCruft" : "throw 1; < don't be evil' >",
 
     // This variable is needed during the config init to parse config augmentation
-    "jsPath" : "${Cur['gadgets.uri.js.path']}"
+    "jsPath" : "${Cur['gadgets.uri.js.path']}",
+
+    // interval in milliseconds used to poll xhr request for the readyState
+    "xhrPollIntervalMs" : 50
   },
   "views" : {
     "profile" : {
