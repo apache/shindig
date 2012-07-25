@@ -273,7 +273,7 @@ public class MakeRequestHandler implements ContainerConfig.ConfigObserver {
     } else if ("1".equals(getParameter(request, MULTI_PART_FORM_POST, null))) {
       // We need the entire header from the original request because it comes with a boundary value
       // we need to reuse.
-      req.addHeader("Content-Type", request.getHeader("Content-Type"));
+      req.setHeader("Content-Type", request.getHeader("Content-Type"));
     }
 
     req.setIgnoreCache("1".equals(getParameter(request, Param.NO_CACHE.getKey(), null)));
