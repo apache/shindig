@@ -47,6 +47,7 @@ import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.oauth.AccessorInfo.HttpMethod;
 import org.apache.shindig.gadgets.oauth.AccessorInfo.OAuthParamLocation;
+import org.apache.shindig.gadgets.oauth.OAuthStore.ConsumerInfo;
 import org.apache.shindig.gadgets.oauth.OAuthStore.TokenInfo;
 import org.json.JSONObject;
 
@@ -345,7 +346,7 @@ public class OAuthRequest {
 
     addCallback(requestTokenParams);
 
-    HttpRequest signed = sanitizeAndSign(request, requestTokenParams, true);
+    HttpRequest signed = sanitizeAndSign(request, requestTokenParams, true, this.accessorInfo.getConsumer().isOauthBodyHash());
 
     OAuthMessage reply = sendOAuthMessage(signed);
 
@@ -518,7 +519,7 @@ public class OAuthRequest {
    * Send it.
    */
   public HttpRequest sanitizeAndSign(HttpRequest base, List<Parameter> params,
-      boolean tokenEndpoint) throws OAuthRequestException {
+      boolean tokenEndpoint, boolean addBodyHash) throws OAuthRequestException {
     if (params == null) {
       params = Lists.newArrayList();
     }
@@ -540,14 +541,16 @@ public class OAuthRequest {
         }
         break;
       case URL_AND_BODY_HASH:
-        try {
-          byte[] body = IOUtils.toByteArray(base.getPostBody());
-          byte[] hash = DigestUtils.sha(body);
-          String b64 = CharsetUtil.newUtf8String(Base64.encodeBase64(hash));
-          params.add(new Parameter(OAuthConstants.OAUTH_BODY_HASH, b64));
-        } catch (IOException e) {
-          throw new OAuthRequestException(OAuthError.UNKNOWN_PROBLEM,
-              "Error taking body hash", e);
+        if (addBodyHash) {
+          try {
+            byte[] body = IOUtils.toByteArray(base.getPostBody());
+            byte[] hash = DigestUtils.sha(body);
+            String b64 = CharsetUtil.newUtf8String(Base64.encodeBase64(hash));
+            params.add(new Parameter(OAuthConstants.OAUTH_BODY_HASH, b64));
+          } catch (IOException e) {
+            throw new OAuthRequestException(OAuthError.UNKNOWN_PROBLEM,
+                "Error taking body hash", e);
+          }
         }
         break;
     }
@@ -556,7 +559,9 @@ public class OAuthRequest {
     // trusted parameters have ability to override these parameters.
     List<Parameter> authParams = Lists.newArrayList();
 
-    addIdentityParams(authParams);
+    if (addBodyHash) {
+      addIdentityParams(authParams);
+    }
 
     addSignatureParams(authParams);
 
@@ -767,7 +772,7 @@ public class OAuthRequest {
       }
     }
 
-    HttpRequest signed = sanitizeAndSign(request, msgParams, true);
+    HttpRequest signed = sanitizeAndSign(request, msgParams, true, this.accessorInfo.getConsumer().isOauthBodyHash());
 
     OAuthMessage reply = sendOAuthMessage(signed);
 
@@ -846,7 +851,7 @@ public class OAuthRequest {
       // This is a request for access token data, return it.
       builder = formatAccessTokenData();
     } else {
-      HttpRequest signed = sanitizeAndSign(realRequest, null, false);
+      HttpRequest signed = sanitizeAndSign(realRequest, null, false, this.accessorInfo.getConsumer().isOauthBodyHash());
 
       HttpResponse response = fetchFromServer(signed);
 

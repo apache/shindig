@@ -23,7 +23,7 @@ package org.apache.shindig.gadgets.oauth;
  */
 public class BasicOAuthStoreConsumerKeyAndSecret {
 
-  public static enum KeyType { HMAC_SYMMETRIC, RSA_PRIVATE }
+  public static enum KeyType { HMAC_SYMMETRIC, RSA_PRIVATE, PLAINTEXT }
 
   /** Value for oauth_consumer_key */
   private final String consumerKey;
@@ -40,13 +40,21 @@ public class BasicOAuthStoreConsumerKeyAndSecret {
   /** Callback URL associated with this consumer key */
   private final String callbackUrl;
 
+  private final boolean oauthBodyHash;
+
   public BasicOAuthStoreConsumerKeyAndSecret(String key, String secret, KeyType type, String name,
-      String callbackUrl) {
+          String callbackUrl) {
+    this(key, secret, type, name, callbackUrl, true);
+  }
+
+  public BasicOAuthStoreConsumerKeyAndSecret(String key, String secret, KeyType type, String name,
+      String callbackUrl, boolean oauthBodyHash) {
     consumerKey = key;
     consumerSecret = secret;
     keyType = type;
     keyName = name;
     this.callbackUrl = callbackUrl;
+    this.oauthBodyHash = oauthBodyHash;
   }
 
   public String getConsumerKey() {
@@ -67,5 +75,9 @@ public class BasicOAuthStoreConsumerKeyAndSecret {
 
   public String getCallbackUrl() {
     return callbackUrl;
+  }
+
+  public boolean isOauthBodyHash() {
+    return this.oauthBodyHash;
   }
 }

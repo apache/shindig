@@ -54,6 +54,7 @@ public interface OAuthStore {
     private final OAuthConsumer consumer;
     private final String keyName;
     private final String callbackUrl;
+    private final boolean oauthBodyHash;
 
     /**
      * @param consumer the OAuth consumer
@@ -63,9 +64,21 @@ public interface OAuthStore {
      * shindig server.
      */
     public ConsumerInfo(OAuthConsumer consumer, String keyName, String callbackUrl) {
+      this(consumer, keyName, callbackUrl, true);
+    }
+
+    /**
+     * @param consumer the OAuth consumer
+     * @param keyName the name of the key to use for this consumer (passed on query parameters to
+     * help with key rotation.)
+     * @param callbackUrl callback URL associated with this consumer, likely to point to the
+     * shindig server.
+     */
+    public ConsumerInfo(OAuthConsumer consumer, String keyName, String callbackUrl, boolean oauthBodyHash) {
       this.consumer = consumer;
       this.keyName = keyName;
       this.callbackUrl = callbackUrl;
+      this.oauthBodyHash = oauthBodyHash;
     }
 
     public OAuthConsumer getConsumer() {
@@ -78,6 +91,10 @@ public interface OAuthStore {
 
     public String getCallbackUrl() {
       return callbackUrl;
+    }
+
+    public boolean isOauthBodyHash() {
+      return this.oauthBodyHash;
     }
   }
 

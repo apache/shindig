@@ -52,6 +52,7 @@ public class BasicOAuthStore implements OAuthStore {
   private static final String CONSUMER_KEY_KEY = "consumer_key";
   private static final String KEY_TYPE_KEY = "key_type";
   private static final String CALLBACK_URL = "callback_url";
+  private static final String OAUTH_BODY_HASH_KEY = "bodyHash";
 
   /**
    * HashMap of provider and consumer information. Maps BasicOAuthStoreConsumerIndexs (i.e.
@@ -131,15 +132,22 @@ public class BasicOAuthStore implements OAuthStore {
     String consumerSecret = consumerInfo.getString(CONSUMER_SECRET_KEY);
     String consumerKey = consumerInfo.getString(CONSUMER_KEY_KEY);
     String keyTypeStr = consumerInfo.getString(KEY_TYPE_KEY);
+    boolean oauthBodyHash = true;
+    String oauthBodyHashString = consumerInfo.optString(OAUTH_BODY_HASH_KEY);
+    if ("false".equalsIgnoreCase(oauthBodyHashString)) {
+      oauthBodyHash = false;
+    }
     KeyType keyType = KeyType.HMAC_SYMMETRIC;
 
     if ("RSA_PRIVATE".equals(keyTypeStr)) {
       keyType = KeyType.RSA_PRIVATE;
       consumerSecret = convertFromOpenSsl(consumerSecret);
+    } else if ("PLAINTEXT".equals(keyTypeStr)) {
+      keyType = KeyType.PLAINTEXT;
     }
 
     BasicOAuthStoreConsumerKeyAndSecret kas = new BasicOAuthStoreConsumerKeyAndSecret(
-        consumerKey, consumerSecret, keyType, null, callbackUrl);
+        consumerKey, consumerSecret, keyType, null, callbackUrl, oauthBodyHash);
 
     BasicOAuthStoreConsumerIndex index = new BasicOAuthStoreConsumerIndex();
     index.setGadgetUri(gadgetUri.toASCIIString());
@@ -185,13 +193,17 @@ public class BasicOAuthStore implements OAuthStore {
           "No key for gadget " + securityToken.getAppUrl() + " and service " + serviceName);
     }
     OAuthConsumer consumer;
-    if (cks.getKeyType() == KeyType.RSA_PRIVATE) {
+    final KeyType keyType = cks.getKeyType();
+    if (keyType == KeyType.RSA_PRIVATE) {
       consumer = new OAuthConsumer(null, cks.getConsumerKey(), null, provider);
       // The oauth.net java code has lots of magic.  By setting this property here, code thousands
       // of lines away knows that the consumerSecret value in the consumer should be treated as
       // an RSA private key and not an HMAC key.
       consumer.setProperty(OAuth.OAUTH_SIGNATURE_METHOD, OAuth.RSA_SHA1);
       consumer.setProperty(RSA_SHA1.PRIVATE_KEY, cks.getConsumerSecret());
+    } else if  (keyType == KeyType.PLAINTEXT) {
+      consumer = new OAuthConsumer(null, cks.getConsumerKey(), cks.getConsumerSecret(), provider);
+      consumer.setProperty(OAuth.OAUTH_SIGNATURE_METHOD, "PLAINTEXT");
     } else {
       consumer = new OAuthConsumer(null, cks.getConsumerKey(), cks.getConsumerSecret(), provider);
       consumer.setProperty(OAuth.OAUTH_SIGNATURE_METHOD, OAuth.HMAC_SHA1);
@@ -202,7 +214,7 @@ public class BasicOAuthStore implements OAuthStore {
       callback = callback.replace("%authority%", authority.getAuthority());
     }
 
-    return new ConsumerInfo(consumer, cks.getKeyName(), callback);
+    return new ConsumerInfo(consumer, cks.getKeyName(), callback, cks.isOauthBodyHash());
   }
 
   private BasicOAuthStoreTokenIndex makeBasicOAuthStoreTokenIndex(
