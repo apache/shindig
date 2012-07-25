@@ -360,10 +360,12 @@ osapi.container.Container.prototype.getGadgetMetadata = function(
  * @param {Function} callback post-RPC function to call, with RPC-related
  *                   arguments (with the calling GadgetSite augmented) and the
  *                   callback response itself.
+ *
+ * @return The old service handler for serviceName, if any.
  */
 osapi.container.Container.prototype.rpcRegister = function(service, callback) {
   var self = this;
-  gadgets.rpc.register(service, function() {
+  return gadgets.rpc.register(service, function() {
     // this['f'] is set by calling iframe via gadgets.rpc.
     this[osapi.container.GadgetSite.RPC_ARG_KEY] =
         self.getGadgetSiteByIframeId_(this['f']);

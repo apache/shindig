@@ -817,6 +817,7 @@ if (!window['gadgets']['rpc']) { // make lib resilient to double-inclusion
        * @param {string} serviceName Service name to register.
        * @param {function(Object,Object)} handler Service handler.
        *
+       * @return The old service handler for serviceName, if any.
        * @member gadgets.rpc
        */
       register: function(serviceName, handler) {
@@ -829,7 +830,9 @@ if (!window['gadgets']['rpc']) { // make lib resilient to double-inclusion
                         + ' use registerDefault');
         }
 
+        var old = services[serviceName];
         services[serviceName] = handler;
+        return old;
       },
 
       /**
