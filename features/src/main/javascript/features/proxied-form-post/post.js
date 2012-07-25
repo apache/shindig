@@ -169,7 +169,7 @@
 
       if (xhr.upload) {
         xhr.upload.onprogress = function(event) {
-          onprogress.call(null, event, xhr.abort);
+          onprogress.call(null, event, function(){ xhr.abort(); });
         };
       }
       xhr.onreadystatechange = gadgets.util.makeClosure(
