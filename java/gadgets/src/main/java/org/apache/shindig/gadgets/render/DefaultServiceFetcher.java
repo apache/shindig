@@ -56,10 +56,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Retrieves the rpc services for a container by fetching them from the container's
- * system.listMethods endpoints as defined in the container config.
+ * Default implementation for the ServiceFetcher the rpc services for a container by fetching
+ * them from the container's system.listMethods endpoints as defined in the container config.
  */
-public class DefaultServiceFetcher {
+public class DefaultServiceFetcher implements ServiceFetcher {
 
   //class name for logging purpose
   private static final String classname = DefaultServiceFetcher.class.getName();
@@ -139,7 +139,7 @@ public class DefaultServiceFetcher {
   }
 
   @SuppressWarnings("unchecked")
-  private List<String> getEndpointsFromContainerConfig(String container, String host) {
+  protected List<String> getEndpointsFromContainerConfig(String container, String host) {
     Map<String, Object> properties = (Map<String, Object>) containerConfig.getMap(container,
         GADGETS_FEATURES_CONFIG).get(OSAPI_FEATURE_CONFIG);
 
@@ -149,7 +149,7 @@ public class DefaultServiceFetcher {
     return ImmutableList.of();
   }
 
-  private Set<String> retrieveServices(String container, String endpoint) {
+  protected Set<String> retrieveServices(String container, String endpoint) {
     try {
       StringBuilder sb = new StringBuilder( 250 );
       sb.append(endpoint).append( "?method=" + SYSTEM_LIST_METHODS_METHOD );
@@ -186,7 +186,7 @@ public class DefaultServiceFetcher {
     return ImmutableSet.of();
   }
 
-  private Set<String> getServicesFromJsonResponse(String content)
+  protected Set<String> getServicesFromJsonResponse(String content)
       throws JSONException {
     ImmutableSet.Builder<String> services = ImmutableSet.builder();
     JSONObject js = new JSONObject(content);

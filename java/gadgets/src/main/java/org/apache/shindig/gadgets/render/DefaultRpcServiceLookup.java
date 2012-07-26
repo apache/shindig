@@ -48,14 +48,14 @@ public class DefaultRpcServiceLookup implements RpcServiceLookup {
 
   private final Cache<String, Multimap<String, String>> containerServices;
 
-  private final DefaultServiceFetcher fetcher;
+  private final ServiceFetcher fetcher;
 
   /**
    * @param fetcher  RpcServiceFetcher to retrieve services available from endpoints
    * @param duration in seconds service definitions should remain in the cache
    */
   @Inject
-  public DefaultRpcServiceLookup(DefaultServiceFetcher fetcher,
+  public DefaultRpcServiceLookup(ServiceFetcher fetcher,
       @Named("org.apache.shindig.serviceExpirationDurationMinutes")Long duration) {
     this.containerServices = CacheBuilder.newBuilder()
         .expireAfterWrite(duration * 60, TimeUnit.SECONDS)
