@@ -60,23 +60,22 @@ import java.util.logging.Logger;
  * them from the container's system.listMethods endpoints as defined in the container config.
  */
 public class DefaultServiceFetcher implements ServiceFetcher {
+  public static final String JSON_RESPONSE_WRAPPER_ELEMENT = "result";
+
+  public static final String OSAPI_FEATURE_CONFIG = "osapi";
+
+  public static final String OSAPI_SERVICES = "osapi.services";
+
+  public static final String GADGETS_FEATURES_CONFIG = "gadgets.features";
+
+  public static final String SYSTEM_LIST_METHODS_METHOD = "system.listMethods";
+
+  /** Key in container config that lists the endpoints offering services */
+  public static final String OSAPI_BASE_ENDPOINTS = "endPoints";
 
   //class name for logging purpose
   private static final String classname = DefaultServiceFetcher.class.getName();
   private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
-
-  static final String JSON_RESPONSE_WRAPPER_ELEMENT = "result";
-
-  static final String OSAPI_FEATURE_CONFIG = "osapi";
-
-  static final String OSAPI_SERVICES = "osapi.services";
-
-  static final String GADGETS_FEATURES_CONFIG = "gadgets.features";
-
-  static final String SYSTEM_LIST_METHODS_METHOD = "system.listMethods";
-
-  /** Key in container config that lists the endpoints offering services */
-  static final String OSAPI_BASE_ENDPOINTS = "endPoints";
 
   private final ContainerConfig containerConfig;
 
