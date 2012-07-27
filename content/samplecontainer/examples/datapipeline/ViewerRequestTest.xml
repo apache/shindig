@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Module>
+	<ModulePrefs title="ViewerRequest test"	description="ViewerRequest test">
+      <Require feature="opensocial-data" />
+	</ModulePrefs>
+   <Content view="default" type="html">
+   <![CDATA[
+      <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+      <script xmlns:os="http://ns.opensocial.org/2008/markup" type="text/os-data">
+         <os:ViewerRequest key="viewer" />
+      </script>
+      <!-- Initialize the gadget -->
+      <script type="text/javascript">
+         gadgets.util.registerOnLoadHandler(function() {
+            var currentViewer = opensocial.data.getDataContext().getDataSet('viewer');
+            if (currentViewer) {
+               document.getElementById("gadgetBody").innerHTML = "The current viewer id is " + currentViewer.id;
+            }
+         });
+     </script>
+     <div id="gadgetBody">No current viewer yet</div>
+   ]]>
+   </Content>
+</Module>

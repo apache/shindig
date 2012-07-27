@@ -75,7 +75,7 @@
 // Config param to load Opensocial data for social
 // preloads in data pipelining.  %host% will be
 // substituted with the current host.
-"gadgets.osDataUri" : "http://%host%${CONTEXT_ROOT}/rpc",
+"gadgets.osDataUri" : "//%host%${CONTEXT_ROOT}/rpc",
 
 // Use an insecure security token by default
 "gadgets.securityTokenType" : "insecure",

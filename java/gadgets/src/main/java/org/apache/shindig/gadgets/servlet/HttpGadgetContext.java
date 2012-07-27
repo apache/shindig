@@ -83,6 +83,12 @@ public class HttpGadgetContext extends GadgetContext {
   }
 
   @Override
+  public String getHostSchema() {
+    String schema = request.getScheme();
+    return schema == null ? super.getHostSchema() : schema;
+  }
+
+  @Override
   public String getUserIp() {
     String ip = request.getRemoteAddr();
     return ip == null ? super.getUserIp() : ip;

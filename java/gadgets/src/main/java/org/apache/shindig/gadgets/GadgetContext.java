@@ -100,6 +100,13 @@ public class GadgetContext {
   }
 
   /**
+   * @return The host schema for which the current request is being made.
+   */
+  public String getHostSchema() {
+    return delegate == null ? null : delegate.getHostSchema();
+  }
+
+  /**
    * @return The IP Address for the current user.
    */
   public String getUserIp() {

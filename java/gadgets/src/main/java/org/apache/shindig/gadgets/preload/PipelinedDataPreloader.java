@@ -47,6 +47,7 @@ import java.util.concurrent.Callable;
 import javax.servlet.http.HttpServletResponse;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -389,6 +390,10 @@ public class PipelinedDataPreloader {
     UriBuilder builder = UriBuilder.parse(
         jsonUri.replace("%host%", context.getHost()))
         .addQueryParameter("st", token);
-    return builder.toUri();
+    Uri uri = builder.toUri();
+    if(Strings.isNullOrEmpty(uri.getScheme()) && !Strings.isNullOrEmpty(context.getHostSchema())) {
+      uri = builder.setScheme(context.getHostSchema()).toUri();
+    }
+    return uri;
   }
 }
