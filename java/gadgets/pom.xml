@@ -80,7 +80,7 @@
     <profile>
       <id>java6</id>
       <activation>
-        <jdk>1.6</jdk>
+        <jdk>[1.6,)</jdk>
       </activation>
       <dependencies>
         <dependency>
