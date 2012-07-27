@@ -72,10 +72,10 @@ The following application wants to access your account information<br/><br/>
 <c:out value="${appDesc}" default=""/>
 <br/>
 
-<form name="authZForm" action="authorize" method="POST">
-  <input type="hidden" name="oauth_token" value="<%= token %>"/>
-  <input type="submit" name="Authorize" value="Deny"/>
-  <input type="submit" name="Authorize" value="Authorize"/>
+<form id="authorize_form" name="authZForm" action="authorize" method="POST">
+  <input type="hidden" id="authorize_oauth_token" name="oauth_token" value="<%= token %>"/>
+  <input type="submit" id="authroize_deny" name="Authorize" value="Deny"/>
+  <input type="submit" id="authorize_authorize" name="Authorize" value="Authorize"/>
 </form>
 
 </body>
