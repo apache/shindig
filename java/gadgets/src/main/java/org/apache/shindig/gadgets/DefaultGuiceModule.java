@@ -100,7 +100,8 @@ public class DefaultGuiceModule extends AbstractModule {
    * Sets up multibinding for rpc handlers
    */
   protected void registerGadgetHandlers() {
-    Multibinder<Object> handlerBinder = Multibinder.newSetBinder(binder(), Object.class, Names.named("org.apache.shindig.handlers"));
+    Multibinder<Object> handlerBinder = Multibinder.newSetBinder(binder(), Object.class,
+        Names.named("org.apache.shindig.handlers"));
     handlerBinder.addBinding().to(InvalidationHandler.class);
     handlerBinder.addBinding().to(HttpRequestHandler.class);
     handlerBinder.addBinding().to(GadgetsHandler.class);

@@ -64,7 +64,7 @@ public abstract class ApiServlet extends InjectedServlet {
 
   /** The default key used to look up handlers if the servlet config parameter is not available */
   public static final Key<Set<Object>> DEFAULT_HANDLER_KEY =
-       Key.get(new TypeLiteral<Set<Object>>(){}, Names.named("org.apache.shindig.protocol.handlers"));
+       Key.get(new TypeLiteral<Set<Object>>(){}, Names.named("org.apache.shindig.handlers"));
 
   protected HandlerRegistry dispatcher;
   protected BeanJsonConverter jsonConverter;
