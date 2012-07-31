@@ -76,7 +76,6 @@ public class DefaultRpcServiceLookup implements RpcServiceLookup {
     try {
       return containerServices.get(container,
         new Callable<Multimap<String, String>>() {
-          @Override
           public Multimap<String, String> call() {
             return Objects.firstNonNull(fetcher.getServicesForContainer(container, host),
                 ImmutableMultimap.<String,String>of());

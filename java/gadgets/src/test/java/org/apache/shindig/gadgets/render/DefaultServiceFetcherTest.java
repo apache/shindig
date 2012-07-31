@@ -180,7 +180,6 @@ public class DefaultServiceFetcherTest extends EasyMockTestCase {
     public CapturingHttpFetcher() {
     }
 
-    @Override
     public HttpResponse fetch(HttpRequest request) throws GadgetException {
       this.request = request;
       return new HttpResponseBuilder().setHttpStatusCode( HttpResponse.SC_OK )

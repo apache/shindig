@@ -153,7 +153,6 @@ public class ImplicitCollectionFieldMapping implements ImplicitCollectionMapping
     return itemType;
   }
 
-  @Override
   public String getKeyFieldName() {
     return null;
   }

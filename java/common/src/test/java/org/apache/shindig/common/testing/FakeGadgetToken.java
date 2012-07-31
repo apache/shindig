@@ -105,7 +105,6 @@ public class FakeGadgetToken extends AbstractSecurityToken {
     return this;
   }
 
-  @Override
   public String getUpdatedToken() {
     return updated;
   }
