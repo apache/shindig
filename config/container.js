@@ -235,14 +235,14 @@
     ]
   },
   "minimessage": {
-      "css": [
-        ".mmlib_table {",
-        "width: 100%;",
-        "font: bold 9px arial,sans-serif;",
-        "background-color: #fff4c2;",
-        "border-collapse: separate;",
-        "border-spacing: 0px;",
-        "padding: 1px 0px;",
+    "css": [
+      ".mmlib_table {",
+      "width: 100%;",
+      "font: bold 9px arial,sans-serif;",
+      "background-color: #fff4c2;",
+      "border-collapse: separate;",
+      "border-spacing: 0px;",
+      "padding: 1px 0px;",
       "}",
       ".mmlib_xlink {",
         "font: normal 1.1em arial,sans-serif;",
@@ -250,7 +250,7 @@
         "color: #0000cc;",
         "cursor: pointer;",
       "}"
-     ]
+    ]
   },
   "rpc" : {
     // Path to the relay file. Automatically appended to the parent
