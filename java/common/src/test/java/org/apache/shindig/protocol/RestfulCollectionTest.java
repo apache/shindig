@@ -64,4 +64,34 @@ public class RestfulCollectionTest extends Assert {
     assertEquals(totalResults, collection.getTotalResults());
     assertEquals(resultsPerPage, collection.getItemsPerPage());
   }
+
+  @Test
+  public void testMapMethods() throws Exception {
+    RestfulCollection<String> collection
+        = new RestfulCollection<String>(Lists.<String>newArrayList());
+
+    List<String> entryList = Lists.newArrayList("banana");
+    int startIndex = 5;
+    int totalResults = 8675309;
+    String anyItem = "anyvalue";
+
+    collection.put("list", entryList);
+    collection.put("startIndex", startIndex);
+    collection.put("totalResults", totalResults);
+    collection.put("anyItem",anyItem);
+
+    assertEquals(entryList, collection.get("list"));
+    assertEquals(startIndex, collection.get("startIndex"));
+    assertEquals(totalResults, collection.get("totalResults"));
+    assertEquals(anyItem, collection.get("anyItem"));
+
+    int resultsPerPage = 1;
+    List<String> entry = Lists.newArrayList("banana", "who");
+    collection = new RestfulCollection<String>(entry, startIndex, totalResults, resultsPerPage);
+
+    assertEquals(entry, collection.get("list"));
+    assertEquals(startIndex, collection.get("startIndex"));
+    assertEquals(totalResults, collection.get("totalResults"));
+    assertEquals(resultsPerPage, collection.get("itemsPerPage"));
+  }
 }

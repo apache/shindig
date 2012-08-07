@@ -100,7 +100,17 @@ public class BeanXStreamConverter implements BeanConverter {
   private String convertToXml(Object obj) {
 
     writerStack.reset();
-    if (obj instanceof Map<?, ?>) {
+    if (obj instanceof RestfulCollection) {
+      XStreamConfiguration.ConverterConfig cc = converterMap
+          .get(XStreamConfiguration.ConverterSet.COLLECTION);
+      cc.mapper.setBaseObject(obj); // thread safe method
+      String result = cc.xstream.toXML(obj);
+
+      if (LOG.isLoggable(Level.FINE))
+        LOG.fine("Result is " + result);
+
+      return XML_DECL + result;
+    } else if (obj instanceof Map<?, ?>) {
       Map<?, ?> m = (Map<?, ?>) obj;
       XStreamConfiguration.ConverterConfig cc = converterMap
           .get(XStreamConfiguration.ConverterSet.MAP);
@@ -114,16 +124,6 @@ public class BeanXStreamConverter implements BeanConverter {
 
         return XML_DECL + "<response xmlns=\"http://ns.opensocial.org/2008/opensocial\">" + result + "</response>";
       }
-    } else if (obj instanceof RestfulCollection) {
-      XStreamConfiguration.ConverterConfig cc = converterMap
-          .get(XStreamConfiguration.ConverterSet.COLLECTION);
-      cc.mapper.setBaseObject(obj); // thread safe method
-      String result = cc.xstream.toXML(obj);
-
-      if (LOG.isLoggable(Level.FINE))
-        LOG.fine("Result is " + result);
-
-      return XML_DECL + result;
     } else if (obj instanceof DataCollection) {
       XStreamConfiguration.ConverterConfig cc = converterMap
           .get(XStreamConfiguration.ConverterSet.MAP);

@@ -18,12 +18,13 @@
  */
 package org.apache.shindig.protocol;
 
+import java.util.HashMap;
 import java.util.List;
 
 /**
  * Data structure representing a Rest response.
  */
-public class RestfulCollection<T> {
+public class RestfulCollection<T> extends HashMap<String, Object>{
   private List<T> list;
   private int startIndex;
   private int totalResults;
@@ -45,6 +46,9 @@ public class RestfulCollection<T> {
     this.filtered=true;
     this.sorted=true;
     this.updatedSince=true;
+    put("filtered", true);
+    put("sorted", true);
+    put("updatedSince", true);
   }
 
   /**
@@ -62,7 +66,12 @@ public class RestfulCollection<T> {
     this.startIndex = startIndex;
     this.totalResults = totalResults;
     this.itemsPerPage = Math.min(itemsPerPage, totalResults);
+    put("list", list);
+    put("startIndex", startIndex);
+    put("totalResults", totalResults);
+    put("itemsPerPage", this.itemsPerPage);
   }
+
 
   /**
    * Helper constructor for un-paged collection,
@@ -78,6 +87,7 @@ public class RestfulCollection<T> {
 
   public void setList(List<T> list) {
     this.list = list;
+    put("list", list);
   }
 
   public int getStartIndex() {
@@ -86,6 +96,7 @@ public class RestfulCollection<T> {
 
   public void setStartIndex(int startIndex) {
     this.startIndex = startIndex;
+    put("startIndex", startIndex);
   }
 
   public int getTotalResults() {
@@ -94,6 +105,7 @@ public class RestfulCollection<T> {
 
   public void setItemsPerPage(int itemsPerPage) {
     this.itemsPerPage = itemsPerPage;
+    put("itemsPerPage", itemsPerPage);
   }
 
   public int getItemsPerPage() {
@@ -102,6 +114,7 @@ public class RestfulCollection<T> {
 
   public void setTotalResults(int totalResults) {
     this.totalResults = totalResults;
+    put("totalResults", totalResults);
   }
 
   public boolean isFiltered() {
@@ -110,6 +123,7 @@ public class RestfulCollection<T> {
 
   public void setFiltered(boolean filtered) {
     this.filtered = filtered;
+    put("filtered", filtered);
   }
 
   public boolean isSorted() {
@@ -118,6 +132,7 @@ public class RestfulCollection<T> {
 
   public void setSorted(boolean sorted) {
     this.sorted = sorted;
+    put("sorted", sorted);
   }
 
   public boolean isUpdatedSince() {
@@ -126,5 +141,6 @@ public class RestfulCollection<T> {
 
   public void setUpdatedSince(boolean updatedSince) {
     this.updatedSince = updatedSince;
+    put("updatedSince", updatedSince);
   }
 }

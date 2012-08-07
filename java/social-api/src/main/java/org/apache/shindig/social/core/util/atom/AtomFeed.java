@@ -54,16 +54,7 @@ public class AtomFeed {
   @SuppressWarnings("unchecked")
   public AtomFeed(Object obj) {
     Preconditions.checkNotNull(obj);
-    if (obj instanceof Map) {
-      Map<?, ?> m = (Map<?, ?>) obj;
-      entry = Lists.newArrayList();
-      for ( Entry<?, ?> o : m.entrySet()) {
-        entry.add(new AtomEntry(o));
-      }
-      startIndex = 0;
-      totalResults = entry.size();
-      itemsPerPage = entry.size();
-    } else if (obj instanceof RestfulCollection<?>) {
+    if (obj instanceof RestfulCollection<?>) {
       RestfulCollection<?> r = (RestfulCollection<?>) obj;
       entry = Lists.newArrayList();
       List<?> entryList = r.getList();
@@ -75,6 +66,15 @@ public class AtomFeed {
       itemsPerPage = r.getItemsPerPage();
       author = "?";
       link = new AtomLink("rel", "???");
+    } else if (obj instanceof Map) {
+      Map<?, ?> m = (Map<?, ?>) obj;
+      entry = Lists.newArrayList();
+      for ( Entry<?, ?> o : m.entrySet()) {
+        entry.add(new AtomEntry(o));
+      }
+      startIndex = 0;
+      totalResults = entry.size();
+      itemsPerPage = entry.size();
     } else if ( obj instanceof DataCollection ) {
       DataCollection dc = (DataCollection) obj;
       entry = Lists.newArrayList();
