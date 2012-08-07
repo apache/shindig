@@ -217,18 +217,30 @@ public abstract class AbstractSpecFactory<T> {
         T newSpec = fetchFromNetwork(query);
         cache.addElement(query.specUri.toString(), newSpec, refresh);
       } catch (SpecRetrievalFailedException se) {
-        if (LOG.isLoggable(Level.INFO)) {
-          LOG.logp(Level.INFO, classname, "SpecUpdater", MessageKeys.UPDATE_SPEC_FAILURE_APPLY_NEG_CACHE, new Object[] {query.specUri});
+        if (LOG.isLoggable(Level.WARNING)) {
+          LOG.logp(Level.WARNING, classname, "SpecUpdater", MessageKeys.UPDATE_SPEC_FAILURE_APPLY_NEG_CACHE, new Object[] {
+              query.specUri,
+              se.getHttpStatusCode(),
+              se.getMessage()
+          });
         }
       } catch (GadgetException e) {
         if (old != null) {
-          if (LOG.isLoggable(Level.INFO)) {
-            LOG.logp(Level.INFO, classname, "SpecUpdater", MessageKeys.UPDATE_SPEC_FAILURE_USE_CACHE_VERSION, new Object[] {query.specUri});
+          if (LOG.isLoggable(Level.WARNING)) {
+            LOG.logp(Level.WARNING, classname, "SpecUpdater", MessageKeys.UPDATE_SPEC_FAILURE_USE_CACHE_VERSION, new Object[] {
+                query.specUri,
+                e.getHttpStatusCode(),
+                e.getMessage()
+            });
           }
           cache.addElement(query.specUri.toString(), old, refresh);
         } else {
-          if (LOG.isLoggable(Level.INFO)) {
-            LOG.logp(Level.INFO, classname, "SpecUpdater", MessageKeys.UPDATE_SPEC_FAILURE_APPLY_NEG_CACHE, new Object[] {query.specUri});
+          if (LOG.isLoggable(Level.WARNING)) {
+            LOG.logp(Level.WARNING, classname, "SpecUpdater", MessageKeys.UPDATE_SPEC_FAILURE_APPLY_NEG_CACHE, new Object[] {
+                query.specUri,
+                e.getHttpStatusCode(),
+                e.getMessage()
+            });
           }
           cache.addElement(query.specUri.toString(), e, refresh);
         }
