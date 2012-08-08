@@ -142,6 +142,7 @@ ContainerTest.prototype.testMixinViaPrototype = function() {
       }
     };
   };
+  osapi.container.Container.prototype.mixinsOrder_.push('test');
   var container = new osapi.container.Container();
   this.setupGadgetSite(1, {}, null);
   container.newGadgetSite(null);

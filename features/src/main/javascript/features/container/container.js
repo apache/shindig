@@ -403,6 +403,7 @@ osapi.container.Container.addMixin = function(namespace, func) {
       return func.call(this, container);
     };
   } else {
+    osapi.container.Container.prototype.mixinsOrder_.push(namespace);
     mixins[namespace] = func;
   }
 };
@@ -421,14 +422,24 @@ osapi.container.Container.addMixin = function(namespace, func) {
  */
 osapi.container.Container.prototype.mixins_ = {};
 
+/**
+ * Order of addMixin calls.
+ * @type {Array<string>}
+ * @private
+ */
+osapi.container.Container.prototype.mixinsOrder_ = [];
+
 
 /**
  * Called from the constructor to add any namespace extensions.
  * @private
  */
 osapi.container.Container.prototype.initializeMixins_ = function() {
-  for (var i in this.mixins_) {
-    this[i] = new this.mixins_[i](this);
+  var mixins = osapi.container.Container.prototype.mixins_,
+      order = osapi.container.Container.prototype.mixinsOrder_;
+  for (var i = 0; i < order.length; i++) {
+    var namespace = order[i];
+    this[namespace] = new mixins[namespace](this);
   }
 };
 
