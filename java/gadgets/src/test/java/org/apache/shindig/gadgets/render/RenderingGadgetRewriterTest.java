@@ -930,7 +930,7 @@ public class RenderingGadgetRewriterTest extends EasyMockTestCase{
     JSONObject config = new JSONObject(configJson);
     JSONObject xhrConfig = config.getJSONObject("shindig.xhrwrapper");
     JSONObject expectedJson = new JSONObject(expected);
-    assertEquals(message, xhrConfig.toString(), expectedJson.toString());
+    JsonAssert.assertJsonObjectEquals(xhrConfig, expectedJson);
   }
 
   @Test

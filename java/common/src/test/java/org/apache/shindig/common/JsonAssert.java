@@ -29,6 +29,11 @@ public final class JsonAssert {
   private JsonAssert() {}
 
   public static void assertJsonArrayEquals(JSONArray expected, JSONArray actual) throws Exception {
+    assertJsonArrayEquals(null, expected, actual);
+  }
+
+  public static void assertJsonArrayEquals(String message, JSONArray expected, JSONArray actual)
+          throws Exception {
     if (expected.length() != actual.length()) {
       assertEquals("Arrays are not of equal length", expected.toString(), actual.toString());
     }
@@ -37,20 +42,26 @@ public final class JsonAssert {
       Object expectedValue = expected.opt(i);
       Object actualValue = actual.opt(i);
 
-      assertSame(expected.toString() + " != " + actual.toString(),
-                   expectedValue.getClass(), actualValue.getClass());
+      assertSame(expected.toString() + " != " + actual.toString(), expectedValue.getClass(),
+              actualValue.getClass());
 
       if (expectedValue instanceof JSONObject) {
-        assertJsonObjectEquals((JSONObject) expectedValue, (JSONObject) actualValue);
+        assertJsonObjectEquals(message, (JSONObject) expectedValue, (JSONObject) actualValue);
       } else if (expectedValue instanceof JSONArray) {
-        assertJsonArrayEquals((JSONArray) expectedValue, (JSONArray) actualValue);
+        assertJsonArrayEquals(message, (JSONArray) expectedValue, (JSONArray) actualValue);
       } else {
         assertEquals(expectedValue, actualValue);
       }
     }
   }
 
-  public static void assertJsonObjectEquals(JSONObject expected, JSONObject actual) throws Exception {
+  public static void assertJsonObjectEquals(JSONObject expected, JSONObject actual)
+          throws Exception {
+    assertJsonObjectEquals(null, expected, actual);
+  }
+
+  public static void assertJsonObjectEquals(String message, JSONObject expected, JSONObject actual)
+          throws Exception {
     if (expected.length() != actual.length()) {
       assertEquals("Objects are not of equal size", expected.toString(2), actual.toString(2));
     }
@@ -66,13 +77,13 @@ public final class JsonAssert {
       if (expectedValue != null) {
         assertNotNull(expected.toString() + " != " + actual.toString(), actualValue);
       }
-      assertSame(expected.toString() + " != " + actual.toString(),
-                 expectedValue.getClass(), actualValue.getClass());
+      assertSame(expected.toString() + " != " + actual.toString(), expectedValue.getClass(),
+              actualValue.getClass());
 
       if (expectedValue instanceof JSONObject) {
-        assertJsonObjectEquals((JSONObject) expectedValue, (JSONObject) actualValue);
+        assertJsonObjectEquals(message, (JSONObject) expectedValue, (JSONObject) actualValue);
       } else if (expectedValue instanceof JSONArray) {
-        assertJsonArrayEquals((JSONArray) expectedValue, (JSONArray) actualValue);
+        assertJsonArrayEquals(message, (JSONArray) expectedValue, (JSONArray) actualValue);
       } else {
         assertEquals(expectedValue, actualValue);
       }
@@ -80,28 +91,38 @@ public final class JsonAssert {
   }
 
   public static void assertJsonEquals(String expected, String actual) throws Exception {
+    assertJsonEquals(null, expected, actual);
+  }
+
+  public static void assertJsonEquals(String message, String expected, String actual)
+          throws Exception {
     switch (expected.charAt(0)) {
-      case '{':
-        assertJsonObjectEquals(new JSONObject(expected), new JSONObject(actual));
-        break;
-      case '[':
-        assertJsonArrayEquals(new JSONArray(expected), new JSONArray(actual));
-        break;
-      default:
-        assertEquals(expected, actual);
-        break;
+    case '{':
+      assertJsonObjectEquals(message, new JSONObject(expected), new JSONObject(actual));
+      break;
+    case '[':
+      assertJsonArrayEquals(message, new JSONArray(expected), new JSONArray(actual));
+      break;
+    default:
+      assertEquals(expected, actual);
+      break;
     }
   }
 
   public static void assertObjectEquals(Object expected, Object actual) throws Exception {
+    assertObjectEquals(null, expected, actual);
+  }
+
+  public static void assertObjectEquals(String message, Object expected, Object actual)
+          throws Exception {
     if (!(expected instanceof String)) {
       expected = JsonSerializer.serialize(expected);
     }
 
-    if (!(actual instanceof String)){
+    if (!(actual instanceof String)) {
       actual = JsonSerializer.serialize(actual);
     }
 
-    assertJsonEquals((String) expected, (String) actual);
+    assertJsonEquals(message, (String) expected, (String) actual);
   }
 }
