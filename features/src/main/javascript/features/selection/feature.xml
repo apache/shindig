@@ -36,8 +36,11 @@ specific language governing permissions and limitations under the License.
   <container>
     <script src="selection_container.js"/>
     <api>
-      <exports type="rpc">gadgets.selection.set</exports>
-      <exports type="rpc">gadgets.selection.register</exports>
+      <exports type="rpc">osapi.container.Container.selection</exports>
+      <exports type="rpc">osapi.container.Container.selection.setSelection</exports>
+      <exports type="rpc">osapi.container.Container.selection.getSelection</exports>
+      <exports type="rpc">osapi.container.Container.selection.addListener</exports>
+      <exports type="rpc">osapi.container.Container.selection.removeListener</exports>
       <uses type="rpc">gadgets.selection.selectionChanged</uses>
     </api>
   </container>
