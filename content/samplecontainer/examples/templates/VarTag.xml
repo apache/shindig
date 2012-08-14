@@ -1,0 +1,17 @@
+<Module>
+	<ModulePrefs title="Varible Replacement Templating Example"
+		height="400" width="400">
+		<Require feature="opensocial-templates">
+		</Require>
+	</ModulePrefs>
+	<Content view="default" type="html">
+	<![CDATA[
+		<div>
+			<script type="text/os-template" xmlns:os="http://ns.opensocial.org/2008/markup" >
+				<os:Var key="myvar" value="3"></os:Var>
+				This value of myvar is ${myvar}
+			</script>
+		</div>
+	]]>
+	</Content>
+</Module>

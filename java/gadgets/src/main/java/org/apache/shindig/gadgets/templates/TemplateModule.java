@@ -27,6 +27,7 @@ import org.apache.shindig.gadgets.templates.tags.IfTagHandler;
 import org.apache.shindig.gadgets.templates.tags.RenderTagHandler;
 import org.apache.shindig.gadgets.templates.tags.RepeatTagHandler;
 import org.apache.shindig.gadgets.templates.tags.TagHandler;
+import org.apache.shindig.gadgets.templates.tags.VarTagHandler;
 import org.apache.shindig.gadgets.templates.tags.VariableTagHandler;
 
 /**
@@ -50,5 +51,6 @@ public class TemplateModule extends AbstractModule {
     tagBinder.addBinding().to(RepeatTagHandler.class);
     tagBinder.addBinding().to(FlashTagHandler.class);
     tagBinder.addBinding().to(VariableTagHandler.class);
+    tagBinder.addBinding().to(VarTagHandler.class);
   }
 }
