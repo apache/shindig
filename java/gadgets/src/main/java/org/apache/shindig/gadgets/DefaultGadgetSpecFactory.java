@@ -42,7 +42,7 @@ public class DefaultGadgetSpecFactory extends AbstractSpecFactory<GadgetSpec>
     implements GadgetSpecFactory {
   public static final String CACHE_NAME = "gadgetSpecs";
   public static final String RAW_GADGETSPEC_XML_PARAM_NAME = "rawxml";
-  static final Uri RAW_GADGET_URI = Uri.parse("http://localhost/raw.xml");
+  public static final Uri RAW_GADGET_URI = Uri.parse("http://localhost/raw.xml");
 
   @Inject
   public DefaultGadgetSpecFactory(ExecutorService executor,
@@ -78,7 +78,7 @@ public class DefaultGadgetSpecFactory extends AbstractSpecFactory<GadgetSpec>
         .setContainer(context.getContainer())
         .setGadgetUri(gadgetUri)
         .setIgnoreCache(context.getIgnoreCache());
-    return super.getSpec(query);
+    return getSpec(query);
   }
 
   private static final String BOM_ENTITY = "&#xFEFF;";

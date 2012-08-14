@@ -166,6 +166,10 @@ public abstract class AbstractSpecFactory<T> {
     private Uri gadgetUri = null;
     private boolean ignoreCache = false;
 
+    // Expose public constructor
+    public Query() {
+    }
+
     public Query setSpecUri(Uri specUri) {
       this.specUri = specUri;
       return this;
