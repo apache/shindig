@@ -259,6 +259,9 @@ public abstract class RewriterTestBase {
         public GadgetSpec getGadgetSpec(GadgetContext context) {
           return null;
         }
+        public Uri getGadgetUri(GadgetContext context) {
+          return null;
+        }
       });
     }
   }

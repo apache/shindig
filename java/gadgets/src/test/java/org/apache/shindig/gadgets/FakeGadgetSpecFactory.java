@@ -59,4 +59,8 @@ public class FakeGadgetSpecFactory implements GadgetSpecFactory {
       return new GadgetSpec(uri, baseSpec);
     }
   }
+
+  public Uri getGadgetUri(GadgetContext context) throws GadgetException {
+    return context.getUrl();
+  }
 }

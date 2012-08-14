@@ -234,6 +234,10 @@ public class MockUtils {
 
       throw new GadgetException(GadgetException.Code.OAUTH_STORAGE_ERROR);
     }
+
+    public Uri getGadgetUri(GadgetContext context) throws GadgetException {
+        return context.getUrl();
+    }
   }
 
   private static void setTokenCommons(final OAuth2TokenPersistence token) throws Exception {

@@ -19,6 +19,7 @@
 package org.apache.shindig.gadgets;
 
 import org.apache.shindig.gadgets.spec.GadgetSpec;
+import org.apache.shindig.common.uri.Uri;
 
 import com.google.inject.ImplementedBy;
 
@@ -30,4 +31,6 @@ public interface GadgetSpecFactory {
 
   /** Return a gadget spec for a context */
   GadgetSpec getGadgetSpec(GadgetContext context) throws GadgetException;
+
+  Uri getGadgetUri(GadgetContext context) throws GadgetException;
 }

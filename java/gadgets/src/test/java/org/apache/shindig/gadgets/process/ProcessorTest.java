@@ -211,6 +211,10 @@ public class ProcessorTest extends EasyMockTestCase {
       }
       return new GadgetSpec(context.getUrl(), GADGET);
     }
+
+    public Uri getGadgetUri(GadgetContext context) throws GadgetException {
+        return context.getUrl();
+    }
   }
 
   private static class FakeVariableSubstituter extends VariableSubstituter {

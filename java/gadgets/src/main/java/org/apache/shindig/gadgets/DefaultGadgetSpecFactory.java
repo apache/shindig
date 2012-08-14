@@ -57,21 +57,15 @@ public class DefaultGadgetSpecFactory extends AbstractSpecFactory<GadgetSpec>
   }
 
   public GadgetSpec getGadgetSpec(GadgetContext context) throws GadgetException {
-    String rawxml = context.getParameter(RAW_GADGETSPEC_XML_PARAM_NAME);
-    if (rawxml != null) {
-      // Set URI to a fixed, safe value (localhost), preventing a gadget rendered
-      // via raw XML (eg. via POST) to be rendered on a locked domain of any other
-      // gadget whose spec is hosted non-locally.
-      try
-      {
-        Uri uri = RAW_GADGET_URI;
-        return new GadgetSpec(uri, XmlUtil.parse(rawxml), rawxml);
+    Uri gadgetUri = getGadgetUri(context);
+    if (RAW_GADGET_URI.equals(gadgetUri)) {
+      try {
+        String rawxml = context.getParameter(RAW_GADGETSPEC_XML_PARAM_NAME);
+        return new GadgetSpec(gadgetUri, XmlUtil.parse(rawxml), rawxml);
       } catch (XmlException e) {
         throw new SpecParserException(e);
       }
     }
-
-    Uri gadgetUri = context.getUrl();
 
     Query query = new Query()
         .setSpecUri(gadgetUri)
@@ -79,6 +73,17 @@ public class DefaultGadgetSpecFactory extends AbstractSpecFactory<GadgetSpec>
         .setGadgetUri(gadgetUri)
         .setIgnoreCache(context.getIgnoreCache());
     return getSpec(query);
+  }
+
+  public Uri getGadgetUri(GadgetContext context) throws GadgetException {
+    String rawxml = context.getParameter(RAW_GADGETSPEC_XML_PARAM_NAME);
+    if (rawxml != null) {
+      // Set URI to a fixed, safe value (localhost), preventing a gadget rendered
+      // via raw XML (eg. via POST) to be rendered on a locked domain of any other
+      // gadget whose spec is hosted non-locally.
+      return RAW_GADGET_URI;
+    }
+    return context.getUrl();
   }
 
   private static final String BOM_ENTITY = "&#xFEFF;";

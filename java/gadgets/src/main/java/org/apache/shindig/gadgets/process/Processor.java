@@ -85,6 +85,22 @@ public class Processor {
     FeatureRegistry featureRegistry;
 
     try {
+      Uri url = gadgetSpecFactory.getGadgetUri(context);
+
+      if (url == null) {
+        throw new ProcessingException("Missing or malformed url parameter",
+            HttpServletResponse.SC_BAD_REQUEST);
+      }
+
+      validateGadgetUrl(url);
+      if (!gadgetAdminStore.isWhitelisted(context.getContainer(), url.toString())) {
+        if (LOG.isLoggable(Level.INFO)) {
+          LOG.logp(Level.INFO, classname, "process", MessageKeys.RENDER_NON_WHITELISTED_GADGET, new Object[] {url});
+        }
+        throw new ProcessingException("The requested gadget is not authorized for this container",
+            HttpServletResponse.SC_FORBIDDEN);
+      }
+
       spec = gadgetSpecFactory.getGadgetSpec(context);
       spec = substituter.substitute(context, spec);
 
@@ -95,22 +111,6 @@ public class Processor {
       featureRegistry = featureRegistryProvider.get(context.getRepository());
     } catch (GadgetException e) {
       throw new ProcessingException(e.getMessage(), e, e.getHttpStatusCode());
-    }
-
-    Uri url = spec.getUrl();
-
-    if (url == null) {
-      throw new ProcessingException("Missing or malformed url parameter",
-          HttpServletResponse.SC_BAD_REQUEST);
-    }
-
-    validateGadgetUrl(url);
-    if (!gadgetAdminStore.isWhitelisted(context.getContainer(), url.toString())) {
-      if (LOG.isLoggable(Level.INFO)) {
-        LOG.logp(Level.INFO, classname, "process", MessageKeys.RENDER_NON_WHITELISTED_GADGET, new Object[] {url});
-      }
-      throw new ProcessingException("The requested gadget is not authorized for this container",
-              HttpServletResponse.SC_FORBIDDEN);
     }
 
     return new Gadget()
