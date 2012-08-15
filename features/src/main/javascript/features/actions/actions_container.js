@@ -21,6 +21,27 @@
  *               of the UI. Available to the common container.
  */
 (function() {
+  /**
+   * Determines if the passed param is valid action
+   *
+   * @param {Object} actionObj
+   * @return {boolean} If the passed actionObj is valid
+   */
+  function isValidActionObject(actionObj) {
+    var isValid = true;
+    if (!actionObj) {
+      isValid = false;
+    } else {
+      var id = actionObj.id,
+          path = actionObj.path,
+          dataType = actionObj.dataType;
+
+      if (!id || !(path || dataType)) {
+        isValid = false;
+      }
+    }
+    return isValid;
+  }
 
   /**
    * @constructor Object that tracks the actions currently registered with the
@@ -56,12 +77,13 @@
      *          originated.
      */
     this.addAction = function(actionObj, url) {
-      var id = actionObj.id;
-      if (!id) { /* invalid object */
-        return;
+      if (!isValidActionObject(actionObj)) {
+        return; // invalid object
       }
+      var id = actionObj.id,
+          path = actionObj.path,
+          dataType = actionObj.dataType;
 
-      var path = actionObj.path;
       if (path) {
         /**
          * We maintain a tree of arrays for actions that are contributed
@@ -84,19 +106,15 @@
         } else {
           parent['@actions'] = actionsAtPath.concat(actionObj);
         }
-      } else if (actionObj.dataType) {
+      } else if (dataType) {
         /**
          * We maintain a simple map for actions that are bound to an
          * OpenSocial data object type such as the person object.
          */
-        var dataType = actionObj.dataType;
         this.registryByDataType[dataType] =
           this.registryByDataType[dataType] ?
               this.registryByDataType[dataType].concat(actionObj) :
                 [actionObj];
-      } else {
-        // invalid object, no valid path or dataType to bind action
-        return;
       }
 
       // add action to id registry
@@ -104,7 +122,7 @@
 
       // map actions to url, used by runAction to render gadget
       if (url) {
-        this.actionToUrl[actionObj.id] = url;
+        this.actionToUrl[id] = url;
         this.registryByUrl[url] =
           this.registryByUrl[url] ?
               this.registryByUrl[url].concat(actionObj) :
@@ -356,6 +374,9 @@
    *
    */
   function addAction(actionObj, url) {
+    if (!isValidActionObject(actionObj)) {
+      return; // invalid action
+    }
     registry.addAction(actionObj, url);
 
     // Comply with spec by passing an array of the object
@@ -712,12 +733,6 @@
           renderGadgetInContainer = renderGadgetFunction;
         }
       },
-
-      /*
-       * Uncomment the below two functions to run full jsunit tests.
-       */
-      // addAction : function(actionObj) { addAction(actionObj); },
-      // removeAction : function(actionId) { removeAction(actionId); },
 
       /**
        * Executes the action associated with the action id.

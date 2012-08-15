@@ -29,205 +29,220 @@ DeclarativeActionsTest.inherits(TestCase);
 
 (function() {
 
-DeclarativeActionsTest.prototype.setUp = function() {
+  DeclarativeActionsTest.prototype.setUp = function() {
     this.apiUri = window.__API_URI;
     window.__API_URI = shindig.uri('http://shindig.com');
     this.containerUri = window.__CONTAINER_URI;
     window.__CONTAINER_URI = shindig.uri('http://container.com');
 
     this.gadgetsRpc = gadgets.rpc;
-    var that = this;
+    var self = this;
     gadgets.rpc = {};
-    gadgets.rpc.register = function() {};
-    gadgets.rpc.call = function() {
-      that.rpcArguments = Array.prototype.slice.call(arguments);
+    gadgets.rpc.register = function(service, callback) {
+      if (self.captures && self.captures.hasOwnProperty(service)) {
+        self.captures[service] = callback;
+      }
     };
-};
+    gadgets.rpc.call = function() {
+      self.rpcArguments = Array.prototype.slice.call(arguments);
+    };
+  };
 
-DeclarativeActionsTest.prototype.tearDown = function() {
+  DeclarativeActionsTest.prototype.tearDown = function() {
     window.__API_URI = this.apiUri;
     window.__CONTAINER_URI = this.containerUri;
 
     gadgets.rpc = this.gadgetsRpc;
-    this.rpcArguments = undefined;
-};
+    delete this.rpcArguments;
+    delete this.captures;
+  };
 
-DeclarativeActionsTest.prototype.testGadgetsAddAction = function() {
-  var actionId = "testAction";
-  var callbackFn = function(){};
-  var _actionObj = {
-      id: actionId,
-      label:"Test Action",
-      path:"container/navigationLinks",
-      callback: callbackFn
-    };
-  gadgets.actions.addAction(_actionObj);
-  this.assertRpcCalled('..', 'actions.bindAction', null, _actionObj);
-};
+  DeclarativeActionsTest.prototype.testGadgetsAddAction = function() {
+    var actionId = "testAction";
+    var callbackFn = function(){};
+    var _actionObj = {
+        id: actionId,
+        label:"Test Action",
+        path:"container/navigationLinks",
+        callback: callbackFn
+      };
+    gadgets.actions.addAction(_actionObj);
+    this.assertRpcCalled('..', 'actions.bindAction', null, _actionObj);
+  };
 
-DeclarativeActionsTest.prototype.testGadgetsRemoveAction = function() {
-  var actionId = "testAction";
-  gadgets.actions.removeAction(actionId);
-  this.assertRpcCalled('..', 'actions.removeAction', null, actionId);
-};
+  DeclarativeActionsTest.prototype.testGadgetsRemoveAction = function() {
+    var actionId = "testAction";
+    gadgets.actions.removeAction(actionId);
+    this.assertRpcCalled('..', 'actions.removeAction', null, actionId);
+  };
 
-DeclarativeActionsTest.prototype.testGadgetsRunAction = function() {
-  var actionId = "testAction";
-  var opt_selection = "testSelection";
-  gadgets.actions.runAction(actionId, opt_selection);
-  this.assertRpcCalled('..', 'actions.runAction', null,
-    actionId, opt_selection
-  );
-};
-
-
-DeclarativeActionsTest.prototype.testContainerGetAction = function() {
-  var container = new osapi.container.Container({});
-  var actionId = "testAction";
-  var actionObj = container.actions.getAction(actionId);
-  // registry is empty
-  this.assertUndefined(actionObj);
-};
+  DeclarativeActionsTest.prototype.testGadgetsRunAction = function() {
+    var actionId = "testAction";
+    var opt_selection = "testSelection";
+    gadgets.actions.runAction(actionId, opt_selection);
+    this.assertRpcCalled('..', 'actions.runAction', null,
+      actionId, opt_selection
+    );
+  };
 
 
-DeclarativeActionsTest.prototype.testContainerGetActionsByPath = function() {
-  var container = new osapi.container.Container();
-  var actionId = "testAction";
-  var actionsArray = container.actions
-    .getActionsByPath("container/navigationLinks");
-  //registry is empty
-  this.assertEquals(actionsArray, []);
-};
+  DeclarativeActionsTest.prototype.testContainerGetAction = function() {
+    var container = new osapi.container.Container({});
+    var actionId = "testAction";
+    var actionObj = container.actions.getAction(actionId);
+    // registry is empty
+    this.assertUndefined(actionObj);
+  };
 
-DeclarativeActionsTest.prototype.testContainerGetActionsByDataType =
-  function(){
+
+  DeclarativeActionsTest.prototype.testContainerGetActionsByPath = function() {
     var container = new osapi.container.Container();
     var actionId = "testAction";
     var actionsArray = container.actions
-      .getActionsByDataType("opensocial.Person");
+      .getActionsByPath("container/navigationLinks");
     //registry is empty
     this.assertEquals(actionsArray, []);
   };
 
-/**
- * Uncomment following _Full tests once addAction() and removeAction()
- * functions in actions_container.js are uncommented
- */
-/* FULL TESTS
-DeclarativeActionsTest.prototype.testContainerGetAction_Full = function() {
-  var container = new osapi.container.Container({});
-  var actionId = "testAction";
-  var actionObj_ = {
-          id: actionId,
-          label: "Test Action",
-          path: "container/navigationLinks"
-  }
-  container.actions.addAction(actionObj_);
-  var actionObj = container.actions.getAction(actionId);
-  this.assertEquals(actionObj_, actionObj);
-
-  container.actions.removeAction(actionId);
-  actionObj = container.actions.getAction(actionId);
-  this.assertUndefined(actionObj);
-
-};
-
-DeclarativeActionsTest.prototype.testContainerGetActions_Full = function() {
-  var container = new osapi.container.Container({});
-  var actionId = "testAction",
-      actions = [
-        {
-          id: "test1",
-          label: "Test Action1",
-          path: "container/navigationLinks"
-        },
-        {
-          id: "test2",
-          label: "Test Action2",
-          path: "container/navigationLinks"
-        },
-        {
-          id: "test3",
-          label: "Test Action3",
-          dataType: "opensocial.Person"
-        },
-        {
-          id: "test4",
-          label: "Test Action4",
-          dataType: "opensocial.Person"
-        }
-      ];
-  for (actionIndex in actions) {
-    container.actions.addAction(actions[actionIndex]);
-  }
-
-  var allActions = container.actions.getAllActions();
-  this.assertEquals(actions, allActions);
-
-  for (actionIndex in actions) {
-    container.actions.removeAction(actions[actionIndex].id);
-  }
-
-  allActions = container.actions.getAllActions();
-  this.assertEquals([], allActions);
-
-};
-DeclarativeActionsTest.prototype.testContainerGetActionsByPath_Full =
-  function(){
+  DeclarativeActionsTest.prototype.testContainerGetActionsByDataType = function() {
     var container = new osapi.container.Container();
     var actionId = "testAction";
-    var actionObj_ = {
-            id: actionId,
-            label: "Test Action",
-            path: "container/navigationLinks"
-    }
-    container.actions.addAction(actionObj_);
-    var actionsArray = container.actions
-      .getActionsByPath("container/navigationLinks");
-    this.assertEquals(actionsArray, [ actionObj_ ]);
-
-    container.actions.removeAction(actionId);
-    actionsArray = container.actions
-      .getActionsByPath("container/navigationLinks");
+    var actionsArray = container.actions.getActionsByDataType("opensocial.Person");
+    // registry is empty
     this.assertEquals(actionsArray, []);
   };
 
-DeclarativeActionsTest.prototype.testContainerGetActionsByDataType_Full =
-  function() {
-    var container = new osapi.container.Container();
-    var actionId = "testAction";
-    var actionObj_ = {
-            id: actionId,
-            label: "Test Action",
-            dataType: "opensocial.Person"
+  DeclarativeActionsTest.prototype.testBindInvalidAction = function() {
+    var undef, captures = this.captures = {
+      'actions.bindAction': undef
     };
 
-    container.actions.addAction(actionObj_);
-    var actionsArray = container.actions
-      .getActionsByDataType("opensocial.Person");
-    this.assertEquals([ actionObj_ ], actionsArray);
+    var container = new osapi.container.Container(),
+        showActionCalled = false,
+        actionId = 'testAction',
+        actionObj = {
+          id: actionId
+        };
 
-    container.actions.removeAction(actionId);
-    actionsArray = container.actions
-      .getActionsByDataType("opensocial.Person");
-    this.assertEquals([], actionsArray);
+    this.assertNotUndefined('RPC endpoint "actions.bindAction" was not registered.', captures['actions.bindAction']);
+    container.actions.registerShowActionsHandler(function() {
+      showActionCalled = true;
+    });
+    captures['actions.bindAction'](actionObj);
+
+    this.assertUndefined(container.actions.getAction(actionId));
+    this.assertFalse(showActionCalled);
+  };
+
+  DeclarativeActionsTest.prototype.testContainerGetAction_Full = function() {
+    var undef, captures = this.captures = {
+      'actions.bindAction': undef,
+      'actions.removeAction': undef
+    };
+
+    var container = new osapi.container.Container({}),
+        actionId = "testAction",
+        actionObj = {
+          id: actionId,
+          label: "Test Action",
+          path: "container/navigationLinks"
+        };
+
+    this.assertNotUndefined('RPC endpoint "actions.bindAction" was not registered.', captures['actions.bindAction']);
+    this.assertNotUndefined('RPC endpoint "actions.removeAction" was not registered.', captures['actions.removeAction']);
+    captures['actions.bindAction'](actionObj);
+
+    this.assertEquals(actionObj, container.actions.getAction(actionId));
+
+    captures['actions.removeAction'](actionId);
+    this.assertUndefined(container.actions.getAction(actionId));
+  };
+
+
+  DeclarativeActionsTest.prototype.testContainerGetActions_Full = function() {
+    var undef, captures = this.captures = {
+      'actions.bindAction': undef,
+      'actions.removeAction': undef
+    };
+
+    var container = new osapi.container.Container({}),
+        actions = [
+          { id: "test1", label: "Test Action1", path: "container/navigationLinks" },
+          { id: "test2", label: "Test Action2", path: "container/navigationLinks" },
+          { id: "test3", label: "Test Action3", dataType: "opensocial.Person" },
+          { id: "test4", label: "Test Action4", dataType: "opensocial.Person" }
+        ];
+    this.assertNotUndefined('RPC endpoint "actions.bindAction" was not registered.', captures['actions.bindAction']);
+    this.assertNotUndefined('RPC endpoint "actions.removeAction" was not registered.', captures['actions.removeAction']);
+
+    for (var i = 0; i < actions.length; i++) {
+      captures['actions.bindAction'](actions[i]);
+    }
+    this.assertEquals(actions, container.actions.getAllActions());
+
+    for (var i = 0; i < actions.length; i++) {
+      captures['actions.removeAction'](actions[i].id);
+    }
+    this.assertEquals([], container.actions.getAllActions());
 
   };
 
- FULL TESTS */
 
-/**
- * Asserts gadgets.rpc.call() is called with the expected arguments given.
- */
-DeclarativeActionsTest.prototype.assertRpcCalled = function() {
-  this.assertNotUndefined("RPC was not called.", this.rpcArguments);
-  this.assertEquals("RPC argument list not valid length.", arguments.length,
-      this.rpcArguments.length);
+  DeclarativeActionsTest.prototype.testContainerGetActionsByPath_Full = function() {
+    var undef, captures = this.captures = {
+      'actions.bindAction': undef,
+      'actions.removeAction': undef
+    };
 
-  for ( var i = 0; i < arguments.length; i++) {
-    this.assertEquals(arguments[i], this.rpcArguments[i]);
-  }
-  this.rpcArguments = undefined;
-};
+    var container = new osapi.container.Container(),
+        actionObj = {
+          id: "testAction",
+          label: "Test Action",
+          path: "container/navigationLinks"
+        };
+    this.assertNotUndefined('RPC endpoint "actions.bindAction" was not registered.', captures['actions.bindAction']);
+    this.assertNotUndefined('RPC endpoint "actions.removeAction" was not registered.', captures['actions.removeAction']);
 
+    captures['actions.bindAction'](actionObj);
+    this.assertEquals([actionObj], container.actions.getActionsByPath("container/navigationLinks"));
+
+    captures['actions.removeAction'](actionObj.id);
+    this.assertEquals([], container.actions.getActionsByPath("container/navigationLinks"));
+  };
+
+  DeclarativeActionsTest.prototype.testContainerGetActionsByDataType_Full = function() {
+    var undef, captures = this.captures = {
+      'actions.bindAction': undef,
+      'actions.removeAction': undef
+    };
+
+    var container = new osapi.container.Container();
+        actionObj = {
+          id: "testAction",
+          label: "Test Action",
+          dataType: "opensocial.Person"
+        };
+    this.assertNotUndefined('RPC endpoint "actions.bindAction" was not registered.', captures['actions.bindAction']);
+    this.assertNotUndefined('RPC endpoint "actions.removeAction" was not registered.', captures['actions.removeAction']);
+
+    captures['actions.bindAction'](actionObj);
+    this.assertEquals([actionObj], container.actions.getActionsByDataType("opensocial.Person"));
+
+    captures['actions.removeAction'](actionObj.id);
+    this.assertEquals([], container.actions.getActionsByDataType("opensocial.Person"));
+  };
+
+  /**
+   * Asserts gadgets.rpc.call() is called with the expected arguments given.
+   */
+  DeclarativeActionsTest.prototype.assertRpcCalled = function() {
+    this.assertNotUndefined("RPC was not called.", this.rpcArguments);
+    this.assertEquals("RPC argument list not valid length.", arguments.length,
+        this.rpcArguments.length);
+
+    for ( var i = 0; i < arguments.length; i++) {
+      this.assertEquals(arguments[i], this.rpcArguments[i]);
+    }
+    this.rpcArguments = undefined;
+  };
 })();
