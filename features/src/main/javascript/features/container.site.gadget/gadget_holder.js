@@ -105,7 +105,7 @@ osapi.container.GadgetHolder.prototype.getView = function() {
 
 /**
  * @inheritDoc
- * @see osapi.container.GadgetHolder.prototype.doOaaIframeHtml_ and org.openajax.hub-2.0.5/iframe.js:createIframe()
+ * @see osapi.container.GadgetHolder.prototype.doOaaIframeHtml_ and org.openajax.hub-2.0.7/iframe.js:createIframe()
  */
 osapi.container.GadgetHolder.prototype.getIframeElement = function() {
   return this.el_.getElementsByTagName('iframe')[0];

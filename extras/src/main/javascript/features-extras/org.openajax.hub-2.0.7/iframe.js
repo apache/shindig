@@ -119,6 +119,11 @@ if (!OpenAjax.hub.IframeContainer) {
  *    DOM element that is to be parent of iframe
  * @param {String} params.IframeContainer.uri
  *    Initial Iframe URI (Container will add parameters to this URI)
+ * @param {String} [params.IframeContainer.clientRelay]
+ *    URI of the relay file used by the client.  Must be from the same origin
+ *    as params.IframeContainer.uri.  This value is only used by the IFPC
+ *    transport layer, which is primarily used by IE 6 & 7. This value isn't
+ *    required if you don't need to support those browsers.
  * @param {String} [params.IframeContainer.tunnelURI]
  *    URI of the tunnel iframe. Must be from the same origin as the page which
  *    instantiates the IframeContainer. If not specified, connection will not
@@ -184,15 +189,15 @@ OpenAjax.hub.IframeContainer = function( hub, clientID, params )
         internalID = OpenAjax.hub.IframeContainer._rpcRouter.add( clientID, this );
         securityToken = generateSecurityToken( params, scope, log );
         
-        var relay = null;
+        var relay = params.IframeContainer.clientRelay;
         var transportName = OpenAjax.gadgets.rpc.getRelayChannel();
         if ( params.IframeContainer.tunnelURI ) {
-            if ( transportName !== "wpm" && transportName !== "nix" ) {
+            if ( transportName !== "wpm" && transportName !== "ifpc" ) {
                 throw new Error( OpenAjax.hub.Error.IncompatBrowser );
             }
         } else {
             log( "WARNING: Parameter 'IframeContaienr.tunnelURI' not specified. Connection will not be fully secure." );
-            if ( transportName === "rmr" ) {
+            if ( transportName === "rmr" && !relay ) {
                 relay = OpenAjax.gadgets.rpc.getOrigin( params.IframeContainer.uri ) + "/robots.txt"; 
             }
         }
