@@ -20,17 +20,11 @@
   <name>gadgets.json.ext</name>
   <dependency>globals</dependency>
   <dependency>taming</dependency>
-  <gadget>
+  <all>
     <script src="json-xmltojson.js"/>
     <script src="taming.js" caja="1"/>
     <api>
       <exports type="js">gadgets.json.xml.convertXmlToJson</exports>
     </api>
-  </gadget>
-  <container>
-    <script src="json-xmltojson.js"/>
-    <api>
-      <exports type="js">gadgets.json.xml.convertXmlToJson</exports>
-    </api>
-  </container>
+  </all>
 </feature>

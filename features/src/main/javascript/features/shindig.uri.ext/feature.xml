@@ -23,10 +23,7 @@ specific language governing permissions and limitations under the License.
   <name>shindig.uri.ext</name>
   <dependency>globals</dependency>
   <dependency>shindig.uri</dependency>
-  <gadget>
+  <all>
     <script src="util.js"/>
-  </gadget>
-  <container>
-    <script src="util.js"/>
-  </container>
+  </all>
 </feature>
