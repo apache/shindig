@@ -56,18 +56,21 @@ class DataPipelining {
         switch ($tag['type']) {
           case 'os:PeopleRequest':
             $tag['method'] = 'people.get';
+            $tag['type'] = 'os:DataRequest';
             break;
           case 'os:ViewerRequest':
           case 'os:OwnerRequest':
             $tag['method'] = 'people.get';
             $tag['userId'] = $tag['type'] == 'os:ViewerRequest' ? '@viewer' : '@owner';
             $tag['groupId'] = '@self';
+            $tag['type'] = 'os:DataRequest';
             break;
           case 'os:ActivitiesRequest':
             $tag['method'] = 'activities.get';
+            $tag['type'] = 'os:DataRequest';
             break;
         }
-        $tag['type'] = 'os:DataRequest';
+        
         $dataPipeliningTags[] = $tag;
       }
       return $dataPipeliningTags;
