@@ -72,8 +72,8 @@ class GadgetSpecParser {
         $view = trim($view);
         $href = trim($viewNode->getAttribute('href'));
         $type = trim(strtoupper($viewNode->getAttribute('type')));
-        if (empty($type)) {
-          $type = 'html';
+        if (empty($type) || $type == 'html') {
+          $type = 'HTML';
         }
         $dataPipeliningRequests = array();
         if (! empty($href) && $type == 'HTML') {
