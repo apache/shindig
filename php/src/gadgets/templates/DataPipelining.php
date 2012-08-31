@@ -55,21 +55,19 @@ class DataPipelining {
         // makes it a whole lot simpler to implement the actual data fetching in the renderer
         switch ($tag['type']) {
           case 'os:PeopleRequest':
-            $tag['type'] = 'os:DataRequest';
             $tag['method'] = 'people.get';
             break;
           case 'os:ViewerRequest':
           case 'os:OwnerRequest':
-            $tag['type'] = 'os:DataRequest';
             $tag['method'] = 'people.get';
-            $tag['userId'] = $tag['type'] == 'osViewerRequest' ? '@viewer' : '@owner';
+            $tag['userId'] = $tag['type'] == 'os:ViewerRequest' ? '@viewer' : '@owner';
             $tag['groupId'] = '@self';
             break;
           case 'os:ActivitiesRequest':
-            $tag['type'] = 'os:DataRequest';
             $tag['method'] = 'activities.get';
             break;
         }
+        $tag['type'] = 'os:DataRequest';
         $dataPipeliningTags[] = $tag;
       }
       return $dataPipeliningTags;
