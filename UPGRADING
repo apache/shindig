@@ -7,6 +7,9 @@ FROM 2.0.x TO 2.5.x
 The new property allows for embedding the key directly or referencing a classpath or filesystem
 resource.  Please see the comments at the top of container.js and around the new property for more
 details.
+* The CommonContainer class now depends on the oauthpopup feature for some reworked logic in the
+feature.  If you roll your own container and do not use the CommonContainer, update your container
+dependencies to include the oauthpopup feature.
 
 == Java Dependency Changes ==
 

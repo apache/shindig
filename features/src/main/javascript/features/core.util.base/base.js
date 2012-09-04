@@ -44,18 +44,10 @@ gadgets.util = gadgets.util || {};
  * @return {function()} a callback function.
  */
 gadgets.util.makeClosure = function(scope, callback, var_args) {
-  // arguments isn't a real array, so we copy it into one.
-  var baseArgs = [];
-  for (var i = 2, j = arguments.length; i < j; ++i) {
-    baseArgs.push(arguments[i]);
-  }
+  var baseArgs = Array.prototype.slice.call(arguments, 2);
   return function() {
-    // append new arguments.
-    var tmpArgs = baseArgs.slice();
-    for (var i = 0, j = arguments.length; i < j; ++i) {
-      tmpArgs.push(arguments[i]);
-    }
-    return callback.apply(scope, tmpArgs);
+    var passedArgs = Array.prototype.slice.call(arguments);
+    return callback.apply(scope, baseArgs.concat(passedArgs));
   };
 };
 

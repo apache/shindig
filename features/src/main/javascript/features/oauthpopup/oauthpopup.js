@@ -105,89 +105,64 @@ gadgets.oauth = gadgets.oauth || {};
  * @param {string} destination Target URL for the popup window.
  * @param {string} windowOptions Options for window.open, used to specify
  *     look and feel of the window.
- * @param {function()} openCallback Function to call when the window is opened.
- * @param {function()} closeCallback Function to call when the window is closed.
+ * @param {function()} onOpen Function to call when the window is opened.
+ * @param {function()} onClose Function to call when the window is closed.
  */
-gadgets.oauth.Popup = function(destination, windowOptions, openCallback,
-    closeCallback) {
+gadgets.oauth.Popup = function(destination, windowOptions, onOpen, onClose) {
   this.destination_ = destination;
   this.windowOptions_ = windowOptions;
-  this.openCallback_ = openCallback;
-  this.closeCallback_ = closeCallback;
-  this.win_ = null;
+  this.openCallback_ = onOpen;
+  this.closeCallback_ = onClose;
 };
 
 /**
  * @return {function()} an onclick handler for the "open the approval window" link.
  */
-gadgets.oauth.Popup.prototype.createOpenerOnClick = function() {
-  var self = this;
-  return function() {
-    self.onClick_();
-  };
-};
 
-/**
- * Called when the user clicks to open the popup window.
- *
- * @return {boolean} false to prevent the default action for the click.
- * @private
- */
-gadgets.oauth.Popup.prototype.onClick_ = function() {
-  // If a popup blocker blocks the window, we do nothing.  The user will
-  // need to approve the popup, then click again to open the window.
-  // Note that because we don't call window.open until the user has clicked
-  // something the popup blockers *should* let us through.
-  this.win_ = window.open(this.destination_, '_blank', this.windowOptions_);
-  if (this.win_) {
-    // Poll every 100ms to check if the window has been closed
-    var self = this;
-    var closure = function() {
-      self.checkClosed_();
-    };
-    this.timer_ = window.setInterval(closure, 100);
+
+(function() {
+  var callbacks = {};
+
+  gadgets.util.registerOnLoadHandler(function() {
+    gadgets.rpc.register('oauth.close', function(cbid) {
+      if (this.f == '..') {
+        callbacks[cbid] && callbacks[cbid]();
+      }
+    });
+  });
+
+  function onOpen(cbid) {
+    this.cbid = cbid;
+    callbacks[cbid] = this.createApprovedOnClick();
     this.openCallback_();
   }
-  return false;
-};
 
-/**
- * Called at intervals to check whether the window has closed.
- * @private
- */
-gadgets.oauth.Popup.prototype.checkClosed_ = function() {
-  if ((!this.win_) || this.win_.closed) {
-    this.win_ = null;
-    this.handleApproval_();
-  }
-};
-
-/**
- * Called when we recieve an indication the user has approved access, either
- * because they closed the popup window or clicked an "I've approved" button.
- * @private
- */
-gadgets.oauth.Popup.prototype.handleApproval_ = function() {
-  if (this.timer_) {
-    window.clearInterval(this.timer_);
-    this.timer_ = null;
-  }
-  if (this.win_) {
-    this.win_.close();
-    this.win_ = null;
-  }
-  this.closeCallback_();
-  return false;
-};
-
-/**
- * @return {function()} an onclick handler for the "I've approved" link.  This may not
- * ever be called.  If we successfully detect that the window was closed,
- * this link is unnecessary.
- */
-gadgets.oauth.Popup.prototype.createApprovedOnClick = function() {
-  var self = this;
-  return function() {
-    self.handleApproval_();
+  /**
+   * Called when the user clicks to open the popup window.
+   *
+   * @return {boolean} false to prevent the default action for the click.
+   * @private
+   */
+  gadgets.oauth.Popup.prototype.createOpenerOnClick = function() {
+    return gadgets.util.makeClosure(this, function() {
+      gadgets.rpc.call('..', 'oauth.open', gadgets.util.makeClosure(this, onOpen),
+              this.destination_, this.windowOptions_
+      );
+      return false;
+    });
   };
-};
+
+  /**
+   * @return {function()} an onclick handler for the "I've approved" link.  This may not
+   * ever be called.  If we successfully detect that the window was closed,
+   * this link is unnecessary.
+   */
+  gadgets.oauth.Popup.prototype.createApprovedOnClick = function() {
+    return gadgets.util.makeClosure(this, function() {
+      if (this.cbid) {
+        delete callbacks[this.cbid];
+      }
+      this.closeCallback_();
+    });
+  };
+})();

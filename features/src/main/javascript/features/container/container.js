@@ -399,8 +399,8 @@ osapi.container.Container.addMixin = function(namespace, func) {
   if (mixins[namespace]) {
     var orig = mixins[namespace];
     mixins[namespace] = function(container) {
-      orig.call(this, container);
-      return func.call(this, container);
+      var base = orig.call(this, container);
+      return func.call(this, container, base); // pass overriding mixins the original.
     };
   } else {
     osapi.container.Container.prototype.mixinsOrder_.push(namespace);
