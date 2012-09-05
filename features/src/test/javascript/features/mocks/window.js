@@ -24,12 +24,31 @@
  * the global window object in each test case that uses the window.
  *
  * Example:
- * 
+ *
  * ExampleTest.prototype.testSomething = function() {
  *   window = new mocks.FakeWindow();
  *   // Test things
  * };
  */
+
+// So tests aren't broken :/
+(function() {
+  var timer = new java.util.Timer(),
+      timerIds = {},
+      inc = 1;
+
+  this.setTimeout = function (fn, delay) {
+    var id = inc++;
+    timerIds[id] = new JavaAdapter(java.util.TimerTask, {run: fn});
+    timer.schedule(timerIds[id], delay);
+  };
+
+  this.clearTimeout = function(id) {
+    ids[id].cancel();
+    timer.purge();
+    delete timerIds[id];
+  };
+}).call(this);
 
 var mocks = mocks || {};
 
