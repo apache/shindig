@@ -218,7 +218,7 @@ public class GadgetsHandlerService {
     Set<String> rpcServiceIds = getRpcServiceIds(gadget);
 
     Integer tokenTTL = isFieldIncluded(fields, "tokenTTL") ?
-        securityTokenCodec.getTokenTimeToLive() : null;
+        securityTokenCodec.getTokenTimeToLive(context.getContainer()) : null;
 
     return createMetadataResponse(context.getUrl(), gadget.getSpec(), uris,
         needsTokenRefresh, fields, timeSource.currentTimeMillis() + specRefreshInterval, tokenTTL,
@@ -292,10 +292,15 @@ public class GadgetsHandlerService {
       token = securityTokenCodec.encodeToken(tokenData);
     }
 
-    Long expiryTimeMs = tokenData == null ? null : tokenData.getExpiresAt();
+    Long expiryTimeMs = null;
+    Integer tokenTTL = null;
+    if (tokenData != null) {
+      expiryTimeMs = tokenData.getExpiresAt();
+      tokenTTL = isFieldIncluded(fields, "tokenTTL") ?
+              securityTokenCodec.getTokenTimeToLive(tokenData.getContainer())
+              : null;
+    }
 
-    Integer tokenTTL = isFieldIncluded(fields, "tokenTTL") ?
-        securityTokenCodec.getTokenTimeToLive() : null;
     moduleId = isFieldIncluded(fields, "moduleId") ? moduleId : null;
 
     return createTokenResponse(request.getUrl(), token, fields, expiryTimeMs, tokenTTL, moduleId);

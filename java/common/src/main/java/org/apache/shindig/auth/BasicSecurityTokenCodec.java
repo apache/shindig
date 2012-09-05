@@ -18,13 +18,18 @@
  */
 package org.apache.shindig.auth;
 
+import java.util.Collection;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shindig.common.crypto.BlobCrypterException;
 import org.apache.shindig.common.util.Utf8UrlCoder;
+import org.apache.shindig.config.ContainerConfig;
 
 import com.google.common.base.Joiner;
+import com.google.common.collect.Maps;
 import com.google.inject.Singleton;
 
 /**
@@ -34,7 +39,11 @@ import com.google.inject.Singleton;
  * @since 2.0.0
  */
 @Singleton
-public class BasicSecurityTokenCodec implements SecurityTokenCodec {
+public class BasicSecurityTokenCodec implements SecurityTokenCodec, ContainerConfig.ConfigObserver {
+
+  // Logging
+  private static final String CLASSNAME = BasicSecurityTokenCodec.class.getName();
+  private static final Logger LOG = Logger.getLogger(CLASSNAME);
 
   private static final int OWNER_INDEX = 0;
   private static final int VIEWER_INDEX = 1;
@@ -45,6 +54,7 @@ public class BasicSecurityTokenCodec implements SecurityTokenCodec {
   private static final int CONTAINER_ID_INDEX = 6;
   private static final int EXPIRY_INDEX = 7; // for back compat, conditionally check later
   private static final int TOKEN_COUNT = CONTAINER_ID_INDEX + 1;
+  private Map<String, Integer> tokenTTLs = Maps.newHashMap();
 
   /**
    * Encodes a token using the a plaintext dummy format.
@@ -53,12 +63,23 @@ public class BasicSecurityTokenCodec implements SecurityTokenCodec {
    */
   public String encodeToken(SecurityToken token) {
     Long expires = null;
+    Integer tokenTTL = this.tokenTTLs.get(token.getContainer());
     if (token instanceof AbstractSecurityToken) {
-      ((AbstractSecurityToken) token).setExpires();
+      if (tokenTTL != null) {
+        ((AbstractSecurityToken) token).setExpires(tokenTTL);
+      } else {
+        ((AbstractSecurityToken) token).setExpires();
+      }
       expires = token.getExpiresAt();
     } else {
       // Quick and dirty token expire calculation.
-      expires = new BasicSecurityToken().setExpires().getExpiresAt();
+      AbstractSecurityToken localToken = new BasicSecurityToken();
+      if (tokenTTL != null) {
+        localToken.setExpires(tokenTTL);
+      } else {
+        localToken.setExpires();
+      }
+      expires = localToken.getExpiresAt();
     }
 
     String encoded = Joiner.on(":").join(
@@ -122,11 +143,49 @@ public class BasicSecurityTokenCodec implements SecurityTokenCodec {
   }
 
   public int getTokenTimeToLive() {
-    return AbstractSecurityToken.MAX_TOKEN_TTL;
+    return AbstractSecurityToken.DEFAULT_MAX_TOKEN_TTL;
+  }
+
+  public int getTokenTimeToLive(String container) {
+    Integer tokenTTL = this.tokenTTLs.get(container);
+    if (tokenTTL == null) {
+      return getTokenTimeToLive();
+    }
+    return tokenTTL;
   }
 
   /**
    * Creates a basic signer
    */
   public BasicSecurityTokenCodec() {}
+
+  /**
+   * Creates a basic signer that can observe container configuration changes
+   * @param config the container config to observe
+   */
+  public BasicSecurityTokenCodec(ContainerConfig config) {
+    config.addConfigObserver(this, true);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public void containersChanged(ContainerConfig config, Collection<String> changed,
+          Collection<String> removed) {
+    for (String container : removed) {
+      this.tokenTTLs.remove(container);
+    }
+
+    for (String container : changed) {
+      int tokenTTL = config.getInt(container, SECURITY_TOKEN_TTL_CONFIG);
+      // 0 means the value was not defined or NaN.  0 shouldn't be a valid TTL anyway.
+      if (tokenTTL > 0) {
+        this.tokenTTLs.put(container, tokenTTL);
+      } else {
+        LOG.logp(Level.WARNING, CLASSNAME, "containersChanged",
+                "Token TTL for container \"{0}\" was {1} and will be ignored.",
+                new Object[] { container, tokenTTL });
+      }
+    }
+  }
 }

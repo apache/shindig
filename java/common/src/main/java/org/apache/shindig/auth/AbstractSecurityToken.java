@@ -38,8 +38,7 @@ public abstract class AbstractSecurityToken implements SecurityToken {
   /** allow three minutes for clock skew */
   private static final long CLOCK_SKEW_ALLOWANCE = 180;
 
-  // TODO: Make configurable.
-  public static final int MAX_TOKEN_TTL = 3600; // 1 hour
+  public static final int DEFAULT_MAX_TOKEN_TTL = 3600; // 1 hour
 
   private static final TimeSource TIME_SOURCE = new TimeSource();
 
@@ -172,8 +171,8 @@ public abstract class AbstractSecurityToken implements SecurityToken {
   private Long expiresAt;
   private String trustedJson;
   private String activeUrl;
-
   private TimeSource timeSource = AbstractSecurityToken.TIME_SOURCE;
+  private int tokenTTL;
 
   /**
    * This method is mostly used for test code to test the expire methods.
@@ -259,11 +258,23 @@ public abstract class AbstractSecurityToken implements SecurityToken {
   }
 
   /**
-   * Compute and set the expiration time for this token.
+   * Compute and set the expiration time for this token using the default TTL.
    *
    * @return This security token.
+   * @see #setExpires(int)
    */
   protected AbstractSecurityToken setExpires() {
+    return setExpires(DEFAULT_MAX_TOKEN_TTL);
+  }
+
+  /**
+   * Compute and set the expiration time for this token using the provided TTL.
+   *
+   * @param tokenTTL the time to live (in seconds) of the token
+   * @return This security token.
+   */
+  protected AbstractSecurityToken setExpires(int tokenTTL) {
+    this.tokenTTL = tokenTTL;
     return setExpiresAt((getTimeSource().currentTimeMillis() / 1000) + getMaxTokenTTL());
   }
 
@@ -339,10 +350,16 @@ public abstract class AbstractSecurityToken implements SecurityToken {
   }
 
   /**
+   * Returns the maximum allowable time (in seconds) for this token to live. Override this method
+   * only if you are internal token that doesn't get serialized via
+   * {@link SecurityTokenCodec#encodeToken(SecurityToken)}, e.g., OAuth state tokens. For all other
+   * cases, the SecurityTokenCodec will handle the time to live of the token.
+   *
    * @return Maximum allowable time in seconds for a token to live.
+   * @see SecurityTokenCodec#getTokenTimeToLive(String)
    */
   protected int getMaxTokenTTL() {
-    return MAX_TOKEN_TTL;
+    return this.tokenTTL;
   }
 
   /**

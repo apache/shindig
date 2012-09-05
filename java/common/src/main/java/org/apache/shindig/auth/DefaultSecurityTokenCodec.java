@@ -54,7 +54,7 @@ public class DefaultSecurityTokenCodec implements SecurityTokenCodec {
     String tokenType = config.getString(ContainerConfig.DEFAULT_CONTAINER, SECURITY_TOKEN_TYPE);
 
     if ("insecure".equals(tokenType)) {
-      codec = new BasicSecurityTokenCodec();
+      codec = new BasicSecurityTokenCodec(config);
     } else if ("secure".equals(tokenType)) {
       codec = new BlobCrypterSecurityTokenCodec(config);
     } else {
@@ -83,5 +83,9 @@ public class DefaultSecurityTokenCodec implements SecurityTokenCodec {
 
   public int getTokenTimeToLive() {
     return codec.getTokenTimeToLive();
+  }
+
+  public int getTokenTimeToLive(String container) {
+    return codec.getTokenTimeToLive(container);
   }
 }

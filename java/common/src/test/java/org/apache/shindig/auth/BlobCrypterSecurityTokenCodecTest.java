@@ -36,6 +36,7 @@ import org.junit.Test;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMap.Builder;
 
 /**
  * Tests for BlobCrypterSecurityTokenCodec
@@ -154,7 +155,7 @@ public class BlobCrypterSecurityTokenCodecTest {
 
     BlobCrypterSecurityToken token = new BlobCrypterSecurityToken("container", null, null, values);
     token.setTimeSource(timeSource);
-    timeSource.incrementSeconds(-1 * (3600 + 181)); // one hour plus clock skew
+    timeSource.incrementSeconds(-1 * (codec.getTokenTimeToLive("container") + 181)); // one hour plus clock skew
     String encrypted = codec.encodeToken(token);
     try {
       codec.createToken(ImmutableMap.of(SecurityTokenCodec.SECURITY_TOKEN_NAME, encrypted));
@@ -216,5 +217,18 @@ public class BlobCrypterSecurityTokenCodecTest {
     } catch (SecurityTokenException e) {
       // pass
     }
+  }
+
+  @Test
+  public void testGetTokenTimeToLive() throws Exception {
+    Builder<String, Object> builder = ImmutableMap.builder();
+    Map<String, Object> container = builder.putAll(makeContainer("tokenTest"))
+            .put(SecurityTokenCodec.SECURITY_TOKEN_TTL_CONFIG, Integer.valueOf(300)).build();
+
+    config.newTransaction().addContainer(container).commit();
+    assertEquals("Token TTL matches what is set in the container config", 300,
+            codec.getTokenTimeToLive("tokenTest"));
+    assertEquals("Token TTL matches the default TTL", AbstractSecurityToken.DEFAULT_MAX_TOKEN_TTL,
+            codec.getTokenTimeToLive());
   }
 }

@@ -51,7 +51,10 @@ import com.google.inject.Singleton;
  */
 @Singleton
 public class BlobCrypterSecurityTokenCodec implements SecurityTokenCodec, ContainerConfig.ConfigObserver {
-  private static final Logger LOG = Logger.getLogger(BlobCrypterSecurityTokenCodec.class.getName());
+
+  // Logging
+  private static final String CLASSNAME = BlobCrypterSecurityTokenCodec.class.getName();
+  private static final Logger LOG = Logger.getLogger(CLASSNAME);
 
   public static final String SECURITY_TOKEN_KEY = "gadgets.securityTokenKey";
 
@@ -67,11 +70,13 @@ public class BlobCrypterSecurityTokenCodec implements SecurityTokenCodec, Contai
    */
   protected Map<String, String> domains = Maps.newHashMap();
 
+  private Map<String, Integer> tokenTTLs = Maps.newHashMap();
+
   @Inject
   public BlobCrypterSecurityTokenCodec(ContainerConfig config) {
     try {
       config.addConfigObserver(this, false);
-      loadContainers(config, config.getContainers(), crypters, domains);
+      loadContainers(config, config.getContainers(), crypters, domains, tokenTTLs);
     } catch (IOException e) {
       // Someone specified securityTokenKeyFile, but we couldn't load the key.  That merits killing
       // the server.
@@ -84,11 +89,13 @@ public class BlobCrypterSecurityTokenCodec implements SecurityTokenCodec, Contai
       ContainerConfig config, Collection<String> changed, Collection<String> removed) {
     Map<String, BlobCrypter> newCrypters = Maps.newHashMap(crypters);
     Map<String, String> newDomains = Maps.newHashMap(domains);
+    Map<String, Integer> newTokenTTLs = Maps.newHashMap(tokenTTLs);
     try {
-      loadContainers(config, changed, newCrypters, newDomains);
+      loadContainers(config, changed, newCrypters, newDomains, newTokenTTLs);
       for (String container : removed) {
         newCrypters.remove(container);
         newDomains.remove(container);
+        newTokenTTLs.remove(container);
       }
     } catch (IOException e) {
       // Someone specified securityTokenKeyFile, but we couldn't load the key.
@@ -99,10 +106,12 @@ public class BlobCrypterSecurityTokenCodec implements SecurityTokenCodec, Contai
     }
     crypters = newCrypters;
     domains = newDomains;
+    tokenTTLs = newTokenTTLs;
   }
 
   private void loadContainers(ContainerConfig config, Collection<String> containers,
-      Map<String, BlobCrypter> crypters, Map<String, String> domains) throws IOException {
+          Map<String, BlobCrypter> crypters, Map<String, String> domains,
+          Map<String, Integer> tokenTTLs) throws IOException {
     for (String container : containers) {
       String key = config.getString(container, SECURITY_TOKEN_KEY);
       if (key != null) {
@@ -111,6 +120,17 @@ public class BlobCrypterSecurityTokenCodec implements SecurityTokenCodec, Contai
       }
       String domain = config.getString(container, SIGNED_FETCH_DOMAIN);
       domains.put(container, domain);
+
+      // Process tokenTTLs
+      int tokenTTL = config.getInt(container, SECURITY_TOKEN_TTL_CONFIG);
+      // 0 means the value was not defined or NaN.  0 shouldn't be a valid TTL anyway.
+      if (tokenTTL > 0) {
+        tokenTTLs.put(container, tokenTTL);
+      } else {
+        LOG.logp(Level.WARNING, CLASSNAME, "loadContainers",
+                "Token TTL for container \"{0}\" was {1} and will be ignored.",
+                new Object[] { container, tokenTTL });
+      }
     }
   }
 
@@ -177,7 +197,12 @@ public class BlobCrypterSecurityTokenCodec implements SecurityTokenCodec, Contai
     }
 
     try {
-      aToken.setExpires();
+      Integer tokenTTL = this.tokenTTLs.get(aToken.getContainer());
+      if (tokenTTL != null) {
+        aToken.setExpires(tokenTTL);
+      } else {
+        aToken.setExpires();
+      }
       return aToken.getContainer() + ':' + crypter.wrap(aToken.toMap());
     } catch (BlobCrypterException e) {
       throw new SecurityTokenException(e);
@@ -185,6 +210,14 @@ public class BlobCrypterSecurityTokenCodec implements SecurityTokenCodec, Contai
   }
 
   public int getTokenTimeToLive() {
-    return AbstractSecurityToken.MAX_TOKEN_TTL;
+    return AbstractSecurityToken.DEFAULT_MAX_TOKEN_TTL;
+  }
+
+  public int getTokenTimeToLive(String container) {
+    Integer tokenTTL = this.tokenTTLs.get(container);
+    if (tokenTTL == null) {
+      return getTokenTimeToLive();
+    }
+    return tokenTTL;
   }
 }

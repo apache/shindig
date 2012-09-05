@@ -448,7 +448,7 @@ public class GadgetsHandlerTest extends EasyMockTestCase {
   @Test
   public void testMetadataOneGadgetRequestTokenTTLParam() throws Exception {
     SecurityTokenCodec codec = createMock(SecurityTokenCodec.class);
-    expect(codec.getTokenTimeToLive()).andReturn(42).anyTimes();
+    expect(codec.getTokenTimeToLive(CONTAINER)).andReturn(42).anyTimes();
     replay(codec);
 
     registerGadgetsHandler(codec);
