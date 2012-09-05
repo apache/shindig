@@ -41,6 +41,7 @@
     var id = inc++;
     timerIds[id] = new JavaAdapter(java.util.TimerTask, {run: fn});
     timer.schedule(timerIds[id], delay);
+    return id;
   };
 
   this.clearTimeout = function(id) {
