@@ -1,6 +1,10 @@
 FROM 2.0.x TO 2.5.x
 ===================
 
+== API changes ==
+
+The JavaScript GagdetSite.getActiveGadgetHolder has been changed to GagdetSite.getActiveSiteHolder
+
 == container.js config changes ==
 
 * The "gadgets.securityTokenKeyFile" property has been replaced with "gadgets.securityTokenKey".
