@@ -187,8 +187,9 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
       Element injectedStyle = document.createElement("style");
       injectedStyle.setAttribute("type", "text/css");
       head.insertBefore(injectedStyle, firstHeadChild);
-      injectedStyle.appendChild(injectedStyle.getOwnerDocument().
-          createTextNode(SCROLLING_CSS));
+
+      // Inject default scrolling to the body
+      this.injectDefaultScrolling(injectedStyle);
 
       // Only inject default styles if no doctype was specified.
       if (document.getDoctype() == null) {
@@ -255,6 +256,11 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
     } catch (GadgetException e) {
       throw new RewritingException(e.getLocalizedMessage(), e, e.getHttpStatusCode());
     }
+  }
+
+  protected void injectDefaultScrolling(Element injectedStyle) {
+    injectedStyle.appendChild(injectedStyle.getOwnerDocument().
+        createTextNode(SCROLLING_CSS));
   }
 
   protected void injectBaseTag(Gadget gadget, Node headTag) {
