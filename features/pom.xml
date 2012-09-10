@@ -140,6 +140,7 @@
                 <source>core.prefs/prefs.js</source>
                 <source>core.log/log.js</source>
                 <source>core.io/io.js</source>
+                <source>container.mixin/mixin.js</source>
                 <source>container.util/constant.js</source>
                 <source>container.util/util.js</source>
                 <source>container.site/site.js</source>

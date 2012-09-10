@@ -26,7 +26,7 @@
  * Set up namespace.
  * @type {Object}
  */
-osapi.container = {};
+osapi.container = osapi.container || {};
 
 
 /**

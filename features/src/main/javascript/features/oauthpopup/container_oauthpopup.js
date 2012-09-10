@@ -109,22 +109,20 @@
     }
   };
 
+
+  if (gadgets.rpc) { // Tests dont have gadgets.rpc defined right away.
+    gadgets.rpc.register('oauth.open', function(location, options) {
+      oauth.open(location, options, this.f, this.callback);
+    });
+  }
+
   // Support mixing into the container which makes js rpc tests super easy.
-  // To override this mixin, you'll need to setTimeout, because we need to do the same here.
-  // This feature doesn't depend on `container` so it probably won't get defined before us.
-  setTimeout(function() {
-    if (osapi && osapi.container && osapi.container.Container && osapi.container.Container.addMixin) {
-      osapi.container.Container.addMixin('oauth', function(container) {
-        gadgets.rpc.register('oauth.open', function(location, options) {
-          container.oauth.open(location, options, this.f, this.callback);
-        });
-  
-        return oauth;
-      });
-    } else {
-      gadgets.rpc.register('oauth.open', function(location, options) {
-        oauth.open(location, options, this.f, this.callback);
-      });
-    }
-  }, 0);
+  // This overrides the rpc register above if you instantiate a commoncontainer.
+  osapi.container.addMixin('oauth', function(container) {
+    gadgets.rpc.register('oauth.open', function(location, options) {
+      container.oauth.open(location, options, this.f, this.callback);
+    });
+
+    return oauth;
+  });
 })();

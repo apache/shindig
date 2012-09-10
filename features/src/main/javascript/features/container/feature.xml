@@ -28,6 +28,7 @@ under the License.
   <dependency>container.util</dependency>
   <dependency>container.site.gadget</dependency>
   <dependency>container.site.url</dependency>
+  <dependency>container.mixin</dependency>
   <dependency>oauthpopup</dependency>
   <container>
     <script src="service.js"/>

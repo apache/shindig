@@ -28,6 +28,7 @@ features/caja/es53-guest-frame.opt.xml
 features/caja/es53-taming-frame.xml
 features/caja/es53-taming-frame.opt.xml
 features/container/feature.xml
+features/container.mixin/feature.xml
 features/container.site/feature.xml
 features/container.site.gadget/feature.xml
 features/container.site.url/feature.xml

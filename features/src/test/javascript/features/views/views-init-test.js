@@ -65,10 +65,15 @@ ViewsInitTest.prototype.testRewriteLinksStandards = function() {
       name = arguments[0];
       func = arguments[1];
       bubble = arguments[2];
-    }
+    },
+    location: {
+      href: "http://localhost",
+      host: "localhost",
+      hostname: "localhost"
+    },
+    scripts: []
   };
 
-  document.scripts = [];
   gadgets.config.init({views:{rewriteLinks: true}});
 
   this.assertEquals("click", name);
@@ -83,12 +88,15 @@ ViewsInitTest.prototype.testRewriteLinksIe = function() {
     attachEvent: function() {
       name = arguments[0];
       func = arguments[1];
-    
     },
-    addEventListener: undefined
+    location: {
+      href: "http://localhost",
+      host: "localhost",
+      hostname: "localhost"
+    },
+    scripts: []
   };
 
-  document.scripts = [];
   gadgets.config.init({views:{rewriteLinks: true}});
 
   this.assertEquals("onclick", name);

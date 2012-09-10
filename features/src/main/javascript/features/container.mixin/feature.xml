@@ -17,25 +17,13 @@ KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 -->
 <feature>
-  <name>oauthpopup</name>
+  <name>container.mixin</name>
   <dependency>globals</dependency>
-  <dependency>container.mixin</dependency>
-  <dependency>rpc</dependency>
   <container>
-    <script src="container_oauthpopup.js"/>
+    <script src="mixin.js"/>
     <api>
-      <exports type="rpc">oauth.open</exports>
-      <uses type="rpc">oauth.close</uses>
+      <exports type="js">osapi.container.addMixin</exports>
+      <exports type="js">osapi.container.mixin</exports>
     </api>
   </container>
-  <gadget>
-    <script src="oauthpopup.js"/>
-    <api>
-      <exports type="js">gadgets.oauth.Popup</exports>
-      <exports type="js">gadgets.oauth.Popup.prototype.createOpenerOnClick</exports>
-      <exports type="js">gadgets.oauth.Popup.prototype.createApprovedOnClick</exports>
-      <exports type="rpc">oauth.close</exports>
-      <uses type="rpc">oauth.open</uses>
-    </api>
-  </gadget>
 </feature>
