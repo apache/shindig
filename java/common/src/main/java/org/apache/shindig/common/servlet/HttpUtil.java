@@ -107,13 +107,17 @@ public final class HttpUtil {
   }
 
   public static List<Pair<String, String>> getCachingHeadersToSet(int ttl, boolean noProxy) {
+    return getCachingHeadersToSet(ttl, null, null, noProxy);
+  }
+
+  public static List<Pair<String, String>> getCachingHeadersToSet(int ttl, String cacheControl, String pragma, boolean noProxy) {
     List<Pair<String, String>> cachingHeaders = Lists.newArrayListWithExpectedSize(3);
     cachingHeaders.add(Pair.of("Expires",
         DateUtil.formatRfc1123Date(timeSource.currentTimeMillis() + (1000L * ttl))));
 
     if (ttl <= 0) {
-      cachingHeaders.add(Pair.of("Pragma", "no-cache"));
-      cachingHeaders.add(Pair.of("Cache-Control", "no-cache"));
+      cachingHeaders.add(Pair.of("Pragma", pragma == null ? "no-cache" : pragma));
+      cachingHeaders.add(Pair.of("Cache-Control", cacheControl == null ? "no-cache" : cacheControl));
     } else {
       if (noProxy) {
         cachingHeaders.add(Pair.of("Cache-Control", "private,max-age=" + Integer.toString(ttl)));

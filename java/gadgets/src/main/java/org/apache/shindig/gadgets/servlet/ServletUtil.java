@@ -90,7 +90,10 @@ public final class ServletUtil {
   }
 
   public static void setCachingHeaders(HttpResponseBuilder response, int ttl, boolean noProxy) {
-    for (Pair<String, String> header : HttpUtil.getCachingHeadersToSet(ttl, noProxy)) {
+    // Initial cache control headers are in this response, we should now sanitize them or set them if they are missing.
+    String cacheControl = response.getHeader("Cache-Control");
+    String pragma = response.getHeader("Pragma");
+    for (Pair<String, String> header : HttpUtil.getCachingHeadersToSet(ttl, cacheControl, pragma, noProxy)) {
       response.setHeader(header.one, header.two);
     }
   }
