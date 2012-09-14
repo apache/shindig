@@ -29,6 +29,9 @@ gadgets.pubsub = function() {
   var listeners = {};
 
   function router(channel, sender, message) {
+    if (this.f !== '..') {
+      return;
+    }
     var listener = listeners[channel];
     if (typeof listener === 'function') {
       listener(sender, message);

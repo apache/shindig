@@ -28,6 +28,9 @@ gadgets.views = gadgets.views || {};
 
   gadgets.util.registerOnLoadHandler(function() {
     gadgets.rpc.register('gadgets.views.deliverResult', function(rcbnum, result) {
+      if (this.f !== '..') {
+        return;
+      }
       var resultCallback;
       if (resultCallback = resultCallbackMap[rcbnum]) {
         delete resultCallbackMap[rcbnum];

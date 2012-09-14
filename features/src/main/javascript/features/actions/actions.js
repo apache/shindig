@@ -47,6 +47,9 @@ gadgets['actions'] = (function() {
   gadgets.util.registerOnLoadHandler(function() {
     // register rpc endpoint
     gadgets.rpc.register('actions.runAction', function(id, selection) {
+      if (this.f !== '..') {
+        return;
+      }
       var callback = callbackRegistry.getCallback(id);
       if (callback) {
         callback.call(this, selection);
@@ -221,6 +224,9 @@ gadgets['actions'] = (function() {
         if (!showListeners) {
           showListeners = [];
           gadgets.rpc.register('actions.onActionShow', function(actions) {
+            if (this.f !== '..') {
+              return;
+            }
             for (var i = 0, listener; listener = showListeners[i]; i++) {
               listener(actions);
             }
@@ -244,6 +250,9 @@ gadgets['actions'] = (function() {
         if (!hideListeners) {
           hideListeners = [];
           gadgets.rpc.register('actions.onActionHide', function(actions) {
+            if (this.f !== '..') {
+              return;
+            }
             for (var i = 0, listener; listener = hideListeners[i]; i++) {
               listener(actions);
             }

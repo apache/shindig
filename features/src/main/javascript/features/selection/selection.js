@@ -44,6 +44,9 @@ gadgets['selection'] = function() {
 
   gadgets.util.registerOnLoadHandler(function() {
     gadgets.rpc.register('gadgets.selection.selectionChanged', function(selection) {
+      if (this.f !== '..') {
+        return;
+      }
       currentSelection = selection;
       for (var i=0, currentListener; currentListener=listeners[i]; i++) {
         listeners[i](selection);

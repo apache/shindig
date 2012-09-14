@@ -22,5 +22,8 @@
  * @fileoverview Allows the container to refresh the gadget security token.
  */
 gadgets.rpc.register('update_security_token', function(token) {
+  if (this.f !== '..') {
+    return;
+  }
   shindig.auth.updateSecurityToken(token);
 });

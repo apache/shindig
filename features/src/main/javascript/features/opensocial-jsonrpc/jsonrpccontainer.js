@@ -115,6 +115,9 @@ var JsonRpcRequestItem = function(rpc, opt_processData) {
    */
   JsonRpcContainer.requestShareAppCallback_ = function(callbackId,
       success, opt_errorCode, recipientIds) {
+    if (this.f !== '..') {
+      return;
+    }
     callback = callbackIdStore[callbackId];
     if (callback) {
       callbackIdStore[callbackId] = null;

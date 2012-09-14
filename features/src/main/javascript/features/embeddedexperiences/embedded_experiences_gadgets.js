@@ -30,6 +30,9 @@ gadgets['ee'] = gadgets['ee'] || {};
    *         The embedded experiences context.
    */
   function setDataContext(context) {
+    if (this.f !== '..') {
+      return;
+    }
     opensocial.data.DataContext.putDataSet('org.opensocial.ee.context', context);
   };
 
