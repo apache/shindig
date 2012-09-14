@@ -83,10 +83,10 @@ public class DefaultGuiceModule extends AbstractModule {
     install(new SubstituterModule());
     install(new TemplateModule());
     install(new UriModule());
-    install(new JsCompilerModule());
     install(new JsServingPipelineModule());
 
-    // bind(Long.class).annotatedWith(Names.named("org.apache.shindig.serviceExpirationDurationMinutes")).toInstance(60l);
+    // Install the JS Compiler module
+    installJSCompilerModule();
 
     // We perform static injection on HttpResponse for cache TTLs.
     requestStaticInjection(HttpResponse.class);
@@ -94,6 +94,14 @@ public class DefaultGuiceModule extends AbstractModule {
     requestStaticInjection(ProxyUriBase.class);
     registerGadgetHandlers();
     registerFeatureHandlers();
+  }
+
+  /**
+   * Override-able method to install the JS Compiler Module.
+   * Default JS Compiler is bound to DefaultJSCompiler class.
+   */
+  protected void installJSCompilerModule() {
+    install(new JsCompilerModule());
   }
 
   /**
