@@ -27,6 +27,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.ThreadFactory;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -62,6 +63,9 @@ import com.google.javascript.jscomp.Result;
 import com.google.javascript.jscomp.SourceFile;
 
 public class ClosureJsCompiler implements JsCompiler {
+  // Default stack size for the compiler threads. The value was copied from closure compiler class.
+  private static final long DEFAULT_COMPILER_STACK_SIZE = 1048576L;
+
   // Based on Closure Library's goog.exportSymbol implementation.
   private static final JsContent EXPORTSYMBOL_CODE =
       JsContent.fromText("var goog=goog||{};goog.exportSymbol=function(name,obj){"
@@ -83,6 +87,7 @@ public class ClosureJsCompiler implements JsCompiler {
   private final Map<String, Future<CompileResult>> compiling;
 
   private int threadPoolSize = 5;
+  private long compilerStackSize = DEFAULT_COMPILER_STACK_SIZE;
   private ExecutorService compilerPool;
 
   @Inject
@@ -120,13 +125,22 @@ public class ClosureJsCompiler implements JsCompiler {
     }
   }
 
+  @Inject(optional = true)
+  public void setCompilerStackSize(
+      @Named("shindig.closure.compile.compilerStackSize") Long compilerStackSize) {
+    if (compilerStackSize > 0L) {
+      this.compilerStackSize = compilerStackSize;
+    }
+  }
+
   /**
    * Override this to provide your own {@link ExecutorService}
    *
    * @return An {@link ExecutorService} to use for the compiler pool.
    */
   protected ExecutorService createThreadPool() {
-    return Executors.newFixedThreadPool(threadPoolSize);
+    ThreadFactory threadFactory = new ClosureJSThreadFactory();
+    return Executors.newFixedThreadPool(threadPoolSize, threadFactory);
   }
 
   public CompilerOptions defaultCompilerOptions() {
@@ -254,6 +268,10 @@ public class ClosureJsCompiler implements JsCompiler {
       List<SourceFile> externs) throws CompilerException {
 
     Compiler compiler = new Compiler(getErrorManager()); // We shouldn't reuse compilers
+
+    // disable JS Closure Compiler internal thread
+    compiler.disableThreads();
+
     SourceFile source = SourceFile.fromCode(content.getSource(), content.get());
     Result result = compiler.compile(externs, Lists.newArrayList(source), options);
 
@@ -341,6 +359,12 @@ public class ClosureJsCompiler implements JsCompiler {
       };
 
       return builder.build();
+    }
+  }
+
+  private class ClosureJSThreadFactory implements ThreadFactory {
+    public Thread newThread(Runnable runnable) {
+      return new Thread(null, runnable, "shindigjscompiler", compilerStackSize);
     }
   }
 }
