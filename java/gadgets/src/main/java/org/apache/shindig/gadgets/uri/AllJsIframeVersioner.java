@@ -18,9 +18,6 @@
  */
 package org.apache.shindig.gadgets.uri;
 
-import java.nio.charset.Charset;
-import java.security.MessageDigest;
-
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.util.HashUtil;
 import org.apache.shindig.gadgets.features.FeatureRegistry;
@@ -50,17 +47,11 @@ public class AllJsIframeVersioner implements Versioner {
 
   @Inject
   public AllJsIframeVersioner(FeatureRegistry registry) {
-    Charset charset = Charset.defaultCharset();
-    MessageDigest digest = HashUtil.getMessageDigest();
-    digest.reset();
+    StringBuilder jsBuf = new StringBuilder();
     for (FeatureResource resource : registry.getAllFeatures().getResources()) {
-      // Emulate StringBuilder append of content
-      String content = resource.getContent();
-      digest.update((content == null ? "null" : content).getBytes(charset));
-      content = resource.getDebugContent();
-      digest.update((content == null ? "null" : content).getBytes(charset));
+      jsBuf.append(resource.getContent()).append(resource.getDebugContent());
     }
-    allJsChecksum = HashUtil.bytesToHex(digest.digest());
+    allJsChecksum = HashUtil.checksum(jsBuf.toString().getBytes());
   }
 
   public String version(Uri gadgetUri, String container) {
