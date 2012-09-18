@@ -81,7 +81,7 @@ PopupTest.prototype.testPopup = function() {
   // User or site closes window
   popup.close();
   window.incrementTime(100);
-  this.assertEquals('Closer callback not called.', ['from', 'oauth.close', null, cbid], this.rpcArguments);
+  this.assertEquals('Closer callback not called.', ['from', 'oauth.close', null, cbid, undef], this.rpcArguments);
 
   delete this.rpcArguments;
   window.incrementTime(1000);

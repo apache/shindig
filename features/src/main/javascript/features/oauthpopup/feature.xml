@@ -34,6 +34,7 @@ specific language governing permissions and limitations under the License.
       <exports type="js">gadgets.oauth.Popup</exports>
       <exports type="js">gadgets.oauth.Popup.prototype.createOpenerOnClick</exports>
       <exports type="js">gadgets.oauth.Popup.prototype.createApprovedOnClick</exports>
+      <exports type="js">reportOauthCallbackUrl_</exports>
       <exports type="rpc">oauth.close</exports>
       <uses type="rpc">oauth.open</uses>
     </api>

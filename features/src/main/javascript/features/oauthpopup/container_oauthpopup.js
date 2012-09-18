@@ -22,17 +22,49 @@
  */
 
 (function() {
-  var timers = {},
+  var windows = {},
+      callbacks = {},
+      timers = {},
       cbid = 1;  // start at 1 so they are always truthy
 
-  function checkClosed(win, callback, key) {
-    if (this.isClosed(win)) {
-      // setInterval, when missed, can run multiple times.
-      if (typeof(timers[key]) != 'undefined') {
-        window.clearInterval(timers[key]);
-        delete timers[key];
-        callback();
+  /**
+   * This function handles the completion of oauth callback url to the
+   * gadgets.io.oauthReceivedCallbackUrl_ variable in the gadget that
+   * gadgets.io.makeRequest is looking for.
+   *
+   * @see org.apache.shindig.gadgets.servlet.OAuth2CallbackServlet.java
+   * @see org.apache.shindig.gadgets.servlet.OAuthCallbackServlet.java
+   * @see /src/main/javascript/features/core.io/io.js
+   *        (gadgets.io.oauthReceivedCallbackUrl_)
+   */
+  window.reportOauthCallbackUrl_ = function(win, cburl) {
+    for (var key in windows) {
+      if (windows.hasOwnProperty(key)) {
+        if (win === windows[key]) {
+          return finishClose.call(window, key, cburl);
+        }
       }
+    }
+  };
+
+  function finishClose(key, cburl) {
+    // setInterval, when missed, can run multiple times.
+    if (typeof(timers[key]) != 'undefined') {
+      window.clearInterval(timers[key]);
+
+      try {
+        callbacks[key](cburl);
+      } finally {
+        delete timers[key];
+        delete callbacks[key];
+        delete windows[key];
+      }
+    }
+  }
+
+  function checkClosed(win, key) {
+    if (this.isClosed(win)) {
+      finishClose(key);
     }
   }
 
@@ -55,14 +87,16 @@
           win = this.getWindow(location, options);
 
       if (win) {
-        var id = cbid++,
-            callback = gadgets.util.makeClosure(this, function(id) {
-              this.closeWindow(win); // make sure it's closed
-              gadgets.rpc.call(from, 'oauth.close', null, id);
-            }, id);
+        windows[key] = win;
+
+        var id = cbid++;
+        callbacks[key] = gadgets.util.makeClosure(this, function(id, cburl) {
+          this.closeWindow(win); // make sure it's closed
+          gadgets.rpc.call(from, 'oauth.close', null, id, cburl);
+        }, id);
 
         // Poll every 100ms to check if the window has been closed
-        timers[key] = window.setInterval(gadgets.util.makeClosure(this, checkClosed, win, callback, key), 100);
+        timers[key] = window.setInterval(gadgets.util.makeClosure(this, checkClosed, win, key), 100);
 
         onOpen(id);
       } else {

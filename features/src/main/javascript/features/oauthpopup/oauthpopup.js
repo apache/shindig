@@ -124,8 +124,9 @@ gadgets.oauth.Popup = function(destination, windowOptions, onOpen, onClose) {
   var callbacks = {};
 
   gadgets.util.registerOnLoadHandler(function() {
-    gadgets.rpc.register('oauth.close', function(cbid) {
+    gadgets.rpc.register('oauth.close', function(cbid, cburl) {
       if (this.f == '..') {
+        gadgets.io.oauthReceivedCallbackUrl_ = cburl; // gadgets.io completion.
         callbacks[cbid] && callbacks[cbid]();
       }
     });

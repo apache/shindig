@@ -64,7 +64,7 @@ public class OAuth2CallbackServlet extends InjectedServlet {
           + "<body>\n"
           + "<script type='text/javascript'>\n"
           + "try {\n"
-          + "  window.opener.gadgets.io.oauthReceivedCallbackUrl_ = document.location.href;\n"
+          + "  window.opener.reportOauthCallbackUrl_(window, document.location.href);\n"
           + "} catch (e) {\n"
           + "}\n"
           + "window.close();\n"
