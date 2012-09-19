@@ -17,6 +17,7 @@ dependencies to include the oauthpopup feature.
 
 == Java Dependency Changes ==
 
+* caja r4884 -> r5054
 * closure-compiler (new) r1918
 * commons-codec 1.5 -> 1.6
 * commons-lang to commons-lang3 3.1
