@@ -18,6 +18,10 @@
  */
 package org.apache.shindig.gadgets.uri;
 
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
+import java.security.MessageDigest;
+
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.util.HashUtil;
 import org.apache.shindig.gadgets.features.FeatureRegistry;
@@ -47,11 +51,23 @@ public class AllJsIframeVersioner implements Versioner {
 
   @Inject
   public AllJsIframeVersioner(FeatureRegistry registry) {
-    StringBuilder jsBuf = new StringBuilder();
+    String charset = Charset.defaultCharset().name();
+    MessageDigest digest = HashUtil.getMessageDigest();
+    digest.reset();
     for (FeatureResource resource : registry.getAllFeatures().getResources()) {
-      jsBuf.append(resource.getContent()).append(resource.getDebugContent());
+      // Emulate StringBuilder append of content
+      update(digest, resource.getContent(), charset);
+      update(digest, resource.getDebugContent(), charset);
     }
-    allJsChecksum = HashUtil.checksum(jsBuf.toString().getBytes());
+    allJsChecksum = HashUtil.bytesToHex(digest.digest());
+  }
+
+  private void update(MessageDigest digest, String content, String charset) {
+    try {
+      digest.update((content == null ? "null" : content).getBytes(charset));
+    } catch (UnsupportedEncodingException e) {
+      digest.update((content == null ? "null" : content).getBytes());
+    }
   }
 
   public String version(Uri gadgetUri, String container) {

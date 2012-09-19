@@ -35,6 +35,9 @@ import org.junit.Test;
 
 import com.google.common.collect.Lists;
 
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
+import java.security.MessageDigest;
 import java.util.List;
 
 public class AllJsIframeVersionerTest {
@@ -49,7 +52,20 @@ public class AllJsIframeVersionerTest {
   public void setUp() {
     String featureContent = "THE_FEATURE_CONTENT";
     String debugContent = "FEATURE_DEBUG_CONTENT";
-    featureChecksum = HashUtil.checksum((featureContent + debugContent).getBytes());
+    String charset = Charset.defaultCharset().name();
+    MessageDigest digest = HashUtil.getMessageDigest();
+    try{
+      digest.update(featureContent.getBytes(charset));
+    } catch (UnsupportedEncodingException e) {
+      digest.update(featureContent.getBytes());
+    }
+    try{
+      digest.update(debugContent.getBytes(charset));
+    } catch (UnsupportedEncodingException e) {
+      digest.update(debugContent.getBytes());
+    }
+
+    featureChecksum = HashUtil.bytesToHex(digest.digest());
     FeatureRegistry registry = createMock(FeatureRegistry.class);
     FeatureResource resource = new FeatureResource.Simple(featureContent, debugContent, "js");
     List<FeatureResource> allResources = Lists.newArrayList(resource);
