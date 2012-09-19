@@ -20,6 +20,7 @@ package org.apache.shindig.gadgets.parse.caja;
 
 import org.apache.shindig.gadgets.GadgetException;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.bootstrap.DOMImplementationRegistry;
@@ -43,15 +44,11 @@ public class VanillaCajaHtmlParserTest {
     serializer = new VanillaCajaHtmlSerializer();
   }
 
-  @Test
+  @Ignore
+  @Test(expected = GadgetException.class)
   public void testEmptyDocument() throws Exception {
     boolean exceptionCaught = false;
-    try {
-      parser.parseDom("");
-    } catch (GadgetException e) {
-      exceptionCaught = true;
-    }
-    assertTrue(exceptionCaught);
+    parser.parseDom("");
   }
 
   // Bad behavior by Caja DomParser. Bug to be raised with Caja team.

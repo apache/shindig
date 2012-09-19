@@ -41,6 +41,7 @@ import org.apache.shindig.gadgets.rewrite.MutableContent;
 import org.apache.shindig.gadgets.rewrite.RewriterTestBase;
 import org.apache.shindig.gadgets.uri.ProxyUriManager;
 import org.easymock.EasyMock;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.DOMImplementation;
@@ -49,8 +50,10 @@ import java.util.List;
 
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.replay;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.matchers.JUnitMatchers.containsString;
 
 public class CajaContentRewriterTest extends RewriterTestBase {
   private List<GadgetHtmlParser> parsers;
@@ -89,13 +92,10 @@ public class CajaContentRewriterTest extends RewriterTestBase {
 
   @Test
   public void testErrorDuringRewrite() throws Exception {
-    String markup = "<script>var x={}; with(x) {};</script>";
+    String markup = "<script>window['x']={}; with(x) {};</script>";
     String expected = "<html><head></head><body><ul class=\"gadgets-messages\">";
 
     List<String> messages = ImmutableList.of(
-            "folding element html into parent",
-            "folding element head into parent",
-            "folding element body into parent",
             "&#34;with&#34; blocks are not allowed");
     testMarkup(markup, expected, messages);
   }
@@ -107,23 +107,17 @@ public class CajaContentRewriterTest extends RewriterTestBase {
         "<div>test</div>";
 
     List<String> messages = ImmutableList.of(
-            "folding element html into parent",
-            "folding element head into parent",
-            "folding element body into parent",
             "css property top has bad value: ==&gt;expression(alert(0), 0)");
     testMarkup(markup, expected, messages);
   }
 
   @Test
   public void testRewrite() throws Exception {
-    String markup = "<script>var a=0;</script>";
+    String markup = "<script>window['a']=0;</script>";
     String expected =
         "caja___.start";
 
-    List<String> messages = ImmutableList.of(
-            "folding element html into parent",
-            "folding element head into parent",
-            "folding element body into parent");
+    List<String> messages = ImmutableList.of();
     testMarkup(markup, expected, messages);
   }
 
@@ -198,12 +192,11 @@ public class CajaContentRewriterTest extends RewriterTestBase {
       rewriter.rewrite(gadget, mc);
 
       String actual = mc.getContent();
-      assertTrue(actual.contains(expected));
 
       if (msgs != null) {
         for (String msg : msgs) {
           System.out.println("Msg:" + msg);
-          assertTrue(actual.contains(msg));
+          assertThat(actual, containsString(msg));
         }
       }
     }

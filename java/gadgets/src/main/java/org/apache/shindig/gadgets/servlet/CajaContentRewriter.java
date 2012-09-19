@@ -80,6 +80,7 @@ import org.apache.shindig.gadgets.rewrite.MutableContent;
 import org.apache.shindig.gadgets.uri.ProxyUriManager;
 import org.apache.shindig.gadgets.uri.UriStatus;
 import org.w3c.dom.Document;
+import org.w3c.dom.DocumentFragment;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -228,7 +229,7 @@ public class CajaContentRewriter implements GadgetRewriter {
 
     // Serialize outside of MutableContent, to prevent a re-parse.
     String docContent = HtmlSerialization.serialize(doc);
-    Node root = doc.createDocumentFragment();
+    DocumentFragment root = doc.createDocumentFragment();
     root.appendChild(doc.getDocumentElement());
 
     if (debug) {
@@ -268,7 +269,7 @@ public class CajaContentRewriter implements GadgetRewriter {
     innerDiv.setAttribute("class", "g___");
     outerDiv.appendChild(innerDiv);
 
-    innerDiv.appendChild(doc.adoptNode(result.html));
+    innerDiv.appendChild(doc.importNode(result.html, true));
 
     String cajoledJs = renderJs(result.js, debug);
     cajoledOutput.appendChild(cajaStart(doc, cajoledJs, debug));
