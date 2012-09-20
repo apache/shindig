@@ -73,7 +73,7 @@ ContainerTest.prototype.testUnloadGadgets = function() {
 
 ContainerTest.prototype.testPreloadConfigGadgets = function() {
   this.setupGadgetsRpcRegister();
-  var container = new osapi.container.Container(
+  var container = new osapi.container.Container( 
     { 'preloadMetadatas' : { 'preloaded1.xml' : {}}});
   var test = null;
   this.assertTrue('1', 'preloaded1.xml' in container.preloadedGadgetUrls_);
@@ -131,6 +131,23 @@ ContainerTest.prototype.testNewGadgetSite = function() {
   var site2 = container.newGadgetSite(null);
   this.assertTrue(container.sites_[1] != null);
   this.assertTrue(container.sites_[2] != null);
+};
+
+ContainerTest.prototype.testMixinViaPrototype = function() {
+  this.setupGadgetsRpcRegister();
+  osapi.container.Container.prototype.mixins_['test'] = function(context) {
+    return {
+      'getSitesLength' : function() {
+        return context.sites_.length;
+      }
+    };
+  };
+  osapi.container.Container.prototype.mixinsOrder_.push('test');
+  var container = new osapi.container.Container();
+  this.setupGadgetSite(1, {}, null);
+  container.newGadgetSite(null);
+  this.assertTrue(container.sites_[1] != null);
+  this.assertEquals(container.sites_.length, container.test.getSitesLength());
 };
 
 ContainerTest.prototype.testMixinViaAdd = function() {

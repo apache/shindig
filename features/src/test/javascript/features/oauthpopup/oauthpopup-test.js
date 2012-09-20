@@ -26,76 +26,58 @@ PopupTest.inherits(TestCase);
 PopupTest.prototype.setUp = function() {
   this.oldWindow = window;
   window = new mocks.FakeWindow();
-  window.__API_URI = shindig.uri('http://shindig.com');
-  window.__CONTAINER_URI = shindig.uri('http://container.com');
-
-  this.gadgetsRpc = gadgets.rpc;
-  gadgets.rpc = {};
-  var self = this;
-  gadgets.rpc.register = function(service, callback) {
-    if (self.captures && self.captures.hasOwnProperty(service)) {
-      self.captures[service] = callback;
-    }
-  };
-  gadgets.rpc.call = function() {
-    self.rpcArguments = Array.prototype.slice.call(arguments);
-  };
 };
 
 PopupTest.prototype.tearDown = function() {
   window = this.oldWindow;
-  gadgets.rpc = this.gadgetsRpc;
-  delete this.rpcArguments;
-  delete this.captures;
 };
 
 PopupTest.prototype.testPopup = function() {
-  var undef, captures = this.captures = {
-    'oauth.open': undef
-  };
-  var container = new osapi.container.Container();
-  this.assertNotUndefined('RPC endpoint "oauth.open" was not registered.', captures['oauth.open']);
-
-  delete this.rpcArguments;
-
-  var cbid, popup, opened = false;
-  window.open = function(url, target, options) {
-    return popup = mocks.FakeWindow.prototype.open.call(this, url, target, options);
-  };
-  this.assertUndefined('Window opened prematurely.', popup);
-
-  captures['oauth.open'].call({f: 'from', callback: function(id) {
+  var opened = false;
+  var open = function() {
     opened = true;
-    cbid = id;
-  }}, 'destination', 'options');
-  this.assertNotUndefined('Window not opened.', popup);
-  this.assertTrue('Opened callback not fired.', opened);
-  this.assertEquals('Url incorrect.', 'destination', popup.url_);
-  this.assertEquals('Target incorrect.', '_blank', popup.target_);
-  this.assertEquals('Options incorrect.', 'options', popup.options_);
+  };
+  var closed = false;
+  var close = function() {
+    closed = true;
+  };
+  // Create the popup
+  var popup = new gadgets.oauth.Popup('destination', 'options', open, close);
+  var openerOnClick = popup.createOpenerOnClick();
+  var closerOnClick = popup.createApprovedOnClick();
+  this.assertNull('Window opened prematurely', popup.win_);
+  this.assertFalse('Opener callback was called', opened);
+
+  // Open the window
+  var ranDefaultAction = openerOnClick();
+  this.assertTrue('Window not opened', opened);
+  this.assertFalse('Ran browser default action on open', ranDefaultAction);
+  this.assertNotNull('Window was null', popup.win_);
+  this.assertEquals('Url incorrect', 'destination', popup.win_.url_);
+  this.assertEquals('Target incorrect', '_blank', popup.win_.target_);
+  this.assertEquals('Options incorrect', 'options', popup.win_.options_);
 
   // Wait a bit for our events to run
   window.incrementTime(1000);
-  this.assertUndefined('close callback called early.', this.rpcArguments);
+  this.assertFalse('closer callback called early', closed);
 
   // User or site closes window
-  popup.close();
+  popup.win_.close();
   window.incrementTime(100);
-  this.assertEquals('Closer callback not called.', ['from', 'oauth.close', null, cbid, undef], this.rpcArguments);
-
-  delete this.rpcArguments;
-  window.incrementTime(1000);
-  this.assertUndefined('Timer not cancelled.', this.rpcArguments);
+  this.assertTrue('Closer callback not called', closed);
 };
 
 PopupTest.prototype.testPopup_userClick = function() {
-  var opened = false, closed = false;
-  // Create the popup
-  var popup = new gadgets.oauth.Popup('destination', 'options', function() {
+  var opened = false;
+  var open = function() {
     opened = true;
-  }, function() {
+  };
+  var closed = false;
+  var close = function() {
     closed = true;
-  });
+  };
+  // Create the popup
+  var popup = new gadgets.oauth.Popup('destination', 'options', open, close);
   var openerOnClick = popup.createOpenerOnClick();
   var closerOnClick = popup.createApprovedOnClick();
 
@@ -110,4 +92,29 @@ PopupTest.prototype.testPopup_userClick = function() {
   var ranDefaultAction = closerOnClick();
   this.assertFalse(ranDefaultAction);
   this.assertTrue('Closer callback not called', closed);
+};
+
+PopupTest.prototype.testTimerCancelled = function() {
+  var open = function() {};
+  var closeCount = 0;
+  var close = function() {
+    ++closeCount;
+  };
+
+  // Create the popup
+  var popup = new gadgets.oauth.Popup('destination', 'options', open, close);
+  var openerOnClick = popup.createOpenerOnClick();
+  var closerOnClick = popup.createApprovedOnClick();
+
+  // Open the window
+  openerOnClick();
+
+  // Close the window
+  popup.win_.close();
+
+  // Wait a bit for our events to run
+  window.incrementTime(1000);
+  this.assertEquals('Wrong number of calls to close', 1, closeCount);
+  window.incrementTime(1000);
+  this.assertEquals('timer not cancelled', 1, closeCount);
 };

@@ -393,9 +393,19 @@ osapi.container.Container.prototype.onConstructed = function(opt_config) {};
  * @param {string} namespace the namespace to add.
  * @param {function} func to call when creating the namespace.
  */
-// TODO: Deprecate me in 3.0 in favor of new location.
 osapi.container.Container.addMixin = function(namespace, func) {
-  osapi.container.addMixin(namespace, func);
+  var mixins = osapi.container.Container.prototype.mixins_;
+
+  if (mixins[namespace]) {
+    var orig = mixins[namespace];
+    mixins[namespace] = function(container) {
+      orig.call(this, container);
+      return func.call(this, container);
+    };
+  } else {
+    osapi.container.Container.prototype.mixinsOrder_.push(namespace);
+    mixins[namespace] = func;
+  }
 };
 
 
@@ -403,13 +413,34 @@ osapi.container.Container.addMixin = function(namespace, func) {
 // Private variables and methods.
 // -----------------------------------------------------------------------------
 
+
+/**
+ * Adds the ability for features to extend the container with
+ * their own functionality that may be specific to that feature.
+ * @type {Object<string,function>}
+ * @private
+ */
+osapi.container.Container.prototype.mixins_ = {};
+
+/**
+ * Order of addMixin calls.
+ * @type {Array<string>}
+ * @private
+ */
+osapi.container.Container.prototype.mixinsOrder_ = [];
+
+
 /**
  * Called from the constructor to add any namespace extensions.
  * @private
  */
-//TODO: Deprecate me in 3.0 in favor of new location.
 osapi.container.Container.prototype.initializeMixins_ = function() {
-  osapi.container.mixin(this);
+  var mixins = osapi.container.Container.prototype.mixins_,
+      order = osapi.container.Container.prototype.mixinsOrder_;
+  for (var i = 0; i < order.length; i++) {
+    var namespace = order[i];
+    this[namespace] = new mixins[namespace](this);
+  }
 };
 
 
