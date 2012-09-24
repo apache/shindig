@@ -18,9 +18,9 @@
  */
 package org.apache.shindig.gadgets.oauth2.handler;
 
-import java.io.Serializable;
-
 import org.apache.shindig.gadgets.oauth2.OAuth2Error;
+
+import java.io.Serializable;
 
 /**
  * Stores an error in the handler layer.
@@ -33,12 +33,21 @@ public class OAuth2HandlerError implements Serializable {
   private final OAuth2Error error;
   private final Exception cause;
   private final String contextMessage;
+  private final String uri;
+  private final String description;
 
   public OAuth2HandlerError(final OAuth2Error error, final String contextMessage,
-      final Exception cause) {
+          final Exception cause) {
+    this(error, contextMessage, cause, "", "");
+  }
+
+  public OAuth2HandlerError(final OAuth2Error error, final String contextMessage,
+          final Exception cause, final String uri, final String description) {
     this.error = error;
     this.contextMessage = contextMessage;
     this.cause = cause;
+    this.uri = uri;
+    this.description = description;
   }
 
   /**
@@ -59,16 +68,24 @@ public class OAuth2HandlerError implements Serializable {
 
   /**
    *
-   * @return non-translated message about the context of this error for
-   *         debugging purposes
+   * @return non-translated message about the context of this error for debugging purposes
    */
   public String getContextMessage() {
     return this.contextMessage;
   }
 
+  public String getUri() {
+    return this.uri;
+  }
+
+  public String getDescription() {
+    return this.description;
+  }
+
   @Override
   public String toString() {
     return OAuth2HandlerError.class.getName() + " : " + this.error + " : "
-        + this.getContextMessage() + " : " + this.cause;
+            + this.getContextMessage() + " : " + this.uri + " : " + this.description + ":"
+            + this.cause;
   }
 }

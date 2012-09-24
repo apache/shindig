@@ -18,13 +18,12 @@
  */
 package org.apache.shindig.gadgets.oauth2.handler;
 
-import org.apache.commons.codec.binary.Base64;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.oauth2.OAuth2Accessor;
 import org.apache.shindig.gadgets.oauth2.OAuth2Error;
 import org.apache.shindig.gadgets.oauth2.OAuth2Message;
 
-import java.util.Map;
+import org.apache.commons.codec.binary.Base64;
 
 /**
  *
@@ -36,8 +35,6 @@ import java.util.Map;
 public class BasicAuthenticationHandler implements ClientAuthenticationHandler {
   private static final OAuth2Error ERROR = OAuth2Error.AUTHENTICATION_PROBLEM;
 
-  public BasicAuthenticationHandler() {}
-
   public OAuth2HandlerError addOAuth2Authentication(final HttpRequest request,
           final OAuth2Accessor accessor) {
     try {
@@ -45,7 +42,7 @@ public class BasicAuthenticationHandler implements ClientAuthenticationHandler {
         return BasicAuthenticationHandler.getError("request is null");
       }
 
-      if ((accessor == null) || (!accessor.isValid()) || (accessor.isErrorResponse())) {
+      if (accessor == null || !accessor.isValid() || accessor.isErrorResponse()) {
         return BasicAuthenticationHandler.getError("accessor is invalid " + accessor);
       }
 

@@ -18,7 +18,11 @@
  */
 package org.apache.shindig.gadgets.oauth2.persistence;
 
+import org.apache.shindig.gadgets.oauth2.BasicOAuth2Store;
+import org.apache.shindig.gadgets.oauth2.OAuth2Accessor;
+import org.apache.shindig.gadgets.oauth2.OAuth2Store;
 import org.apache.shindig.gadgets.oauth2.OAuth2Token;
+import org.apache.shindig.gadgets.oauth2.persistence.sample.JSONOAuth2Persister;
 
 import java.util.Set;
 
@@ -38,10 +42,12 @@ import java.util.Set;
  */
 public interface OAuth2Persister {
   /**
+   * Retrieves a client from the persistence layer. Returns <code>null</code> if not found.
    *
    * @param gadgetUri
    * @param serviceName
-   * @return the client in the given mapping
+   * @return the client in the given mapping, must return <code>null</code> if the client is not
+   *         found
    * @throws OAuth2PersistenceException
    */
   OAuth2Client findClient(String gadgetUri, String serviceName) throws OAuth2PersistenceException;

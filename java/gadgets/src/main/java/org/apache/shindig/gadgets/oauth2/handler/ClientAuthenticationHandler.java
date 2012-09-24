@@ -27,12 +27,12 @@ import org.apache.shindig.gadgets.oauth2.OAuth2Accessor;
  *
  * Enables injection of new Client Authentication schemes into the system.
  *
- * If a {@link ClientAuthenticationHandler#geClientAuthenticationType()} matches
- * a {@link OAuth2Accessor#getClientAuthenticationType()} it will be invoked for
- * the outbound request to the service provider.
+ * If a {@link ClientAuthenticationHandler#geClientAuthenticationType()} matches a
+ * {@link OAuth2Accessor#getClientAuthenticationType()} it will be invoked for the outbound request
+ * to the service provider.
  *
- * By default "Basic" and "STANDARD" (client_id and client_secret added to
- * request parameters) are supported.
+ * By default "Basic" and "STANDARD" (client_id and client_secret added to request parameters) are
+ * supported.
  */
 
 public interface ClientAuthenticationHandler {
@@ -43,11 +43,11 @@ public interface ClientAuthenticationHandler {
    * @param accessor
    * @return indicates failure by returning a {@link OAuth2HandlerError}
    */
-  public OAuth2HandlerError addOAuth2Authentication(HttpRequest request, OAuth2Accessor accessor);
+  OAuth2HandlerError addOAuth2Authentication(HttpRequest request, OAuth2Accessor accessor);
 
   /**
    *
    * @return the Client Authentication type for this handler
    */
-  public String geClientAuthenticationType();
+  String geClientAuthenticationType();
 }

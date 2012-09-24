@@ -30,6 +30,8 @@ public class OAuth2RequestException extends Exception {
    * Error code for the client.
    */
   private final OAuth2Error error;
+  private final String errorUri;
+  private final String errorDescription;
 
   /**
    * Error text for the client.
@@ -37,33 +39,56 @@ public class OAuth2RequestException extends Exception {
   private final String errorText;
 
   /**
-   * Create an exception and record information about the exception to be
-   * returned to the gadget.
+   * Create an exception and record information about the exception to be returned to the gadget.
    *
    * @param error
+   *          {@link OAuth2Error} for this error
    * @param errorText
+   *          String to help elaborate on the cause of this error
    * @param cause
+   *          {@link Throwable} optional root cause of the error
    */
   public OAuth2RequestException(final OAuth2Error error, final String errorText,
-      final Throwable cause) {
+          final Throwable cause) {
+    this(error, errorText, cause, "", "");
+  }
+
+  /**
+   * Create an exception and record information about the exception to be returned to the gadget.
+   *
+   * @param error
+   *          {@link OAuth2Error} for this error
+   * @param errorText
+   *          String to help elaborate on the cause of this error
+   * @param cause
+   *          {@link Throwable} optional root cause of the error
+   * @param errorUri
+   *          optional errorUri from the OAuth2 spec
+   * @param errorDescription
+   *          optionally provide more details about the error
+   */
+  public OAuth2RequestException(final OAuth2Error error, final String errorText,
+          final Throwable cause, final String errorUri, final String errorDescription) {
     super('[' + error.name() + ',' + String.format(error.toString(), errorText) + ']', cause);
     this.error = error;
     this.errorText = error.getErrorDescription(errorText);
+    this.errorUri = errorUri;
+    this.errorDescription = errorDescription;
   }
 
   /**
    * Get the error code
    *
-   * @return
+   * @return the {@link OAuth2Error}, never <code>null</code>
    */
   public OAuth2Error getError() {
     return this.error;
   }
 
   /**
-   * Get a meaningful description of the exception
+   * Get a description of the exception
    *
-   * @return
+   * @return, the error text never <code>null</code>
    */
   public String getErrorText() {
     return this.errorText;
@@ -72,6 +97,24 @@ public class OAuth2RequestException extends Exception {
   @Override
   public String getMessage() {
     return this.errorText;
+  }
+
+  /**
+   * Returns the errorUri, if it was provided by the OAuth2 service provider
+   *
+   * @return the errorUri, or "" or <code>null</code>
+   */
+  public String getErrorUri() {
+    return this.errorUri;
+  }
+
+  /**
+   * Returns the more meaningful description of the error
+   *
+   * @return the errorDescription, or "" or <code>null</code>
+   */
+  public String getErrorDescription() {
+    return this.errorDescription;
   }
 
   @Override

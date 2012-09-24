@@ -19,12 +19,13 @@
 package org.apache.shindig.gadgets.oauth2.handler;
 
 import org.apache.shindig.gadgets.oauth2.OAuth2Error;
+
 import org.junit.Assert;
 import org.junit.Test;
 
 public class OAuth2HandlerErrorTest {
   @Test
-  public void testOAuth2HandlerError_1() throws Exception {
+  public void testOAuth2HandlerError1() throws Exception {
     final OAuth2Error error = OAuth2Error.AUTHENTICATION_PROBLEM;
     final String contextMessage = "";
     final Exception cause = new Exception();
@@ -33,16 +34,15 @@ public class OAuth2HandlerErrorTest {
 
     Assert.assertNotNull(result);
     Assert.assertEquals("", result.getContextMessage());
-    Assert
-        .assertEquals(
-            "org.apache.shindig.gadgets.oauth2.handler.OAuth2HandlerError : AUTHENTICATION_PROBLEM :  : java.lang.Exception",
+    Assert.assertEquals(
+            "org.apache.shindig.gadgets.oauth2.handler.OAuth2HandlerError : AUTHENTICATION_PROBLEM :  :  : :java.lang.Exception",
             result.toString());
   }
 
   @Test
-  public void testGetCause_1() throws Exception {
+  public void testGetCause1() throws Exception {
     final OAuth2HandlerError fixture = new OAuth2HandlerError(OAuth2Error.AUTHENTICATION_PROBLEM,
-        "", new Exception());
+            "", new Exception());
 
     final Exception result = fixture.getCause();
 
@@ -54,9 +54,9 @@ public class OAuth2HandlerErrorTest {
   }
 
   @Test
-  public void testGetContextMessage_1() throws Exception {
+  public void testGetContextMessage1() throws Exception {
     final OAuth2HandlerError fixture = new OAuth2HandlerError(OAuth2Error.AUTHENTICATION_PROBLEM,
-        "", new Exception());
+            "", new Exception());
 
     final String result = fixture.getContextMessage();
 
@@ -64,9 +64,9 @@ public class OAuth2HandlerErrorTest {
   }
 
   @Test
-  public void testGetError_1() throws Exception {
+  public void testGetError1() throws Exception {
     final OAuth2HandlerError fixture = new OAuth2HandlerError(OAuth2Error.AUTHENTICATION_PROBLEM,
-        "", new Exception());
+            "", new Exception());
 
     final OAuth2Error result = fixture.getError();
 
@@ -78,15 +78,14 @@ public class OAuth2HandlerErrorTest {
   }
 
   @Test
-  public void testToString_1() throws Exception {
+  public void testToString1() throws Exception {
     final OAuth2HandlerError fixture = new OAuth2HandlerError(OAuth2Error.AUTHENTICATION_PROBLEM,
-        "", new Exception());
+            "", new Exception());
 
     final String result = fixture.toString();
 
-    Assert
-        .assertEquals(
-            "org.apache.shindig.gadgets.oauth2.handler.OAuth2HandlerError : AUTHENTICATION_PROBLEM :  : java.lang.Exception",
+    Assert.assertEquals(
+            "org.apache.shindig.gadgets.oauth2.handler.OAuth2HandlerError : AUTHENTICATION_PROBLEM :  :  : :java.lang.Exception",
             result);
   }
 }

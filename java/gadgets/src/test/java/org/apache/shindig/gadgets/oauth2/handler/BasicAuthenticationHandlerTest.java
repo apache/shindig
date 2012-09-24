@@ -18,20 +18,21 @@
  */
 package org.apache.shindig.gadgets.oauth2.handler;
 
-import java.net.URI;
-
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.oauth2.MockUtils;
 import org.apache.shindig.gadgets.oauth2.OAuth2Accessor;
 import org.apache.shindig.gadgets.oauth2.OAuth2Error;
 import org.apache.shindig.gadgets.oauth2.OAuth2Message;
+
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.net.URI;
+
 public class BasicAuthenticationHandlerTest extends MockUtils {
   @Test
-  public void testBasicAuthenticationHandler_1() throws Exception {
+  public void testBasicAuthenticationHandler1() throws Exception {
     final BasicAuthenticationHandler result = new BasicAuthenticationHandler();
 
     Assert.assertNotNull(result);
@@ -40,7 +41,7 @@ public class BasicAuthenticationHandlerTest extends MockUtils {
   }
 
   @Test
-  public void testAddOAuth2Authentication_1() throws Exception {
+  public void testAddOAuth2Authentication1() throws Exception {
     final BasicAuthenticationHandler fixture = new BasicAuthenticationHandler();
     final HttpRequest request = null;
     final OAuth2Accessor accessor = MockUtils.getOAuth2Accessor_Code();
@@ -50,14 +51,13 @@ public class BasicAuthenticationHandlerTest extends MockUtils {
     Assert.assertNotNull(result);
     Assert.assertEquals(null, result.getCause());
     Assert.assertEquals("request is null", result.getContextMessage());
-    Assert
-        .assertEquals(
-            "org.apache.shindig.gadgets.oauth2.handler.OAuth2HandlerError : AUTHENTICATION_PROBLEM : request is null : null",
+    Assert.assertEquals(
+            "org.apache.shindig.gadgets.oauth2.handler.OAuth2HandlerError : AUTHENTICATION_PROBLEM : request is null :  : :null",
             result.toString());
   }
 
   @Test
-  public void testAddOAuth2Authentication_2() throws Exception {
+  public void testAddOAuth2Authentication2() throws Exception {
     final BasicAuthenticationHandler fixture = new BasicAuthenticationHandler();
     final HttpRequest request = new HttpRequest(Uri.fromJavaUri(new URI("")));
     final OAuth2Accessor accessor = null;
@@ -67,14 +67,13 @@ public class BasicAuthenticationHandlerTest extends MockUtils {
     Assert.assertNotNull(result);
     Assert.assertEquals(null, result.getCause());
     Assert.assertEquals("accessor is invalid null", result.getContextMessage());
-    Assert
-        .assertEquals(
-            "org.apache.shindig.gadgets.oauth2.handler.OAuth2HandlerError : AUTHENTICATION_PROBLEM : accessor is invalid null : null",
+    Assert.assertEquals(
+            "org.apache.shindig.gadgets.oauth2.handler.OAuth2HandlerError : AUTHENTICATION_PROBLEM : accessor is invalid null :  : :null",
             result.toString());
   }
 
   @Test
-  public void testAddOAuth2Authentication_3() throws Exception {
+  public void testAddOAuth2Authentication3() throws Exception {
     final BasicAuthenticationHandler fixture = new BasicAuthenticationHandler();
     final HttpRequest request = new HttpRequest(Uri.fromJavaUri(new URI("")));
     final OAuth2Accessor accessor = MockUtils.getOAuth2Accessor_Error();
@@ -88,7 +87,7 @@ public class BasicAuthenticationHandlerTest extends MockUtils {
   }
 
   @Test
-  public void testAddOAuth2Authentication_4() throws Exception {
+  public void testAddOAuth2Authentication4() throws Exception {
     final BasicAuthenticationHandler fixture = new BasicAuthenticationHandler();
     final HttpRequest request = new HttpRequest(Uri.fromJavaUri(new URI("")));
     final OAuth2Accessor accessor = MockUtils.getOAuth2Accessor_Code();
@@ -105,7 +104,7 @@ public class BasicAuthenticationHandlerTest extends MockUtils {
   }
 
   @Test
-  public void testGeClientAuthenticationType_1() throws Exception {
+  public void testGeClientAuthenticationType1() throws Exception {
     final BasicAuthenticationHandler fixture = new BasicAuthenticationHandler();
 
     final String result = fixture.geClientAuthenticationType();

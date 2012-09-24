@@ -23,8 +23,6 @@ import org.apache.shindig.gadgets.oauth2.OAuth2Accessor;
 import org.apache.shindig.gadgets.oauth2.OAuth2Error;
 import org.apache.shindig.gadgets.oauth2.OAuth2Message;
 
-import java.util.Map;
-
 /**
  *
  * See {@link ClientAuthenticationHandler}
@@ -34,8 +32,6 @@ import java.util.Map;
  */
 public class StandardAuthenticationHandler implements ClientAuthenticationHandler {
   private static final OAuth2Error ERROR = OAuth2Error.AUTHENTICATION_PROBLEM;
-
-  public StandardAuthenticationHandler() {}
 
   public OAuth2HandlerError addOAuth2Authentication(final HttpRequest request,
           final OAuth2Accessor accessor) {

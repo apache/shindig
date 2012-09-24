@@ -179,4 +179,19 @@ public interface OAuth2Store {
    * @return the token that was invalidated, or <code>null</code> if token could not be found
    */
   OAuth2Token invalidateToken(OAuth2Token token);
+
+  /**
+   * Clears all currently cached {@link OAuth2Accessor}s.
+   */
+  void clearAccessorCache() throws GadgetException;
+
+  /**
+   * Clears all currently cached {@link OAuth2Token}s. Does not remove them from persistence.
+   */
+  void clearTokenCache() throws GadgetException;
+
+  /**
+   * Clears all currently cache {@link OAuth2Client}s. Does not remove the from persistence.
+   */
+  void clearClientCache() throws GadgetException;
 }

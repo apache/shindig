@@ -154,8 +154,12 @@ public class CodeAuthorizationResponseHandler implements AuthorizationEndpointRe
       try {
         final OAuth2Message msg = this.oauth2MessageProvider.get();
         msg.parseRequest(request);
-
-        ret = this.setAuthorizationCode(msg.getAuthorization(), accessor);
+        if (msg.getError() != null) {
+          ret = new OAuth2HandlerError(msg.getError(), "error parsing authorization response",
+                  null, msg.getErrorUri(), msg.getErrorDescription());
+        } else {
+          ret = this.setAuthorizationCode(msg.getAuthorization(), accessor);
+        }
       } catch (final Exception e) {
         if (CodeAuthorizationResponseHandler.LOG.isLoggable()) {
           CodeAuthorizationResponseHandler.LOG.log(
@@ -272,7 +276,7 @@ public class CodeAuthorizationResponseHandler implements AuthorizationEndpointRe
           msg.parseJSON(response.getResponseAsString());
           if (msg.getError() != null) {
             ret = new OAuth2HandlerError(msg.getError(), "error exchanging code for access_token",
-                    null);
+                    null, msg.getErrorUri(), msg.getErrorDescription());
           }
         }
 

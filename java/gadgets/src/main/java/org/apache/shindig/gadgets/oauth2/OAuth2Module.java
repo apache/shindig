@@ -62,10 +62,10 @@ public class OAuth2Module extends AbstractModule {
   private static final String CLASS_NAME = OAuth2Module.class.getName();
   static final FilteredLogger LOG = FilteredLogger.getFilteredLogger(OAuth2Module.CLASS_NAME);
 
-  private static final String OAUTH2_IMPORT = "shindig.oauth2.import";
-  private static final String OAUTH2_IMPORT_CLEAN = "shindig.oauth2.import.clean";
-  private static final String OAUTH2_REDIRECT_URI = "shindig.oauth2.global-redirect-uri";
-  private static final String SEND_TRACE_TO_CLIENT = "shindig.oauth2.send-trace-to-client";
+  public static final String OAUTH2_IMPORT = "shindig.oauth2.import";
+  public static final String OAUTH2_IMPORT_CLEAN = "shindig.oauth2.import.clean";
+  public static final String OAUTH2_REDIRECT_URI = "shindig.oauth2.global-redirect-uri";
+  public static final String SEND_TRACE_TO_CLIENT = "shindig.oauth2.send-trace-to-client";
 
   public static class OAuth2RequestProvider implements Provider<OAuth2Request> {
     private final List<AuthorizationEndpointResponseHandler> authorizationEndpointResponseHandlers;

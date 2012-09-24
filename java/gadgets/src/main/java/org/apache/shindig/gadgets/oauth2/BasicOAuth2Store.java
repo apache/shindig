@@ -39,7 +39,8 @@ import java.util.Set;
 /**
  * see {@link OAuth2Store}
  *
- * Default OAuth2Store.
+ * Default OAuth2Store.  Handles a persistence scenario with a separate cache
+ * and persistence layer.
  *
  * Uses 3 Guice bindings to achieve storage implementation.
  *
@@ -327,49 +328,29 @@ public class BasicOAuth2Store implements OAuth2Store {
         BasicOAuth2Store.LOG.exiting(BasicOAuth2Store.LOG_CLASS, "removeToken", token);
       }
 
-      return this.removeToken(token.getGadgetUri(), token.getServiceName(), token.getUser(),
-              token.getScope(), token.getType());
+      OAuth2Token removedToken = null;
+      try {
+        // Remove token from the cache
+        removedToken = this.cache.removeToken(token);
+        // Token is gone from the cache, also remove it from persistence
+        this.persister.removeToken(removedToken.getGadgetUri(), removedToken.getServiceName(),
+                removedToken.getUser(), removedToken.getScope(), removedToken.getType());
+
+        return removedToken;
+      } catch (final OAuth2PersistenceException e) {
+        if (isLogging) {
+          BasicOAuth2Store.LOG.log("Error removing OAuth2 token ", e);
+        }
+        throw new GadgetException(Code.OAUTH_STORAGE_ERROR, "Error removing OAuth2 token "
+                + token.getServiceName(), e);
+      }
     }
 
     if (isLogging) {
-      BasicOAuth2Store.LOG.exiting(BasicOAuth2Store.LOG_CLASS, "removeOAuth2Accessor", null);
+      BasicOAuth2Store.LOG.exiting(BasicOAuth2Store.LOG_CLASS, "removeToken", null);
     }
 
     return null;
-  }
-
-  public OAuth2Token removeToken(final String gadgetUri, final String serviceName,
-          final String user, final String scope, final OAuth2Token.Type type)
-          throws GadgetException {
-
-    final boolean isLogging = BasicOAuth2Store.LOG.isLoggable();
-    if (isLogging) {
-      BasicOAuth2Store.LOG.entering(BasicOAuth2Store.LOG_CLASS, "removeToken", new Object[] {
-              gadgetUri, serviceName, user, scope, type });
-    }
-
-    final String processedGadgetUri = this.getGadgetUri(gadgetUri, serviceName);
-    OAuth2Token token = this.getToken(processedGadgetUri, serviceName, user, scope, type);
-    try {
-      if (token != null) {
-        token = this.cache.removeToken(token);
-        if (token != null) {
-          this.persister.removeToken(processedGadgetUri, serviceName, user, scope, type);
-        }
-
-        if (isLogging) {
-          BasicOAuth2Store.LOG.exiting(BasicOAuth2Store.LOG_CLASS, "removeToken", token);
-        }
-      }
-
-      return token;
-    } catch (final OAuth2PersistenceException e) {
-      if (isLogging) {
-        BasicOAuth2Store.LOG.log("Error loading OAuth2 token ", e);
-      }
-      throw new GadgetException(Code.OAUTH_STORAGE_ERROR, "Error loading OAuth2 token "
-              + serviceName, e);
-    }
   }
 
   public static boolean runImport(final OAuth2Persister source, final OAuth2Persister target,
@@ -465,5 +446,65 @@ public class BasicOAuth2Store implements OAuth2Store {
 
   public OAuth2Token invalidateToken(final OAuth2Token token) {
     return this.cache.removeToken(token);
+  }
+
+  public void clearAccessorCache() throws GadgetException {
+    final boolean isLogging = BasicOAuth2Store.LOG.isLoggable();
+    if (isLogging) {
+      BasicOAuth2Store.LOG.entering(BasicOAuth2Store.LOG_CLASS, "clearAccessorCache");
+    }
+
+    try {
+      this.cache.clearAccessors();
+    } catch (final OAuth2CacheException e) {
+      if (isLogging) {
+        BasicOAuth2Store.LOG.log("Error clearing OAuth2 Accessor cache", e);
+      }
+      throw new GadgetException(Code.OAUTH_STORAGE_ERROR, "Error clearing OAuth2Accessor cache", e);
+    }
+
+    if (isLogging) {
+      BasicOAuth2Store.LOG.exiting(BasicOAuth2Store.LOG_CLASS, "clearAccessorCache");
+    }
+  }
+
+  public void clearTokenCache() throws GadgetException {
+    final boolean isLogging = BasicOAuth2Store.LOG.isLoggable();
+    if (isLogging) {
+      BasicOAuth2Store.LOG.entering(BasicOAuth2Store.LOG_CLASS, "clearTokenCache");
+    }
+
+    try {
+      this.cache.clearTokens();
+    } catch (final OAuth2CacheException e) {
+      if (isLogging) {
+        BasicOAuth2Store.LOG.log("Error clearing OAuth2 Token cache", e);
+      }
+      throw new GadgetException(Code.OAUTH_STORAGE_ERROR, "Error clearing OAuth2Token cache", e);
+    }
+
+    if (isLogging) {
+      BasicOAuth2Store.LOG.exiting(BasicOAuth2Store.LOG_CLASS, "clearTokenCache");
+    }
+  }
+
+  public void clearClientCache() throws GadgetException {
+    final boolean isLogging = BasicOAuth2Store.LOG.isLoggable();
+    if (isLogging) {
+      BasicOAuth2Store.LOG.entering(BasicOAuth2Store.LOG_CLASS, "clearClientCache");
+    }
+
+    try {
+      this.cache.clearClients();
+    } catch (final OAuth2CacheException e) {
+      if (isLogging) {
+        BasicOAuth2Store.LOG.log("Error clearing OAuth2 Client cache", e);
+      }
+      throw new GadgetException(Code.OAUTH_STORAGE_ERROR, "Error clearing OAuth2Client cache", e);
+    }
+
+    if (isLogging) {
+      BasicOAuth2Store.LOG.exiting(BasicOAuth2Store.LOG_CLASS, "clearClientCache");
+    }
   }
 }

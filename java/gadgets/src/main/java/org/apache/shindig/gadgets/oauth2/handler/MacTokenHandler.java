@@ -18,10 +18,6 @@
  */
 package org.apache.shindig.gadgets.oauth2.handler;
 
-import java.io.UnsupportedEncodingException;
-import java.security.GeneralSecurityException;
-
-import org.apache.commons.codec.binary.Base64;
 import org.apache.shindig.common.crypto.Crypto;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.http.HttpRequest;
@@ -29,6 +25,11 @@ import org.apache.shindig.gadgets.oauth2.OAuth2Accessor;
 import org.apache.shindig.gadgets.oauth2.OAuth2Error;
 import org.apache.shindig.gadgets.oauth2.OAuth2Message;
 import org.apache.shindig.gadgets.oauth2.OAuth2Token;
+
+import org.apache.commons.codec.binary.Base64;
+
+import java.io.UnsupportedEncodingException;
+import java.security.GeneralSecurityException;
 
 /**
  *
@@ -40,12 +41,10 @@ public class MacTokenHandler implements ResourceRequestHandler {
   public static final String TOKEN_TYPE = OAuth2Message.MAC_TOKEN_TYPE;
   private static final OAuth2Error ERROR = OAuth2Error.MAC_TOKEN_PROBLEM;
 
-  public MacTokenHandler() {
-  }
-
   public OAuth2HandlerError addOAuth2Params(final OAuth2Accessor accessor, final HttpRequest request) {
     try {
-      final OAuth2HandlerError handlerError = MacTokenHandler.validateOAuth2Params(accessor, request);
+      final OAuth2HandlerError handlerError = MacTokenHandler.validateOAuth2Params(accessor,
+              request);
       if (handlerError != null) {
         return handlerError;
       }
@@ -53,7 +52,7 @@ public class MacTokenHandler implements ResourceRequestHandler {
       final OAuth2Token accessToken = accessor.getAccessToken();
 
       String ext = accessToken.getMacExt();
-      if ((ext == null) || (ext.length() == 0)) {
+      if (ext == null || ext.length() == 0) {
         ext = "";
       }
 
@@ -80,13 +79,13 @@ public class MacTokenHandler implements ResourceRequestHandler {
       // calculate the credentials' age.
       final long currentTime = System.currentTimeMillis() / 1000;
       final String nonce = Long.toString(currentTime - accessToken.getIssuedAt()) + ':'
-          + String.valueOf(Math.abs(Crypto.RAND.nextLong()));
+              + String.valueOf(Math.abs(Crypto.RAND.nextLong()));
 
       // OPTIONAL. The HTTP request payload body hash as described in
       // Section 3.2.
 
       String bodyHash = MacTokenHandler.getBodyHash(request, accessToken.getMacSecret(),
-          accessToken.getMacAlgorithm());
+              accessToken.getMacAlgorithm());
       if (bodyHash == null) {
         bodyHash = "";
       }
@@ -114,7 +113,7 @@ public class MacTokenHandler implements ResourceRequestHandler {
       }
 
       final String mac = MacTokenHandler.getMac(nonce, request.getMethod(), uriString, host, port,
-          bodyHash, ext, accessToken.getMacSecret(), accessToken.getMacAlgorithm());
+              bodyHash, ext, accessToken.getMacSecret(), accessToken.getMacAlgorithm());
 
       final String headerString = buildHeaderString(id, nonce, bodyHash, ext, mac);
 
@@ -125,7 +124,8 @@ public class MacTokenHandler implements ResourceRequestHandler {
     }
   }
 
-  private static String buildHeaderString(String id, String nonce, String bodyHash, String ext, String mac) {
+  private static String buildHeaderString(final String id, final String nonce,
+          final String bodyHash, final String ext, final String mac) {
     final StringBuilder headerString = new StringBuilder();
 
     headerString.append(OAuth2Message.MAC_HEADER);
@@ -155,8 +155,9 @@ public class MacTokenHandler implements ResourceRequestHandler {
     return headerString.toString();
   }
 
-  private static OAuth2HandlerError validateOAuth2Params(OAuth2Accessor accessor, HttpRequest request) {
-    if ((accessor == null) || (!accessor.isValid()) || (accessor.isErrorResponse())) {
+  private static OAuth2HandlerError validateOAuth2Params(final OAuth2Accessor accessor,
+          final HttpRequest request) {
+    if (accessor == null || !accessor.isValid() || accessor.isErrorResponse()) {
       return MacTokenHandler.getError("accessor is invalid " + accessor);
     }
 
@@ -166,17 +167,17 @@ public class MacTokenHandler implements ResourceRequestHandler {
 
     final OAuth2Token accessToken = accessor.getAccessToken();
 
-    if ((accessToken == null) || (accessToken.getTokenType().length() == 0)) {
+    if (accessToken == null || accessToken.getTokenType().length() == 0) {
       return MacTokenHandler.getError("accessToken is invalid " + accessToken);
     }
 
     if (!MacTokenHandler.TOKEN_TYPE.equalsIgnoreCase(accessToken.getTokenType())) {
       return MacTokenHandler.getError("token type mismatch expected " + MacTokenHandler.TOKEN_TYPE
-          + " but got " + accessToken.getTokenType());
+              + " but got " + accessToken.getTokenType());
     }
 
     final String algorithm = accessToken.getMacAlgorithm();
-    if ((algorithm == null) || (algorithm.length() == 0)) {
+    if (algorithm == null || algorithm.length() == 0) {
       return MacTokenHandler.getError("invalid mac algorithm " + algorithm);
     }
 
@@ -201,7 +202,7 @@ public class MacTokenHandler implements ResourceRequestHandler {
   }
 
   private static String getBodyHash(final HttpRequest request, final byte[] key,
-      final String algorithm) throws UnsupportedEncodingException, GeneralSecurityException {
+          final String algorithm) throws UnsupportedEncodingException, GeneralSecurityException {
     if (request.getPostBodyLength() > 0) {
       final byte[] text = MacTokenHandler.getBody(request);
       final byte[] hashed = MacTokenHandler.hash(text, key, algorithm);
@@ -216,19 +217,19 @@ public class MacTokenHandler implements ResourceRequestHandler {
   }
 
   private static String getMac(final String nonce, final String method, final String uri,
-      final String host, final String port, final String bodyHash, final String ext,
-      final byte[] key, final String algorithm) throws UnsupportedEncodingException,
-      GeneralSecurityException {
+          final String host, final String port, final String bodyHash, final String ext,
+          final byte[] key, final String algorithm) throws UnsupportedEncodingException,
+          GeneralSecurityException {
     final StringBuilder normalizedRequestString = MacTokenHandler.getNormalizedRequestString(nonce,
-        method, uri, host, port, bodyHash, ext);
+            method, uri, host, port, bodyHash, ext);
     final byte[] normalizedRequestBytes = normalizedRequestString.toString().getBytes("UTF-8");
     final byte[] mac = MacTokenHandler.hash(normalizedRequestBytes, key, algorithm);
     final byte[] encodedBytes = Base64.encodeBase64(mac);
     return new String(encodedBytes, "UTF-8");
   }
 
-  private static byte[] hash(final byte[] text, byte[] key, final String algorithm)
-      throws GeneralSecurityException {
+  private static byte[] hash(final byte[] text, final byte[] key, final String algorithm)
+          throws GeneralSecurityException {
     if (OAuth2Message.HMAC_SHA_1.equalsIgnoreCase(algorithm)) {
       return Crypto.hmacSha1(key, text);
     }
@@ -237,8 +238,8 @@ public class MacTokenHandler implements ResourceRequestHandler {
   }
 
   private static StringBuilder getNormalizedRequestString(final String nonce, final String method,
-      final String uri, final String host, final String port, final String bodyHash,
-      final String ext) {
+          final String uri, final String host, final String port, final String bodyHash,
+          final String ext) {
     final StringBuilder ret = new StringBuilder();
     ret.append(nonce);
     ret.append('\n');

@@ -18,9 +18,8 @@
  */
 package org.apache.shindig.gadgets.oauth2.handler;
 
-import java.io.UnsupportedEncodingException;
-import java.util.List;
-import java.util.Map;
+import com.google.common.collect.Maps;
+import com.google.inject.Inject;
 
 import org.apache.shindig.auth.AnonymousSecurityToken;
 import org.apache.shindig.common.uri.Uri;
@@ -31,8 +30,9 @@ import org.apache.shindig.gadgets.oauth2.OAuth2Message;
 import org.apache.shindig.gadgets.oauth2.OAuth2RequestException;
 import org.apache.shindig.gadgets.oauth2.OAuth2Utils;
 
-import com.google.common.collect.Maps;
-import com.google.inject.Inject;
+import java.io.UnsupportedEncodingException;
+import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -72,7 +72,7 @@ public class ClientCredentialsGrantTypeHandler implements GrantRequestHandler {
     ret = OAuth2Utils.buildUrl(ret, queryParams, null);
 
     final char firstChar = ret.charAt(0);
-    if ((firstChar == '?') || (firstChar == '&')) {
+    if (firstChar == '?' || firstChar == '&') {
       ret = ret.substring(1);
     }
 
@@ -82,7 +82,7 @@ public class ClientCredentialsGrantTypeHandler implements GrantRequestHandler {
   public HttpRequest getAuthorizationRequest(final OAuth2Accessor accessor,
           final String completeAuthorizationUrl) throws OAuth2RequestException {
 
-    if ((completeAuthorizationUrl == null) || (completeAuthorizationUrl.length() == 0)) {
+    if (completeAuthorizationUrl == null || completeAuthorizationUrl.length() == 0) {
       throw new OAuth2RequestException(ClientCredentialsGrantTypeHandler.ERROR,
               "completeAuthorizationUrl is null", null);
     }
@@ -105,7 +105,7 @@ public class ClientCredentialsGrantTypeHandler implements GrantRequestHandler {
     final HttpRequest request = new HttpRequest(Uri.parse(completeAuthorizationUrl));
     request.setMethod("GET");
     request.setHeader("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
-    request.setSecurityToken( new AnonymousSecurityToken( "", 0L, accessor.getGadgetUri()));
+    request.setSecurityToken(new AnonymousSecurityToken("", 0L, accessor.getGadgetUri()));
 
     for (final ClientAuthenticationHandler clientAuthenticationHandler : this.clientAuthenticationHandlers) {
       if (clientAuthenticationHandler.geClientAuthenticationType().equalsIgnoreCase(
@@ -114,7 +114,7 @@ public class ClientCredentialsGrantTypeHandler implements GrantRequestHandler {
                 request, accessor);
         if (error != null) {
           throw new OAuth2RequestException(error.getError(), error.getContextMessage(),
-                  error.getCause());
+                  error.getCause(), error.getUri(), error.getDescription());
         }
       }
     }
@@ -158,7 +158,7 @@ public class ClientCredentialsGrantTypeHandler implements GrantRequestHandler {
       queryParams.put(OAuth2Message.CLIENT_SECRET, secret);
 
       final String scope = accessor.getScope();
-      if ((scope != null) && (scope.length() > 0)) {
+      if (scope != null && scope.length() > 0) {
         queryParams.put(OAuth2Message.SCOPE, scope);
       }
 

@@ -119,7 +119,10 @@ public class TokenAuthorizationResponseHandler implements TokenEndpointResponseH
           }
 
           final OAuth2Error error = msg.getError();
-          if (error == null && accessor != null) {
+          if (error != null) {
+            ret = getError("error parsing request", null, msg.getErrorUri(),
+                    msg.getErrorDescription());
+          } else if (error == null && accessor != null) {
             final String accessToken = msg.getAccessToken();
             final String refreshToken = msg.getRefreshToken();
             final String expiresIn = msg.getExpiresIn();
@@ -180,7 +183,7 @@ public class TokenAuthorizationResponseHandler implements TokenEndpointResponseH
                 "exception thrown handling authorization response", e);
       }
       return TokenAuthorizationResponseHandler.getError(
-              "exception thrown handling authorization response", e);
+              "exception thrown handling authorization response", e, "", "");
     }
 
     if (isLogging) {
@@ -200,10 +203,12 @@ public class TokenAuthorizationResponseHandler implements TokenEndpointResponseH
   }
 
   private static OAuth2HandlerError getError(final String contextMessage) {
-    return TokenAuthorizationResponseHandler.getError(contextMessage, null);
+    return TokenAuthorizationResponseHandler.getError(contextMessage, null, "", "");
   }
 
-  private static OAuth2HandlerError getError(final String contextMessage, final Exception e) {
-    return new OAuth2HandlerError(TokenAuthorizationResponseHandler.ERROR, contextMessage, e);
+  private static OAuth2HandlerError getError(final String contextMessage, final Exception e,
+          final String uri, final String description) {
+    return new OAuth2HandlerError(TokenAuthorizationResponseHandler.ERROR, contextMessage, e, uri,
+            description);
   }
 }

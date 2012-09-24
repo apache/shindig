@@ -18,7 +18,7 @@
  */
 package org.apache.shindig.gadgets.oauth2.handler;
 
-import java.util.Map;
+import com.google.common.collect.Maps;
 
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.http.HttpRequest;
@@ -28,7 +28,7 @@ import org.apache.shindig.gadgets.oauth2.OAuth2Message;
 import org.apache.shindig.gadgets.oauth2.OAuth2Token;
 import org.apache.shindig.gadgets.oauth2.OAuth2Utils;
 
-import com.google.common.collect.Maps;
+import java.util.Map;
 
 /**
  *
@@ -40,12 +40,9 @@ public class BearerTokenHandler implements ResourceRequestHandler {
   public static final String TOKEN_TYPE = OAuth2Message.BEARER_TOKEN_TYPE;
   private static final OAuth2Error ERROR = OAuth2Error.BEARER_TOKEN_PROBLEM;
 
-  public BearerTokenHandler() {
-  }
-
   public OAuth2HandlerError addOAuth2Params(final OAuth2Accessor accessor, final HttpRequest request) {
     try {
-      if ((accessor == null) || (!accessor.isValid()) || (accessor.isErrorResponse())) {
+      if (accessor == null || !accessor.isValid() || accessor.isErrorResponse()) {
         return BearerTokenHandler.getError("accessor is invalid " + accessor);
       }
 
@@ -61,13 +58,13 @@ public class BearerTokenHandler implements ResourceRequestHandler {
 
       final OAuth2Token accessToken = accessor.getAccessToken();
 
-      if ((accessToken == null) || (accessToken.getTokenType().length() == 0)) {
+      if (accessToken == null || accessToken.getTokenType().length() == 0) {
         return BearerTokenHandler.getError("accessToken is invalid " + accessToken);
       }
 
       if (!BearerTokenHandler.TOKEN_TYPE.equalsIgnoreCase(accessToken.getTokenType())) {
         return BearerTokenHandler.getError("token type mismatch expected "
-            + BearerTokenHandler.TOKEN_TYPE + " but got " + accessToken.getTokenType());
+                + BearerTokenHandler.TOKEN_TYPE + " but got " + accessToken.getTokenType());
       }
 
       if (accessor.isUrlParameter()) {
@@ -76,14 +73,14 @@ public class BearerTokenHandler implements ResourceRequestHandler {
         final String secret = new String(secretBytes, "UTF-8");
         queryParams.put(OAuth2Message.ACCESS_TOKEN, secret);
         final String authorizedUriString = OAuth2Utils.buildUrl(unAuthorizedRequestUri.toString(),
-            queryParams, null);
+                queryParams, null);
 
         request.setUri(Uri.parse(authorizedUriString));
       }
 
       if (accessor.isAuthorizationHeader()) {
         request.setHeader("Authorization", BearerTokenHandler.TOKEN_TYPE + ' '
-            + new String(accessToken.getSecret(), "UTF-8"));
+                + new String(accessToken.getSecret(), "UTF-8"));
       }
 
       return null;
@@ -101,6 +98,6 @@ public class BearerTokenHandler implements ResourceRequestHandler {
   }
 
   private static OAuth2HandlerError getError(final String contextMessage, final Exception e) {
-    return new OAuth2HandlerError(BearerTokenHandler.ERROR, contextMessage, e);
+    return new OAuth2HandlerError(BearerTokenHandler.ERROR, contextMessage, e, "", "");
   }
 }

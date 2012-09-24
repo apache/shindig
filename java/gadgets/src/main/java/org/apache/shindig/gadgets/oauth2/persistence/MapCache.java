@@ -46,8 +46,10 @@ public abstract class MapCache implements OAuth2Cache {
   }
 
   public void storeTokens(final Collection<OAuth2Token> storeTokens) throws OAuth2CacheException {
-    for (final OAuth2Token token : storeTokens) {
-      this.storeToken(token);
+    if (storeTokens != null) {
+      for (final OAuth2Token token : storeTokens) {
+        this.storeToken(token);
+      }
     }
   }
 

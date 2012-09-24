@@ -30,12 +30,15 @@ import org.apache.shindig.gadgets.oauth2.OAuth2CallbackState;
 import org.apache.shindig.gadgets.oauth2.OAuth2Error;
 import org.apache.shindig.gadgets.oauth2.OAuth2FetcherConfig;
 import org.apache.shindig.gadgets.oauth2.OAuth2Message;
+import org.apache.shindig.gadgets.oauth2.OAuth2Module;
 import org.apache.shindig.gadgets.oauth2.OAuth2Store;
 import org.apache.shindig.gadgets.oauth2.handler.AuthorizationEndpointResponseHandler;
 import org.apache.shindig.gadgets.oauth2.handler.OAuth2HandlerError;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -43,12 +46,14 @@ import javax.servlet.http.HttpServletResponse;
 public class OAuth2CallbackServlet extends InjectedServlet {
   private static final long serialVersionUID = -8829844832872635091L;
 
+  private static final String LOG_CLASS = OAuth2CallbackServlet.class.getName();
+  private static final Logger LOGGER = Logger.getLogger(OAuth2CallbackServlet.LOG_CLASS);
+
   private transient List<AuthorizationEndpointResponseHandler> authorizationEndpointResponseHandlers;
   private transient OAuth2Store store;
   private transient Provider<OAuth2Message> oauth2MessageProvider;
   private transient BlobCrypter stateCrypter;
-
-  private static final int ONE_HOUR_IN_SECONDS = 3600;
+  private transient boolean sendTraceToClient = false;
 
   // This bit of magic passes the entire callback URL into the opening gadget
   // for later use.
@@ -96,11 +101,12 @@ public class OAuth2CallbackServlet extends InjectedServlet {
       final String encRequestStateKey = msg.getState();
       if (encRequestStateKey == null) {
         if (error != null) {
-          OAuth2CallbackServlet.sendError(error, msg.getErrorDescription(), msg.getErrorUri(),
-                  null, resp, null);
+          OAuth2CallbackServlet.sendError(error, "encRequestStateKey is null", msg.getErrorUri(),
+                  msg.getErrorDescription(), null, resp, null, this.sendTraceToClient);
         } else {
           OAuth2CallbackServlet.sendError(OAuth2Error.CALLBACK_PROBLEM,
-                  "OAuth2CallbackServlet requestStateKey is null.", "", null, resp, null);
+                  "OAuth2CallbackServlet requestStateKey is null.", "", "", null, resp, null,
+                  this.sendTraceToClient);
         }
         return;
       }
@@ -111,29 +117,33 @@ public class OAuth2CallbackServlet extends InjectedServlet {
       accessor = this.store.getOAuth2Accessor(state);
 
       if (error != null) {
-        OAuth2CallbackServlet.sendError(error, msg.getErrorDescription(), msg.getErrorUri(),
-                accessor, resp, null);
+        OAuth2CallbackServlet.sendError(error, "error parsing request", msg.getErrorDescription(),
+                msg.getErrorUri(), accessor, resp, null, this.sendTraceToClient);
         return;
       }
 
       if (accessor == null || !accessor.isValid() || accessor.isErrorResponse()) {
+        String message;
         if (accessor != null) {
-          OAuth2CallbackServlet.sendError(OAuth2Error.CALLBACK_PROBLEM,
-                  "OAuth2CallbackServlet accessor is invalid " + accessor, "", accessor, resp,
-                  accessor.getErrorException());
+          message = accessor.isValid() ? "OAuth2CallbackServlet accessor isErrorResponse "
+                  : "OAuth2CallbackServlet accessor is invalid ";
+          message = message + accessor;
         } else {
-          OAuth2CallbackServlet.sendError(OAuth2Error.CALLBACK_PROBLEM,
-                  "OAuth2CallbackServlet accessor is null", "", null, resp, null);
-
+          message = "OAuth2CallbackServlet accessor is null";
         }
+
+        OAuth2CallbackServlet.sendError(OAuth2Error.CALLBACK_PROBLEM, message,
+                accessor.getErrorContextMessage(), accessor.getErrorUri(), accessor, resp,
+                accessor.getErrorException(), this.sendTraceToClient);
+
         return;
       }
 
       if (!accessor.isRedirecting()) {
         // Somehow our accessor got lost. We should not proceed.
         OAuth2CallbackServlet.sendError(OAuth2Error.CALLBACK_PROBLEM,
-                "OAuth2CallbackServlet accessor is not valid, isn't redirecting.", "", accessor,
-                resp, null);
+                "OAuth2CallbackServlet accessor is not valid, isn't redirecting.", "", "",
+                accessor, resp, null, this.sendTraceToClient);
         return;
       }
 
@@ -143,9 +153,10 @@ public class OAuth2CallbackServlet extends InjectedServlet {
           final OAuth2HandlerError handlerError = authorizationEndpointResponseHandler
                   .handleRequest(accessor, request);
           if (handlerError != null) {
-            OAuth2CallbackServlet
-                    .sendError(handlerError.getError(), handlerError.getContextMessage(), null,
-                            accessor, resp, handlerError.getCause());
+            OAuth2CallbackServlet.sendError(handlerError.getError(),
+                    handlerError.getContextMessage(), handlerError.getDescription(),
+                    handlerError.getUri(), accessor, resp, handlerError.getCause(),
+                    this.sendTraceToClient);
             return;
           }
           foundHandler = true;
@@ -156,42 +167,62 @@ public class OAuth2CallbackServlet extends InjectedServlet {
       if (!foundHandler) {
         OAuth2CallbackServlet.sendError(OAuth2Error.NO_RESPONSE_HANDLER,
                 "OAuth2Callback servlet couldn't find a AuthorizationEndpointResponseHandler", "",
-                accessor, resp, null);
+                "", accessor, resp, null, this.sendTraceToClient);
         return;
       }
 
-      HttpUtil.setCachingHeaders(resp, OAuth2CallbackServlet.ONE_HOUR_IN_SECONDS, true);
+      HttpUtil.setNoCache(resp);
       resp.setContentType("text/html; charset=UTF-8");
       resp.getWriter().write(OAuth2CallbackServlet.RESP_BODY);
     } catch (final Exception e) {
       OAuth2CallbackServlet.sendError(OAuth2Error.CALLBACK_PROBLEM,
-              "Exception occurred processing redirect.", "", accessor, resp, e);
+              "Exception occurred processing redirect.", "", "", accessor, resp, e,
+              this.sendTraceToClient);
       if (IOException.class.isInstance(e)) {
         throw (IOException) e;
       }
     } finally {
       if (accessor != null) {
-        accessor.invalidate();
-        this.store.removeOAuth2Accessor(accessor);
+        if (!accessor.isErrorResponse()) {
+          accessor.invalidate();
+          this.store.removeOAuth2Accessor(accessor);
+        } else {
+          this.store.storeOAuth2Accessor(accessor);
+        }
       }
     }
   }
 
-  private static void sendError(final OAuth2Error error, final String description,
-          final String uri, final OAuth2Accessor accessor, final HttpServletResponse resp,
-          final Throwable t) throws IOException {
+  private static void sendError(final OAuth2Error error, final String contextMessage,
+          final String description, final String uri, final OAuth2Accessor accessor,
+          final HttpServletResponse resp, final Throwable t, final boolean sendTraceToClient)
+          throws IOException {
 
-    HttpUtil.setCachingHeaders(resp, OAuth2CallbackServlet.ONE_HOUR_IN_SECONDS, true);
+    OAuth2CallbackServlet.LOGGER.warning(OAuth2CallbackServlet.LOG_CLASS + " , callback error "
+            + error + " -  " + contextMessage + " , " + description + " - " + uri);
+    if (t != null) {
+      if (OAuth2CallbackServlet.LOGGER.isLoggable(Level.FINE)) {
+        OAuth2CallbackServlet.LOGGER.log(Level.FINE, " callback exception ", t);
+      }
+    }
+
+    HttpUtil.setNoCache(resp);
     resp.setContentType("text/html; charset=UTF-8");
 
     if (accessor != null) {
-      accessor.setErrorResponse(t, error, description, uri);
+      accessor.setErrorResponse(t, error, contextMessage + " , " + description, uri);
     } else {
       // We don't have an accessor to report the error back to the client in the
       // normal manner.
       // Anything is better than nothing, hack something together....
-      final String errorResponse = String.format(OAuth2CallbackServlet.RESP_ERROR_BODY,
-              error.getErrorCode(), error.getErrorDescription(description), uri);
+      final String errorResponse;
+      if (sendTraceToClient) {
+        errorResponse = String.format(OAuth2CallbackServlet.RESP_ERROR_BODY, error.getErrorCode(),
+                error.getErrorDescription(description), uri);
+      } else {
+        errorResponse = String.format(OAuth2CallbackServlet.RESP_ERROR_BODY, error.getErrorCode(),
+                "", "");
+      }
       resp.getWriter().write(errorResponse);
       return;
     }
@@ -203,6 +234,12 @@ public class OAuth2CallbackServlet extends InjectedServlet {
   public void setAuthorizationResponseHandlers(
           final List<AuthorizationEndpointResponseHandler> authorizationEndpointResponseHandlers) {
     this.authorizationEndpointResponseHandlers = authorizationEndpointResponseHandlers;
+  }
+
+  @Inject
+  public void setOAuth2Store(@Named(OAuth2Module.SEND_TRACE_TO_CLIENT)
+  final boolean sendTraceToClient) {
+    this.sendTraceToClient = sendTraceToClient;
   }
 
   @Inject

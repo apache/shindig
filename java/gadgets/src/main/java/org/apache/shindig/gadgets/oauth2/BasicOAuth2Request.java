@@ -21,6 +21,7 @@ package org.apache.shindig.gadgets.oauth2;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 
+import org.apache.shindig.auth.AnonymousSecurityToken;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.GadgetException;
@@ -148,7 +149,7 @@ public class BasicOAuth2Request implements OAuth2Request {
       if (request == null || request.getSecurityToken() == null) {
         // Any errors before we have an accessor are special cases
         response = this.sendErrorResponse(null, OAuth2Error.MISSING_FETCH_PARAMS,
-                "no request or security token", "");
+                "no request or security token");
       } else {
         this.realRequest = request;
         this.securityToken = request.getSecurityToken();
@@ -165,7 +166,7 @@ public class BasicOAuth2Request implements OAuth2Request {
         if (this.responseParams == null || this.arguments == null) {
           // Any errors before we have an accessor are special cases
           return this.sendErrorResponse(null, OAuth2Error.FETCH_INIT_PROBLEM,
-                  "no responseParams or arguments", "");
+                  "no responseParams or arguments");
         }
 
         accessor = this.getAccessor();
@@ -177,22 +178,20 @@ public class BasicOAuth2Request implements OAuth2Request {
         if (accessor == null) {
           // Any errors before we have an accessor are special cases
           response = this.sendErrorResponse(null, OAuth2Error.FETCH_INIT_PROBLEM,
-                  "accessor is null", "");
+                  "accessor is null");
         } else {
-          synchronized (accessor) {
-            accessor.setRedirecting(false);
+          accessor.setRedirecting(false);
 
-            final Map<String, String> requestParams = this.requestParameterGenerator
-                    .generateParams(this.realRequest);
-            accessor.setAdditionalRequestParams(requestParams);
+          final Map<String, String> requestParams = this.requestParameterGenerator
+                  .generateParams(this.realRequest);
+          accessor.setAdditionalRequestParams(requestParams);
 
-            HttpResponseBuilder responseBuilder = null;
-            if (!accessor.isErrorResponse()) {
-              responseBuilder = this.attemptFetch(accessor);
-            }
-
-            response = this.processResponse(accessor, responseBuilder);
+          HttpResponseBuilder responseBuilder = null;
+          if (!accessor.isErrorResponse()) {
+            responseBuilder = this.attemptFetch(accessor);
           }
+
+          response = this.processResponse(accessor, responseBuilder);
         }
       }
     } catch (final Throwable t) {
@@ -207,14 +206,27 @@ public class BasicOAuth2Request implements OAuth2Request {
                 "");
       }
       response = this.processResponse(accessor, this.getErrorResponseBuilder(t,
-              OAuth2Error.FETCH_PROBLEM, "exception occurred during fetch", ""));
+              OAuth2Error.FETCH_PROBLEM, "exception occurred during fetch"));
     } finally {
       if (accessor != null) {
         if (!accessor.isRedirecting()) {
+          if (BasicOAuth2Request.LOG.isLoggable()) {
+            BasicOAuth2Request.LOG.log("accessor is not redirecting, remove it", accessor);
+          }
           accessor.invalidate();
           this.store.removeOAuth2Accessor(accessor);
           this.internalAccessor = null;
         } else {
+          if (!accessor.isValid()) {
+            if (BasicOAuth2Request.LOG.isLoggable()) {
+              BasicOAuth2Request.LOG.log("accesssor is not valid", accessor);
+            }
+          } else if (accessor.isErrorResponse()) {
+            if (BasicOAuth2Request.LOG.isLoggable()) {
+              BasicOAuth2Request.LOG.log("accessor isErrorResponse",
+                      accessor.getErrorContextMessage());
+            }
+          }
           this.store.storeOAuth2Accessor(accessor);
         }
       }
@@ -232,6 +244,24 @@ public class BasicOAuth2Request implements OAuth2Request {
     if (isLogging) {
       BasicOAuth2Request.LOG.entering(BasicOAuth2Request.LOG_CLASS, "attemptFetch",
               new Object[] { accessor });
+      BasicOAuth2Request.LOG.log("BasicOAuth2Request.haveAccessToken(accessor) = {0}",
+              BasicOAuth2Request.haveAccessToken(accessor) == null);
+      BasicOAuth2Request.LOG.log("BasicOAuth2Request.haveRefreshToken(accessor) = {0}",
+              BasicOAuth2Request.haveRefreshToken(accessor) == null);
+    }
+
+    if (this.attemptCounter > BasicOAuth2Request.MAX_ATTEMPTS) {
+      if (isLogging) {
+        BasicOAuth2Request.LOG.log("MAX_ATTEMPTS exceeded {0}", this.attemptCounter);
+        // This can be useful to diagnose the recursion
+        final StackTraceElement[] stackElements = Thread.currentThread().getStackTrace();
+        String stack = "";
+        for (final StackTraceElement element : stackElements) {
+          stack = stack + element.toString() + "\n";
+        }
+        BasicOAuth2Request.LOG.log("MAX_ATTEMPTS stack = {0}", stack);
+      }
+      return this.fetchData(accessor, true);
     }
 
     this.attemptCounter++;
@@ -244,7 +274,8 @@ public class BasicOAuth2Request implements OAuth2Request {
 
     if (accessor.isErrorResponse()) {
       // If there's an error in the accessor don't continue.
-      return null;
+      return this.getErrorResponseBuilder(accessor.getErrorException(), accessor.getError(),
+              accessor.getErrorContextMessage(), accessor.getErrorUri(), accessor.getErrorContextMessage());
     } else {
       if (BasicOAuth2Request.haveAccessToken(accessor) != null) {
         // We have an access_token, use it and stop!
@@ -255,21 +286,66 @@ public class BasicOAuth2Request implements OAuth2Request {
         // First step see if we have a refresh token
         if (BasicOAuth2Request.haveRefreshToken(accessor) != null) {
           if (BasicOAuth2Request.checkCanRefresh()) {
-            final OAuth2HandlerError handlerError = this.refreshToken(accessor);
-            if (handlerError == null) {
-              // No errors refreshing, attempt the fetch again.
-              this.store.removeOAuth2Accessor(accessor);
-              this.internalAccessor.invalidate();
+            boolean attempt = false;
+            final String internedAccessor = getAccessorKey(accessor).intern();
+            if (isLogging) {
+              BasicOAuth2Request.LOG.log("about to synchronize on {0}", internedAccessor);
+            }
+            // This syncrhonized block is less than ideal.
+            // It is needed because if a gadget has multiple makeRequests that triggers
+            // multiple refreshes they can end up clobbering each other, and cause
+            // temporary failures until the gadget is refreshed.
+            // Syncrhonizing on the internedAccessor helps.  It is not cluster safe
+            // and could be problematic having so much code synchd.
+            // TODO : https://issues.apache.org/jira/browse/SHINDIG-1871
+            synchronized (internedAccessor) {
+              final OAuth2Accessor acc = this.getAccessorInternal();
+              if (isLogging) {
+                BasicOAuth2Request.LOG.log("acc = {0}", acc);
+                BasicOAuth2Request.LOG.log("BasicOAuth2Request.haveAccessToken(acc) = {0}",
+                        BasicOAuth2Request.haveAccessToken(acc) == null);
+                BasicOAuth2Request.LOG.log("BasicOAuth2Request.haveRefreshToken(acc) = {0}",
+                        BasicOAuth2Request.haveRefreshToken(acc) == null);
+              }
+              if (BasicOAuth2Request.haveAccessToken(acc) != null) {
+                // Another refresh must have won
+                if (isLogging) {
+                  BasicOAuth2Request.LOG.log("found an access token from another refresh",
+                          new Object[] {});
+                }
+                attempt = true;
+              } else {
+                final OAuth2HandlerError handlerError = this.refreshToken(accessor);
+                if (handlerError == null) {
+                  // No errors refreshing, attempt the fetch again.
+                  attempt = true;
+                  if (isLogging) {
+                    BasicOAuth2Request.LOG.log("no refresh errors reported", new Object[] {});
+                  }
+                } else {
+                  if (isLogging) {
+                    BasicOAuth2Request.LOG.log("refresh errors reported", new Object[] {});
+                  }
+                  // There was an error refreshing, stop.
+                  final OAuth2Error error = handlerError.getError();
+                  ret = this.getErrorResponseBuilder(handlerError.getCause(), error,
+                          handlerError.getContextMessage(), handlerError.getUri(),
+                          handlerError.getDescription());
+                }
+              }
+            }
+            if (attempt) {
+              if (isLogging) {
+                BasicOAuth2Request.LOG.log("going to re-attempt with a clean accesor",
+                        new Object[] {});
+              }
+              this.store.removeOAuth2Accessor(this.internalAccessor);
               this.internalAccessor = null;
               ret = this.attemptFetch(this.getAccessor());
-            } else {
-              // There was an error refreshing, stop.
-              final OAuth2Error error = handlerError.getError();
-              ret = this.getErrorResponseBuilder(handlerError.getCause(), error,
-                      handlerError.getContextMessage(), "");
             }
           } else {
             // User cannot refresh, they'll have to try to authorize again.
+            accessor.setAccessToken(null);
             accessor.setRefreshToken(null);
             ret = this.attemptFetch(accessor);
           }
@@ -345,7 +421,7 @@ public class BasicOAuth2Request implements OAuth2Request {
                 completeAuthUrl);
         if (error != null) {
           accessor.setErrorResponse(error.getCause(), OAuth2Error.AUTHENTICATION_PROBLEM,
-                  error.getContextMessage(), "");
+                  error.getContextMessage() + " , " + error.getDescription(), error.getUri());
         }
       }
     }
@@ -524,7 +600,8 @@ public class BasicOAuth2Request implements OAuth2Request {
         }
       }
     } catch (final OAuth2RequestException e) {
-      ret = this.getErrorResponseBuilder(e, e.getError(), e.getErrorText(), "");
+      ret = this.getErrorResponseBuilder(e, e.getError(), e.getErrorText(), e.getErrorUri(),
+              e.getErrorDescription());
     }
 
     if (isLogging) {
@@ -658,15 +735,21 @@ public class BasicOAuth2Request implements OAuth2Request {
     return ret;
   }
 
+  private OAuth2Accessor getAccessorInternal() {
+    OAuth2Accessor ret = null;
+    if (this.fetcherConfig != null) {
+      final GadgetOAuth2TokenStore tokenStore = this.fetcherConfig.getTokenStore();
+      if (tokenStore != null) {
+        ret = tokenStore.getOAuth2Accessor(this.securityToken, this.arguments,
+                this.realRequest.getGadget());
+      }
+    }
+    return ret;
+  }
+
   private OAuth2Accessor getAccessor() {
     if (this.internalAccessor == null || !this.internalAccessor.isValid()) {
-      if (this.fetcherConfig != null) {
-        final GadgetOAuth2TokenStore tokenStore = this.fetcherConfig.getTokenStore();
-        if (tokenStore != null) {
-          this.internalAccessor = tokenStore.getOAuth2Accessor(this.securityToken, this.arguments,
-                  this.realRequest.getGadget());
-        }
-      }
+      this.internalAccessor = this.getAccessorInternal();
     }
 
     return this.internalAccessor;
@@ -677,12 +760,17 @@ public class BasicOAuth2Request implements OAuth2Request {
   }
 
   private HttpResponseBuilder getErrorResponseBuilder(final Throwable t, final OAuth2Error error,
-          final String contextMessage, final String errorUri) {
+          final String contextMessage) {
+    return this.getErrorResponseBuilder(t, error, contextMessage);
+  }
+
+  private HttpResponseBuilder getErrorResponseBuilder(final Throwable t, final OAuth2Error error,
+          final String contextMessage, final String errorUri, final String errorDescription) {
 
     final boolean isLogging = BasicOAuth2Request.LOG.isLoggable();
     if (isLogging) {
       BasicOAuth2Request.LOG.entering(BasicOAuth2Request.LOG_CLASS, "getErrorResponseBuilder",
-              new Object[] { t, error, contextMessage, errorUri });
+              new Object[] { t, error, contextMessage, errorUri, errorDescription });
     }
 
     final HttpResponseBuilder ret = new HttpResponseBuilder().setHttpStatusCode(
@@ -695,8 +783,14 @@ public class BasicOAuth2Request implements OAuth2Request {
       this.responseParams.addDebug(message);
     }
 
-    this.responseParams.addToResponse(ret, error.getErrorCode(),
-            error.getErrorDescription(contextMessage), errorUri, error.getErrorExplanation());
+    if (this.sendTraceToClient) {
+      this.responseParams.addToResponse(ret, error.getErrorCode(),
+              error.getErrorDescription(contextMessage) + " , " + errorDescription, errorUri,
+              error.getErrorExplanation());
+    } else {
+      this.responseParams.addToResponse(ret, error.getErrorCode(), "", "",
+              error.getErrorExplanation());
+    }
 
     if (isLogging) {
       BasicOAuth2Request.LOG.exiting(BasicOAuth2Request.LOG_CLASS, "getErrorResponseBuilder", ret);
@@ -759,7 +853,7 @@ public class BasicOAuth2Request implements OAuth2Request {
 
     if (accessor.isErrorResponse() || responseBuilder == null) {
       return this.sendErrorResponse(accessor.getErrorException(), accessor.getError(),
-              accessor.getErrorContextMessage(), accessor.getErrorUri());
+              accessor.getErrorContextMessage(), accessor.getErrorUri(), "");
     }
 
     if (this.responseParams.getAuthorizationUrl() != null) {
@@ -799,6 +893,7 @@ public class BasicOAuth2Request implements OAuth2Request {
     if (refershTokenUrl != null) {
       HttpResponse response = null;
       final HttpRequest request = new HttpRequest(Uri.parse(refershTokenUrl));
+      request.setSecurityToken(new AnonymousSecurityToken("", 0L, accessor.getGadgetUri()));
       request.setMethod("POST");
       request.setHeader("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
 
@@ -847,7 +942,8 @@ public class BasicOAuth2Request implements OAuth2Request {
         if (ret == null) {
           // response is not null..
           final int statusCode = response.getHttpStatusCode();
-          if ((statusCode == HttpResponse.SC_UNAUTHORIZED) || (statusCode == HttpResponse.SC_BAD_REQUEST)) {
+          if (statusCode == HttpResponse.SC_UNAUTHORIZED
+                  || statusCode == HttpResponse.SC_BAD_REQUEST) {
             try {
               this.store.removeToken(accessor.getRefreshToken());
             } catch (final GadgetException e) {
@@ -855,9 +951,16 @@ public class BasicOAuth2Request implements OAuth2Request {
                       "failed to remove refresh token", e);
             }
             accessor.setRefreshToken(null);
+            if (isLogging) {
+              BasicOAuth2Request.LOG.log(Level.FINEST,
+                      "received {0} from provider, removed refresh token.  response = {1}",
+                      new Object[] { statusCode, response.getResponseAsString() });
+            }
+            return null;
           } else if (statusCode != HttpResponse.SC_OK) {
             ret = new OAuth2HandlerError(OAuth2Error.REFRESH_TOKEN_PROBLEM,
-                    "bad response from server : " + statusCode, null);
+                    "bad response from server : " + statusCode, null, "",
+                    response.getResponseAsString());
           }
 
           if (ret == null) {
@@ -866,6 +969,13 @@ public class BasicOAuth2Request implements OAuth2Request {
                 final OAuth2HandlerError error = tokenEndpointResponseHandler.handleResponse(
                         accessor, response);
                 if (error != null) {
+                  try {
+                    this.store.removeToken(accessor.getRefreshToken());
+                  } catch (final GadgetException e) {
+                    ret = new OAuth2HandlerError(OAuth2Error.REFRESH_TOKEN_PROBLEM,
+                            error.getContextMessage(), e, error.getUri(), error.getDescription());
+                  }
+                  accessor.setRefreshToken(null);
                   return error;
                 }
               }
@@ -883,51 +993,36 @@ public class BasicOAuth2Request implements OAuth2Request {
   }
 
   private HttpResponse sendErrorResponse(final Throwable t, final OAuth2Error error,
-          final String contextMessage, final String errorUri) {
+          final String contextMessage) {
     final HttpResponseBuilder responseBuilder = this.getErrorResponseBuilder(t, error,
-            contextMessage, errorUri);
+            contextMessage);
+    return responseBuilder.create();
+  }
+
+  private HttpResponse sendErrorResponse(final Throwable t, final OAuth2Error error,
+          final String contextMessage, final String errorUri, final String errorDescription) {
+    final HttpResponseBuilder responseBuilder = this.getErrorResponseBuilder(t, error,
+            contextMessage, errorUri, errorDescription);
     return responseBuilder.create();
   }
 
   private static OAuth2Token haveAccessToken(final OAuth2Accessor accessor) {
-    final boolean isLogging = BasicOAuth2Request.LOG.isLoggable();
-    if (isLogging) {
-      BasicOAuth2Request.LOG.entering(BasicOAuth2Request.LOG_CLASS, "haveAccessToken",
-              new Object[] { accessor });
-    }
-
     OAuth2Token ret = accessor.getAccessToken();
     if (ret != null) {
       if (!BasicOAuth2Request.validateAccessToken(ret)) {
         ret = null;
       }
     }
-
-    if (isLogging) {
-      BasicOAuth2Request.LOG.exiting(BasicOAuth2Request.LOG_CLASS, "haveAccessToken", ret);
-    }
-
     return ret;
   }
 
   private static OAuth2Token haveRefreshToken(final OAuth2Accessor accessor) {
-    final boolean isLogging = BasicOAuth2Request.LOG.isLoggable();
-    if (isLogging) {
-      BasicOAuth2Request.LOG.entering(BasicOAuth2Request.LOG_CLASS, "haveRefreshToken",
-              new Object[] { accessor });
-    }
-
     OAuth2Token ret = accessor.getRefreshToken();
     if (ret != null) {
       if (!BasicOAuth2Request.validateRefreshToken(ret)) {
         ret = null;
       }
     }
-
-    if (isLogging) {
-      BasicOAuth2Request.LOG.exiting(BasicOAuth2Request.LOG_CLASS, "haveRefreshToken", ret);
-    }
-
     return ret;
   }
 
@@ -958,5 +1053,14 @@ public class BasicOAuth2Request implements OAuth2Request {
 
   private static boolean validateRefreshToken(final OAuth2Token refreshToken) {
     return refreshToken != null;
+  }
+
+  private static String getAccessorKey(final OAuth2Accessor accessor) {
+    if (accessor != null) {
+      return "accessor:" + accessor.getGadgetUri() + ':' + accessor.getServiceName() + ':'
+              + accessor.getUser() + ':' + accessor.getScope();
+    }
+
+    return null;
   }
 }
