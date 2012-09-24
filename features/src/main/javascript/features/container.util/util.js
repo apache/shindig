@@ -188,7 +188,7 @@ osapi.container.util.createIframeHtml = function(iframeParams) {
 osapi.container.util.buildTokenRequestUrl = function(url, moduleId) {
   url = shindig.uri(url);
   if (moduleId) {
-    url.setFragment(moduleId);
+    url.setFP('moduleId', moduleId);
   }
   return url.toString();
 };
