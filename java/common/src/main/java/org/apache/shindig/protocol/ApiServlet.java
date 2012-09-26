@@ -67,7 +67,7 @@ public abstract class ApiServlet extends InjectedServlet {
        Key.get(new TypeLiteral<Set<Object>>(){}, Names.named("org.apache.shindig.handlers"));
 
   protected HandlerRegistry dispatcher;
-  protected BeanJsonConverter jsonConverter;
+  protected BeanConverter jsonConverter;
   protected BeanConverter xmlConverter;
   protected BeanConverter atomConverter;
   protected ContainerConfig containerConfig;
@@ -105,8 +105,7 @@ public abstract class ApiServlet extends InjectedServlet {
       @Named("shindig.bean.converter.json") BeanConverter jsonConverter,
       @Named("shindig.bean.converter.xml") BeanConverter xmlConverter,
       @Named("shindig.bean.converter.atom") BeanConverter atomConverter) {
-    // fix this
-    this.jsonConverter = (BeanJsonConverter) jsonConverter;
+    this.jsonConverter = jsonConverter;
     this.xmlConverter = xmlConverter;
     this.atomConverter = atomConverter;
   }
