@@ -86,7 +86,6 @@ public class OAuth2Servlet extends InjectedServlet {
    *
    * @param servletResp is the servlet's response object
    * @param normalizedResp maintains the headers and body fields to respond with
-   * @param createBody defines whether or not to create a body from the response parameters
    */
   private void sendOAuth2Response(HttpServletResponse servletResp,
       OAuth2NormalizedResponse normalizedResp) {

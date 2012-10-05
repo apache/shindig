@@ -621,6 +621,7 @@ gadgets.io = function() {
  * @const
  **/
 gadgets.io.RequestParameters = gadgets.util.makeEnum([
+  'ALIAS',
   'METHOD',
   'CONTENT_TYPE',
   'POST_DATA',

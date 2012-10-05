@@ -72,6 +72,7 @@ import com.google.inject.Singleton;
 @Singleton
 public class MakeRequestHandler implements ContainerConfig.ConfigObserver {
   // Relaxed visibility for ease of integration. Try to avoid relying on these.
+  public static final String ALIAS_PARAM = "alias";
   public static final String POST_DATA_PARAM = "postData";
   public static final String METHOD_PARAM = "httpMethod";
   public static final String HEADERS_PARAM = "headers";

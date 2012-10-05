@@ -386,7 +386,7 @@ public class HttpRequestHandler {
    */
   public static class HttpApiRequest {
     static final Set<String> KNOWN_PARAMETERS = ImmutableSet.of(
-        "href", "headers", "body", "gadget", "authz", "sign_owner",
+        "alias", "href", "headers", "body", "gadget", "authz", "sign_owner",
         "sign_viewer", "format", "refreshInterval", "noCache", "sanitize",
         "summarize", "entryCount");
 
