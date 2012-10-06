@@ -94,12 +94,14 @@ public class BasicContainerConfigTest {
         "bool", Boolean.valueOf(true),
         "bool2", "true",
         "int", Integer.valueOf(1234),
+        "int2", "1234",
         "string", "abcd",
         "list", ImmutableList.of("a"),
         "map", ImmutableMap.of("a", "b"))).commit();
     assertEquals(true, config.getBool(container, "bool"));
     assertEquals(true, config.getBool(container, "bool2"));
     assertEquals(1234, config.getInt(container, "int"));
+    assertEquals(1234, config.getInt(container, "int2"));
     assertEquals("abcd", config.getString(container, "string"));
     assertEquals(ImmutableList.of("a"), config.getList(container, "list"));
     assertEquals(ImmutableMap.of("a", "b"), config.getMap(container, "map"));

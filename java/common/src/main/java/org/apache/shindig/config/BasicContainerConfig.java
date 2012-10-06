@@ -76,6 +76,12 @@ public class BasicContainerConfig implements ContainerConfig {
     Object value = getProperty(container, property);
     if (value instanceof Number) {
       return ((Number) value).intValue();
+    } else if (value instanceof String) {
+      try {
+        return Integer.parseInt((String) value);
+      } catch (NumberFormatException nfe) {
+        return 0;
+      }
     }
     return 0;
   }
