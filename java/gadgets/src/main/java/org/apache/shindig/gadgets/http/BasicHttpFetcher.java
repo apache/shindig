@@ -220,7 +220,6 @@ public class BasicHttpFetcher implements HttpFetcher {
         }
       }
     });
-    client.setHttpRequestRetryHandler(new DefaultHttpRequestRetryHandler());
 
     // Disable automatic storage and sending of cookies (see SHINDIG-1382)
     client.removeRequestInterceptorByClass(RequestAddCookies.class);
