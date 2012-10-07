@@ -93,18 +93,28 @@ public class BasicContainerConfigTest {
     config.newTransaction().addContainer(makeContainer("misc",
         "bool", Boolean.valueOf(true),
         "bool2", "true",
+        "badbool", Integer.valueOf(1234),
+        "badbool2", "notabool",
         "int", Integer.valueOf(1234),
         "int2", "1234",
+        "badint", "notanint",
         "string", "abcd",
         "list", ImmutableList.of("a"),
-        "map", ImmutableMap.of("a", "b"))).commit();
+        "badlist", "notalist",
+        "map", ImmutableMap.of("a", "b"),
+        "badmap", "notamap")).commit();
     assertEquals(true, config.getBool(container, "bool"));
     assertEquals(true, config.getBool(container, "bool2"));
+    assertEquals(false, config.getBool(container, "badbool"));
+    assertEquals(false, config.getBool(container, "badbool2"));
     assertEquals(1234, config.getInt(container, "int"));
     assertEquals(1234, config.getInt(container, "int2"));
+    assertEquals(0, config.getInt(container, "badint"));
     assertEquals("abcd", config.getString(container, "string"));
     assertEquals(ImmutableList.of("a"), config.getList(container, "list"));
+    assertTrue(config.getList(container, "badlist").isEmpty());
     assertEquals(ImmutableMap.of("a", "b"), config.getMap(container, "map"));
+    assertTrue(config.getMap(container, "badmap").isEmpty());
   }
 
   @Test
