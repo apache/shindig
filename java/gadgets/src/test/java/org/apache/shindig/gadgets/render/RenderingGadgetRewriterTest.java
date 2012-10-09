@@ -189,7 +189,7 @@ public class RenderingGadgetRewriterTest extends EasyMockTestCase{
     Matcher matcher = DOCUMENT_SPLIT_PATTERN.matcher(rewritten);
     assertTrue("Output is not valid HTML.", matcher.matches());
     assertTrue("Missing opening html tag", matcher.group(BEFORE_HEAD_GROUP).
-        toLowerCase().contains("<html>"));
+        toLowerCase().contains("<html"));
     assertTrue("Default CSS missing.", matcher.group(HEAD_GROUP).contains(DEFAULT_CSS));
     // Not very accurate -- could have just been user prefs.
     assertTrue("Default javascript not included.",
@@ -295,7 +295,7 @@ public class RenderingGadgetRewriterTest extends EasyMockTestCase{
     Matcher matcher = DOCUMENT_SPLIT_PATTERN.matcher(rewritten);
     assertTrue("Output is not valid HTML.", matcher.matches());
     assertTrue("DOCTYPE not preserved", matcher.group(BEFORE_HEAD_GROUP).contains(docType));
-    assertTrue("Missing opening html tag", matcher.group(BEFORE_HEAD_GROUP).contains("<html>"));
+    assertTrue("Missing opening html tag", matcher.group(BEFORE_HEAD_GROUP).contains("<html"));
     // TODO: reinstate test when non-tag-reordering parser is used.
     // assertTrue("Custom head content is missing.", matcher.group(HEAD_GROUP).contains(head));
     assertTrue("IsGadget beacon not included.",
@@ -650,7 +650,7 @@ public class RenderingGadgetRewriterTest extends EasyMockTestCase{
     Matcher matcher = DOCUMENT_SPLIT_PATTERN.matcher(rewritten);
     assertTrue("Output is not valid HTML.", matcher.matches());
     assertTrue("Missing opening html tag", matcher.group(BEFORE_HEAD_GROUP).
-        toLowerCase().contains("<html>"));
+        toLowerCase().contains("<html"));
     assertTrue("Default CSS missing.", matcher.group(HEAD_GROUP).contains(DEFAULT_CSS));
     // Not very accurate -- could have just been user prefs.
     assertTrue("Default javascript not included.",

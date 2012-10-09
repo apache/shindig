@@ -20,6 +20,7 @@ package org.apache.shindig.gadgets.render;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
@@ -224,6 +225,17 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
             document.removeChild(document.getDoctype());
           }
           document.insertBefore(docTypeNode, document.getFirstChild());
+        }
+      }
+
+      Element html= (Element)document.getElementsByTagName("html").item(0);
+      if(html != null){
+        Locale locale = gadget.getContext().getLocale();
+        if (locale != null) {
+          String locStr = locale.toString();
+          String locValue = locStr.replace("_", "-");
+          html.setAttribute("lang", locValue);
+          html.setAttribute("xml:lang", locValue);
         }
       }
 

@@ -139,6 +139,19 @@ osapi.container.GadgetSite.prototype.getActiveSiteHolder = function() {
 };
 
 /**
+ * @inheritDoc
+ */
+osapi.container.GadgetSite.prototype.setTitle = function(title) {
+  osapi.container.Site.prototype.setTitle.call(this, title);
+  // sometimes there are 2 holders
+  if (this.loadingGadgetHolder_ && this.currentGadgetHolder_) {
+    // loadingGadgetHolder_ was set by super call
+    this.currentGadgetHolder_.setTitle(title); // set my other one.
+  }
+  return this;
+};
+
+/**
  * Returns configuration of a feature with a given name. Defaults to current
  * loading or visible gadget if no metadata is passed in.
  * @param {string} name Name of the feature.

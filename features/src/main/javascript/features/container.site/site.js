@@ -69,7 +69,21 @@ osapi.container.Site = function(container, service, element, args) {
    * @protected
    */
   this.ownerId_ = undef;
+
+  /**
+   * Site title which would show up as iframe title.
+   * @type {string}
+   * @private
+   */
+  this.title_ = undef;
 };
+
+/**
+ * Default site title.
+ * @type {string}
+ * @private
+ */
+osapi.container.Site.DEFAULT_TITLE = 'default title';
 
 /**
  * Unique counter for sites.  Used if no explicit ID was provided in their creation.
@@ -127,6 +141,36 @@ osapi.container.Site.prototype.setHeight = function(value) {
     }
   }
   return this;
+};
+
+/**
+ * Set the title of the site's iframe.
+ *
+ * @param {String} title The site title.
+ * @return {osapi.container.Site} this.
+ */
+osapi.container.Site.prototype.setTitle = function(title) {
+  this.title_ = title;
+  var siteHolder = this.getActiveSiteHolder();
+  if (siteHolder) {
+    siteHolder.setTitle(title);
+  }
+  return this;
+};
+
+/**
+ * Get the site title.
+ *
+ * @return {String} the site title.
+ */
+osapi.container.Site.prototype.getTitle = function() {
+  if (typeof(this.title_) !== 'undefined') {
+    return this.title_;
+  } else if (this.gadgetInfo_ && this.gadgetInfo_.modulePrefs && this.gadgetInfo_.modulePrefs.title) {
+    return this.gadgetInfo_.modulePrefs.title;
+  } else {
+    return osapi.container.Site.DEFAULT_TITLE;
+  }
 };
 
 /**

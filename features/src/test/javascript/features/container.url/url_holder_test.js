@@ -45,11 +45,11 @@ UrlHolderTest.prototype.testNew = function() {
 UrlHolderTest.prototype.testRenderWithoutParams = function() {
   var element = {};
   var url = "http://example.com";
-  var holder = new osapi.container.UrlHolder({getId: function(){return 123;}}, element);
+  var holder = new osapi.container.UrlHolder({getId: function(){return 123;}, getTitle: function(){return "default title"}}, element);
   this.assertUndefined(holder.getUrl());
   this.assertUndefined(holder.getIframeId());
   holder.render(url, {});
-  this.assertEquals('<iframe' + ' marginwidth="0"' + ' hspace="0"' + ' frameborder="0"'
+  this.assertEquals('<iframe' + ' marginwidth="0"' + ' hspace="0"' + ' title="default title"' + ' frameborder="0"'
           + ' scrolling="auto"' + ' marginheight="0"' + ' vspace="0"' + ' id="__url_123"'
           + ' name="__url_123"' + ' src="http://example.com"' + ' ></iframe>', element.innerHTML);
   this.assertEquals(url, holder.getUrl());
@@ -59,7 +59,7 @@ UrlHolderTest.prototype.testRenderWithoutParams = function() {
 UrlHolderTest.prototype.testRenderWithParams = function() {
   var element = {};
   var url = "http://example.com";
-  var holder = new osapi.container.UrlHolder({getId: function(){return 123;}}, element);
+  var holder = new osapi.container.UrlHolder({getId: function(){return 123;}, getTitle: function(){return "default title"}}, element);
   this.assertUndefined(holder.getUrl());
   this.assertUndefined(holder.getIframeId());
   holder.render(url, {
@@ -68,7 +68,7 @@ UrlHolderTest.prototype.testRenderWithParams = function() {
           "height" : 104
   });
   this.assertEquals('<iframe' + ' marginwidth="0"' + ' hspace="0"' + ' height="104"'
-          + ' frameborder="0"' + ' scrolling="auto"' + ' class="myClass"' + ' marginheight="0"'
+          + ' title="default title"' + ' frameborder="0"' + ' scrolling="auto"' + ' class="myClass"' + ' marginheight="0"'
           + ' vspace="0"' + ' id="__url_123"' + ' width="54"' + ' name="__url_123"'
           + ' src="http://example.com"' + ' ></iframe>', element.innerHTML);
   this.assertEquals(url, holder.getUrl());

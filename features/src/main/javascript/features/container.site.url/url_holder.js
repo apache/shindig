@@ -75,7 +75,7 @@ osapi.container.UrlHolder.prototype.getUrl = function() {
 osapi.container.UrlHolder.prototype.render = function(url, renderParams) {
   this.iframeId_ = osapi.container.UrlHolder.IFRAME_PREFIX_ + this.site_.getId();
   this.renderParams_ = renderParams;
-  this.el_.innerHTML = this.createIframeHtml(this.url_ = url, {scrolling: 'auto'});
+  this.el_.innerHTML = this.createIframeHtml(this.url_ = url, {scrolling: 'auto',title: this.site_.getTitle()});
 };
 
 /**

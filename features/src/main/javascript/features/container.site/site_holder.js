@@ -148,6 +148,17 @@ osapi.container.SiteHolder.prototype.createIframeAttributeMap = function(url, ov
    return params;
 };
 
+/**
+ * Set a title to the site.
+ * @private
+ */
+osapi.container.SiteHolder.prototype.setTitle = function(title) {
+  var ifr = this.getIframeElement();
+  if (ifr) {
+    ifr.title = title;
+  }
+};
+
 //Abstract methods
 
 /**

@@ -56,7 +56,7 @@ UrlSiteTest.prototype.testRenderNoParams = function() {
   var site = new osapi.container.UrlSite(null, null, args);
   site.render(url, {});
   this.assertNotNull(site.getActiveSiteHolder());
-  this.assertEquals('<iframe' + ' marginwidth="0"' + ' hspace="0"' + ' frameborder="0"'
+  this.assertEquals('<iframe' + ' marginwidth="0"' + ' hspace="0"' + ' title="default title"' + ' frameborder="0"'
           + ' scrolling="auto"' + ' marginheight="0"' + ' vspace="0"' + ' id="__url_' + site.getId() + '"'
           + ' name="__url_' + site.getId() + '"' + ' src="http://example.com"' + ' ></iframe>', el.innerHTML);
 };
@@ -75,7 +75,7 @@ UrlSiteTest.prototype.testRenderWithParams = function() {
   });
   this.assertNotNull(site.getActiveSiteHolder());
   this.assertEquals('<iframe' + ' marginwidth="0"' + ' hspace="0"' + ' height="104"'
-          + ' frameborder="0"' + ' scrolling="auto"' + ' class="myClass"' + ' marginheight="0"'
+          + ' title="default title"' + ' frameborder="0"' + ' scrolling="auto"' + ' class="myClass"' + ' marginheight="0"'
           + ' vspace="0"' + ' id="__url_' + site.getId() + '"' + ' width="54"' + ' name="__url_' + site.getId() + '"'
           + ' src="http://example.com"' + ' ></iframe>', el.innerHTML);
 };

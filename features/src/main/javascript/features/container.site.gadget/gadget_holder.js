@@ -201,7 +201,7 @@ osapi.container.GadgetHolder.prototype.doOaaIframeHtml_ = function() {
           //tunnelURI: shindig.uri('/test1/gadgets/' + '../container/rpc_relay.html')
           //   .resolve(shindig.uri(window.location.href)),
           tunnelURI: shindig.uri(this.relayPath_).resolve(shindig.uri(window.location.href)),
-          iframeAttrs: this.createIframeAttributeMap(this.getIframeUrl_()),
+          iframeAttrs: this.createIframeAttributeMap(this.getIframeUrl_(), {title:this.site_.getTitle()}),
           onGadgetLoad: this.onLoad_
         }
       }
