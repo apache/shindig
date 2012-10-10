@@ -18,10 +18,13 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
+import org.apache.shindig.common.logging.i18n.MessageKeys;
 import org.apache.shindig.common.servlet.InjectedServlet;
 import org.apache.shindig.gadgets.GadgetException;
 
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -39,6 +42,8 @@ import com.google.inject.Inject;
 public class MakeRequestServlet extends InjectedServlet {
 
   private static final long serialVersionUID = -8298705081500283786L;
+  private static final String classname = MakeRequestServlet.class.getName();
+  private static final Logger LOG = Logger.getLogger(classname, MessageKeys.MESSAGES);
 
   private transient MakeRequestHandler makeRequestHandler;
 
@@ -54,6 +59,9 @@ public class MakeRequestServlet extends InjectedServlet {
     try {
       makeRequestHandler.fetch(request, response);
     } catch (GadgetException e) {
+      if (LOG.isLoggable(Level.FINEST)) {
+        LOG.logp(Level.FINEST, classname, "doGet", MessageKeys.HTTP_ERROR_FETCHING, e);
+      }
       int responseCode = HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
       if (e.getCode() != GadgetException.Code.INTERNAL_SERVER_ERROR) {
         responseCode = HttpServletResponse.SC_BAD_REQUEST;
