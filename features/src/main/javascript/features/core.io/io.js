@@ -596,9 +596,19 @@ gadgets.io = function() {
           authParam = '&authz=' + authz.toLowerCase();
         }
       }
+
+      var uri = shindig.uri(url);
+      var path = uri.getPath();
+      var fileName = "";
+      var lSlash = path.lastIndexOf('/');
+      if (lSlash !== -1) {
+        fileName = path.substring(lSlash); // include the slash
+      }
+
       var ret = proxyUrl.replace('%url%', encodeURIComponent(url)).
           replace('%host%', document.location.host).
           replace('%rawurl%', url).
+          replace('%filename%', fileName).
           replace('%refresh%', encodeURIComponent(refresh)).
           replace('%gadget%', encodeURIComponent(urlParams['url'])).
           replace('%container%', encodeURIComponent(urlParams['container'] || urlParams['synd'] || 'default')).

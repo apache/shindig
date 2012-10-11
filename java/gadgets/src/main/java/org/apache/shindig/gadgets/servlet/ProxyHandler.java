@@ -164,7 +164,14 @@ public class ProxyHandler {
     // This does make some sites a higher value phishing target, but this can be mitigated by
     // additional referer checks.
     if (!isFlash(response.getHeader("Content-Type"), results.getHeader("Content-Type"))) {
-      response.setHeader("Content-Disposition", "attachment;filename=p.txt");
+      String contentDispositionValue = results.getHeader("Content-Disposition");
+      if (StringUtils.isBlank(contentDispositionValue)
+              || contentDispositionValue.indexOf("attachment;") == -1
+              || contentDispositionValue.indexOf("filename") == -1) {
+        response.setHeader("Content-Disposition", "attachment;filename=p.txt");
+      } else {
+        response.setHeader("Content-Disposition", contentDispositionValue);
+      }
     }
     if (results.getHeader("Content-Type") == null) {
       response.setHeader("Content-Type", "application/octet-stream");

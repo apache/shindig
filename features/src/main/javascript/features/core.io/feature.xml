@@ -35,6 +35,7 @@
   <dependency>core.json</dependency>
   <dependency>core.util.base</dependency>
   <dependency>core.util.urlparams</dependency>
+  <dependency>shindig.uri</dependency>
   <all>
     <script src="io.js"/>
     <script src="taming.js" caja="1"/>

@@ -53,6 +53,14 @@ IoTest.prototype.setSchemaless = function() {
   gadgets.io.preloaded_ = [];
 };
 
+IoTest.prototype.setWithFileName = function() {
+  gadgets.config.init({ "core.io" : {
+      "proxyUrl" : "http://example.com/proxy%filename%?url=%url%&refresh=%refresh%&g=%gadget%&c=%container%",
+      "jsonProxyUrl" : "http://example.com/json",
+      "unparseableCruft" : "throw 1; < don't be evil' >"}});
+  gadgets.io.preloaded_ = [];
+};
+
 IoTest.prototype.setOAuthSupportEnabled = function() {
   gadgets.config.init({ "core.io" : {
       "proxyUrl" : "http://example.com/proxy?url=%url%&refresh=%refresh%&g=%gadget%&c=%container%%authz%",
@@ -115,6 +123,17 @@ IoTest.prototype.testGetProxyUrl_schemaless = function() {
   var proxied = gadgets.io.getProxyUrl("http://target.example.com/image.gif");
   this.assertEquals(
       "https://example.com/proxy?url=http%3a%2f%2ftarget.example.com%2fimage.gif" +
+          "&refresh=3600" +
+          "&g=http%3a%2f%2fwww.gadget.com%2fgadget.xml" +
+          "&c=foo",
+      proxied);
+};
+
+IoTest.prototype.testGetProxyUrl_withFileName = function() {
+  this.setWithFileName();
+  var proxied = gadgets.io.getProxyUrl("http://target.example.com/image.gif");
+  this.assertEquals(
+      "http://example.com/proxy/image.gif?url=http%3a%2f%2ftarget.example.com%2fimage.gif" +
           "&refresh=3600" +
           "&g=http%3a%2f%2fwww.gadget.com%2fgadget.xml" +
           "&c=foo",
