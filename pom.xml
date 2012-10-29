@@ -507,6 +507,7 @@
     <module>java/gadgets</module>
     <module>java/social-api</module>
     <module>java/sample-container</module>
+    <module>java/sample-maven-archetype</module>
     <module>java/server-resources</module>
     <module>java/server-dependencies</module>
     <module>java/server</module>
