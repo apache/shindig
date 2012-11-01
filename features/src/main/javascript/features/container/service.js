@@ -421,7 +421,6 @@ osapi.container.Service.prototype.getCountry = function() {
       containerTokenTTL = 1800000 * 0.8, // 30 min default token ttl
       callbacks = [];
 
-
   function runCallbacks(callbacks, error) {
     while (callbacks.length) {
       callbacks.shift().call(null, error); // Window context
