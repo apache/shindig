@@ -36,6 +36,9 @@ ContainerTest.prototype.setUp = function() {
   window.__CONTAINER_URI = shindig.uri('http://container.com');
   this.shindigContainerGadgetSite = osapi.container.GadgetSite;
   this.gadgetsRpc = gadgets.rpc;
+  window._setTimeout = window.setTimeout;
+  window.setTimeout = function(fn, time) {};
+  setTimeout = window.setTimeout;
 };
 
 ContainerTest.prototype.tearDown = function() {
@@ -43,6 +46,7 @@ ContainerTest.prototype.tearDown = function() {
   window.__CONTAINER_URI = this.containerUri;
   osapi.container.GadgetSite = this.shindigContainerGadgetSite;
   gadgets.rpc = this.gadgetsRpc;
+  window.setTimeout = window._setTimeout;
 };
 
 ContainerTest.prototype.testUnloadGadget = function() {
@@ -100,6 +104,23 @@ ContainerTest.prototype.testPreloadCaches = function() {
     'preloadMetadatas' : mockMetadata,
     'preloadTokens' : mockMetadata
   });
+};
+
+ContainerTest.prototype.testPreloadConfigTokens = function() {
+  this.setupGadgetsRpcRegister();
+  var container = new osapi.container.Container(
+          { 'preloadMetadatas' : { 'preloaded1.xml' : {'tokenTTL' : 200, 'needsTokenRefresh' : true}},
+            'preloadTokens' : { 'preloaded1.xml' : {'tokenTTL' : 100}}});
+  this.assertEquals(100*1000*0.8, container.tokenRefreshInterval_);
+
+  container = new osapi.container.Container(
+          { 'preloadMetadatas' : { 'preloaded1.xml' : {'tokenTTL' : 200, 'needsTokenRefresh' : true}}});
+  this.assertEquals(200*1000*0.8, container.tokenRefreshInterval_);
+
+  container = new osapi.container.Container(
+          { 'preloadMetadatas' : { 'preloaded1.xml' : {'tokenTTL' : 200, 'needsTokenRefresh' : true}},
+            'preloadTokens' : { 'preloaded1.xml' : {'tokenTTL' : 300}}});
+  this.assertEquals(300*1000*0.8, container.tokenRefreshInterval_);
 };
 
 ContainerTest.prototype.testNavigateGadget = function() {

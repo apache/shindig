@@ -446,10 +446,16 @@ osapi.container.Container.prototype.initializeMixins_ = function() {
 
 /**
  * Add list of gadgets to preload list
- * @param {Object} response hash of gadgets data.
+ *
+ * @param {Object}
+ *          response hash of gadgets data.
+ * @param {Object=}
+ *          opt_tokenResponse hash of gadget token data. Used in the case where the container is
+ *          initialized with tokens.
  * @private
  */
-osapi.container.Container.prototype.addPreloadGadgets_ = function(response) {
+osapi.container.Container.prototype.addPreloadGadgets_ = function(response, opt_tokenResponse) {
+  var tokenResponse = opt_tokenResponse || {};
   for (var id in response) {
     if (response[id].error) {
       var message = ['Failed to preload gadget ', id, '.'].join('');
@@ -460,8 +466,15 @@ osapi.container.Container.prototype.addPreloadGadgets_ = function(response) {
     } else {
       this.addPreloadedGadgetUrl_(id);
       if (response[id][osapi.container.MetadataResponse.NEEDS_TOKEN_REFRESH]) {
+        // Check the opt_tokenResponse for the TTL of any preloaded tokens
+        var tokenTTL;
+        if (tokenResponse[id]) {
+          tokenTTL = tokenResponse[id][osapi.container.TokenResponse.TOKEN_TTL];
+        } else {
+          tokenTTL = response[id][osapi.container.MetadataResponse.TOKEN_TTL];
+        }
         // Safe to re-schedule many times.
-        this.scheduleRefreshTokens_(response[id][osapi.container.MetadataResponse.TOKEN_TTL]);
+        this.scheduleRefreshTokens_(tokenTTL);
       }
     }
   }
@@ -484,7 +497,7 @@ osapi.container.Container.prototype.preloadCaches = function(preloadData) {
 
   this.service_.addGadgetMetadatas(gadgets, refTime);
   this.service_.addGadgetTokens(tokens, refTime);
-  this.addPreloadGadgets_(gadgets);
+  this.addPreloadGadgets_(gadgets, tokens);
 };
 
 
