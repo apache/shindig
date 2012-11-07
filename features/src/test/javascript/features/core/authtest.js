@@ -28,11 +28,13 @@ AuthTest.prototype.setUp = function() {
   gadgets.util = gadgets.util || {};
   gadgets.config = gadgets.config || {};
   this.oldConfigRegister = gadgets.config.register;
+  this.getUrlParameters = gadgets.util.getUrlParameters;
 };
 
 AuthTest.prototype.tearDown = function() {
   // Remove mocks
   gadgets.config.register = this.oldConfigRegister;
+  gadgets.util.getUrlParameters = this.getUrlParameters;
 };
 
 AuthTest.prototype.testTokenOnFragment = function() {

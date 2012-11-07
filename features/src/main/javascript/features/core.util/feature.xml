@@ -34,6 +34,7 @@
       <exports type="js">gadgets.util.getFeatureParameters</exports>
       <exports type="js">gadgets.util.hasFeature</exports>
       <exports type="js">gadgets.util.getServices</exports>
+      <exports type="js">gadgets.util.isDebug</exports>
     </api>
   </all>
 </feature>

@@ -25,11 +25,15 @@ ViewsInitTest.inherits(TestCase);
 
 (function() {
 
-var oldDocument = document;
 var callback;
 
+ViewsInitTest.prototype.setUp = function() {
+  this.document = document;
+  this.getUrlParameters = gadgets.util.getUrlParameters;
+};
 ViewsInitTest.prototype.tearDown = function() {
-  document = oldDocument;
+  document = this.document;
+  gadgets.util.getUrlParameters = this.getUrlParameters;
 };
 
 ViewsInitTest.prototype.testObjectParams = function() {
@@ -65,7 +69,8 @@ ViewsInitTest.prototype.testRewriteLinksStandards = function() {
       name = arguments[0];
       func = arguments[1];
       bubble = arguments[2];
-    }
+    },
+    getElementsByTagName: function (name) { return []; }
   };
 
   document.scripts = [];
@@ -83,9 +88,10 @@ ViewsInitTest.prototype.testRewriteLinksIe = function() {
     attachEvent: function() {
       name = arguments[0];
       func = arguments[1];
-    
+
     },
-    addEventListener: undefined
+    addEventListener: undefined,
+    getElementsByTagName: function (name) { return []; }
   };
 
   document.scripts = [];

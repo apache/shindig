@@ -29,8 +29,27 @@ gadgets.util = gadgets.util || {};
 
 (function() {
 
-  var features = {};
-  var services = {};
+  var features = {},
+      services = {},
+      undef,
+      isDebug;
+
+  /**
+   * Checks injected feature script to see if it's debug mode.
+   */
+  function checkIsDebug(config) {
+    var coreio = config['core.io'],
+        jsPath = coreio && coreio.jsPath,
+        scripts = document.getElementsByTagName('script');
+
+    for (var i = 0; jsPath && i < scripts.length; i++) {
+      var src = scripts[i].src;
+      if (src && src.indexOf(jsPath) > -1) {
+        return isDebug = gadgets.util.getUrlParameters(src).debug == '1';
+      }
+    }
+    isDebug = false;
+  }
 
   /**
    * Initializes feature parameters.
@@ -38,8 +57,10 @@ gadgets.util = gadgets.util || {};
   function init(config) {
     features = config['core.util'] || {};
   }
+
   if (gadgets.config) {
     gadgets.config.register('core.util', null, init);
+    gadgets.config.register('core.io', undef, checkIsDebug, checkIsDebug);
   }
 
   /**
@@ -72,4 +93,10 @@ gadgets.util = gadgets.util || {};
     return services;
   };
 
+  /**
+   * @return {boolean} If gadget is being rendered in debug mode.
+   */
+  gadgets.util.isDebug = function() {
+    return isDebug;
+  };
 })();

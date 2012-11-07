@@ -24,6 +24,7 @@ function IoTest(name) {
 IoTest.inherits(TestCase);
 
 IoTest.prototype.setUp = function() {
+  this.getUrlParameters = gadgets.util.getUrlParameters;
   gadgets.util.getUrlParameters = function() {
     return { "st" : "authtoken", "url" : "http://www.gadget.com/gadget.xml", "container" : "foo" };
   };
@@ -43,6 +44,9 @@ IoTest.prototype.setUp = function() {
       "jsonProxyUrl" : "http://example.com/json",
       "unparseableCruft" : "throw 1; < don't be evil' >"}});
   gadgets.io.preloaded_ = [];
+};
+IoTest.prototype.tearDown = function() {
+  gadgets.util.getUrlParameters = this.getUrlParameters;
 };
 
 IoTest.prototype.setSchemaless = function() {
