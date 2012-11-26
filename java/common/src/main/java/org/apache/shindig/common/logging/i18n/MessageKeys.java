@@ -146,5 +146,8 @@ public interface MessageKeys {
 	public static final String NO_LOCKED_DOMAIN_CONFIG="noLockedDomainConfig";
 	//Bootstrap
 	public static final String STARTING_CONN_MANAGER_WITH="startingConnManagerWith";
+	//DefaultRequestPipeline
+	public static final String CACHED_RESPONSE="cachedResponse";
+	public static final String STALE_RESPONSE="staleResponse";
 
 }

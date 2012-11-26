@@ -24,6 +24,7 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
 import org.apache.shindig.common.Nullable;
+import org.apache.shindig.common.logging.i18n.MessageKeys;
 import org.apache.shindig.common.servlet.HttpUtil;
 import org.apache.shindig.common.util.DateUtil;
 import org.apache.shindig.common.util.Utf8UrlCoder;
@@ -37,6 +38,8 @@ import org.apache.shindig.gadgets.rewrite.RewritingException;
 
 import java.util.Collection;
 import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * A standard implementation of a request pipeline. Performs request caching and
@@ -58,6 +61,10 @@ public class DefaultRequestPipeline implements RequestPipeline {
 
   @Inject(optional = true) @Named("shindig.http.date-drift-limit-ms")
   private static long responseDateDriftLimit = DEFAULT_DRIFT_LIMIT_MS;
+  
+  //class name for logging purpose
+  private static final String classname = DefaultRequestPipeline.class.getName();
+  private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
 
   @Inject
   public DefaultRequestPipeline(HttpFetcher httpFetcher,
@@ -78,6 +85,7 @@ public class DefaultRequestPipeline implements RequestPipeline {
   }
 
   public HttpResponse execute(HttpRequest request) throws GadgetException {
+    final String method = "execute";
     normalizeProtocol(request);
 
     HttpResponse cachedResponse = checkCachedResponse(request);
@@ -91,6 +99,10 @@ public class DefaultRequestPipeline implements RequestPipeline {
     if (cachedResponse != null && !cachedResponse.isStrictNoCache()) {
       if (!cachedResponse.isStale()) {
         if (invalidationService.isValid(request, cachedResponse)) {
+          if(LOG.isLoggable(Level.FINEST)) {
+            LOG.logp(Level.FINEST, classname, method, MessageKeys.CACHED_RESPONSE, 
+                    new Object[]{request.getUri().toString()});
+          }
           return cachedResponse;
         } else {
           invalidatedResponse = cachedResponse;
@@ -186,6 +198,7 @@ public class DefaultRequestPipeline implements RequestPipeline {
    */
   protected HttpResponse fixFetchedResponse(HttpRequest request, HttpResponse fetchedResponse,
       @Nullable HttpResponse invalidatedResponse, @Nullable HttpResponse staleResponse) throws GadgetException {
+    final String method = "fixFetchedResponse";
     if (fetchedResponse.isError() && invalidatedResponse != null) {
       // Use the invalidated cached response if it is not stale. We don't update its
       // mark so it remains invalidated
@@ -195,6 +208,9 @@ public class DefaultRequestPipeline implements RequestPipeline {
     if (fetchedResponse.getHttpStatusCode() >= 500 && staleResponse != null) {
       // If we have trouble accessing the remote server,
       // Lets try the latest good but staled result
+      if(LOG.isLoggable(Level.FINEST)) {
+        LOG.logp(Level.FINEST, classname, method, MessageKeys.STALE_RESPONSE, new Object[]{request.getUri().toString()});
+      }
       return staleResponse;
     }
 
