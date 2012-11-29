@@ -114,14 +114,14 @@ public class OAuth2Module extends AbstractModule {
     private final BasicOAuth2Store store;
 
     @Inject
-    public OAuth2StoreProvider(@Named(OAuth2Module.OAUTH2_REDIRECT_URI)
-    final String globalRedirectUri, @Named(OAuth2Module.OAUTH2_IMPORT)
-    final boolean importFromConfig, @Named(OAuth2Module.OAUTH2_IMPORT_CLEAN)
-    final boolean importClean, final Authority authority, final OAuth2Cache cache,
-            final OAuth2Persister persister, final OAuth2Encrypter encrypter, @Nullable
-            @Named("shindig.contextroot")
-            final String contextRoot, @Named(OAuth2FetcherConfig.OAUTH2_STATE_CRYPTER)
-            final BlobCrypter stateCrypter) {
+    public OAuth2StoreProvider(
+        @Named(OAuth2Module.OAUTH2_REDIRECT_URI) final String globalRedirectUri,
+        @Named(OAuth2Module.OAUTH2_IMPORT) final boolean importFromConfig,
+        @Named(OAuth2Module.OAUTH2_IMPORT_CLEAN) final boolean importClean,
+        final Authority authority, final OAuth2Cache cache, final OAuth2Persister persister,
+        final OAuth2Encrypter encrypter,
+        @Nullable @Named("shindig.contextroot") final String contextRoot,
+        @Named(OAuth2FetcherConfig.OAUTH2_STATE_CRYPTER) final BlobCrypter stateCrypter) {
 
       this.store = new BasicOAuth2Store(cache, persister, encrypter, globalRedirectUri, authority,
               contextRoot, stateCrypter);
