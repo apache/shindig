@@ -115,7 +115,8 @@ public class DefaultRequestPipeline implements RequestPipeline {
       }
     }
     HttpResponse fetchedResponse = fetchResponse(request);
-    fetchedResponse = fixFetchedResponse(request, fetchedResponse, invalidatedResponse, staleResponse);
+    fetchedResponse = fixFetchedResponse(request, fetchedResponse, invalidatedResponse,
+        staleResponse);
     return fetchedResponse;
   }
 
@@ -197,7 +198,8 @@ public class DefaultRequestPipeline implements RequestPipeline {
    * @throws GadgetException
    */
   protected HttpResponse fixFetchedResponse(HttpRequest request, HttpResponse fetchedResponse,
-      @Nullable HttpResponse invalidatedResponse, @Nullable HttpResponse staleResponse) throws GadgetException {
+      @Nullable HttpResponse invalidatedResponse, @Nullable HttpResponse staleResponse)
+      throws GadgetException {
     final String method = "fixFetchedResponse";
     if (fetchedResponse.isError() && invalidatedResponse != null) {
       // Use the invalidated cached response if it is not stale. We don't update its
@@ -209,7 +211,8 @@ public class DefaultRequestPipeline implements RequestPipeline {
       // If we have trouble accessing the remote server,
       // Lets try the latest good but staled result
       if(LOG.isLoggable(Level.FINEST)) {
-        LOG.logp(Level.FINEST, classname, method, MessageKeys.STALE_RESPONSE, new Object[]{request.getUri().toString()});
+        LOG.logp(Level.FINEST, classname, method, MessageKeys.STALE_RESPONSE,
+            new Object[]{request.getUri().toString()});
       }
       return staleResponse;
     }
@@ -218,9 +221,11 @@ public class DefaultRequestPipeline implements RequestPipeline {
 
     if (!fetchedResponse.isError() && !request.getIgnoreCache() && request.getCacheTtl() != 0) {
       try {
-        fetchedResponse = responseRewriterRegistry.rewriteHttpResponse(request, fetchedResponse, null);
+        fetchedResponse =
+            responseRewriterRegistry.rewriteHttpResponse(request, fetchedResponse, null);
       } catch (RewritingException e) {
-        throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, e, e.getHttpStatusCode());
+        throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, e,
+            e.getHttpStatusCode());
       }
     }
 
