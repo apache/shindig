@@ -48,15 +48,62 @@ gadgets.util = gadgets.util || {};
       cb();
     };
 
-    for (var i = 0, j = onLoadHandlers.length; i < j; ++i) {
-      try {
-        onLoadHandlers[i]();
-      } catch (ex) {
-        gadgets.warn("Could not fire onloadhandler "+ex.message);
+    if (onLoadHandlers) {
+      for (var i = 0, j = onLoadHandlers.length; i < j; ++i) {
+        try {
+          onLoadHandlers[i]();
+        } catch (ex) {
+          gadgets.warn("Could not fire onloadhandler "+ ex.message);
+        }
       }
+      onLoadHandlers = undefined;  // No need to hold these references anymore.
     }
-    onLoadHandlers = undefined;  // No need to hold these references anymore.
   };
 
+  (function() {
+    // If a script is statically inserted into the dom, use events
+    // to call runOnLoadHandlers.
+    // Try to attach to DOMContentLoaded if using a modern browser.
+    gadgets.util.attachBrowserEvent(document,
+            "DOMContentLoaded",
+            gadgets.util.runOnLoadHandlers,
+            false);
+    // Always attach to window.onload as a fallback. We can safely ignore
+    // any repeated calls to runOnLoadHandlers.
+    var oldWindowOnload = window.onload;
+    window.onload = function() {
+      oldWindowOnload && oldWindowOnload();
+      gadgets.util.runOnLoadHandlers();
+    };
+    // If a script is dynamically inserted into the page, the DOMContentLoaded
+    // event will be fired before runOnLoadHandlers can be attached
+    // to the event. In this case, find the script that loads the core libary
+    // and attach runOnLoadHandlers to the script's onload event.
+    var libParam = "";
+    if (window && window.location && window.location.href) {
+      libParam = gadgets.util.getUrlParameters(window.location.href).libs;
+    }
+
+    var regex = /(?:js\/)([^&|\.]+)/g;
+    var match = regex.exec(libParam);
+
+    if (match) {
+      var url = decodeURIComponent(match[1]);
+      var scripts = document.getElementsByTagName("script") || [];
+      for (var i = 0; i < scripts.length; i++) {
+        var script = scripts[i];
+        var src = script.src;
+        if (src && url && src.indexOf(url) !== -1) {
+          // save a reference to the function that is already hooked up
+          // to the event
+          var oldonload = script.onload;
+          script.onload = function() {
+            oldonload && oldonload();
+            gadgets.util.runOnLoadHandlers();
+          };
+        }
+      }
+    }
+  })();
 })();
 

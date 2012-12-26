@@ -133,12 +133,12 @@
                 <source>core.util.base/base.js</source>
                 <source>core.util.dom/dom.js</source>
                 <source>core.util.event/event.js</source>
+                <source>core.log/log.js</source>
                 <source>core.util.onload/onload.js</source>
                 <source>core.util.string/string.js</source>
                 <source>core.util.urlparams/urlparams.js</source>
                 <source>core.util/util.js</source>
                 <source>core.prefs/prefs.js</source>
-                <source>core.log/log.js</source>
                 <source>core.io/io.js</source>
                 <source>container.util/constant.js</source>
                 <source>container.util/util.js</source>

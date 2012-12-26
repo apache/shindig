@@ -19,6 +19,7 @@
 <feature>
   <name>core.util.onload</name>
   <dependency>globals</dependency>
+  <dependency>core.util.urlparams</dependency>
   <all>
     <script src="onload.js"/>
     <script src="taming.js" caja="1"/>
