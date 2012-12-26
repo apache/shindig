@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.el.ELContext;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shindig.common.JsonSerializer;
@@ -33,8 +34,10 @@ import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.common.xml.DomUtil;
 import org.apache.shindig.config.ContainerConfig;
+import org.apache.shindig.expressions.Expressions;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
+import org.apache.shindig.gadgets.GadgetELResolver;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.GadgetException.Code;
 import org.apache.shindig.gadgets.MessageBundleFactory;
@@ -58,6 +61,7 @@ import org.apache.shindig.gadgets.spec.Feature;
 import org.apache.shindig.gadgets.spec.MessageBundle;
 import org.apache.shindig.gadgets.spec.UserPref;
 import org.apache.shindig.gadgets.spec.View;
+import org.apache.shindig.gadgets.templates.MessageELResolver;
 import org.apache.shindig.gadgets.uri.JsUriManager;
 import org.apache.shindig.gadgets.uri.JsUriManager.JsUri;
 import org.apache.shindig.gadgets.uri.UriCommon;
@@ -65,6 +69,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.DocumentType;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
 
 import com.google.common.base.Splitter;
@@ -127,11 +132,14 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
   private String defaultDoctypePubId = null;
   private String defaultDoctypeSysId = null;
 
+  private final Expressions expressions;
+  private ELContext elContext;
   /**
    * @param messageBundleFactory Used for injecting message bundles into gadget output.
    */
   @Inject
   public RenderingGadgetRewriter(MessageBundleFactory messageBundleFactory,
+                                 Expressions expressions,
                                  ContainerConfig containerConfig,
                                  FeatureRegistryProvider featureRegistryProvider,
                                  JsServingPipeline jsServingPipeline,
@@ -139,6 +147,7 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
                                  ConfigProcessor configProcessor,
                                  GadgetAdminStore gadgetAdminStore) {
     this.messageBundleFactory = messageBundleFactory;
+    this.expressions = expressions;
     this.containerConfig = containerConfig;
     this.featureRegistryProvider = featureRegistryProvider;
     this.jsServingPipeline = jsServingPipeline;
@@ -171,6 +180,35 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
     this.externalizeFeatures = externalizeFeatures;
   }
 
+  /** Process the children of an element or document. */
+  public void processChildNodes(Node source) {
+    NodeList nodes = source.getChildNodes();
+    for (int i = 0; i < nodes.getLength(); i++) {
+      processNode(nodes.item(i));
+    }
+  }
+
+  /**
+   * Process a node.
+   *
+   * @param result the target node where results should be inserted
+   * @param source the source node of the template being processed
+   */
+  private void processNode(Node source) {
+    switch (source.getNodeType()) {
+    case Node.TEXT_NODE:
+      source.setTextContent(String.valueOf(expressions.parse(source.getTextContent(), String.class)
+              .getValue(elContext)));
+      break;
+    case Node.ELEMENT_NODE:
+      processChildNodes(source);
+      break;
+    case Node.DOCUMENT_NODE:
+      processChildNodes(source);
+      break;
+    }
+  }
+
   public void rewrite(Gadget gadget, MutableContent mutableContent) throws RewritingException {
     // Don't touch sanitized gadgets.
     if (gadget.sanitizeOutput()) {
@@ -178,8 +216,17 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
     }
 
     try {
-      Document document = mutableContent.getDocument();
+      GadgetContext context = gadget.getContext();
+      MessageBundle bundle = messageBundleFactory.getBundle(gadget.getSpec(), context.getLocale(),
+              context.getIgnoreCache(), context.getContainer(), context.getView());
 
+      MessageELResolver messageELResolver = new MessageELResolver(expressions, bundle);
+
+      this.elContext = expressions.newELContext(messageELResolver,
+              new GadgetELResolver(gadget.getContext()));
+      this.elContext.putContext(GadgetContext.class, elContext);
+      Document document = mutableContent.getDocument();
+      processChildNodes(document);
       Element head = (Element) DomUtil.getFirstNamedChildNode(document.getDocumentElement(), "head");
 
       // Insert new content before any of the existing children of the head element
@@ -245,9 +292,6 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
 
       // This can be one script block.
       Element mainScriptTag = document.createElement("script");
-      GadgetContext context = gadget.getContext();
-      MessageBundle bundle = messageBundleFactory.getBundle(
-          gadget.getSpec(), context.getLocale(), context.getIgnoreCache(), context.getContainer(), context.getView());
       injectMessageBundles(bundle, mainScriptTag);
       injectDefaultPrefs(gadget, mainScriptTag);
       injectPreloads(gadget, mainScriptTag);

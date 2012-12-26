@@ -43,6 +43,7 @@ import org.apache.shindig.common.PropertiesModule;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.xml.XmlUtil;
 import org.apache.shindig.config.BasicContainerConfig;
+import org.apache.shindig.expressions.Expressions;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
@@ -116,9 +117,11 @@ public class RenderingGadgetRewriterTest extends EasyMockTestCase{
   private JsServingPipeline jsServingPipeline;
   private RenderingGadgetRewriter rewriter;
   private GadgetHtmlParser parser;
+  private Expressions expressions;
 
   @Before
   public void setUp() throws Exception {
+    expressions = Expressions.forTesting();
     featureRegistry = createMock(FeatureRegistry.class);
     FeatureRegistryProvider featureRegistryProvider = new FeatureRegistryProvider() {
       public FeatureRegistry get(String repository) {
@@ -132,7 +135,7 @@ public class RenderingGadgetRewriterTest extends EasyMockTestCase{
         "shindig.xhrwrapper", new XhrwrapperConfigContributor()
     );
     rewriter
-        = new RenderingGadgetRewriter(messageBundleFactory, config, featureRegistryProvider,
+        = new RenderingGadgetRewriter(messageBundleFactory, expressions, config, featureRegistryProvider,
             jsServingPipeline, jsUriManager,
             new DefaultConfigProcessor(configContributors, config), gadgetAdminStore);
     Injector injector = Guice.createInjector(new ParseModule(), new PropertiesModule());

@@ -186,8 +186,9 @@ public class DefaultTemplateProcessor implements TemplateProcessor {
           String staticText = textContent.substring(start, current - 1);
           result.appendChild(ownerDocument.createTextNode(staticText));
         }
-
-        start = current;
+        //EL syntax is supported in gadget rendering(https://reviews.apache.org/r/8184),
+        //so keep the \ into expression result, to make sure "\${" will not be evaluated in gadget rendering as expected
+        start = current -1 ;
         current = current + 2;
         continue;
       }

@@ -154,10 +154,10 @@ public class DefaultTemplateProcessorTest {
   @Test
   public void testEscapedExpressions() throws Exception {
     String output = executeTemplate("\\${escaped}");
-    assertEquals("${escaped}", output);
+    assertEquals("\\${escaped}", output);
 
     output = executeTemplate("foo\\${escaped}bar");
-    assertEquals("foo${escaped}bar", output);
+    assertEquals("foo\\${escaped}bar", output);
   }
 
   @Test
