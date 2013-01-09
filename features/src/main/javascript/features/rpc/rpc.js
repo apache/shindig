@@ -439,7 +439,14 @@ if (!window['gadgets']['rpc']) { // make lib resilient to double-inclusion
 
       var siblingId = parseSiblingId(id);
       if (siblingId) {
-        return window.frames[siblingId.id];
+        var currentWindow = window;
+        while (!currentWindow.frames[siblingId.id]) {
+          if (currentWindow === window.top) {
+            break;
+          }
+          currentWindow = currentWindow.parent;
+        }
+        return currentWindow.frames[siblingId.id];
       }
 
       // Cast to a String to avoid an index lookup.
