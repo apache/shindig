@@ -110,6 +110,7 @@
           <suffix>.opt</suffix>
           <excludes>
             <exclude>**/*.xml</exclude>
+            <exclude>**/swfobject/*.js</exclude>
           </excludes>
           <jswarn>false</jswarn>
           <statistics>false</statistics>

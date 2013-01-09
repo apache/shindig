@@ -258,9 +258,8 @@
           <suffix>.opt</suffix>
           <excludes>
             <exclude>**/*.xml</exclude>
-            <!-- Caja & swfobject are already minified -->
+            <!-- Caja is already minified -->
             <exclude>**/caja/*.js</exclude>
-            <exclude>**/swfobject/*.js</exclude>
           </excludes>
           <jswarn>false</jswarn>
           <statistics>false</statistics>
@@ -326,7 +325,6 @@
               <ext>js</ext>
               <exclude>
                 <param>.+.opt.js</param>
-                <param>swfobject.js</param>
               </exclude>
             </configuration>
           </plugin>

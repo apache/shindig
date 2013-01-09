@@ -794,8 +794,8 @@
                 <exclude>**/README*</exclude>
                 <exclude>**/target/**</exclude>
                 <exclude>**/external/**</exclude>
-                <exclude>**/features/swfobject/swfobject.js</exclude>
-                <exclude>**/features/swfobject/swfobject.opt.js</exclude>
+                <exclude>**/features-extras/swfobject/swfobject.js</exclude>
+                <exclude>**/features-extras/swfobject/swfobject.opt.js</exclude>
                 <exclude>etc/svn-ignores</exclude>
                 <exclude>etc/svn-props</exclude>
                 <exclude>etc/eclipse/shindig.importorder</exclude>
@@ -1328,8 +1328,8 @@
               <exclude>**/README*</exclude>
               <exclude>**/target/**</exclude>
               <exclude>**/external/**</exclude>
-              <exclude>**/features/swfobject/swfobject.js</exclude>
-              <exclude>**/features/swfobject/swfobject.opt.js</exclude>
+              <exclude>**/features-extras/swfobject/swfobject.js</exclude>
+              <exclude>**/features-extras/swfobject/swfobject.opt.js</exclude>
               <exclude>etc/svn-ignores</exclude>
               <exclude>etc/svn-props</exclude>
               <exclude>etc/eclipse/shindig.importorder</exclude>
@@ -1344,7 +1344,7 @@
               <exclude>**/site/src/site/resources/**</exclude>
               <exclude>**/site/src/site/site.vm</exclude>
               <exclude>**/site/generated_site/**</exclude>
-							<exclude>**/site/cms/trunk/content/bootstrap/**</exclude>
+              <exclude>**/site/cms/trunk/content/bootstrap/**</exclude>
               <exclude>**/site/cms/trunk/content/jquery/**</exclude>
               <exclude>phpunit.xml.dist</exclude>
               <exclude>BUILD-JAVA</exclude>
@@ -1364,7 +1364,7 @@
               <exclude>**/*.classpath</exclude>
               <exclude>**/.project</exclude>
               <exclude>**/.settings/*</exclude>
-              <exclude>**/src/test/resources/**</exclude>              
+              <exclude>**/src/test/resources/**</exclude>
             </excludes>
           </configuration>
         </plugin>

@@ -103,7 +103,6 @@ features/shindig.uri/feature.xml
 features/shindig.uri.ext/feature.xml
 features/shindig.xhrwrapper/feature.xml
 features/skins/feature.xml
-features/swfobject/feature.xml
 features/tabs/feature.xml
 features/taming/feature.xml
 features/views/feature.xml

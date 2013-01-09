@@ -24,3 +24,4 @@ features-extras/wave/feature.xml
 features-extras/opensocial-payment/feature.xml
 features-extras/pubsub-2/feature.xml
 features-extras/org.openajax.hub-2.0.7/feature.xml
+features-extras/swfobject/feature.xml
