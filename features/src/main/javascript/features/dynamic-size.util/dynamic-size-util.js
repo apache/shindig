@@ -31,11 +31,43 @@ gadgets.window = gadgets.window || {};
    * @private
    */
   function getElementComputedStyle(elem, attr) {
-    if (window.getComputedStyle) {
-      var style = window.getComputedStyle(elem, null);
+    var n = navigator;
+    var dua = n.userAgent,dav = n.appVersion;
+    var isWebKit = parseFloat(dua.split("WebKit/")[1]) || undefined;
+    var isIE = parseFloat(dav.split("MSIE ")[1]) || undefined;
+    var gcs;
+    if(isWebKit){
+      /**
+       * Get the computed style from the dom node, implementation of this function differs in browsers.
+       * @private
+       * @param {DomNode} node the dom node.
+       * @return {Object} the style object.
+       */
+      gcs = function(node){
+        var s;
+        if(node.nodeType == DOM_ELEMENT_NODE){
+          var dv = node.ownerDocument.defaultView;
+          s = dv.getComputedStyle(node, null);
+          if(!s && node.style){
+            node.style.display = "";
+            s = dv.getComputedStyle(node, null);
+          }
+        }
+        return s || {};
+      };
+    } else if (isIE) {
+      gcs = function(node){
+        // IE (as of 7) doesn't expose Element like sane browsers
+        return node.nodeType == DOM_ELEMENT_NODE ? node.currentStyle : {};
+      };
     } else {
-      var style = elem.currentStyle;
+      gcs = function(node){
+        return node.nodeType == DOM_ELEMENT_NODE ?
+          node.ownerDocument.defaultView.getComputedStyle(node, null) : {};
+      };
     }
+
+    var style = gcs(elem);
     return attr && style ? style[attr] : style;
   }
 

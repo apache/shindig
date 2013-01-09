@@ -19,13 +19,14 @@
 <feature>
   <name>core.config.base</name>
   <dependency>globals</dependency>
+  <dependency>domnode</dependency>
   <all>
     <script src="config.js"/>
     <api>
       <exports type="js">gadgets.config.register</exports>
       <exports type="js">gadgets.config.get</exports>
       <exports type="js">gadgets.config.init</exports>
-      <exports type="js">gadgets.config.update</exports>      
+      <exports type="js">gadgets.config.update</exports>
     </api>
   </all>
 </feature>

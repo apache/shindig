@@ -24,7 +24,8 @@
   <dependency>opensocial-data-context</dependency>
   <dependency>opensocial</dependency>
   <dependency>xmlutil</dependency>
-  <gadget>    
+  <dependency>domnode</dependency>
+  <gadget>
     <script src="data.js"></script>
   </gadget>
 </feature>

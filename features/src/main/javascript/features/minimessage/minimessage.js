@@ -181,10 +181,9 @@ gadgets.MiniMessage.prototype.createStaticMessage = function(message) {
 
   // If the message already exists in DOM, preserve its location.
   // Otherwise, insert it at the top.
-  var ELEMENT_NODE = 1;
   if (typeof message === 'object' &&
       message.parentNode &&
-      message.parentNode.nodeType === ELEMENT_NODE) {
+      message.parentNode.nodeType === DOM_ELEMENT_NODE) {
     var messageClone = message.cloneNode(true);
     message.style.display = 'none';
     messageClone.id = '';

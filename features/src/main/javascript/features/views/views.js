@@ -62,7 +62,7 @@ gadgets.views = function() {
       target = e.srcElement;
     }
 
-    if (target.nodeType === 3) {
+    if (target.nodeType === DOM_TEXT_NODE) {
       target = target.parentNode;
     }
 

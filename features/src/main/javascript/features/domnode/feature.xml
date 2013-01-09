@@ -17,24 +17,22 @@ KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 -->
 <feature>
-  <!-- 
-    jsondom (Read Only DOM) is implemented in both JavaScript
-    and server-side code. Its JavaScript-only implementation
-    provides a DOM parser that uses underlying browser objects.
-    This is, however, not Caja-compatible.
-
-    Therefore a server-side DOM-to-JSON parser mode is provided
-    to support this use case, where either explicitly required
-    (Caja context) or otherwise directly requested.
-  -->
-  <name>jsondom</name>
-  <dependency>globals</dependency>
-  <dependency>domnode</dependency>
-  <dependency>xmlutil</dependency>
-  <gadget>
-    <script src="jsondom.js"/>
+  <name>domnode</name>
+  <all>
+    <script src="constants.js"/>
     <api>
-      <exports type="js">gadgets.jsondom.parse</exports>
+      <exports type="js">DOM_ELEMENT_NODE</exports>
+      <exports type="js">DOM_ATTRIBUTE_NODE</exports>
+      <exports type="js">DOM_TEXT_NODE</exports>
+      <exports type="js">DOM_CDATA_SECTION_NODE</exports>
+      <exports type="js">DOM_ENTITY_REFERENCE_NODE</exports>
+      <exports type="js">DOM_ENTITY_NODE</exports>
+      <exports type="js">DOM_PROCESSING_INSTRUCTION_NODE</exports>
+      <exports type="js">DOM_COMMENT_NODE</exports>
+      <exports type="js">DOM_DOCUMENT_NODE</exports>
+      <exports type="js">DOM_DOCUMENT_TYPE_NODE</exports>
+      <exports type="js">DOM_DOCUMENT_FRAGMENT_NODE</exports>
+      <exports type="js">DOM_NOTATION_NODE</exports>
     </api>
-  </gadget>
+  </all>
 </feature>

@@ -29,9 +29,6 @@
  */
 gadgets.json.xml = (function() {
 
-  //Integer which represents a text node
-  var TEXT_NODE = 3;
-
     /**
      * Parses all the child nodes of a specific DOM element and adds them to the JSON object
      * passed in.
@@ -43,7 +40,7 @@ gadgets.json.xml = (function() {
   function parseChildNodes(childNodes, json) {
     for (var index = 0; index < childNodes.length; index++) {
       var node = childNodes[index];
-      if (node.nodeType == TEXT_NODE) {
+      if (node.nodeType == DOM_TEXT_NODE) {
         setTextNodeValue(json, node.nodeName, node);
       }
       else {
@@ -65,7 +62,7 @@ gadgets.json.xml = (function() {
           }
         }
         else {
-          if (node.childNodes.length == 1 && node.firstChild.nodeType == TEXT_NODE && (node.attributes == null || node.attributes.length == 0)) {
+          if (node.childNodes.length == 1 && node.firstChild.nodeType == DOM_TEXT_NODE && (node.attributes == null || node.attributes.length == 0)) {
             /*
              * There is only one child node and it is a text node AND we have no attributes so
              * just extract the text value from the text node and set it in the JSON object.

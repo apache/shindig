@@ -21,6 +21,7 @@ specific language governing permissions and limitations under the License.
   <dependency>globals</dependency>
   <dependency>taming</dependency>
   <dependency>core.config</dependency>
+  <dependency>domnode</dependency>
   <gadget>
     <script src="minimessage.js"/>
     <script src="taming.js" caja="1"/>

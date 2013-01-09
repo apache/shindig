@@ -38,6 +38,7 @@ if (!this.JsUtil) {
   eval(JsUtil.prototype.include(testSrcDir + '/mocks/xhr.js'));
   eval(JsUtil.prototype.include(srcDir + '/globals/globals.js'));
   eval(JsUtil.prototype.include(srcDir + '/cloo/cloo.js'));
+  eval(JsUtil.prototype.include(srcDir + '/domnode/constants.js'));
   eval(JsUtil.prototype.include(srcDir + '/core.config.base/config.js'));
   eval(JsUtil.prototype.include(srcDir + '/core.config/validators.js'));
   eval(JsUtil.prototype.include(srcDir + '/core.json/json-native.js'));

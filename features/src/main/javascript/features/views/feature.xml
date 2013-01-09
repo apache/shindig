@@ -30,6 +30,7 @@ A map of view names to view attributes. Examples:
   <dependency>core.json</dependency>
   <dependency>core.util</dependency>
   <dependency>rpc</dependency>
+  <dependency>domnode</dependency>
   <gadget>
     <script src="views.js"/>
     <script src="taming.js" caja="1"/>

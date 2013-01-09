@@ -109,7 +109,7 @@ gadgets.config = function() {
 
   function getInnerText(scriptNode) {
     var scriptText = '';
-    if (scriptNode.nodeType == 3 || scriptNode.nodeType == 4) {
+    if (scriptNode.nodeType == DOM_TEXT_NODE || scriptNode.nodeType == DOM_CDATA_SECTION_NODE) {
       scriptText = scriptNode.nodeValue;
     } else if (scriptNode.innerText) {
       scriptText = scriptNode.innerText;

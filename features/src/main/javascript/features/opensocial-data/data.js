@@ -471,7 +471,7 @@ opensocial.data.loadRequestsFromMarkup_ = function(xml) {
 
   // Find the <root> node (skip DOCTYPE).
   var node = doc.firstChild;
-  while (node.nodeType != 1) {
+  while (node.nodeType != DOM_ELEMENT_NODE) {
     node = node.nextSibling;
   }
 
@@ -486,7 +486,7 @@ opensocial.data.loadRequestsFromMarkup_ = function(xml) {
  */
 opensocial.data.processDataNode_ = function(node) {
   for (var child = node.firstChild; child; child = child.nextSibling) {
-    if (child.nodeType == 1) {
+    if (child.nodeType == DOM_ELEMENT_NODE) {
       var requestDescriptor = new opensocial.data.RequestDescriptor(child);
     }
   }

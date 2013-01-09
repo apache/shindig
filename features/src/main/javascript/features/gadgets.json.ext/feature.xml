@@ -20,6 +20,7 @@
   <name>gadgets.json.ext</name>
   <dependency>globals</dependency>
   <dependency>taming</dependency>
+  <dependency>domnode</dependency>
   <all>
     <script src="json-xmltojson.js"/>
     <script src="taming.js" caja="1"/>

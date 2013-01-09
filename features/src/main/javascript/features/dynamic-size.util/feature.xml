@@ -21,6 +21,7 @@ specific language governing permissions and limitations under the License.
 <feature>
   <name>dynamic-size.util</name>
   <dependency>globals</dependency>
+  <dependency>domnode</dependency>
   <dependency>taming</dependency>
   <all>
     <script src="dynamic-size-util.js"/>
