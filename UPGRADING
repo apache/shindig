@@ -14,17 +14,27 @@ details.
 
 == Java Dependency Changes ==
 
+Updates
 * caja r4884 -> r5054
 * closure-compiler (new) r1918
-* commons-codec 1.5 -> 1.6
+* commons-codec 1.5 -> 1.7
 * commons-lang to commons-lang3 3.1
+* commons-io 2.1 -> 2.4
+* easymock 3.0->3.1
 * ehcache  2.3.2 -> 2.5.2
 * guava r09->11.0.1
 * guice 2.0->3.0
+* joda-time 2.0->2.1
+* junit 4.10->4.11
+* log4j 1.2.16->1.2.17
 * htmlunit 2.8->2.9 
-* nekohtml 1.9.14->1.9.15
+* nekohtml 1.9.14->1.9.17
 * slf4j 1.5.11->1.6.1
-* xstream 1.3.1->1.4.2
+* xstream 1.3.1->1.4.3
+
+New
+* tomcat el-api/jasper-el
+
 
 FROM 1.0.x TO 2.0.x
 ===================
