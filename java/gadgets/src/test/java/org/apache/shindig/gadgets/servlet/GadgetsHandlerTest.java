@@ -40,6 +40,7 @@ import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.common.testing.ImmediateExecutorService;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.util.FakeTimeSource;
+import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
@@ -113,6 +114,7 @@ public class GadgetsHandlerTest extends EasyMockTestCase {
   private final JsServingPipeline jsPipeline = mock(JsServingPipeline.class);
   private final JsRequestBuilder jsRequestBuilder = new JsRequestBuilder(jsUriManager, null);
   private final GadgetAdminStore gadgetAdminStore = mock(GadgetAdminStore.class);
+  private final ContainerConfig config = mock(ContainerConfig.class);
 
   private Injector injector;
   private BeanJsonConverter converter;
@@ -139,7 +141,7 @@ public class GadgetsHandlerTest extends EasyMockTestCase {
     GadgetsHandlerService service = new GadgetsHandlerService(timeSource, processor, urlGenerator,
             codec, proxyUriManager, jsUriManager, proxyHandler, jsPipeline, jsRequestBuilder,
             SPEC_REFRESH_INTERVAL, beanFilter, cajaContentRewriter, gadgetAdminStore,
-            featureRegistryProvider, new ModuleIdManagerImpl());
+            featureRegistryProvider, new ModuleIdManagerImpl(),config);
     GadgetsHandler handler = new GadgetsHandler(new ImmediateExecutorService(), service, beanFilter);
     registry = new DefaultHandlerRegistry(injector, converter,
             new HandlerExecutionListener.NoOpHandler());

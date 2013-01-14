@@ -37,6 +37,7 @@ import org.apache.shindig.common.Nullable;
 import org.apache.shindig.common.servlet.HttpUtil;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.util.TimeSource;
+import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
@@ -67,6 +68,7 @@ import org.apache.shindig.gadgets.spec.OAuthSpec;
 import org.apache.shindig.gadgets.spec.UserPref;
 import org.apache.shindig.gadgets.spec.UserPref.EnumValuePair;
 import org.apache.shindig.gadgets.spec.View;
+import org.apache.shindig.gadgets.uri.DefaultIframeUriManager;
 import org.apache.shindig.gadgets.uri.IframeUriManager;
 import org.apache.shindig.gadgets.uri.JsUriManager;
 import org.apache.shindig.gadgets.uri.JsUriManager.JsUri;
@@ -158,6 +160,7 @@ public class GadgetsHandlerService {
   protected final GadgetAdminStore gadgetAdminStore;
   protected final FeatureRegistryProvider featureRegistryProvider;
   protected final ModuleIdManager moduleIdManager;
+  private ContainerConfig config;
 
   @Inject
   public GadgetsHandlerService(TimeSource timeSource, Processor processor,
@@ -168,7 +171,8 @@ public class GadgetsHandlerService {
       BeanFilter beanFilter, CajaContentRewriter cajaContentRewriter,
       GadgetAdminStore gadgetAdminStore,
       FeatureRegistryProvider featureRegistryProvider,
-      ModuleIdManager moduleIdManager) {
+      ModuleIdManager moduleIdManager,
+      ContainerConfig config) {
     this.timeSource = timeSource;
     this.processor = processor;
     this.iframeUriManager = iframeUriManager;
@@ -186,6 +190,7 @@ public class GadgetsHandlerService {
     this.moduleIdManager = moduleIdManager;
 
     this.beanDelegator = new BeanDelegator(API_CLASSES, ENUM_CONVERSION_MAP);
+    this.config = config;
   }
 
   /**
@@ -214,7 +219,11 @@ public class GadgetsHandlerService {
     Boolean needsTokenRefresh =
         isFieldIncluded(fields, "needstokenrefresh") ?
             gadget.getAllFeatures().contains("auth-refresh") : null;
-
+    boolean alwaysAppendSecurityToken = config.getBool(gadget.getContext().getContainer(),
+            DefaultIframeUriManager.SECURITY_TOKEN_ALWAYS_KEY);
+    if (alwaysAppendSecurityToken) {
+      needsTokenRefresh = Boolean.TRUE;
+    }
     Set<String> rpcServiceIds = getRpcServiceIds(gadget);
 
     Integer tokenTTL = isFieldIncluded(fields, "tokenTTL") ?

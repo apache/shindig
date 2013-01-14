@@ -21,7 +21,7 @@ under the License.
   <name>container</name>
   <dependency>globals</dependency>
   <dependency>core.log</dependency>
-  <dependency>shindig.auth</dependency>
+  <dependency>security-token</dependency>
   <dependency>shindig.uri.ext</dependency>
   <dependency>osapi</dependency>
   <dependency>rpc</dependency>
@@ -47,6 +47,7 @@ under the License.
       <exports type="js">osapi.container.Container.prototype.onConstructed</exports>
       <exports type="js">osapi.container.Container.prototype.getGadgetSiteById</exports>
       <exports type="js">osapi.container.Container.prototype.updateContainerSecurityToken</exports>
+      <exports type="js">osapi.container.Container.prototype.forceRefreshAllTokens</exports>
       <exports type="rpc">resize_iframe</exports>
       <exports type="rpc">resize_iframe_width</exports>
       <exports type="rpc">set_pref</exports>

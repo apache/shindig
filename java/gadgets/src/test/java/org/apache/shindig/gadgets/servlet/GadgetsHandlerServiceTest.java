@@ -23,6 +23,7 @@ import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.isA;
+import static org.easymock.EasyMock.replay;
 
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -38,6 +39,7 @@ import org.apache.shindig.common.EasyMockTestCase;
 import org.apache.shindig.common.servlet.HttpUtil;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.util.FakeTimeSource;
+import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
@@ -57,6 +59,7 @@ import org.apache.shindig.gadgets.js.JsResponseBuilder;
 import org.apache.shindig.gadgets.js.JsServingPipeline;
 import org.apache.shindig.gadgets.process.ProcessingException;
 import org.apache.shindig.gadgets.servlet.GadgetsHandlerApi.Feature;
+import org.apache.shindig.gadgets.uri.DefaultIframeUriManager;
 import org.apache.shindig.gadgets.uri.JsUriManager;
 import org.apache.shindig.gadgets.uri.JsUriManager.JsUri;
 import org.apache.shindig.gadgets.uri.ProxyUriManager;
@@ -105,6 +108,7 @@ public class GadgetsHandlerServiceTest extends EasyMockTestCase {
   private final JsRequestBuilder jsRequestBuilder = new JsRequestBuilder(jsUriManager, null);
   private final GadgetAdminStore gadgetAdminStore = mock(GadgetAdminStore.class);
 
+  private ContainerConfig config;
   private FakeSecurityTokenCodec tokenCodec;
   private GadgetsHandlerService gadgetHandler;
   private GadgetsHandlerService gadgetHandlerWithAdmin;
@@ -118,14 +122,15 @@ public class GadgetsHandlerServiceTest extends EasyMockTestCase {
         return mockRegistry;
       }
     };
+    config = createMock(ContainerConfig.class);
     gadgetHandler = new GadgetsHandlerService(timeSource, processor, urlGenerator, tokenCodec,
             proxyUriManager, jsUriManager, proxyHandler, jsPipeline, jsRequestBuilder,
             SPEC_REFRESH_INTERVAL_MS, new BeanFilter(), cajaContentRewriter, gadgetAdminStore,
-            featureRegistryProvider, new ModuleIdManagerImpl());
+            featureRegistryProvider, new ModuleIdManagerImpl(),config);
     gadgetHandlerWithAdmin = new GadgetsHandlerService(timeSource, processor, urlGenerator,
             tokenCodec, proxyUriManager, jsUriManager, proxyHandler, jsPipeline, jsRequestBuilder,
             SPEC_REFRESH_INTERVAL_MS, new BeanFilter(), cajaContentRewriter, gadgetAdminStore,
-            featureRegistryProvider, new ModuleIdManagerImpl());
+            featureRegistryProvider, new ModuleIdManagerImpl(),config);
   }
 
   // Next test verify that the API data classes are configured correctly.
@@ -193,6 +198,20 @@ public class GadgetsHandlerServiceTest extends EasyMockTestCase {
     assertEquals(CURRENT_TIME_MS, response.getResponseTimeMs());
     assertEquals(METADATA_EXPIRY_TIME_MS, response.getExpireTimeMs());
     assertEquals(Sets.newHashSet(RPC_SERVICE_1, RPC_SERVICE_2, RPC_SERVICE_3), response.getRpcServiceIds());
+    verify();
+  }
+
+  @Test
+  public void testGetMetadataWithalwaysAppendST() throws Exception {
+    GadgetsHandlerApi.MetadataRequest request = createMetadataRequest(FakeProcessor.SPEC_URL,
+            CONTAINER, "default", createAuthContext(null, null), ImmutableList.of("*"));
+    setupMockGadgetAdminStore(true);
+    setupMockRegistry(ImmutableList.<String> of(""));
+    expect(config.getBool(CONTAINER, DefaultIframeUriManager.SECURITY_TOKEN_ALWAYS_KEY)).andReturn(
+            true).once();
+    replay(config);
+    GadgetsHandlerApi.MetadataResponse response = gadgetHandler.getMetadata(request);
+    assertTrue(response.getNeedsTokenRefresh());
     verify();
   }
 

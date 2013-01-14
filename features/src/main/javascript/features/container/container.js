@@ -870,6 +870,31 @@ osapi.container.Container.prototype.refreshTokens_ = function() {
 
 
 /**
+ * invalidate all tokens, so next time the refreshToken_ is called, all the token will be refreshed.
+ * @private
+ */
+osapi.container.Container.prototype.invalidateAllTokens_ = function() {
+  var self = this;
+  for ( var siteId in self.sites_) {
+    var site = sites[siteId];
+    if (site instanceof osapi.container.GadgetSite) {
+      var holder = site.getActiveSiteHolder();
+      var gadgetInfo = commonContainer.service_.getCachedGadgetMetadata(holder.getUrl());
+      gadgetInfo[osapi.container.MetadataResponse.NEEDS_TOKEN_REFRESH] = true;
+    }
+  }
+};
+
+/**
+ * Refresh all security tokens on all gadget sites immediately no matter it's needed or not. This
+ * will fetch gadget metadata, along with its token and have the token cache updated
+ */
+osapi.container.Container.prototype.forceRefreshAllTokens = function() {
+  this.invalidateAllTokens_();
+  this.refreshTokens_();
+};
+
+/**
  * invokes methods on the gadget lifecycle callback registered with the
  * container.  The callback will be passed the remainder of the arguments after methodName.
  * @param {string} methodName of the callback method to be called.
