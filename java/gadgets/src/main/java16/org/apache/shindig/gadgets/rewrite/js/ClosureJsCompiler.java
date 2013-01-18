@@ -172,6 +172,16 @@ public class ClosureJsCompiler implements JsCompiler {
     CompilerOptions options = getCompilerOptions(jsUri);
     StringBuilder compiled = new StringBuilder();
     StringBuilder exports = new StringBuilder();
+    boolean useExterns = compileLevel.equals("advanced");
+    if (!useExterns) {
+      /*
+       * Kicking the can down the road.  Advanced optimizations doesn't currently work with the closure compiler in shindig.
+       * When it's fixed, we need to make sure all externs are included (not just externs for what was requested) otherwise
+       * the cache key will fluctuate with the url hit, and we will get massive cache churn and possible DDOS scenarios
+       * when we recompile all requested modules on the fly because the cache key was different.
+       */
+      externs = "";
+    }
 
     // Add externs export to the list if set in options.
     if (options.isExternExportsEnabled()) {
@@ -224,9 +234,11 @@ public class ClosureJsCompiler implements JsCompiler {
       for (Future<CompileResult> future : futures) {
         CompileResult result = future.get();
         compiled.append(result.getContent());
-        String export = result.getExternExport();
-        if (export != null) {
-          exports.append(export);
+        if (useExterns) {
+          String export = result.getExternExport();
+          if (export != null) {
+            exports.append(export);
+          }
         }
       }
 
