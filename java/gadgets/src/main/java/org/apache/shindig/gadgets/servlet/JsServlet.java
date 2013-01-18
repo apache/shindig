@@ -102,6 +102,10 @@ public class JsServlet extends InjectedServlet {
 
   protected void emitJsResponse(JsResponse jsResponse, HttpServletRequest req,
       HttpServletResponse resp) throws IOException {
+    if (jsResponse.getStatusCode() == 304) {
+      resp.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+      return;
+    }
     if (jsResponse.getStatusCode() == 200 && jsResponse.toJsString().length() == 0) {
       resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
       return;

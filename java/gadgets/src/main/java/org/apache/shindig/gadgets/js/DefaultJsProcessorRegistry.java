@@ -29,18 +29,29 @@ import java.util.List;
  */
 public class DefaultJsProcessorRegistry implements JsProcessorRegistry {
 
+  private final List<JsProcessor> preProcessors;
   private final List<JsProcessor> optionalProcessors;
   private final List<JsProcessor> requiredProcessors;
 
   @Inject
   public DefaultJsProcessorRegistry(
+      @Named("shindig.js.pre-processors") List<JsProcessor> preProcessors,
       @Named("shindig.js.optional-processors") List<JsProcessor> optionalProcessors,
       @Named("shindig.js.required-processors") List<JsProcessor> requiredProcessors) {
+    this.preProcessors = preProcessors;
     this.optionalProcessors = optionalProcessors;
     this.requiredProcessors = requiredProcessors;
   }
 
   public void process(JsRequest request, JsResponseBuilder response) throws JsException {
+    // JsProcessor defined in preProcessors can determine whether the js process really need to happen
+    // Typically, IfModifiedSinceProcessor is one of the preProcessors, if it sets a 304 status code,
+    // all the remaining JsProcessors in optional and required won't be started.
+    for (JsProcessor processor : preProcessors) {
+      if (!processor.process(request, response)){
+        return;
+      }
+    }
     for (JsProcessor processor : optionalProcessors) {
       if (!processor.process(request, response)) {
         break;

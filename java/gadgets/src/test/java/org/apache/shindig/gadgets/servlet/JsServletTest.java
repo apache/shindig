@@ -80,8 +80,8 @@ public class JsServletTest extends ServletTestFixture {
     jsLoadProcessor = new JsLoadProcessor(jsUriManagerMock, jsloadTtlSecs, true);
     JsProcessorRegistry jsProcessorRegistry =
         new DefaultJsProcessorRegistry(
-            ImmutableList.<JsProcessor>of(jsLoadProcessor, new IfModifiedSinceProcessor(),
-                 getJsProcessorMock, new AddOnloadFunctionProcessor()),
+            ImmutableList.<JsProcessor>of(new IfModifiedSinceProcessor()),
+            ImmutableList.<JsProcessor>of(jsLoadProcessor, getJsProcessorMock, new AddOnloadFunctionProcessor()),
             ImmutableList.<JsProcessor>of());
 
     jsServingPipeline = new DefaultJsServingPipeline(jsProcessorRegistry);
@@ -249,7 +249,7 @@ public class JsServletTest extends ServletTestFixture {
         builder.addError("Something bad happened");
         return false;
       }};
-    JsProcessorRegistry jsProcessorRegistry = new DefaultJsProcessorRegistry(
+    JsProcessorRegistry jsProcessorRegistry = new DefaultJsProcessorRegistry(ImmutableList.<JsProcessor> of(),
             ImmutableList.<JsProcessor> of(errorProcessor), ImmutableList.<JsProcessor> of());
 
     JsServingPipeline pipeline = new DefaultJsServingPipeline(jsProcessorRegistry);

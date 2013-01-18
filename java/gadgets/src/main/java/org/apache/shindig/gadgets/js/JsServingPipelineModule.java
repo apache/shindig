@@ -38,12 +38,19 @@ public class JsServingPipelineModule extends AbstractModule {
 
   @Provides
   @Inject
+  @Named("shindig.js.pre-processors")
+  public List<JsProcessor> provideProcessors(
+      IfModifiedSinceProcessor ifModifiedSinceProcessor) {
+    return ImmutableList.<JsProcessor>of(ifModifiedSinceProcessor);
+  }
+
+  @Provides
+  @Inject
   @Named("shindig.js.optional-processors")
   public List<JsProcessor> provideProcessors(
       AddJslInfoVariableProcessor addJslInfoVariableProcessor,
       DeferJsProcessor deferJsProcessor,
       JsLoadProcessor jsLoaderGeneratorProcessor,
-      IfModifiedSinceProcessor ifModifiedSinceProcessor,
       GetJsContentProcessor getJsContentProcessor,
       CajaJsSubtractingProcessor cajaJsSubtractingProcessor,
       ExportJsProcessor exportJsProcessor,
@@ -56,7 +63,6 @@ public class JsServingPipelineModule extends AbstractModule {
         addJslInfoVariableProcessor,
         deferJsProcessor,
         jsLoaderGeneratorProcessor,
-        ifModifiedSinceProcessor,
         getJsContentProcessor,
         cajaJsSubtractingProcessor,
         exportJsProcessor,

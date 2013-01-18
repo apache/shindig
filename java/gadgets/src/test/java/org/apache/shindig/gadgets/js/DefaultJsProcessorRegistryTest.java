@@ -37,6 +37,7 @@ public class DefaultJsProcessorRegistryTest {
   private IMocksControl control;
   private JsRequest request;
   private JsResponseBuilder response;
+  private JsProcessor processor0;
   private JsProcessor processor1;
   private JsProcessor processor2;
   private JsProcessor processor3;
@@ -47,16 +48,23 @@ public class DefaultJsProcessorRegistryTest {
     control = EasyMock.createControl();
     request = control.createMock(JsRequest.class);
     response = new JsResponseBuilder();
+    processor0 = control.createMock(JsProcessor.class);
     processor1 = control.createMock(JsProcessor.class);
     processor2 = control.createMock(JsProcessor.class);
     processor3 = control.createMock(JsProcessor.class);
     registry = new DefaultJsProcessorRegistry(
+        ImmutableList.of(processor0),
         ImmutableList.of(processor1, processor2),
         ImmutableList.of(processor3));
   }
 
   @Test
   public void testProcessorModifiesResponse() throws Exception {
+    JsProcessor preprocessor = new JsProcessor() {
+      public boolean process(JsRequest request, JsResponseBuilder builder) {
+        return true;
+      }
+    };
     JsProcessor processor = new JsProcessor() {
       public boolean process(JsRequest request, JsResponseBuilder builder) {
         builder.clearJs().appendJs(JS_CODE, "js");
@@ -64,6 +72,7 @@ public class DefaultJsProcessorRegistryTest {
       }
     };
     registry = new DefaultJsProcessorRegistry(
+        ImmutableList.of(preprocessor),
         ImmutableList.of(processor),
         ImmutableList.<JsProcessor>of());
     control.replay();
@@ -74,6 +83,7 @@ public class DefaultJsProcessorRegistryTest {
 
   @Test
   public void testTwoProcessorsAreRunOneAfterAnother() throws Exception {
+    EasyMock.expect(processor0.process(request, response)).andReturn(true);
     EasyMock.expect(processor1.process(request, response)).andReturn(true);
     EasyMock.expect(processor2.process(request, response)).andReturn(true);
     EasyMock.expect(processor3.process(request, response)).andReturn(true);
@@ -84,8 +94,17 @@ public class DefaultJsProcessorRegistryTest {
 
   @Test
   public void testProcessorStopsProcessingWhenItReturnsFalse() throws Exception {
+    EasyMock.expect(processor0.process(request, response)).andReturn(true);
     EasyMock.expect(processor1.process(request, response)).andReturn(false);
     EasyMock.expect(processor3.process(request, response)).andReturn(true);
+    control.replay();
+    registry.process(request, response);
+    control.verify();
+  }
+
+  @Test
+  public void testProcessorStopsProcessingWhenPreProcessorsReturnsFalse() throws Exception {
+    EasyMock.expect(processor0.process(request, response)).andReturn(false);
     control.replay();
     registry.process(request, response);
     control.verify();
