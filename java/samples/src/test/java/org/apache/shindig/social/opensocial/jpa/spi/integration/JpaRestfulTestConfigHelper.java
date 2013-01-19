@@ -80,6 +80,7 @@ public class JpaRestfulTestConfigHelper {
     EasyMock.expect(containerConfig.<String>getList(null, "gadgets.parentOrigins")).andReturn(Collections.<String>singletonList("*")).anyTimes();
     EasyMock.replay(containerConfig);
     servlet.setContainerConfig(containerConfig);
+    servlet.setJSONPAllowed(true);
     return servlet;
   }
 

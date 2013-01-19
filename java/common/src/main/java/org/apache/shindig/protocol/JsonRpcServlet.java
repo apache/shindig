@@ -110,7 +110,7 @@ public class JsonRpcServlet extends ApiServlet {
       // Get content or deal with JSON-RPC GET
       if ("POST".equals(method)) {
         content = getPostContent(servletRequest, formData);
-      } else if (HttpUtil.isJSONP(servletRequest)) {
+      } else if (this.isJSONPAllowed && HttpUtil.isJSONP(servletRequest)) {
         content = servletRequest.getParameter("request");
         callback = servletRequest.getParameter("callback");
       } else {

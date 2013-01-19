@@ -71,6 +71,7 @@ public abstract class ApiServlet extends InjectedServlet {
   protected BeanConverter xmlConverter;
   protected BeanConverter atomConverter;
   protected ContainerConfig containerConfig;
+  protected Boolean isJSONPAllowed;
 
   @Override
   public void init(ServletConfig config) throws ServletException {
@@ -99,6 +100,11 @@ public abstract class ApiServlet extends InjectedServlet {
     this.containerConfig = containerConfig;
   }
 
+  @Inject
+  public void setJSONPAllowed(
+      @Named("shindig.allowJSONP") Boolean isJSONPAllowed) {
+    this.isJSONPAllowed = isJSONPAllowed;
+  }
 
   @Inject
   public void setBeanConverters(

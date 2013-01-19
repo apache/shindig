@@ -48,6 +48,7 @@ public class RpcServletTest extends Assert {
     servlet = new RpcServlet();
     handler = createMock(JsonRpcHandler.class);
     servlet.setJsonRpcHandler(handler);
+    servlet.setJSONPAllowed(true);
   }
 
   @Test
@@ -63,6 +64,21 @@ public class RpcServletTest extends Assert {
     replay(handler);
     servlet.doGet(request, response);
     verify(response);
+  }
+
+  @Test
+  public void testDisallowJSONP() throws Exception {
+    servlet.setJSONPAllowed(false);
+    HttpServletRequest request = createGetRequest("{\"gadgets\":[]}",null);
+    HttpServletResponse response = createHttpResponse("Content-Disposition",
+        "attachment;filename=rpc.txt", "application/json; charset=utf-8",
+        "{\"GADGETS\":[]}", HttpServletResponse.SC_OK);
+    JSONObject handlerResponse = new JSONObject("{\"GADGETS\":[]}");
+    expect(handler.process(isA(JSONObject.class))).andReturn(handlerResponse);
+    replay(handler);
+    servlet.doGet(request, response);
+    verify(response);
+    servlet.setJSONPAllowed(true);
   }
 
   @Test

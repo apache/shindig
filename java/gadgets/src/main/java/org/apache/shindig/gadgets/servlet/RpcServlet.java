@@ -26,6 +26,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -49,11 +50,18 @@ public class RpcServlet extends InjectedServlet {
   private static final Logger LOG = Logger.getLogger("org.apache.shindig.gadgets.servlet.RpcServlet");
 
   private transient JsonRpcHandler jsonHandler;
+  private Boolean isJSONPAllowed;
 
   @Inject
   public void setJsonRpcHandler(JsonRpcHandler jsonHandler) {
     checkInitialized();
     this.jsonHandler = jsonHandler;
+  }
+
+  @Inject
+  public void setJSONPAllowed(
+      @Named("shindig.allowJSONP") Boolean isJSONPAllowed) {
+    this.isJSONPAllowed = isJSONPAllowed;
   }
 
   @Override
@@ -63,9 +71,13 @@ public class RpcServlet extends InjectedServlet {
     String callbackValue;
 
     try {
-      HttpUtil.isJSONP(request);
+      if (this.isJSONPAllowed) {
+        HttpUtil.isJSONP(request);
+        callbackValue = validateParameterValue(request, GET_REQUEST_CALLBACK_PARAM);
+      } else {
+        callbackValue = validateParameterValueNull(request, GET_REQUEST_CALLBACK_PARAM);
+      }
       reqValue = validateParameterValue(request, GET_REQUEST_REQ_PARAM);
-      callbackValue = validateParameterValue(request, GET_REQUEST_CALLBACK_PARAM);
     } catch (IllegalArgumentException e) {
       response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
       LOG.log(Level.INFO, e.getMessage(), e);
@@ -73,9 +85,15 @@ public class RpcServlet extends InjectedServlet {
     }
 
     Result result = process(request, response, reqValue);
-    response.getWriter().write(result.isSuccess()
-        ? callbackValue + '(' + result.getOutput() + ')'
-        : result.getOutput());
+    if (result.isSuccess()) {
+      if (callbackValue != null) {
+        response.getWriter().write(callbackValue + '(' + result.getOutput() + ')');
+      } else {
+        response.getWriter().write(result.getOutput());
+      }
+    } else {
+      response.getWriter().write(result.getOutput());
+    }
   }
 
   @Override
@@ -98,6 +116,13 @@ public class RpcServlet extends InjectedServlet {
       throws IllegalArgumentException {
     String result = request.getParameter(parameter);
     Preconditions.checkArgument(result != null, "No parameter '%s' specified", parameter);
+    return result;
+  }
+
+  private String validateParameterValueNull(HttpServletRequest request, String parameter)
+      throws IllegalArgumentException {
+    String result = request.getParameter(parameter);
+    Preconditions.checkArgument(result == null, "Wrong parameter '%s' found", parameter);
     return result;
   }
 

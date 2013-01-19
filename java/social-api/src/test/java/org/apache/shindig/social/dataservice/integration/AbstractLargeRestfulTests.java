@@ -104,6 +104,7 @@ public abstract class AbstractLargeRestfulTests extends EasyMockTestCase {
     EasyMock.expect(containerConfig.<String>getList(null, "gadgets.parentOrigins")).andReturn(Collections.<String>singletonList("*")).anyTimes();
     EasyMock.replay(containerConfig);
     servlet.setContainerConfig(containerConfig);
+    servlet.setJSONPAllowed(true);
     servlet.setBeanConverters(new BeanJsonConverter(injector),
         new BeanXStreamConverter(new XStream081Configuration(injector)),
         new BeanXStreamAtomConverter(new XStream081Configuration(injector)));

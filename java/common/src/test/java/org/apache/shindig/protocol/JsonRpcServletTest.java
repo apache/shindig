@@ -96,6 +96,7 @@ public class JsonRpcServletTest extends Assert {
     servlet.setHandlerRegistry(registry);
     servlet.setBeanConverters(converter, null, null);
     servlet.setContainerConfig(containerConfig);
+    servlet.setJSONPAllowed(true);
 
     handler.setMock(new TestHandler() {
       @Override
@@ -345,6 +346,23 @@ public class JsonRpcServletTest extends Assert {
 
     JsonAssert.assertJsonEquals("[{id:'1',result:{foo:'bar'}},{id:'2',result:{foo:'bar'}}]",
         getOutput());
+  }
+
+  @Test
+  public void testDisallowJSONP() throws Exception {
+    servlet.setJSONPAllowed(false);
+    setupRequest("[{method:test.get,id:'1'},{method:test.get,id:'2'}]");
+
+    expect(res.getWriter()).andReturn(writer);
+    expectLastCall();
+
+    mockControl.replay();
+    servlet.service(req, res);
+    mockControl.verify();
+
+    JsonAssert.assertJsonEquals("[{id:'1',result:{foo:'bar'}},{id:'2',result:{foo:'bar'}}]",
+        getOutput());
+    servlet.setJSONPAllowed(true);
   }
 
   @Test

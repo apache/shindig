@@ -78,6 +78,7 @@ public class DataServiceServletTest extends Assert {
 
     servlet.setHandlerRegistry(registry);
     servlet.setContainerConfig(containerConfig);
+    servlet.setJSONPAllowed(true);
 
     servlet.setBeanConverters(jsonConverter, xmlConverter, atomConverter);
   }
@@ -114,6 +115,14 @@ public class DataServiceServletTest extends Assert {
     servlet.service(req, res);
     mockControl.verify();
     mockControl.reset();
+  }
+
+  @Test
+  public void testDisallowJSONP() throws Exception {
+    servlet.setJSONPAllowed(false);
+    String route = "/test";
+    verifyHandlerWasFoundForPathInfo(route, "POST", "GET");
+    servlet.setJSONPAllowed(true);
   }
 
   @Test
