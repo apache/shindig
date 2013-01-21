@@ -25,7 +25,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import javax.el.ELContext;
+import javax.el.PropertyNotFoundException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shindig.common.JsonSerializer;
@@ -197,8 +199,14 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
   private void processNode(Node source) {
     switch (source.getNodeType()) {
     case Node.TEXT_NODE:
-      source.setTextContent(String.valueOf(expressions.parse(source.getTextContent(), String.class)
+      try {
+        source.setTextContent(String.valueOf(expressions.parse(source.getTextContent(), String.class)
               .getValue(elContext)));
+      } catch (PropertyNotFoundException pe) {
+        if (LOG.isLoggable(Level.INFO)) {
+          LOG.log(Level.INFO, pe.getMessage(), pe);
+        }
+      }
       break;
     case Node.ELEMENT_NODE:
       processChildNodes(source);
