@@ -18,67 +18,96 @@
   under the License.
 -->
 <Module>
-	<ModulePrefs
-		title="Test Gadget and Container Domain Configuration"
-		description="Tests Gadget and Container domain configuration by trying to access container page information from within a gadget"
-	>
-	</ModulePrefs>
-	<Content type="html">
-  <![CDATA[
-	<div id="msgDiv" />
-    <script type="text/javascript">
-		function testDomain(){
-			var msgDiv = document.getElementById("msgDiv");
-			var msg;
-			if (!doTest()) {
-				msg = "Fail! Gadget was able to see container page's location: " + window.parent.location;
-			} else {
-				msg = "Success! Gadget could not get container page's information.";
-			}
-			msgDiv.innerHTML = msg;
-		};
+  <ModulePrefs
+    title="Test Gadget and Container Domain Configuration"
+    description="Tests Gadget and Container domain configuration by trying to access container page information from within a gadget"
+  >
+  </ModulePrefs>
+  <Content type="html"><![CDATA[
+    <html>
+      <head>
+        <link href='http://fonts.googleapis.com/css?family=Lora|Istok+Web:700' rel='stylesheet' type='text/css'/>
+        <link rel="stylesheet" href="http://jashkenas.github.com/docco/resources/docco.css"/>
+        <link rel="stylesheet" href="http://pivotal.github.com/jasmine/css/jasmine_docco.css"/>
+        <link rel="stylesheet" href="http://pivotal.github.com/jasmine/lib/jasmine.css"/>
+        <style type="text/css">
+          body {
+            margin: 0;
+            overflow: auto;
+          }
+          .exceptions {
+            display: none;
+          }
+          #HTMLReporter .stackTrace {
+            max-height: 5em;
+          }
+        </style>
+        <script src="http://pivotal.github.com/jasmine/lib/jasmine.js"></script>
+        <script src="http://pivotal.github.com/jasmine/lib/jasmine-html.js"></script>
 
-		function doTest() {
-			// First simple test, just try to get at the parent window's location
-			try {
-				var loc = "" + window.parent.location;
-				return false;
-			} catch (err) {
-				// Expected.  Do nothing.
-			}
+        <!-- Begin Tests -->
+        <script type="text/javascript">
+          describe("This gadget", function() {
+            it("is rendering over https", function() {
+              expect(window.location.protocol).toMatch(/^https/);
+            });
 
-			// Keep lowering the domain to try to get on the same domain as the container page.
-			// Some (all?) browsers will allow two windows to communicate if they have both set
-			// document.domain to be the same value.  If the container has set document.domain
-			// and the gadget can lower it's domain to that same domain, then we want to mark
-			// that as a failure.
-			var domain = document.domain;
-			var split = domain.split('.');
-			var success = true;
-			while (split.length > 0) {
-				try {
-					// Stringifying the location of another window is subject to same origin policy
-					var loc = "" + window.parent.location;
+            it("is rendering on a locked domain", function() {
+              expect(gadgets.config.get()['core.io'].proxyUrl).not.toContain('%host%');
+            });
 
-					// If we got here, the above didn't throw an exception so we know we failed.
-					success = false;
-					break;
-				} catch (err) {
-					// Expected.  Do nothing
-				}
-				split.shift();
-				try {
-					document.domain = split.join('.');
-				} catch (err) {
-					// This will happen (in FF at least), if we try to set document.domain to "com" or "org".
-					// Consider this the end of the test
-					break;
-				}
-			}
-			return success;
-		}
-		gadgets.util.registerOnLoadHandler(testDomain);
-    </script>
-  ]]>
-	</Content>
+            var parentLoc = undef;
+            it("cannot access the parent window", function() {
+              try {
+                parentLoc = window.parent.location.href;
+              } catch (ignore) {}
+              expect(parentLoc).toBeUndefined();
+            });
+
+            if (parentLoc == undef) {
+	            it("cannot access the parent window by lowering its domain", function() {
+	              var parts = document.domain.split('.'),
+	                  undef;
+	              parts.shift();
+	              while(parts.length > 1) {
+	                document.domain = parts.join('.');
+	
+	                var parentLoc = undef;
+	                try {
+	                  parentLoc = window.parent.location.href;
+	                } catch (ignore) {}
+	                expect(parentLoc).toBeUndefined();
+	                parts.shift();
+	              }
+	            });
+	          }
+          });
+        </script>
+
+        <!-- End Tests -->
+        <script type="text/javascript">
+          gadgets.util.registerOnLoadHandler(function go() {
+            // The links jasmine generates in the report break gadgets.
+            var orig = jasmine.Runner.prototype.finishCallback;
+            jasmine.Runner.prototype.finishCallback = function() {
+              orig.call(this);
+              var links = document.body.getElementsByTagName('a');
+              for (var i = 0; i < links.length; i++) {
+                links[i].href = 'javascript: void 0;';
+              }
+            };
+
+            var jasmineEnv = jasmine.getEnv(),
+                htmlReporter = new jasmine.HtmlReporter();
+            jasmineEnv.addReporter(htmlReporter);
+            jasmineEnv.specFilter = function(spec) {
+              return htmlReporter.specFilter(spec);
+            };
+            jasmineEnv.execute();
+          });
+        </script>
+      </head>
+      <body></body>
+    </html>
+  ]]></Content>
 </Module>
