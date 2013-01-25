@@ -182,6 +182,11 @@
       "isOnlyVisible" : false,
       "urlTemplate" : "http://localhost${CONTEXT_ROOT}/gadgets/default?{var}",
       "aliases" : ["home", "profile", "canvas"]
+    },
+    "embedded" : {
+      "isOnlyVisible" : false,
+      "urlTemplate" : "http://localhost${CONTEXT_ROOT}/gadgets/embedded?{var}",
+      "aliases" : ["embedded"]
     }
   },
   "tabs": {
