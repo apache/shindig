@@ -236,13 +236,19 @@ public class BasicOAuth2Store implements OAuth2Store {
     }
 
     final String processedGadgetUri = this.getGadgetUri(gadgetUri, serviceName);
-
     OAuth2Token token = this.cache.getToken(processedGadgetUri, serviceName, user, scope, type);
     if (token == null) {
       try {
         token = this.persister.findToken(processedGadgetUri, serviceName, user, scope, type);
         if (token != null) {
-          this.cache.storeToken(token);
+          synchronized (token) {
+            try {
+              token.setGadgetUri(processedGadgetUri);
+              this.cache.storeToken(token);
+            } finally {
+              token.setGadgetUri(gadgetUri);
+            }
+          }
         }
       } catch (final OAuth2PersistenceException e) {
         throw new GadgetException(Code.OAUTH_STORAGE_ERROR, "Error loading OAuth2 token", e);
@@ -328,15 +334,22 @@ public class BasicOAuth2Store implements OAuth2Store {
         BasicOAuth2Store.LOG.exiting(BasicOAuth2Store.LOG_CLASS, "removeToken", token);
       }
 
-      OAuth2Token removedToken = null;
       try {
-        // Remove token from the cache
-        removedToken = this.cache.removeToken(token);
-        // Token is gone from the cache, also remove it from persistence
-        this.persister.removeToken(removedToken.getGadgetUri(), removedToken.getServiceName(),
-                removedToken.getUser(), removedToken.getScope(), removedToken.getType());
+        synchronized (token) {
+          final String origGadgetApi = token.getGadgetUri();
+          final String processedGadgetUri = this.getGadgetUri(token.getGadgetUri(), token.getServiceName());
+          token.setGadgetUri(processedGadgetUri);
+          try {
+            // Remove token from the cache
+            this.cache.removeToken(token);
+            // Token is gone from the cache, also remove it from persistence
+            this.persister.removeToken(processedGadgetUri, token.getServiceName(), token.getUser(), token.getScope(), token.getType());
+          } finally {
+            token.setGadgetUri(origGadgetApi);
+          }
+        }
 
-        return removedToken;
+        return token;
       } catch (final OAuth2PersistenceException e) {
         if (isLogging) {
           BasicOAuth2Store.LOG.log("Error removing OAuth2 token ", e);
@@ -375,29 +388,40 @@ public class BasicOAuth2Store implements OAuth2Store {
       final String serviceName = token.getServiceName();
 
       final String processedGadgetUri = this.getGadgetUri(gadgetUri, serviceName);
-
-      token.setGadgetUri(processedGadgetUri);
-
-      final OAuth2Token existingToken = this.getToken(gadgetUri, token.getServiceName(),
-              token.getUser(), token.getScope(), token.getType());
-      try {
-        if (existingToken == null) {
-          this.persister.insertToken(token);
-        } else {
-          this.cache.removeToken(existingToken);
-          this.persister.updateToken(token);
+      synchronized (token) {
+        token.setGadgetUri(processedGadgetUri);
+        try {
+          final OAuth2Token existingToken = this.getToken(gadgetUri, token.getServiceName(),
+                  token.getUser(), token.getScope(), token.getType());
+          try {
+            if (existingToken == null) {
+              this.persister.insertToken(token);
+            } else {
+              synchronized (existingToken) {
+                try {
+                  existingToken.setGadgetUri(processedGadgetUri);
+                  this.cache.removeToken(existingToken);
+                  this.persister.updateToken(token);
+                } finally {
+                  existingToken.setGadgetUri(gadgetUri);
+                }
+              }
+            }
+            this.cache.storeToken(token);
+          } catch (final OAuth2CacheException e) {
+            if (isLogging) {
+              BasicOAuth2Store.LOG.log("Error storing OAuth2 token", e);
+            }
+            throw new GadgetException(Code.OAUTH_STORAGE_ERROR, "Error storing OAuth2 token", e);
+          } catch (final OAuth2PersistenceException e) {
+            if (isLogging) {
+              BasicOAuth2Store.LOG.log("Error storing OAuth2 token", e);
+            }
+            throw new GadgetException(Code.OAUTH_STORAGE_ERROR, "Error storing OAuth2 token", e);
+          }
+        } finally {
+          token.setGadgetUri(gadgetUri);
         }
-        this.cache.storeToken(token);
-      } catch (final OAuth2CacheException e) {
-        if (isLogging) {
-          BasicOAuth2Store.LOG.log("Error storing OAuth2 token", e);
-        }
-        throw new GadgetException(Code.OAUTH_STORAGE_ERROR, "Error storing OAuth2 token", e);
-      } catch (final OAuth2PersistenceException e) {
-        if (isLogging) {
-          BasicOAuth2Store.LOG.log("Error storing OAuth2 token", e);
-        }
-        throw new GadgetException(Code.OAUTH_STORAGE_ERROR, "Error storing OAuth2 token", e);
       }
     }
 
