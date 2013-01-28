@@ -27,7 +27,6 @@ specific language governing permissions and limitations under the License.
   <dependency>rpc</dependency>
   <dependency>container.util</dependency>
   <dependency>container.site</dependency>
-  container.site
   <container>
     <script src="gadget_holder.js" />
     <script src="gadget_site.js" />
