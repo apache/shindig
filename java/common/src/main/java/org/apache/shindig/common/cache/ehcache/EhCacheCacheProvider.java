@@ -81,7 +81,7 @@ public class EhCacheCacheProvider implements CacheProvider,
     normalizedFilterPath = normalizedFilterPath.replaceFirst(ResourceLoader.FILE_PREFIX, "");
     System.getProperties().put("net.sf.ehcache.sizeof.filter", normalizedFilterPath);
 
-    cacheManager = new CacheManager(getConfiguration(configPath));
+    cacheManager = CacheManager.create(getConfiguration(configPath));
     create(jmxEnabled, withCacheStats);
     cleanupHandler.register(this);
   }
