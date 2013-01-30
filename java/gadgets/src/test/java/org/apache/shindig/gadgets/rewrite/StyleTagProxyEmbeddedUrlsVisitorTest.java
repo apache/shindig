@@ -29,13 +29,14 @@ import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.admin.GadgetAdminModule;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.oauth.OAuthModule;
+import org.apache.shindig.gadgets.oauth2.OAuth2MessageModule;
 import org.apache.shindig.gadgets.oauth2.OAuth2Module;
 import org.apache.shindig.gadgets.oauth2.handler.OAuth2HandlerModule;
 import org.apache.shindig.gadgets.oauth2.persistence.sample.OAuth2PersistenceModule;
-import org.apache.shindig.gadgets.oauth2.OAuth2MessageModule;
 import org.apache.shindig.gadgets.parse.ParseModule;
 import org.apache.shindig.gadgets.parse.caja.CajaHtmlParser;
 import org.apache.shindig.gadgets.parse.caja.CajaHtmlSerializer;
+import org.apache.shindig.gadgets.rewrite.ContentRewriterFeature.Config;
 import org.apache.shindig.gadgets.uri.DefaultProxyUriManager;
 import org.apache.shindig.gadgets.uri.ProxyUriManager;
 import org.easymock.EasyMock;
@@ -91,6 +92,16 @@ public class StyleTagProxyEmbeddedUrlsVisitorTest extends DomWalkerTestBase {
       + "</head><body><a href=\"hello\">Hello</a>"
       + "</body></html>";
 
+  private static final String NOREWRITE = "<html><head>"
+      + "<style>"
+      + "@import url('http://1.com/1.css');"
+      + "P {color:blue;}"
+      + "P {color:red;}"
+      + "A {background: url('http://1.com/2.jpg');}"
+      + "</style>"
+      + "</head><body><a href=\"hello\">Hello</a>"
+      + "</body></html>";
+
   private static final String EXPECTED = "<html><head>"
       + "<style>"
       + "@import url('//localhost:8080/gadgets/proxy?container=default&"
@@ -107,23 +118,41 @@ public class StyleTagProxyEmbeddedUrlsVisitorTest extends DomWalkerTestBase {
 
   @Test
   public void testImportsAndBackgroundUrlsInStyleTagDefaultContainer() throws Exception {
-    testImportsAndBackgroundUrlsInStyleTag(ORIGINAL, EXPECTED, ContainerConfig.DEFAULT_CONTAINER);
+    // TODO: IMPORTANT!  This test needs to not rely on the packaged shindig config, but rather
+    //       mock the config with expected values, so that tests do not fail when people set
+    //       alternative defaults.
+    Config config = injector.getInstance(ContentRewriterFeature.DefaultConfig.class);
+    EasyMock.replay();
+    if (config.isRewriteEnabled())
+      testImportsAndBackgroundUrlsInStyleTag(ORIGINAL, EXPECTED, ContainerConfig.DEFAULT_CONTAINER, config);
+    else
+      testImportsAndBackgroundUrlsInStyleTag(ORIGINAL, NOREWRITE, ContainerConfig.DEFAULT_CONTAINER, config);
   }
 
   @Test
   public void testImportsAndBackgroundUrlsInStyleTagMockContainer() throws Exception {
-    testImportsAndBackgroundUrlsInStyleTag(ORIGINAL, EXPECTED.replace(
-        "localhost:8080/gadgets/proxy?container=default", "www.mock.com/gadgets/proxy?container=mock"),
-        MOCK_CONTAINER);
+    // TODO: IMPORTANT!  This test needs to not rely on the packaged shindig config, but rather
+    //       mock the config with expected values, so that tests do not fail when people set
+    //       alternative defaults.
+    Config config = injector.getInstance(ContentRewriterFeature.DefaultConfig.class);
+    EasyMock.replay();
+
+    if (config.isRewriteEnabled()) {
+      testImportsAndBackgroundUrlsInStyleTag(ORIGINAL, EXPECTED.replace(
+          "localhost:8080/gadgets/proxy?container=default", "www.mock.com/gadgets/proxy?container=mock"),
+          MOCK_CONTAINER, config);
+    } else {
+      testImportsAndBackgroundUrlsInStyleTag(ORIGINAL, NOREWRITE, ContainerConfig.DEFAULT_CONTAINER, config);
+    }
+
   }
 
-  private void testImportsAndBackgroundUrlsInStyleTag(String html, String expected, String container)
+  private void testImportsAndBackgroundUrlsInStyleTag(String html, String expected, String container, Config config)
       throws Exception {
+    // TODO: IMPORTANT!  This test needs to not rely on the packaged shindig config, but rather
+    //       mock the config with expected values, so that tests do not fail when people set
+    //       alternative defaults.
     Document doc = htmlParser.parseDom(html);
-
-    ContentRewriterFeature.Config config = injector.getInstance(
-        ContentRewriterFeature.DefaultConfig.class);
-    EasyMock.replay();
 
     StyleTagProxyEmbeddedUrlsVisitor visitor = new StyleTagProxyEmbeddedUrlsVisitor(
         config, proxyUriManager,
