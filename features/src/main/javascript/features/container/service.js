@@ -238,7 +238,7 @@ osapi.container.Service.prototype.getGadgetToken = function(request, opt_callbac
     // Otherwise, cache response. Augment final response with server response.
     } else {
       for (var id in response) {
-        var mid = response[osapi.container.TokenResponse.MODULE_ID],
+        var mid = response[id][osapi.container.TokenResponse.MODULE_ID],
             url = osapi.container.util.buildTokenRequestUrl(id, mid);
 
         //response[id]['url'] = id; // make sure url is set
