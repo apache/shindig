@@ -43,7 +43,7 @@ public class JsonRpcGadgetContext extends GadgetContext {
   private final Boolean debug;
   private final Boolean ignoreCache;
   private final Locale locale;
-  private final Integer moduleId;
+  private final Long moduleId;
   private final Uri url;
   private final UserPrefs userPrefs;
   private final String view;
@@ -91,7 +91,7 @@ public class JsonRpcGadgetContext extends GadgetContext {
     return locale == null ? super.getLocale() : locale;
   }
   @Override
-  public int getModuleId() {
+  public long getModuleId() {
     return moduleId == null ? super.getModuleId() : moduleId;
   }
 
@@ -132,9 +132,9 @@ public class JsonRpcGadgetContext extends GadgetContext {
    * @return module id from the request, or null if not present
    * @throws JSONException
    */
-  private static Integer getModuleId(JSONObject json) throws JSONException {
+  private static Long getModuleId(JSONObject json) throws JSONException {
     if (json.has("moduleId")) {
-      return Integer.valueOf(json.getInt("moduleId"));
+      return Long.valueOf(json.getLong("moduleId"));
     }
     return null;
   }

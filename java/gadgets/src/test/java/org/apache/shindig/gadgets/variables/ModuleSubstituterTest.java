@@ -46,17 +46,17 @@ public class ModuleSubstituterTest extends Assert {
 
   @Test
   public void testSpecific() throws Exception {
-    final int moduleId = 12345678;
+    final long moduleId = 12345678L;
 
     ModuleSubstituter substituter = new ModuleSubstituter();
     substituter.addSubstitutions(substitutions, new GadgetContext() {
         @Override
-        public int getModuleId() {
+        public long getModuleId() {
             return moduleId;
         }
     }, spec);
 
-    assertEquals(Integer.toString(moduleId),
+    assertEquals(Long.toString(moduleId),
         substitutions.getSubstitution(Type.MODULE, "ID"));
   }
 }

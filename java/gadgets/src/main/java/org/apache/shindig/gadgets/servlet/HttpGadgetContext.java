@@ -113,7 +113,7 @@ public class HttpGadgetContext extends GadgetContext {
   }
 
   @Override
-  public int getModuleId() {
+  public long getModuleId() {
     return moduleId == null ? super.getModuleId() : moduleId;
   }
 

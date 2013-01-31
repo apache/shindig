@@ -30,6 +30,6 @@ import org.apache.shindig.gadgets.spec.GadgetSpec;
 public class ModuleSubstituter implements Substituter {
   public void addSubstitutions(Substitutions substituter, GadgetContext context, GadgetSpec spec)
         throws GadgetException {
-    substituter.addSubstitution(Substitutions.Type.MODULE, "ID", Integer.toString(context.getModuleId()));
+    substituter.addSubstitution(Substitutions.Type.MODULE, "ID", Long.toString(context.getModuleId()));
   }
 }

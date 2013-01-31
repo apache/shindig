@@ -495,7 +495,7 @@ public class GadgetsHandlerService {
     }
 
     @Override
-    public int getModuleId() {
+    public long getModuleId() {
       return 1;
     }
 
