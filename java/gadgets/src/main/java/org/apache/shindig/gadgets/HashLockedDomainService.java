@@ -156,7 +156,7 @@ public class HashLockedDomainService extends AbstractLockedDomainService {
           }
           return false;
         }
-        return host.equals(neededHost);
+        return host.equalsIgnoreCase(neededHost);
       }
     }
     return true;
@@ -166,7 +166,7 @@ public class HashLockedDomainService extends AbstractLockedDomainService {
   public boolean isHostUsingLockedDomain(String host) {
     if (isEnabled()) {
       for (String suffix : this.lockedSuffixes.values()) {
-        if (host.endsWith(suffix)) {
+        if (host.toLowerCase().endsWith(suffix.toLowerCase())) {
           return true;
         }
       }
