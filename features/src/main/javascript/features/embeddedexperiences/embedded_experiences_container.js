@@ -35,12 +35,13 @@
      * @param {Element} element the element to put the gadget in.
      * @param {Object} dataModel the EE data model.
      * @param {Object} renderParams params to augment the rendering.
-     * @param {Function} opt_callback called once the gadget has been navigated to.
-     * @param {Object} opt_containerContext additional context that a container could pass to gadget.
+     * @param {Function=} opt_callback called once the gadget has been navigated to.
+     * @param {Object=} opt_containerContext additional context that a container could pass to gadget.
      *    The container context should contain at least "associatedContext" which is used
      *    to define context where the gadget is displayed.
+     * @param {Element=} opt_bufferEl The optional element to use for double buffering when rendering the gadget.
      */
-    function navigateGadget_(element, dataModel, renderParams, opt_callback, opt_containerContext) {
+    function navigateGadget_(element, dataModel, renderParams, opt_callback, opt_containerContext, opt_bufferEl) {
       var viewParams = renderParams[osapi.container.ee.RenderParam.GADGET_VIEW_PARAMS] || {};
       var localRenderParams =
         renderParams[osapi.container.ee.RenderParam.GADGET_RENDER_PARAMS] || {};
@@ -89,7 +90,7 @@
       }
       localRenderParams[osapi.container.ee.RenderParam.DATA_MODEL] = dataModel;
 
-      var site = context.newGadgetSite(element);
+      var site = context.newGadgetSite(element, opt_bufferEl);
       var gadgetUrl = dataModel[ee_data_model.GADGET];
 
       context.preloadGadget(gadgetUrl, function(result) {
@@ -179,11 +180,12 @@
        * @param {Element} element the element to render the embedded experience in.
        * @param {Object} datModel the EE data model.
        * @param {Object} renderParams parameters for the embedded experience.
-       * @param {Function} opt_callback callback function which will be called after the
+       * @param {Function=} opt_callback callback function which will be called after the
        *        gadget has rendered.
-       * @param {Object} opt_containerContext additional context that a container could pass to gadget
+       * @param {Object=} opt_containerContext additional context that a container could pass to gadget
+       * @param {Element=} opt_bufferEl Element to use for double buffering when rendering a gadget.
        */
-      'navigate' : function(element, dataModel, renderParams, opt_callback, opt_containerContext) {
+      'navigate' : function(element, dataModel, renderParams, opt_callback, opt_containerContext, opt_bufferEl) {
         var preferredEE = null;
         if (!!context.config_ && !!context.config_[ee_containerconfig.GET_EE_NAVIGATION_TYPE] &&
             (typeof context.config_[ee_containerconfig.GET_EE_NAVIGATION_TYPE] === 'function')) {
@@ -206,7 +208,7 @@
 
         // Lets navigate
         if (preferredEE === osapi.container.ee.TargetType.GADGET) {
-          navigateGadget_(element, dataModel, renderParams, opt_callback, opt_containerContext);
+          navigateGadget_(element, dataModel, renderParams, opt_callback, opt_containerContext, opt_bufferEl);
         }
         else if (preferredEE === osapi.container.ee.TargetType.URL) {
           navigateUrl_(element, dataModel, renderParams, opt_callback);
