@@ -79,6 +79,13 @@ osapi.container.GadgetSite = function(container, service, args) {
    */
   this.loadingGadgetHolder_ = undef;
 
+  var self = this;
+  var listeners = {};
+  listeners[osapi.container.CallbackType.ON_RENDER] = function(gadgetUrl) {
+    self.onRender();
+  };
+  container.addGadgetLifecycleCallback('gadget_site_on_render_' + this.getId(), listeners);
+
   this.onConstructed();
 };
 
@@ -329,8 +336,6 @@ osapi.container.GadgetSite.prototype.render = function(
   this.updateSecurityToken_(gadgetInfo, localRenderParams);
 
   this.loadingGadgetHolder_.render(gadgetInfo, viewParams, localRenderParams);
-
-  this.onRender(gadgetInfo, viewParams, renderParams);
 };
 
 
@@ -395,6 +400,7 @@ osapi.container.GadgetSite.prototype.close = function() {
   if (this.currentGadgetHolder_) {
     this.currentGadgetHolder_.dispose();
   }
+  this.container_.removeGadgetLifecycleCallback('gadget_site_on_render_' + this.getId());
 };
 
 /**

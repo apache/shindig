@@ -165,7 +165,7 @@
      */
     function gadgetRendered_(rpcArgs) {
       var gadgetSite = rpcArgs.gs;
-      var renderParams = gadgetSite.currentGadgetHolder_.renderParams_;
+      var renderParams = gadgetSite.getActiveSiteHolder().renderParams_;
       var eeDataModel = renderParams.eeDataModel;
       return eeDataModel ? eeDataModel[ee_data_model.CONTEXT] : null;
     }
