@@ -162,7 +162,7 @@ osapi.container.GadgetHolder.IFRAME_ID_PREFIX_ = '__gadget_';
  */
 osapi.container.GadgetHolder.prototype.doNormalIframeHtml_ = function() {
   var uri = this.getIframeUrl_();
-  this.el_.innerHTML = this.createIframeHtml(uri);
+  this.el_.innerHTML = this.createIframeHtml(uri, {title:this.site_.getTitle()});
 
   // Set up RPC channel.
   var iframeUri = shindig.uri(uri);
