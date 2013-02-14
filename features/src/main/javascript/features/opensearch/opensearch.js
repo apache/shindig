@@ -104,7 +104,7 @@
    */
   function preloaded(response) {
     for (var item in response) {
-      if (!response[item].error) {
+      if (!response[item].error && response[item].modulePrefs) {
         // check for os feature
         var feature = response[item].modulePrefs.features['opensearch'];
         var title = response[item].modulePrefs.title;

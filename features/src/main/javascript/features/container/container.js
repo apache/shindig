@@ -494,10 +494,18 @@ osapi.container.Container.prototype.preloadCaches = function(preloadData) {
       preloadData, osapi.container.ContainerConfig.PRELOAD_TOKENS, {});
   var refTime = osapi.container.util.getSafeJsonValue(
       preloadData, osapi.container.ContainerConfig.PRELOAD_REF_TIME, null);
+  var gadgetUrls = [];//keys of gadgets
+  for(var k in gadgets) {
+      if (gadgets.hasOwnProperty(k)){
+          gadgetUrls.push(k);
+      }
+  }
 
+  this.applyLifecycleCallbacks_(osapi.container.CallbackType.ON_BEFORE_PRELOAD, gadgetUrls);
   this.service_.addGadgetMetadatas(gadgets, refTime);
   this.service_.addGadgetTokens(tokens, refTime);
   this.addPreloadGadgets_(gadgets, tokens);
+  this.applyLifecycleCallbacks_(osapi.container.CallbackType.ON_PRELOADED, gadgets);
 };
 
 

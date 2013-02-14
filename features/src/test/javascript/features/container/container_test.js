@@ -100,6 +100,7 @@ ContainerTest.prototype.testPreloadCaches = function() {
   container.addPreloadGadgets_ = function(gadgets) {
     self.assertEquals(mockMetadata, gadgets);
   };
+  container.applyLifecycleCallbacks_ = function() {};
   container.preloadCaches({
     'preloadMetadatas' : mockMetadata,
     'preloadTokens' : mockMetadata
