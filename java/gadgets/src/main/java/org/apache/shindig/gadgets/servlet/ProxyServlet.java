@@ -104,6 +104,7 @@ public class ProxyServlet extends InjectedServlet {
       ProxyUriManager.ProxyUri proxyUri = proxyUriManager.process(reqUri);
       SecurityToken st = AuthInfoUtil.getSecurityTokenFromRequest(request);
       proxyUri.setSecurityToken(st);
+      proxyUri.setUserAgent(request.getHeader("User-Agent"));
       // get gadget from security token
       if(proxyUri.getGadget() == null) {
         if(st != null && !st.isAnonymous()) {

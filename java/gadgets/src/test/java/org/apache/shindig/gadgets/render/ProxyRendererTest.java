@@ -61,6 +61,7 @@ public class ProxyRendererTest {
   private static final Uri EXPECTED_PROXIED_HTML_HREF
       = Uri.parse("http://example.org/proxied.php?lang=all&country=ALL");
   private static final String USER_AGENT = "TestUserAgent/1.0";
+  private static final String USER_AGENT_SET = "TestUserAgent/1.0 Shindig";
   private static final GadgetContext CONTEXT = new GadgetContext() {
     @Override
     public SecurityToken getToken() {
@@ -100,6 +101,7 @@ public class ProxyRendererTest {
   @Test
   public void renderProxied() throws Exception {
     HttpRequest request = new HttpRequest(EXPECTED_PROXIED_HTML_HREF);
+    request.setHeader("User-Agent", USER_AGENT_SET);
     HttpResponse response = new HttpResponse(PROXIED_HTML_CONTENT);
     pipeline.plainResponses.put(EXPECTED_PROXIED_HTML_HREF, response);
 
@@ -118,6 +120,7 @@ public class ProxyRendererTest {
       .toUri();
 
     HttpRequest request = new HttpRequest(resolved);
+    request.setHeader("User-Agent", USER_AGENT_SET);
     HttpResponse response = new HttpResponse(PROXIED_HTML_CONTENT);
 
     pipeline.plainResponses.put(resolved, response);
@@ -138,6 +141,7 @@ public class ProxyRendererTest {
   @Test
   public void renderProxiedRelativeBadPath() throws Exception {
     HttpRequest request = new HttpRequest(EXPECTED_PROXIED_HTML_HREF);
+    request.setHeader("User-Agent", USER_AGENT_SET);
     HttpResponse response = new HttpResponse(PROXIED_HTML_CONTENT);
     pipeline.plainResponses.put(EXPECTED_PROXIED_HTML_HREF, response);
 
@@ -158,6 +162,7 @@ public class ProxyRendererTest {
   @Test
   public void renderProxiedFromCache() throws Exception {
     HttpRequest request = new HttpRequest(EXPECTED_PROXIED_HTML_HREF);
+    request.setHeader("User-Agent", USER_AGENT_SET);
     HttpResponse response = new HttpResponse(PROXIED_HTML_CONTENT);
     cache.addResponse(request, response);
     String content = proxyRenderer.render(makeHrefGadget("none"));

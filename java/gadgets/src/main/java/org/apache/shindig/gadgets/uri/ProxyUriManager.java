@@ -70,6 +70,9 @@ public interface ProxyUriManager {
     // The html tag that requested this ProxyUri.
     private String htmlTagContext;
 
+    // The User-Agent from the request
+    private String userAgent;
+
     public ProxyUri(Gadget gadget, Uri resource) {
       super(gadget);
       this.resource = resource;
@@ -103,6 +106,12 @@ public interface ProxyUriManager {
       this.returnOriginalContentOnError = returnOriginalContentOnError ? "1" : null;
     }
 
+    public void setUserAgent(String ua) {
+      this.userAgent = ua;
+    }
+    public String getUserAgent() {
+      return userAgent;
+    }
     public void setHtmlTagContext(String htmlTagContext) {
       this.htmlTagContext = htmlTagContext;
     }

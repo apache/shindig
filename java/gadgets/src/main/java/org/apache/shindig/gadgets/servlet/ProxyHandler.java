@@ -86,6 +86,12 @@ public class ProxyHandler {
       // convert String into InputStream
       req.setPostBody(new ByteArrayInputStream(postBody.getBytes()));
     }
+    if (req.getHeader("User-Agent") == null) {
+      final String userAgent = uriCtx.getUserAgent();
+      if (userAgent != null) {
+        req.setHeader("User-Agent", userAgent);
+      }
+    }
     return req;
   }
 

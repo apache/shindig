@@ -208,6 +208,7 @@ public abstract class AbstractHttpCache implements HttpCache {
    * - the resize width parameter
    * - the resize quality parameter
    * - the no_expand parameter
+   * - the User-Agent request header
    *
    * Except for the first two, all of these may be unset or <code>null</code>,
    * depending on authentication rules. See individual methods for details.  New cache key items
@@ -234,8 +235,8 @@ public abstract class AbstractHttpCache implements HttpCache {
         .setParam("rw", request.getParam(RESIZE_WIDTH))
         .setParam("rq", request.getParam(RESIZE_QUALITY))
         .setParam("ne", request.getParam(NO_EXPAND))
-        .setParam("rm", request.getRewriteMimeType());
-
+        .setParam("rm", request.getRewriteMimeType())
+        .setParam("ua", request.getHeader("User-Agent"));
     return keyBuilder.build();
   }
 
