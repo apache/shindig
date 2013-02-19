@@ -79,13 +79,6 @@ osapi.container.GadgetSite = function(container, service, args) {
    */
   this.loadingGadgetHolder_ = undef;
 
-  var self = this;
-  var listeners = {};
-  listeners[osapi.container.CallbackType.ON_RENDER] = function(gadgetUrl) {
-    self.onRender();
-  };
-  container.addGadgetLifecycleCallback('gadget_site_on_render_' + this.getId(), listeners);
-
   this.onConstructed();
 };
 
@@ -341,12 +334,8 @@ osapi.container.GadgetSite.prototype.render = function(
 
 /**
  * Called when a gadget loads in the site. Uses double buffer, if present.
- * @param {Object} gadgetInfo the JSON gadget description.
- * @param {Object} viewParams Look at osapi.container.ViewParam.
- * @param {Object} renderParams Look at osapi.container.RenderParam.
  */
-osapi.container.GadgetSite.prototype.onRender = function(
-    gadgetInfo, viewParams, renderParams) {
+osapi.container.GadgetSite.prototype.onRender = function() {
   this.swapBuffers_();
 
   if (this.currentGadgetHolder_) {
@@ -400,7 +389,6 @@ osapi.container.GadgetSite.prototype.close = function() {
   if (this.currentGadgetHolder_) {
     this.currentGadgetHolder_.dispose();
   }
-  this.container_.removeGadgetLifecycleCallback('gadget_site_on_render_' + this.getId());
 };
 
 /**

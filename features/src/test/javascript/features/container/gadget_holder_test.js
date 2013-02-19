@@ -49,10 +49,8 @@ GadgetHolderTest.prototype.testNew = function() {
     },
     id: '123'
   };
-  var container = this.createContainer();
-  var site = new osapi.container.GadgetSite(container, null, {gadgetEl: element});
+  var site = new osapi.container.GadgetSite(null, null, {gadgetEl: element});
   var holder = new osapi.container.GadgetHolder(site, element);
-  this.assertEquals('gadget_site_on_render_123', container.getCallbackId());
   this.assertEquals(element, holder.getElement());
   this.assertUndefined(holder.getIframeId());
   this.assertUndefined(holder.getGadgetInfo());
@@ -72,11 +70,9 @@ GadgetHolderTest.prototype.testRenderWithoutRenderParams = function() {
   var service = {};
   service.getCountry = function(){return "ZH";};
   service.getLanguage = function(){return "cn"};
-  var container = this.createContainer();
-  var site = new osapi.container.GadgetSite(container, service, {gadgetEl: element});
+  var site = new osapi.container.GadgetSite(null, service, {gadgetEl: element});
   var holder = new osapi.container.GadgetHolder(site, element, '__gadgetOnLoad');
   holder.render(gadgetInfo, {}, {'view' : 'default'});
-  this.assertEquals('gadget_site_on_render_123', container.getCallbackId());
   this.assertEquals('<iframe' +
       ' marginwidth="0"' +
       ' hspace="0"' +
@@ -115,11 +111,9 @@ GadgetHolderTest.prototype.testRenderWithRenderRequests = function() {
   var service = {};
   service.getCountry = function(){return "US";};
   service.getLanguage = function(){return "en"};
-  var container = this.createContainer();
-  var site = new osapi.container.GadgetSite(container, service, {gadgetEl: element, moduleId: 123});
+  var site = new osapi.container.GadgetSite(null, service, {gadgetEl: element, moduleId: 123});
   var holder = new osapi.container.GadgetHolder(site, element, '__gadgetOnLoad');
   holder.render(gadgetInfo, {}, renderParams);
-  this.assertEquals('gadget_site_on_render_123', container.getCallbackId());
   this.assertEquals('<iframe' +
       ' marginwidth="0"' +
       ' hspace="0"' +
@@ -181,16 +175,4 @@ GadgetHolderTest.prototype.setupMockPubsub2router = function(existing) {
         })()
     };
     return gadgets.pubsub2router.hub;
-};
-
-GadgetHolderTest.prototype.createContainer = function() {
-  var container = {};
-  var callbackId;
-  container.addGadgetLifecycleCallback = function(id, listeners) {
-    callbackId = id;
-  }
-  container.getCallbackId = function() {
-    return callbackId;
-  }
-  return container;
 };

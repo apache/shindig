@@ -59,15 +59,9 @@ GadgetSiteTest.prototype.tearDown = function() {
 };
 
 GadgetSiteTest.prototype.testGetId = function() {
-  var site;
-  var container = this.createContainer();
-  site = new osapi.container.GadgetSite(container, null, {});
-  this.assertEquals('gadget_site_on_render_' + (osapi.container.Site.prototype.nextUniqueSiteId_ - 1),
-          container.getCallbackId());
+  var site = new osapi.container.GadgetSite(null, null, {});
   this.assertEquals(osapi.container.Site.prototype.nextUniqueSiteId_ - 1, site.getId());
-  site = new osapi.container.GadgetSite(container, null, {});
-  this.assertEquals('gadget_site_on_render_' + (osapi.container.Site.prototype.nextUniqueSiteId_ - 1),
-          container.getCallbackId());
+  site = new osapi.container.GadgetSite(null, null, {});
   this.assertEquals(osapi.container.Site.prototype.nextUniqueSiteId_ - 1, site.getId());
 };
 
@@ -135,19 +129,7 @@ GadgetSiteTest.prototype.newMetadataError = function(url, message) {
 };
 
 GadgetSiteTest.prototype.newGadgetSite = function(service, navigateCallback) {
-  return new osapi.container.GadgetSite(this.createContainer(), service, {
+  return new osapi.container.GadgetSite(null, service, {
     'navigateCallback' : navigateCallback
   });
-};
-
-GadgetSiteTest.prototype.createContainer = function() {
-  var container = {};
-  var callbackId;
-  container.addGadgetLifecycleCallback = function(id, listeners) {
-    callbackId = id;
-  }
-  container.getCallbackId = function() {
-    return callbackId;
-  }
-  return container;
 };
