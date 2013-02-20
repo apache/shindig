@@ -72,6 +72,9 @@ public class GetJsContentProcessorTest {
     request = control.createMock(JsRequest.class);
     response = new JsResponseBuilder();
     processor = new GetJsContentProcessor(new DefaultFeatureRegistryProvider(registry), compiler);
+    processor.setVersionedMaxAge(GetJsContentProcessor.DEFAULT_VERSIONED_MAXAGE);
+    processor.setUnversionedMaxAge(GetJsContentProcessor.DEFAULT_UNVERSIONED_MAXAGE);
+    processor.setInvalidMaxAge(GetJsContentProcessor.DEFAULT_INVALID_MAXAGE);
   }
 
   @Test
@@ -79,7 +82,7 @@ public class GetJsContentProcessorTest {
     setupForVersionAndProxy(true, UriStatus.VALID_UNVERSIONED);
     control.replay();
     processor.process(request, response);
-    checkResponse(true, 3600, JS_CODE1 + JS_CODE2, "");
+    checkResponse(true, GetJsContentProcessor.DEFAULT_UNVERSIONED_MAXAGE, JS_CODE1 + JS_CODE2, "");
     control.verify();
   }
 
@@ -88,7 +91,7 @@ public class GetJsContentProcessorTest {
     setupForVersionAndProxy(true, UriStatus.VALID_VERSIONED);
     control.replay();
     processor.process(request, response);
-    checkResponse(true, -1, JS_CODE1 + JS_CODE2, "");
+    checkResponse(true, GetJsContentProcessor.DEFAULT_VERSIONED_MAXAGE, JS_CODE1 + JS_CODE2, "");
     control.verify();
   }
 
@@ -97,7 +100,7 @@ public class GetJsContentProcessorTest {
     setupForVersionAndProxy(true, UriStatus.INVALID_VERSION);
     control.replay();
     processor.process(request, response);
-    checkResponse(true, 0, JS_CODE1 + JS_CODE2, "");
+    checkResponse(true, GetJsContentProcessor.DEFAULT_INVALID_MAXAGE, JS_CODE1 + JS_CODE2, "");
     control.verify();
   }
 
@@ -106,7 +109,7 @@ public class GetJsContentProcessorTest {
     setupForVersionAndProxy(false, UriStatus.VALID_UNVERSIONED);
     control.replay();
     processor.process(request, response);
-    checkResponse(false, 3600, JS_CODE1 + JS_CODE2, "");
+    checkResponse(false, GetJsContentProcessor.DEFAULT_UNVERSIONED_MAXAGE, JS_CODE1 + JS_CODE2, "");
     control.verify();
   }
 
@@ -129,7 +132,7 @@ public class GetJsContentProcessorTest {
 
     control.replay();
     processor.process(request, response);
-    checkResponse(true, 3600, JS_CODE1, "export2", "extern2");
+    checkResponse(true, GetJsContentProcessor.DEFAULT_UNVERSIONED_MAXAGE, JS_CODE1, "export2", "extern2");
     control.verify();
   }
 

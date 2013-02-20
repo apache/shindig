@@ -18,8 +18,8 @@
  */
 package org.apache.shindig.gadgets.js;
 
-import com.google.common.collect.Sets;
-import com.google.inject.Inject;
+import java.util.List;
+import java.util.Set;
 
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
@@ -32,15 +32,24 @@ import org.apache.shindig.gadgets.rewrite.js.JsCompiler;
 import org.apache.shindig.gadgets.uri.JsUriManager.JsUri;
 import org.apache.shindig.gadgets.uri.UriStatus;
 
-import java.util.List;
-import java.util.Set;
+import com.google.common.collect.Sets;
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
 
 /**
  * Retrieves the requested Javascript code using a {@link JsProcessor}.
  */
 public class GetJsContentProcessor implements JsProcessor {
+  public static final int DEFAULT_VERSIONED_MAXAGE = -1;
+  public static final int DEFAULT_UNVERSIONED_MAXAGE = 3600;
+  public static final int DEFAULT_INVALID_MAXAGE = 0;
+
   private final FeatureRegistryProvider registryProvider;
   private final JsCompiler compiler;
+
+  private int versionedMaxAge = DEFAULT_VERSIONED_MAXAGE;
+  private int unversionedMaxAge = DEFAULT_UNVERSIONED_MAXAGE;
+  private int invalidMaxAge = DEFAULT_INVALID_MAXAGE;
 
   @Inject
   public GetJsContentProcessor(
@@ -48,6 +57,25 @@ public class GetJsContentProcessor implements JsProcessor {
       JsCompiler compiler) {
     this.registryProvider = registryProvider;
     this.compiler = compiler;
+  }
+
+  @Inject(optional=true)
+  public void setVersionedMaxAge(@Named("shindig.jscontent.versioned.maxage") Integer maxAge) {
+    if (maxAge != null) {
+      versionedMaxAge = maxAge;
+    }
+  }
+  @Inject(optional=true)
+  public void setUnversionedMaxAge(@Named("shindig.jscontent.unversioned.maxage") Integer maxAge) {
+    if (maxAge != null) {
+      unversionedMaxAge = maxAge;
+    }
+  }
+  @Inject(optional=true)
+  public void setInvalidMaxAge(@Named("shindig.jscontent.invalid.maxage") Integer maxAge) {
+    if (maxAge != null) {
+      invalidMaxAge = maxAge;
+    }
   }
 
   public boolean process(JsRequest request, JsResponseBuilder builder) throws JsException {
@@ -104,17 +132,14 @@ public class GetJsContentProcessor implements JsProcessor {
   protected void setResponseCacheTtl(JsResponseBuilder builder, UriStatus vstatus) {
     switch (vstatus) {
       case VALID_VERSIONED:
-        // Versioned files get cached indefinitely
-        builder.setCacheTtlSecs(-1);
+        builder.setCacheTtlSecs(versionedMaxAge);
         break;
       case VALID_UNVERSIONED:
-        // Unversioned files get cached for 1 hour.
-        builder.setCacheTtlSecs(60 * 60);
+        builder.setCacheTtlSecs(unversionedMaxAge);
         break;
       case INVALID_VERSION:
         // URL is invalid in some way, likely version mismatch.
-        // Indicate no-cache forcing subsequent requests to regenerate URLs.
-        builder.setCacheTtlSecs(0);
+        builder.setCacheTtlSecs(invalidMaxAge);
         break;
     }
   }
