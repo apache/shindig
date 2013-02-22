@@ -76,6 +76,7 @@ GadgetHolderTest.prototype.testRenderWithoutRenderParams = function() {
   this.assertEquals('<iframe' +
       ' marginwidth="0"' +
       ' hspace="0"' +
+      ' title="default title"' +
       ' frameborder="0"' +
       ' scrolling="no"' +
       ' onload="window.__gadgetOnLoad(\'gadget.xml\', \'123\');"' +
@@ -118,6 +119,7 @@ GadgetHolderTest.prototype.testRenderWithRenderRequests = function() {
       ' marginwidth="0"' +
       ' hspace="0"' +
       ' height="111"' +
+      ' title="default title"' +
       ' frameborder="0"' +
       ' scrolling="no"' +
       ' onload="window.__gadgetOnLoad(\'gadget.xml\', \'123\');"' +
