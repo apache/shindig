@@ -195,9 +195,7 @@ public class BasicOAuth2Request implements OAuth2Request {
         }
       }
     } catch (final Throwable t) {
-      if (BasicOAuth2Request.LOG.isLoggable()) {
-        BasicOAuth2Request.LOG.log("exception occurred during fetch", t);
-      }
+      BasicOAuth2Request.LOG.log(Level.SEVERE, "exception occurred during fetch", t);
       if (accessor == null) {
         accessor = new BasicOAuth2Accessor(t, OAuth2Error.FETCH_PROBLEM,
                 "exception occurred during fetch", "");
