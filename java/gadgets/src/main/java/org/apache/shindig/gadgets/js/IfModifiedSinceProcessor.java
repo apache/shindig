@@ -20,6 +20,9 @@ package org.apache.shindig.gadgets.js;
 
 import org.apache.shindig.gadgets.uri.UriStatus;
 
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
+
 import javax.servlet.http.HttpServletResponse;
 
 /**
@@ -29,10 +32,22 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class IfModifiedSinceProcessor implements JsProcessor {
 
+  public static final int DEFAULT_VERSIONED_MAXAGE = -1;
+
+  private int versionedMaxAge = DEFAULT_VERSIONED_MAXAGE;
+
+  @Inject(optional=true)
+  public void setVersionedMaxAge(@Named("shindig.jscontent.versioned.maxage") Integer maxAge) {
+    if (maxAge != null) {
+      versionedMaxAge = maxAge;
+    }
+  }
+
   public boolean process(JsRequest request, JsResponseBuilder builder) {
     if (request.isInCache() &&
         request.getJsUri().getStatus() == UriStatus.VALID_VERSIONED) {
       builder.setStatusCode(HttpServletResponse.SC_NOT_MODIFIED);
+      builder.setCacheTtlSecs(versionedMaxAge);
       return false;
     }
     return true;

@@ -102,11 +102,13 @@ public class JsServlet extends InjectedServlet {
 
   protected void emitJsResponse(JsResponse jsResponse, HttpServletRequest req,
       HttpServletResponse resp) throws IOException {
-    if (jsResponse.getStatusCode() == 304) {
+    if (jsResponse.getStatusCode() == HttpServletResponse.SC_NOT_MODIFIED) {
       resp.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+      cachingSetter.setCachingHeaders(
+          resp, jsResponse.getCacheTtlSecs(), !jsResponse.isProxyCacheable());
       return;
     }
-    if (jsResponse.getStatusCode() == 200 && jsResponse.toJsString().length() == 0) {
+    if (jsResponse.getStatusCode() == HttpServletResponse.SC_OK && jsResponse.toJsString().length() == 0) {
       resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
       return;
     }
