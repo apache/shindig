@@ -519,33 +519,6 @@
   <!-- P R O F I L E S                                                        -->
   <!-- ====================================================================== -->
   <profiles>
-    <profile>
-      <!-- force java5 usage -->
-      <id>java5</id>
-      <activation>
-        <activeByDefault>false</activeByDefault>
-        <jdk>1.5</jdk>
-      </activation>
-      <properties>
-        <shindig.jdk.version>1.5</shindig.jdk.version>
-        <shindig.jdk.javadoc>1.5.0</shindig.jdk.javadoc>
-        <shindig.jdk.classifier>java5</shindig.jdk.classifier>
-      </properties>
-    </profile>
-
-    <profile>
-      <!-- force java6 usage -->
-      <id>java6</id>
-      <activation>
-        <activeByDefault>false</activeByDefault>
-        <jdk>1.6</jdk>
-      </activation>
-
-      <properties>
-        <shindig.jdk.version>1.6</shindig.jdk.version>
-        <shindig.jdk.javadoc>1.6.0</shindig.jdk.javadoc>
-      </properties>
-    </profile>
 
     <!-- stub for all -->
     <profile>
