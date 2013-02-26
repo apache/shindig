@@ -138,10 +138,10 @@
 "gadgets.uri.proxy.path" : "${CONTEXT_ROOT}/gadgets/proxy",
 
 // Enables/Disables feature administration
-"gadgets.admin.enableFeatureAdministration" : "false",
+"gadgets.admin.enableFeatureAdministration" : false,
 
 // Enables whitelist checks
-"gadgets.admin.enableGadgetWhitelist" : "false",
+"gadgets.admin.enableGadgetWhitelist" : false,
 
 // Max post size for posts through the makeRequest proxy.
 "gadgets.jsonProxyUrl.maxPostSize" : 5242880, // 5 MiB
