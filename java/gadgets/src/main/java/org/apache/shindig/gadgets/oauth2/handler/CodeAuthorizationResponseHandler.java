@@ -227,7 +227,7 @@ public class CodeAuthorizationResponseHandler implements AuthorizationEndpointRe
     request.setHeader("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
     request.setSecurityToken(new AnonymousSecurityToken("", 0L, accessor.getGadgetUri()));
 
-    if (!isUriAllowed(request.getUri(), accessor.getAllowedDomains())) {
+    if (!OAuth2Utils.isUriAllowed(request.getUri(), accessor.getAllowedDomains())) {
       ret = new OAuth2HandlerError(OAuth2Error.AUTHORIZATION_CODE_PROBLEM,
               "Exception exchanging authorization code for access_token - domain not allowed", null);
     }
@@ -300,26 +300,5 @@ public class CodeAuthorizationResponseHandler implements AuthorizationEndpointRe
     }
 
     return ret;
-  }
-
-  private static boolean isUriAllowed(final Uri uri, final String[] allowedDomains) {
-    if (allowedDomains == null || allowedDomains.length == 0) {
-      // if white list is not specified, allow client to access any domain
-      return true;
-    }
-    String host = uri.getAuthority();
-    final int pos = host.indexOf(':');
-    if (pos != -1) {
-      host = host.substring(0, pos);
-    }
-    for (String domain : allowedDomains) {
-      if (domain != null) {
-        domain = domain.trim();
-        if (domain.startsWith(".") && host.endsWith(domain) || domain.equals(host)) {
-          return true;
-        }
-      }
-    }
-    return false;
   }
 }

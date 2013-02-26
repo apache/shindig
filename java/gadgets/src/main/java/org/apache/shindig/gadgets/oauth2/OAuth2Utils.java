@@ -187,4 +187,37 @@ public class OAuth2Utils {
     }
     return secret;
   }
+
+  /**
+   * Check if the given Uri is in the allowedDomains array.
+   *
+   * @param uri
+   *          The uri
+   * @param allowedDomains
+   *          allowed domains
+   *
+   * @return boolean true if uri is allowed
+   */
+  public static boolean isUriAllowed(final Uri uri, final String[] allowedDomains) {
+    if (allowedDomains == null || allowedDomains.length == 0) {
+      // if white list is not specified, allow client to access any domain
+      return true;
+    }
+    String host = uri.getAuthority();
+    final int pos = host.indexOf(':');
+    if (pos != -1) {
+      host = host.substring(0, pos);
+    }
+    host = host.toLowerCase();
+    for (String domain : allowedDomains) {
+      if (domain != null) {
+        domain = domain.trim();
+        domain = domain.toLowerCase();
+        if (domain.startsWith(".") && host.endsWith(domain) || domain.equalsIgnoreCase(host)) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
 }

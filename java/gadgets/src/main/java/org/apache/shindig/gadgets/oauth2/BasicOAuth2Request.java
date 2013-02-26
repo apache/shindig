@@ -673,7 +673,7 @@ public class BasicOAuth2Request implements OAuth2Request {
     }
 
     if (accessToken != null) {
-      final boolean isAllowed = isUriAllowed(request.getUri(), accessor.getAllowedDomains());
+      final boolean isAllowed = OAuth2Utils.isUriAllowed(request.getUri(), accessor.getAllowedDomains());
       if (isAllowed) {
         String tokenType = accessToken.getTokenType();
         if (tokenType == null || tokenType.length() == 0) {
@@ -913,7 +913,7 @@ public class BasicOAuth2Request implements OAuth2Request {
                 "error generating refresh body", e);
       }
 
-      if (!isUriAllowed(request.getUri(), accessor.getAllowedDomains())) {
+      if (!OAuth2Utils.isUriAllowed(request.getUri(), accessor.getAllowedDomains())) {
         ret = new OAuth2HandlerError(OAuth2Error.REFRESH_TOKEN_PROBLEM,
                 "error fetching refresh token - domain not allowed", null);
       }
@@ -1022,27 +1022,6 @@ public class BasicOAuth2Request implements OAuth2Request {
       }
     }
     return ret;
-  }
-
-  private static boolean isUriAllowed(final Uri uri, final String[] allowedDomains) {
-    if (allowedDomains == null || allowedDomains.length == 0) {
-      // if white list is not specified, allow client to access any domain
-      return true;
-    }
-    String host = uri.getAuthority();
-    final int pos = host.indexOf(':');
-    if (pos != -1) {
-      host = host.substring(0, pos);
-    }
-    for (String domain : allowedDomains) {
-      if (domain != null) {
-        domain = domain.trim();
-        if (domain.startsWith(".") && host.endsWith(domain) || domain.equals(host)) {
-          return true;
-        }
-      }
-    }
-    return false;
   }
 
   private static boolean validateAccessToken(final OAuth2Token accessToken) {
