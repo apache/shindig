@@ -27,6 +27,7 @@ import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.LockedDomainService;
 import org.apache.shindig.gadgets.process.ProcessingException;
 import org.apache.shindig.gadgets.process.Processor;
+import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.View;
 
 import com.google.inject.Inject;
@@ -77,10 +78,11 @@ public class Renderer {
     try {
       Gadget gadget = processor.process(context);
 
+      GadgetSpec gadgetSpec = gadget.getSpec();
       if (gadget.getCurrentView() == null) {
         return RenderingResults.error("Unable to locate an appropriate view in this gadget. " +
             "Requested: '" + gadget.getContext().getView() +
-            "' Available: " + gadget.getSpec().getViews().keySet(), HttpServletResponse.SC_NOT_FOUND);
+            "' Available: " + gadgetSpec.getViews().keySet(), HttpServletResponse.SC_NOT_FOUND);
       }
 
       if (gadget.getCurrentView().getType() == View.ContentType.URL) {
@@ -95,7 +97,9 @@ public class Renderer {
       }
 
       if (!lockedDomainService.isGadgetValidForHost(context.getHost(), gadget, context.getContainer())) {
-        return RenderingResults.error("Invalid domain", HttpServletResponse.SC_BAD_REQUEST);
+        return RenderingResults.error("Invalid domain for host (" + context.getHost()
+                + ") and gadget (" + gadgetSpec.getUrl() + ")",
+                HttpServletResponse.SC_BAD_REQUEST);
       }
 
       return RenderingResults.ok(renderer.render(gadget));
