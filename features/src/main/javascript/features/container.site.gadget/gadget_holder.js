@@ -181,6 +181,7 @@ osapi.container.GadgetHolder.prototype.doNormalIframeHtml_ = function() {
 osapi.container.GadgetHolder.prototype.doOaaIframeHtml_ = function() {
   //Remove any prior container for the iframe id from the OpenAjax hub prior to registering the new one
   this.removeOaaContainer_(this.iframeId_);
+  var self = this;
   new OpenAjax.hub.IframeContainer(
       gadgets.pubsub2router.hub,
       this.iframeId_,
@@ -202,7 +203,11 @@ osapi.container.GadgetHolder.prototype.doOaaIframeHtml_ = function() {
           //   .resolve(shindig.uri(window.location.href)),
           tunnelURI: shindig.uri(this.relayPath_).resolve(shindig.uri(window.location.href)),
           iframeAttrs: this.createIframeAttributeMap(this.getIframeUrl_(), {title:this.site_.getTitle()}),
-          onGadgetLoad: this.onLoad_
+          onGadgetLoad: function() {
+            if(self.onLoad_) {
+              window[self.onLoad_](self.getUrl(), self.site_.getId());
+            }
+          }
         }
       }
   );
