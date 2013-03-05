@@ -317,14 +317,13 @@ osapi.container.GadgetHolder.prototype.updateUserPrefParams_ = function(uri) {
   }
 };
 
-function init(config) {
-  if (config['container']) {
-    var rpath = config['container']['relayPath'];
-    osapi.container.GadgetHolder.prototype.relayPath_ = rpath;
-  }
-}
 
 // We do run this in the container mode in the new common container
 if (gadgets.config) {
-  gadgets.config.register('container', null, init);
+  gadgets.config.register('container', null, function (config) {
+    if (config['container']) {
+      var rpath = config['container']['relayPath'];
+      osapi.container.GadgetHolder.prototype.relayPath_ = rpath;
+    }
+  });
 }
