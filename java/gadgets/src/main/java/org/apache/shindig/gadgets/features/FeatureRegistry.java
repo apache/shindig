@@ -46,7 +46,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Queue;
@@ -693,6 +695,10 @@ public class FeatureRegistry {
         return;
       }
 
+      // Detect feature dependency loop
+      Set<String> tempList  = new HashSet<String>();
+      this.checkDependencyLoop(this, tempList);
+
       this.nodeDepth = 0;
       this.transitiveDeps = Lists.newLinkedList();
       this.transitiveDeps.add(this);
@@ -703,10 +709,6 @@ public class FeatureRegistry {
       while (!toTraverse.isEmpty()) {
         Pair<FeatureNode, Pair<Integer, String>> next = toTraverse.poll();
         String debug = next.two.two + (next.two.one > 0 ? " -> " : "") + next.one.name;
-        if (next.one == this && next.two.one != 0) {
-          throw new GadgetException(GadgetException.Code.INVALID_CONFIG,
-              "Feature dep loop detected: " + debug);
-        }
         // Breadth-first list of dependencies.
         this.transitiveDeps.add(next.one);
         this.nodeDepth = Math.max(this.nodeDepth, next.two.one);
@@ -721,6 +723,31 @@ public class FeatureRegistry {
 
     public List<FeatureNode> getTransitiveDeps() {
       return this.transitiveDeps;
+    }
+
+    /**
+     * Check whether current feature node has dependency loop
+     * @param featureNode
+     *     feature node which needs to check whether it has dependency loop.
+     * @param dependencyList
+     *     used to check whether current branch of feature dependency tree has dependency loop or not.
+     * @throws GadgetException
+     *     a new GadgetException will be thrown if a loop is detected.
+     */
+    private void checkDependencyLoop(FeatureNode featureNode, Set<String> dependencyList) throws GadgetException {
+        String featureNodeName = featureNode.name;
+        if (dependencyList.contains(featureNodeName)) {
+            // If dependencyList already contains this feature node, then current branch has dependency loop.
+            throw new GadgetException(GadgetException.Code.INVALID_CONFIG, "Feature " + featureNodeName + " has dependency loop problem.");
+        }
+        // Add the current dependency into branch.
+        dependencyList.add(featureNodeName);
+        List<FeatureNode> deps = featureNode.getDepList();
+        for (FeatureNode f : deps) {
+            checkDependencyLoop(f, dependencyList);
+            // Remove the part which already has been verified.
+            dependencyList.remove(f.name);
+        }
     }
   }
 }
