@@ -166,13 +166,10 @@ osapi.container.Site.prototype.setTitle = function(title) {
 osapi.container.Site.prototype.getTitle = function() {
   if (typeof(this.title_) !== 'undefined') {
     return this.title_;
+  } else if (this.gadgetInfo_ && this.gadgetInfo_.modulePrefs && this.gadgetInfo_.modulePrefs.title) {
+    return this.gadgetInfo_.modulePrefs.title;
   } else {
-    var gadgetInfo = this.getActiveSiteHolder().gadgetInfo_;
-    if (gadgetInfo && gadgetInfo.modulePrefs && gadgetInfo.modulePrefs.title) {
-      return gadgetInfo.modulePrefs.title;
-    } else {
-      return osapi.container.Site.DEFAULT_TITLE;
-    }
+    return osapi.container.Site.DEFAULT_TITLE;
   }
 };
 
