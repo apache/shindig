@@ -212,6 +212,20 @@ public class HttpResponseBuilder extends MutableContent {
     return this;
   }
 
+  /**
+   * Adds all the headers in the given multimap to the HttpResponse that is under construction.
+   *
+   * @param headers
+   *          A multimap of header keys and values. WARNING: This Multimap should be one constructed
+   *          by org.apache.shindig.gadgets.http.HttpResponse.newHeaderMultimap()
+   * @return <code>this</code>
+   */
+  public HttpResponseBuilder addAllHeaders(Multimap<String, String> headers) {
+    this.headers.putAll(headers);
+    incrementNumChanges();
+    return this;
+  }
+
   public Collection<String> removeHeader(String name) {
     Collection<String> ret = headers.removeAll(name);
     if (ret != null) {

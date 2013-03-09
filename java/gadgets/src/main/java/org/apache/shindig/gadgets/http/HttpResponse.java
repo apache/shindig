@@ -445,7 +445,7 @@ public final class HttpResponse implements Externalizable {
   /**
    * @return the expiration time from the Expires header or -1 if not set
    */
-  private long getExpiresTime() {
+  public long getExpiresTime() {
     String expires = getHeader(HttpHeaders.EXPIRES);
     if (expires != null) {
       Date expiresDate = DateUtil.parseRfc1123Date(expires);
@@ -668,6 +668,8 @@ public final class HttpResponse implements Externalizable {
       return new LinkedList<String>();  //To change body of implemented methods use File | Settings | File Templates.
     }
   }
+
+  // FIXME: Why isn't this a ListMultimap?  Headers should be ordered and we want to be able to do type checks on our Multimap.
   public static Multimap<String,String> newHeaderMultimap() {
     TreeMap<String,Collection<String>> map = new TreeMap<String,Collection<String>>(String.CASE_INSENSITIVE_ORDER);
     return Multimaps.newMultimap(map, HEADER_COLLECTION_SUPPLIER);

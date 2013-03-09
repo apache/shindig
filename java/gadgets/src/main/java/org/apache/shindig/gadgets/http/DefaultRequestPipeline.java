@@ -18,6 +18,8 @@
  */
 package org.apache.shindig.gadgets.http;
 
+import com.google.common.collect.Multimap;
+import com.google.common.net.HttpHeaders;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
@@ -61,7 +63,7 @@ public class DefaultRequestPipeline implements RequestPipeline {
 
   @Inject(optional = true) @Named("shindig.http.date-drift-limit-ms")
   private static long responseDateDriftLimit = DEFAULT_DRIFT_LIMIT_MS;
-  
+
   //class name for logging purpose
   private static final String classname = DefaultRequestPipeline.class.getName();
   private static final Logger LOG = Logger.getLogger(classname,MessageKeys.MESSAGES);
@@ -100,7 +102,7 @@ public class DefaultRequestPipeline implements RequestPipeline {
       if (!cachedResponse.isStale()) {
         if (invalidationService.isValid(request, cachedResponse)) {
           if(LOG.isLoggable(Level.FINEST)) {
-            LOG.logp(Level.FINEST, classname, method, MessageKeys.CACHED_RESPONSE, 
+            LOG.logp(Level.FINEST, classname, method, MessageKeys.CACHED_RESPONSE,
                     new Object[]{request.getUri().toString()});
           }
           return cachedResponse;
@@ -114,6 +116,22 @@ public class DefaultRequestPipeline implements RequestPipeline {
         }
       }
     }
+
+    // If we have a stale response, perform a conditional GET.
+    // Note: Fixing up the request with these headers will not affect http response caching. See
+    // org.apache.shindig.gadgets.http.AbstractHttpCache.createKey(HttpRequest)
+    if (staleResponse != null) {
+      final String lastModified = staleResponse.getHeader(HttpHeaders.LAST_MODIFIED);
+      if (lastModified != null) {
+        request.setHeader(HttpHeaders.IF_MODIFIED_SINCE, lastModified);
+      }
+
+      final String etag = staleResponse.getHeader(HttpHeaders.ETAG);
+      if (etag != null) {
+        request.setHeader(HttpHeaders.IF_NONE_MATCH, etag);
+      }
+    }
+
     HttpResponse fetchedResponse = fetchResponse(request);
     fetchedResponse = fixFetchedResponse(request, fetchedResponse, invalidatedResponse,
         staleResponse);
@@ -218,6 +236,38 @@ public class DefaultRequestPipeline implements RequestPipeline {
     }
 
     fetchedResponse = maybeFixDriftTime(fetchedResponse);
+
+    // 304 Not Modified
+    // Return the stale response and update what is in the cache with any new headers per
+    // http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
+    //
+    // "If a cache uses a received 304 response to update a cache entry,
+    //  the cache MUST update the entry to reflect any new field values
+    //  given in the response."
+    if (fetchedResponse.getHttpStatusCode() == HttpResponse.SC_NOT_MODIFIED) {
+
+      // Update the stale response's headers with the new headers from the fetched response.
+      // If the response from the remote server doesn't have an "Expires" or "Cache-Control" header,
+      // we should service the current request and remove the stale response from the cache. We rely
+      // on those headers to be present so that the response that is in the cache will return the
+      // correct value when isStale() is called. Without removing the stale response, we would get
+      // stuck in a loop of doing conditional GETs for the same stale resource every time it is
+      // requested.
+      final Multimap<String, String> fetchedResponseHeaders = fetchedResponse.getHeaders();
+      if (fetchedResponse.getCacheControlMaxAge() == -1
+              && fetchedResponse.getExpiresTime() == -1) {
+        // CONSIDER: We could try to recurse in this case and do a non-conditional-get for the resource.
+        return httpCache.removeResponse(request);
+      }
+
+      HttpResponseBuilder httpResponseBuilder = new HttpResponseBuilder(staleResponse);
+      for (String headerName : fetchedResponseHeaders.keySet()) {
+        httpResponseBuilder.removeHeader(headerName);
+      }
+
+      httpResponseBuilder.addAllHeaders(fetchedResponse.getHeaders());
+      return cacheFetchedResponse(request, httpResponseBuilder.create());
+    }
 
     if (!fetchedResponse.isError() && !request.getIgnoreCache() && request.getCacheTtl() != 0) {
       try {
