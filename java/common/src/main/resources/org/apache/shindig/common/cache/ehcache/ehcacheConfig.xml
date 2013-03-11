@@ -42,7 +42,7 @@ under the License.
     The directory where any caches configured as diskPersistent or overflowToDisk
     will end up.
   -->
-  <diskStore path="java.io.tmpdir"/>
+  <diskStore path="ehcache.disk.store.dir"/>
 
   <!-- Default sizeOfPolicy for computing the size of cache elements in memory -->
   <sizeOfPolicy maxDepth="1000" maxDepthExceededBehavior="abort"/>
