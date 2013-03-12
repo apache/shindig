@@ -21,7 +21,7 @@ package org.apache.shindig.protocol.conversion;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 
 import org.apache.shindig.protocol.conversion.BeanFilter.Unfiltered;
 import org.junit.Before;

@@ -397,11 +397,9 @@ OpenAjax.hub.IframeContainer = function( hub, clientID, params )
         var iframe = document.getElementById( internalID );
         if(iframe.attachEvent) {
           //Works for IE
-          iframe.attachEvent('onload', function(){
-            window[params.IframeContainer.onGadgetLoad]();
-          });
+          iframe.attachEvent('onload', params.IframeContainer.onGadgetLoad);
         } else {
-          iframe.onload = function(){window[params.IframeContainer.onGadgetLoad]();};
+          iframe.onload = params.IframeContainer.onGadgetLoad;
         }
 
         var uri = params.IframeContainer.uri;

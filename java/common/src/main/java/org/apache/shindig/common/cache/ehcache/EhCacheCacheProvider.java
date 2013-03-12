@@ -19,6 +19,8 @@
 package org.apache.shindig.common.cache.ehcache;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
+
 import org.apache.shindig.common.cache.Cache;
 import org.apache.shindig.common.cache.CacheProvider;
 import org.apache.shindig.common.servlet.GuiceServletContextListener;
@@ -79,7 +81,14 @@ public class EhCacheCacheProvider implements CacheProvider,
     // Remove res:// and file:// prefixes.  EhCache can't understand them.
     String normalizedFilterPath = filterPath.replaceFirst(ResourceLoader.RESOURCE_PREFIX, "");
     normalizedFilterPath = normalizedFilterPath.replaceFirst(ResourceLoader.FILE_PREFIX, "");
-    System.getProperties().put("net.sf.ehcache.sizeof.filter", normalizedFilterPath);
+    System.setProperty("net.sf.ehcache.sizeof.filter", normalizedFilterPath);
+
+    // If ehcache.disk.store.dir isn't already set, set it to java.io.tmpdir.
+    // See http://ehcache.org/documentation/user-guide/storage-options#diskstore-configuration-element
+    String diskStoreProperty = System.getProperty("ehcache.disk.store.dir");
+    if (Strings.isNullOrEmpty(diskStoreProperty)) {
+      System.setProperty("ehcache.disk.store.dir", System.getProperty("java.io.tmpdir"));
+    }
 
     cacheManager = CacheManager.create(getConfiguration(configPath));
     create(jmxEnabled, withCacheStats);

@@ -34,6 +34,26 @@
   <description>Default server war dependencies</description>
 
   <build>
+    <!--
+        Replace some property values in the archetype pom upon generation of the archetype, see
+        http://stackoverflow.com/questions/7223031/how-to-embed-archetype-project-version-in-maven-archetype
+    -->
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>true</filtering>
+        <includes>
+          <include>archetype-resources/pom.xml</include>
+        </includes>
+      </resource>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>false</filtering>
+        <excludes>
+          <exclude>archetype-resources/pom.xml</exclude>
+        </excludes>
+      </resource>
+    </resources>
     <extensions>
       <extension>
         <groupId>org.apache.maven.archetype</groupId>
@@ -47,6 +67,14 @@
         <plugin>
           <artifactId>maven-archetype-plugin</artifactId>
           <version>2.2</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-resources-plugin</artifactId>
+          <version>2.5</version>
+          <configuration>
+            <escapeString>\</escapeString>
+          </configuration>
         </plugin>
       </plugins>
     </pluginManagement>

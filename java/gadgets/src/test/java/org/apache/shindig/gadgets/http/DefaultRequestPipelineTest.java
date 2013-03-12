@@ -22,6 +22,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 
 import com.google.common.collect.Maps;
+import com.google.common.net.HttpHeaders;
 import com.google.inject.Provider;
 
 import org.apache.shindig.common.uri.Uri;
@@ -39,6 +40,7 @@ import java.util.Map;
 
 public class DefaultRequestPipelineTest {
   private static final Uri DEFAULT_URI = Uri.parse("http://example.org/gadget.xml");
+  private static final String RFC1123_EPOCH = DateUtil.formatRfc1123Date(0);
 
   private final FakeHttpFetcher fetcher = new FakeHttpFetcher();
   private final FakeHttpCache cache = new FakeHttpCache();
@@ -217,6 +219,105 @@ public class DefaultRequestPipelineTest {
   }
 
   @Test
+  public void authTypeNoneStaleConditionalGet() throws Exception {
+    // Cached response that is stale.  Test that a conditional GET is used.
+    // Verify that the cached response is updated and returned.
+    // Verify that the 304 doesn't get cached.
+    HttpRequest request = new HttpRequest(DEFAULT_URI).setAuthType(AuthType.NONE);
+
+    HttpResponse cached = new HttpResponseBuilder()
+                                .setHeader(HttpHeaders.LAST_MODIFIED, RFC1123_EPOCH)
+                                .setHeader(HttpHeaders.ETAG, "ETAG")
+                                .setCacheTtl(-1)
+                                .create();
+    cache.data.put(DEFAULT_URI, cached);
+
+    String expiresDate = DateUtil.formatRfc1123Date(System.currentTimeMillis() + 3600 * 1000);
+    String maxAge = "max-age=3600";
+    HttpResponse notModified = new HttpResponseBuilder()
+                                    .setHttpStatusCode(HttpResponse.SC_NOT_MODIFIED)
+                                    .setHeader(HttpHeaders.EXPIRES, expiresDate)
+                                    .setHeader(HttpHeaders.CACHE_CONTROL, maxAge)
+                                    .create();
+    fetcher.response = notModified;
+    HttpResponse response = pipeline.execute(request);
+
+    HttpResponse expectedResponse = new HttpResponseBuilder(cached)
+                                      .setHeader(HttpHeaders.EXPIRES, expiresDate)
+                                      .setHeader(HttpHeaders.CACHE_CONTROL, maxAge)
+                                      .create();
+
+    assertEquals(RFC1123_EPOCH, fetcher.request.getHeader(HttpHeaders.IF_MODIFIED_SINCE));
+    assertEquals("ETAG", fetcher.request.getHeader(HttpHeaders.IF_NONE_MATCH));
+    assertEquals(expectedResponse, response);
+    assertEquals(expectedResponse, cache.data.get(DEFAULT_URI));
+    assertEquals(1, cache.readCount);
+    assertEquals(1, cache.writeCount);
+    assertEquals(1, fetcher.fetchCount);
+  }
+
+  @Test
+  public void authTypeNoneStaleConditionalGetNoExpiresNoMaxAge() throws Exception {
+    // Cached response that is stale and a conditional GET is used. Response has no Expires
+    // header and no Cache-Control header with max-age. Remove the cached entry from the cache and
+    // return it.
+    HttpRequest request = new HttpRequest(DEFAULT_URI).setAuthType(AuthType.NONE);
+
+    HttpResponse cached = new HttpResponseBuilder()
+                                .setHeader(HttpHeaders.LAST_MODIFIED, RFC1123_EPOCH)
+                                .setCacheTtl(-1)
+                                .create();
+    cache.data.put(DEFAULT_URI, cached);
+
+    HttpResponse notModified = new HttpResponseBuilder()
+                                    .setHttpStatusCode(HttpResponse.SC_NOT_MODIFIED)
+                                    .create();
+    fetcher.response = notModified;
+    HttpResponse response = pipeline.execute(request);
+
+    assertEquals(RFC1123_EPOCH, fetcher.request.getHeader(HttpHeaders.IF_MODIFIED_SINCE));
+    assertEquals(cached, response);
+    assertEquals(null, cache.data.get(DEFAULT_URI));
+    assertEquals(1, cache.readCount);
+    assertEquals(0, cache.writeCount);
+    assertEquals(1, fetcher.fetchCount);
+  }
+
+  @Test
+  public void authTypeNoneStaleConditionalGetNoLastModified() throws Exception {
+    // Cached response is stale and has no Last-Modified header on it. Test that an
+    // If-Modified-Since header is not issued.
+    HttpRequest request = new HttpRequest(DEFAULT_URI).setAuthType(AuthType.NONE);
+
+    HttpResponse cached = new HttpResponseBuilder()
+                                .setCacheTtl(-1)
+                                .create();
+    cache.data.put(DEFAULT_URI, cached);
+
+    fetcher.response = HttpResponse.error(); // Really don't care what this is.
+    pipeline.execute(request);
+
+    assertEquals(null, fetcher.request.getHeader(HttpHeaders.IF_MODIFIED_SINCE));
+  }
+
+  @Test
+  public void authTypeNoneStaleConditionalGetNoEtag() throws Exception {
+    // Cached response is stale and has no Etag header on it. Test that an
+    // If-None-Match header is not issued.
+    HttpRequest request = new HttpRequest(DEFAULT_URI).setAuthType(AuthType.NONE);
+
+    HttpResponse cached = new HttpResponseBuilder()
+                                .setCacheTtl(-1)
+                                .create();
+    cache.data.put(DEFAULT_URI, cached);
+
+    fetcher.response = HttpResponse.error(); // Really don't care what this is.
+    pipeline.execute(request);
+
+    assertEquals(null, fetcher.request.getHeader(HttpHeaders.IF_NONE_MATCH));
+  }
+
+  @Test
   public void authTypeOAuthNotCached() throws Exception {
     HttpRequest request = new HttpRequest(DEFAULT_URI).setAuthType(AuthType.OAUTH);
 
@@ -337,7 +438,7 @@ public class DefaultRequestPipelineTest {
     }
 
     public HttpResponse removeResponse(HttpRequest key) {
-      throw new UnsupportedOperationException();
+      return data.remove(key.getUri());
     }
 
     public String createKey(HttpRequest request) {

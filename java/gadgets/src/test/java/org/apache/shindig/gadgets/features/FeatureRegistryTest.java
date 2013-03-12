@@ -663,6 +663,106 @@ public class FeatureRegistryTest {
     assertEquals("top();gadget();", resources.get(3).getContent());
   }
 
+  @Test(expected = GadgetException.class)
+  public void testCheckDependencyLoopWithLoopDependencyError() throws Exception {
+        TestFeatureRegistry.Builder builder = TestFeatureRegistry.newBuilder();
+        Uri featureA, featureB, featureC, featureD, txtFile;
+
+        // featureA, featureB, featureC and featureD have dependency loop
+        // problem.
+        featureA = builder.expectResource("<feature>" + "<name>featureA</name>"
+                + "<dependency>featureB</dependency>" + "<gadget>"
+                + "  <script>top();gadget();</script>" + "</gadget>" + "<all>"
+                + "  <script>top();all();</script>" + "</all>" + "</feature>");
+        featureB = builder.expectResource("<feature>" + "<name>featureB</name>"
+                + "<dependency>featureC</dependency>" + "<container>"
+                + "  <script>mid_a();container();</script>" + "</container>"
+                + "<all>" + "  <script>mid_a();all();</script>" + "</all>"
+                + "</feature>");
+        featureC = builder.expectResource("<feature>" + "<name>featureC</name>"
+                + "<dependency>featureD</dependency>" + "<container>"
+                + "  <script>mid_b();container();</script>" + "</container>"
+                + "<gadget>" + "  <script>mid_b();gadget();</script>"
+                + "</gadget>" + "</feature>");
+        featureD = builder.expectResource("<feature>" + "<name>featureD</name>"
+                + "<dependency>featureA</dependency>" + "<all>"
+                + "  <script>bottom();all();</script>" + "</all>"
+                + "</feature>");
+        txtFile = builder.expectResource(
+                featureA.toString() + '\n' + featureB.toString() + '\n'
+                        + featureC.toString() + '\n' + featureD.toString(),
+                ".txt");
+
+        registry = builder.build(txtFile.toString());
+  }
+
+  @Test(expected = GadgetException.class)
+  public void testCheckDependencyLoopWithPartialLoopDependencyError() throws Exception {
+        TestFeatureRegistry.Builder builder = TestFeatureRegistry.newBuilder();
+        Uri featureA, featureB, featureC, featureD, txtFile;
+
+        // featureC and featureD have dependency loop problem.
+        featureA = builder.expectResource("<feature>" + "<name>featureA</name>"
+                + "<dependency>featureB</dependency>" + "<gadget>"
+                + "  <script>top();gadget();</script>" + "</gadget>" + "<all>"
+                + "  <script>top();all();</script>" + "</all>" + "</feature>");
+        featureB = builder.expectResource("<feature>" + "<name>featureB</name>"
+                + "<dependency>featureC</dependency>" + "<container>"
+                + "  <script>mid_a();container();</script>" + "</container>"
+                + "<all>" + "  <script>mid_a();all();</script>" + "</all>"
+                + "</feature>");
+        featureC = builder.expectResource("<feature>" + "<name>featureC</name>"
+                + "<dependency>featureD</dependency>" + "<container>"
+                + "  <script>mid_b();container();</script>" + "</container>"
+                + "<gadget>" + "  <script>mid_b();gadget();</script>"
+                + "</gadget>" + "</feature>");
+        featureD = builder.expectResource("<feature>" + "<name>featureD</name>"
+                + "<dependency>featureC</dependency>" + "<all>"
+                + "  <script>bottom();all();</script>" + "</all>"
+                + "</feature>");
+        txtFile = builder.expectResource(
+                featureA.toString() + '\n' + featureB.toString() + '\n'
+                        + featureC.toString() + '\n' + featureD.toString(),
+                ".txt");
+
+        registry = builder.build(txtFile.toString());
+  }
+
+  @Test
+  public void testCheckDependencyLoopWithNormalDependency() {
+        TestFeatureRegistry.Builder builder = TestFeatureRegistry.newBuilder();
+        Uri featureA, featureB, featureC, featureD, txtFile;
+
+        // There is no loop problem.
+        featureA = builder.expectResource("<feature>" + "<name>featureA</name>"
+                + "<dependency>featureB</dependency>" + "<gadget>"
+                + "  <script>top();gadget();</script>" + "</gadget>" + "<all>"
+                + "  <script>top();all();</script>" + "</all>" + "</feature>");
+        featureB = builder.expectResource("<feature>" + "<name>featureB</name>"
+                + "<dependency>featureC</dependency>" + "<container>"
+                + "  <script>mid_a();container();</script>" + "</container>"
+                + "<all>" + "  <script>mid_a();all();</script>" + "</all>"
+                + "</feature>");
+        featureC = builder.expectResource("<feature>" + "<name>featureC</name>"
+                + "<dependency>featureD</dependency>" + "<container>"
+                + "  <script>mid_b();container();</script>" + "</container>"
+                + "<gadget>" + "  <script>mid_b();gadget();</script>"
+                + "</gadget>" + "</feature>");
+        featureD = builder.expectResource("<feature>" + "<name>featureD</name>"
+                + "<all>" + "  <script>bottom();all();</script>" + "</all>"
+                + "</feature>");
+        txtFile = builder.expectResource(
+                featureA.toString() + '\n' + featureB.toString() + '\n'
+                        + featureC.toString() + '\n' + featureD.toString(),
+                ".txt");
+
+        try {
+            registry = builder.build(txtFile.toString());
+        } catch (GadgetException e) {
+            fail("Shouldn't throw a GadgetException.");
+        }
+  }
+
   private GadgetContext getCtx(final RenderingContext rctx, final String container) {
     return getCtx(rctx, container, false);
   }

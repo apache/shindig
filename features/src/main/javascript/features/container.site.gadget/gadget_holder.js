@@ -181,6 +181,7 @@ osapi.container.GadgetHolder.prototype.doNormalIframeHtml_ = function() {
 osapi.container.GadgetHolder.prototype.doOaaIframeHtml_ = function() {
   //Remove any prior container for the iframe id from the OpenAjax hub prior to registering the new one
   this.removeOaaContainer_(this.iframeId_);
+  var self = this;
   new OpenAjax.hub.IframeContainer(
       gadgets.pubsub2router.hub,
       this.iframeId_,
@@ -202,7 +203,11 @@ osapi.container.GadgetHolder.prototype.doOaaIframeHtml_ = function() {
           //   .resolve(shindig.uri(window.location.href)),
           tunnelURI: shindig.uri(this.relayPath_).resolve(shindig.uri(window.location.href)),
           iframeAttrs: this.createIframeAttributeMap(this.getIframeUrl_(), {title:this.site_.getTitle()}),
-          onGadgetLoad: this.onLoad_
+          onGadgetLoad: function() {
+            if(self.onLoad_) {
+              window[self.onLoad_](self.getUrl(), self.site_.getId());
+            }
+          }
         }
       }
   );
@@ -317,14 +322,13 @@ osapi.container.GadgetHolder.prototype.updateUserPrefParams_ = function(uri) {
   }
 };
 
-function init(config) {
-  if (config['container']) {
-    var rpath = config['container']['relayPath'];
-    osapi.container.GadgetHolder.prototype.relayPath_ = rpath;
-  }
-}
 
 // We do run this in the container mode in the new common container
 if (gadgets.config) {
-  gadgets.config.register('container', null, init);
+  gadgets.config.register('container', null, function (config) {
+    if (config['container']) {
+      var rpath = config['container']['relayPath'];
+      osapi.container.GadgetHolder.prototype.relayPath_ = rpath;
+    }
+  });
 }
