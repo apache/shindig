@@ -94,7 +94,12 @@ public class ClosureJsCompiler implements JsCompiler {
 
   @Inject
   public ClosureJsCompiler(DefaultJsCompiler defaultCompiler, CacheProvider cacheProvider,
-      @Named("shindig.closure.compile.level") String level) {
+          @Named("shindig.closure.compile.level") String level) {
+    this(defaultCompiler, cacheProvider, level, null);
+  }
+  
+  public ClosureJsCompiler(DefaultJsCompiler defaultCompiler, CacheProvider cacheProvider,
+          String level, ExecutorService executorService) {
     this.cache = cacheProvider.createCache(CACHE_NAME);
     this.defaultCompiler = defaultCompiler;
     List<SourceFile> externs = null;
@@ -108,7 +113,11 @@ public class ClosureJsCompiler implements JsCompiler {
     defaultExterns = externs;
 
     compileLevel = level.toLowerCase().trim();
-    compilerPool = createThreadPool();
+    if(executorService != null) {
+      compilerPool = executorService;
+    }else {
+      compilerPool = createThreadPool();
+    }
     Map<String, Future<CompileResult>> map = Maps.newHashMap();
     compiling = new ConcurrentHashMap<String, Future<CompileResult>>(map);
   }
