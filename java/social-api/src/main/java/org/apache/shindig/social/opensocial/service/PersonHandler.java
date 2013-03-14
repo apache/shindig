@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Future;
 
-import org.apache.shindig.common.util.FutureUtil;
+
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.protocol.HandlerPreconditions;
 import org.apache.shindig.protocol.Operation;
@@ -37,8 +37,11 @@ import org.apache.shindig.social.opensocial.spi.PersonService;
 import org.apache.shindig.social.opensocial.spi.UserId;
 
 import com.google.common.base.Objects;
+import com.google.common.base.Function;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
+import com.google.common.util.concurrent.Futures;
+
 import com.google.inject.Inject;
 
 /**
@@ -48,6 +51,21 @@ import com.google.inject.Inject;
 public class PersonHandler {
   private final PersonService personService;
   private final ContainerConfig config;
+
+
+  // Return a future for the first item of a collection
+  private static <T> Future<T> firstItem(Future<RestfulCollection<T>> collection) {
+    Function<RestfulCollection<T>, T> firstItem = new Function<RestfulCollection<T>, T>() {
+      @Override
+      public T apply(RestfulCollection<T> c) {
+        if (c != null && c.getTotalResults() > 0) {
+          return c.getList().get(0);
+        }
+        return null;
+      };
+    };
+    return Futures.lazyTransform(collection, firstItem);
+ }
 
   @Inject
   public PersonHandler(PersonService personService, ContainerConfig config) {
@@ -82,7 +100,7 @@ public class PersonHandler {
           if (options.getFilter() != null) {
             Future<RestfulCollection<Person>> people = personService.getPeople(
                 userIds, groupId, options, fields, request.getToken());
-            return FutureUtil.getFirstFromCollection(people);
+            return firstItem(people);
           } else {
             return personService.getPerson(userIds.iterator().next(), fields, request.getToken());
           }
@@ -97,7 +115,7 @@ public class PersonHandler {
         Future<RestfulCollection<Person>> people = personService.getPeople(
             optionalUserIds, new GroupId(GroupId.Type.self, null),
             options, fields, request.getToken());
-        return FutureUtil.getFirstFromCollection(people);
+        return firstItem(people);
       } else {
         ImmutableSet.Builder<UserId> personIds = ImmutableSet.builder();
         for (String pid : optionalPersonId) {

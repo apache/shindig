@@ -27,7 +27,6 @@ import java.util.concurrent.Future;
 import javax.persistence.EntityManager;
 
 import org.apache.shindig.auth.SecurityToken;
-import org.apache.shindig.common.util.ImmediateFuture;
 import org.apache.shindig.protocol.DataCollection;
 import org.apache.shindig.protocol.ProtocolException;
 import org.apache.shindig.social.opensocial.jpa.ApplicationDataMapDb;
@@ -37,6 +36,7 @@ import org.apache.shindig.social.opensocial.spi.UserId;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.util.concurrent.Futures;
 import com.google.inject.Inject;
 
 /**
@@ -71,7 +71,7 @@ public class AppDataServiceDb implements AppDataService {
     entityManager.flush();
     entityManager.getTransaction().commit();
 
-    return ImmediateFuture.newInstance(null);
+    return Futures.immediateFuture(null);
   }
 
   /**
@@ -188,7 +188,7 @@ public class AppDataServiceDb implements AppDataService {
       }
     }
     DataCollection dc = new DataCollection(results);
-    return ImmediateFuture.newInstance(dc);
+    return Futures.immediateFuture(dc);
   }
 
   /**
@@ -211,7 +211,7 @@ public class AppDataServiceDb implements AppDataService {
     entityManager.flush();
     entityManager.getTransaction().commit();
 
-    return ImmediateFuture.newInstance(null);
+    return Futures.immediateFuture(null);
   }
 
 }

@@ -18,7 +18,6 @@
  */
 package org.apache.shindig.sample.container;
 
-import org.apache.shindig.common.util.ImmediateFuture;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.protocol.Operation;
 import org.apache.shindig.protocol.ProtocolException;
@@ -38,6 +37,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
+import com.google.common.util.concurrent.Futures;
 import com.google.inject.Inject;
 
 @Service(name = "samplecontainer", path = "/{type}/{doevil}")
@@ -81,7 +81,7 @@ public class SampleContainerHandler {
           "evil data has not been implemented yet");
     }
 
-    return ImmediateFuture.newInstance(null);
+    return Futures.immediateFuture(null);
   }
 
   /**
@@ -89,7 +89,7 @@ public class SampleContainerHandler {
    */
   @Operation(httpMethods = "GET")
   public Future<?> get(RequestItem request) {
-    return ImmediateFuture.newInstance(service.getDb());
+    return Futures.immediateFuture(service.getDb());
   }
 
   private String fetchStateDocument(String stateFileLocation) {

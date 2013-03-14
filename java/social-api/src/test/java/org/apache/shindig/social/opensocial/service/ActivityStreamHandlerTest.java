@@ -28,7 +28,6 @@ import java.util.concurrent.Future;
 
 import org.apache.shindig.common.EasyMockTestCase;
 import org.apache.shindig.common.testing.FakeGadgetToken;
-import org.apache.shindig.common.util.ImmediateFuture;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.config.JsonContainerConfig;
 import org.apache.shindig.expressions.Expressions;
@@ -53,6 +52,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.google.common.util.concurrent.Futures;
 
 /**
  * Tests the ActivityStreamsHandler.
@@ -104,7 +104,7 @@ public class ActivityStreamHandlerTest extends EasyMockTestCase {
     org.easymock.EasyMock.expect(service.getActivityEntries(eq(JOHN_DOE),
        eq(new GroupId(group, null)), (String)isNull(), eq(ImmutableSet.<String>of()),
         org.easymock.EasyMock.isA(CollectionOptions.class), eq(token))).
-        andReturn(ImmediateFuture.newInstance(data));
+        andReturn(Futures.immediateFuture(data));
 
     replay();
     assertEquals(data, operation.execute(Maps.<String, String[]>newHashMap(),
@@ -140,7 +140,7 @@ public class ActivityStreamHandlerTest extends EasyMockTestCase {
     org.easymock.EasyMock.expect(service.getActivityEntries(eq(userIdSet),
         eq(new GroupId(GroupId.Type.self, null)), eq("appId"),eq(ImmutableSet.<String>of()),
         org.easymock.EasyMock.isA((CollectionOptions.class)), eq(token))).andReturn(
-          ImmediateFuture.newInstance(data));
+          Futures.immediateFuture(data));
 
     replay();
     assertEquals(data, operation.execute(Maps.<String, String[]>newHashMap(),
@@ -158,7 +158,7 @@ public class ActivityStreamHandlerTest extends EasyMockTestCase {
     org.easymock.EasyMock.expect(service.getActivityEntry(eq(JOHN_DOE.iterator().next()),
         eq(new GroupId(GroupId.Type.friends, null)),
         eq("appId"), eq(ImmutableSet.<String>of()), eq("myObjectId123"), eq(token))).andReturn(
-        ImmediateFuture.newInstance(entry));
+        Futures.immediateFuture(entry));
 
     replay();
     assertEquals(entry, operation.execute(Maps.<String, String[]>newHashMap(),
@@ -180,7 +180,7 @@ public class ActivityStreamHandlerTest extends EasyMockTestCase {
 
     org.easymock.EasyMock.expect(service.createActivityEntry(eq(JOHN_DOE.iterator().next()),
         eq(new GroupId(GroupId.Type.self, null)), eq("appId"), eq(ImmutableSet.<String>of()),
-        eq(entry), eq(token))).andReturn(ImmediateFuture.newInstance((ActivityEntry) null));
+        eq(entry), eq(token))).andReturn(Futures.immediateFuture((ActivityEntry) null));
     replay();
 
     return operation.execute(Maps.<String, String[]>newHashMap(),
@@ -200,7 +200,7 @@ public class ActivityStreamHandlerTest extends EasyMockTestCase {
 
     org.easymock.EasyMock.expect(service.createActivityEntry(eq(JOHN_DOE.iterator().next()),
         eq(new GroupId(GroupId.Type.self, null)), eq("appId"), eq(ImmutableSet.<String>of()),
-        eq(entry), eq(token))).andReturn(ImmediateFuture.newInstance((ActivityEntry) null));
+        eq(entry), eq(token))).andReturn(Futures.immediateFuture((ActivityEntry) null));
     replay();
 
     Future<?> future = operation.execute(Maps.<String, String[]>newHashMap(),
@@ -223,7 +223,7 @@ public class ActivityStreamHandlerTest extends EasyMockTestCase {
 
     org.easymock.EasyMock.expect(service.updateActivityEntry(eq(JOHN_DOE.iterator().next()),
         eq(new GroupId(GroupId.Type.self, null)), eq("appId"), eq(ImmutableSet.<String>of()),
-        eq(entry), eq("testObject"), eq(token))).andReturn(ImmediateFuture.newInstance((ActivityEntry) null));
+        eq(entry), eq("testObject"), eq(token))).andReturn(Futures.immediateFuture((ActivityEntry) null));
     replay();
 
     Future<?> future = operation.execute(Maps.<String, String[]>newHashMap(),
@@ -240,7 +240,7 @@ public class ActivityStreamHandlerTest extends EasyMockTestCase {
 
     org.easymock.EasyMock.expect(service.deleteActivityEntries(eq(JOHN_DOE.iterator().next()),
         eq(new GroupId(GroupId.Type.self, null)), eq("appId"), eq(ImmutableSet.of("myObjectId123")),
-        eq(token))).andReturn(ImmediateFuture.newInstance((Void) null));
+        eq(token))).andReturn(Futures.immediateFuture((Void) null));
 
     replay();
     assertNull(operation.execute(Maps.<String, String[]>newHashMap(), null,

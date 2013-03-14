@@ -21,7 +21,6 @@ package org.apache.shindig.social.opensocial.service;
 import org.apache.shindig.auth.AnonymousSecurityToken;
 import org.apache.shindig.common.EasyMockTestCase;
 import org.apache.shindig.common.testing.FakeGadgetToken;
-import org.apache.shindig.common.util.ImmediateFuture;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.config.JsonContainerConfig;
 import org.apache.shindig.expressions.Expressions;
@@ -46,6 +45,7 @@ import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.google.common.util.concurrent.Futures;
 
 import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
@@ -118,7 +118,7 @@ public class PersonHandlerTest extends EasyMockTestCase {
         eq(DEFAULT_OPTIONS),
         eq(DEFAULT_FIELDS),
         eq(token)))
-        .andReturn(ImmediateFuture.newInstance(data));
+        .andReturn(Futures.immediateFuture(data));
 
     replay();
     assertEquals(data, operation.execute(Maps.<String, String[]>newHashMap(), null,
@@ -139,7 +139,7 @@ public class PersonHandlerTest extends EasyMockTestCase {
         eq(DEFAULT_OPTIONS),
         eq(DEFAULT_FIELDS),
         eq(token)))
-        .andReturn(ImmediateFuture.newInstance(data));
+        .andReturn(Futures.immediateFuture(data));
 
     replay();
     assertEquals(data, operation.execute(Maps.<String, String[]>newHashMap(),
@@ -178,7 +178,7 @@ public class PersonHandlerTest extends EasyMockTestCase {
         eq(JOHN_DOE),
         eq(new GroupId(GroupId.Type.friends, null)), eq(options),
         eq(ImmutableSortedSet.of("money", "fame", "fortune")), eq(token)))
-        .andReturn(ImmediateFuture.newInstance(data));
+        .andReturn(Futures.immediateFuture(data));
 
     replay();
     assertEquals(data, operation.execute(params, null, token, converter).get());
@@ -198,7 +198,7 @@ public class PersonHandlerTest extends EasyMockTestCase {
         eq(ImmutableSet.of(new UserId(UserId.Type.userId, "jane.doe"))),
         eq(new GroupId(GroupId.Type.self, null)), eq(DEFAULT_OPTIONS),
         eq(DEFAULT_FIELDS), eq(token)))
-        .andReturn(ImmediateFuture.newInstance(data));
+        .andReturn(Futures.immediateFuture(data));
 
     replay();
     assertEquals(person, operation.execute(Maps.<String, String[]>newHashMap(),
@@ -213,7 +213,7 @@ public class PersonHandlerTest extends EasyMockTestCase {
 
     Person data = new PersonImpl();
     expect(personService.getPerson(eq(JOHN_DOE.iterator().next()),
-        eq(DEFAULT_FIELDS), eq(token))).andReturn(ImmediateFuture.newInstance(data));
+        eq(DEFAULT_FIELDS), eq(token))).andReturn(Futures.immediateFuture(data));
 
     replay();
     assertEquals(data, operation.execute(Maps.<String, String[]>newHashMap(),
@@ -228,7 +228,7 @@ public class PersonHandlerTest extends EasyMockTestCase {
 
     Person data = new PersonImpl();
     expect(personService.getPerson(eq(ANONYMOUS),
-        eq(DEFAULT_FIELDS), eq(token))).andReturn(ImmediateFuture.newInstance(data));
+        eq(DEFAULT_FIELDS), eq(token))).andReturn(Futures.immediateFuture(data));
 
     replay();
     assertEquals(data, operation.execute(Maps.<String, String[]>newHashMap(),
@@ -249,7 +249,7 @@ public class PersonHandlerTest extends EasyMockTestCase {
         eq(new GroupId(GroupId.Type.self, null)),
         eq(DEFAULT_OPTIONS),
         eq(DEFAULT_FIELDS),
-        eq(token))).andReturn(ImmediateFuture.newInstance(data));
+        eq(token))).andReturn(Futures.immediateFuture(data));
 
     replay();
     assertEquals(data, operation.execute(Maps.<String, String[]>newHashMap(),
@@ -270,7 +270,7 @@ public class PersonHandlerTest extends EasyMockTestCase {
 
     expect(personService.updatePerson(eq(JOHN_DOE.iterator().next()),
         eq(person),
-        eq(token))).andReturn(ImmediateFuture.newInstance(person));
+        eq(token))).andReturn(Futures.immediateFuture(person));
 
     replay();
     assertEquals(person, operation.execute(Maps.<String, String[]>newHashMap(),

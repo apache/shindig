@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.shindig.common.testing.FakeGadgetToken;
-import org.apache.shindig.common.util.ImmediateFuture;
 import org.apache.shindig.protocol.DefaultHandlerRegistry;
 import org.apache.shindig.protocol.HandlerExecutionListener;
 import org.apache.shindig.protocol.HandlerRegistry;
@@ -42,6 +41,7 @@ import org.junit.Test;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.util.concurrent.Futures;
 
 public class MessageHandlerTest extends Assert {
 
@@ -77,7 +77,7 @@ public class MessageHandlerTest extends Assert {
 
     EasyMock.expect(converter.convertToObject(null, Message.class)).andReturn(message);
     EasyMock.expect(messageService.createMessage(sender, "messageHandlerTest", "@outbox", message,
-        token)).andReturn(ImmediateFuture.newInstance((Void) null));
+        token)).andReturn(Futures.immediateFuture((Void) null));
 
     EasyMock.replay(messageService, converter);
 

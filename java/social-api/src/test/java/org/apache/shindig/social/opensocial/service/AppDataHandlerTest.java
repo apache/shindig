@@ -22,7 +22,6 @@ import static org.easymock.EasyMock.eq;
 
 import org.apache.shindig.common.EasyMockTestCase;
 import org.apache.shindig.common.testing.FakeGadgetToken;
-import org.apache.shindig.common.util.ImmediateFuture;
 import org.apache.shindig.protocol.DataCollection;
 import org.apache.shindig.protocol.DefaultHandlerRegistry;
 import org.apache.shindig.protocol.HandlerExecutionListener;
@@ -48,6 +47,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Maps;
+import com.google.common.util.concurrent.Futures;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -85,7 +85,7 @@ public class AppDataHandlerTest extends EasyMockTestCase {
     org.easymock.EasyMock.expect(appDataService.getPersonData(eq(JOHN_DOE),
         eq(new GroupId(group, null)),
         eq("appId"), eq(ImmutableSet.<String>of()), eq(token)))
-        .andReturn(ImmediateFuture.newInstance(data));
+        .andReturn(Futures.immediateFuture(data));
 
     replay();
     assertEquals(data, operation.execute(Maps.<String, String[]>newHashMap(),
@@ -119,7 +119,7 @@ public class AppDataHandlerTest extends EasyMockTestCase {
     org.easymock.EasyMock.expect(appDataService.getPersonData(eq(userIdSet),
         eq(new GroupId(GroupId.Type.self, null)),
         eq("appId"), eq(ImmutableSet.<String>of()), eq(token)))
-        .andReturn(ImmediateFuture.newInstance(data));
+        .andReturn(Futures.immediateFuture(data));
 
     replay();
     assertEquals(data, operation.execute(Maps.<String, String[]>newHashMap(),
@@ -139,7 +139,7 @@ public class AppDataHandlerTest extends EasyMockTestCase {
     org.easymock.EasyMock.expect(appDataService.getPersonData(eq(JOHN_DOE),
         eq(new GroupId(GroupId.Type.friends, null)),
         eq("appId"), eq(ImmutableSet.of("pandas")), eq(token)))
-        .andReturn(ImmediateFuture.newInstance(data));
+        .andReturn(Futures.immediateFuture(data));
 
     replay();
     assertEquals(data, operation.execute(params, null, token, converter).get());
@@ -162,7 +162,7 @@ public class AppDataHandlerTest extends EasyMockTestCase {
     org.easymock.EasyMock.expect(appDataService.updatePersonData(eq(JOHN_DOE.iterator().next()),
         eq(new GroupId(GroupId.Type.self, null)),
         eq("appId"), eq(ImmutableSet.of("pandas")), eq(values), eq(token)))
-        .andReturn(ImmediateFuture.newInstance((Void) null));
+        .andReturn(Futures.immediateFuture((Void) null));
     replay();
     return operation.execute(params, new StringReader(jsonAppData), token, converter);
   }
@@ -252,7 +252,7 @@ public class AppDataHandlerTest extends EasyMockTestCase {
     EasyMock.expect(appDataService.deletePersonData(eq(JOHN_DOE.iterator().next()),
         eq(new GroupId(GroupId.Type.self, null)),
         eq("appId"), eq(ImmutableSet.of("pandas")), eq(token)))
-        .andReturn(ImmediateFuture.newInstance((Void) null));
+        .andReturn(Futures.immediateFuture((Void) null));
 
     replay();
     assertNull(operation.execute(params, null, token, converter).get());

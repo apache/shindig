@@ -18,9 +18,9 @@
  */
 package org.apache.shindig.protocol;
 
-import org.apache.shindig.common.util.ImmediateFuture;
-
 import com.google.common.collect.ImmutableMap;
+import com.google.common.util.concurrent.Futures;
+
 
 import org.junit.Ignore;
 
@@ -84,7 +84,7 @@ public class TestHandler {
     if (mock != null) {
       return mock.create(req);
     }
-    return ImmediateFuture.newInstance(CREATE_RESPONSE);
+    return Futures.immediateFuture(CREATE_RESPONSE);
   }
 
   @Operation(httpMethods = "DELETE")
@@ -92,7 +92,7 @@ public class TestHandler {
     if (mock != null) {
       return mock.futureException(req);
     }
-    return ImmediateFuture.errorInstance(new ProtocolException(HttpServletResponse.SC_BAD_REQUEST,
+    return Futures.immediateFailedFuture(new ProtocolException(HttpServletResponse.SC_BAD_REQUEST,
         FAILURE_MESSAGE, new Throwable()));
   }
 

@@ -23,7 +23,6 @@ import com.google.common.base.Strings;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shindig.auth.SecurityToken;
-import org.apache.shindig.common.util.ImmediateFuture;
 import org.apache.shindig.protocol.conversion.BeanConverter;
 import org.apache.shindig.protocol.conversion.BeanJsonConverter;
 import org.apache.shindig.protocol.multipart.FormDataItem;
@@ -32,6 +31,7 @@ import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.google.common.util.concurrent.Futures;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Provider;
@@ -294,14 +294,14 @@ public class DefaultHandlerRegistry implements HandlerRegistry {
         JSONObject params = rpc.has("params") ? (JSONObject)rpc.get("params") : new JSONObject();
         item = methodCaller.getRpcRequestItem(params, formItems, token, beanJsonConverter);
       } catch (Exception e) {
-        return ImmediateFuture.errorInstance(e);
+        return Futures.immediateFailedFuture(e);
       }
 
       try {
         listener.executing(item);
         return methodCaller.call(handlerProvider.get(), item);
       } catch (Exception e) {
-        return ImmediateFuture.errorInstance(e);
+        return Futures.immediateFailedFuture(e);
       } finally {
         listener.executed(item);
       }
@@ -361,16 +361,16 @@ public class DefaultHandlerRegistry implements HandlerRegistry {
         }
         item = methodCaller.getRestRequestItem(parameters, token, converter, beanJsonConverter);
       } catch (Exception e) {
-        return ImmediateFuture.errorInstance(e);
+        return Futures.immediateFailedFuture(e);
       }
 
       try {
         listener.executing(item);
         return methodCaller.call(handlerProvider.get(), item);
       } catch (Exception e) {
-        return ImmediateFuture.errorInstance(e);
+        return Futures.immediateFailedFuture(e);
       } finally {
-          listener.executed(item);
+        listener.executed(item);
       }
     }
   }
@@ -488,12 +488,12 @@ public class DefaultHandlerRegistry implements HandlerRegistry {
         if (result instanceof Future<?>) {
           return (Future<?>) result;
         }
-        return ImmediateFuture.newInstance(result);
+        return Futures.immediateFuture(result);
       } catch (IllegalAccessException e) {
-        return ImmediateFuture.errorInstance(e);
+        return Futures.immediateFailedFuture(e);
       } catch (InvocationTargetException e) {
         // Unwrap the internal exception
-        return ImmediateFuture.errorInstance(e.getTargetException());
+        return Futures.immediateFailedFuture(e.getTargetException());
       }
     }
   }
@@ -511,7 +511,7 @@ public class DefaultHandlerRegistry implements HandlerRegistry {
 
     public Future<?> execute(Map<String, String[]> parameters, Reader body,
                           SecurityToken token, BeanConverter converter) {
-      return ImmediateFuture.errorInstance(error);
+      return Futures.immediateFailedFuture(error);
     }
   }
 
@@ -528,7 +528,7 @@ public class DefaultHandlerRegistry implements HandlerRegistry {
 
     public Future<?> execute(Map<String, FormDataItem> formItems, SecurityToken token,
         BeanConverter converter) {
-      return ImmediateFuture.errorInstance(error);
+      return Futures.immediateFailedFuture(error);
     }
   }
 

@@ -27,7 +27,6 @@ import javax.persistence.Query;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.shindig.auth.SecurityToken;
-import org.apache.shindig.common.util.ImmediateFuture;
 import org.apache.shindig.protocol.ProtocolException;
 import org.apache.shindig.protocol.RestfulCollection;
 import org.apache.shindig.social.opensocial.jpa.PersonDb;
@@ -40,6 +39,7 @@ import org.apache.shindig.social.opensocial.spi.PersonService;
 import org.apache.shindig.social.opensocial.spi.UserId;
 
 import com.google.common.collect.Lists;
+import com.google.common.util.concurrent.Futures;
 import com.google.inject.Inject;
 
 /**
@@ -147,7 +147,7 @@ public class PersonServiceDb implements PersonService {
     // db wait times.
     RestfulCollection<Person> restCollection = new RestfulCollection<Person>(
         plist, collectionOptions.getFirst(), totalResults.intValue(), collectionOptions.getMax());
-    return ImmediateFuture.newInstance(restCollection);
+    return Futures.immediateFuture(restCollection);
 
   }
 
@@ -166,7 +166,7 @@ public class PersonServiceDb implements PersonService {
     if (plist != null && !plist.isEmpty()) {
       person = (Person) plist.get(0);
     }
-    return ImmediateFuture.newInstance(person);
+    return Futures.immediateFuture(person);
   }
 
   /**
@@ -227,7 +227,7 @@ public class PersonServiceDb implements PersonService {
     entiyManager.getTransaction().commit();
 
     // send personDb data back
-    return ImmediateFuture.newInstance((Person) personDb);
+    return Futures.immediateFuture((Person) personDb);
   }
 
   /** Check if a viewer is allowed to update the given person record. **/

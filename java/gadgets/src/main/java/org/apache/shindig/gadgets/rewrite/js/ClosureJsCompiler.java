@@ -35,7 +35,6 @@ import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.shindig.common.cache.Cache;
 import org.apache.shindig.common.cache.CacheProvider;
 import org.apache.shindig.common.util.HashUtil;
-import org.apache.shindig.common.util.ImmediateFuture;
 import org.apache.shindig.gadgets.features.ApiDirective;
 import org.apache.shindig.gadgets.features.FeatureRegistry.FeatureBundle;
 import org.apache.shindig.gadgets.http.HttpResponse;
@@ -49,6 +48,7 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.util.concurrent.Futures;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
@@ -228,13 +228,13 @@ public class ClosureJsCompiler implements JsCompiler {
                 compiling.put(cacheKey, future);
               }
             } else {
-              future = ImmediateFuture.newInstance(cached);
+              future = Futures.immediateFuture(cached);
             }
           }
         }
 
         if (future == null) {
-          future = ImmediateFuture.newInstance(new CompileResult(code.get()));
+          future = Futures.immediateFuture(new CompileResult(code.get()));
         }
         futures.add(future);
       }
