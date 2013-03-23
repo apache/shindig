@@ -77,8 +77,8 @@
   <!-- C I  M A N A G E M E N T                                               -->
   <!-- ====================================================================== -->
   <ciManagement>
-    <system>Hudson</system>
-    <url>http://hudson.zones.apache.org/hudson/job/Shindig/</url>
+    <system>Jenkins</system>
+    <url>https://builds.apache.org/view/S-Z/view/Shindig/</url>
   </ciManagement>
 
   <!-- ====================================================================== -->
