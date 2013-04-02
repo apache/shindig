@@ -27,9 +27,9 @@
     <html>
       <head>
         <link href='http://fonts.googleapis.com/css?family=Lora|Istok+Web:700' rel='stylesheet' type='text/css'/>
-        <link rel="stylesheet" href="http://jashkenas.github.com/docco/resources/docco.css"/>
-        <link rel="stylesheet" href="http://pivotal.github.com/jasmine/css/jasmine_docco.css"/>
-        <link rel="stylesheet" href="http://pivotal.github.com/jasmine/lib/jasmine.css"/>
+        <link rel="stylesheet" href="http://pivotal.github.com/jasmine/css/docco.css"/>
+        <link rel="stylesheet" href="http://pivotal.github.com/jasmine/css/jasmine_docco-1.3.1.css"/>
+        <link rel="stylesheet" href="http://pivotal.github.com/jasmine/lib/jasmine-1.3.1/jasmine.css"/>
         <style type="text/css">
           body {
             margin: 0;
@@ -42,8 +42,8 @@
             max-height: 5em;
           }
         </style>
-        <script src="http://pivotal.github.com/jasmine/lib/jasmine.js"></script>
-        <script src="http://pivotal.github.com/jasmine/lib/jasmine-html.js"></script>
+        <script src="http://pivotal.github.com/jasmine/lib/jasmine-1.3.1/jasmine.js"></script>
+        <script src="http://pivotal.github.com/jasmine/lib/jasmine-1.3.1/jasmine-html.js"></script>
 
         <!-- Begin Tests -->
         <script type="text/javascript">
