@@ -56,7 +56,8 @@
               expect(gadgets.config.get()['core.io'].proxyUrl).not.toContain('%host%');
             });
 
-            var parentLoc = undef;
+            var undef, 
+                parentLoc = undef;
             it("cannot access the parent window", function() {
               try {
                 parentLoc = window.parent.location.href;
