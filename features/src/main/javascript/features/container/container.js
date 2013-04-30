@@ -885,7 +885,7 @@ osapi.container.Container.prototype.refreshTokens_ = function() {
 osapi.container.Container.prototype.invalidateAllTokens_ = function() {
   var self = this;
   for ( var siteId in self.sites_) {
-    var site = sites[siteId];
+    var site = sites_[siteId];
     if (site instanceof osapi.container.GadgetSite) {
       var holder = site.getActiveSiteHolder();
       var gadgetInfo = commonContainer.service_.getCachedGadgetMetadata(holder.getUrl());
