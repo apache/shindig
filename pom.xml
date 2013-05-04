@@ -47,8 +47,8 @@
     <shindig.api.previous>2.0.0</shindig.api.previous>
 
     <!-- properties that help us sort through the java 1.5/1.6 mess -->
-    <shindig.jdk.version>1.5</shindig.jdk.version>
-    <shindig.jdk.javadoc>1.5.0</shindig.jdk.javadoc>
+    <shindig.jdk.version>1.6</shindig.jdk.version>
+    <shindig.jdk.javadoc>1.6.0</shindig.jdk.javadoc>
     <shindig.jdk.classifier />
   </properties>
 
