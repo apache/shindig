@@ -48,7 +48,10 @@ public class AtomAuthor {
    * @param activityEntry
    */
   public AtomAuthor(ActivityEntry activityEntry) {
-    uri = activityEntry.getActor().getId();
+    uri = activityEntry.getActor().getUrl();
     name = activityEntry.getActor().getDisplayName();
+    if (name == null) {
+      name = activityEntry.getActor().getId();
+    }
   }
 }

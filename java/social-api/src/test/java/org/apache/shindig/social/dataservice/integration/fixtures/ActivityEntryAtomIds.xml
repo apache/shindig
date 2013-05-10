@@ -2,11 +2,12 @@
   <entry>
     <id>activity2</id>
     <title>John posted a new photo album.</title>
-    <summary>Photo posted</summary>
+    <summary type="html" />
     <author>
-      <uri>john.doe</uri>
-      <name xmlns="http://ns.opensocial.org/2008/opensocial">John Doe</name>
+      <uri>http://example.org/john</uri>
+      <name>John Doe</name>
     </author>
+    <link rel="alternate">http://example.org/album/my_fluffy_cat.jpg</link>
     <content type="application/xml">
       <activityEntry xmlns="http://ns.opensocial.org/2008/opensocial">
         <actor>
@@ -89,10 +90,12 @@
   <entry>
     <id>activity1</id>
     <title>John shared new photos with you</title>
+    <summary type="html" />
     <author>
-      <uri>john.doe</uri>
-      <name xmlns="http://ns.opensocial.org/2008/opensocial">John Doe</name>
+      <uri>http://example.org/john</uri>
+      <name>John Doe</name>
     </author>
+    <link rel="alternate">http://example.org/blog/2011/02/entry</link>
     <content type="application/xml">
       <activityEntry xmlns="http://ns.opensocial.org/2008/opensocial">
         <actor>
@@ -145,5 +148,7 @@
   <osearch:totalResults>2</osearch:totalResults>
   <osearch:itemsPerPage>2</osearch:itemsPerPage>
   <author>?</author>
-  <link rel="rel">???</link>
+  <title>?</title>
+  <updated></updated>
+  <id>?</id>
 </feed>

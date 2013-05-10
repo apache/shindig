@@ -2,11 +2,12 @@
   <entry>
     <id>activity2</id>
     <title>John posted a new photo album.</title>
-    <summary>Photo posted</summary>
+    <summary type="html" />
     <author>
-      <uri>john.doe</uri>
-      <name xmlns="http://ns.opensocial.org/2008/opensocial">John Doe</name>
+      <uri>http://example.org/john</uri>
+      <name>John Doe</name>
     </author>
+    <link rel="alternate">http://example.org/album/my_fluffy_cat.jpg</link>
     <content type="application/xml">
       <activityEntry xmlns="http://ns.opensocial.org/2008/opensocial">
         <actor>

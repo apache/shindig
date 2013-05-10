@@ -38,7 +38,7 @@ public class AtomEntry {
   @SuppressWarnings("unused")
   private String title;
   @SuppressWarnings("unused")
-  private String summary;
+  private AtomSummary summary;
   @SuppressWarnings("unused")
   private String icon;
   @SuppressWarnings("unused")
@@ -79,7 +79,7 @@ public class AtomEntry {
       Activity activity = (Activity) o;
       content = new AtomContent(activity);
       title = activity.getTitle();
-      summary = activity.getBody();
+      summary = new AtomSummary(activity.getBody());
       link = new AtomLink("self", activity.getUrl());
       icon = activity.getStreamFaviconUrl();
       source = new AtomSource(activity);
@@ -90,7 +90,8 @@ public class AtomEntry {
       ActivityEntry activity = (ActivityEntry)o;
       id = activity.getId();
       title = activity.getTitle();
-      summary = activity.getObject().getSummary();
+      summary = new AtomSummary(activity.getObject().getSummary());
+      link = new AtomLink("alternate", activity.getObject().getUrl());
       author = new AtomAuthor(activity);
       content = new AtomContent(activity);
       try {

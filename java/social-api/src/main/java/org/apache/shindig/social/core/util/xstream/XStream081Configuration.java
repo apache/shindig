@@ -52,6 +52,7 @@ import org.apache.shindig.social.core.util.atom.AtomEntry;
 import org.apache.shindig.social.core.util.atom.AtomFeed;
 import org.apache.shindig.social.core.util.atom.AtomKeyValue;
 import org.apache.shindig.social.core.util.atom.AtomLinkConverter;
+import org.apache.shindig.social.core.util.atom.AtomSummaryConverter;
 import org.apache.shindig.social.opensocial.model.Account;
 import org.apache.shindig.social.opensocial.model.Activity;
 import org.apache.shindig.social.opensocial.model.ActivityEntry;
@@ -152,7 +153,6 @@ public class XStream081Configuration implements XStreamConfiguration {
         .put("bodyType", os)
         .put("message", os)
         .put("mediaItem", os)
-        .put("name", os)
         .put("url", os)
         .put("response", os)
         .put("appdata", os)
@@ -352,6 +352,7 @@ public class XStream081Configuration implements XStreamConfiguration {
     xstream.registerConverter(new RestfullCollectionConverter(fmapper));
     xstream.registerConverter(new DataCollectionConverter(fmapper));
     xstream.registerConverter(new AtomLinkConverter());
+    xstream.registerConverter(new AtomSummaryConverter());
 
     xstream.registerConverter(new ISO8601DateConverter());
     xstream.registerConverter(new ISO8601GregorianCalendarConverter());

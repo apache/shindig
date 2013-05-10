@@ -46,7 +46,19 @@ public class AtomFeed {
   @SuppressWarnings("unused")
   private String author;
   @SuppressWarnings("unused")
+  private String title;
+  @SuppressWarnings("unused")
+  private String updated;
+  @SuppressWarnings("unused")
+  private String id;
+  @SuppressWarnings("unused")
   private AtomLink link;
+
+  public static final String AUTHOR = "author";
+  public static final String TITLE = "title";
+  public static final String UPDATED = "updated";
+  public static final String ID = "id";
+  public static final String URL = "url";
 
   /**
    * @param obj
@@ -64,8 +76,15 @@ public class AtomFeed {
       startIndex = r.getStartIndex();
       totalResults = r.getTotalResults();
       itemsPerPage = r.getItemsPerPage();
-      author = "?";
-      link = new AtomLink("rel", "???");
+      author = (r.get(AUTHOR)==null) ? "?" : r.get(AUTHOR).toString();
+      title = (r.get(TITLE)==null) ? "?" : r.get(TITLE).toString();
+      id = (r.get(ID)==null) ? "?" : r.get(ID).toString();
+      updated = (r.get(UPDATED)==null) ? "" : r.get(UPDATED).toString();
+
+      if (r.get(URL)!=null) {
+        link = new AtomLink("self", r.get(URL).toString());
+      }
+
     } else if (obj instanceof Map) {
       Map<?, ?> m = (Map<?, ?>) obj;
       entry = Lists.newArrayList();
