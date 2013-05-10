@@ -18,9 +18,15 @@
  */
 package org.apache.shindig.gadgets;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+import org.apache.shindig.common.logging.i18n.MessageKeys;
 import org.apache.shindig.config.ContainerConfig;
 
 import com.google.common.collect.Maps;
@@ -52,22 +58,33 @@ public abstract class AbstractLockedDomainService implements LockedDomainService
             Collection<String> removed) {
       for (String container : changed) {
         required.put(container, config.getBool(container, LOCKED_DOMAIN_REQUIRED_KEY));
+        permittedRefererDomains.put(container, config.getList(container, PERMITTED_REFERER_DOMAINS_KEY));
       }
       for (String container : removed) {
         required.remove(container);
+        permittedRefererDomains.remove(container);
       }
     }
   }
 
   protected static final String LOCKED_DOMAIN_REQUIRED_KEY = "gadgets.uri.iframe.lockedDomainRequired";
 
+  protected static final String PERMITTED_REFERER_DOMAINS_KEY = "shindig.locked-domain.permittedRefererDomains";
+
   protected static final String LOCKED_DOMAIN_FEATURE = "locked-domain";
   private final boolean enabled;
+
+  private boolean refererCheckEnabled;
 
   protected final Map<String, Boolean> required;
   private boolean lockSecurityTokens = false;
 
   private LockedDomainObserver ldObserver;
+
+  protected final Map<String, List<Object>> permittedRefererDomains;
+
+  private static final String classname = HashLockedDomainService.class.getName();
+  private static final Logger LOG = Logger.getLogger(classname, MessageKeys.MESSAGES);
 
   /**
    * Create a LockedDomainService. This constructor should be called by implementors.
@@ -80,10 +97,16 @@ public abstract class AbstractLockedDomainService implements LockedDomainService
   protected AbstractLockedDomainService(ContainerConfig config, boolean enabled) {
     this.enabled = enabled;
     this.required = Maps.newHashMap();
+    this.permittedRefererDomains = Maps.newHashMap();
     if (enabled) {
       this.ldObserver = new LockedDomainObserver();
       config.addConfigObserver(this.ldObserver, true);
     }
+  }
+
+  @Inject
+  public void setRefererCheckEnabled(@Named("shindig.locked-domain.refererCheck.enabled") boolean refererCheckEnabled) {
+      this.refererCheckEnabled = refererCheckEnabled;
   }
 
   /*
@@ -131,6 +154,15 @@ public abstract class AbstractLockedDomainService implements LockedDomainService
     return true;
   }
 
+  /*
+   * (non-Javadoc)
+   *
+   * @see org.apache.shindig.gadgets.LockedDomainService#isRefererCheckEnabled()
+   */
+  public boolean isRefererCheckEnabled() {
+    return this.refererCheckEnabled;
+  }
+
   /**
    * Allows a renderer to render all gadgets that require a security token on a locked domain. This
    * is recommended security practice, as it secures the token from other gadgets, but because the
@@ -150,11 +182,11 @@ public abstract class AbstractLockedDomainService implements LockedDomainService
   }
 
   /**
-   * Returns true iff domain locking is enforced for every gadget by the container
+   * Returns true if domain locking is enforced for every gadget by the container
    *
    * @param container
    *          the container configuration, e.g., "default"
-   * @return true iff domain locking is enforced by the container
+   * @return true if domain locking is enforced by the container
    */
   protected boolean isDomainLockingEnforced(String container) {
     return this.required.get(container);
@@ -169,19 +201,63 @@ public abstract class AbstractLockedDomainService implements LockedDomainService
   }
 
   /**
-   * Returns true iff the gadget is requesting to be on a locked domain. If security token locking
+   * Returns true if the gadget is requesting to be on a locked domain. If security token locking
    * has been enabled via {@link #setLockSecurityTokens(Boolean)}, this method will return true if
    * the gadget is explicitly or implicitly requesting locked domains; otherwise, this will return
    * true only if the gadget is explicitly requesting locked domains.
    *
    * @param gadget
    *          the gadget
-   * @return true iff the gadget is requesting to be on a locked domain
+   * @return true if the gadget is requesting to be on a locked domain
    */
   protected boolean isGadgetReqestingLocking(Gadget gadget) {
     if (this.lockSecurityTokens) {
       return gadget.getAllFeatures().contains(LOCKED_DOMAIN_FEATURE);
     }
     return gadget.getViewFeatures().keySet().contains(LOCKED_DOMAIN_FEATURE);
+  }
+
+  /**
+   * Check whether the referer value in the request head is in the permitted referer domain list or not.
+   * @param gadget
+   *     the gadget
+   * @param container
+   *     the container
+   * @return true if the referer is valid, otherwise return false.
+   */
+  protected boolean isValidReferer(Gadget gadget, String container) {
+    String referer = gadget.getContext().getReferer();
+    List<Object> domainList = this.permittedRefererDomains.get(container);
+    if (null != referer && !"".equals(referer.trim())) {
+      try {
+        URL url = new URL(referer);
+        if (!domainList.isEmpty()) {
+          boolean matched = false;
+          String refererHost = url.getHost().toLowerCase();
+          for (Object permittedDomain: domainList) {
+            if (refererHost.endsWith(((String) permittedDomain).toLowerCase())) {
+              matched = true;
+              break;
+            }
+          }
+          if (!matched) {
+            LOG.logp(Level.SEVERE, classname, "Referer check failed.",
+                MessageKeys.FAILED_TO_VALIDATE, new Object[] { referer });
+            return false;
+          }
+        }
+      } catch (MalformedURLException e) {
+        LOG.logp(Level.SEVERE, classname, "Referer check failed, malformed referer url.",
+            MessageKeys.FAILED_TO_VALIDATE, new Object[] { referer });
+        return false;
+      }
+    } else {
+      if (!domainList.isEmpty()) {
+        LOG.logp(Level.SEVERE, classname, "Referer check failed, referer url is not valid.",
+          MessageKeys.FAILED_TO_VALIDATE, new Object[] { referer });
+        return false;
+      }
+    }
+    return true;
   }
 }

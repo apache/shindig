@@ -295,5 +295,9 @@ public class RendererTest {
     public boolean isHostUsingLockedDomain(String host) {
       return false;
     }
+
+    public boolean isRefererCheckEnabled() {
+        return false;
+    }
   }
 }

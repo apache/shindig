@@ -147,6 +147,9 @@ public class HashLockedDomainService extends AbstractLockedDomainService {
     if (isEnabled()) {
       if (isGadgetReqestingLocking(gadget) || isHostUsingLockedDomain(host)
               || isDomainLockingEnforced(container)) {
+        if (isRefererCheckEnabled() && !isValidReferer(gadget, container)) {
+          return false;
+        }
         String neededHost;
         try {
           neededHost = getLockedDomain(gadget, container);

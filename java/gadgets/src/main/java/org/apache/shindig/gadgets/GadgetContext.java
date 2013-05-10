@@ -168,5 +168,9 @@ public class GadgetContext {
   public String getRepository() {
     return delegate == null ? null : delegate.getRepository();
   }
+
+  public String getReferer() {
+      return delegate == null ? null : delegate.getReferer();
+  }
 }
 

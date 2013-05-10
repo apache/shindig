@@ -71,4 +71,9 @@ public interface LockedDomainService {
    *         Returns false if locked domains are not enabled on the server.
    */
   boolean isHostUsingLockedDomain(String host);
+
+  /**
+   * @return If referrer check is enabled, return true. Otherwise, return false.
+   */
+  boolean isRefererCheckEnabled();
 }

@@ -51,6 +51,7 @@ public class HttpGadgetContext extends GadgetContext {
   private final Uri url;
   private final UserPrefs userPrefs;
   private final String view;
+  private final String referer;
 
   public HttpGadgetContext(HttpServletRequest request) {
     this.request = request;
@@ -64,6 +65,7 @@ public class HttpGadgetContext extends GadgetContext {
     url = getUrl(request);
     userPrefs = getUserPrefs(request);
     view = getView(request);
+    referer = getReferer();
   }
 
   @Override
@@ -164,6 +166,12 @@ public class HttpGadgetContext extends GadgetContext {
       return super.getRepository();
     }
     return repository;
+  }
+
+  @Override
+  public String getReferer() {
+    String referer = request.getHeader("Referer");
+    return referer == null ? super.getReferer() : referer;
   }
 
   /**
