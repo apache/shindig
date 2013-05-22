@@ -55,7 +55,7 @@ gadgets.window = gadgets.window || {};
         }
         return s || {};
       };
-    } else if (isIE) {
+    } else if (isIE && !window.getComputedStyle) {
       gcs = function(node){
         // IE (as of 7) doesn't expose Element like sane browsers
         return node.nodeType == DOM_ELEMENT_NODE ? node.currentStyle : {};
