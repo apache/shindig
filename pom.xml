@@ -525,14 +525,6 @@
       <id>all</id>
     </profile>
 
-    <!-- profile to build java/samples -->
-    <profile>
-      <id>samples</id>
-      <modules>
-        <module>java/samples</module>
-      </modules>
-    </profile>
-
     <!-- profile to run an embedded jetty instance -->
     <profile>
       <id>run</id>
@@ -585,7 +577,6 @@
         <module>java/server-resources</module>
         <module>java/server-dependencies</module>
         <module>java/server</module>
-        <module>java/samples</module>
         <module>extras</module>
       </modules>
       <build>
@@ -909,7 +900,6 @@
         <module>java/server-resources</module>
         <module>java/server-dependencies</module>
         <module>java/server</module>
-        <module>java/samples</module>
         <module>java/uber</module>
         <module>extras</module>
         <module>php</module>
