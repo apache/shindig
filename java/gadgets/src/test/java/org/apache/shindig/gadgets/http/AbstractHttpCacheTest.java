@@ -430,6 +430,24 @@ public class AbstractHttpCacheTest {
   }
 
   @Test
+  public void addResponseWithForcedTtlAndErrorResponse() {
+    HttpRequest request = new HttpRequest(DEFAULT_URI).setCacheTtl(10);
+
+    String key = cache.createKey(request);
+    HttpResponse response = new HttpResponseBuilder()
+        .setResponseString("result")
+        .setHttpStatusCode(500)
+        .create();
+
+    assertNotNull(cache.addResponse(request, response));
+
+    assertNull(cache.map.get(key).getHeader("Cache-Control"));
+
+    assertNotNull(extendedStrictNoCacheTtlCache.addResponse(request, response));
+    assertNull(extendedStrictNoCacheTtlCache.map.get(key).getHeader("Cache-Control"));
+  }
+
+  @Test
   public void addResponseWithNoCachingHeaders() {
     HttpRequest request = new HttpRequest(DEFAULT_URI);
 

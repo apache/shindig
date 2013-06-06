@@ -117,7 +117,7 @@ public abstract class AbstractHttpCache implements HttpCache {
       return null;
     }
     int forcedTtl = request.getCacheTtl();
-    if (forcedTtl != -1) {
+    if (forcedTtl != -1 && !response.isError()) {
       responseBuilder.setCacheTtl(forcedTtl);
     }
     response = responseBuilder.create();

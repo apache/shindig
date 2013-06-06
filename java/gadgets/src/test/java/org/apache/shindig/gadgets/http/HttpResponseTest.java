@@ -615,4 +615,17 @@ public class HttpResponseTest extends Assert {
   public void testCacheExpirationForStrictNoCacheResponseWithoutOverride() throws Exception {
     assertEquals(-1, new HttpResponseBuilder().setStrictNoCache().create().getCacheExpiration());
   }
+
+  @Test
+  public void testCacheExpirationForNegativeCacheExemptNoCacheControl() throws Exception {
+    // Response should return a 401 or 403 (which are negative cache exempt) that don't have cache
+    // control headers. They should still be cached for the negative ttl.
+    HttpResponse response = new HttpResponseBuilder()
+                                  .setHttpStatusCode(HttpResponse.SC_FORBIDDEN)
+                                  .create();
+    assertTrue(
+            "Response is cached for the negative TTL",
+            response.getCacheExpiration() <= timeSource.currentTimeMillis()
+                    + response.getNegativeTtl());
+  }
 }

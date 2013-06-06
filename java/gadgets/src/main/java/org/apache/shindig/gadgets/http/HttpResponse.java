@@ -18,6 +18,7 @@
  */
 package org.apache.shindig.gadgets.http;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Charsets;
 import com.google.common.base.Supplier;
 import com.google.common.cache.CacheBuilder;
@@ -379,6 +380,11 @@ public final class HttpResponse implements Externalizable {
     if (expiration != -1) {
       return expiration;
     }
+
+    if (isError()) {
+      return date + negativeCacheTtl;
+    }
+
     return date + defaultTtl;
   }
 
@@ -517,6 +523,11 @@ public final class HttpResponse implements Externalizable {
    */
   public long getDefaultTtl() {
     return defaultTtl;
+  }
+
+  @VisibleForTesting
+  long getNegativeTtl() {
+    return negativeCacheTtl;
   }
 
   /**
