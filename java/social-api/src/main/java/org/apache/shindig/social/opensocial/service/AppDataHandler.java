@@ -99,7 +99,7 @@ public class AppDataHandler {
 
     @SuppressWarnings("unchecked")
     // As of today, this is the only format supported by the AppData protocol
-    Map<String, String> values = request.getTypedParameter("data", Map.class);
+    Map<String, Object> values = request.getTypedParameter("data", Map.class);
     for (String key : values.keySet()) {
       if (!isValidKey(key)) {
         throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST,

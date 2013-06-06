@@ -155,7 +155,7 @@ public class AppDataHandlerTest extends EasyMockTestCase {
     Map<String, String[]> params = Maps.newHashMap();
     params.put("fields", new String[]{"pandas"});
 
-    HashMap<String, String> values = Maps.newHashMap();
+    HashMap<String, Object> values = Maps.newHashMap();
     org.easymock.EasyMock.expect(converter.convertToObject(eq(jsonAppData), eq(Map.class)))
         .andReturn(values);
 

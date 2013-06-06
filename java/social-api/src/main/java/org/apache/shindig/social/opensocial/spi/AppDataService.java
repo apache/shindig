@@ -70,6 +70,6 @@ public interface AppDataService {
    * @return an error if one occurs
    */
   Future<Void> updatePersonData(UserId userId, GroupId groupId,
-      String appId, Set<String> fields, Map<String, String> values, SecurityToken token)
+      String appId, Set<String> fields, Map<String, Object> values, SecurityToken token)
       throws ProtocolException;
 }

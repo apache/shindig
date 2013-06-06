@@ -273,7 +273,7 @@ public class JsonDbOpensocialServiceTest extends Assert {
   public void testUpdateExpectedAppData() throws Exception {
     // Delete the data
     db.updatePersonData(CANON_USER, SELF_GROUP, APP_ID,
-        null, ImmutableMap.of("count", "10", "newvalue", "20"), new FakeGadgetToken());
+        null, ImmutableMap.of("count", (Object)"10", "newvalue", (Object)"20", "isValid", new Boolean(true)), new FakeGadgetToken());
 
     // Fetch the remaining and test
     DataCollection responseItem = db.getPersonData(
@@ -283,11 +283,13 @@ public class JsonDbOpensocialServiceTest extends Assert {
     assertFalse(responseItem.getEntry().isEmpty());
     assertFalse(responseItem.getEntry().get(CANONICAL_USER_ID).isEmpty());
 
-    assertSame(3, responseItem.getEntry().get(CANONICAL_USER_ID).size());
+    assertSame(4, responseItem.getEntry().get(CANONICAL_USER_ID).size());
     assertTrue(responseItem.getEntry().get(CANONICAL_USER_ID).containsKey("count"));
     assertEquals("10", responseItem.getEntry().get(CANONICAL_USER_ID).get("count"));
     assertTrue(responseItem.getEntry().get(CANONICAL_USER_ID).containsKey("newvalue"));
     assertEquals("20", responseItem.getEntry().get(CANONICAL_USER_ID).get("newvalue"));
+    assertTrue(responseItem.getEntry().get(CANONICAL_USER_ID).containsKey("isValid"));
+    assertEquals(true, Boolean.valueOf(responseItem.getEntry().get(CANONICAL_USER_ID).get("isValid")));
   }
 
   @Test

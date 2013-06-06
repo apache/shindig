@@ -562,7 +562,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
 
   /** {@inheritDoc} */
   public Future<Void> updatePersonData(UserId userId, GroupId groupId, String appId,
-      Set<String> fields, Map<String, String> values, SecurityToken token)
+      Set<String> fields, Map<String, Object> values, SecurityToken token)
       throws ProtocolException {
     // TODO: this seems redundant. No need to pass both fields and a map of
     // field->value
@@ -577,7 +577,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
         db.getJSONObject(DATA_TABLE).put(userId.getUserId(token), personData);
       }
 
-      for (Map.Entry<String, String> entry : values.entrySet()) {
+      for (Map.Entry<String, Object> entry : values.entrySet()) {
         personData.put(entry.getKey(), entry.getValue());
       }
       return Futures.immediateFuture(null);
