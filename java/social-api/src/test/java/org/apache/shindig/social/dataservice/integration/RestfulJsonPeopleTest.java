@@ -174,7 +174,7 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
     canonical.setSports(Lists.newArrayList("frisbee", "rugby"));
     canonical.setStatus("happy");
     canonical.setTags(Lists.newArrayList("C#", "JSON", "template"));
-    canonical.setThumbnailUrl("/samplecontainer/examples/nophoto.gif");
+    canonical.setThumbnailUrl("/images/nophoto.gif");
     canonical.setUtcOffset(-8L);
     canonical.setTurnOffs(Lists.newArrayList("lack of unit tests", "cabbage"));
     canonical.setTurnOns(Lists.newArrayList("well document code"));
@@ -182,7 +182,7 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
 
     canonical.setUrls(Lists.<Url>newArrayList(
         new UrlImpl("http://www.example.org/?id=1", "my profile", "Profile"),
-        new UrlImpl("/samplecontainer/examples/nophoto.gif", "my awesome picture", "Thumbnail")));
+        new UrlImpl("/images/nophoto.gif", "my awesome picture", "Thumbnail")));
   }
 
   /**

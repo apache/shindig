@@ -32,7 +32,7 @@
           "type" : "whitelist"
         }
       },
-      "http://localhost:8080/samplecontainer/examples/media-openGadgets/Media.xml" : {
+      "http://localhost:8080/gadgets/media-openGadgets/Media.xml" : {
         "features" : {
           "names" : [],
           "type" : "blacklist"

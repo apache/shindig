@@ -58,7 +58,7 @@
                   <java.lang.String>http://farm3.static.flickr.com/2668/3858018351_1e7b73c0b7_t.jpg</java.lang.String>
                 </photoUrls>
       </context>
-      <gadget>http://localhost:8080/samplecontainer/examples/embeddedexperiences/AlbumViewer.xml</gadget>
+      <gadget>http://localhost:8080/containers/embeddedexperiences/AlbumViewer.xml</gadget>
     </embed>
   </openSocial>
   <provider>

@@ -18,16 +18,16 @@
  */
 
 {
-  "http://localhost:8080/samplecontainer/examples/oauth.xml" : {
+  "http://localhost:8080/gadgets/oauth.xml" : {
     "" : {
       "consumer_key" : "gadgetConsumer",
       "consumer_secret" : "gadgetSecret",
       "key_type" : "HMAC_SYMMETRIC"
     }
   },
-  "http://localhost:8080/samplecontainer/examples/shindigoauth.xml" : {
+  "http://localhost:8080/gadgets/shindigoauth.xml" : {
     "shindig" : {
-      "consumer_key" : "http://localhost:8080/samplecontainer/examples/shindigoauth.xml",
+      "consumer_key" : "http://localhost:8080/gadgets/shindigoauth.xml",
       "consumer_secret" : "secret",
       "key_type" : "HMAC_SYMMETRIC"
     }

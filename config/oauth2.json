@@ -32,49 +32,49 @@
 */
 {
    "gadgetBindings" : {
-      "%origin%%contextRoot%/samplecontainer/examples/oauth2/oauth2_google.xml" : {
+      "%origin%%contextRoot%/gadgets/oauth2/oauth2_google.xml" : {
          "googleAPI" : {
             "clientName"          : "googleApi_client1",
             "allowModuleOverride" : "true"
          }
       },
-      "%origin%%contextRoot%/samplecontainer/examples/oauth2/oauth2_google_shared1.xml" : {
+      "%origin%%contextRoot%/gadgets/oauth2/oauth2_google_shared1.xml" : {
          "googleAPI" : {
             "clientName"          : "googleApi_shared_client",
             "allowModuleOverride" : "true"
          }
       },
-      "%origin%%contextRoot%/samplecontainer/examples/oauth2/oauth2_google_shared2.xml" : {
+      "%origin%%contextRoot%/gadgets/oauth2/oauth2_google_shared2.xml" : {
          "googleAPI" : {
             "clientName"          : "googleApi_shared_client",
             "allowModuleOverride" : "true"
          }
       },
-      "%origin%%contextRoot%/samplecontainer/examples/oauth2/oauth2_facebook.xml" : {
+      "%origin%%contextRoot%/gadgets/oauth2/oauth2_facebook.xml" : {
           "facebook" : {
              "clientName"          : "facebook_client1",
              "allowModuleOverride" : "true"
           }
       },
-      "%origin%%contextRoot%/samplecontainer/examples/oauth2/oauth2_windowslive.xml" : {
+      "%origin%%contextRoot%/gadgets/oauth2/oauth2_windowslive.xml" : {
           "windows_live" : {
              "clientName"          : "wl_client1",
              "allowModuleOverride" : "true"
           }
       },
-      "%origin%%contextRoot%/samplecontainer/examples/oauth2/shindig_authorization.xml" : {
+      "%origin%%contextRoot%/gadgets/oauth2/shindig_authorization.xml" : {
 		  "shindigOAuth2Provider" : {
             "clientName"          : "shindig_client1",
             "allowModuleOverride" : "true"
           }
       },
-      "%origin%%contextRoot%/samplecontainer/examples/oauth2/shindig_client_credentials.xml" : {
+      "%origin%%contextRoot%/gadgets/oauth2/shindig_client_credentials.xml" : {
         "shindigOAuth2Provider" : {
             "clientName"          : "shindig_client2",
             "allowModuleOverride" : "true"
           }
       },
-      "%origin%%contextRoot%/samplecontainer/examples/oauth2/oauth2_spring_proxy.xml" : {
+      "%origin%%contextRoot%/gadgets/oauth2/oauth2_spring_proxy.xml" : {
          "springAPI" : {
             "clientName"          : "spring_client1",
             "allowModuleOverride" : "true"

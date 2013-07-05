@@ -4,22 +4,22 @@
             "name": "Publish Subscribe Demo",
             "Description": "This is a sample pub/sub demo showcasing the pubsub-2 feature",
             "apps" : [
-                     {"name": "publisher", "url": "/container/sample-pubsub-2-publisher.xml"},
-                     {"name": "subscriber", "url": "/container/sample-pubsub-2-subscriber.xml"}
+                     {"name": "publisher", "url": "/gadgets/sample-pubsub-2-publisher.xml"},
+                     {"name": "subscriber", "url": "/gadgets/sample-pubsub-2-subscriber.xml"}
                      ]
              },
              {
             "name": "Activity Streams Sample",
             "Description": "Simple gadget to test base ActivityStreams implementation in features",
             "apps" : [
-                     {"name": "ActivityStreams Sample", "url": "/samplecontainer/examples/ActivityStreams/ActivityStreamGadget.xml"}
+                     {"name": "ActivityStreams Sample", "url": "/gadgets/ActivityStreams/ActivityStreamGadget.xml"}
                      ]
              },
                          {
             "name": "Sample Media Items Gadget",
             "Description": "This is a sample pub/sub demo showcasing the pubsub-2 feature",
             "apps" : [
-                     {"name": "publisher", "url": "/samplecontainer/examples/media/Media.xml"}
+                     {"name": "publisher", "url": "/gadgets/media/Media.xml"}
                      ]
              },
              {
@@ -34,7 +34,7 @@
              "name": "Sample Media Items Gadget with openGadget API",
              "Description": "Sample gadget used in the view enhancements sample",
              "apps" : [
-                     {"name": "publisher", "url": "/samplecontainer/examples/media-openGadgets/Media.xml"}
+                     {"name": "publisher", "url": "/gadgets/media-openGadgets/Media.xml"}
                      ]
              },
              {
@@ -49,51 +49,51 @@
              "name": "OAuth2 Demo with Google Provider",
              "Description": "OAuth2 Demo with Google Provider",
              "apps" : [
-                      {"name": "oauth2_authorization_g", "url": "/samplecontainer/examples/oauth2/oauth2_google.xml"}
+                      {"name": "oauth2_authorization_g", "url": "/gadgets/oauth2/oauth2_google.xml"}
                       ]
              },
              {
              "name": "OAuth2 Demo with Facebook Provider",
              "Description": "OAuth2 Demo with Facebook Provider",
              "apps" : [
-                      {"name": "oauth2_authorization_f", "url": "/samplecontainer/examples/oauth2/oauth2_facebook.xml"}
+                      {"name": "oauth2_authorization_f", "url": "/gadgets/oauth2/oauth2_facebook.xml"}
                       ]
              },
              {
              "name": "OAuth2 Demo with Windows Live Provider",
              "Description": "OAuth2 Demo with Windows Live Provider",
              "apps" : [
-                      {"name": "oauth2_authorization_w", "url": "/samplecontainer/examples/oauth2/oauth2_windowslive.xml"}
+                      {"name": "oauth2_authorization_w", "url": "/gadgets/oauth2/oauth2_windowslive.xml"}
                       ]
              },
              {
              "name": "OAuth2 Demo with Shindig Provider (Authorization Code)",
              "Description": "OAuth2 Demo with Shindig Provider (Authorization Code)",
              "apps" : [
-                      {"name": "oauth2_authorization_s", "url": "/samplecontainer/examples/oauth2/shindig_authorization.xml"}
+                      {"name": "oauth2_authorization_s", "url": "/gadgets/oauth2/shindig_authorization.xml"}
                       ]
              },
              {
              "name": "OAuth2 Demo with Shindig Provider (Client Credentials)",
              "Description": "OAuth2 Demo with Shindig Provider (Client Credentials)",
              "apps" : [
-                      {"name": "oauth2_client_credentials_s", "url": "/samplecontainer/examples/oauth2/shindig_client_credentials.xml"}
+                      {"name": "oauth2_client_credentials_s", "url": "/gadgets/oauth2/shindig_client_credentials.xml"}
                       ]
              },
              {
              "name" : "Test Gadget and Container Domain Configuration",
              "Description" : "Tests Gadget and Container domain configuration by trying to access container page information from within a gadget",
-             "apps" : [ {"name" : "Domain Test", "url" : "/samplecontainer/examples/ContainerGadgetDomainTest.xml"} ]
+             "apps" : [ {"name" : "Domain Test", "url" : "/gadgets/ContainerGadgetDomainTest.xml"} ]
              },
              {
              "name" : "Sample gadget for context proxy with OAuth2",
              "Description" : "Sample gadget that demonstrate use of context proxy to retrieve resources protected by OAuth2",
-             "apps" : [ {"name" : "oauth2_context_proxy", "url" : "/samplecontainer/examples/oauth2/oauth2_spring_proxy.xml"} ]
+             "apps" : [ {"name" : "oauth2_context_proxy", "url" : "/gadgets/oauth2/oauth2_spring_proxy.xml"} ]
              },
              {
              "name" : "Sample gadget for leveraging EL within gadget ",
              "Description" : "Sample gadget demonstrate how to use EL for variable substitution in gadget content ",
-             "apps" : [ {"name" : "el_variable_sub", "url" : "/samplecontainer/examples/ELInGadgetDemo.xml"} ]
+             "apps" : [ {"name" : "el_variable_sub", "url" : "/gadgets/ELInGadgetDemo.xml"} ]
              }
          ]
 }

@@ -87,7 +87,7 @@ class FilesServletTest extends \PHPUnit_Framework_TestCase
 
     public function testContentGif() {
         $servlet = new MockContentFilesServlet();
-        $servlet->uri = 'samplecontainer/examples/new.gif';
+        $servlet->uri = 'images/new.gif';
         ob_start();
         $servlet->doGet();
         $servletContent = ob_get_clean();
@@ -97,7 +97,7 @@ class FilesServletTest extends \PHPUnit_Framework_TestCase
 
     public function testContentPng() {
         $servlet = new MockContentFilesServlet();
-        $servlet->uri = 'samplecontainer/examples/icon.png';
+        $servlet->uri = 'images/icon.png';
         ob_start();
         $servlet->doGet();
         $servletContent = ob_get_clean();

@@ -18,7 +18,7 @@
 */
 
 // url base should be <host>:<port>//<contextRoot>
-var urlBase = location.href.substr(0, location.href.indexOf('/samplecontainer/examples/commoncontainer/'));
+var urlBase = location.href.substr(0, location.href.indexOf('/containers/commoncontainer/'));
 var contextRoot = urlBase.substr(urlBase.indexOf(location.host) + location.host.length);
 
 var testConfig = testConfig || {};

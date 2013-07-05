@@ -45,7 +45,7 @@ shindig.samplecontainer = {};
   var gadgetUrlMatches = /[?&]url=((?:[^#&]+|&amp;)+)/.exec(parentUrl);
   var gadgetUrl = (gadgetUrlMatches)
       ? gadgetUrlMatches[1]
-      : baseUrl + 'samplecontainer/examples/SocialHelloWorld.xml';
+      : baseUrl + 'gadgets/SocialHelloWorld.xml';
 
   var gadgetUrlCookie = 'sampleContainerGadgetUrl';
 

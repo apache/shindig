@@ -69,7 +69,7 @@
         <verb>post</verb>
         <openSocial>
           <embed>
-            <gadget>http://localhost:8080/samplecontainer/examples/embeddedexperiences/AlbumViewer.xml</gadget>
+            <gadget>http://localhost:8080/containers/embeddedexperiences/AlbumViewer.xml</gadget>
             <context>
               <albumName>Germany 2009</albumName>
                 <photoUrls>

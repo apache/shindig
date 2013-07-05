@@ -64,7 +64,7 @@
                   <java.lang.String>http://farm3.static.flickr.com/2668/3858018351_1e7b73c0b7_t.jpg</java.lang.String>
                 </photoUrls>
             </context>
-            <gadget>http://localhost:8080/samplecontainer/examples/embeddedexperiences/AlbumViewer.xml</gadget>
+            <gadget>http://localhost:8080/containers/embeddedexperiences/AlbumViewer.xml</gadget>
           </embed>
         </openSocial>
         <provider>
@@ -118,7 +118,7 @@
           <embed>
             <context>
                 <albumName>Germany 2009</albumName>
-                <eeGadget>http://localhost:8080/samplecontainer/examples/embeddedexperiences/AlbumViewer.xml</eeGadget>
+                <eeGadget>http://localhost:8080/containers/embeddedexperiences/AlbumViewer.xml</eeGadget>
                 <photoUrls>
                   <java.lang.String>http://farm4.static.flickr.com/3495/3925132517_5959dac775.jpg</java.lang.String>
                   <java.lang.String>http://farm4.static.flickr.com/3629/3394799776_47676abb46.jpg</java.lang.String>
@@ -129,7 +129,7 @@
                   <java.lang.String>http://farm3.static.flickr.com/2668/3858018351_1e7b73c0b7.jpg</java.lang.String>
                 </photoUrls>
             </context>
-            <gadget>http://localhost:8080/samplecontainer/examples/embeddedexperiences/PhotoList.xml</gadget>
+            <gadget>http://localhost:8080/containers/embeddedexperiences/PhotoList.xml</gadget>
           </embed>
         </openSocial>
         <published>2011-02-10T15:04:55Z</published>

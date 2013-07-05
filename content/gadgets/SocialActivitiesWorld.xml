@@ -19,7 +19,7 @@
 -->
 <Module>
  <ModulePrefs title="Social Activities World"
-              icon="http://localhost:8080/samplecontainer/examples/icon.png">
+              icon="http://localhost:8080/images/icon.png">
    <Require feature="settitle"/>
    <Require feature="dynamic-height"/>
  </ModulePrefs>
