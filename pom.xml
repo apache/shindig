@@ -789,8 +789,6 @@
                 <exclude>**/drop.sql</exclude>
                 <exclude>**/derby.log</exclude>
                 <exclude>**/dependency-reduced-pom.xml</exclude>
-                <exclude>content/editor/CodeMirror-0.8/js/*</exclude>
-                <exclude>content/editor/CodeMirror-0.8/css/*</exclude>
               </excludes>
             </configuration>
           </plugin>
@@ -1322,8 +1320,6 @@
               <exclude>**/drop.sql</exclude>
               <exclude>**/derby.log</exclude>
               <exclude>**/dependency-reduced-pom.xml</exclude>
-              <exclude>content/editor/CodeMirror-0.8/js/*</exclude>
-              <exclude>content/editor/CodeMirror-0.8/css/*</exclude>
               <exclude>**/*.classpath</exclude>
               <exclude>**/.project</exclude>
               <exclude>**/.settings/*</exclude>
