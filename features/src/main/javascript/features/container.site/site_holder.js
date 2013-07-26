@@ -109,9 +109,11 @@ osapi.container.SiteHolder.prototype.dispose = function() {
  * @protected
  */
 osapi.container.SiteHolder.prototype.createIframeHtml = function(url, overrides) {
-   return osapi.container.util.createIframeHtml(
-     this.createIframeAttributeMap(url, overrides)
-   );
+	var undef,
+	    map = this.createIframeAttributeMap(url, overrides);
+	map['onload'] = this.onLoad_ ?
+	        ('window.' + this.onLoad_ + "('" + this.getUrl() + "', '" + this.site_.getId() + "');") : undef;
+   return osapi.container.util.createIframeHtml(map);
 };
 
 /**
@@ -122,8 +124,7 @@ osapi.container.SiteHolder.prototype.createIframeHtml = function(url, overrides)
  * @protected
  */
 osapi.container.SiteHolder.prototype.createIframeAttributeMap = function(url, overrides) {
-  var undef,
-      renderParams = this.renderParams_ || {},
+  var renderParams = this.renderParams_ || {},
       params = {
         id: this.iframeId_,
         name: this.iframeId_,
@@ -136,9 +137,7 @@ osapi.container.SiteHolder.prototype.createIframeAttributeMap = function(url, ov
         hspace: 0,
         'class': renderParams[osapi.container.RenderParam.CLASS],
         height: renderParams[osapi.container.RenderParam.HEIGHT],
-        width: renderParams[osapi.container.RenderParam.WIDTH],
-        onload: this.onLoad_ ?
-                ('window.' + this.onLoad_ + "('" + this.getUrl() + "', '" + this.site_.getId() + "');") : undef
+        width: renderParams[osapi.container.RenderParam.WIDTH]
       };
    if (overrides) {
      for(var i in overrides) {
