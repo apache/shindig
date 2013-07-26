@@ -22,21 +22,21 @@
   <parent>
     <groupId>org.apache.shindig</groupId>
     <artifactId>shindig-project</artifactId>
-    <version>2.5.0</version>
+    <version>2.5.1-SNAPSHOT</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
 
   <artifactId>shindig-server</artifactId>
-  <version>2.5.0</version>
+  <version>2.5.1-SNAPSHOT</version>
   <packaging>war</packaging>
 
   <name>Apache Shindig Web App</name>
   <description>Default server war containing both the gadget rendering code and the social api code.</description>
 
   <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/shindig/tags/shindig-project-2.5.0/java/server</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/shindig/tags/shindig-project-2.5.0/java/server</developerConnection>
-    <url>http://svn.apache.org/viewvc/shindig/tags/shindig-project-2.5.0/java/server</url>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/shindig/trunk/java/server</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/shindig/trunk/java/server</developerConnection>
+    <url>http://svn.apache.org/viewvc/shindig/trunk/java/server</url>
   </scm>
 
   <build>
