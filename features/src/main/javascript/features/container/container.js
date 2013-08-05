@@ -885,10 +885,10 @@ osapi.container.Container.prototype.refreshTokens_ = function() {
 osapi.container.Container.prototype.invalidateAllTokens_ = function() {
   var self = this;
   for ( var siteId in self.sites_) {
-    var site = sites_[siteId];
+    var site = self.sites_[siteId];
     if (site instanceof osapi.container.GadgetSite) {
       var holder = site.getActiveSiteHolder();
-      var gadgetInfo = commonContainer.service_.getCachedGadgetMetadata(holder.getUrl());
+      var gadgetInfo = self.service_.getCachedGadgetMetadata(holder.getUrl());
       gadgetInfo[osapi.container.MetadataResponse.NEEDS_TOKEN_REFRESH] = true;
     }
   }
