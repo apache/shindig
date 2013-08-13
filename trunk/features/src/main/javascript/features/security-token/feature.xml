@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements. See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership. The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License. You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied. See the License for the
+specific language governing permissions and limitations under the License.
+-->
+<feature>
+  <!--
+    security-token is implemented in server code.
+
+    It serves as a placeholder that signals when a gadget requires a security
+    token for proper operation. It does not indicate where the token is needed
+    (fragment or query string).
+
+    This feature is referenced and used in a few ways:
+    a. Other features that require a security token, such as opensocial,
+       will depend on it. The transitive closure of the dependency tree thus
+       indicates such requests require a security token.
+    b. As noted in (a), metadata requests may be formed for a gadget which
+       request whether or not a security token is needed for rendering the
+       gadget. This makes it possible to intelligently choose when to mint
+       and include a security token during rendering.
+    c. As a corollary to (a) and (b), this feature depends on locked-domain,
+       again to provide a clear mechanism for containers to render gadgets
+       on the locked-domain when rendered in an IFRAME. This ensures token security.
+    d. Another corollary to (a) and (b), a dep on auth-refresh ensures it too
+       is pulled in when necessary. This obviates the need for containers to
+       manually append &libs=auth-refresh to support this.
+    e. GadgetSpec processing code automatically includes this feature when
+       OAuth tags are included in the gadget, signaling the token's need.
+  -->
+  <name>security-token</name>
+  <dependency>locked-domain</dependency>
+  <dependency>auth-refresh</dependency>
+</feature>

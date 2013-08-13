@@ -1,0 +1,68 @@
+<?xml version="1.0"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements. See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership. The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License. You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied. See the License for the
+specific language governing permissions and limitations under the License.
+-->
+<feature>
+  <name>container.util</name>
+  <dependency>globals</dependency>
+  <dependency>core.log</dependency>
+  <dependency>shindig.auth</dependency>
+  <dependency>shindig.uri.ext</dependency>
+  <dependency>core.util</dependency>
+  <dependency>osapi</dependency>
+  <dependency>rpc</dependency>
+  <container>
+    <script src="constant.js"/>
+    <script src="util.js"/>
+    <api>
+      <exports type="js">osapi.container.RenderParam.ALLOW_DEFAULT_VIEW</exports>
+      <exports type="js">osapi.container.RenderParam.CAJOLE</exports>
+      <exports type="js">osapi.container.RenderParam.CLASS</exports>
+      <exports type="js">osapi.container.RenderParam.DEBUG</exports>
+      <exports type="js">osapi.container.RenderParam.HEIGHT</exports>
+      <exports type="js">osapi.container.RenderParam.NO_CACHE</exports>
+      <exports type="js">osapi.container.RenderParam.TEST_MODE</exports>
+      <exports type="js">osapi.container.RenderParam.USER_PREFS</exports>
+      <exports type="js">osapi.container.RenderParam.VIEW</exports>
+      <exports type="js">osapi.container.RenderParam.WIDTH</exports>
+      <exports type="js">osapi.container.RenderParam.MODULE_ID</exports>
+
+      <exports type="js">osapi.container.ViewParam.VIEW</exports>
+
+      <exports type="js">osapi.container.ContainerConfig.ALLOW_DEFAULT_VIEW</exports>
+      <exports type="js">osapi.container.ContainerConfig.RENDER_CAJOLE</exports>
+      <exports type="js">osapi.container.ContainerConfig.RENDER_DEBUG</exports>
+      <exports type="js">osapi.container.ContainerConfig.RENDER_DEBUG_PARAM</exports>
+      <exports type="js">osapi.container.ContainerConfig.RENDER_TEST</exports>
+      <exports type="js">osapi.container.ContainerConfig.TOKEN_REFRESH_INTERVAL</exports>
+      <exports type="js">osapi.container.ContainerConfig.NAVIGATE_CALLBACK</exports>
+      <exports type="js">osapi.container.ContainerConfig.PRELOAD_REF_TIME</exports>
+      <exports type="js">osapi.container.ContainerConfig.PRELOAD_METADATAS</exports>
+      <exports type="js">osapi.container.ContainerConfig.PRELOAD_TOKENS</exports>
+      <exports type="js">osapi.container.ContainerConfig.GET_LANGUAGE</exports>
+      <exports type="js">osapi.container.ContainerConfig.GET_COUNTRY</exports>
+      <exports type="js">osapi.container.ContainerConfig.GET_PREFERENCES</exports>
+      <exports type="js">osapi.container.ContainerConfig.SET_PREFERENCES</exports>
+      <exports type="js">osapi.container.ContainerConfig.RPC_ARBITRATOR</exports>
+      <exports type="js">osapi.container.ContainerConfig.GET_GADGET_TOKEN</exports>
+      <exports type="js">osapi.container.ContainerConfig.GET_CONTAINER_TOKEN</exports>
+
+      <exports type="js">osapi.container.ServiceConfig.API_HOST</exports>
+      <exports type="js">osapi.container.ServiceConfig.API_PATH</exports>
+    </api>
+  </container>
+</feature>

@@ -1,0 +1,8 @@
+@import url('//www.test.com/dir/proxy?container=default&gadget=http%3A%2F%2Fwww.example.org%2Fpath%2Frewritebasic.css&debug=0&nocache=0&url=http%3A%2F%2Fwww.example.org%2Fother1.css');
+@import url('//www.test.com/dir/proxy?container=default&gadget=http%3A%2F%2Fwww.example.org%2Fpath%2Frewritebasic.css&debug=0&nocache=0&url=http%3A%2F%2Fwww.example.org%2Fpath%2Frelative%2Fother2.css');
+@import url('http://www.example.org/hostrelative/excluded/other1.css');
+
+DiV {
+  font: arial;
+  background-image : url('//www.test.com/dir/proxy?container=default&gadget=http%3A%2F%2Fwww.example.org%2Fpath%2Frewritebasic.css&debug=0&nocache=0&url=http%3A%2F%2Fwww.some.site%2Fimage.gif');
+}

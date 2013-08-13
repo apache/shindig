@@ -1,0 +1,138 @@
+Checking out the source code from SVN
+============================================
+
+1) A Subversion client installed in order to checkout the code.
+  * Instructions for downloading and installing Subversion can be found here: http://subversion.tigris.org/
+2) Create a subdirectory and checkout the Apache Shindig code from its Subversion repository
+  * mkdir ~/src/shindig (or wherever you'd like to put it)
+  * cd ~/src/shindig
+3) svn co http://svn.apache.org/repos/asf/shindig/trunk/ .
+
+
+Installing and running the various java servers
+============================================
+
+1) Install Maven 2.0.8 or higher (see http://maven.apache.org)
+
+2) Make sure the JAVA_HOME environment variable is set to the location of your
+   JDK/JRE, and that the maven executable is in your PATH.
+
+3) From the base source directory ( eg cd .. )
+  * mvn - Cleans the source tree and then builds all the java classes, packages
+    them into jars and installs them in your local repository also adds source
+    jars ( by default ~/.m2/repository on Unix/OSX)
+  * mvn install - does the above but does not clean first
+  * mvn -Psocial - builds only the social parts
+  * mvn -Pgadgets - builds only the gadget parts
+
+  You must perform at least a "mvn" to place build all the artifacts and place
+  them in you local maven repository.
+
+4) To Run, using a embedded Jetty Webapp container, in the base project
+       directory (eg cd .. )
+   * First do a full build as in step 3
+   * mvn -Prun - to run Jetty with both social and gadgets
+   * mvn -Prun -DrunType=gadgets - to run Jetty with only the gadgets server
+   * mvn -Prun -DrunType=social - to run Jetty with only the social server
+
+5) To Run with a different port
+   * cd java/server
+   * mvn clean install jetty:run -DrunType=<full|gadgets|social> -Djetty.port=<port>
+
+6) Once running, you can test the gadget rendering server by hitting this url:
+  http://localhost:8080/gadgets/ifr?url=http://www.labpixies.com/campaigns/todo/todo.xml
+
+  Or you can take a look at the sample container here:
+  http://localhost:8080/samplecontainer/samplecontainer.html
+
+
+Editing the Shindig code with Eclipse
+---------------------------------------------
+
+  * Install the Maven Eclipse plugin
+  * Create and import the Eclipse Project files
+  * Clean up some Build Path errors.
+
+1 - Install the Maven Eclipse plugin from
+    http://m2eclipse.sonatype.org/update/
+  
+  * There is an optional dependency on Sublipse which you can get from
+    http://subclipse.tigris.org/
+    If not installing this dependency then select only the Maven Integration plug-in.
+
+2 - Creating and Importing the Eclipse Projects
+
+  * In the project base directory (same level as this file) run
+
+     mvn eclipse:m2eclipse
+
+  * In Eclipse, import the new projects in the File->Import->Existing Project
+    menu.
+  
+    Choose "Select Root Directory" and select the project base directory that this
+    file is in. This should find five Eclipse projects (common, features, gadgets,
+    server and social-api). Click "Finish".
+
+  * In each project, you will have a section called "Maven Dependencies", where
+    you can find all your jars and sources. Use options in the plugin for
+    downloading or source jars and updating dependencies.
+
+3 - A Necessary Clean-up Step
+
+    You should have 6 errors when you start Eclipse until you clean up:
+
+    At the moment, you will have to edit the source dependencies to remove
+    nested folders. On each project, edit properties > Build Path > Source and
+    remove missing Source folders of "config", and "javascript". Do this for
+    each of "gadgets", and "server" projects.
+
+    There is a maven-eclipse-plugin bug tracking this issue in MECLIPSE-444.
+
+To remove all eclipse-related metadata from your shindig source tree, run:
+
+     mvn eclipse:clean
+
+     
+Generating Code Coverage in Eclipse
+----------------------------------
+
+To generate code coverage statistics inside of Eclipse, install the EclEmma plugin
+  * http://www.eclemma.org/
+  * Open org.apache.shindig.gadgets.AllTests
+  * Right-click in the class, and select Coverage as -> JUnit Test
+
+
+Building a Maven Site with Reports
+----------------------------------
+
+To build a Maven based site with reports
+
+Run:
+     mvn clean install site:site site:deploy -Dsite.localurl=file:///Users/ieb/public_html/shindig -Dproject.url=/~ieb/shindig
+
+Where
+    file:///Users/ieb/public_html/shindig is the final directory where you want to deploy the site to
+    /~ieb/shindig is absolute site URL where you want the site to be hosted from. 
+
+
+Running with Caja
+----------------------------------
+
+Caja is an important part of OpenSocial that greatly enhances JavaScript security.
+Caja is managed in a separate open source project hosted by Google code projects.
+For more information on Caja, see: http://code.google.com/p/google-caja/wiki/GettingStarted
+
+   1) Load this page: http://localhost:8080/samplecontainer/samplecontainer.html
+   2) Point it to this gadget: http://localhost:8080/gadgets/SocialHelloWorld.xml
+
+To see the cajoled code (Firefox only), right-click inside the iframe and do "This Frame -> View Frame Source"    
+    
+    
+Additional Reading
+----------------------------------
+
+For more information, see http://shindig.apache.org/
+
+Read javascript/README for instructions for using the Apache Shindig Gadget Container JavaScript
+to enable your page to render Gadgets using gmodules.com or a server started up as described above.
+

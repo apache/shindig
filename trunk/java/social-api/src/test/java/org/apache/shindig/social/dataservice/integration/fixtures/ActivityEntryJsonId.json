@@ -1,0 +1,49 @@
+{
+   "entry":{
+		"id": "activity1",
+		"title": "John shared new photos with you",
+	    "published": "2011-02-10T15:04:55Z",
+	    "actor": {
+	      "url": "http://example.org/john",
+	      "objectType" : "person",
+	      "id": "john.doe",
+	      "image": {
+	        "url": "http://example.org/john/image",
+	        "width": 250,
+	        "height": 250
+	      },
+	      "displayName": "John Doe"
+	    },
+	    "verb": "post",
+	    "object" : {
+	      "url": "http://example.org/blog/2011/02/entry",
+	      "id": "object1"
+	    },
+	    "target" : {
+	      "url": "http://example.org/blog/",
+	      "objectType": "blog",
+	      "id": "target1",
+	      "displayName": "John's Blog"
+	    },
+          "openSocial":{
+          "embed" : {
+            "gadget" : "http://localhost:8080/containers/embeddedexperiences/PhotoList.xml",
+            "context" : {
+              "albumName": "Germany 2009",
+              "eeGadget" : "http://localhost:8080/containers/embeddedexperiences/AlbumViewer.xml",
+              "photoUrls": [
+                "http://farm4.static.flickr.com/3495/3925132517_5959dac775.jpg",
+     	        "http://farm4.static.flickr.com/3629/3394799776_47676abb46.jpg",
+     		    "http://farm5.static.flickr.com/4009/4413640211_715d924d9b.jpg",
+     		    "http://farm3.static.flickr.com/2340/3528537244_d2fb037aba.jpg",
+     		    "http://farm1.static.flickr.com/36/98407782_9c4c5866d1.jpg",
+     		    "http://farm1.static.flickr.com/48/180544479_bb0d0f6559.jpg",
+     		    "http://farm3.static.flickr.com/2668/3858018351_1e7b73c0b7.jpg"
+     		  ]
+     	    }
+          }
+        }
+
+
+	  }
+}

@@ -1,0 +1,5 @@
+These keys are just used for unit test and should never be used in production.
+
+Goto the certs directory shindig/php/certs and create your own public and private keys
+with your own password there.
+

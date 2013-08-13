@@ -1,0 +1,8 @@
+{
+   "entry": {
+  	 "id": "activity2",
+  	 "title" : "Super Updated Activity",
+  	 "actor": {"id": "john.doe"},
+  	 "object" : {"id": "object2"}
+   }
+}

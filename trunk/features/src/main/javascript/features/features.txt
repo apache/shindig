@@ -1,0 +1,111 @@
+#
+#  Licensed to the Apache Software Foundation (ASF) under one
+#  or more contributor license agreements.  See the NOTICE file
+#  distributed with this work for additional information
+#  regarding copyright ownership.  The ASF licenses this file
+#  to you under the Apache License, Version 2.0 (the
+#  "License"); you may not use this file except in compliance
+#  with the License.  You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing,
+#  software distributed under the License is distributed on an
+#  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+#  KIND, either express or implied.  See the License for the
+#  specific language governing permissions and limitations
+#  under the License.
+#
+# List each feature you want to support here
+
+features/globals/feature.xml
+features/actions/feature.xml
+features/auth-refresh/feature.xml
+features/caja/feature.xml
+features/caja/caja-debug.xml
+features/caja/es53-guest-frame.xml
+features/caja/es53-guest-frame.opt.xml
+features/caja/es53-taming-frame.xml
+features/caja/es53-taming-frame.opt.xml
+features/container/feature.xml
+features/container.site/feature.xml
+features/container.site.gadget/feature.xml
+features/container.site.url/feature.xml
+features/container.util/feature.xml
+features/content-rewrite/feature.xml
+features/core.config/feature.xml
+features/core.config.base/feature.xml
+features/core.io/feature.xml
+features/core.json/feature.xml
+features/core.legacy/feature.xml
+features/core.log/feature.xml
+features/core.none/feature.xml
+features/core.prefs/feature.xml
+features/core.util/feature.xml
+features/core.util.base/feature.xml
+features/core.util.dom/feature.xml
+features/core.util.event/feature.xml
+features/core.util.onload/feature.xml
+features/core.util.string/feature.xml
+features/core.util.urlparams/feature.xml
+features/core/feature.xml
+features/defer.test/feature.xml
+features/deferjs/feature.xml
+features/domnode/feature.xml
+features/dynamic-height.height/feature.xml
+features/dynamic-height/feature.xml
+features/dynamic-size.util/feature.xml
+features/dynamic-width.width/feature.xml
+features/dynamic-width/feature.xml
+features/embeddedexperiences/feature.xml
+features/exportjs/feature.xml
+features/flash/feature.xml
+features/gadgets.json.ext/feature.xml
+features/i18n/feature.xml
+features/jsondom/feature.xml
+features/locked-domain/feature.xml
+features/minimessage/feature.xml
+features/oauthpopup/feature.xml
+features/opensearch/feature.xml
+features/opensocial-0.9/feature.xml
+features/opensocial-1.0/feature.xml
+features/opensocial-2.0/feature.xml
+features/opensocial-2.5/feature.xml
+features/opensocial-base/feature.xml
+features/opensocial-current/feature.xml
+features/opensocial-data-context/feature.xml
+features/opensocial-data/feature.xml
+features/opensocial-jsonrpc/feature.xml
+features/opensocial-reference/feature.xml
+features/opensocial-templates/feature.xml
+features/open-views/feature.xml
+features/open-views.common/feature.xml
+features/open-views.ee/feature.xml
+features/open-views.gadget/feature.xml
+features/open-views.results/feature.xml
+features/open-views.url/feature.xml
+features/osapi.base/feature.xml
+features/osapi/feature.xml
+features/osml/feature.xml
+features/proxied-form-post/feature.xml
+features/pubsub/feature.xml
+features/rpc/feature.xml
+features/shared-script-frame/feature.xml
+features/security-token/feature.xml
+features/selection/feature.xml
+features/setprefs/feature.xml
+features/settitle/feature.xml
+features/shindig.auth/feature.xml
+features/shindig.container/feature.xml
+features/shindig.container-1.0/feature.xml
+features/shindig.random/feature.xml
+features/shindig.sha1/feature.xml
+features/shindig.uri/feature.xml
+features/shindig.uri.ext/feature.xml
+features/shindig.xhrwrapper/feature.xml
+features/skins/feature.xml
+features/tabs/feature.xml
+features/taming/feature.xml
+features/views/feature.xml
+features/xhrwrapper/feature.xml
+features/xmlutil/feature.xml

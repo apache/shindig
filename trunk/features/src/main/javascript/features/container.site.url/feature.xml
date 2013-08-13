@@ -1,0 +1,53 @@
+<?xml version="1.0"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements. See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership. The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License. You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied. See the License for the
+specific language governing permissions and limitations under the License.
+-->
+<feature>
+  <name>container.site.url</name>
+  <dependency>osapi</dependency>
+  <dependency>container.util</dependency>
+  <dependency>container.site</dependency>
+  <container>
+    <script src="url_holder.js" />
+    <script src="url_site.js" />
+    <api>
+      <!-- inherited -->
+      <exports type="js">osapi.container.UrlSite</exports>
+      <exports type="js">osapi.container.UrlSite.prototype.onConstructed</exports>
+      <exports type="js">osapi.container.UrlSite.prototype.close</exports>
+      <exports type="js">osapi.container.UrlSite.prototype.setParentId</exports>
+      <exports type="js">osapi.container.UrlSite.prototype.getParentId</exports>
+      <exports type="js">osapi.container.UrlSite.prototype.getActiveSiteHolder</exports>
+      <exports type="js">osapi.container.UrlSite.prototype.getId</exports>
+      <exports type="js">osapi.container.UrlSite.prototype.render</exports>
+      <exports type="js">osapi.container.UrlSite.prototype.setHeight</exports>
+      <exports type="js">osapi.container.UrlSite.prototype.setWidth</exports>
+
+      <!-- inherited -->
+      <exports type="js">osapi.container.UrlHolder</exports>
+      <exports type="js">osapi.container.UrlHolder.prototype.onConstructed</exports>
+      <exports type="js">osapi.container.UrlHolder.prototype.createIframeAttributeMap</exports>
+      <exports type="js">osapi.container.UrlHolder.prototype.createIframeHtml</exports>
+      <exports type="js">osapi.container.UrlHolder.prototype.dispose</exports>
+      <exports type="js">osapi.container.UrlHolder.prototype.getElement</exports>
+      <exports type="js">osapi.container.UrlHolder.prototype.getIframeElement</exports>
+      <exports type="js">osapi.container.UrlHolder.prototype.getIframeId</exports>
+      <exports type="js">osapi.container.UrlHolder.prototype.getUrl</exports>
+      <exports type="js">osapi.container.UrlHolder.prototype.render</exports>
+    </api>
+  </container>
+</feature>

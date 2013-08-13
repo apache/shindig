@@ -1,0 +1,180 @@
+FROM 2.0.x TO 2.5.x
+===================
+
+== API changes ==
+
+The JavaScript GagdetSite.getActiveGadgetHolder has been changed to GagdetSite.getActiveSiteHolder
+
+== container.js config changes ==
+
+* The "gadgets.securityTokenKeyFile" property has been replaced with "gadgets.securityTokenKey".
+The new property allows for embedding the key directly or referencing a classpath or filesystem
+resource.  Please see the comments at the top of container.js and around the new property for more
+details.
+
+== Java Dependency Changes ==
+
+Updates
+* caja r4884 -> r5054
+* closure-compiler (new) r1918
+* commons-codec 1.5 -> 1.7
+* commons-lang to commons-lang3 3.1
+* commons-io 2.1 -> 2.4
+* easymock 3.0->3.1
+* ehcache  2.3.2 -> 2.5.2
+* guava r09->11.0.1
+* guice 2.0->3.0
+* joda-time 2.0->2.1
+* junit 4.10->4.11
+* log4j 1.2.16->1.2.17
+* htmlunit 2.8->2.9 
+* nekohtml 1.9.14->1.9.17
+* slf4j 1.5.11->1.6.1
+* xstream 1.3.1->1.4.3
+
+New
+* tomcat el-api/jasper-el
+
+
+FROM 1.0.x TO 2.0.x
+===================
+
+Almost all interfaces have been updated from 1.0.x -> 2.0.x.  The 
+following information is not complete.
+
+
+== container.js config changes ==
+
+* gadgets.parentOrigins: Default ["*"] (NEW)
+
+An array of valid origin domains for the container.
+
+* Endpoint Changes for rpc
+
+The default RPC endpoints used for json-rpc were moved from /gadgets/api/rpc and /social/rpc to just /rpc
+
+* css for tabs/minimessage is now included in container.js
+
+* System properties shindig.host/jetty.host and shindig.port/jetty.port are injected as SERVER_HOST/SERVER_PORT
+
+== Java Dependency Changes ==
+
+Too many to mention.  Check the top-level pom.xml for all the new versions.
+Here are some highlights:
+
+* slf4j dependencies are needed if you use the EhCache module See http://www.slf4j.org/manual.html
+* guava replaces google-collections
+* caja r3034 -> r4209
+* guice 1.0->2.0
+* guice-multibindings (NEW)
+* nekohtml 1.9.9 -> 1.9.13
+* oauth-* 20080621 -> 20100527 (and others)
+* rome 0.9 -> 1.0
+* rome-modules 0.3.2 (NEW)
+* servlet-api 2.4->2.5
+* ehcache 1.5 -> 1.6.2
+* xstream 1.2 -> 1.3.1
+* xpp3 1.1.3.3 -> 1.1.4c
+* commons-codec 1.3 -> 1.4
+
+== Java Interface Changes ==
+
+* AbstractContainerConfig
+
+Changed signature on getMap() and getList() to use Java
+generics.
+
+* SecurityToken
+
+New methods: getExpiresAt() and isExpired() are now required.  A new AbstractSecurityToken
+base class is available.
+
+* SecurityTokenDecoder 
+
+The interface and implementation are replaced
+with the new SecurityTokenCodec interface and implementations.
+
+You will need to adjust any custom SecurityToken decoders to 
+encode tokens as well as decode them.
+
+* SocialSpiException class is removed, use ProtocolException instead
+
+* GuiceBeanConverter.DuplicateFieldException class is removed 
+
+* RestfulCollection
+
+The constructor RestfulCollection(List<T> entry, int startIndex, int totalResults) is removed.  
+Use the constructor with an items-per-page parameter instead.
+
+* RequestRewriter, ImageRewriter -> ResponseRewriter
+
+ResponseRewriter is replacing RequestRewriter and ImageRewriter. Its interface method is:
+void rewrite(HttpRequest req, HttpResponseBuilder builder);
+
+HttpResponseBuilder extends MutableContent. RequestRewriters may be migrated by
+mutating builder rather than the previously-passed MutableContent. There is no
+provision for reading "original" HttpResponse headers.
+
+ImageRewriters may be migrated to ResponseRewriters as well by mutating the builder,
+where previously a new HttpResponse was returned.
+
+* UrlManager -> IframeUriManager, JsUriManager, OAuthUriManager
+
+The UrlManager interface has been removed. In its place are IframeUriManager, JsUriManager, and OAuthUriManager,
+producing Uris (equivalent to previous Strings). This change is done to better encapsulate Uri logic, putting
+creation and processing logic in the same place.
+
+@see (now-removed) shim class
+http://svn.apache.org/viewvc/shindig/trunk/java/gadgets/src/main/java/org/apache/shindig/gadgets/uri/GlueUrlGenerator.java?revision=906688&view=markup
+
+...for a schematic on how the previous methods map to new versions. This class was a bridge between the new
+and old interfaces.
+
+Default implementations of each UriManager class are provided in org.apache.shindig.gadgets.uri, each
+named DefaultX, where X = interface. These classes are suitable for subclassing to extend, should you prefer.
+Note that the ContainerConfig values the default implementations use are different (mostly by name/key)
+than those DefaultUrlGenerator used. Specific values are documented in the class comment and statics
+for each impl.
+
+* MediaItem
+
+Location field changed from String to Address.
+
+== Java Guice Changes ==
+
+2.0.x uses Guice 2.0 which allows for @Provides annotations and much more.
+
+* TemplateModule
+
+If you had previously customized the Set of TagHandlers you'll need to start
+using Guice Multibindings instead.  This is much easier than subclassing the
+Guice module.  Here's what you would add to your local module to add a new 
+Tag handler.
+
+  Multibinder.newSetBinder(binder(), TagHandler.class).addBinding().to(MyCustomTagHandler.class);
+
+* SocialApiGuiceModule, DefaultGuiceModule
+
+Configuring a new Rest/RPC handler now uses Multibindings.  Adding a new binding
+is easy, just use the following syntax:
+
+    Multibinder.newSetBinder(binder(), Object.class, Names.named("org.apache.shindig.handlers"))
+        .addBinding().toInstance(MyHandler.class);
+
+The long value annotated with the name "org.apache.shindig.serviceExpirationDurationMinutes" has
+been moved to shindig/common/conf/shindig.properties.  Guice 2.0 can inject Long values from Strings
+automatically.
+
+The Executor.class injection is removed.  Use ExecutorService.class injection instead.
+
+
+* Rename SecurityTokenDecoder to SecurityTokenCodec
+
+This class is renamed to provide a single place to capture both encoding and decoding work
+for gadget security tokens. This also affects classes previously implementing SecurityTokenDecoder
+and previously extending DefaultSecurityTokenDecoder.
+
+== PHP Changes ==
+
+TBD
+

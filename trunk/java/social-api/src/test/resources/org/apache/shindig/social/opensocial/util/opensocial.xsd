@@ -1,0 +1,487 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+-->
+<xs:schema xmlns:tns="http://ns.opensocial.org/2008/opensocial"
+  elementFormDefault="qualified"
+  targetNamespace="http://ns.opensocial.org/2008/opensocial"
+  xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <xs:element name="person" type="tns:Person" />
+  <xs:element name="group" type="tns:Group" />
+  <xs:element name="activity" type="tns:Activity" />
+  <xs:element name="appdata" type="tns:Appdata" />
+  
+  <xs:element name="response" type="tns:Response" />
+
+  <xs:complexType name="Response">
+    <xs:choice minOccurs="0" maxOccurs="unbounded" >
+      <xs:element minOccurs="0" name="group" type="tns:Group" />
+      <xs:element minOccurs="0" name="activity" type="tns:Activity" />
+      <xs:element minOccurs="0" name="person" type="tns:Person" />
+
+      <xs:group ref="tns:collection" />
+      <xs:element minOccurs="0" name="invalidationKeys" type="tns:InvalidationKeys" />
+
+      <!--  this is to allow responses to create to validate -->
+      <xs:element minOccurs="0" name="map" type="xs:anyType" />
+      <xs:element minOccurs="0" name="list.container" type="xs:anyType" />
+    </xs:choice>
+  </xs:complexType>
+
+  <!-- update for OpenSocial latest XSD -->
+  <!-- (see http://opensocial-resources.googlecode.com/svn/spec/trunk/Core-API-Server.xml#XML_format_XSD) -->
+  <xs:group name="collection">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="itemsPerPage" type="xs:int"/>
+      <xs:element minOccurs="0" name="startIndex" type="xs:long"/>
+      <xs:element minOccurs="0" name="totalResults" type="xs:long"/>
+      <xs:element minOccurs="0" name="filtered" type="xs:boolean"/>
+      <xs:element minOccurs="0" name="sorted" type="xs:boolean"/>
+      <xs:element minOccurs="0" name="updatedSince" type="xs:boolean"/>
+      <xs:element name="list" type="tns:CollectionList" />
+    </xs:sequence>
+  </xs:group>
+
+  <xs:complexType name="InvalidationKeys">
+    <xs:sequence>
+      <xs:element name="invalidationKey" type="xs:string" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="CollectionList" >
+    <xs:sequence>
+      <xs:element name="entry" type="tns:Entry" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="Entry" >
+    <xs:choice>
+      <xs:element minOccurs="0" name="activity" type="tns:Activity" />
+      <xs:element minOccurs="0" name="person" type="tns:Person" />
+      <xs:element minOccurs="0" name="group" type="tns:Group" />
+    </xs:choice>
+  </xs:complexType>
+    
+  <xs:complexType name="Activity">
+    <xs:choice minOccurs="0" maxOccurs="unbounded">
+      <xs:element minOccurs="0" name="appId" type="xs:string" />
+      <xs:element minOccurs="0" name="body" type="xs:string" />
+      <xs:element minOccurs="0" name="bodyId" type="xs:string" />
+      <xs:element minOccurs="0" name="externalId" type="xs:string" />
+      <xs:element minOccurs="0" name="id" type="xs:string" />
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="mediaItems" type="tns:MediaItem" />
+      <xs:element minOccurs="0" name="postedTime" type="xs:long" />
+      <xs:element minOccurs="0" name="priority" type="xs:double" />
+      <xs:element minOccurs="0" name="streamFaviconUrl" type="xs:string" />
+      <xs:element minOccurs="0" name="streamSourceUrl" type="xs:string" />
+      <xs:element minOccurs="0" name="streamTitle" type="xs:string" />
+      <xs:element minOccurs="0" name="streamUrl" type="xs:string" />
+      <xs:element minOccurs="0" name="templateParams" type="tns:ActivityTemplateParams" />
+      <xs:element minOccurs="0" name="title" type="xs:string" />
+      <xs:element minOccurs="0" name="titleId" type="xs:string" />
+      <xs:element minOccurs="0" name="updated" type="xs:dateTime"/>
+      <xs:element minOccurs="0" name="url" type="xs:string" />
+      <xs:element minOccurs="0" name="userId" type="xs:string" />
+    </xs:choice>
+  </xs:complexType>
+  
+  
+  <xs:complexType name="ActivityTemplateParams">
+    <xs:all>
+      <xs:element minOccurs="0" name="PersonKey" type="xs:string" />
+      <xs:element minOccurs="0" name="PersonKey.DisplayName" type="xs:string" />
+      <xs:element minOccurs="0" name="PersonKey.Id" type="xs:string" />
+      <xs:element minOccurs="0" name="PersonKey.ProfileUrl" type="xs:string" />
+      <xs:element minOccurs="0" name="person" type="tns:Person" />
+    </xs:all>
+  </xs:complexType>
+  
+  <xs:complexType name="Person">
+    <xs:choice minOccurs="1" maxOccurs="unbounded">
+      <xs:element minOccurs="0" name="aboutMe" type="xs:string" />
+      <xs:element minOccurs="0" name="accounts" type="tns:Account"/>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="activities" type="xs:string" />
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="addresses" type="tns:Address" />
+      <xs:element minOccurs="0" name="age" type="xs:string"/>
+      <xs:element minOccurs="0" name="anniversary" type="xs:dateTime" />
+      <xs:element minOccurs="0" name="appData" type="tns:Appdata"/>
+      <xs:element minOccurs="0" name="birthday" type="xs:dateTime" />
+      <xs:element minOccurs="0" name="bodyType" type="tns:BodyType" />
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="books" type="xs:string" />
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="cars" type="xs:string" />
+      <xs:element minOccurs="0" name="children" type="xs:string" />
+      <xs:element minOccurs="0" name="connected" type="tns:Presence" />
+      <xs:element minOccurs="0" name="currentLocation" type="tns:Address" />
+      <xs:element minOccurs="0" name="displayName" type="xs:string" />
+      <xs:element minOccurs="0" name="drinker" type="tns:Drinker" />
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="emails" type="tns:PluralPersonField" />
+      <xs:element minOccurs="0" name="ethnicity" type="xs:string" />
+      <xs:element minOccurs="0" name="fashion" type="xs:string" />
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="food" type="xs:string" />
+      <xs:element minOccurs="0" name="gender" type="xs:string" />
+      <xs:element minOccurs="0" name="happiestWhen" type="xs:string" />
+      <xs:element minOccurs="0" name="hasApp" type="xs:boolean" />
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="heroes" type="xs:string" />
+      <xs:element minOccurs="0" name="humor" type="xs:string" />
+      <xs:element minOccurs="0" name="id" type="xs:string" />
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="ims" type="tns:PluralPersonField"/>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="interests" type="xs:string" />
+      <xs:element minOccurs="0" name="jobInterests" type="xs:string" />
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="languagesSpoken" type="xs:string" />
+      <xs:element minOccurs="0" name="livingArrangement" type="xs:string" />
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="lookingFor" type="tns:LookingFor" />
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="movies" type="xs:string" />
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="music" type="xs:string" />
+      <xs:element minOccurs="0" name="name" type="tns:Name" />
+      <xs:element minOccurs="0" name="networkPresence" type="tns:NetworkPresence" />
+      <xs:element minOccurs="0" name="nickname" type="xs:string" />
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="organizations" type="tns:Organization" />
+      <xs:element minOccurs="0" name="pets" type="xs:string" />
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="phoneNumbers" type="tns:PluralPersonField" />
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="photos" type="tns:PluralPersonField" />
+      <xs:element minOccurs="0" name="politicalViews" type="xs:string" />
+      <xs:element minOccurs="0" name="preferredUsername" type="xs:string" />
+      <xs:element minOccurs="0" name="profileSong" type="tns:Url" />
+      <xs:element minOccurs="0" name="profileUrl" type="xs:string" />
+      <xs:element minOccurs="0" name="profileVideo" type="tns:Url" />
+      <xs:element minOccurs="0" name="published" type="xs:dateTime"/>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="quotes" type="xs:string" />
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="relationships" type="xs:string" />
+      <xs:element minOccurs="0" name="relationshipStatus" type="xs:string" />
+      <xs:element minOccurs="0" name="religion" type="xs:string" />
+      <xs:element minOccurs="0" name="romance" type="xs:string" />
+      <xs:element minOccurs="0" name="scaredOf" type="xs:string" />
+      <xs:element minOccurs="0" name="sexualOrientation" type="xs:string" />
+      <xs:element minOccurs="0" name="smoker" type="tns:Smoker" />
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="sports" type="xs:string" />
+      <xs:element minOccurs="0" name="status" type="xs:string" />
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="tags" type="xs:string" />
+      <xs:element minOccurs="0" name="thumbnailUrl" type="xs:string" />
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="turnOffs" type="xs:string" />
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="turnOns" type="xs:string" />
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="tvShows" type="xs:string" />
+      <xs:element minOccurs="0" name="updated" type="xs:dateTime"/>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="urls" type="tns:Url" />
+      <xs:element minOccurs="0" name="utcOffset" type="xs:int" />
+    </xs:choice>
+  </xs:complexType>
+  
+  <xs:complexType name="Group">
+    <xs:all>
+      <xs:element minOccurs="0" name="id" type="xs:string" />
+      <xs:element minOccurs="0" name="title" type="xs:string" />
+    </xs:all>
+  </xs:complexType>
+  <xs:complexType name="AppdataEntry" mixed="true">
+    <xs:all>
+      <xs:element minOccurs="1" name="key" type="xs:string" />
+      <xs:element minOccurs="1" name="value"  type="xs:anyType" />
+    </xs:all>
+  </xs:complexType>
+  <xs:complexType name="Appdata">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="entry" type="tns:AppdataEntry" />
+    </xs:sequence>
+  </xs:complexType>
+  
+  <xs:complexType name="BodyType">
+    <xs:all>
+      <xs:element minOccurs="0" name="build" type="xs:string" />
+      <xs:element minOccurs="0" name="eyeColor" type="xs:string" />
+      <xs:element minOccurs="0" name="hairColor" type="xs:string" />
+      <xs:element minOccurs="0" name="height" type="xs:double" />
+      <xs:element minOccurs="0" name="weight" type="xs:double" />
+    </xs:all>
+  </xs:complexType>
+  
+  <xs:complexType name="Address">
+    <xs:all>
+      <xs:element minOccurs="0" name="country" type="xs:string" />
+      <xs:element minOccurs="0" name="extendedAddress" type="xs:string" />
+      <xs:element minOccurs="0" name="latitude" type="xs:double" />
+      <xs:element minOccurs="0" name="locality" type="xs:string" />
+      <xs:element minOccurs="0" name="longitude" type="xs:double" />
+      <xs:element minOccurs="0" name="poBox" type="xs:string" />
+      <xs:element minOccurs="0" name="postalCode" type="xs:string" />
+      <xs:element minOccurs="0" name="primary" type="xs:boolean"/>
+      <xs:element minOccurs="0" name="region" type="xs:string" />
+      <xs:element minOccurs="0" name="streetAddress" type="xs:string" />
+      <xs:element minOccurs="0" name="type" type="xs:string" />
+      <xs:element minOccurs="0" name="formatted" type="xs:string" />
+    </xs:all>
+  </xs:complexType>
+  
+  
+  <xs:complexType name="Account">
+    <xs:all>
+      <xs:element minOccurs="0" name="domain" type="xs:string" />
+      <xs:element minOccurs="0" name="primary" type="xs:boolean"/>
+      <xs:element minOccurs="0" name="userid" type="xs:string" />
+      <xs:element minOccurs="0" name="username" type="xs:string" />
+    </xs:all>
+  </xs:complexType> 
+  
+  
+  <xs:complexType name="Organization">
+    <xs:all>
+      <xs:element minOccurs="0" name="address" type="tns:Address" />
+      <xs:element minOccurs="0" name="department" type="xs:string" />
+      <xs:element minOccurs="0" name="description" type="xs:string" />
+      <xs:element minOccurs="0" name="endDate" type="xs:dateTime" />
+      <xs:element minOccurs="0" name="name" type="xs:string" />
+      <xs:element minOccurs="0" name="startDate" type="xs:dateTime" />
+      <xs:element minOccurs="0" name="type" type="xs:string" />
+      <xs:element minOccurs="0" name="title" type="xs:string" />
+      <xs:element minOccurs="0" name="field" type="xs:string" />
+      <xs:element minOccurs="0" name="subField" type="xs:string" />
+      <xs:element minOccurs="0" name="webpage" type="xs:string" />
+      <xs:element minOccurs="0" name="salary" type="xs:string" />
+   
+    </xs:all>
+  </xs:complexType>
+  <xs:complexType name="Name">
+    <xs:all>
+      <xs:element minOccurs="0" name="additionalName" type="xs:string" />
+      <xs:element minOccurs="0" name="familyName" type="xs:string" />
+      <xs:element minOccurs="0" name="givenName" type="xs:string" />
+      <xs:element minOccurs="0" name="honorificPrefix" type="xs:string" />
+      <xs:element minOccurs="0" name="honorificSuffix" type="xs:string" />
+      <xs:element minOccurs="0" name="formatted" type="xs:string" />
+    </xs:all>
+  </xs:complexType>
+  
+  <xs:complexType name="Url">
+    <xs:all>
+      <xs:element minOccurs="0" name="value" type="xs:string" />
+      <xs:element minOccurs="0" name="linkText" type="xs:string" />
+      <xs:element minOccurs="0" name="type" type="xs:string" />
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="Album">
+    <xs:all>
+      <xs:element minOccurs="0" name="id" type="xs:string" />
+      <xs:element minOccurs="0" name="thumbnailUrl" type="xs:string" />
+      <xs:element minOccurs="0" name="title" type="xs:string" />
+      <xs:element minOccurs="0" name="description" type="xs:string" />
+      <xs:element minOccurs="0" name="location" type="tns:Address" />
+      <xs:element minOccurs="0" name="ownerId" type="xs:string" />
+      <xs:element minOccurs="0" name="mediaType" type="tns:MediaItemType" />
+      <xs:element minOccurs="0" name="mediaMimeType" type="xs:string" />
+      <xs:element minOccurs="0" name="mediaItemCount" type="xs:integer" />
+    </xs:all>
+  </xs:complexType>
+  
+  <xs:complexType name="MediaItem">
+    <xs:all>
+      <xs:element minOccurs="0" name="mimeType" type="xs:string" />
+      <xs:element minOccurs="0" name="type" type="tns:MediaItemType" />
+      <xs:element minOccurs="0" name="url" type="xs:string" />
+    </xs:all>
+  </xs:complexType>
+  <xs:simpleType name="MediaItemType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="AUDIO" />
+      <xs:enumeration value="IMAGE" />
+      <xs:enumeration value="VIDEO" />
+    </xs:restriction>
+  </xs:simpleType>
+  
+  
+  <xs:complexType name="Drinker">
+    <xs:all>
+      <xs:element minOccurs="0" name="displayValue" type="xs:string" />
+      <xs:element minOccurs="0" name="value" type="tns:DrinkerType" />
+    </xs:all>
+  </xs:complexType>
+  <xs:simpleType name="DrinkerType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="HEAVILY" />
+      <xs:enumeration value="NO" />
+      <xs:enumeration value="OCCASIONALLY" />
+      <xs:enumeration value="QUIT" />
+      <xs:enumeration value="QUITTING" />
+      <xs:enumeration value="REGULARLY" />
+      <xs:enumeration value="SOCIALLY" />
+      <xs:enumeration value="YES" />
+    </xs:restriction>
+  </xs:simpleType>
+  
+  
+  <xs:complexType name="Presence">
+    <xs:all>
+      <xs:element minOccurs="0" name="displayValue" type="xs:string" />
+      <xs:element minOccurs="0" name="value" type="tns:PresenceType" />
+    </xs:all>
+  </xs:complexType>
+  <xs:simpleType name="PresenceType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="AWAY" />
+      <xs:enumeration value="CHAT" />
+      <xs:enumeration value="DND" />
+      <xs:enumeration value="OFFLINE" />
+      <xs:enumeration value="ONLINE" />
+      <xs:enumeration value="XA" />
+    </xs:restriction>
+  </xs:simpleType>
+  
+  
+  <xs:complexType name="Smoker">
+    <xs:all>
+      <xs:element minOccurs="0" name="displayValue" type="xs:string" />
+      <xs:element minOccurs="0" name="value" type="tns:SmokerType" />
+    </xs:all>
+  </xs:complexType>
+  <xs:simpleType name="SmokerType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="HEAVILY" />
+      <xs:enumeration value="NO" />
+      <xs:enumeration value="OCCASIONALLY" />
+      <xs:enumeration value="QUIT" />
+      <xs:enumeration value="QUITTING" />
+      <xs:enumeration value="REGULARLY" />
+      <xs:enumeration value="SOCIALLY" />
+      <xs:enumeration value="YES" />
+    </xs:restriction>
+  </xs:simpleType>
+  
+  <xs:complexType name="CreateActivityPriority">
+    <xs:all>
+      <xs:element minOccurs="0" name="displayValue" type="xs:string" />
+      <xs:element minOccurs="0" name="value" type="tns:CreateActivityPriorityType" />
+    </xs:all>
+  </xs:complexType>
+  <xs:simpleType name="CreateActivityPriorityType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="HIGH" />
+      <xs:enumeration value="LOW" />
+    </xs:restriction>
+  </xs:simpleType>
+  
+  <xs:complexType name="EscapeType">
+    <xs:all>
+      <xs:element minOccurs="0" name="displayValue" type="xs:string" />
+      <xs:element minOccurs="0" name="value" type="tns:EscapeTypeType" />
+    </xs:all>
+  </xs:complexType>
+  <xs:simpleType name="EscapeTypeType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="HTML_ESCAPE" />
+      <xs:enumeration value="NONE" />
+    </xs:restriction>
+  </xs:simpleType>
+  
+  
+  
+  <xs:complexType name="Message">
+    <xs:all>
+      <xs:element minOccurs="0" name="body" type="xs:string" />
+      <xs:element minOccurs="0" name="bodyId" type="xs:string" />
+      <xs:element minOccurs="0" name="title" type="xs:string" />
+      <xs:element minOccurs="0" name="titleId" type="xs:string" />
+    </xs:all>
+  </xs:complexType>
+  <xs:complexType name="MessageType">
+    <xs:all>
+      <xs:element minOccurs="0" name="displayValue" type="xs:string" />
+      <xs:element minOccurs="0" name="value" type="tns:MessageTypeType" />
+    </xs:all>
+  </xs:complexType>
+  <xs:simpleType name="MessageTypeType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="EMAIL" />
+      <xs:enumeration value="NOTIFICATION" />
+      <xs:enumeration value="PRIVATE_MESSAGE" />
+      <xs:enumeration value="PUBLIC_MESSAGE" />
+    </xs:restriction>
+  </xs:simpleType>
+  
+  
+  
+  <xs:complexType name="Environment">
+    <xs:all>
+      <xs:element minOccurs="0" name="displayValue" type="xs:string" />
+      <xs:element minOccurs="0" name="value" type="tns:EnvironmentType" />
+    </xs:all>
+  </xs:complexType>
+  <xs:simpleType name="EnvironmentType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="ACTIVITY" />
+      <xs:enumeration value="ADDRESS" />
+      <xs:enumeration value="BODY_TYPE" />
+      <xs:enumeration value="EMAIL" />
+      <xs:enumeration value="FILTER_TYPE" />
+      <xs:enumeration value="MEDIAITEM" />
+      <xs:enumeration value="MESSAGE" />
+      <xs:enumeration value="MESSAGE_TYPE" />
+      <xs:enumeration value="NAME" />
+      <xs:enumeration value="ORGANIZATION" />
+      <xs:enumeration value="PERSON" />
+      <xs:enumeration value="PHONE" />
+      <xs:enumeration value="SORTORDER" />
+      <xs:enumeration value="URL" />
+    </xs:restriction>
+  </xs:simpleType>
+  
+  
+  
+  
+  <xs:complexType name="LookingFor">
+    <xs:all>
+      <xs:element minOccurs="0" name="displayValue" type="xs:string" />
+      <xs:element minOccurs="0" name="value" type="tns:LookingForType" />
+    </xs:all>
+  </xs:complexType>
+  <xs:simpleType name="LookingForType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="ACTIVITY_PARTNERS" />
+      <xs:enumeration value="DATING" />
+      <xs:enumeration value="FRIENDS" />
+      <xs:enumeration value="NETWORKING" />
+      <xs:enumeration value="RANDOM" />
+      <xs:enumeration value="RELATIONSHIP" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="NetworkPresence">
+    <xs:all>
+      <xs:element minOccurs="0" name="displayValue" type="xs:string" />
+      <xs:element minOccurs="0" name="value" type="tns:NetworkPresenceType" />
+    </xs:all>
+  </xs:complexType>
+  <xs:simpleType name="NetworkPresenceType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="AWAY" />
+      <xs:enumeration value="CHAT" />
+      <xs:enumeration value="DND" />
+      <xs:enumeration value="OFFLINE" />
+      <xs:enumeration value="ONLINE" />
+      <xs:enumeration value="XA" />
+    </xs:restriction>
+  </xs:simpleType>
+  
+  <xs:complexType name="PluralPersonField">
+    <xs:all>
+      <xs:element minOccurs="0" name="value" type="xs:string" />
+      <xs:element minOccurs="0" name="type" type="xs:string" />
+      <xs:element minOccurs="0" name="primary" type="xs:boolean"/>
+    </xs:all>
+  </xs:complexType>
+  
+  
+</xs:schema>

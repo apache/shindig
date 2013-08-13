@@ -1,0 +1,68 @@
+<?xml version="1.0"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements. See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership. The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License. You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied. See the License for the
+specific language governing permissions and limitations under the License.
+-->
+<feature>
+    <name>embedded-experiences</name>
+    <dependency>core.config</dependency>
+    <dependency>opensocial-data-context</dependency>
+    <dependency>opensocial</dependency>
+    <dependency>container</dependency>
+    <gadget>
+        <script src="embedded_experiences_gadgets.js" />
+        <api>
+          <exports type="js">gadgets.ee.registerContextListener</exports>
+          <exports type="rpc">ee_set_context</exports>
+          <uses type="rpc">ee_gadget_rendered</uses>
+        </api>
+    </gadget>
+    <container>
+        <script src="constant.js" />
+        <script src="embedded_experiences_container.js" />
+        <api>
+            <exports type="js">osapi.container.Container.ee</exports>
+            <exports type="js">osapi.container.Container.ee.navigate</exports>
+            <exports type="js">osapi.container.Container.ee.close</exports>
+            <exports type="js">osapi.container.ee.RenderParam.GADGET_RENDER_PARAMS</exports>
+            <exports type="js">osapi.container.ee.RenderParam.GADGET_VIEW_PARAMS</exports>
+            <exports type="js">osapi.container.ee.RenderParam.URL_RENDER_PARAMS</exports>
+            <exports type="js">osapi.container.ee.RenderParam.DATA_MODEL</exports>
+            <exports type="js">osapi.container.ee.RenderParam.EMBEDDED</exports>
+            <exports type="js">osapi.container.ee.DataModel.CONTEXT</exports>
+            <exports type="js">osapi.container.ee.DataModel.GADGET</exports>
+            <exports type="js">osapi.container.ee.DataModel.URL</exports>
+            <exports type="js">osapi.container.ee.DataModel.PREVIEW_IMAGE</exports>
+            <exports type="js">osapi.container.ee.DataModel.PREFERRED_EXPERIENCE</exports>
+            <exports type="js">osapi.container.ee.PreferredExperience.TARGET</exports>
+            <exports type="js">osapi.container.ee.PreferredExperience.DISPLAY</exports>
+            <exports type="js">osapi.container.ee.PreferredExperience.TYPE</exports>
+            <exports type="js">osapi.container.ee.PreferredExperience.VIEW</exports>
+            <exports type="js">osapi.container.ee.PreferredExperience.VIEW_TARGET</exports>
+            <exports type="js">osapi.container.ee.TargetType.GADGET</exports>
+            <exports type="js">osapi.container.ee.TargetType.URL</exports>
+            <exports type="js">osapi.container.ee.DisplayType.IMAGE</exports>
+            <exports type="js">osapi.container.ee.DisplayType.TEXT</exports>
+            <exports type="js">osapi.container.ee.Context.ASSOCIATED_CONTEXT</exports>
+            <exports type="js">osapi.container.ee.Context.OPENSOCIAL</exports>
+            <exports type="js">osapi.container.ee.AssociatedContext.ID</exports>
+            <exports type="js">osapi.container.ee.AssociatedContext.TYPE</exports>
+            <exports type="js">osapi.container.ee.AssociatedContext.OBJECT_REFERENCE</exports>
+            <exports type="js">osapi.container.ee.ContainerConfig.GET_EE_NAVIGATION_TYPE</exports>
+            <exports type="rpc">ee_gadget_rendered</exports>
+        </api>
+    </container>
+</feature>

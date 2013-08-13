@@ -1,0 +1,78 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+ 
+{
+   "gadgetBindings" : {
+      "http://www.example.com/1" : {
+         "serviceName" : {
+            "clientName"          : "client1",
+            "allowModuleOverride" : "true"
+         }
+      },
+      "http://www.example.com/2" : {
+          "serviceName" : {
+             "clientName"          : "client2",
+             "allowModuleOverride" : "false"
+          }
+      }      
+   },
+   
+   "clients" : {
+      "client1" : {
+         "providerName"  : "provider1",
+         "redirect_uri"  : "https://www.example.com/gadgets/oauth2callback",
+         "type"          : "confidential",
+         "grant_type"    : "code",
+         "client_id"     : "clientId1",
+         "client_secret" : "dmjfouTfdsfu2",
+         "allowedDomains": ["example.com", "ibm.com"]
+      },
+      
+      "client2" : {
+         "providerName"  : "provider2",
+         "redirect_uri"  : "https://www.example.com/gadgets/oauth2callback",
+         "type"          : "public",
+         "grant_type"    : "client_credentials",
+         "client_id"     : "clientId2",
+         "client_secret" : "dmjfouTfdsfu3"
+      }             
+   },
+   
+   "providers" : {
+      "provider1" : {
+        "client_authentication" : "Basic",   
+        "usesAuthorizationHeader" : "true",    
+        "usesUrlParameter" : "false",
+        "endpoints" : {
+            "authorizationUrl"  : "http://www.example.com/authorize",
+            "tokenUrl"          : "http://www.example.com/token"
+        }
+      },
+      
+      "provider2" : {
+        "client_authentication" : "STANDARD",
+        "usesAuthorizationHeader" : "false",
+        "usesUrlParameter" : "true",       
+        "endpoints" : {
+            "authorizationUrl"   : "http://www.example.com/authorize",
+            "tokenUrl"           : "http://www.example.com/token"
+        }
+      }
+   }
+}

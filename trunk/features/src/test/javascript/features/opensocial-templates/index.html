@@ -1,0 +1,190 @@
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+<html>
+  <head>
+    <title>OpenSocial templates JsUnit tests</title>
+    <script src="../../lib/JsUtil.js"></script>
+    <script src="../../lib/JsUnit.js"></script>
+    <script>
+        var gadgets = {};
+      // TODO: These adapters are needed because the tests were originally
+      // created with a different version of JSUnit in mind. Refactor this file
+      // and the various test files to use the TestCase class infrastructure.
+      var _assert = new Assert();
+      function assertTrue(a) {
+        _assert.assertTrue(a);
+      }
+      function assertEquals(a,b) {
+        _assert.assertEquals(a,b);
+      }
+      function assertNotNull(a) {
+        _assert.assertNotNull(a);
+      }
+      function assertContains(a,b) {
+        _assert.assertTrue(b.indexOf(a) >= 0);
+      }
+    </script>
+    
+    <!-- the set of js files that make up opensocial-templates feature, as they appear in feature.xml -->
+    <script src="../../../../main/javascript/features/opensocial-templates/jsTemplate/util.js"></script>
+    <script src="../../../../main/javascript/features/opensocial-templates/jsTemplate/jsevalcontext.js"></script>
+    <script src="../../../../main/javascript/features/opensocial-templates/jsTemplate/jstemplate.js"></script>
+    
+    <script src="../../../../main/javascript/features/opensocial-data-context/datacontext.js"></script>
+    <script src="../../../../main/javascript/features/jsondom/jsondom.js"></script>
+    <script src="../../../../main/javascript/features/xmlutil/xmlutil.js"></script>
+    <script src="../../../../main/javascript/features/core.json/json-native.js"></script>
+    <script src="../../../../main/javascript/features/core.json/json-jsimpl.js"></script>
+    <script src="../../../../main/javascript/features/core.json/json-flatten.js"></script>
+    <script src="../../../../main/javascript/features/core.util/util.js"></script>
+    <script src="../../../../main/javascript/features/opensocial-data/data.js"></script>
+    <script src="../../../../main/javascript/features/opensocial-templates/base.js"></script>
+    <script src="../../../../main/javascript/features/opensocial-templates/namespaces.js"></script>
+    <script src="../../../../main/javascript/features/opensocial-templates/util.js"></script>
+    <script src="../../../../main/javascript/features/opensocial-templates/template.js"></script>
+    <script src="../../../../main/javascript/features/opensocial-templates/compiler.js"></script>
+    <script src="../../../../main/javascript/features/opensocial-templates/loader.js"></script>
+    <script src="../../../../main/javascript/features/opensocial-templates/container.js"></script>
+    <script src="../../../../main/javascript/features/opensocial-templates/os.js"></script>
+    <!-- the JsUnit tests -->
+    <script src="domutil.js"></script>
+    <script type="text/javascript" src="compiler_test.js"></script>
+    <script type="text/javascript" src="container_test.js"></script>
+    <script type="text/javascript" src="loader_test.js"></script>
+    <script type="text/javascript" src="os_test.js"></script>
+    <script type="text/javascript" src="util_test.js"></script>
+    <script type="text/javascript" src="template_test.js"></script>
+    <!-- JsUnit work-around for non-FireFox browsers -->
+    <script type="text/javascript">
+      function exposeTestFunctionNames() {
+        var testSource = typeof RuntimeObject != 'undefined' ?
+                         RuntimeObject('test' + '*') : self;
+        var testFunctionNames = [];
+        for (var i in testSource) {
+          if (i.substring(0, 4) == 'test' && typeof(testSource[i]) == 'function')
+           testFunctionNames.push(i);
+        }
+        return testFunctionNames;
+      }
+
+      function runAllTests() {
+        var log = function(msg, forcePage) {
+          if (window.console && !forcePage) {
+            console.log(msg);
+            return;
+          } 
+          var div = document.createElement("div");
+          div.appendChild(document.createTextNode(msg));
+          document.body.appendChild(div); 
+        };
+        var tests = exposeTestFunctionNames();
+        var failed = 0;
+        for (var i = 0; i < tests.length; i++) {
+          log(tests[i]);
+          try {
+            window[tests[i]]();
+            log("OK");
+          } catch (e) {
+            log("FAIL: " + e);
+            failed++;
+          }
+        }
+        log("All finished. " + i + " run. " + failed + " failed.", true);
+      }
+      
+      os.createNamespace("test", "http://www.google.com/#test");
+    </script>
+  </head>
+  <body>
+    <input type="button" onclick="runAllTests()" value="Run tests"/>
+    <script type="text/os-template" tag="os:Test">tag template</script>
+    <script type="text/os-template">
+      <div id="test"><os:Test/></div>
+    </script>
+
+    <div style="display: none">
+      <div id="domSource">
+        <ul>
+          <li>one</li>
+          <li>two</li>
+        </ul>
+        <b>bold</b>
+      </div>
+      <div id="domTarget">
+      </div>
+    </div>
+
+    <xmp id="_T_Substitution_attribute" style="display: none">
+      <button id="${id}" style="color: ${color}" a1="value ${A1}">${text}</button>
+    </xmp>
+    <xmp id="my:user" style="display: none">
+      <a href="${My.dat.url}">${My.dat.name}</a> (${My.foo})
+    </xmp>
+    <xmp id="my:record" style="display: none">
+      <b style="color: ${My.color}">${My.dat.title}</b>: <my:user foo="${My.foo}" dat="${My.dat.user}"/>
+    </xmp>
+    <xmp id="_T_Substitution_nested" style="display: none">
+      <div repeat="users">
+        <my:record color="${color}" foo="${user.id}" dat="${Cur}"/>
+      </div>
+    </xmp>
+
+    <xmp id="_T_Conditional_Number" style="display: none">
+      <span if="42==42">TRUE</span>
+      <span if="!(42==42)">FALSE</span>
+    </xmp>
+    <xmp id="_T_Conditional_String" style="display: none">
+      <span if="'101'=='101'">TRUE</span>
+      <span if="'101'!='101'">FALSE</span>
+    </xmp>
+    <xmp id="_T_Conditional_Mixed" style="display: none">
+      <span if="'101' gt 42">TRUE</span>
+      <span if="'101' lt 42">FALSE</span>
+    </xmp>
+
+    <xmp id="_T_Repeat" style="display: none">
+      <div repeat="entries">
+        ${data}
+      </div>
+    </xmp>
+
+    <xmp id="_T_Options" style="display: none">
+      <select id="options">
+        <option repeat="options" value="${value}">${value}</option>
+      </select>
+    </xmp>
+
+    <xmp id="custom:list" style="display: none">
+      <div repeat="$my.item"><os:renderAll content="header"/><os:renderAll content="body"/></div>
+    </xmp>
+
+    <xmp id="_T_List" style="display: none">
+      <custom:list>
+        <item>
+          <header>hello</header>
+          <body>world</body>
+        </item>
+      </custom:list>
+    </xmp>
+
+    <xmp id="_T_Tag_blink" style="display: none">
+      <custom:blink>blink text</custom:blink>
+    </xmp>
+  </body>
+</html>

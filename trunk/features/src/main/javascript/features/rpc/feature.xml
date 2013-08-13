@@ -1,0 +1,57 @@
+<?xml version="1.0"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements. See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership. The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License. You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied. See the License for the
+specific language governing permissions and limitations under the License.
+-->
+<feature>
+  <name>rpc</name>
+  <dependency>globals</dependency>
+  <dependency>core.config.base</dependency>
+  <dependency>core.json</dependency>
+  <dependency>core.util.onload</dependency>
+  <dependency>core.util.urlparams</dependency>
+  <all>
+    <api>
+      <exports type="js">gadgets.rpc.config</exports>
+      <exports type="js">gadgets.rpc.register</exports>
+      <exports type="js">gadgets.rpc.unregister</exports>
+      <exports type="js">gadgets.rpc.registerDefault</exports>
+      <exports type="js">gadgets.rpc.unregisterDefault</exports>
+      <exports type="js">gadgets.rpc.forceParentVerifiable</exports>
+      <exports type="js">gadgets.rpc.call</exports>
+      <exports type="js">gadgets.rpc.getRelayUrl</exports>
+      <exports type="js">gadgets.rpc.setRelayUrl</exports>
+      <exports type="js">gadgets.rpc.setAuthToken</exports>
+      <exports type="js">gadgets.rpc.setupReceiver</exports>
+      <exports type="js">gadgets.rpc.getAuthToken</exports>
+      <exports type="js">gadgets.rpc.removeReceiver</exports>
+      <exports type="js">gadgets.rpc.getRelayChannel</exports>
+      <exports type="js">gadgets.rpc.receive</exports>
+      <exports type="js">gadgets.rpc.receiveSameDomain</exports>
+      <exports type="js">gadgets.rpc.getOrigin</exports>
+      <exports type="js">gadgets.rpc.getTargetOrigin</exports>
+      <uses type="rpc">__ack</uses>
+      <uses type="rpc">__cb</uses>
+    </api>
+    <script src="wpm.transport.js"/>
+    <script src="flash.transport.js"/>
+    <script src="fe.transport.js"/>
+    <script src="nix.transport.js"/>
+    <script src="rmr.transport.js"/>
+    <script src="ifpc.transport.js"/>
+    <script src="rpc.js"/>
+  </all>
+</feature>

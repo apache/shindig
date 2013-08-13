@@ -1,0 +1,337 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.apache.shindig</groupId>
+    <artifactId>shindig-project</artifactId>
+    <version>2.5.1-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+
+  <artifactId>shindig-features</artifactId>
+  <version>2.5.1-SNAPSHOT</version>
+  <packaging>jar</packaging>
+
+  <name>Apache Shindig Features</name>
+  <description>Packages all the features that shindig provides into a single jar file to allow
+    loading from the classpath
+  </description>
+
+  <scm>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/shindig/trunk/features</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/shindig/trunk/features</developerConnection>
+    <url>http://svn.apache.org/viewvc/shindig/trunk/features</url>
+  </scm>
+
+  <pluginRepositories>
+    <pluginRepository>
+      <id>jsdoctk2</id>
+      <url>http://jsdoctk-plugin.googlecode.com/svn/repo</url>
+    </pluginRepository>
+  </pluginRepositories>
+
+  <build>
+    <resources>
+      <resource>
+        <targetPath>features</targetPath>
+        <directory>${basedir}/src/main/javascript/features</directory>
+      </resource>
+    </resources>
+    <testResources>
+      <testResource>
+        <targetPath>features</targetPath>
+        <directory>${basedir}/src/test/javascript/features</directory>
+      </testResource>
+    </testResources>
+
+    <pluginManagement>
+      <!-- set versions of common plugins for reproducibility, ordered alphabetically by owner -->
+      <plugins>
+        <!-- Misc -->
+        <plugin>
+          <groupId>de.berlios.jsunit</groupId>
+          <artifactId>jsunit-maven2-plugin</artifactId>
+          <version>1.3</version>
+          <dependencies>
+            <dependency>
+                <groupId>rhino</groupId>
+                <artifactId>js</artifactId>
+                <version>1.7R1</version>
+            </dependency>
+          </dependencies>
+        </plugin>
+        <plugin>
+          <groupId>net.alchim31.maven</groupId>
+          <artifactId>yuicompressor-maven-plugin</artifactId>
+        </plugin>
+        <plugin>
+          <groupId>org.eclipse.m2e</groupId>
+          <artifactId>lifecycle-mapping</artifactId>
+          <version>1.0.0</version>
+          <configuration>
+            <lifecycleMappingMetadata>
+              <pluginExecutions>
+                <pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>net.alchim31.maven</groupId>
+                    <artifactId>yuicompressor-maven-plugin</artifactId>
+                    <versionRange>[0.0.0,)</versionRange>
+                    <goals>
+                      <goal>compress</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <ignore />
+                  </action>
+                </pluginExecution>
+              </pluginExecutions>
+            </lifecycleMappingMetadata>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+
+    <!-- ordered alphabetically by owner -->
+    <plugins>
+      <plugin>
+        <groupId>de.berlios.jsunit</groupId>
+        <artifactId>jsunit-maven2-plugin</artifactId>
+        <executions>
+          <execution>
+            <configuration>
+              <sourceDirectory>${basedir}/src/main/javascript/features</sourceDirectory>
+              <sources>
+                <source>../../../../src/test/javascript/features/mocks/env.js</source>
+                <source>../../../../src/test/javascript/features/mocks/window.js</source>
+                <source>../../../../src/test/javascript/features/mocks/xhr.js</source>
+                <source>globals/globals.js</source>
+                <source>domnode/constants.js</source>
+                <source>cloo/cloo.js</source>
+                <source>core.config.base/config.js</source>
+                <source>core.config/validators.js</source>
+                <source>core.json/json-native.js</source>
+                <source>core.json/json-jsimpl.js</source>
+                <source>core.json/json-flatten.js</source>
+                <source>shindig.auth/auth.js</source>
+                <source>core.util.base/base.js</source>
+                <source>core.util.dom/dom.js</source>
+                <source>core.util.event/event.js</source>
+                <source>core.log/log.js</source>
+                <source>core.util.onload/onload.js</source>
+                <source>core.util.string/string.js</source>
+                <source>core.util.urlparams/urlparams.js</source>
+                <source>core.util/util.js</source>
+                <source>core.prefs/prefs.js</source>
+                <source>core.io/io.js</source>
+                <source>container.util/constant.js</source>
+                <source>container.util/util.js</source>
+                <source>container.site/site.js</source>
+                <source>container.site/site_holder.js</source>
+                <source>container.site.gadget/gadget_holder.js</source>
+                <source>container.site.gadget/gadget_site.js</source>
+                <source>container.site.url/url_holder.js</source>
+                <source>container.site.url/url_site.js</source>
+                <source>container/service.js</source>
+                <source>container/container.js</source>
+                <source>i18n/currencycodemap.js</source>
+                <source>i18n/datetimeformat.js</source>
+                <source>i18n/datetimeparse.js</source>
+                <source>i18n/formatting.js</source>
+                <source>i18n/numberformat.js</source>
+                <source>setprefs/setprefs.js</source>
+                <source>views/views.js</source>
+                <source>shindig.uri/uri.js</source>
+                <source>shindig.xhrwrapper/xhrwrapper.js</source>
+                <source>xmlutil/xmlutil.js</source>
+                <source>opensocial-data-context/datacontext.js</source>
+                <source>opensocial-data/data.js</source>
+                <source>opensocial-reference/opensocial.js</source>
+                <source>opensocial-reference/activity.js</source>
+                <source>opensocial-reference/address.js</source>
+                <source>opensocial-reference/album.js</source>
+                <source>opensocial-reference/bodytype.js</source>
+                <source>opensocial-reference/collection.js</source>
+                <source>opensocial-reference/container.js</source>
+                <source>opensocial-reference/datarequest.js</source>
+                <source>opensocial-reference/dataresponse.js</source>
+                <source>opensocial-reference/email.js</source>
+                <source>opensocial-reference/enum.js</source>
+                <source>opensocial-reference/environment.js</source>
+                <source>opensocial-reference/idspec.js</source>
+                <source>opensocial-reference/mediaitem.js</source>
+                <source>opensocial-reference/message.js</source>
+                <source>opensocial-reference/name.js</source>
+                <source>opensocial-reference/navigationparameters.js</source>
+                <source>opensocial-reference/organization.js</source>
+                <source>opensocial-reference/person.js</source>
+                <source>opensocial-reference/phone.js</source>
+                <source>opensocial-reference/responseitem.js</source>
+                <source>opensocial-reference/url.js</source>
+                <source>opensocial-base/fieldtranslations.js</source>
+                <source>opensocial-base/jsonactivity.js</source>
+                <source>opensocial-base/jsonalbum.js</source>
+                <source>opensocial-base/jsonmediaitem.js</source>
+                <source>opensocial-base/jsonperson.js</source>
+                <source>opensocial-jsonrpc/jsonrpccontainer.js</source>
+                <source>osapi.base/osapi.js</source>
+                <source>osapi.base/batch.js</source>
+                <source>osapi/jsonrpctransport.js</source>
+                <source>osapi/peoplehelpers.js</source>
+                <source>../../../../src/test/javascript/lib/testutils.js</source>
+                <source>oauthpopup/oauthpopup.js</source>
+                <source>selection/selection_container.js</source>
+                <source>selection/selection.js</source>
+                <source>actions/actions_container.js</source>
+                <source>actions/actions.js</source>
+                <source>opensearch/opensearch.js</source>
+                <source>embeddedexperiences/constant.js</source>
+                <source>embeddedexperiences/embedded_experiences_container.js</source>
+                <source>proxied-form-post/post.js</source>
+                <source>open-views.common/open-views-common-container.js</source>
+                <source>open-views.common/open-views-common-gadget.js</source>
+                <source>open-views.url/open-views-url-container.js</source>
+                <source>open-views.url/open-views-url-gadget.js</source>
+                <source>open-views.gadget/open-views-gadget-container.js</source>
+                <source>open-views.gadget/open-views-gadget-gadget.js</source>
+                <source>open-views.ee/open-views-ee-container.js</source>
+                <source>open-views.ee/open-views-ee-gadget.js</source>
+                <source>open-views.results/open-views-results-container.js</source>
+                <source>open-views.results/open-views-results-gadget.js</source>
+                <source>gadgets.json.ext/json-xmltojson.js</source>
+              </sources>
+              <testSourceDirectory>${basedir}/src/test/javascript/features</testSourceDirectory>
+              <testSuites>
+                <testSuite>
+                  <name>FeatureTests</name>
+                  <type>TESTCASES</type>
+                  <includes>
+                    <include>mocks/*.js</include>
+                    <include>*/*test.js</include>
+                  </includes>
+                </testSuite>
+              </testSuites>
+            </configuration>
+            <goals>
+              <goal>jsunit-test</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-eclipse-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <!-- TODO: Replace this with the more generic javascript plugin that
+          allows the use of arbitrary compressor / compilers.
+          The maven-javascript-plugin does not seem to work.
+        -->
+        <!-- <groupId>net.sf.hammerfest</groupId> -->
+        <!-- <artifactId>maven-javascript-plugin</artifactId> -->
+        <groupId>net.alchim31.maven</groupId>
+        <artifactId>yuicompressor-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>compress</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <suffix>.opt</suffix>
+          <excludes>
+            <exclude>**/*.xml</exclude>
+            <!-- Caja is already minified -->
+            <exclude>**/caja/*.js</exclude>
+          </excludes>
+          <jswarn>false</jswarn>
+          <statistics>false</statistics>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <!--
+       Profile used for rebuilding the xpc.swf file
+       You will need to put a copy of mtasc in features/mtasc
+       It's available from http://www.mtasc.org/
+  -->
+  <profiles>
+    <profile>
+      <id>flashxpc</id>
+      <build>
+        <defaultGoal>exec:exec</defaultGoal>
+        <plugins>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <version>1.2</version>
+            <executions>
+              <execution>
+                <goals>
+                  <goal>exec</goal>
+                 </goals>
+              </execution>
+            </executions>
+            <configuration>
+              <executable>./mtasc/mtasc</executable>
+              <!--<workingDirectory>/tmp</workingDirectory>-->
+              <arguments>
+                <!--  -header 1:1:1 -v  -main -version 8 -swf xpc.swf src/main/flex/Main.as -->
+                <argument>-header</argument>
+                <argument>1:1:1</argument>
+                <argument>-v</argument>
+                <argument>-main</argument>
+                <argument>-version</argument>
+                <argument>8</argument>
+                <argument>-swf</argument>
+                <argument>../content/xpc.swf</argument>
+                <argument>src/main/flex/Main.as</argument>
+              </arguments>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <profile>
+      <id>reporting</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>nl.windgazer</groupId>
+            <artifactId>jsdoctk-plugin</artifactId>
+            <version>2.3.2</version>
+            <configuration>
+              <recurse>3</recurse><!-- This is the level of recursion, not a boolean -->
+              <srcDir>${basedir}/src/main/javascript/features</srcDir>
+              <ext>js</ext>
+              <exclude>
+                <param>.+.opt.js</param>
+              </exclude>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+</project>

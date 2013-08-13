@@ -1,0 +1,94 @@
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:osearch="http://a9.com/-/spec/opensearch/1.1">
+  <entry>
+    <id>activity2</id>
+    <title>John posted a new photo album.</title>
+    <summary type="html" />
+    <author>
+      <uri>http://example.org/john</uri>
+      <name>John Doe</name>
+    </author>
+    <link rel="alternate">http://example.org/album/my_fluffy_cat.jpg</link>
+    <content type="application/xml">
+      <activityEntry xmlns="http://ns.opensocial.org/2008/opensocial">
+        <actor>
+          <displayName>John Doe</displayName>
+          <id>john.doe</id>
+          <image>
+            <height>250</height>
+            <url>http://example.org/john/image</url>
+            <width>250</width>
+          </image>
+          <objectType>person</objectType>
+          <url>http://example.org/john</url>
+        </actor>
+        <generator>
+          <url>http://example.org/activities-app</url>
+        </generator>
+        <id>activity2</id>
+        <object>
+          <attachments>
+            <object>
+              <id>attachment1</id>
+              <objectType>attachment</objectType>
+            </object>
+            <object>
+              <id>attachment2</id>
+              <objectType>attachment</objectType>
+            </object>
+          </attachments>
+          <downstreamDuplicate>downstream1</downstreamDuplicate>
+          <downstreamDuplicate>downstream2</downstreamDuplicate>
+          <id>object2</id>
+          <image>
+            <height>250</height>
+            <url>http://example.org/album/my_fluffy_cat_thumb.jpg</url>
+            <width>250</width>
+          </image>
+          <objectType>photo</objectType>
+          <summary>Photo posted</summary>
+          <upstreamDuplicate>upstream1</upstreamDuplicate>
+          <upstreamDuplicate>upstream2</upstreamDuplicate>
+          <url>http://example.org/album/my_fluffy_cat.jpg</url>
+        </object>
+        <provider>
+          <url>http://example.org/activity-stream</url>
+        </provider>
+        <published>2011-03-10T15:04:55Z</published>
+        <target>
+          <displayName>John&apos;s Photo Album</displayName>
+          <id>target2</id>
+          <image>
+            <height>250</height>
+            <url>http://example.org/album/thumbnail.jpg</url>
+            <width>250</width>
+          </image>
+          <objectType>photo-album</objectType>
+          <url>http://example.org/album/</url>
+        </target>
+        <title>John posted a new photo album.</title>
+        <verb>post</verb>
+        <openSocial>
+          <embed>
+            <gadget>http://localhost:8080/containers/embeddedexperiences/AlbumViewer.xml</gadget>
+            <context>
+              <albumName>Germany 2009</albumName>
+                <photoUrls>
+                  <java.lang.String>http://farm4.static.flickr.com/3495/3925132517_5959dac775_t.jpg</java.lang.String>
+                  <java.lang.String>http://farm4.static.flickr.com/3629/3394799776_47676abb46_t.jpg</java.lang.String>
+                  <java.lang.String>http://farm5.static.flickr.com/4009/4413640211_715d924d9b_t.jpg</java.lang.String>
+                  <java.lang.String>http://farm3.static.flickr.com/2340/3528537244_d2fb037aba_t.jpg</java.lang.String>
+                  <java.lang.String>http://farm1.static.flickr.com/36/98407782_9c4c5866d1_t.jpg</java.lang.String>
+                  <java.lang.String>http://farm1.static.flickr.com/48/180544479_bb0d0f6559_t.jpg</java.lang.String>
+                  <java.lang.String>http://farm3.static.flickr.com/2668/3858018351_1e7b73c0b7_t.jpg</java.lang.String>
+                </photoUrls>
+            </context>
+          </embed>
+        </openSocial>
+      </activityEntry>
+    </content>
+  </entry>
+  <osearch:startIndex>0</osearch:startIndex>
+  <osearch:totalResults>1</osearch:totalResults>
+  <osearch:itemsPerPage>1</osearch:itemsPerPage>
+
+</feed>

@@ -1,0 +1,8 @@
+@import url(http://www.example.org/other1.css);
+@import url("relative/other2.css");
+@import url('/hostrelative/excluded/other1.css');
+
+DiV {
+  font: arial;
+  background-image : url("http://www.some.site/image.gif");
+}

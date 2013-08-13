@@ -1,0 +1,169 @@
+{
+  "itemsPerPage": 3,
+  "sorted": true,
+  "startIndex": 0,
+  "totalResults": 3,
+  "filtered": true,
+  "updatedSince": true,
+  "list": [{
+    "id": "activity1",
+    "title": "John shared new photos with you",
+    "verb": "post",
+    "target": {
+      "id": "target1",
+      "displayName": "John's Blog",
+      "objectType": "blog",
+      "url": "http://example.org/blog/"
+    },
+    "object": {
+      "id": "object1",
+      "url": "http://example.org/blog/2011/02/entry"
+    },
+    "actor": {
+      "id": "john.doe",
+      "image": {
+        "height": 250,
+        "width": 250,
+        "url": "http://example.org/john/image"
+      },
+      "displayName": "John Doe",
+      "objectType": "person",
+      "url": "http://example.org/john"
+    },
+    "published": "2011-02-10T15:04:55Z",
+    "openSocial": {
+      "embed": {
+        "context": {
+          "eeGadget": "http://localhost:8080/containers/embeddedexperiences/AlbumViewer.xml",
+          "photoUrls": ["http://farm4.static.flickr.com/3495/3925132517_5959dac775.jpg", "http://farm4.static.flickr.com/3629/3394799776_47676abb46.jpg", "http://farm5.static.flickr.com/4009/4413640211_715d924d9b.jpg", "http://farm3.static.flickr.com/2340/3528537244_d2fb037aba.jpg", "http://farm1.static.flickr.com/36/98407782_9c4c5866d1.jpg", "http://farm1.static.flickr.com/48/180544479_bb0d0f6559.jpg", "http://farm3.static.flickr.com/2668/3858018351_1e7b73c0b7.jpg"],
+          "albumName": "Germany 2009"
+        },
+        "gadget": "http://localhost:8080/containers/embeddedexperiences/PhotoList.xml"
+      }
+    }
+  }, {
+    "id": "activity2",
+    "title": "John posted a new photo album.",
+    "verb": "post",
+    "target": {
+      "id": "target2",
+      "image": {
+        "height": 250,
+        "width": 250,
+        "url": "http://example.org/album/thumbnail.jpg"
+      },
+      "displayName": "John's Photo Album",
+      "objectType": "photo-album",
+      "url": "http://example.org/album/"
+    },
+    "generator": {
+      "url": "http://example.org/activities-app"
+    },
+    "provider": {
+      "url": "http://example.org/activity-stream"
+    },
+    "object": {
+      "upstreamDuplicates": ["upstream1", "upstream2"],
+      "summary": "Photo posted",
+      "id": "object2",
+      "image": {
+        "height": 250,
+        "width": 250,
+        "url": "http://example.org/album/my_fluffy_cat_thumb.jpg"
+      },
+      "attachments": [{
+        "id": "attachment1",
+        "objectType": "attachment"
+      }, {
+        "id": "attachment2",
+        "objectType": "attachment"
+      }],
+      "downstreamDuplicates": ["downstream1", "downstream2"],
+      "objectType": "photo",
+      "url": "http://example.org/album/my_fluffy_cat.jpg"
+    },
+    "actor": {
+      "id": "john.doe",
+      "image": {
+        "height": 250,
+        "width": 250,
+        "url": "http://example.org/john/image"
+      },
+      "displayName": "John Doe",
+      "objectType": "person",
+      "url": "http://example.org/john"
+    },
+    "published": "2011-03-10T15:04:55Z",
+    "openSocial": {
+      "embed": {
+        "context": {
+          "photoUrls": ["http://farm4.static.flickr.com/3495/3925132517_5959dac775_t.jpg", "http://farm4.static.flickr.com/3629/3394799776_47676abb46_t.jpg", "http://farm5.static.flickr.com/4009/4413640211_715d924d9b_t.jpg", "http://farm3.static.flickr.com/2340/3528537244_d2fb037aba_t.jpg", "http://farm1.static.flickr.com/36/98407782_9c4c5866d1_t.jpg", "http://farm1.static.flickr.com/48/180544479_bb0d0f6559_t.jpg", "http://farm3.static.flickr.com/2668/3858018351_1e7b73c0b7_t.jpg"],
+          "albumName": "Germany 2009"
+        },
+        "gadget": "http://localhost:8080/containers/embeddedexperiences/AlbumViewer.xml"
+      }
+    }
+  }, {
+    "id": "activity3",
+    "title": "John posted a new photo to his blog",
+    "verb": "post",
+    "target": {
+      "id": "target3",
+      "image": {
+        "height": 250,
+        "width": 250,
+        "url": "http://example.org/album/thumbnail.jpg"
+      },
+      "displayName": "John's Blog About Life",
+      "objectType": "blog",
+      "url": "http://example.org/blog/"
+    },
+    "generator": {
+      "url": "http://example.org/activities-app"
+    },
+    "provider": {
+      "url": "http://example.org/activity-stream"
+    },
+    "object": {
+      "summary": "Photo about new world",
+      "id": "object3",
+      "image": {
+        "height": 250,
+        "width": 250,
+        "url": "http://example.org/album/new_world.jpg"
+      },
+      "objectType": "photo",
+      "url": "http://example.org/album/new_world.jpg"
+    },
+    "actor": {
+      "id": "john.doe",
+      "image": {
+        "height": 250,
+        "width": 250,
+        "url": "http://example.org/john/image"
+      },
+      "displayName": "John Doe",
+      "objectType": "person",
+      "url": "http://example.org/john"
+    },
+    "published": "2012-06-02T10:02:55Z",
+    "openSocial": {
+      "embed": {
+        "context": {
+          "photoUrl": "http://example.org/album/new_world.jpg"
+        },
+        "preferredExperience": {
+          "display": {
+            "type": "text",
+            "label": "Checkout new photo in John's blog"
+          },
+          "target": {
+            "type": "gadget",
+            "view": "embedded_canvas"
+          }
+        },
+        "gadget": "http://localhost:8080/containers/embeddedexperiences/BlogViewer.xml"
+      }
+    }
+  }]
+}

@@ -1,0 +1,122 @@
+{
+   "itemsPerPage": 2,
+   "sorted": true,
+   "startIndex": 0,
+   "totalResults": 2,
+   "filtered": true,
+   "updatedSince": true,
+   "list":[
+      {
+        "id": "activity1",
+        "title": "John shared new photos with you",
+          "published": "2011-02-10T15:04:55Z",
+          "actor": {
+            "url": "http://example.org/john",
+            "objectType" : "person",
+            "id": "john.doe",
+            "image": {
+              "url": "http://example.org/john/image",
+              "width": 250,
+              "height": 250
+            },
+            "displayName": "John Doe"
+          },
+          "verb": "post",
+          "object" : {
+            "url": "http://example.org/blog/2011/02/entry",
+            "id": "object1"
+          },
+          "target" : {
+            "url": "http://example.org/blog/",
+            "objectType": "blog",
+            "id": "target1",
+            "displayName": "John's Blog"
+          },
+          "openSocial":{
+          "embed" : {
+            "gadget" : "http://localhost:8080/containers/embeddedexperiences/PhotoList.xml",
+            "context" : {
+              "albumName": "Germany 2009",
+              "eeGadget" : "http://localhost:8080/containers/embeddedexperiences/AlbumViewer.xml",
+              "photoUrls": [
+                "http://farm4.static.flickr.com/3495/3925132517_5959dac775.jpg",
+     	        "http://farm4.static.flickr.com/3629/3394799776_47676abb46.jpg",
+     		    "http://farm5.static.flickr.com/4009/4413640211_715d924d9b.jpg",
+     		    "http://farm3.static.flickr.com/2340/3528537244_d2fb037aba.jpg",
+     		    "http://farm1.static.flickr.com/36/98407782_9c4c5866d1.jpg",
+     		    "http://farm1.static.flickr.com/48/180544479_bb0d0f6559.jpg",
+     		    "http://farm3.static.flickr.com/2668/3858018351_1e7b73c0b7.jpg"
+     		  ]
+     	    }
+          }
+        }
+      }, {
+	  	  "id": "activity2",
+        "published": "2011-03-10T15:04:55Z",
+        "generator": {
+          "url": "http://example.org/activities-app"
+        },
+        "provider": {
+          "url": "http://example.org/activity-stream"
+        },
+        "title": "John posted a new photo album.",
+        "actor": {
+          "url": "http://example.org/john",
+          "objectType": "person",
+          "id": "john.doe",
+          "image": {
+            "url": "http://example.org/john/image",
+            "width": 250,
+            "height": 250
+          },
+          "displayName": "John Doe"
+        },
+        "verb": "post",
+        "object" : {
+          "url": "http://example.org/album/my_fluffy_cat.jpg",
+          "objectType": "photo",
+          "id": "object2",
+          "summary": "Photo posted",
+          "image": {
+            "url": "http://example.org/album/my_fluffy_cat_thumb.jpg",
+            "width": 250,
+            "height": 250
+          },
+          "upstreamDuplicates" : ["upstream1", "upstream2"],
+          "downstreamDuplicates" : ["downstream1", "downstream2"],
+          "attachments": [
+          	{"id": "attachment1", "objectType": "attachment"},
+          	{"id": "attachment2", "objectType": "attachment"}
+          ]
+        },
+        "target": {
+          "url": "http://example.org/album/",
+          "objectType": "photo-album",
+          "id": "target2",
+          "displayName": "John's Photo Album",
+          "image": {
+            "url": "http://example.org/album/thumbnail.jpg",
+            "width": 250,
+            "height": 250
+          }
+        },
+        "openSocial":{
+          "embed" : {
+            "gadget" : "http://localhost:8080/containers/embeddedexperiences/AlbumViewer.xml",
+            "context" : {
+              "albumName": "Germany 2009",
+              "photoUrls": [
+                "http://farm4.static.flickr.com/3495/3925132517_5959dac775_t.jpg",
+     	        "http://farm4.static.flickr.com/3629/3394799776_47676abb46_t.jpg",
+     		    "http://farm5.static.flickr.com/4009/4413640211_715d924d9b_t.jpg",
+     		    "http://farm3.static.flickr.com/2340/3528537244_d2fb037aba_t.jpg",
+     		    "http://farm1.static.flickr.com/36/98407782_9c4c5866d1_t.jpg",
+     		    "http://farm1.static.flickr.com/48/180544479_bb0d0f6559_t.jpg",
+     		    "http://farm3.static.flickr.com/2668/3858018351_1e7b73c0b7_t.jpg"
+     		  ]
+     	    }
+          }
+        }
+      }
+   ]
+}

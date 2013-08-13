@@ -1,0 +1,64 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl"?>
+<rdf:RDF xml:lang="en"
+         xmlns="http://usefulinc.com/ns/doap#" 
+         xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" 
+         xmlns:asfext="http://projects.apache.org/ns/asfext#"
+         xmlns:foaf="http://xmlns.com/foaf/0.1/">
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one or more
+    contributor license agreements.  See the NOTICE file distributed with
+    this work for additional information regarding copyright ownership.
+    The ASF licenses this file to You under the Apache License, Version 2.0
+    (the "License"); you may not use this file except in compliance with
+    the License.  You may obtain a copy of the License at
+   
+         http://www.apache.org/licenses/LICENSE-2.0
+   
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+  <Project rdf:about="http://shindig.apache.org">
+    <created>2012-04-14</created>
+    <license rdf:resource="http://usefulinc.com/doap/licenses/asl20" />
+    <name>Apache Shindig</name>
+    <homepage rdf:resource="http://shindig.apache.org" />
+    <asfext:pmc rdf:resource="http://shindig.apache.org" />
+    <shortdesc>Apache Shindig software is an OpenSocial container and helps you to start hosting OpenSocial apps quickly by providing the code to render gadgets, proxy requests, and handle REST and RPC requests.</shortdesc>
+    <description>Apache Shindig is a container for hosting social application consisting of four parts:
+
+    Gadget Container JavaScript: core JavaScript foundation for general gadget functionality (read more about gadget functionality). This JavaScript manages security, communication, UI layout, and feature extensions, such as the OpenSocial API.
+    Gadget Rendering Server: used to render the gadget XML into JavaScript and HTML for the container to expose via the container JavaScript.
+    OpenSocial Container JavaScript: JavaScript environment that sits on top of the Gadget Container JavaScript and provides OpenSocial specific functionality (profiles, friends, activities, datastore).
+    OpenSocial Data Server: an implementation of the server interface to container-specific information, including the OpenSocial REST APIs, with clear extension points so others can connect it to their own backends.
+
+Apache Shindig is the reference implementation of OpenSocial API specifications, versions 0.8.x and 0.9.x, a standard set of Social Network APIs.</description>
+    <bug-database rdf:resource="https://issues.apache.org/jira/browse/SHINDIG" />
+    <mailing-list rdf:resource="http://shindig.apache.org/mail-lists.html" />
+    <download-page rdf:resource="http://shindig.apache.org/download" />
+    <programming-language>Java</programming-language>
+    <category rdf:resource="http://projects.apache.org/category/javaee" />
+    <release>
+      <Version>
+        <name>Apache Shindig 2.0.0</name>
+        <created>2010-09-10</created>
+        <revision>2.0.0</revision>
+      </Version>
+    </release>
+	    <repository>
+      <SVNRepository>
+        <location rdf:resource="http://svn.apache.org/repos/asf/shindig"/>
+        <browse rdf:resource="http://svn.apache.org/viewvc/shindig"/>
+      </SVNRepository>
+    </repository>
+    <maintainer>
+      <foaf:Person>
+        <foaf:name>Apache Shindig PMC</foaf:name>
+          <foaf:mbox rdf:resource="mailto:dev@shindig.apache.org"/>
+      </foaf:Person>
+    </maintainer>
+  </Project>
+</rdf:RDF>

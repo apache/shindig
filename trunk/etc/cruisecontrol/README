@@ -1,0 +1,35 @@
+=== Instructions for running cruise control on the shindig java source code ===
+
+Download the latest CruiseControl (CC) from http://cruisecontrol.sourceforge.net/download.html. As
+of now we are using 2.7.2, but newer version should work as well.
+
+Install CC on the same level as your Shindig project. (You can use other locations as well, but this
+would require you to modify the config.xml file -- which should be easy.)
+
+/usr/local
+       |
+       +---- Shindig
+       +---- CruiseControl
+
+In ~/.m2 create settings.xml with the following content. The site.html.dir property needs to point
+the right location were the httpd can find it.
+
+   <settings>
+     <profiles>
+       <profile>
+         <id>reporting</id>
+         <properties>
+           <site.html.dir>file:///usr/local/google/shindig/html&lt;/site.html.dir>
+         </properties>
+       </profile>
+     </profiles>
+   </settings>
+
+
+Build the project with 'mvn clean package site-deploy -P reporting'
+
+Replace the existing cruisecontrol/config.xml with the one from <shindig trunk>/etc/cruisecontrol/
+
+Restart CruiseControl
+
+Force a build!

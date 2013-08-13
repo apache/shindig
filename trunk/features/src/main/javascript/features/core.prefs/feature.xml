@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one
+  or more contributor license agreements. See the NOTICE file
+  distributed with this work for additional information
+  regarding copyright ownership. The ASF licenses this file
+  to you under the Apache License, Version 2.0 (the
+  "License"); you may not use this file except in compliance
+  with the License. You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing,
+  software distributed under the License is distributed on an
+  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  KIND, either express or implied. See the License for the
+  specific language governing permissions and limitations under the License.
+-->
+<feature>
+  <name>core.prefs</name>
+  <dependency>globals</dependency>
+  <dependency>taming</dependency>
+  <dependency>core.util</dependency>
+  <gadget>
+    <script src="prefs.js"/>
+    <script src="taming.js" caja="1"/>
+    <api>
+      <exports type="js">gadgets.Prefs</exports>
+      <exports type="js">gadgets.Prefs.prototype.getString</exports>
+      <exports type="js">gadgets.Prefs.prototype.getInt</exports>
+      <exports type="js">gadgets.Prefs.prototype.getFloat</exports>
+      <exports type="js">gadgets.Prefs.prototype.getBool</exports>
+      <exports type="js">gadgets.Prefs.prototype.set</exports>
+      <exports type="js">gadgets.Prefs.prototype.getArray</exports>
+      <exports type="js">gadgets.Prefs.prototype.setArray</exports>
+      <exports type="js">gadgets.Prefs.prototype.getMsg</exports>
+      <exports type="js">gadgets.Prefs.prototype.getCountry</exports>
+      <exports type="js">gadgets.Prefs.prototype.getLang</exports>
+      <exports type="js">gadgets.Prefs.prototype.getModuleId</exports>
+    </api>
+  </gadget>
+</feature>
