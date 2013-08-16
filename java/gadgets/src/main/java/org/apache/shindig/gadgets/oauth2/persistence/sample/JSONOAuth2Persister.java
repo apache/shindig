@@ -250,7 +250,7 @@ public class JSONOAuth2Persister implements OAuth2Persister {
     return ret;
   }
 
-  private Map<String, OAuth2GadgetBinding> loadGadgetBindings() throws OAuth2PersistenceException {
+  protected Map<String, OAuth2GadgetBinding> loadGadgetBindings() throws OAuth2PersistenceException {
     final Map<String, OAuth2GadgetBinding> ret = Maps.newHashMap();
 
     try {
@@ -291,7 +291,7 @@ public class JSONOAuth2Persister implements OAuth2Persister {
     return ret;
   }
 
-  private Map<String, OAuth2Provider> loadProviders() throws OAuth2PersistenceException {
+  protected Map<String, OAuth2Provider> loadProviders() throws OAuth2PersistenceException {
     final Map<String, OAuth2Provider> ret = Maps.newHashMap();
 
     try {
