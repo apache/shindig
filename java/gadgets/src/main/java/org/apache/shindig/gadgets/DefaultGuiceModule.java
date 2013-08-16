@@ -18,19 +18,21 @@
  */
 package org.apache.shindig.gadgets;
 
-import com.google.common.base.Splitter;
-import com.google.common.collect.ImmutableList;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Inject;
-import com.google.inject.Provides;
-import com.google.inject.Singleton;
-import com.google.inject.multibindings.Multibinder;
-import com.google.inject.name.Named;
-import com.google.inject.name.Names;
-
+import org.apache.shindig.common.crypto.BasicBlobCrypter;
+import org.apache.shindig.common.servlet.Authority;
 import org.apache.shindig.common.servlet.BasicAuthority;
 import org.apache.shindig.common.servlet.GuiceServletContextListener;
+import org.apache.shindig.common.util.GenericDigestUtils;
 import org.apache.shindig.gadgets.config.DefaultConfigContributorModule;
 import org.apache.shindig.gadgets.http.AbstractHttpCache;
 import org.apache.shindig.gadgets.http.HttpResponse;
@@ -46,14 +48,17 @@ import org.apache.shindig.gadgets.servlet.HttpRequestHandler;
 import org.apache.shindig.gadgets.templates.TemplateModule;
 import org.apache.shindig.gadgets.uri.ProxyUriBase;
 import org.apache.shindig.gadgets.uri.UriModule;
-
-import org.apache.shindig.common.servlet.Authority;
-
 import org.apache.shindig.gadgets.variables.SubstituterModule;
 
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.*;
+import com.google.common.base.Splitter;
+import com.google.common.collect.ImmutableList;
+import com.google.inject.AbstractModule;
+import com.google.inject.Inject;
+import com.google.inject.Provides;
+import com.google.inject.Singleton;
+import com.google.inject.multibindings.Multibinder;
+import com.google.inject.name.Named;
+import com.google.inject.name.Names;
 
 /**
  * Creates a module to supply all of the core gadget classes.
@@ -90,6 +95,8 @@ public class DefaultGuiceModule extends AbstractModule {
     requestStaticInjection(HttpResponse.class);
     requestStaticInjection(AbstractHttpCache.class);
     requestStaticInjection(ProxyUriBase.class);
+    requestStaticInjection(GenericDigestUtils.class);
+    requestStaticInjection(BasicBlobCrypter.class);
     registerGadgetHandlers();
     registerFeatureHandlers();
   }

@@ -42,11 +42,11 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
 /**
- * Locked domain implementation based on sha1.
+ * Locked domain implementation based on sha.
  *
  * The generated domain takes the form:
  *
- * base32(sha1(gadget url)).
+ * base32(sha(gadget url)).
  *
  * Other domain locking schemes are possible as well.
  */

@@ -29,6 +29,7 @@ import org.apache.shindig.auth.AbstractSecurityToken.Keys;
 import org.apache.shindig.common.crypto.BasicBlobCrypter;
 import org.apache.shindig.common.crypto.BlobCrypter;
 import org.apache.shindig.common.util.FakeTimeSource;
+import org.apache.shindig.common.util.HMACType;
 import org.apache.shindig.config.BasicContainerConfig;
 import org.apache.shindig.config.ContainerConfig;
 import org.junit.Before;
@@ -74,7 +75,7 @@ public class BlobCrypterSecurityTokenCodecTest {
   }
 
   protected BlobCrypter getBlobCrypter(String key) {
-    BasicBlobCrypter c = new BasicBlobCrypter(key);
+    BasicBlobCrypter c = new BasicBlobCrypter(key,HMACType.HMACSHA1);
     c.timeSource = timeSource;
     return c;
   }

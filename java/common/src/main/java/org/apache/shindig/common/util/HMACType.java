@@ -16,22 +16,36 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.shindig.gadgets.uri;
-
-import org.apache.shindig.common.uri.Uri;
-import org.apache.shindig.common.util.Base32;
-import org.apache.shindig.common.util.GenericDigestUtils;
+package org.apache.shindig.common.util;
 
 /**
- * A simple implementation of locked domain that hashes the gadgeturi as the prefix.
+ *  HMACSHA algorithm is a family of Keyed-Hashing for Message Authentication as defined in RFC 2104 and FIPS 198-1
+ *
  */
-public class HashShaLockedDomainPrefixGenerator implements LockedDomainPrefixGenerator {
-  public String getLockedDomainPrefix(Uri gadgetUri) {
-    return getLockedDomainPrefix(gadgetUri.toString().toLowerCase());
+public enum HMACType {
+  HMACSHA1(20, "HMACSHA1"), //$NON-NLS-1$
+  HMACSHA256(32, "HMACSHA256"), //$NON-NLS-1$
+  HMACSHA384(48, "HMACSHA384"), //$NON-NLS-1$
+  HMACSHA512(64, "HMACSHA512"); //$NON-NLS-1$
+
+  private final int length;
+  private final String name;
+
+  private HMACType(int length, String name) {
+    this.length = length;
+    this.name = name;
   }
 
-  public String getLockedDomainPrefix(String token) {
-    byte[] sha = GenericDigestUtils.digest(token);
-    return new String(Base32.encodeBase32(sha)); // a hash
+  public String toString() {
+    return this.name;
   }
+
+  public String getName() {
+    return this.name;
+  }
+
+  public int getLength() {
+    return this.length;
+  }
+
 }

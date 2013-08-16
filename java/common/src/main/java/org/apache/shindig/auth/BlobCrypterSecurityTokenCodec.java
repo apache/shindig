@@ -28,6 +28,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.shindig.common.crypto.BasicBlobCrypter;
 import org.apache.shindig.common.crypto.BlobCrypter;
 import org.apache.shindig.common.crypto.BlobCrypterException;
+import org.apache.shindig.common.util.HMACType;
 import org.apache.shindig.config.ContainerConfig;
 
 import com.google.common.collect.Maps;
@@ -142,7 +143,7 @@ public class BlobCrypterSecurityTokenCodec implements SecurityTokenCodec, Contai
    * @return The BlobCrypter.
    */
   protected BlobCrypter loadCrypter(String key) {
-    return new BasicBlobCrypter(key);
+    return new BasicBlobCrypter(key,HMACType.HMACSHA1);
   }
 
   /**

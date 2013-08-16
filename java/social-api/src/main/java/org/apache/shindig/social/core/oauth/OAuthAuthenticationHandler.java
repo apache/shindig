@@ -18,35 +18,35 @@
  */
 package org.apache.shindig.social.core.oauth;
 
-import com.google.common.base.Strings;
-import com.google.inject.Inject;
-
-import net.oauth.OAuth;
-import net.oauth.OAuthAccessor;
-import net.oauth.OAuthConsumer;
-import net.oauth.OAuthException;
-import net.oauth.OAuthMessage;
-import net.oauth.OAuthValidator;
-import net.oauth.OAuthProblemException;
-import net.oauth.server.OAuthServlet;
-
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.shindig.auth.AuthenticationHandler;
-import org.apache.shindig.auth.OAuthConstants;
-import org.apache.shindig.auth.SecurityToken;
-import org.apache.shindig.common.util.CharsetUtil;
-import org.apache.shindig.social.opensocial.oauth.OAuthDataStore;
-import org.apache.shindig.social.opensocial.oauth.OAuthEntry;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 
 import javax.servlet.http.HttpServletRequest;
+
+import net.oauth.OAuth;
+import net.oauth.OAuthAccessor;
+import net.oauth.OAuthConsumer;
+import net.oauth.OAuthException;
+import net.oauth.OAuthMessage;
+import net.oauth.OAuthProblemException;
+import net.oauth.OAuthValidator;
+import net.oauth.server.OAuthServlet;
+
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.shindig.auth.AuthenticationHandler;
+import org.apache.shindig.auth.OAuthConstants;
+import org.apache.shindig.auth.SecurityToken;
+import org.apache.shindig.common.util.CharsetUtil;
+import org.apache.shindig.common.util.GenericDigestUtils;
+import org.apache.shindig.social.opensocial.oauth.OAuthDataStore;
+import org.apache.shindig.social.opensocial.oauth.OAuthEntry;
+
+import com.google.common.base.Strings;
+import com.google.inject.Inject;
 
 /**
  * Handle both 2-legged consumer and full 3-legged OAuth requests.
@@ -187,7 +187,7 @@ public class OAuthAuthenticationHandler implements AuthenticationHandler {
       try {
         byte[] rawBody = readBody(request);
         byte[] received = Base64.decodeBase64(CharsetUtil.getUtf8Bytes(oauthBodyHash));
-        byte[] expected = DigestUtils.sha(rawBody);
+        byte[] expected = GenericDigestUtils.digest(rawBody);
         if (!Arrays.equals(received, expected)) {
           throw new AuthenticationHandler.InvalidAuthenticationException(
             "oauth_body_hash failed verification", null);

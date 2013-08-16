@@ -30,6 +30,7 @@ import org.apache.shindig.auth.AbstractSecurityToken.Keys;
 import org.apache.shindig.common.crypto.BasicBlobCrypter;
 import org.apache.shindig.common.crypto.Crypto;
 import org.apache.shindig.common.util.FakeTimeSource;
+import org.apache.shindig.common.util.HMACType;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -46,7 +47,7 @@ public class BlobCrypterSecurityTokenTest {
 
   @Before
   public void setUp() {
-    crypter = new BasicBlobCrypter(Crypto.getRandomBytes(20));
+    crypter = new BasicBlobCrypter(Crypto.getRandomBytes(20),HMACType.HMACSHA1);
     crypter.timeSource = timeSource;
   }
 

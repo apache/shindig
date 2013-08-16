@@ -26,6 +26,7 @@ import java.security.GeneralSecurityException;
 import java.util.regex.Pattern;
 
 import org.apache.shindig.common.util.FakeTimeSource;
+import org.apache.shindig.common.util.HMACType;
 import org.junit.Test;
 
 public class CryptoTest {
@@ -44,7 +45,7 @@ public class CryptoTest {
         -21, 2, 47, -101, 9, -40, 18, 43, 76, 117,
         -51, 115, -122, -91, 39, 26, -18, 122, 30, 90,
     };
-    byte[] hmac = Crypto.hmacSha1(key.getBytes(), val.getBytes());
+    byte[] hmac = Crypto.hmacSha(key.getBytes(), val.getBytes(),HMACType.HMACSHA1.getName());
     assertArrayEquals(expected, hmac);
   }
 
@@ -56,7 +57,7 @@ public class CryptoTest {
         -21, 2, 47, -101, 9, -40, 18, 43, 76, 117,
         -51, 115, -122, -91, 39, 26, -18, 122, 30, 90,
     };
-    Crypto.hmacSha1Verify(key.getBytes(), val.getBytes(), expected);
+    Crypto.hmacShaVerify(key.getBytes(), val.getBytes(), expected,HMACType.HMACSHA1.getName());
   }
 
 
@@ -68,7 +69,7 @@ public class CryptoTest {
         -21, 2, 47, -101, 9, -40, 18, 43, 76, 117,
         -51, 115, -122, -91, 39, 0, -18, 122, 30, 90,
     };
-    Crypto.hmacSha1Verify(key.getBytes(), val.getBytes(), expected);
+    Crypto.hmacShaVerify(key.getBytes(), val.getBytes(), expected,HMACType.HMACSHA1.getName());
   }
 
   @Test

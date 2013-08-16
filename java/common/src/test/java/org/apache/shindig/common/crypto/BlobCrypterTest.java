@@ -22,6 +22,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 
 import org.apache.shindig.common.util.FakeTimeSource;
+import org.apache.shindig.common.util.HMACType;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -37,7 +38,7 @@ public class BlobCrypterTest {
   private FakeTimeSource timeSource;
 
   public BlobCrypterTest() {
-    crypter = new BasicBlobCrypter("0123456789abcdef".getBytes());
+    crypter = new BasicBlobCrypter("0123456789abcdef".getBytes(),HMACType.HMACSHA1);
     timeSource = new FakeTimeSource();
     crypter.timeSource = timeSource;
   }
@@ -128,7 +129,7 @@ public class BlobCrypterTest {
 
   @Test
   public void testFixedKey() throws Exception {
-    BlobCrypter alt = new BasicBlobCrypter("0123456789abcdef".getBytes());
+    BlobCrypter alt = new BasicBlobCrypter("0123456789abcdef".getBytes(),HMACType.HMACSHA1);
     Map<String, String> in = ImmutableMap.of("a","b");
 
     String blob = crypter.wrap(in);
@@ -138,7 +139,7 @@ public class BlobCrypterTest {
 
   @Test(expected=BlobCrypterException.class)
   public void testBadKey() throws Exception {
-    BlobCrypter alt = new BasicBlobCrypter("1123456789abcdef".getBytes());
+    BlobCrypter alt = new BasicBlobCrypter("1123456789abcdef".getBytes(),HMACType.HMACSHA1);
     Map<String, String> in = ImmutableMap.of("a","b");
 
     String blob = crypter.wrap(in);

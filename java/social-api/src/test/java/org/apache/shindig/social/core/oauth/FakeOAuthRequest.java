@@ -18,8 +18,9 @@
  */
 package org.apache.shindig.social.core.oauth;
 
-import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 import net.oauth.OAuth;
 import net.oauth.OAuthAccessor;
@@ -27,17 +28,15 @@ import net.oauth.OAuthConsumer;
 import net.oauth.OAuthMessage;
 
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.codec.digest.DigestUtils;
-
 import org.apache.shindig.auth.OAuthConstants;
 import org.apache.shindig.common.testing.FakeHttpServletRequest;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.common.util.CharsetUtil;
+import org.apache.shindig.common.util.GenericDigestUtils;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
+import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 
 /**
  * This is largely a copy of OAuthCommandLine with some tweaks for FakeHttpServletRequest
@@ -100,7 +99,7 @@ public class FakeOAuthRequest {
       } else if (bodySigning == BodySigning.HASH) {
         oauthParams.add(
             new OAuth.Parameter(OAuthConstants.OAUTH_BODY_HASH,
-                new String(Base64.encodeBase64(DigestUtils.sha(body.getBytes())), "UTF-8")));
+                new String(Base64.encodeBase64(GenericDigestUtils.digest(body.getBytes())), "UTF-8")));
       }
     }
 

@@ -18,10 +18,17 @@
  */
 package org.apache.shindig.social.core.oauth;
 
+import java.util.Arrays;
+import java.util.Date;
+
+import javax.servlet.http.HttpServletRequest;
+
 import net.oauth.OAuth;
 import net.oauth.OAuthConsumer;
-import net.oauth.OAuthServiceProvider;
 import net.oauth.OAuthProblemException;
+import net.oauth.OAuthServiceProvider;
+import net.oauth.OAuthValidator;
+import net.oauth.SimpleOAuthValidator;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -32,19 +39,12 @@ import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.EasyMockTestCase;
 import org.apache.shindig.common.testing.FakeHttpServletRequest;
 import org.apache.shindig.common.util.CharsetUtil;
+import org.apache.shindig.common.util.GenericDigestUtils;
 import org.apache.shindig.social.opensocial.oauth.OAuthDataStore;
 import org.apache.shindig.social.opensocial.oauth.OAuthEntry;
-
-import net.oauth.OAuthValidator;
-import net.oauth.SimpleOAuthValidator;
 import org.easymock.EasyMock;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.util.Arrays;
-import java.util.Date;
-
-import javax.servlet.http.HttpServletRequest;
 
 /**
  * Verify behavior of OAuth handler for consumer and 3-legged requests.
@@ -374,7 +374,7 @@ public class OAuthAuthenticationHanderTest extends EasyMockTestCase {
     req.setContentType("text/plain");
     String body = "BODY";
     req.setPostData(CharsetUtil.getUtf8Bytes(body));
-    String hash = new String(Base64.encodeBase64(DigestUtils.sha(CharsetUtil
+    String hash = new String(Base64.encodeBase64(GenericDigestUtils.digest(CharsetUtil
         .getUtf8Bytes(body))), "UTF-8");
     req.setParameter(OAuthConstants.OAUTH_BODY_HASH, hash);
     OAuthAuthenticationHandler.verifyBodyHash(req, hash);
@@ -386,7 +386,7 @@ public class OAuthAuthenticationHanderTest extends EasyMockTestCase {
     req.setContentType("text/plain");
     String body = "BODY";
     req.setPostData(CharsetUtil.getUtf8Bytes(body));
-    String hash = new String(Base64.encodeBase64(DigestUtils.sha(CharsetUtil
+    String hash = new String(Base64.encodeBase64(GenericDigestUtils.digest(CharsetUtil
         .getUtf8Bytes("NOTBODY"))), "UTF-8");
     req.setParameter(OAuthConstants.OAUTH_BODY_HASH, hash);
     try {
@@ -403,7 +403,7 @@ public class OAuthAuthenticationHanderTest extends EasyMockTestCase {
     req.setContentType(OAuth.FORM_ENCODED);
     String body = "BODY";
     req.setPostData(CharsetUtil.getUtf8Bytes(body));
-    String hash = new String(Base64.encodeBase64(DigestUtils.sha(CharsetUtil
+    String hash = new String(Base64.encodeBase64(GenericDigestUtils.digest(CharsetUtil
         .getUtf8Bytes(body))), "UTF-8");
     req.setParameter(OAuthConstants.OAUTH_BODY_HASH, hash);
     try {

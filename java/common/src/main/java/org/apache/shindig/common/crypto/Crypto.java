@@ -18,9 +18,6 @@
  */
 package org.apache.shindig.common.crypto;
 
-import com.google.common.primitives.Bytes;
-import org.apache.commons.codec.binary.Hex;
-
 import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.security.SecureRandom;
@@ -29,6 +26,11 @@ import javax.crypto.Cipher;
 import javax.crypto.Mac;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+
+import org.apache.commons.codec.binary.Hex;
+import org.apache.shindig.common.util.HMACType;
+
+import com.google.common.primitives.Bytes;
 
 /**
  * Cryptographic utility functions.
@@ -44,7 +46,7 @@ public final class Crypto {
   /**
    * HMAC algorithm to use
    */
-  private final static String HMAC_TYPE = "HMACSHA1";
+  private static String HMAC_TYPE = HMACType.HMACSHA1.getName();
 
   /**
    * minimum safe length for hmac keys (this is good practice, but not
@@ -69,7 +71,7 @@ public final class Crypto {
   /**
    * Length of HMAC SHA1 output
    */
-  public final static int HMAC_SHA1_LEN = 20;
+  public static int HMAC_SHA_LEN = HMACType.HMACSHA1.getLength();
 
   private final static char[] DIGITS = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
 
@@ -118,41 +120,69 @@ public final class Crypto {
    *
    * @throws GeneralSecurityException
    */
-  public static byte[] hmacSha1(byte[] key, byte[] in) throws GeneralSecurityException {
+  public static byte[] hmacSha(byte[] key, byte[] in) throws GeneralSecurityException {
+    return hmacSha(key, in, HMAC_TYPE);
+  }
+
+  /**
+   * HMAC sha
+   *
+   * @param key the key must be at least 8 bytes in length.
+   * @param in byte array to HMAC.
+   * @param hmacType HMAC algorithms.
+   * @return the hash
+   *
+   * @throws GeneralSecurityException
+   */
+  public static byte[] hmacSha(byte[] key, byte[] in, String hmacType) throws GeneralSecurityException {
     if (key.length < MIN_HMAC_KEY_LEN) {
       throw new GeneralSecurityException("HMAC key should be at least "
           + MIN_HMAC_KEY_LEN + " bytes.");
     }
-    Mac hmac = Mac.getInstance(HMAC_TYPE);
-    Key hmacKey = new SecretKeySpec(key, HMAC_TYPE);
+    Mac hmac = Mac.getInstance(hmacType);
+    Key hmacKey = new SecretKeySpec(key, hmacType);
     hmac.init(hmacKey);
     hmac.update(in);
     return hmac.doFinal();
   }
 
   /**
-   * Verifies an HMAC SHA1 hash.  Throws if the verification fails.
+   * Verifies an HMAC SHA hash.  Throws if the verification fails.
    *
    * @param key
    * @param in
    * @param expected
+   * @param hmacType HMAC algorithms.
    * @throws GeneralSecurityException
    */
-  public static void hmacSha1Verify(byte[] key, byte[] in, byte[] expected)
-  throws GeneralSecurityException {
-    Mac hmac = Mac.getInstance(HMAC_TYPE);
-    Key hmacKey = new SecretKeySpec(key, HMAC_TYPE);
+  public static void hmacShaVerify(byte[] key, byte[] in, byte[] expected,
+      String hmacType) throws GeneralSecurityException {
+    Mac hmac = Mac.getInstance(hmacType);
+    Key hmacKey = new SecretKeySpec(key, hmacType);
     hmac.init(hmacKey);
     hmac.update(in);
     byte actual[] = hmac.doFinal();
     if (actual.length != expected.length) {
       throw new GeneralSecurityException("HMAC verification failure");
     }
-    for (int i=0; i < actual.length; i++) {
+    for (int i = 0; i < actual.length; i++) {
       if (actual[i] != expected[i]) {
         throw new GeneralSecurityException("HMAC verification failure");
       }
     }
+  }
+
+  /**
+   * Verifies an HMAC SHA hash. Throws if the verification fails.
+   *
+   * @param key
+   * @param in
+   * @param expected
+   * @throws GeneralSecurityException
+   */
+  public static void hmacShaVerify(byte[] key, byte[] in, byte[] expected)
+      throws GeneralSecurityException {
+    hmacShaVerify(key, in, expected, HMAC_TYPE);
   }
 
   /**

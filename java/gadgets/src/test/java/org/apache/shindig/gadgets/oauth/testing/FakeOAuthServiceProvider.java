@@ -18,9 +18,14 @@
  */
 package org.apache.shindig.gadgets.oauth.testing;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import net.oauth.OAuth;
 import net.oauth.OAuth.Parameter;
@@ -33,6 +38,8 @@ import net.oauth.OAuthValidator;
 import net.oauth.SimpleOAuthValidator;
 import net.oauth.signature.RSA_SHA1;
 
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.IOUtils;
 import org.apache.shindig.auth.OAuthConstants;
 import org.apache.shindig.auth.OAuthUtil;
 import org.apache.shindig.auth.OAuthUtil.SignatureType;
@@ -43,6 +50,7 @@ import org.apache.shindig.common.cache.SoftExpiringCache.CachedObject;
 import org.apache.shindig.common.crypto.Crypto;
 import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.common.util.CharsetUtil;
+import org.apache.shindig.common.util.GenericDigestUtils;
 import org.apache.shindig.common.util.TimeSource;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpFetcher;
@@ -51,18 +59,9 @@ import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.oauth.AccessorInfo.OAuthParamLocation;
 
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.io.IOUtils;
-
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 public class FakeOAuthServiceProvider implements HttpFetcher {
 
@@ -768,7 +767,7 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
           throw new RuntimeException("Requiring oauth_body_hash parameter");
         }
         byte[] received = Base64.decodeBase64(CharsetUtil.getUtf8Bytes(bodyHash));
-        byte[] expected = DigestUtils.sha(info.rawBody);
+        byte[] expected = GenericDigestUtils.digest(info.rawBody);
         if (!Arrays.equals(received, expected)) {
           throw new RuntimeException("oauth_body_hash mismatch");
         }

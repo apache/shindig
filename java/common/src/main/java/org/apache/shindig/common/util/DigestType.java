@@ -16,22 +16,27 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.shindig.gadgets.uri;
-
-import org.apache.shindig.common.uri.Uri;
-import org.apache.shindig.common.util.Base32;
-import org.apache.shindig.common.util.GenericDigestUtils;
+package org.apache.shindig.common.util;
 
 /**
- * A simple implementation of locked domain that hashes the gadgeturi as the prefix.
+ * The Secure Hash Algorithm is a family of cryptographic hash functions published by the National Institute of Standards and Technology (NIST)
  */
-public class HashShaLockedDomainPrefixGenerator implements LockedDomainPrefixGenerator {
-  public String getLockedDomainPrefix(Uri gadgetUri) {
-    return getLockedDomainPrefix(gadgetUri.toString().toLowerCase());
+public enum DigestType {
+  SHA("SHA"), //$NON-NLS-1$
+  SHA256("SHA-256"), //$NON-NLS-1$
+  SHA384("SHA-384"), //$NON-NLS-1$
+  SHA512("SHA-512"); //$NON-NLS-1$
+  private final String name;
+
+  private DigestType(String name) {
+    this.name = name;
   }
 
-  public String getLockedDomainPrefix(String token) {
-    byte[] sha = GenericDigestUtils.digest(token);
-    return new String(Base32.encodeBase32(sha)); // a hash
+  public String toString() {
+    return this.name;
+  }
+
+  public String getName() {
+    return this.name;
   }
 }

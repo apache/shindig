@@ -18,18 +18,18 @@
  */
 package org.apache.shindig.gadgets.oauth2.handler;
 
+import java.io.UnsupportedEncodingException;
+import java.security.GeneralSecurityException;
+
+import org.apache.commons.codec.binary.Base64;
 import org.apache.shindig.common.crypto.Crypto;
 import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.common.util.HMACType;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.oauth2.OAuth2Accessor;
 import org.apache.shindig.gadgets.oauth2.OAuth2Error;
 import org.apache.shindig.gadgets.oauth2.OAuth2Message;
 import org.apache.shindig.gadgets.oauth2.OAuth2Token;
-
-import org.apache.commons.codec.binary.Base64;
-
-import java.io.UnsupportedEncodingException;
-import java.security.GeneralSecurityException;
 
 /**
  *
@@ -231,7 +231,7 @@ public class MacTokenHandler implements ResourceRequestHandler {
   private static byte[] hash(final byte[] text, final byte[] key, final String algorithm)
           throws GeneralSecurityException {
     if (OAuth2Message.HMAC_SHA_1.equalsIgnoreCase(algorithm)) {
-      return Crypto.hmacSha1(key, text);
+      return Crypto.hmacSha(key, text, HMACType.HMACSHA1.getName());
     }
 
     return new byte[] {};
