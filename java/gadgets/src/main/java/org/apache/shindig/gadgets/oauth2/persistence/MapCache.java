@@ -167,18 +167,13 @@ public abstract class MapCache implements OAuth2Cache {
             state.getScope());
   }
 
-  private String getAccessorKey(final String gadgetUri, final String serviceName,
+  protected String getAccessorKey(final String gadgetUri, final String serviceName,
           final String user, final String scope) {
     if (gadgetUri == null || serviceName == null || user == null) {
       return null;
     }
 
-    final String s;
-    if (scope == null) {
-      s = "";
-    } else {
-      s = scope;
-    }
+    final String s = scope == null ? "" : scope;
 
     final StringBuilder buf = new StringBuilder(gadgetUri.length() + serviceName.length()
             + user.length() + s.length() + 3);
