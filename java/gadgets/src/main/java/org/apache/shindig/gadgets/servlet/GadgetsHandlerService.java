@@ -86,9 +86,11 @@ import com.google.caja.reporting.MessageContext;
 import com.google.caja.reporting.RenderContext;
 import com.google.caja.util.Sets;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
@@ -214,8 +216,8 @@ public class GadgetsHandlerService {
               HttpResponse.SC_BAD_REQUEST);
       }
     }
-    Map<String, Uri> uris = needIfrUrls ?
-            iframeUriManager.makeAllRenderingUris(gadget) : null;
+    Map<String, String> uris = needIfrUrls ?
+            translateUris(iframeUriManager.makeAllRenderingUris(gadget)) : null;
     Boolean needsTokenRefresh =
         isFieldIncluded(fields, "needstokenrefresh") ?
             gadget.getAllFeatures().contains("auth-refresh") : null;
@@ -232,6 +234,16 @@ public class GadgetsHandlerService {
     return createMetadataResponse(context.getUrl(), gadget.getSpec(), uris,
         needsTokenRefresh, fields, timeSource.currentTimeMillis() + specRefreshInterval, tokenTTL,
         rpcServiceIds);
+  }
+
+  private Map<String, String> translateUris(Map<String, Uri> iframeUris) {
+    Function<Uri, String> toString = new Function<Uri, String>() {
+      @Override
+      public String apply(Uri input) {
+        return input.toString();
+      }
+    };
+    return Maps.transformValues(iframeUris, toString);
   }
 
   /**
@@ -573,7 +585,7 @@ public class GadgetsHandlerService {
 
   @VisibleForTesting
   GadgetsHandlerApi.MetadataResponse createMetadataResponse(Uri url, GadgetSpec spec, Map<String,
-        Uri> iframeUris, Boolean needsTokenRefresh, Set<String> fields, Long expireTime,
+        String> iframeUris, Boolean needsTokenRefresh, Set<String> fields, Long expireTime,
         Integer tokenTTL, Set<String> rpcServiceIds) {
     return (GadgetsHandlerApi.MetadataResponse) beanFilter.createFilteredBean(
         beanDelegator.createDelegator(spec, GadgetsHandlerApi.MetadataResponse.class,

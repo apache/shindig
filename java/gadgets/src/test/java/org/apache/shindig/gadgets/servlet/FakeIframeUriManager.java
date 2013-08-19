@@ -29,11 +29,14 @@ import com.google.caja.util.Maps;
 
 public class FakeIframeUriManager implements IframeUriManager {
   protected boolean throwRandomFault = false;
-  public static final Uri DEFAULT_IFRAME_URI = Uri.parse("http://example.org/gadgets/foo-does-not-matter");
+  private static final String URI = "http://example.org/gadgets/foo-does-not-matter";
+  public static final Uri DEFAULT_IFRAME_URI = Uri.parse(URI);
   protected Uri iframeUrl = DEFAULT_IFRAME_URI;
   public static Map<String, Uri> IFRAME_URIS = Maps.newHashMap();
+  public static Map<String, String> IFRAME_URIS_STRINGS = Maps.newHashMap();
   static {
     IFRAME_URIS.put("default", DEFAULT_IFRAME_URI);
+    IFRAME_URIS_STRINGS.put("default", URI);
   }
 
   FakeIframeUriManager() { }
