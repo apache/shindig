@@ -240,8 +240,8 @@ public class BasicBlobCrypter implements BlobCrypter {
   public Map<String, String> unwrap(String in) throws BlobCrypterException {
     try {
       byte[] bin = Base64.decodeBase64(CharsetUtil.getUtf8Bytes(in));
-      byte[] hmac = new byte[Crypto.HMAC_SHA_LEN];
-      byte[] cipherText = new byte[bin.length-Crypto.HMAC_SHA_LEN];
+      byte[] hmac = new byte[hmacType.getLength()];
+      byte[] cipherText = new byte[bin.length-hmacType.getLength()];
       System.arraycopy(bin, 0, cipherText, 0, cipherText.length);
       System.arraycopy(bin, cipherText.length, hmac, 0, hmac.length);
       Crypto.hmacShaVerify(hmacKey, cipherText, hmac, hmacType.getName());

@@ -60,7 +60,74 @@ public class CryptoTest {
     Crypto.hmacShaVerify(key.getBytes(), val.getBytes(), expected,HMACType.HMACSHA1.getName());
   }
 
+  @Test
+  public void testHmacSha256() throws Exception {
+    String key = "abcd1234";
+    String val = "your mother is a hedgehog";
+    byte[] expected = { 69, -128, -5, 20, 94, -46, -40, 46, 43, -24, -76, -93,
+        -28, -70, 3, 93, 101, 124, 111, -56, 124, -38, 103, 41, 83, -53, -45,
+        36, -21, 73, -10, -32, };
+    byte[] hmac = Crypto.hmacSha(key.getBytes(), val.getBytes(),HMACType.HMACSHA256.getName());
+    assertArrayEquals(expected, hmac);
+  }
 
+  @Test
+  public void testHmacSha256Verify() throws Exception {
+    String key = "abcd1234";
+    String val = "your mother is a hedgehog";
+    byte[] expected = { 69, -128, -5, 20, 94, -46, -40, 46, 43, -24, -76, -93,
+        -28, -70, 3, 93, 101, 124, 111, -56, 124, -38, 103, 41, 83, -53, -45,
+        36, -21, 73, -10, -32, };
+    Crypto.hmacShaVerify(key.getBytes(), val.getBytes(), expected,HMACType.HMACSHA256.getName());
+  }
+
+  @Test
+  public void testHmacSha384() throws Exception {
+    String key = "abcd1234";
+    String val = "your mother is a hedgehog";
+    byte[] expected = { 66, -117, 24, -112, 19, -58, 80, 27, -117, 23, 107, 41,
+        -118, -3, 100, -61, 42, 77, 50, 70, -28, 85, -39, -55, 47, 42, 106,
+        116, -26, 72, 76, -101, 67, -37, -56, 5, -85, 117, -51, -95, -18, -100,
+        81, 69, 9, 105, 70, 99, };
+    byte[] hmac = Crypto.hmacSha(key.getBytes(), val.getBytes(),HMACType.HMACSHA384.getName());
+    assertArrayEquals(expected, hmac);
+  }
+
+  @Test
+  public void testHmacSha384Verify() throws Exception {
+    String key = "abcd1234";
+    String val = "your mother is a hedgehog";
+    byte[] expected = { 66, -117, 24, -112, 19, -58, 80, 27, -117, 23, 107, 41,
+        -118, -3, 100, -61, 42, 77, 50, 70, -28, 85, -39, -55, 47, 42, 106,
+        116, -26, 72, 76, -101, 67, -37, -56, 5, -85, 117, -51, -95, -18, -100,
+        81, 69, 9, 105, 70, 99, };
+    Crypto.hmacShaVerify(key.getBytes(), val.getBytes(), expected,HMACType.HMACSHA384.getName());
+  }
+
+  @Test
+  public void testHmacSha512() throws Exception {
+    String key = "abcd1234";
+    String val = "your mother is a hedgehog";
+    byte[] expected = { -40, -114, 57, 41, -97, -13, 13, 106, -71, 72, -54, 97,
+        -50, -109, -115, -24, -68, 82, 73, -97, 46, -21, -128, -40, 73, 41, 43,
+        61, 20, 35, 79, 90, -27, 83, -1, -64, -128, 49, -118, -117, 34, -63,
+        -51, 87, -85, 120, -9, -107, 29, 106, -48, 51, 105, -56, 86, -52, 18,
+        -45, -81, -6, 0, 16, 67, 90, };
+    byte[] hmac = Crypto.hmacSha(key.getBytes(), val.getBytes(),HMACType.HMACSHA512.getName());
+    assertArrayEquals(expected, hmac);
+  }
+
+  @Test
+  public void testHmacSha512Verify() throws Exception {
+    String key = "abcd1234";
+    String val = "your mother is a hedgehog";
+    byte[] expected = { -40, -114, 57, 41, -97, -13, 13, 106, -71, 72, -54, 97,
+        -50, -109, -115, -24, -68, 82, 73, -97, 46, -21, -128, -40, 73, 41, 43,
+        61, 20, 35, 79, 90, -27, 83, -1, -64, -128, 49, -118, -117, 34, -63,
+        -51, 87, -85, 120, -9, -107, 29, 106, -48, 51, 105, -56, 86, -52, 18,
+        -45, -81, -6, 0, 16, 67, 90, };
+    Crypto.hmacShaVerify(key.getBytes(), val.getBytes(), expected,HMACType.HMACSHA512.getName());
+  }
   @Test(expected = GeneralSecurityException.class)
   public void testHmacSha1VerifyTampered() throws Exception {
     String key = "abcd1234";
