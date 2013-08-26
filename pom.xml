@@ -133,9 +133,9 @@
   <developers>
     <!-- PMC Chair -->
     <developer>
-      <id>lindner</id>
-      <name>Paul Lindner</name>
-      <email>lindner@apache.org</email>
+      <id>rbaxter85</id>
+      <name>Ryan Baxter</name>
+      <email>rbaxter85@apache.org</email>
       <organization>ASF</organization>
       <roles>
         <role>PMC Chair</role>
@@ -288,9 +288,9 @@
       </roles>
     </developer>
     <developer>
-      <id>rbaxter85</id>
-      <name>Ryan Baxter</name>
-      <email>rbaxter85@apache.org</email>
+      <id>lindner</id>
+      <name>Paul Lindner</name>
+      <email>lindner@apache.org</email>
       <organization>ASF</organization>
       <roles>
         <role>PMC Member</role>
