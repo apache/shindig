@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<!--
+  The one and only cache manager for Shindig.
+
+  Allot a modest amount of heap to be shared by all caches.
+
+  By default only the CompiledJs caches will overflow to disk.  No caches will persist
+  to disk by default as a development aid.  It is recommended that deployments tune
+  caches to their needs.
+
+  Statistics are turned on for every cache by default.  This affects cache performance.
+  To turn stats off you can use shindig.cache.ehcache.jmx.stats in shindig.properties.
+
+  See http://ehcache.org/ehcache.xsd for more information on valid configuration.
+-->
+<ehcache xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:noNamespaceSchemaLocation="ehcache.xsd"
+  updateCheck="false"
+  maxBytesLocalHeap="50m"
+  name="ShindigTestCM">
+
+  <!--
+    The directory where any caches configured as diskPersistent or overflowToDisk
+    will end up.
+  -->
+  <diskStore path="ehcache.disk.store.dir"/>
+
+  <!-- Default sizeOfPolicy for computing the size of cache elements in memory -->
+  <sizeOfPolicy maxDepth="1000" maxDepthExceededBehavior="abort"/>
+
+
+  <!--
+    Mandatory Default Cache configuration. These settings will be applied to caches
+    created programmatically using CacheManager.add(String cacheName).
+
+    The defaultCache has an implicit name "default" which is a reserved cache name.
+  -->
+  <defaultCache
+    statistics="true"
+    eternal="false"
+    timeToIdleSeconds="300"
+    timeToLiveSeconds="600"
+    overflowToDisk="false"
+    diskPersistent="false"
+    memoryStoreEvictionPolicy="LFU"/>
+
+  <!--
+    Compiled feature code, 10Mb disk overflow
+  -->
+  <cache name="CompiledJs"
+    statistics="true"
+    eternal="true"
+    overflowToDisk="true"
+    diskPersistent="false"
+    maxBytesLocalDisk="10m"
+    memoryStoreEvictionPolicy="LFU"/>
+
+  <!--
+    gadget specs and message bundles have additional caching policies that
+    allow us to cache the objects indefinitely when using an LFU or LRU cache.
+  -->
+  <cache name="gadgetSpecs"
+    statistics="true"
+    eternal="true"
+    overflowToDisk="false"
+    diskPersistent="false"
+    memoryStoreEvictionPolicy="LFU"/>
+
+  <cache name="messageBundles"
+    statistics="true"
+    eternal="true"
+    overflowToDisk="false"
+    diskPersistent="false"
+    memoryStoreEvictionPolicy="LFU"/>
+
+  <!-- Used to cache parsed HTML DOMs based on their content -->
+  <cache name="parsedDocuments"
+    statistics="true"
+    eternal="true"
+    overflowToDisk="false"
+    diskPersistent="false"
+    memoryStoreEvictionPolicy="LFU"/>
+
+  <!-- Used to cache parsed CSS DOMs based on their content -->
+  <cache name="parsedCss"
+    statistics="true"
+    eternal="true"
+    overflowToDisk="false"
+    diskPersistent="false"
+    memoryStoreEvictionPolicy="LFU"/>
+
+  <!--
+    This configuration is only suitable for a modest sized HTTP cache.
+    You should configure a shared cache for production use.
+    Give this cache 30% of the local heap by default.
+  -->
+  <cache name="httpResponses"
+    maxBytesLocalHeap="30%"
+    statistics="true"
+    eternal="true"
+    overflowToDisk="false"
+    diskPersistent="false"
+    memoryStoreEvictionPolicy="LFU"/>
+
+  <!-- Used to cache parsed expressions based on their content -->
+  <cache name="expressions"
+    statistics="true"
+    eternal="true"
+    overflowToDisk="false"
+    diskPersistent="false"
+    memoryStoreEvictionPolicy="LFU"/>
+
+  <!-- Used to cache cajoled modules based on their content -->
+  <cache name="cajoledModules"
+    statistics="true"
+    eternal="false"
+    timeToIdleSeconds="300"
+    timeToLiveSeconds="600"
+    overflowToDisk="false"
+    diskPersistent="false"
+    memoryStoreEvictionPolicy="LFU"/>
+
+  <!-- Used to cache Gadget Feature JS -->
+  <cache name="FeatureJsCache"
+    statistics="true"
+    eternal="true"
+    overflowToDisk="false"
+    diskPersistent="false"
+    memoryStoreEvictionPolicy="LFU">
+    <!--
+      The elements stored in this cache are complex and the default sizeOfPolicy
+      is insufficient
+    -->
+    <sizeOfPolicy maxDepth="5000" maxDepthExceededBehavior="abort"/>
+  </cache>
+</ehcache>

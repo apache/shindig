@@ -90,7 +90,7 @@ public class EhCacheCacheProvider implements CacheProvider,
       System.setProperty("ehcache.disk.store.dir", System.getProperty("java.io.tmpdir"));
     }
 
-    cacheManager = CacheManager.create(getConfiguration(configPath));
+    cacheManager = CacheManager.newInstance(getConfiguration(configPath));
     create(jmxEnabled, withCacheStats);
     cleanupHandler.register(this);
   }
