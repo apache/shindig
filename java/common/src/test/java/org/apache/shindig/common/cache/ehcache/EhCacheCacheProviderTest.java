@@ -18,13 +18,15 @@
  */
 package org.apache.shindig.common.cache.ehcache;
 
+import net.sf.ehcache.CacheManager;
+
 import org.apache.shindig.common.cache.Cache;
 import org.apache.shindig.common.cache.CacheProvider;
-
 import org.apache.shindig.common.servlet.GuiceServletContextListener;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.powermock.reflect.Whitebox;
 
 /**
  *
@@ -55,5 +57,28 @@ public class EhCacheCacheProviderTest {
     Assert.assertNull(cache.getElement("test"));
     Assert.assertEquals(cache.getCapacity(), cache2.getCapacity());
     Assert.assertEquals(cache.getSize(), cache2.getSize());
+  }
+
+  @Test
+  public void testCacheManagerDuplication() throws Exception {
+    EhCacheCacheProvider duplicateDefaultProvider = new EhCacheCacheProvider(
+            "res://org/apache/shindig/common/cache/ehcache/ehcacheConfig.xml",
+            "org/apache/shindig/common/cache/ehcache/SizeOfFilter.txt",
+            false,
+            true,
+            new GuiceServletContextListener.CleanupHandler());
+    Assert.assertSame("Cache managers are the same",
+                         Whitebox.getInternalState(defaultProvider, "cacheManager"),
+                         Whitebox.getInternalState(duplicateDefaultProvider, "cacheManager"));
+
+    EhCacheCacheProvider differentProvider = new EhCacheCacheProvider(
+            "res://testEhCacheConfig.xml",
+            "org/apache/shindig/common/cache/ehcache/SizeOfFilter.txt",
+            false,
+            true,
+            new GuiceServletContextListener.CleanupHandler());
+    Assert.assertNotSame("Cache managers are different",
+            Whitebox.getInternalState(defaultProvider, "cacheManager"),
+            Whitebox.getInternalState(differentProvider, "cacheManager"));
   }
 }
