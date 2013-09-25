@@ -33,7 +33,7 @@ class GadgetSpecParserTest extends \PHPUnit_Framework_TestCase {
   private $GadgetSpecParser;
 
   /**
-   * @var Gadget
+   * @var string
    */
   private $Gadget = '<?xml version="1.0" encoding="UTF-8" ?>
 <Module specificationVersion="2.0.0">
@@ -87,5 +87,21 @@ class GadgetSpecParserTest extends \PHPUnit_Framework_TestCase {
     $this->assertEquals('2.0.0', (string) $gadgetParsed->specificationVersion);
     $this->assertEquals('html', $gadgetParsed->doctype);
   }
+
+  public function testParseWithXMLExternalEntityInjection() {
+    $gadget = '<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE Module [ <!ENTITY passwd SYSTEM "file://' . __DIR__ . '/_assets/testfile"> ]>
+<Module specificationVersion="2.0.0">
+  <ModulePrefs title="Test" doctype="html" />
+  <Content type="html" view="home">
+  &passwd;
+  </Content>
+</Module>';
+    $gadgetParsed = $this->GadgetSpecParser->parse($gadget, $this->Context);
+    $view = $gadgetParsed->views['home'];
+    $this->assertNotContains('injected content', trim($view['content']));
+  }
+
+
 }
 

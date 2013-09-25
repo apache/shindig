@@ -1324,6 +1324,7 @@
               <exclude>**/.project</exclude>
               <exclude>**/.settings/*</exclude>
               <exclude>**/src/test/resources/**</exclude>
+              <exclude>**/php/test/gadgets/_assets/**</exclude>
             </excludes>
           </configuration>
         </plugin>

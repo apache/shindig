@@ -26,6 +26,10 @@ use apache\shindig\common\Config;
 // this prevents that from generating warnings
 @date_default_timezone_set(@date_default_timezone_get());
 
+// generally disable loading of external entities in xml files to prevent
+// remote file inclusions, see http://websec.io/2012/08/27/Preventing-XEE-in-PHP.html
+libxml_disable_entity_loader(true);
+
 require_once __DIR__ . '/../../../external/Symfony/Component/ClassLoader/UniversalClassLoader.php';
 
 $loader = new \Symfony\Component\ClassLoader\UniversalClassLoader();
