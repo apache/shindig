@@ -100,8 +100,6 @@ public class JsonRpcServlet extends ApiServlet {
       return;
     }
 
-    HttpUtil.setCORSheader(servletResponse, containerConfig.<String>getList(token.getContainer(), "gadgets.parentOrigins"));
-
     try {
       String content = null;
       String callback = null; // for JSONP
