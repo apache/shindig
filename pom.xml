@@ -789,6 +789,7 @@
                 <exclude>**/drop.sql</exclude>
                 <exclude>**/derby.log</exclude>
                 <exclude>**/dependency-reduced-pom.xml</exclude>
+                <exclude>**/php/test/gadgets/_assets/**</exclude>
               </excludes>
             </configuration>
           </plugin>
