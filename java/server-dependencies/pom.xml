@@ -34,9 +34,9 @@
   <description>Default server war dependencies</description>
 
   <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/shindig/trunk/java/server-dependencies</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/shindig/trunk/java/server-dependencies</developerConnection>
-    <url>http://svn.apache.org/viewvc/shindig/trunk/java/server-dependencies</url>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/shindig/branches/2.5.0-updateX/java/server-dependencies</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/shindig/branches/2.5.0-updateX/java/server-dependencies</developerConnection>
+    <url>http://svn.apache.org/viewvc/shindig/branches/2.5.0-updateX/java/server-dependencies</url>
   </scm>
 
   <dependencies>

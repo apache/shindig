@@ -34,9 +34,9 @@
   <description>Default server war containing both the gadget rendering code and the social api code.</description>
 
   <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/shindig/trunk/java/server</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/shindig/trunk/java/server</developerConnection>
-    <url>http://svn.apache.org/viewvc/shindig/trunk/java/server</url>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/shindig/branches/2.5.0-updateX/java/server</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/shindig/branches/2.5.0-updateX/java/server</developerConnection>
+    <url>http://svn.apache.org/viewvc/shindig/branches/2.5.0-updateX/java/server</url>
   </scm>
 
   <build>

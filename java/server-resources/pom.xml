@@ -34,9 +34,9 @@
   <description>Shallow Default server war containing only the configuration and javascript for the gadget rendering and the social api.</description>
 
   <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/shindig/trunk/java/server-resources</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/shindig/trunk/java/server-resources</developerConnection>
-    <url>http://svn.apache.org/viewvc/shindig/trunk/java/server-resources</url>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/shindig/branches/2.5.0-updateX/java/server-resources</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/shindig/branches/2.5.0-updateX/java/server-resources</developerConnection>
+    <url>http://svn.apache.org/viewvc/shindig/branches/2.5.0-updateX/java/server-resources</url>
   </scm>
 
   <build>

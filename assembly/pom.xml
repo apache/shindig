@@ -34,11 +34,11 @@
   <description>Assembles the Java/PHP code base into a deployment package.</description>
 
   <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/shindig/trunk/assembly
+    <connection>scm:svn:http://svn.apache.org/repos/asf/shindig/branches/2.5.0-updateX/assembly
     </connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/shindig/trunk/assembly
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/shindig/branches/2.5.0-updateX/assembly
     </developerConnection>
-    <url>http://svn.apache.org/viewvc/shindig/trunk/assembly</url>
+    <url>http://svn.apache.org/viewvc/shindig/branches/2.5.0-updateX/assembly</url>
   </scm>
 
   <build>

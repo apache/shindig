@@ -34,9 +34,9 @@
   <description>Uber Jar contains Shindig and dependencies</description>
 
   <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/shindig/trunk/java/uber</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/shindig/trunk/java/uber</developerConnection>
-    <url>http://svn.apache.org/viewvc/shindig/trunk/java/uber</url>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/shindig/branches/2.5.0-updateX/java/uber</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/shindig/branches/2.5.0-updateX/java/uber</developerConnection>
+    <url>http://svn.apache.org/viewvc/shindig/branches/2.5.0-updateX/java/uber</url>
   </scm>
 
   <build>

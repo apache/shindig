@@ -34,9 +34,9 @@
   <description>PHP tests</description>
 
   <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/shindig/trunk/php</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/shindig/trunk/php</developerConnection>
-    <url>http://svn.apache.org/viewvc/shindig/trunk/php</url>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/shindig/branches/2.5.0-updateX/php</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/shindig/branches/2.5.0-updateX/php</developerConnection>
+    <url>http://svn.apache.org/viewvc/shindig/branches/2.5.0-updateX/php</url>
   </scm>
 
   <!-- common params -->

@@ -34,9 +34,9 @@
   <description>Default Shindig Sample Container module</description>
 
   <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/shindig/trunk/java/sample-container</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/shindig/trunk/java/sample-container</developerConnection>
-    <url>http://svn.apache.org/viewvc/shindig/trunk/java/server</url>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/shindig/branches/2.5.0-updateX/java/sample-container</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/shindig/branches/2.5.0-updateX/java/sample-container</developerConnection>
+    <url>http://svn.apache.org/viewvc/shindig/branches/2.5.0-updateX/java/server</url>
   </scm>
 
   <dependencies>

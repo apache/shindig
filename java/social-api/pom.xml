@@ -34,9 +34,9 @@
   <description>Serves OpenSocial Data and the RESTful APIs.</description>
 
   <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/shindig/trunk/java/social-api</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/shindig/trunk/java/social-api</developerConnection>
-    <url>http://svn.apache.org/viewvc/shindig/trunk/java/social-api</url>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/shindig/branches/2.5.0-updateX/java/social-api</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/shindig/branches/2.5.0-updateX/java/social-api</developerConnection>
+    <url>http://svn.apache.org/viewvc/shindig/branches/2.5.0-updateX/java/social-api</url>
   </scm>
 
   <build>
