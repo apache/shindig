@@ -759,7 +759,7 @@ public class BasicOAuth2Request implements OAuth2Request {
 
   private HttpResponseBuilder getErrorResponseBuilder(final Throwable t, final OAuth2Error error,
           final String contextMessage) {
-    return this.getErrorResponseBuilder(t, error, contextMessage);
+	return this.getErrorResponseBuilder(t, error, contextMessage, null, null);
   }
 
   private HttpResponseBuilder getErrorResponseBuilder(final Throwable t, final OAuth2Error error,
