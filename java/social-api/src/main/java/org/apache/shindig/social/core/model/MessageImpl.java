@@ -27,7 +27,7 @@ import org.apache.shindig.social.opensocial.model.Url;
 /**
  * Default implementation for a {@link org.apache.shindig.social.opensocial.model.Message}
  */
-public final class MessageImpl implements Message {
+public class MessageImpl implements Message {
 
   private String appUrl;
   private String body;
