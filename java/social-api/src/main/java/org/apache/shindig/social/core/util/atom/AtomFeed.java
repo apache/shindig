@@ -97,7 +97,7 @@ public class AtomFeed {
     } else if ( obj instanceof DataCollection ) {
       DataCollection dc = (DataCollection) obj;
       entry = Lists.newArrayList();
-      for ( Entry<String, Map<String,String>> o : dc.getEntry().entrySet()) {
+      for ( Entry<String, Map<String,Object>> o : dc.getEntry().entrySet()) {
         entry.add(new AtomEntry(o));
       }
       startIndex = 0;

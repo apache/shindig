@@ -67,21 +67,21 @@ public class DataCollectionConverter extends AbstractCollectionConverter {
   public void marshal(Object source, HierarchicalStreamWriter writer, MarshallingContext context) {
 
     DataCollection collection = (DataCollection) source;
-    Map<String, Map<String, String>> internalMap = collection.getEntry();
+    Map<String, Map<String, Object>> internalMap = collection.getEntry();
 
-    for (Entry<String, Map<String, String>> eo : internalMap.entrySet()) {
+    for (Entry<String, Map<String, Object>> eo : internalMap.entrySet()) {
       writer.startNode("entry");
       writer.startNode("key");
       writer.setValue(eo.getKey());
       writer.endNode();
       writer.startNode("value");
-      for (Entry<String, String> ei : eo.getValue().entrySet()) {
+      for (Entry<String, Object> ei : eo.getValue().entrySet()) {
         writer.startNode("entry");
         writer.startNode("key");
         writer.setValue(ei.getKey());
         writer.endNode();
         writer.startNode("value");
-        writer.setValue(ei.getValue());
+        writer.setValue(ei.getValue().toString());
         writer.endNode();
         writer.endNode();
       }
@@ -150,14 +150,14 @@ public class DataCollectionConverter extends AbstractCollectionConverter {
         nonmap = true;
       }
     }
-    Map<String, Map<String, String>> fm = Maps.newHashMap();
+    Map<String, Map<String, Object>> fm = Maps.newHashMap();
     if (nonmap) {
       for (Entry<String, Object> e : m.entrySet()) {
         if (e.getValue() instanceof Map) {
-          fm.put(e.getKey(), (Map<String, String>) e.getValue());
+          fm.put(e.getKey(), (Map<String, Object>) e.getValue());
         } else {
           // not certain that this makes sense, but can't see how else.
-          Map<String, String> mv = Maps.newHashMap();
+          Map<String, Object> mv = Maps.newHashMap();
           mv.put(e.getKey(), (String) e.getValue());
           fm.put(e.getKey(), mv);
         }
@@ -165,7 +165,7 @@ public class DataCollectionConverter extends AbstractCollectionConverter {
 
     } else {
       for (Entry<String, Object> e : m.entrySet()) {
-        fm.put(e.getKey(), (Map<String, String>) e.getValue());
+        fm.put(e.getKey(), (Map<String, Object>) e.getValue());
       }
     }
     return new DataCollection(fm);
