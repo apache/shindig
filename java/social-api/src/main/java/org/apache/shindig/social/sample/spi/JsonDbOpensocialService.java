@@ -498,7 +498,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
   public Future<DataCollection> getPersonData(Set<UserId> userIds, GroupId groupId, String appId,
       Set<String> fields, SecurityToken token) throws ProtocolException {
     try {
-      Map<String, Map<String, String>> idToData = Maps.newHashMap();
+      Map<String, Map<String, Object>> idToData = Maps.newHashMap();
       Set<String> idSet = getIdSet(userIds, groupId, token);
       for (String id : idSet) {
         JSONObject personData;
@@ -518,7 +518,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
         // JSONObject keys are always strings
         @SuppressWarnings("unchecked")
         Iterator<String> keys = personData.keys();
-        Map<String, String> data = Maps.newHashMap();
+        Map<String, Object> data = Maps.newHashMap();
         while (keys.hasNext()) {
           String key = keys.next();
           data.put(key, personData.getString(key));

@@ -29,12 +29,12 @@ public class DataCollectionTest extends Assert {
 
   @Test
   public void testBasicMethods() throws Exception {
-    Map<String, Map<String, String>> entry = Maps.newHashMap();
+    Map<String, Map<String, Object>> entry = Maps.newHashMap();
     DataCollection collection = new DataCollection(entry);
     assertEquals(entry, collection.getEntry());
 
-    Map<String, Map<String, String>> newEntry = Maps.newHashMap();
-    Map<String, String> value = Maps.newHashMap();
+    Map<String, Map<String, Object>> newEntry = Maps.newHashMap();
+    Map<String, Object> value = Maps.newHashMap();
     value.put("knock knock", "who's there?");
     value.put("banana", "banana who?");
     value.put("banana!", "banana who?");
