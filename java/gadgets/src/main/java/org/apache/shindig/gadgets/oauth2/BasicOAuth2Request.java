@@ -243,9 +243,9 @@ public class BasicOAuth2Request implements OAuth2Request {
       BasicOAuth2Request.LOG.entering(BasicOAuth2Request.LOG_CLASS, "attemptFetch",
               new Object[] { accessor });
       BasicOAuth2Request.LOG.log("BasicOAuth2Request.haveAccessToken(accessor) = {0}",
-              BasicOAuth2Request.haveAccessToken(accessor) == null);
+              BasicOAuth2Request.haveAccessToken(accessor) != null);
       BasicOAuth2Request.LOG.log("BasicOAuth2Request.haveRefreshToken(accessor) = {0}",
-              BasicOAuth2Request.haveRefreshToken(accessor) == null);
+              BasicOAuth2Request.haveRefreshToken(accessor) != null);
     }
 
     if (this.attemptCounter > BasicOAuth2Request.MAX_ATTEMPTS) {
