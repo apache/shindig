@@ -289,7 +289,7 @@ public class JsonDbOpensocialServiceTest extends Assert {
     assertTrue(responseItem.getEntry().get(CANONICAL_USER_ID).containsKey("newvalue"));
     assertEquals("20", responseItem.getEntry().get(CANONICAL_USER_ID).get("newvalue"));
     assertTrue(responseItem.getEntry().get(CANONICAL_USER_ID).containsKey("isValid"));
-    assertEquals(true, Boolean.valueOf(responseItem.getEntry().get(CANONICAL_USER_ID).get("isValid")));
+    assertEquals(true, Boolean.valueOf(responseItem.getEntry().get(CANONICAL_USER_ID).get("isValid").toString()));
   }
 
   @Test

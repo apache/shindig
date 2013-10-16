@@ -24,17 +24,17 @@ import java.util.Map;
  * Wrapper class used for data responses.
  */
 public class DataCollection {
-  private Map<String, Map<String, String>> entry;
+  private Map<String, Map<String, Object>> entry;
 
-  public DataCollection(Map<String, Map<String, String>> entry) {
+  public DataCollection(Map<String, Map<String, Object>> entry) {
     this.entry = entry;
   }
 
-  public Map<String, Map<String, String>> getEntry() {
+  public Map<String, Map<String, Object>> getEntry() {
     return entry;
   }
 
-  public void setEntry(Map<String, Map<String, String>> entry) {
+  public void setEntry(Map<String, Map<String, Object>> entry) {
     this.entry = entry;
   }
 
