@@ -19,6 +19,7 @@
 package org.apache.shindig.common.xml;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertNull;
 
 import org.apache.shindig.common.xml.DomUtil;
@@ -27,6 +28,7 @@ import org.apache.shindig.common.xml.XmlUtil;
 
 import com.google.common.collect.ImmutableSet;
 
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.w3c.dom.Document;
@@ -44,15 +46,9 @@ public class DomUtilTest {
       "  <other>not real</other>" +
       "</root>";
 
-  private static Element root;
-
-  @BeforeClass
-  public static void createRoot() throws XmlException {
-    root = XmlUtil.parse(XML);
-  }
-
   @Test
-  public void getFirstNamedChildNode() {
+  public void getFirstNamedChildNode() throws Exception {
+    Element root = XmlUtil.parse(XML);
     assertEquals("zero", DomUtil.getFirstNamedChildNode(root, "element").getTextContent());
     assertEquals("whatever", DomUtil.getFirstNamedChildNode(root, "other").getTextContent());
     assertNull("Did not return null for missing element.",
@@ -60,7 +56,9 @@ public class DomUtilTest {
   }
 
   @Test
-  public void getLastNamedChildNode() {
+  public void getLastNamedChildNode() throws Exception {
+    Element root = XmlUtil.parse(XML);
+    assertTrue(DomUtil.getLastNamedChildNode(root, "element") != null);
     assertEquals("two", DomUtil.getLastNamedChildNode(root, "element").getTextContent());
     assertEquals("not real", DomUtil.getLastNamedChildNode(root, "other").getTextContent());
     assertNull("Did not return null for missing element.",
@@ -68,7 +66,8 @@ public class DomUtilTest {
   }
 
   @Test
-  public void getElementsByTagNameCaseInsensitive() {
+  public void getElementsByTagNameCaseInsensitive() throws Exception {
+    Element root = XmlUtil.parse(XML);
     Document doc = root.getOwnerDocument();
     List<Element> elements
         = DomUtil.getElementsByTagNameCaseInsensitive(doc, ImmutableSet.of("element"));

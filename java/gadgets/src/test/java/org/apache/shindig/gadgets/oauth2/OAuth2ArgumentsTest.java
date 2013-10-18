@@ -34,31 +34,30 @@ import org.junit.Test;
 import com.google.common.collect.Maps;
 
 public class OAuth2ArgumentsTest extends MockUtils {
-  private static HttpServletRequest requestMock;
-  private static Map<String, String> attrs;
+  private HttpServletRequest requestMock;
+  private Map<String, String> attrs;
 
   @Before
   public void setUp() throws Exception {
-    OAuth2ArgumentsTest.attrs = Maps.newHashMap();
-    OAuth2ArgumentsTest.attrs.put("OAUTH_SCOPE", MockUtils.SCOPE);
-    OAuth2ArgumentsTest.attrs.put("OAUTH_SERVICE_NAME", MockUtils.SERVICE_NAME);
-    OAuth2ArgumentsTest.attrs.put("bypassSpecCache", "1");
-    OAuth2ArgumentsTest.attrs.put("extraParam", "extraValue");
-    OAuth2ArgumentsTest.requestMock = EasyMock.createNiceMock(HttpServletRequest.class);
-    EasyMock.expect(OAuth2ArgumentsTest.requestMock.getParameterNames()).andReturn(
-        Collections.enumeration(OAuth2ArgumentsTest.attrs.keySet()));
-    EasyMock.expect(OAuth2ArgumentsTest.requestMock.getParameterMap()).andReturn(
-        OAuth2ArgumentsTest.attrs);
-    for (final Entry<String, String> entry : OAuth2ArgumentsTest.attrs.entrySet()) {
-      EasyMock.expect(OAuth2ArgumentsTest.requestMock.getParameter(entry.getKey())).andReturn(
+    attrs = Maps.newHashMap();
+    attrs.put("OAUTH_SCOPE", MockUtils.SCOPE);
+    attrs.put("OAUTH_SERVICE_NAME", MockUtils.SERVICE_NAME);
+    attrs.put("bypassSpecCache", "1");
+    attrs.put("extraParam", "extraValue");
+    requestMock = EasyMock.createNiceMock(HttpServletRequest.class);
+    EasyMock.expect(requestMock.getParameterNames()).andReturn(
+        Collections.enumeration(attrs.keySet()));
+    EasyMock.expect(requestMock.getParameterMap()).andReturn(attrs);
+    for (final Entry<String, String> entry : attrs.entrySet()) {
+      EasyMock.expect(requestMock.getParameter(entry.getKey())).andReturn(
           entry.getValue());
     }
-    EasyMock.replay(OAuth2ArgumentsTest.requestMock);
+    EasyMock.replay(requestMock);
   }
 
   @Test
   public void testOAuth2Arguments_1() throws Exception {
-    final OAuth2Arguments result = new OAuth2Arguments(OAuth2ArgumentsTest.requestMock);
+    final OAuth2Arguments result = new OAuth2Arguments(requestMock);
 
     Assert.assertNotNull(result);
     Assert.assertTrue(result.getBypassSpecCache());
@@ -95,7 +94,7 @@ public class OAuth2ArgumentsTest extends MockUtils {
   public void testOAuth2Arguments_3() throws Exception {
     final RequestAuthenticationInfo info = EasyMock.createNiceMock(RequestAuthenticationInfo.class);
     EasyMock.expect(info.getAuthType()).andReturn(AuthType.OAUTH2);
-    EasyMock.expect(info.getAttributes()).andReturn(OAuth2ArgumentsTest.attrs);
+    EasyMock.expect(info.getAttributes()).andReturn(attrs);
     EasyMock.replay(info);
 
     final OAuth2Arguments result = new OAuth2Arguments(info);
@@ -108,7 +107,7 @@ public class OAuth2ArgumentsTest extends MockUtils {
 
   @Test
   public void testOAuth2Arguments_4() throws Exception {
-    final OAuth2Arguments result = new OAuth2Arguments(AuthType.OAUTH2, OAuth2ArgumentsTest.attrs);
+    final OAuth2Arguments result = new OAuth2Arguments(AuthType.OAUTH2, attrs);
 
     Assert.assertNotNull(result);
     Assert.assertTrue(result.getBypassSpecCache());
@@ -118,9 +117,9 @@ public class OAuth2ArgumentsTest extends MockUtils {
 
   @Test
   public void testEquals_1() throws Exception {
-    final OAuth2Arguments fixture = new OAuth2Arguments(AuthType.OAUTH2, OAuth2ArgumentsTest.attrs);
+    final OAuth2Arguments fixture = new OAuth2Arguments(AuthType.OAUTH2, attrs);
 
-    final Object obj = new OAuth2Arguments(OAuth2ArgumentsTest.requestMock);
+    final Object obj = new OAuth2Arguments(requestMock);
 
     final boolean result = fixture.equals(obj);
 
@@ -131,14 +130,14 @@ public class OAuth2ArgumentsTest extends MockUtils {
   public void testEquals_2() throws Exception {
     final Object obj = new Object();
 
-    final boolean result = OAuth2ArgumentsTest.requestMock.equals(obj);
+    final boolean result = requestMock.equals(obj);
 
     Assert.assertFalse(result);
   }
 
   @Test
   public void testEquals_3() throws Exception {
-    final boolean result = OAuth2ArgumentsTest.requestMock.equals(null);
+    final boolean result = requestMock.equals(null);
 
     Assert.assertFalse(result);
   }
@@ -160,14 +159,14 @@ public class OAuth2ArgumentsTest extends MockUtils {
 
     final OAuth2Arguments obj = new OAuth2Arguments(request);
 
-    final boolean result = OAuth2ArgumentsTest.requestMock.equals(obj);
+    final boolean result = requestMock.equals(obj);
 
     Assert.assertFalse(result);
   }
 
   @Test
   public void testGetBypassSpecCache_1() throws Exception {
-    final OAuth2Arguments fixture = new OAuth2Arguments(OAuth2ArgumentsTest.requestMock);
+    final OAuth2Arguments fixture = new OAuth2Arguments(requestMock);
 
     final boolean result = fixture.getBypassSpecCache();
 
@@ -176,7 +175,7 @@ public class OAuth2ArgumentsTest extends MockUtils {
 
   @Test
   public void testGetScope_1() throws Exception {
-    final OAuth2Arguments fixture = new OAuth2Arguments(OAuth2ArgumentsTest.requestMock);
+    final OAuth2Arguments fixture = new OAuth2Arguments(requestMock);
 
     final String result = fixture.getScope();
 
@@ -186,7 +185,7 @@ public class OAuth2ArgumentsTest extends MockUtils {
 
   @Test
   public void testGetServiceName_1() throws Exception {
-    final OAuth2Arguments fixture = new OAuth2Arguments(OAuth2ArgumentsTest.requestMock);
+    final OAuth2Arguments fixture = new OAuth2Arguments(requestMock);
 
     final String result = fixture.getServiceName();
 
@@ -196,7 +195,7 @@ public class OAuth2ArgumentsTest extends MockUtils {
 
   @Test
   public void testHashCode_1() throws Exception {
-    final OAuth2Arguments fixture = new OAuth2Arguments(OAuth2ArgumentsTest.requestMock);
+    final OAuth2Arguments fixture = new OAuth2Arguments(requestMock);
 
     final int result = fixture.hashCode();
 
