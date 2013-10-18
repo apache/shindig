@@ -129,7 +129,7 @@ public class RenderingGadgetRewriterTest extends EasyMockTestCase{
       }
     };
     jsServingPipeline = createMock(JsServingPipeline.class);
-    Map<String, ConfigContributor> configContributors = ImmutableMap.of(
+    Map<String, ConfigContributor> configContributors = ImmutableMap.<String, ConfigContributor>of(
         "core.util", new CoreUtilConfigContributor(featureRegistry,
                 gadgetAdminStore),
         "shindig.xhrwrapper", new XhrwrapperConfigContributor()
