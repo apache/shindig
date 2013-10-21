@@ -797,7 +797,7 @@
           <plugin>
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>clirr-maven-plugin</artifactId>
-            <version>2.2.3</version>
+            <version>2.5</version>
             <configuration>
               <comparisonVersion>${shindig.api.previous}</comparisonVersion>
             </configuration>
@@ -1067,8 +1067,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins </groupId>
           <artifactId>maven-eclipse-plugin</artifactId>
-          <!-- stay at 2.6, 2.8 has problems with our poms -->
-          <version>2.6</version>
+          <version>2.9</version>
           <configuration>
             <addVersionToProjectName>true</addVersionToProjectName>
             <workspaceCodeStylesURL>http://svn.apache.org/repos/asf/shindig/trunk/etc/eclipse/shindig-eclipse-codestyle_2.xml</workspaceCodeStylesURL>
@@ -1196,9 +1195,9 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
-          <version>2.7.2</version>
+          <version>2.13</version>
           <configuration>
-            <parallel>both</parallel>
+            <parallel>classesAndMethods</parallel>
           </configuration>
         </plugin>
         <plugin>
@@ -1227,7 +1226,7 @@
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>findbugs-maven-plugin</artifactId>
-          <version>2.3.1</version>
+          <version>2.5.2</version>
         </plugin>
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
