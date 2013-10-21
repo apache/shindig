@@ -191,17 +191,19 @@ public class OAuth2AuthCodeFlowTest extends AbstractLargeRestfulTests {
     HttpServletResponse resp = mock(HttpServletResponse.class);
     Capture<String> redirectURI = new Capture<String>();
     resp.setHeader(EasyMock.eq("Location"), EasyMock.capture(redirectURI));
-    resp.setStatus(EasyMock.eq(HttpServletResponse.SC_FOUND));
+    resp.setStatus(HttpServletResponse.SC_FOUND);
     MockServletOutputStream outputStream = new MockServletOutputStream();
     EasyMock.expect(resp.getOutputStream()).andReturn(outputStream).anyTimes();
     PrintWriter writer = new PrintWriter(outputStream);
     EasyMock.expect(resp.getWriter()).andReturn(writer).anyTimes();
     replay();
+
     servlet.service(req, resp);
     writer.flush();
     String response = new String(outputStream.getBuffer(), "UTF-8");
     assertTrue(response == null || response.equals(""));
     verify();
+
     assertTrue(redirectURI.getValue().startsWith(REDIRECT_URI + "?code="));
     String code = redirectURI.getValue().substring(
         redirectURI.getValue().indexOf("=") + 1);
@@ -229,19 +231,20 @@ public class OAuth2AuthCodeFlowTest extends AbstractLargeRestfulTests {
     HttpServletResponse resp = mock(HttpServletResponse.class);
     Capture<String> redirectURI = new Capture<String>();
     resp.setHeader(EasyMock.eq("Location"), EasyMock.capture(redirectURI));
-    Capture<Integer> respCode = new Capture<Integer>();
-    resp.setStatus(EasyMock.capture(respCode));
+    resp.setStatus(302);
+
     MockServletOutputStream outputStream = new MockServletOutputStream();
     EasyMock.expect(resp.getOutputStream()).andReturn(outputStream).anyTimes();
     PrintWriter writer = new PrintWriter(outputStream);
     EasyMock.expect(resp.getWriter()).andReturn(writer).anyTimes();
     replay();
+
     servlet.service(req, resp);
     writer.flush();
     String response = new String(outputStream.getBuffer(), "UTF-8");
     assertTrue(response == null || response.equals(""));
     verify();
-    assertEquals((Integer) 302, respCode.getValue());
+
     assertTrue(redirectURI.getValue().startsWith(REDIRECT_URI + "?code="));
     String code = redirectURI.getValue().substring(
         redirectURI.getValue().indexOf("=") + 1);
