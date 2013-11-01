@@ -64,8 +64,8 @@ public class AuthCodeGrantValidator implements OAuth2GrantValidator {
       response.setBodyReturned(true);
       throw new OAuth2Exception(response);
     }
-    if (servletRequest.getRedirectURI() != null
-        && !servletRequest.getRedirectURI().equals(authCode.getRedirectURI())) {
+    if (authCode.getRedirectURI() != null
+        && !authCode.getRedirectURI().equals(servletRequest.getRedirectURI())) {
       OAuth2NormalizedResponse response = new OAuth2NormalizedResponse();
       response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
       response.setError(ErrorType.INVALID_GRANT.toString());
