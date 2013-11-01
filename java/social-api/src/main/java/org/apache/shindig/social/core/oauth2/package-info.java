@@ -18,7 +18,7 @@
  */
 /**
  * Implementation of OAuth 2.0.
- * 
+ *
  * This implementation currently complies to
  * <a href="http://tools.ietf.org/html/draft-ietf-oauth-v2-21">OAuth 2.0 DRAFT 21</a>
  */
