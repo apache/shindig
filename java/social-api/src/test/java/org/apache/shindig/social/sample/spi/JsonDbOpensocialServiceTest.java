@@ -31,10 +31,10 @@ import org.apache.shindig.protocol.RestfulCollection;
 import org.apache.shindig.protocol.model.FilterOperation;
 import org.apache.shindig.protocol.model.SortOrder;
 import org.apache.shindig.social.SocialApiTestsGuiceModule;
-import org.apache.shindig.social.core.model.NameImpl;
-import org.apache.shindig.social.core.model.PersonImpl;
+import org.apache.shindig.social.core.model.MessageImpl;
 import org.apache.shindig.social.opensocial.model.Activity;
 import org.apache.shindig.social.opensocial.model.ActivityEntry;
+import org.apache.shindig.social.opensocial.model.Message;
 import org.apache.shindig.social.opensocial.model.Person;
 import org.apache.shindig.social.opensocial.spi.CollectionOptions;
 import org.apache.shindig.social.opensocial.spi.GroupId;
@@ -387,4 +387,22 @@ public class JsonDbOpensocialServiceTest extends Assert {
     }
   }
 
+  @Test
+  public void testGetMessagesNoMessageIds() throws Exception {
+    RestfulCollection<Message> messages = db.getMessages(
+        CANON_USER, "publicMessage",
+        Collections.<String>emptySet(), Collections.<String>emptyList(),
+        new CollectionOptions(), token).get();
+    assertEquals(4, messages.getList().size());
+  }
+
+  @Test
+  public void testGetMessagesSingleId() throws Exception {
+    RestfulCollection<Message> messages = db.getMessages(
+        CANON_USER, "publicMessage",
+        Collections.<String>emptySet(), Collections.<String>singletonList("1"),
+        new CollectionOptions(), token).get();
+    assertEquals(1, messages.getList().size());
+    assertEquals("1", messages.getList().get(0).getId());
+  }
 }

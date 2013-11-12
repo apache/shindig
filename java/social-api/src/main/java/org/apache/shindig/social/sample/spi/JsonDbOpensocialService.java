@@ -688,7 +688,10 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
       // TODO: filter and sort outbox.
       for (int i = 0; i < messages.length(); i++) {
         JSONObject msg = messages.getJSONObject(i);
-        result.add(filterFields(msg, fields, Message.class));
+        Message message = filterFields(msg, fields, Message.class);
+        if (msgIds.isEmpty() || msgIds.contains(message.getId())) {
+          result.add(message);
+        }
       }
 
       return Futures.immediateFuture(new RestfulCollection<Message>(result));
