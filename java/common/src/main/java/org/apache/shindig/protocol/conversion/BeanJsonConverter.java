@@ -265,8 +265,11 @@ public class BeanJsonConverter implements BeanConverter {
      * will support arbitrary mappings to JSON & XML.
      */
     if (ExtendableBean.class.isAssignableFrom(type)) {
-      for (String name : JSONObject.getNames(in)) {
-        ((ExtendableBean) out).put(name, convertToObject(in.opt(name), null));
+      String[] names = JSONObject.getNames(in);
+      if (names != null) {
+        for (String name : names) {
+          ((ExtendableBean) out).put(name, convertToObject(in.opt(name), null));
+        }
       }
     }
 

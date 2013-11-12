@@ -18,6 +18,7 @@
  */
 package org.apache.shindig.protocol.conversion;
 
+import org.apache.shindig.protocol.model.ExtendableBean;
 import org.apache.shindig.protocol.model.Model;
 
 import com.google.common.collect.ImmutableMap;
@@ -32,6 +33,7 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -76,6 +78,10 @@ public class BeanJsonConverterTest extends Assert {
     }
   }
 
+  public static class ExtendableTestObject extends HashMap<String, Object> implements ExtendableBean {
+    private static final long serialVersionUID = 1L;
+  }
+  
   @Test
   public void testJsonToObject() throws Exception {
     String json = '{' +
@@ -186,6 +192,14 @@ public class BeanJsonConverterTest extends Assert {
     String emptyMap = "{}";
     Map<String, String> data = beanJsonConverter.convertToObject(emptyMap,
          new TypeLiteral<Map<String,String>>(){}.getType());
+    assertTrue(data.isEmpty());
+  }
+ 
+  @Test
+  public void testEmptyExtendableBean() throws Exception {
+    String emptyMap = "{}";
+    ExtendableTestObject data = beanJsonConverter.convertToObject(emptyMap,
+         ExtendableTestObject.class);
     assertTrue(data.isEmpty());
   }
 }
