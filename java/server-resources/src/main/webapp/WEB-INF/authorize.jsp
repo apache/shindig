@@ -40,14 +40,15 @@ under the License.
   // TODO - this is a bit hard since we cannot get at the jsondb here...
 
   // If user clicked on the Authorize button then we're good.
-  if (request.getParameter("Authorize") != null) {
+  String submitValue = request.getParameter("Authorize");
+  if ("Authorize".equals(submitValue)) {
     // If the user clicked the Authorize button we authorize the token and redirect back.
     dataStore.authorizeToken(entry, SecurityUtils.getSubject().getPrincipal().toString());
 
     // Bounce back to the servlet to handle redirecting to the callback URL
     request.getRequestDispatcher("/oauth/authorize?oauth_token=" + token + "&oauth_callback=" + callback)
             .forward(request,response);
-  } else if (request.getParameter("Deny") != null) {
+  } else if ("Deny".equals(submitValue)) {
     dataStore.removeToken(entry);
   }
   // Gather some data
