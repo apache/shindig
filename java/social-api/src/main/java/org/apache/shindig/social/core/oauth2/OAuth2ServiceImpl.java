@@ -18,17 +18,11 @@
  */
 package org.apache.shindig.social.core.oauth2;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Properties;
 import java.util.UUID;
 
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.shindig.common.util.ResourceLoader;
 import org.apache.shindig.social.core.oauth2.OAuth2Client.ClientType;
 import org.apache.shindig.social.core.oauth2.OAuth2Types.CodeType;
 import org.apache.shindig.social.core.oauth2.OAuth2Types.ErrorType;
@@ -38,10 +32,9 @@ import org.apache.shindig.social.core.oauth2.validators.DefaultResourceRequestVa
 import org.apache.shindig.social.core.oauth2.validators.OAuth2ProtectedResourceValidator;
 import org.apache.shindig.social.core.oauth2.validators.OAuth2RequestValidator;
 
-import com.google.inject.CreationException;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.inject.spi.Message;
+import com.google.inject.name.Named;
 
 /**
  * A simple in-memory implementation of the OAuth 2 services.
@@ -61,13 +54,13 @@ public class OAuth2ServiceImpl implements OAuth2Service {
 
 
   @Inject
-  public OAuth2ServiceImpl(OAuth2DataService store) {
+  public OAuth2ServiceImpl(OAuth2DataService store,
+      @Named("shindig.oauth2.authCodeExpiration") long authCodeExpires,
+      @Named("shindig.oauth2.accessTokenExpiration") long accessTokenExpires) {
     this.store = store;
 
-    // TODO (Eric): properties should be injected, but getting "no implementation bound"
-    Properties props = readPropertyFile("shindig.properties");
-    this.authCodeExpires = Long.valueOf(props.getProperty("shindig.oauth2.authCodeExpiration"));
-    this.accessTokenExpires = Long.valueOf(props.getProperty("shindig.oauth2.accessTokenExpiration"));
+    this.authCodeExpires = authCodeExpires;
+    this.accessTokenExpires = accessTokenExpires;
 
     // TODO (Matt): validators should be injected
     authCodeValidator = new AuthorizationCodeRequestValidator(store);
@@ -77,6 +70,14 @@ public class OAuth2ServiceImpl implements OAuth2Service {
 
   public OAuth2DataService getDataService() {
     return store;
+  }
+
+  protected long getAuthCodeExpires() {
+    return authCodeExpires;
+  }
+
+  protected long getAccessTokenExpires() {
+    return accessTokenExpires;
   }
 
   public void authenticateClient(OAuth2NormalizedRequest req)
@@ -186,20 +187,5 @@ public class OAuth2ServiceImpl implements OAuth2Service {
   // TODO (Eric): Refresh tokens are not yet supported.
   public OAuth2Code generateRefreshToken(OAuth2NormalizedRequest req) {
     throw new RuntimeException("not yet implemented");
-  }
-
-  private Properties readPropertyFile(String propertyFile) {
-    Properties properties = new Properties();
-    InputStream is = null;
-    try {
-      is = ResourceLoader.openResource(propertyFile);
-      properties.load(is);
-    } catch (IOException e) {
-      throw new CreationException(Arrays.asList(
-          new Message("Unable to load properties: " + propertyFile)));
-    } finally {
-      IOUtils.closeQuietly( is );
-    }
-    return properties;
   }
 }

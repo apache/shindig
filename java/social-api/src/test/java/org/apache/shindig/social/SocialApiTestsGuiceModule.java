@@ -92,5 +92,9 @@ public class SocialApiTestsGuiceModule extends AbstractModule {
         .toInstance(10);
     bind(OAuth2Service.class).to(OAuth2ServiceImpl.class);
     bind(OAuth2DataService.class).to(OAuth2DataServiceImpl.class);
+
+    bindConstant().annotatedWith(Names.named("shindig.oauth2.authCodeExpiration")).to("300000");
+    bindConstant().annotatedWith(Names.named("shindig.oauth2.accessTokenExpiration")).to("18000000");
+    bindConstant().annotatedWith(Names.named("shindig.oauth2.refreshTokenExpiration")).to("432000000");
   }
 }
