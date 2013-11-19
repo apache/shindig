@@ -31,6 +31,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -44,6 +45,18 @@ public class BeanJsonConverterTest extends Assert {
   @Before
   public void setUp() throws Exception {
     beanJsonConverter = new BeanJsonConverter(Guice.createInjector());
+  }
+
+  public interface GenericInterface<T> {
+    void setT(T value);
+  }
+
+  public static class GenericObject implements GenericInterface<String> {
+    String value;
+
+    public void setT(String value) {
+      this.value = value;
+    }
   }
 
   public static class TestObject {
@@ -201,5 +214,13 @@ public class BeanJsonConverterTest extends Assert {
     ExtendableTestObject data = beanJsonConverter.convertToObject(emptyMap,
          ExtendableTestObject.class);
     assertTrue(data.isEmpty());
+  }
+
+  @Test
+  public void testGetPropertyNameOfBridgeMethod() throws NoSuchMethodException, SecurityException {
+    Method bridgeSetter = GenericObject.class.getMethod("setT", Object.class);
+    assertNull(BeanJsonConverter.getPropertyName(bridgeSetter));
+    Method realSetter = GenericObject.class.getMethod("setT", String.class);;
+    assertEquals("t", BeanJsonConverter.getPropertyName(realSetter));
   }
 }

@@ -48,6 +48,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
@@ -104,11 +105,12 @@ public class BeanJsonConverter implements BeanConverter {
     JsonSerializer.append(buf, pojo);
   }
 
-  private static String getPropertyName(Method setter) {
+  @VisibleForTesting
+  protected static String getPropertyName(Method setter) {
     JsonProperty property = setter.getAnnotation(JsonProperty.class);
     if (property == null) {
       String name = setter.getName();
-      if (name.startsWith("set") && !Modifier.isStatic(setter.getModifiers())) {
+      if (name.startsWith("set") && !Modifier.isStatic(setter.getModifiers()) && !setter.isBridge()) {
         return name.substring(3, 4).toLowerCase() + name.substring(4);
       }
       return null;
