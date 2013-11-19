@@ -64,10 +64,13 @@ public class MessageHandler {
           "A message collection is required");
     }
 
-    HandlerPreconditions.requireNotEmpty(messageIds, "No message IDs specified");
-
     UserId user = request.getUsers().iterator().next();
 
+    if (messageIds == null || messageIds.isEmpty()) {
+      // MessageIds may be null if the complete collection should be deleted
+      return service.deleteMessageCollection(user, msgCollId, request.getToken());
+    }
+    // Delete specific messages
     return service.deleteMessages(user, msgCollId, messageIds, request.getToken());
   }
 
