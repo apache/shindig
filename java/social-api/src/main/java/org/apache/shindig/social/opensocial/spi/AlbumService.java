@@ -38,91 +38,91 @@ import javax.servlet.http.HttpServletResponse;
 @ImplementedBy(AlbumService.NotImplementedAlbumService.class)
 public interface AlbumService {
 
-  /*
-    * Retrieves a single album for the given user with the given album ID.
-    *
-    * @param userId  Identifies the person to retrieve the album from
-    * @param appId    Identifies the application to retrieve the album from
-    * @param fields  Indicates the fields to return.  Empty set implies all
-    * @param albumId  Identifies the album to retrieve
-    * @param token    A valid SecurityToken
-    *
-    * @return a response item with the requested album
-    */
+  /**
+   * Retrieves a single album for the given user with the given album ID.
+   *
+   * @param userId  Identifies the person to retrieve the album from
+   * @param appId    Identifies the application to retrieve the album from
+   * @param fields  Indicates the fields to return.  Empty set implies all
+   * @param albumId  Identifies the album to retrieve
+   * @param token    A valid SecurityToken
+   *
+   * @return a response item with the requested album
+   */
   Future<Album> getAlbum(UserId userId, String appId, Set<String> fields,
                          String albumId, SecurityToken token) throws ProtocolException;
 
-  /*
-    * Retrieves albums for the given user with the given album IDs.
-    *
-    * @param userId  Identifies the person to retrieve albums for
-    * @param appId    Identifies the application to retrieve albums from
-    * @param fields  The fields to return; empty set implies all
-    * @param options  The sorting/filtering/pagination options
-    * @param albumIds  The set of album ids to fetch
-    * @param token    A valid SecurityToken
-    *
-    * @return a response item with requested albums
-    */
+  /**
+   * Retrieves albums for the given user with the given album IDs.
+   *
+   * @param userId  Identifies the person to retrieve albums for
+   * @param appId    Identifies the application to retrieve albums from
+   * @param fields  The fields to return; empty set implies all
+   * @param options  The sorting/filtering/pagination options
+   * @param albumIds  The set of album ids to fetch
+   * @param token    A valid SecurityToken
+   *
+   * @return a response item with requested albums
+   */
   Future<RestfulCollection<Album>> getAlbums(UserId userId, String appId,
                                              Set<String> fields, CollectionOptions options,
                                              Set<String> albumIds, SecurityToken token) throws ProtocolException;
 
-  /*
-    * Retrieves albums for the given user and group.
-    *
-    * @param userIds  Identifies the users to retrieve albums from
-    * @param groupId  Identifies the group to retrieve albums from
-    * @param appId    Identifies the application to retrieve albums from
-    * @param fields   The fields to return.  Empty set implies all
-    * @param options  The sorting/filtering/pagination options
-    * @param token    A valid SecurityToken
-    *
-    * @return a response item with the requested albums
-    */
+  /**
+   * Retrieves albums for the given user and group.
+   *
+   * @param userIds  Identifies the users to retrieve albums from
+   * @param groupId  Identifies the group to retrieve albums from
+   * @param appId    Identifies the application to retrieve albums from
+   * @param fields   The fields to return.  Empty set implies all
+   * @param options  The sorting/filtering/pagination options
+   * @param token    A valid SecurityToken
+   *
+   * @return a response item with the requested albums
+   */
   Future<RestfulCollection<Album>> getAlbums(Set<UserId> userIds,
                                              GroupId groupId, String appId, Set<String> fields,
                                              CollectionOptions options, SecurityToken token)
       throws ProtocolException;
 
-  /*
-    * Deletes a single album for the given user with the given album ID.
-    *
-    * @param userId   Identifies the user to delete the album from
-    * @param appId    Identifies the application to delete the album from
-    * @param albumId  Identifies the album to delete
-    * @param token    A valid SecurityToken
-    *
-    * @return a response item containing any errors
-    */
+  /**
+   * Deletes a single album for the given user with the given album ID.
+   *
+   * @param userId   Identifies the user to delete the album from
+   * @param appId    Identifies the application to delete the album from
+   * @param albumId  Identifies the album to delete
+   * @param token    A valid SecurityToken
+   *
+   * @return a response item containing any errors
+   */
   Future<Void> deleteAlbum(UserId userId, String appId, String albumId,
                            SecurityToken token) throws ProtocolException;
 
-  /*
-    * Creates an album for the given user.
-    *
-    * @param userId   Identifies the user to create the album for
-    * @param appId    Identifies the application to create the album in
-    * @param album    The album to create
-    * @param token    A valid SecurityToken
-    *
-    * @return a response containing any errors
-    */
+  /**
+   * Creates an album for the given user.
+   *
+   * @param userId   Identifies the user to create the album for
+   * @param appId    Identifies the application to create the album in
+   * @param album    The album to create
+   * @param token    A valid SecurityToken
+   *
+   * @return a response containing any errors
+   */
   Future<Void> createAlbum(UserId userId, String appId, Album album,
                            SecurityToken token) throws ProtocolException;
 
-  /*
-    * Updates an album for the given user.  The album ID specified in the REST
-    * end-point is used, even if the album also defines an ID.
-    *
-    * @param userId   Identifies the user to update the album for
-    * @param appId    Identifies the application to update the album in
-    * @param album    Defines the updated album
-    * @param albumId  Identifies the ID of the album to update
-    * @param token    A valid SecurityToken
-    *
-    * @return a response containing any errors
-    */
+  /**
+   * Updates an album for the given user.  The album ID specified in the REST
+   * end-point is used, even if the album also defines an ID.
+   *
+   * @param userId   Identifies the user to update the album for
+   * @param appId    Identifies the application to update the album in
+   * @param album    Defines the updated album
+   * @param albumId  Identifies the ID of the album to update
+   * @param token    A valid SecurityToken
+   *
+   * @return a response containing any errors
+   */
   Future<Void> updateAlbum(UserId userId, String appId, Album album,
                            String albumId, SecurityToken token) throws ProtocolException;
 
