@@ -57,6 +57,14 @@ osapi.container.GadgetHolder = function(site, el, onLoad) {
    */
   this.securityToken_ = undef;
 
+  /**
+   * Whether or not this holder is for an OpenAjax Iframe, i.e.,
+   * if the gadget is using pubsub-2
+   * @type {boolean}
+   * @private
+   */
+  this.isOaaIframe_ = false;
+
   this.onConstructed();
 };
 osapi.container.GadgetHolder.prototype = new osapi.container.SiteHolder;
@@ -81,6 +89,9 @@ osapi.container.GadgetHolder.prototype.getGadgetInfo = function() {
  * @inheritDoc
  */
 osapi.container.GadgetHolder.prototype.dispose = function() {
+  if (this.isOaaIframe_) {
+    this.removeOaaContainer_(this.iframeId_);
+  }
   osapi.container.SiteHolder.prototype.dispose.call(this); // super.dispose();
   this.gadgetInfo_ = null;
 };
@@ -131,17 +142,13 @@ osapi.container.GadgetHolder.prototype.setSecurityToken = function(value) {
  * @param {Object} renderParams Look at osapi.container.RenderParam.
  */
 osapi.container.GadgetHolder.prototype.render = function(gadgetInfo, viewParams, renderParams) {
-  this.iframeId_ = osapi.container.GadgetHolder.IFRAME_ID_PREFIX_ +
-      this.site_.getId();
+  this.iframeId_ = osapi.container.GadgetHolder.IFRAME_ID_PREFIX_ + this.site_.getId();
   this.gadgetInfo_ = gadgetInfo;
   this.viewParams_ = viewParams;
   this.renderParams_ = renderParams;
 
-  if (this.hasFeature_(gadgetInfo, 'pubsub-2')) {
-    this.doOaaIframeHtml_();
-  } else {
-    this.doNormalIframeHtml_();
-  }
+  this.isOaaIframe_ = this.hasFeature_(gadgetInfo, 'pubsub-2');
+  this.isOaaIframe_ ? this.doOaaIframeHtml_() : this.doNormalIframeHtml_();
 };
 
 

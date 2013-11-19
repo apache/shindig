@@ -134,6 +134,7 @@ GadgetHolderTest.prototype.testRenderWithRenderRequests = function() {
       ' ></iframe>',
       element.innerHTML);
 };
+
 GadgetHolderTest.prototype.testRemoveOaContainer_exisiting = function() {
     var hub = this.setupMockPubsub2router(true);
     var holder = new osapi.container.GadgetHolder();
@@ -142,6 +143,7 @@ GadgetHolderTest.prototype.testRemoveOaContainer_exisiting = function() {
     this.assertEquals(answer, hub.getCallArgs().g.id);
     this.assertEquals(answer, hub.getCallArgs().r.container.passedId);
 };
+
 GadgetHolderTest.prototype.testRemoveOaContainer_nonexisting = function() {
     var hub = this.setupMockPubsub2router(false);
     var holder = new osapi.container.GadgetHolder();
@@ -149,6 +151,37 @@ GadgetHolderTest.prototype.testRemoveOaContainer_nonexisting = function() {
     holder.removeOaaContainer_(answer);
     this.assertEquals(answer, hub.getCallArgs().g.id);
     this.assertEquals("undefined", typeof hub.getCallArgs().r.container);
+};
+
+GadgetHolderTest.prototype.testDisposeOaContainer = function() {
+  osapi.container.GadgetHolder.prototype.relayPath_ = '/gadgets/files/container/rpc_relay.html';
+  var gadgetInfo = {
+          'iframeUrls' : {'default' : 'http://shindig/gadgets/ifr?url=gadget.xml&lang=en&country=US#rpctoken=1234'},
+          'url' : 'gadget.xml',
+          'modulePrefs' : {
+            'features' : {
+              'pubsub-2' : {}
+            }
+          }
+      };
+  this.setupMockOAHub();
+  var hub = this.setupMockPubsub2router(true);
+  var element = {
+          id: '123'
+  };
+  var service = {};
+  service.getCountry = function(){return "US";};
+  service.getLanguage = function(){return "en"};
+  var site = new osapi.container.GadgetSite(null, service, {gadgetEl: element});
+  site.id_ = 42;
+  var holder = new osapi.container.GadgetHolder(site, element, '__gadgetOnLoad');
+  // I would like to call holder.render, but I can't get the setup to work, so I "mock it"
+  holder.iframeId_ = site.id_;
+  holder.isOaaIframe_ = true;
+  holder.dispose();
+
+  this.assertEquals(site.id_, hub.getCallArgs().g.id);
+  this.assertEquals(site.id_, hub.getCallArgs().r.container.passedId);
 };
 
 GadgetHolderTest.prototype.setupGadgetsRpcSetupReceiver = function() {
@@ -177,4 +210,12 @@ GadgetHolderTest.prototype.setupMockPubsub2router = function(existing) {
         })()
     };
     return gadgets.pubsub2router.hub;
+};
+
+GadgetHolderTest.prototype.setupMockOAHub = function() {
+  OpenAjax = {};
+  OpenAjax.hub = {};
+  OpenAjax.hub.IframeContainer = function() {
+    // Do nothing
+  };
 };
