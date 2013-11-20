@@ -68,7 +68,7 @@ public class OAuth2AuthenticationHandler implements AuthenticationHandler {
     try {
       if (normalizedReq.getAccessToken() != null) {
         store.validateRequestForResource(normalizedReq, null);
-        return new AnonymousSecurityToken(); // Return your valid security token
+        return createSecurityTokenForValidatedRequest(normalizedReq);
       }
     } catch (OAuth2Exception oae) {
       // TODO (Eric): process OAuth2Exception properly
@@ -81,4 +81,17 @@ public class OAuth2AuthenticationHandler implements AuthenticationHandler {
     return String.format("Bearer realm=\"%s\"", realm);
   }
 
+  /**
+   * Return a security token for the request.
+   *
+   * The request was validated against the {@link OAuth2Service}.
+   *
+   * @param request
+   * @return the security token for the request
+   * @throws InvalidAuthenticationException if the token can not be created
+   */
+  protected SecurityToken createSecurityTokenForValidatedRequest(OAuth2NormalizedRequest request)
+      throws InvalidAuthenticationException {
+    return new AnonymousSecurityToken(); // Return your valid security token
+  }
 }
