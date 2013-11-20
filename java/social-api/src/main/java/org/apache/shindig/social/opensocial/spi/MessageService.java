@@ -151,39 +151,39 @@ public interface MessageService {
   public static class NotImplementedMessageService implements MessageService {
     public Future<RestfulCollection<MessageCollection>> getMessageCollections(UserId userId,
        Set<String> fields, CollectionOptions options, SecurityToken token) throws ProtocolException {
-      throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST, "Not Implemented");
+      throw new ProtocolException(HttpServletResponse.SC_NOT_IMPLEMENTED, "Not Implemented");
     }
 
     public Future<MessageCollection> createMessageCollection(UserId userId, MessageCollection msgCollection, SecurityToken token)  throws ProtocolException {
-      throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST, "Not Implemented");
+      throw new ProtocolException(HttpServletResponse.SC_NOT_IMPLEMENTED, "Not Implemented");
     }
 
     public Future<Void> modifyMessageCollection(UserId userId, MessageCollection msgCollection, SecurityToken token) throws ProtocolException {
-      throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST, "Not Implemented");
+      throw new ProtocolException(HttpServletResponse.SC_NOT_IMPLEMENTED, "Not Implemented");
     }
 
     public Future<Void> deleteMessageCollection(UserId userId, String msgCollId, SecurityToken token) throws ProtocolException {
-      throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST, "Not Implemented");
+      throw new ProtocolException(HttpServletResponse.SC_NOT_IMPLEMENTED, "Not Implemented");
     }
 
     public Future<RestfulCollection<Message>> getMessages(UserId userId, String msgCollId,
         Set<String> fields, List<String> msgIds, CollectionOptions options, SecurityToken token) throws ProtocolException {
-      throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST, "Not Implemented");
+      throw new ProtocolException(HttpServletResponse.SC_NOT_IMPLEMENTED, "Not Implemented");
     }
 
     public Future<Void> createMessage(UserId userId, String appId, String msgCollId, Message message,
                                SecurityToken token) throws ProtocolException {
-      throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST, "Not Implemented");
+      throw new ProtocolException(HttpServletResponse.SC_NOT_IMPLEMENTED, "Not Implemented");
     }
 
     public Future<Void> deleteMessages(UserId userId, String msgCollId, List<String> ids,
         SecurityToken token) throws ProtocolException {
-      throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST, "Not Implemented");
+      throw new ProtocolException(HttpServletResponse.SC_NOT_IMPLEMENTED, "Not Implemented");
     }
 
     public Future<Void> modifyMessage(UserId userId, String msgCollId, String messageId, Message message, SecurityToken token)
         throws ProtocolException {
-      throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST, "Not Implemented");
+      throw new ProtocolException(HttpServletResponse.SC_NOT_IMPLEMENTED, "Not Implemented");
     }
   }
 }

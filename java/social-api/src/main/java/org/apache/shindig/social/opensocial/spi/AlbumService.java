@@ -128,27 +128,27 @@ public interface AlbumService {
 
   public static class NotImplementedAlbumService implements AlbumService {
     public Future<Album> getAlbum(UserId userId, String appId, Set<String> fields, String albumId, SecurityToken token) throws ProtocolException {
-      throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST, "Not Implemented");
+      throw new ProtocolException(HttpServletResponse.SC_NOT_IMPLEMENTED, "Not Implemented");
     }
 
     public Future<RestfulCollection<Album>> getAlbums(UserId userId, String appId, Set<String> fields, CollectionOptions options, Set<String> albumIds, SecurityToken token) throws ProtocolException {
-      throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST, "Not Implemented");
+      throw new ProtocolException(HttpServletResponse.SC_NOT_IMPLEMENTED, "Not Implemented");
     }
 
     public Future<RestfulCollection<Album>> getAlbums(Set<UserId> userIds, GroupId groupId, String appId, Set<String> fields, CollectionOptions options, SecurityToken token) throws ProtocolException {
-      throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST, "Not Implemented");
+      throw new ProtocolException(HttpServletResponse.SC_NOT_IMPLEMENTED, "Not Implemented");
     }
 
     public Future<Void> deleteAlbum(UserId userId, String appId, String albumId, SecurityToken token) throws ProtocolException {
-      throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST, "Not Implemented");
+      throw new ProtocolException(HttpServletResponse.SC_NOT_IMPLEMENTED, "Not Implemented");
     }
 
     public Future<Void> createAlbum(UserId userId, String appId, Album album, SecurityToken token) throws ProtocolException {
-      throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST, "Not Implemented");
+      throw new ProtocolException(HttpServletResponse.SC_NOT_IMPLEMENTED, "Not Implemented");
     }
 
     public Future<Void> updateAlbum(UserId userId, String appId, Album album, String albumId, SecurityToken token) throws ProtocolException {
-      throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST, "Not Implemented");
+      throw new ProtocolException(HttpServletResponse.SC_NOT_IMPLEMENTED, "Not Implemented");
     }
   }
 }
