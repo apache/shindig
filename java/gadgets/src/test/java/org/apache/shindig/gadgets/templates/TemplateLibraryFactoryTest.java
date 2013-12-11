@@ -80,6 +80,7 @@ public class TemplateLibraryFactoryTest {
     assertNotNull( st );
     assertTrue( st.isAnonymous() );
     assertEquals( SPEC_URL.toString(), st.getAppUrl() );
+    assertTrue(pipeline.request.getIgnoreCache());
   }
 
   private static class CapturingPipeline implements RequestPipeline {

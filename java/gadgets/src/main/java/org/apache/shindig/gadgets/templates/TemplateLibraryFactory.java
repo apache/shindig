@@ -59,6 +59,7 @@ public class TemplateLibraryFactory {
     HttpRequest request = new HttpRequest(uri).setSecurityToken( new AnonymousSecurityToken( "", 0L, context.getUrl().toString()));
     // 5 minute TTL.
     request.setCacheTtl(300);
+    request.setIgnoreCache(context.getIgnoreCache());
     HttpResponse response = pipeline.execute(request);
     if (response.getHttpStatusCode() != HttpResponse.SC_OK) {
       int retcode = response.getHttpStatusCode();
