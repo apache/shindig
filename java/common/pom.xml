@@ -28,7 +28,7 @@
 
   <artifactId>shindig-common</artifactId>
   <version>2.5.1-SNAPSHOT</version>
-  <packaging>jar</packaging>
+  <packaging>bundle</packaging>
 
   <name>Apache Shindig Common Code</name>
   <description>Common java code for Shindig</description>
@@ -38,6 +38,18 @@
     <developerConnection>scm:svn:https://svn.apache.org/repos/asf/shindig/trunk/java/common</developerConnection>
     <url>http://svn.apache.org/viewvc/shindig/trunk/java/common</url>
   </scm>
+
+  <properties>
+    <osgi.export>
+      org.apache.shindig.auth*,
+      org.apache.shindig.common*,
+      org.apache.shindig.config*,
+      org.apache.shindig.expressions*,
+      org.apache.shindig.protocol*,
+      org.apache.shindig.common.cache.ehcache*,
+      org.apache.shindig.common.logging.i18n,
+    </osgi.export>
+  </properties>
 
   <build>
     <resources>

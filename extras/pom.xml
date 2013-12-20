@@ -28,7 +28,7 @@
 
   <artifactId>shindig-extras</artifactId>
   <version>2.5.1-SNAPSHOT</version>
-  <packaging>jar</packaging>
+  <packaging>bundle</packaging>
 
   <name>Apache Shindig Extra Modules</name>
   <description>Provides extra, deprecated or extended functionality. The items here have unstable APIs and could change at any time.</description>
