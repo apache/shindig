@@ -101,21 +101,19 @@ public class TokenAuthorizationResponseHandler implements TokenEndpointResponseH
           final String responseString = response.getResponseAsString();
           final OAuth2Message msg = this.oauth2MessageProvider.get();
 
-          if (contentType.startsWith("text/plain")) {
-            // Facebook does this
-            msg.parseQuery('?' + responseString);
-          } else if (contentType.startsWith("application/json")) {
+          if (isLogging) {
+            TokenAuthorizationResponseHandler.LOG.log("Content-Type {0}", contentType);
+            TokenAuthorizationResponseHandler.LOG.log("Response String {0}", responseString);
+          }
+          if (contentType.startsWith("application/json")) {
             // Google does this
             final JSONObject responseJson = new JSONObject(responseString);
             msg.parseJSON(responseJson.toString());
           } else {
-            if (isLogging) {
-              TokenAuthorizationResponseHandler.LOG.log("Unhandled Content-Type {0}", contentType);
-              TokenAuthorizationResponseHandler.LOG.exiting(
-                      TokenAuthorizationResponseHandler.LOG_CLASS, "handleResponse", null);
-            }
-            ret = TokenAuthorizationResponseHandler.getError("Unhandled Content-Type "
-                    + contentType);
+            // Default assume it is application/x-www-form-urlencoded
+            // Facebook has a content type of text/plain
+            // GitHub has a content type of application/x-www-form-urlencoded
+            msg.parseQuery('?' + responseString);
           }
 
           final OAuth2Error error = msg.getError();

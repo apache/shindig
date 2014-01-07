@@ -189,14 +189,18 @@ public class TokenAuthorizationResponseHandlerTest extends MockUtils {
     final HttpResponseBuilder builder = new HttpResponseBuilder().setStrictNoCache();
     builder.setHttpStatusCode(HttpResponse.SC_OK);
     builder.setHeader("Content-Type", "BAD");
+    builder.setContent("access_token=xxx&token_type=Bearer&expires=1&refresh_token=yyy&example_parameter=example_value");
     final HttpResponse response = builder.create();
 
     final OAuth2HandlerError result = TokenAuthorizationResponseHandlerTest.tarh.handleResponse(
             accessor, response);
 
-    Assert.assertNotNull(result);
-    Assert.assertEquals(null, result.getCause());
-    Assert.assertEquals(OAuth2Error.TOKEN_RESPONSE_PROBLEM, result.getError());
-    Assert.assertTrue(result.getContextMessage().startsWith("Unhandled Content-Type"));
+    Assert.assertNull(result);
+    final OAuth2Token accessToken = TokenAuthorizationResponseHandlerTest.store.getToken(
+            accessor.getGadgetUri(), accessor.getServiceName(), accessor.getUser(),
+            accessor.getScope(), OAuth2Token.Type.ACCESS);
+    Assert.assertEquals("xxx", new String(accessToken.getSecret(), "UTF-8"));
+    Assert.assertEquals(OAuth2Message.BEARER_TOKEN_TYPE, accessToken.getTokenType());
+    Assert.assertTrue(accessToken.getExpiresAt() > 1000);
   }
 }
