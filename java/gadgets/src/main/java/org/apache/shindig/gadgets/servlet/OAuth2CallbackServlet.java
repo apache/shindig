@@ -101,8 +101,8 @@ public class OAuth2CallbackServlet extends InjectedServlet {
       final String encRequestStateKey = msg.getState();
       if (encRequestStateKey == null) {
         if (error != null) {
-          OAuth2CallbackServlet.sendError(error, "encRequestStateKey is null", msg.getErrorUri(),
-                  msg.getErrorDescription(), null, resp, null, this.sendTraceToClient);
+          OAuth2CallbackServlet.sendError(error, "encRequestStateKey is null", msg.getErrorDescription(),
+                  msg.getErrorUri(), null, resp, null, this.sendTraceToClient);
         } else {
           OAuth2CallbackServlet.sendError(OAuth2Error.CALLBACK_PROBLEM,
                   "OAuth2CallbackServlet requestStateKey is null.", "", "", null, resp, null,
