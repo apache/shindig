@@ -18,10 +18,6 @@
  */
 package org.apache.shindig.gadgets.templates;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.StringReader;
-
 import org.apache.shindig.auth.AnonymousSecurityToken;
 import org.apache.shindig.common.cache.Cache;
 import org.apache.shindig.common.cache.CacheProvider;
@@ -86,27 +82,6 @@ public class TemplateLibraryFactory {
       }
 
       if (element == null) {
-        // JIRA 1935
-        // rewrite the template content to reduce the object number counted by ehcache
-        if (!context.getDebug()) {
-          BufferedReader reader = new BufferedReader(new StringReader(content));
-          StringBuilder sb = new StringBuilder();
-          String s;
-          try {
-            while ((s = reader.readLine()) != null) {
-              sb.append(s);
-            }
-            content = sb.toString();
-          } catch (IOException e) {
-            // not re-throw exception here
-            // If it fails to rewrite the string, just uses the original string for xml parsing
-          } finally {
-            try {
-              reader.close();
-            } catch (IOException e) {}
-          }
-        }
-
         element = XmlUtil.parse(content);
         if (key != null) {
           parsedXmlCache.addElement(key, element);
