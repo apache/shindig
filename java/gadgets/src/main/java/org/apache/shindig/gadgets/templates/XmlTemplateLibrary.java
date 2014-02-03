@@ -130,15 +130,13 @@ public class XmlTemplateLibrary implements TemplateLibrary {
 
   private Set<TagHandler> parseLibraryDocument(Element root) throws GadgetException {
     ImmutableSet.Builder<TagHandler> handlers = ImmutableSet.builder();
-
-    NodeList nodes = root.getChildNodes();
-    for (int i = 0; i < nodes.getLength(); i++) {
-      Node node = nodes.item(i);
-      if (!(node instanceof Element)) {
+    Node childNode = root.getFirstChild();
+    while(childNode != null) {
+      if (!(childNode instanceof Element)) {
+        childNode = childNode.getNextSibling();
         continue;
       }
-
-      Element element = (Element) node;
+      Element element = (Element) childNode;
       if (NAMESPACE_TAG.equals(element.getLocalName())) {
         processNamespace(element);
       } else if (STYLE_TAG.equals(element.getLocalName())) {
@@ -150,6 +148,7 @@ public class XmlTemplateLibrary implements TemplateLibrary {
       } else if (TEMPLATEDEF_TAG.equals(element.getLocalName())) {
         processTemplateDef(handlers, element);
       }
+      childNode = childNode.getNextSibling();
     }
 
     return handlers.build();
@@ -157,11 +156,13 @@ public class XmlTemplateLibrary implements TemplateLibrary {
 
   private void processTemplateDef(Builder<TagHandler> handlers, Element defElement)
       throws TemplateParserException {
-    Attr tagAttribute = defElement.getAttributeNode(TAG_ATTRIBUTE);
-    if (tagAttribute == null) {
-      throw new TemplateParserException("Missing tag attribute on TemplateDef");
+    Attr tagAttribute = null;
+    synchronized (defElement) {
+      tagAttribute =  defElement.getAttributeNode(TAG_ATTRIBUTE);
+      if (tagAttribute == null) {
+        throw new TemplateParserException("Missing tag attribute on TemplateDef");
+      }
     }
-
     ImmutableSet.Builder<TemplateResource> resources = ImmutableSet.builder();
 
     Element scriptElement = (Element) DomUtil.getFirstNamedChildNode(defElement, JAVASCRIPT_TAG);
@@ -216,15 +217,16 @@ public class XmlTemplateLibrary implements TemplateLibrary {
     if ((nsPrefix != null) || (nsUri != null)) {
       throw new TemplateParserException("Duplicate Namespace elements");
     }
+    synchronized (namespaceNode) {
+      nsPrefix = namespaceNode.getAttribute("prefix");
+      if ("".equals(nsPrefix)) {
+        throw new TemplateParserException("Missing prefix attribute on Namespace");
+      }
 
-    nsPrefix = namespaceNode.getAttribute("prefix");
-    if ("".equals(nsPrefix)) {
-      throw new TemplateParserException("Missing prefix attribute on Namespace");
-    }
-
-    nsUri = namespaceNode.getAttribute("url");
-    if ("".equals(nsUri)) {
-      throw new TemplateParserException("Missing url attribute on Namespace");
+      nsUri = namespaceNode.getAttribute("url");
+      if ("".equals(nsUri)) {
+        throw new TemplateParserException("Missing url attribute on Namespace");
+      }
     }
   }
 
@@ -236,7 +238,10 @@ public class XmlTemplateLibrary implements TemplateLibrary {
     if (nameParts.length != 2) {
       return null;
     }
-    String namespaceUri = template.lookupNamespaceURI(nameParts[0]);
+    String namespaceUri = "";
+    synchronized (template) {
+      namespaceUri = template.lookupNamespaceURI(nameParts[0]);
+    }
     if (!nsPrefix.equals(nameParts[0]) || !nsUri.equals(namespaceUri)) {
       throw new TemplateParserException(
           "Can't create tags in undeclared namespace: " + nameParts[0]);
@@ -259,12 +264,12 @@ public class XmlTemplateLibrary implements TemplateLibrary {
    */
   private void bypassTemplateSanitization(Element template) {
     SanitizingGadgetRewriter.bypassSanitization(template, false);
-    NodeList children = template.getChildNodes();
-    for (int i = 0; i < children.getLength(); i++) {
-      Node node = children.item(i);
-      if (node instanceof Element) {
-        bypassTemplateSanitization((Element) node);
+    Node childNode = template.getFirstChild();
+    while(childNode != null) {
+      if (childNode instanceof Element) {
+        bypassTemplateSanitization((Element) childNode);
       }
+      childNode = childNode.getNextSibling();
     }
   }
 

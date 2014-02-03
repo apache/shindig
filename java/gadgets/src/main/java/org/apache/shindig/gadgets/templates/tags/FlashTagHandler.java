@@ -192,12 +192,12 @@ public class FlashTagHandler extends AbstractTagHandler {
   void ensureSwfobject(Document doc, TemplateProcessor processor) {
     // TODO: This should probably be a function of the rewriter.
     Element head = (Element) DomUtil.getFirstNamedChildNode(doc.getDocumentElement(), "head");
-    NodeList childNodes = head.getChildNodes();
-    for (int i = 0; i < childNodes.getLength(); i++) {
-      Node node = childNodes.item(i);
-      if (node.getUserData(SWFOBJECT) != null) {
+    Node childNode = head.getFirstChild();
+    while(childNode != null) {
+      if (childNode.getUserData(SWFOBJECT) != null) {
         return;
       }
+      childNode = childNode.getNextSibling();
     }
     Element swfobject = doc.createElement("script");
     swfobject.setAttribute("type", "text/javascript");

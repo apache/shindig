@@ -87,8 +87,9 @@ public class TemplateLibraryFactory {
           parsedXmlCache.addElement(key, element);
         }
       }
-
-      return new XmlTemplateLibrary(uri, element, content);
+      synchronized(element){
+        return new XmlTemplateLibrary(uri, element, content);
+      }
     } catch (XmlException e) {
       throw new GadgetException(GadgetException.Code.MALFORMED_XML_DOCUMENT, e,
           HttpResponse.SC_BAD_REQUEST);

@@ -65,7 +65,9 @@ public class TemplateBasedTagHandler extends AbstractTagHandler {
 
   /** Process the template content in the new EL state */
   protected void processTemplate(Node result, Element tagInstance, TemplateProcessor processor) {
-    processor.processChildNodes(result, templateDefinition);
+    synchronized (result) {
+      processor.processChildNodes(result, templateDefinition);
+    }
   }
 
   /**
@@ -74,25 +76,26 @@ public class TemplateBasedTagHandler extends AbstractTagHandler {
   protected Map<String, Object> computeMy(Element tagInstance, Node processedContent,
       TemplateProcessor processor) {
     Map<String, Object> myMap = Maps.newHashMap();
-
-    NodeList children = processedContent.getChildNodes();
-
-    for (int i = 0;  i < children.getLength(); i++) {
-      Node child = children.item(i);
-      if (child instanceof Element) {
-        Element el = (Element) child;
+    Node clonedSource;
+    synchronized (processedContent) {
+      clonedSource = processedContent.cloneNode(true);
+    }
+    int children = clonedSource.getChildNodes().getLength();
+    Node childNode = clonedSource.getFirstChild();
+    while(childNode != null) {
+      if (childNode instanceof Element) {
+        Element el = (Element) childNode;
         String name = el.getLocalName();
         // TODO: why???  There should always be a local name.
         if (name == null) {
           name = el.getNodeName();
         }
-
         ElementWrapper wrapper = new ElementWrapper(el);
         Object previous = myMap.get(name);
         if (previous == null) {
           myMap.put(name, wrapper);
         } else if (previous instanceof ElementWrapper) {
-          List<ElementWrapper> bucket = Lists.newArrayListWithCapacity(children.getLength());
+          List<ElementWrapper> bucket = Lists.newArrayListWithCapacity(children);
           bucket.add((ElementWrapper) previous);
           bucket.add(wrapper);
           myMap.put(name, bucket);
@@ -103,6 +106,7 @@ public class TemplateBasedTagHandler extends AbstractTagHandler {
            bucket.add(wrapper);
         }
       }
+      childNode = childNode.getNextSibling();
     }
 
     NamedNodeMap atts = tagInstance.getAttributes();

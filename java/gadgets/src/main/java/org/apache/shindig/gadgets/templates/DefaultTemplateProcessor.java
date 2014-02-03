@@ -122,16 +122,23 @@ public class DefaultTemplateProcessor implements TemplateProcessor {
         new TemplateELResolver(templateContext),
         new ElementELResolver());
 
-    DocumentFragment result = template.getOwnerDocument().createDocumentFragment();
-    processChildNodes(result, template);
+    DocumentFragment result = null;
+    synchronized (template) {
+      result = template.getOwnerDocument().createDocumentFragment();
+      processChildNodes(result, template);
+    }
     return result;
   }
 
   /** Process the children of an element or document. */
   public void processChildNodes(Node result, Node source) {
-    NodeList nodes = source.getChildNodes();
-    for (int i = 0; i < nodes.getLength(); i++) {
-      processNode(result, nodes.item(i));
+    Node current = null;
+    synchronized (source) {
+      current = source.getFirstChild();
+      while (current != null) {
+        processNode(result, current);
+        current = current.getNextSibling();
+      }
     }
   }
 
@@ -167,6 +174,9 @@ public class DefaultTemplateProcessor implements TemplateProcessor {
    * @param textContent the text content being processed
    */
   private void processText(Node result, String textContent) {
+    if (textContent == null) {
+      return;
+    }
     Document ownerDocument = result.getOwnerDocument();
 
     int start = 0;
@@ -235,16 +245,18 @@ public class DefaultTemplateProcessor implements TemplateProcessor {
    * Process repeater state, if needed, on an element.
    */
   private void processElement(final Node result, final Element element) {
-    Attr repeat = element.getAttributeNode(ATTRIBUTE_REPEAT);
-    if (repeat != null) {
-      Iterable<?> dataList = evaluate(repeat.getValue(), Iterable.class, null);
-      processRepeat(result, element, dataList, new Runnable() {
-        public void run() {
-          processElementInner(result, element);
-        }
-      });
-    } else {
-      processElementInner(result, element);
+    synchronized (element) {
+      Attr repeat = element.getAttributeNode(ATTRIBUTE_REPEAT);
+      if (repeat != null) {
+        Iterable<?> dataList = evaluate(repeat.getValue(), Iterable.class, null);
+        processRepeat(result, element, dataList, new Runnable() {
+          public void run() {
+            processElementInner(result, element);
+          }
+        });
+      } else {
+        processElementInner(result, element);
+      }
     }
   }
 
@@ -347,7 +359,9 @@ public class DefaultTemplateProcessor implements TemplateProcessor {
       // document before being adopted by the target document.
       Element resultNode;
       if (element.getOwnerDocument() != result.getOwnerDocument()) {
-        resultNode = (Element)result.getOwnerDocument().importNode(element, false);
+        synchronized (element) {
+          resultNode = (Element)result.getOwnerDocument().importNode(element, false);
+        }
       } else {
         resultNode = (Element)element.cloneNode(false);
       }
