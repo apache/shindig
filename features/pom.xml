@@ -29,7 +29,7 @@
 
   <artifactId>shindig-features</artifactId>
   <version>2.5.1-SNAPSHOT</version>
-  <packaging>jar</packaging>
+  <packaging>bundle</packaging>
 
   <name>Apache Shindig Features</name>
   <description>Packages all the features that shindig provides into a single jar file to allow

@@ -28,7 +28,7 @@
 
   <artifactId>shindig-sample-container</artifactId>
   <version>2.5.1-SNAPSHOT</version>
-  <packaging>jar</packaging>
+  <packaging>bundle</packaging>
 
   <name>Apache Shindig Sample Container</name>
   <description>Default Shindig Sample Container module</description>
@@ -38,6 +38,13 @@
     <developerConnection>scm:svn:https://svn.apache.org/repos/asf/shindig/trunk/java/sample-container</developerConnection>
     <url>http://svn.apache.org/viewvc/shindig/trunk/java/server</url>
   </scm>
+
+  <properties>
+    <osgi.export>
+      org.apache.shindig.sample.container*,
+      org.apache.shindig.sample.shiro*
+    </osgi.export>
+  </properties>
 
   <dependencies>
     <!-- project dependencies -->

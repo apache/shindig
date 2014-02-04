@@ -28,7 +28,7 @@
 
   <artifactId>shindig-gadgets</artifactId>
   <version>2.5.1-SNAPSHOT</version>
-  <packaging>jar</packaging>
+  <packaging>bundle</packaging>
 
   <name>Apache Shindig Gadget Renderer</name>
   <description>Renders gadgets, provides the gadget metadata service, and serves
@@ -39,6 +39,20 @@
     <developerConnection>scm:svn:https://svn.apache.org/repos/asf/shindig/trunk/java/gadgets</developerConnection>
     <url>http://svn.apache.org/viewvc/shindig/trunk/java/gadgets</url>
   </scm>
+
+  <properties>
+    <osgi.export>
+      org.apache.shindig.gadgets*,
+    </osgi.export>
+    <osgi.import>
+      com.sun.imageio.plugins.jpeg;resolution:=optional,
+      org.apache.shindig.common.logging.i18n,
+      org.kohsuke.args4j,
+      org.json.simple,
+      org.xmlpull.v1,
+      *
+    </osgi.import>
+  </properties>
 
   <build>
     <plugins>
