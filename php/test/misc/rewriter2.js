@@ -1,1 +1,0 @@
-document.getElementById('jstarget2').innerHTML= "This content was loaded from rewriter2.js";
