@@ -763,7 +763,6 @@
                 <exclude>etc/svn-ignores</exclude>
                 <exclude>etc/svn-props</exclude>
                 <exclude>etc/eclipse/shindig.importorder</exclude>
-                <exclude>JsMin.php</exclude>
                 <exclude>**/content/**/*.json</exclude>
                 <exclude>**/content/**/*.swf</exclude>
                 <exclude>**/test/misc/rewriter*.css</exclude>
@@ -776,7 +775,6 @@
                 <exclude>**/site/generated_site/**</exclude>
                 <exclude>**/site/cms/trunk/content/bootstrap/**</exclude>
                 <exclude>**/site/cms/trunk/content/jquery/**</exclude>
-                <exclude>phpunit.xml.dist</exclude>
                 <exclude>BUILD-JAVA</exclude>
                 <exclude>COMMITTERS</exclude>
                 <exclude>UPGRADING</exclude>
@@ -900,7 +898,6 @@
         <module>java/server</module>
         <module>java/uber</module>
         <module>extras</module>
-        <module>php</module>
         <module>assembly</module>
       </modules>
       <build>
@@ -945,14 +942,6 @@
           </plugin>
         </plugins>
       </build>
-    </profile>
-
-    <profile>
-      <id>php</id>
-      <modules>
-        <module>features</module>
-        <module>php</module>
-      </modules>
     </profile>
 
     <!-- assemble the source releases -->
@@ -1293,7 +1282,6 @@
               <exclude>etc/svn-ignores</exclude>
               <exclude>etc/svn-props</exclude>
               <exclude>etc/eclipse/shindig.importorder</exclude>
-              <exclude>JsMin.php</exclude>
               <exclude>**/content/**/*.json</exclude>
               <exclude>**/content/**/*.swf</exclude>
               <exclude>**/test/misc/rewriter*.css</exclude>
@@ -1306,7 +1294,6 @@
               <exclude>**/site/generated_site/**</exclude>
               <exclude>**/site/cms/trunk/content/bootstrap/**</exclude>
               <exclude>**/site/cms/trunk/content/jquery/**</exclude>
-              <exclude>phpunit.xml.dist</exclude>
               <exclude>BUILD-JAVA</exclude>
               <exclude>COMMITTERS</exclude>
               <exclude>UPGRADING</exclude>
