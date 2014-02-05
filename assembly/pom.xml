@@ -86,6 +86,27 @@
           </execution>
         </executions>
       </plugin>
+            <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>align-php-structure</id>
+            <phase>validate</phase>
+            <configuration>
+              <tasks>
+               <tstamp>
+                 <format property="year" pattern="yyyy" />
+               </tstamp>
+               <echo file="${project.build.directory}/assemblyFilter.properties">year=${year}</echo>
+              </tasks>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
   <dependencies>
