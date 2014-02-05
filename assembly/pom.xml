@@ -31,7 +31,7 @@
   <packaging>pom</packaging>
 
   <name>Apache Shindig Distribution assembly</name>
-  <description>Assembles the Java/PHP code base into a deployment package.</description>
+  <description>Assembles the Java code base into a deployment package.</description>
 
   <scm>
     <connection>scm:svn:http://svn.apache.org/repos/asf/shindig/trunk/assembly
@@ -52,7 +52,6 @@
         <version>2.2.1</version>
         <configuration>
           <descriptors>
-            <descriptor>src/main/assembly/php.xml</descriptor>
             <descriptor>src/main/assembly/java.xml</descriptor>
             <descriptor>src/main/assembly/source.xml</descriptor>
           </descriptors>
