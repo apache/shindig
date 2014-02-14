@@ -142,7 +142,6 @@ osapi.container.Container = function(opt_config) {
   window[osapi.container.CallbackType.GADGET_ON_LOAD] = function(gadgetUrl, siteId) {
     self.getSiteById(siteId).onRender();
     self.applyLifecycleCallbacks_(osapi.container.CallbackType.ON_RENDER, gadgetUrl, siteId);
-    window[osapi.container.CallbackType.GADGET_ON_LOAD] = function() {};
   };
 
   this.initializeMixins_();
