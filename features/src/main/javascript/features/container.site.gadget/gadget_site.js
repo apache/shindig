@@ -338,12 +338,17 @@ osapi.container.GadgetSite.prototype.render = function(
 osapi.container.GadgetSite.prototype.onRender = function() {
   this.swapBuffers_();
 
-  if (this.currentGadgetHolder_) {
-    this.currentGadgetHolder_.dispose();
-  }
+  // Only dispose the current holder set it to the loading holder if a loading holder exists.
+  // This protects this method from re-entrant code that can cause the current holder to be
+  // removed without a loading holder to take its place
+  if (this.loadingGadgetHolder_) {
+    if (this.currentGadgetHolder_) {
+      this.currentGadgetHolder_.dispose();
+    }
 
-  this.currentGadgetHolder_ = this.loadingGadgetHolder_;
-  this.loadingGadgetHolder_ = null;
+    this.currentGadgetHolder_ = this.loadingGadgetHolder_;
+    this.loadingGadgetHolder_ = null;
+  }
 };
 
 

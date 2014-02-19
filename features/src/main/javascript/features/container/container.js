@@ -139,9 +139,13 @@ osapi.container.Container = function(opt_config) {
   this.tokenRefreshTimer_ = null;
 
   var self = this;
+  var rendered = {};
   window[osapi.container.CallbackType.GADGET_ON_LOAD] = function(gadgetUrl, siteId) {
-    self.getSiteById(siteId).onRender();
-    self.applyLifecycleCallbacks_(osapi.container.CallbackType.ON_RENDER, gadgetUrl, siteId);
+    if (!rendered.hasOwnProperty(siteId)) {
+      self.getSiteById(siteId).onRender();
+      self.applyLifecycleCallbacks_(osapi.container.CallbackType.ON_RENDER, gadgetUrl, siteId);
+      rendered[siteId] = true;
+    }
   };
 
   this.initializeMixins_();
