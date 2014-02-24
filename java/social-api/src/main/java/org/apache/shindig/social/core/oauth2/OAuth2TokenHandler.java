@@ -27,6 +27,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.shindig.social.core.oauth2.OAuth2Types.TokenFormat;
 
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Joiner;
+
 /**
  * Handles operations to the OAuth 2.0 token end point.
  *
@@ -84,15 +87,10 @@ public class OAuth2TokenHandler {
   /**
    * Private utility to comma-delimit a list of Strings
    */
-  private static String listToString(List<String> list) {
-    if (list == null || list.isEmpty())
+  @VisibleForTesting
+  protected static String listToString(List<String> list) {
+    if (list == null)
       return "";
-    StringBuilder sb = new StringBuilder();
-    for (String item : list) {
-      sb.append(item);
-      sb.append(',');
-    }
-    sb.deleteCharAt(sb.length());
-    return sb.toString();
+    return Joiner.on(' ').join(list);
   }
 }
