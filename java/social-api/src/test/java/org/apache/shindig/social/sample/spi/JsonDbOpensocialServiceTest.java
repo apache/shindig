@@ -405,4 +405,20 @@ public class JsonDbOpensocialServiceTest extends Assert {
     assertEquals(1, messages.getList().size());
     assertEquals("1", messages.getList().get(0).getId());
   }
+
+  @Test
+  public void testCreateMessage() throws Exception {
+    // Create a new private message
+    Message msg = new MessageImpl();
+    msg.setBody("Hello");
+    msg.setRecipients(Collections.singletonList(JANE_DOE.getUserId()));
+    db.createMessage(JOHN_DOE, APP_ID, "privateMessage", msg, token).get();
+
+    // Check that the message was created
+    RestfulCollection<Message> messages = db.getMessages(
+        JANE_DOE, "privateMessage",
+        Collections.<String>emptySet(), Collections.<String>singletonList(msg.getId()),
+        new CollectionOptions(), token).get();
+    assertEquals(1, messages.getList().size());
+  }
 }

@@ -24,6 +24,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.Future;
 
 import javax.servlet.http.HttpServletResponse;
@@ -138,9 +139,14 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
   private static final String FRIEND_LINK_TABLE = "friendLinks";
 
   /**
-   * db["messages"] -> Map<Person.Id, Array<Message>>
+   * db["messages"] -> Map<Person.Id, Map<MessageCollection.Id, MessageCollection>>
    */
   private static final String MESSAGE_TABLE = "messages";
+
+  /**
+   * Attribute that contains the messages of a specific MessageCollection.
+   */
+  private static final String MESSAGES_ARRAY = "messages";
 
   /**
    * db["passwords"] -> Map<Person.Id, String>
@@ -616,19 +622,26 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
    */
   public Future<Void> createMessage(UserId userId, String appId, String msgCollId, Message message,
       SecurityToken token) throws ProtocolException {
-    for (String recipient : message.getRecipients()) {
-      try {
-        JSONArray outbox = db.getJSONObject(MESSAGE_TABLE).getJSONArray(recipient);
+    if (message.getId() == null) {
+      // Assign a new ID to the message
+      message.setId(UUID.randomUUID().toString());
+    }
+    try {
+      JSONObject messagesTable = db.getJSONObject(MESSAGE_TABLE);
+      JSONObject messageObject = convertToJson(message);
+      for (String recipient : message.getRecipients()) {
+        JSONObject collection = messagesTable.getJSONObject(recipient).getJSONObject(msgCollId);
+        JSONArray outbox = collection.getJSONArray(MESSAGES_ARRAY);
         if (outbox == null) {
           outbox = new JSONArray();
-          db.getJSONObject(MESSAGE_TABLE).put(recipient, outbox);
+          collection.put(MESSAGES_ARRAY, outbox);
         }
 
-        outbox.put(message);
-      } catch (JSONException je) {
-        throw new ProtocolException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, je.getMessage(),
-            je);
+        outbox.put(messageObject);
       }
+    } catch (JSONException je) {
+      throw new ProtocolException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, je.getMessage(),
+          je);
     }
 
     return Futures.immediateFuture(null);
@@ -644,7 +657,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
       for (String msgCollId : JSONObject.getNames(messageCollections)) {
         JSONObject msgColl = messageCollections.getJSONObject(msgCollId);
         msgColl.put("id", msgCollId);
-        JSONArray messages = msgColl.getJSONArray("messages");
+        JSONArray messages = msgColl.getJSONArray(MESSAGES_ARRAY);
         int numMessages = (messages == null) ? 0 : messages.length();
         msgColl.put("total", String.valueOf(numMessages));
         msgColl.put("unread", String.valueOf(numMessages));
@@ -676,7 +689,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
     try {
       List<Message> result = Lists.newArrayList();
       JSONArray messages = db.getJSONObject(MESSAGE_TABLE).getJSONObject(userId.getUserId(token))
-          .getJSONObject(msgCollId).getJSONArray("messages");
+          .getJSONObject(msgCollId).getJSONArray(MESSAGES_ARRAY);
 
       // TODO: special case @all
 
