@@ -149,7 +149,7 @@ public class OAuth2ServiceImpl implements OAuth2Service {
     OAuth2Code authCode = new OAuth2Code();
     authCode.setValue(UUID.randomUUID().toString());
     authCode.setExpiration(System.currentTimeMillis() + authCodeExpires);
-    OAuth2Client client = store.getClient(req.getString("client_id"));
+    OAuth2Client client = store.getClient(req.getClientId());
     authCode.setClient(client);
     if (req.getRedirectURI() != null) {
       authCode.setRedirectURI(req.getRedirectURI());
