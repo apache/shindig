@@ -18,8 +18,9 @@
  */
 package org.apache.shindig.social.opensocial.service;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
+import java.util.Arrays;
+import java.util.List;
+
 import org.apache.shindig.common.EasyMockTestCase;
 import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.config.ContainerConfig;
@@ -36,7 +37,9 @@ import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.List;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
+import com.google.inject.Guice;
 
 public class MediaItemHandlerTest extends EasyMockTestCase {
   private MediaItemService mediaService;
@@ -45,11 +48,12 @@ public class MediaItemHandlerTest extends EasyMockTestCase {
   private FakeGadgetToken token;
   protected HandlerRegistry registry;
   private BeanJsonConverter converter;
+  protected SocialRequestItem request;
 
   @Before
   public void setUp() throws Exception {
     token = new FakeGadgetToken();
-    converter = mock(BeanJsonConverter.class);
+    converter = new BeanJsonConverter(Guice.createInjector());
     mediaService = mock(MediaItemService.class);
     JSONObject config = new JSONObject('{' + ContainerConfig.DEFAULT_CONTAINER + ':' +
         "{'gadgets.container': ['default']," +
@@ -63,6 +67,9 @@ public class MediaItemHandlerTest extends EasyMockTestCase {
     registry = new DefaultHandlerRegistry(null, converter,
         new HandlerExecutionListener.NoOpHandler());
     registry.addHandlers(ImmutableSet.<Object>of(handler));
+    request = new SocialRequestItem(
+        Maps.<String, String[]>newHashMap(),
+        token, converter, converter);
   }
 
   @Test
@@ -100,5 +107,27 @@ public class MediaItemHandlerTest extends EasyMockTestCase {
     assertEquals("title", received.get(2).toString());
 
     verify();
+  }
+
+  @Test
+  public void testGetRequestMediaItemIds() {
+    List<String> expectedMediaItemIds = Arrays.asList("mediaItemId1");
+    request.setParameter("mediaItemId", expectedMediaItemIds);
+    assertEquals(expectedMediaItemIds, handler.getRequestMediaItemIds(request));
+
+    List<String> expectedIds = Arrays.asList("id1");
+    request.setParameter("id", expectedIds);
+    assertEquals(expectedIds, handler.getRequestMediaItemIds(request));
+  }
+
+  @Test
+  public void testGetRequestMediaItem() {
+    String mediaItemJson = "{\"id\":\"mediaItem\"}";
+    request.setParameter("mediaItem", mediaItemJson);
+    assertEquals("mediaItem", handler.getRequestMediaItem(request).getId());
+
+    String dataJson = "{\"id\":\"data\"}";
+    request.setParameter("data", dataJson);
+    assertEquals("data", handler.getRequestMediaItem(request).getId());
   }
 }

@@ -211,6 +211,20 @@ public class BaseRequestItem implements RequestItem {
     }
   }
 
+  public <T> T getOptionalTypedParameter(String parameterName, Class<T> dataTypeClass) {
+    try {
+      String json = getParameter(parameterName);
+      if (json == null) {
+        return null;
+      }
+      return converter.convertToObject(json, dataTypeClass);
+    } catch (RuntimeException e) {
+      if (e.getCause() instanceof JSONException)
+        throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+      throw e;
+    }
+  }
+
   public <T> T getTypedRequest(Class<T> dataTypeClass) {
     try {
       return jsonConverter.convertToObject(new JSONObject(this.parameters).toString(),

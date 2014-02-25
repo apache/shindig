@@ -43,7 +43,7 @@ import com.google.inject.Inject;
  *
  * @since 2.0.0
  */
-@Service(name = "mediaItems", path = "/{userId}+/{groupId}/{albumId}/{mediaItemId}+")
+@Service(name = "mediaItems", path = "/{userId}+/{groupId}/{albumId}/{id}+")
 public class MediaItemHandler {
 
 
@@ -63,7 +63,7 @@ public class MediaItemHandler {
   /*
     * Handles GET operations.
     *
-    * Allowed end-points: /mediaItems/{userId}+/{groupId}/{albumId}/{mediaItemId}+
+    * Allowed end-points: /mediaItems/{userId}+/{groupId}/{albumId}/{id}+
     *
     * Examples: /mediaItems/john.doe/@self
     *           /mediaItems/john.doe,jane.doe/@self
@@ -75,7 +75,7 @@ public class MediaItemHandler {
     // Get user, group, album IDs, and MediaItem IDs
     Set<UserId> userIds = request.getUsers();
     Set<String> optionalAlbumIds = ImmutableSet.copyOf(request.getListParameter("albumId"));
-    Set<String> optionalMediaItemIds = ImmutableSet.copyOf(request.getListParameter("mediaItemId"));
+    Set<String> optionalMediaItemIds = ImmutableSet.copyOf(getRequestMediaItemIds(request));
 
     // At least one userId must be specified
     HandlerPreconditions.requireNotEmpty(userIds, "No user ID specified");
@@ -133,7 +133,7 @@ public class MediaItemHandler {
   /*
     * Handles DELETE operations.
     *
-    * Allowed end-points: /mediaItem/{userId}/@self/{albumId}/{mediaItemId}
+    * Allowed end-points: /mediaItem/{userId}/@self/{albumId}/{id}
     *
     * Examples: /mediaItems/john.doe/@self/1/2
     */
@@ -142,7 +142,7 @@ public class MediaItemHandler {
     // Get users, Album ID, and MediaItem ID
     Set<UserId> userIds = request.getUsers();
     Set<String> albumIds = ImmutableSet.copyOf(request.getListParameter("albumId"));
-    Set<String> mediaItemIds = ImmutableSet.copyOf(request.getListParameter("mediaItemId"));
+    Set<String> mediaItemIds = ImmutableSet.copyOf(getRequestMediaItemIds(request));
 
     // Exactly one user, Album, and MediaItem must be specified
     HandlerPreconditions.requireNotEmpty(userIds, "No userId specified");
@@ -163,7 +163,7 @@ public class MediaItemHandler {
     *
     * Examples: /mediaItems/john.doe/@self/1
     */
-  @Operation(httpMethods = "POST", bodyParam = "mediaItem")
+  @Operation(httpMethods = "POST", bodyParam = "data")
   public Future<?> create(SocialRequestItem request) throws ProtocolException {
     // Retrieve userIds and albumIds
     Set<UserId> userIds = request.getUsers();
@@ -177,23 +177,23 @@ public class MediaItemHandler {
     // Service request
     return service.createMediaItem(Iterables.getOnlyElement(userIds),
         request.getAppId(), Iterables.getOnlyElement(albumIds),
-        request.getTypedParameter("mediaItem", MediaItem.class),
+        getRequestMediaItem(request),
         request.getToken());
   }
 
   /*
     * Handles PUT operations.
     *
-    * Allowed end-points: /mediaItems/{userId}/@self/{albumId}/{mediaItemId}
+    * Allowed end-points: /mediaItems/{userId}/@self/{albumId}/{id}
     *
     * Examples: /mediaItems/john.doe/@self/1/2
     */
-  @Operation(httpMethods = "PUT", bodyParam = "mediaItem")
+  @Operation(httpMethods = "PUT", bodyParam = "data")
   public Future<?> update(SocialRequestItem request) throws ProtocolException {
     // Retrieve userIds, albumIds, and mediaItemIds
     Set<UserId> userIds = request.getUsers();
     Set<String> albumIds = ImmutableSet.copyOf(request.getListParameter("albumId"));
-    Set<String> mediaItemIds = ImmutableSet.copyOf(request.getListParameter("mediaItemId"));
+    Set<String> mediaItemIds = ImmutableSet.copyOf(getRequestMediaItemIds(request));
 
     // Exactly one user, Album, and MediaItem must be specified
     HandlerPreconditions.requireNotEmpty(userIds, "No userId specified");
@@ -205,7 +205,7 @@ public class MediaItemHandler {
     return service.updateMediaItem(Iterables.getOnlyElement(userIds),
         request.getAppId(), Iterables.getOnlyElement(albumIds),
         Iterables.getOnlyElement(mediaItemIds),
-        request.getTypedParameter("mediaItem", MediaItem.class),
+        getRequestMediaItem(request),
         request.getToken());
   }
 
@@ -216,5 +216,23 @@ public class MediaItemHandler {
         ContainerConfig.DEFAULT_CONTAINER);
     return config.getList(container,
         "${Cur['gadgets.features'].opensocial.supportedFields.mediaItem}");
+  }
+
+  protected List<String> getRequestMediaItemIds(SocialRequestItem request) {
+    List<String> ids = request.getListParameter("id");
+    if (ids.isEmpty()) {
+      ids = request.getListParameter("mediaItemId");
+    }
+    return ids;
+  }
+
+  protected MediaItem getRequestMediaItem(SocialRequestItem request) {
+    // 'data' missing is ok, but then 'mediaItem' must exist.
+    // 'data' or 'mediaItem' invalid will lead to errors.
+    MediaItem result = request.getOptionalTypedParameter("data", MediaItem.class);
+    if (result == null) {
+      result = request.getTypedParameter("mediaItem", MediaItem.class);
+    }
+    return result;
   }
 }
