@@ -32,6 +32,7 @@ import org.apache.shindig.protocol.RestfulCollection;
 import org.apache.shindig.protocol.Service;
 import org.apache.shindig.social.opensocial.model.Person;
 import org.apache.shindig.social.opensocial.spi.CollectionOptions;
+import org.apache.shindig.social.opensocial.spi.CollectionOptionsFactory;
 import org.apache.shindig.social.opensocial.spi.GroupId;
 import org.apache.shindig.social.opensocial.spi.PersonService;
 import org.apache.shindig.social.opensocial.spi.UserId;
@@ -51,6 +52,7 @@ import com.google.inject.Inject;
 public class PersonHandler {
   private final PersonService personService;
   private final ContainerConfig config;
+  private final CollectionOptionsFactory collectionOptionsFactory;
 
 
   // Return a future for the first item of a collection
@@ -65,12 +67,15 @@ public class PersonHandler {
       };
     };
     return Futures.lazyTransform(collection, firstItem);
- }
+  }
 
   @Inject
-  public PersonHandler(PersonService personService, ContainerConfig config) {
+  public PersonHandler(
+      PersonService personService, ContainerConfig config,
+      CollectionOptionsFactory collectionOptionsFactory) {
     this.personService = personService;
     this.config = config;
+    this.collectionOptionsFactory = collectionOptionsFactory;
   }
 
   /**
@@ -91,7 +96,7 @@ public class PersonHandler {
       throw new IllegalArgumentException("Cannot fetch personIds for multiple userIds");
     }
 
-    CollectionOptions options = new CollectionOptions(request);
+    CollectionOptions options = collectionOptionsFactory.create(request);
 
     if (userIds.size() == 1) {
       if (optionalPersonId.isEmpty()) {

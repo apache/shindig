@@ -27,6 +27,7 @@ import org.apache.shindig.protocol.Service;
 import org.apache.shindig.social.opensocial.model.Activity;
 import org.apache.shindig.social.opensocial.spi.ActivityService;
 import org.apache.shindig.social.opensocial.spi.CollectionOptions;
+import org.apache.shindig.social.opensocial.spi.CollectionOptionsFactory;
 import org.apache.shindig.social.opensocial.spi.UserId;
 
 import com.google.common.base.Objects;
@@ -46,11 +47,15 @@ public class ActivityHandler  {
 
   private final ActivityService service;
   private final ContainerConfig config;
+  private final CollectionOptionsFactory collectionOptionsFactory;
 
   @Inject
-  public ActivityHandler(ActivityService service, ContainerConfig config) {
+  public ActivityHandler(
+      ActivityService service, ContainerConfig config,
+      CollectionOptionsFactory collectionOptionsFactory) {
     this.service = service;
     this.config = config;
+    this.collectionOptionsFactory = collectionOptionsFactory;
   }
 
   /**
@@ -117,7 +122,7 @@ public class ActivityHandler  {
     Set<UserId> userIds = request.getUsers();
     Set<String> optionalActivityIds = ImmutableSet.copyOf(request.getListParameter("activityId"));
 
-    CollectionOptions options = new CollectionOptions(request);
+    CollectionOptions options = collectionOptionsFactory.create(request);
 
     // Preconditions
     HandlerPreconditions.requireNotEmpty(userIds, "No userId specified");

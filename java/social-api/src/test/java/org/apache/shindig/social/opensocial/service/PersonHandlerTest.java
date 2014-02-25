@@ -35,6 +35,7 @@ import org.apache.shindig.protocol.model.SortOrder;
 import org.apache.shindig.social.core.model.PersonImpl;
 import org.apache.shindig.social.opensocial.model.Person;
 import org.apache.shindig.social.opensocial.spi.CollectionOptions;
+import org.apache.shindig.social.opensocial.spi.CollectionOptionsFactory;
 import org.apache.shindig.social.opensocial.spi.GroupId;
 import org.apache.shindig.social.opensocial.spi.PersonService;
 import org.apache.shindig.social.opensocial.spi.UserId;
@@ -98,7 +99,7 @@ public class PersonHandlerTest extends EasyMockTestCase {
          "}}}");
 
     containerConfig = new JsonContainerConfig(config, Expressions.forTesting());
-    handler = new PersonHandler(personService, containerConfig);
+    handler = new PersonHandler(personService, containerConfig, new CollectionOptionsFactory());
     registry = new DefaultHandlerRegistry(null, converter,
         new HandlerExecutionListener.NoOpHandler());
     registry.addHandlers(ImmutableSet.<Object>of(handler));

@@ -28,6 +28,7 @@ import org.apache.shindig.protocol.RequestItem;
 import org.apache.shindig.protocol.model.FilterOperation;
 import org.apache.shindig.protocol.model.SortOrder;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Objects;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -58,8 +59,11 @@ public class CollectionOptions {
       "userId",
       "groupId"
     };
+
+  @VisibleForTesting
   public CollectionOptions() {}
 
+  @VisibleForTesting
   public CollectionOptions(RequestItem request) {
     this.sortBy = request.getSortBy();
     this.sortOrder = request.getSortOrder();

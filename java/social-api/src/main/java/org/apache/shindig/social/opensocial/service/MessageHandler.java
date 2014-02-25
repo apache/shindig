@@ -24,6 +24,7 @@ import org.apache.shindig.protocol.ProtocolException;
 import org.apache.shindig.protocol.Service;
 import org.apache.shindig.social.opensocial.model.Message;
 import org.apache.shindig.social.opensocial.model.MessageCollection;
+import org.apache.shindig.social.opensocial.spi.CollectionOptionsFactory;
 import org.apache.shindig.social.opensocial.spi.CollectionOptions;
 import org.apache.shindig.social.opensocial.spi.MessageService;
 import org.apache.shindig.social.opensocial.spi.UserId;
@@ -43,10 +44,12 @@ import com.google.inject.Inject;
 public class MessageHandler {
 
   private final MessageService service;
+  private final CollectionOptionsFactory collectionOptionsFactory;
 
   @Inject
-  public MessageHandler(MessageService service) {
+  public MessageHandler(MessageService service, CollectionOptionsFactory collectionOptionsFactory) {
     this.service = service;
+    this.collectionOptionsFactory = collectionOptionsFactory;
   }
 
   @Operation(httpMethods = "DELETE")
@@ -82,7 +85,7 @@ public class MessageHandler {
     String msgCollId = request.getParameter("msgCollId");
     List<String> messageIds = request.getListParameter("messageIds");
 
-    CollectionOptions options = new CollectionOptions(request);
+    CollectionOptions options = collectionOptionsFactory.create(request);
 
     HandlerPreconditions.requireNotEmpty(userIds, "No userId specified");
     HandlerPreconditions.requireSingular(userIds, "Multiple userIds not supported");

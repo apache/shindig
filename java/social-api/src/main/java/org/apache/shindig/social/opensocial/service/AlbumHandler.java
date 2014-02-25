@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Future;
 
-import com.google.common.base.Objects;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.protocol.HandlerPreconditions;
 import org.apache.shindig.protocol.Operation;
@@ -31,9 +30,10 @@ import org.apache.shindig.protocol.RequestItem;
 import org.apache.shindig.protocol.Service;
 import org.apache.shindig.social.opensocial.model.Album;
 import org.apache.shindig.social.opensocial.spi.AlbumService;
-import org.apache.shindig.social.opensocial.spi.CollectionOptions;
+import org.apache.shindig.social.opensocial.spi.CollectionOptionsFactory;
 import org.apache.shindig.social.opensocial.spi.UserId;
 
+import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.inject.Inject;
@@ -48,11 +48,15 @@ public class AlbumHandler {
 
   private final AlbumService service;
   private final ContainerConfig config;
+  private final CollectionOptionsFactory collectionOptionsFactory;
 
   @Inject
-  public AlbumHandler(AlbumService service, ContainerConfig config) {
+  public AlbumHandler(
+      AlbumService service, ContainerConfig config,
+      CollectionOptionsFactory collectionOptionsFactory) {
     this.service = service;
     this.config = config;
+    this.collectionOptionsFactory = collectionOptionsFactory;
   }
 
   /*
@@ -111,7 +115,7 @@ public class AlbumHandler {
       } else {
         return service.getAlbums(Iterables.getOnlyElement(userIds),
             request.getAppId(), request.getFields(),
-            new CollectionOptions(request), optionalAlbumIds,
+            collectionOptionsFactory.create(request), optionalAlbumIds,
             request.getToken());
       }
     }
@@ -119,7 +123,7 @@ public class AlbumHandler {
     // Retrieve albums by group
     return service.getAlbums(userIds, request.getGroup(), request
         .getAppId(), request.getFields(),
-        new CollectionOptions(request), request.getToken());
+        collectionOptionsFactory.create(request), request.getToken());
   }
 
   /*

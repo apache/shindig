@@ -30,6 +30,7 @@ import org.apache.shindig.protocol.HandlerExecutionListener;
 import org.apache.shindig.protocol.HandlerRegistry;
 import org.apache.shindig.protocol.RestHandler;
 import org.apache.shindig.protocol.conversion.BeanJsonConverter;
+import org.apache.shindig.social.opensocial.spi.CollectionOptionsFactory;
 import org.apache.shindig.social.opensocial.spi.MediaItemService;
 import org.json.JSONObject;
 import org.junit.Before;
@@ -57,7 +58,7 @@ public class MediaItemHandlerTest extends EasyMockTestCase {
          "}}}");
 
     containerConfig = new JsonContainerConfig(config, Expressions.forTesting());
-    handler = new MediaItemHandler(mediaService, containerConfig);
+    handler = new MediaItemHandler(mediaService, containerConfig, new CollectionOptionsFactory());
 
     registry = new DefaultHandlerRegistry(null, converter,
         new HandlerExecutionListener.NoOpHandler());

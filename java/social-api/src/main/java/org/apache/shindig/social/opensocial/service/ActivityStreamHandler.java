@@ -31,6 +31,7 @@ import org.apache.shindig.protocol.Service;
 import org.apache.shindig.social.opensocial.model.ActivityEntry;
 import org.apache.shindig.social.opensocial.spi.ActivityStreamService;
 import org.apache.shindig.social.opensocial.spi.CollectionOptions;
+import org.apache.shindig.social.opensocial.spi.CollectionOptionsFactory;
 import org.apache.shindig.social.opensocial.spi.UserId;
 
 import com.google.common.base.Objects;
@@ -46,17 +47,22 @@ public class ActivityStreamHandler {
 
   private final ActivityStreamService service;
   private final ContainerConfig config;
+  private final CollectionOptionsFactory collectionOptionsFactory;
 
   /**
    * <p>Constructor for ActivityStreamHandler.</p>
    *
    * @param service a {@link org.apache.shindig.social.opensocial.spi.ActivityStreamService} object.
    * @param config a {@link org.apache.shindig.config.ContainerConfig} object.
+   * @param collectionOptionsFactory a {@link org.apache.shindig.social.opensocial.spi.CollectionOptionsFactory} object.
    */
   @Inject
-  public ActivityStreamHandler(ActivityStreamService service, ContainerConfig config) {
+  public ActivityStreamHandler(
+      ActivityStreamService service, ContainerConfig config,
+      CollectionOptionsFactory collectionOptionsFactory) {
     this.service = service;
     this.config = config;
+    this.collectionOptionsFactory = collectionOptionsFactory;
   }
 
   /**
@@ -151,7 +157,7 @@ public class ActivityStreamHandler {
     Set<UserId> userIds = request.getUsers();
     Set<String> optionalActivityIds = ImmutableSet.copyOf(request.getListParameter("activityId"));
 
-    CollectionOptions options = new CollectionOptions(request);
+    CollectionOptions options = collectionOptionsFactory.create(request);
 
     // Preconditions
     HandlerPreconditions.requireNotEmpty(userIds, "No userId specified");

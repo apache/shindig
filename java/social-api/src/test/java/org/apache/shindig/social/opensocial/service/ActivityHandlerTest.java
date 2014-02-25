@@ -34,6 +34,7 @@ import org.apache.shindig.social.core.model.ActivityImpl;
 import org.apache.shindig.social.opensocial.model.Activity;
 import org.apache.shindig.social.opensocial.spi.ActivityService;
 import org.apache.shindig.social.opensocial.spi.CollectionOptions;
+import org.apache.shindig.social.opensocial.spi.CollectionOptionsFactory;
 import org.apache.shindig.social.opensocial.spi.GroupId;
 import org.apache.shindig.social.opensocial.spi.UserId;
 
@@ -85,7 +86,7 @@ public class ActivityHandlerTest extends EasyMockTestCase {
          "}}}");
 
     containerConfig = new JsonContainerConfig(config, Expressions.forTesting());
-    handler = new ActivityHandler(activityService, containerConfig);
+    handler = new ActivityHandler(activityService, containerConfig, new CollectionOptionsFactory());
     registry = new DefaultHandlerRegistry(null, converter,
         new HandlerExecutionListener.NoOpHandler());
     registry.addHandlers(ImmutableSet.<Object>of(handler));

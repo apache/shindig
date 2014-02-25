@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Future;
 
-import com.google.common.base.Objects;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.protocol.HandlerPreconditions;
 import org.apache.shindig.protocol.Operation;
@@ -30,10 +29,11 @@ import org.apache.shindig.protocol.ProtocolException;
 import org.apache.shindig.protocol.RequestItem;
 import org.apache.shindig.protocol.Service;
 import org.apache.shindig.social.opensocial.model.MediaItem;
-import org.apache.shindig.social.opensocial.spi.CollectionOptions;
+import org.apache.shindig.social.opensocial.spi.CollectionOptionsFactory;
 import org.apache.shindig.social.opensocial.spi.MediaItemService;
 import org.apache.shindig.social.opensocial.spi.UserId;
 
+import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.inject.Inject;
@@ -49,11 +49,15 @@ public class MediaItemHandler {
 
   private final MediaItemService service;
   private final ContainerConfig config;
+  private final CollectionOptionsFactory collectionOptionsFactory;
 
   @Inject
-  public MediaItemHandler(MediaItemService service, ContainerConfig config) {
+  public MediaItemHandler(
+      MediaItemService service, ContainerConfig config,
+      CollectionOptionsFactory collectionOptionsFactory) {
     this.service = service;
     this.config = config;
+    this.collectionOptionsFactory = collectionOptionsFactory;
   }
 
   /*
@@ -108,7 +112,7 @@ public class MediaItemHandler {
       } else {
         return service.getMediaItems(Iterables.getOnlyElement(userIds),
             request.getAppId(), albumId, optionalMediaItemIds,
-            request.getFields(), new CollectionOptions(request),
+            request.getFields(), collectionOptionsFactory.create(request),
             request.getToken());
       }
     }
@@ -117,13 +121,13 @@ public class MediaItemHandler {
     if (albumId != null) {
       return service.getMediaItems(Iterables.getOnlyElement(userIds),
           request.getAppId(), albumId, request.getFields(),
-          new CollectionOptions(request), request.getToken());
+          collectionOptionsFactory.create(request), request.getToken());
     }
 
     // Retrieve by users and groups
     return service.getMediaItems(userIds, request.getGroup(), request
         .getAppId(), request.getFields(),
-        new CollectionOptions(request), request.getToken());
+        collectionOptionsFactory.create(request), request.getToken());
   }
 
   /*

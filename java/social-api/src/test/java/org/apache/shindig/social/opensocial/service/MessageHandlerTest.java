@@ -30,6 +30,7 @@ import org.apache.shindig.protocol.RestHandler;
 import org.apache.shindig.protocol.conversion.BeanJsonConverter;
 import org.apache.shindig.social.core.model.MessageImpl;
 import org.apache.shindig.social.opensocial.model.Message;
+import org.apache.shindig.social.opensocial.spi.CollectionOptionsFactory;
 import org.apache.shindig.social.opensocial.spi.MessageService;
 import org.apache.shindig.social.opensocial.spi.UserId;
 import org.easymock.EasyMock;
@@ -63,7 +64,7 @@ public class MessageHandlerTest extends Assert {
     sender = new UserId(UserId.Type.userId, "message.sender");
     recipients = ImmutableList.of("second.recipient", "first.recipient");
 
-    handler = new MessageHandler(messageService);
+    handler = new MessageHandler(messageService, new CollectionOptionsFactory());
     registry = new DefaultHandlerRegistry(null, converter,
         new HandlerExecutionListener.NoOpHandler());
     registry.addHandlers(ImmutableSet.<Object>of(handler));

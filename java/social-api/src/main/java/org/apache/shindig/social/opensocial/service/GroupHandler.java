@@ -26,6 +26,7 @@ import org.apache.shindig.protocol.Operation;
 import org.apache.shindig.protocol.ProtocolException;
 import org.apache.shindig.protocol.Service;
 import org.apache.shindig.social.opensocial.spi.CollectionOptions;
+import org.apache.shindig.social.opensocial.spi.CollectionOptionsFactory;
 import org.apache.shindig.social.opensocial.spi.GroupService;
 import org.apache.shindig.social.opensocial.spi.UserId;
 
@@ -40,16 +41,18 @@ import com.google.inject.Inject;
 public class GroupHandler {
 
   private final GroupService service;
+  private final CollectionOptionsFactory collectionOptionsFactory;
 
   @Inject
-  public GroupHandler(GroupService service) {
+  public GroupHandler(GroupService service, CollectionOptionsFactory collectionOptionsFactory) {
     this.service = service;
+    this.collectionOptionsFactory = collectionOptionsFactory;
   }
 
   @Operation(httpMethods = "GET")
   public Future<?> get(SocialRequestItem request) throws ProtocolException {
     Set<UserId> userIds = request.getUsers();
-    CollectionOptions options = new CollectionOptions(request);
+    CollectionOptions options = collectionOptionsFactory.create(request);
 
     // Preconditions
     HandlerPreconditions.requireNotEmpty(userIds, "No userId specified");
