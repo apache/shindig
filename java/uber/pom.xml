@@ -22,21 +22,21 @@
   <parent>
     <groupId>org.apache.shindig</groupId>
     <artifactId>shindig-project</artifactId>
-    <version>2.5.1-SNAPSHOT</version>
+    <version>2.5.1</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
 
   <artifactId>shindig-uber</artifactId>
-  <version>2.5.1-SNAPSHOT</version>
+  <version>2.5.1</version>
   <packaging>jar</packaging>
 
   <name>Apache Shindig Uber Jar</name>
   <description>Uber Jar contains Shindig and dependencies</description>
 
   <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/shindig/trunk/java/uber</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/shindig/trunk/java/uber</developerConnection>
-    <url>http://svn.apache.org/viewvc/shindig/trunk/java/uber</url>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/shindig/tags/shindig-project-2.5.1/java/uber</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/shindig/tags/shindig-project-2.5.1/java/uber</developerConnection>
+    <url>http://svn.apache.org/viewvc/shindig/tags/shindig-project-2.5.1/java/uber</url>
   </scm>
 
   <build>
