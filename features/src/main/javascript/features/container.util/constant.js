@@ -138,7 +138,10 @@ osapi.container.RenderParam = {
      * The modduleId of this gadget.  Used to identify saved instances of gadgets.
      * Defaults to 0, which means the instance of the gadget is not saved.
      */
-    MODULE_ID: 'moduleid'
+    MODULE_ID: 'moduleid',
+
+    /** Will enable scrolling on the iFrame. */
+    SCROLL: 'scroll'
 };
 
 /**

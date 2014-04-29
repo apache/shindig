@@ -129,7 +129,7 @@ osapi.container.SiteHolder.prototype.createIframeAttributeMap = function(url, ov
         id: this.iframeId_,
         name: this.iframeId_,
         src: url,
-        scrolling: 'no',
+        scrolling: renderParams[osapi.container.RenderParam.SCROLL] ? 'yes' : 'no',
         marginwidth: 0,
         marginheight: 0,
         frameborder: 0,
