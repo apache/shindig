@@ -72,7 +72,11 @@ public final class ContentTypes {
   /**
    * Extract the mime part from an Http Content-Type header
    */
-  public static String extractMimePart(String contentType) {
+  public static String extractMimePart(String contentType) throws InvalidContentTypeException {
+    if (Strings.isNullOrEmpty(contentType)) {
+      throw new InvalidContentTypeException("No Content-Type specified.");
+    }
+
     contentType = contentType.trim();
     int separator = contentType.indexOf(';');
     if (separator != -1) {

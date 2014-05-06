@@ -72,4 +72,14 @@ public class ContentTypesTest extends Assert {
   public void textExtractMimePart() throws Exception {
     assertEquals("text/xml", ContentTypes.extractMimePart("Text/Xml ; charset = ISO-8859-1;x=y"));
   }
+
+  @Test(expected=ContentTypes.InvalidContentTypeException.class)
+  public void testExtractMimePartNull() throws Exception {
+    ContentTypes.extractMimePart(null);
+  }
+
+  @Test(expected=ContentTypes.InvalidContentTypeException.class)
+  public void testExtractMimePartEmptyString() throws Exception {
+    ContentTypes.extractMimePart("");
+  }
 }
