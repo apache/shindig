@@ -126,7 +126,7 @@
       "shindig_client2" : {
          "providerName"  : "shindigOAuth2Provider",
          "type"          : "confidential",
-         "grant_type"    : "code",
+         "grant_type"    : "client_credentials",
          "client_id"     : "testClientCredentialsClient",
          "client_secret" : "clientCredentialsClient_secret"
       },

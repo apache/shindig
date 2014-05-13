@@ -75,7 +75,7 @@ public class OAuth2AuthCodeFlowTest extends AbstractLargeRestfulTests {
             + "&grant_type=authorization_code&redirect_uri="
             + URLEncoder.encode(PUBLIC_REDIRECT_URI, "UTF-8") + "&code="
             + PUBLIC_AUTH_CODE, "UTF-8");
-    req.setMethod("GET");
+    req.setMethod("POST");
     req.setServletPath("/oauth2");
     req.setPathInfo("/access_token");
     HttpServletResponse resp = mock(HttpServletResponse.class);
@@ -332,7 +332,7 @@ public class OAuth2AuthCodeFlowTest extends AbstractLargeRestfulTests {
             + "&grant_type=authorization_code&redirect_uri="
             + URLEncoder.encode(REDIRECT_URI, "UTF-8") + "&code=" + code
             + "&client_secret=" + CONF_CLIENT_SECRET);
-    req.setMethod("GET");
+    req.setMethod("POST");
     req.setServletPath("/oauth2");
     req.setPathInfo("/access_token");
     resp = mock(HttpServletResponse.class);
@@ -367,7 +367,7 @@ public class OAuth2AuthCodeFlowTest extends AbstractLargeRestfulTests {
             + "&grant_type=authorization_code&redirect_uri="
             + URLEncoder.encode(REDIRECT_URI, "UTF-8") + "&code="
             + CONF_AUTH_CODE + "&client_secret=" + CONF_CLIENT_SECRET);
-    req.setMethod("GET");
+    req.setMethod("POST");
     req.setServletPath("/oauth2");
     req.setPathInfo("/access_token");
     HttpServletResponse resp = mock(HttpServletResponse.class);
@@ -407,7 +407,7 @@ public class OAuth2AuthCodeFlowTest extends AbstractLargeRestfulTests {
             + Base64
                 .encodeBase64String((CONF_CLIENT_ID + ":" + CONF_CLIENT_SECRET)
                     .getBytes("UTF-8")));
-    req.setMethod("GET");
+    req.setMethod("POST");
     req.setServletPath("/oauth2");
     req.setPathInfo("/access_token");
     HttpServletResponse resp = mock(HttpServletResponse.class);
@@ -446,7 +446,7 @@ public class OAuth2AuthCodeFlowTest extends AbstractLargeRestfulTests {
         "Basic "
             + Base64.encodeBase64String(("BAD_ID:" + CONF_CLIENT_SECRET)
                 .getBytes("UTF-8")));
-    req.setMethod("GET");
+    req.setMethod("POST");
     req.setServletPath("/oauth2");
     req.setPathInfo("/access_token");
     HttpServletResponse resp = mock(HttpServletResponse.class);
@@ -477,7 +477,7 @@ public class OAuth2AuthCodeFlowTest extends AbstractLargeRestfulTests {
             + "&grant_type=authorization_code&redirect_uri="
             + URLEncoder.encode(REDIRECT_URI, "UTF-8") + "&code="
             + CONF_AUTH_CODE + "&client_secret=BAD_SECRET", "UTF-8");
-    req.setMethod("GET");
+    req.setMethod("POST");
     req.setServletPath("/oauth2");
     req.setPathInfo("/access_token");
     HttpServletResponse resp = mock(HttpServletResponse.class);
@@ -509,7 +509,7 @@ public class OAuth2AuthCodeFlowTest extends AbstractLargeRestfulTests {
         "client_id=BAD_CLIENT&grant_type=authorization_code&redirect_uri="
             + URLEncoder.encode(REDIRECT_URI, "UTF-8") + "&code="
             + PUBLIC_AUTH_CODE);
-    req.setMethod("GET");
+    req.setMethod("POST");
     req.setServletPath("/oauth2");
     req.setPathInfo("/access_token");
     HttpServletResponse resp = mock(HttpServletResponse.class);
@@ -541,7 +541,7 @@ public class OAuth2AuthCodeFlowTest extends AbstractLargeRestfulTests {
             + "&grant_type=BAD_GRANT&redirect_uri="
             + URLEncoder.encode(REDIRECT_URI, "UTF-8") + "&code="
             + PUBLIC_AUTH_CODE);
-    req.setMethod("GET");
+    req.setMethod("POST");
     req.setServletPath("/oauth2");
     req.setPathInfo("/access_token");
     HttpServletResponse resp = mock(HttpServletResponse.class);
@@ -572,7 +572,7 @@ public class OAuth2AuthCodeFlowTest extends AbstractLargeRestfulTests {
         "http://localhost:8080", "/oauth2", "client_id=" + PUBLIC_CLIENT_ID
             + "&grant_type=authorization_code&redirect_uri="
             + URLEncoder.encode(REDIRECT_URI, "UTF-8") + "&code=BAD-CODE-OMG");
-    req.setMethod("GET");
+    req.setMethod("POST");
     req.setServletPath("/oauth2");
     req.setPathInfo("/access_token");
     HttpServletResponse resp = mock(HttpServletResponse.class);
@@ -626,7 +626,7 @@ public class OAuth2AuthCodeFlowTest extends AbstractLargeRestfulTests {
 
     // use authorization code to get access token
     req = new FakeHttpServletRequest("http://localhost:8080","/oauth2", "client_id=" + CONF_CLIENT_ID + "&grant_type=authorization_code&redirect_uri=" + URLEncoder.encode(REDIRECT_URI,"UTF-8") + "&code=" + code + "&client_secret=" + CONF_CLIENT_SECRET);
-    req.setMethod("GET");
+    req.setMethod("POST");
     req.setServletPath("/oauth2");
     req.setPathInfo("/access_token");
     resp = mock(HttpServletResponse.class);
@@ -659,7 +659,7 @@ public class OAuth2AuthCodeFlowTest extends AbstractLargeRestfulTests {
 
     // attempt to re-use authorization code to get new access token
     req = new FakeHttpServletRequest("http://localhost:8080","/oauth2", "client_id=" + CONF_CLIENT_ID + "&grant_type=authorization_code&redirect_uri=" + URLEncoder.encode(REDIRECT_URI,"UTF-8") + "&code=" + code + "&client_secret=" + CONF_CLIENT_SECRET);
-    req.setMethod("GET");
+    req.setMethod("POST");
     req.setServletPath("/oauth2");
     req.setPathInfo("/access_token");
     resp = mock(HttpServletResponse.class);
@@ -685,6 +685,33 @@ public class OAuth2AuthCodeFlowTest extends AbstractLargeRestfulTests {
       return; // test passed
     }
     fail("Should have thrown InvalidAuthenticationException");
+  }
+
+  /**
+   * Test attempting to get access token via GET request
+   */
+  @Test
+  public void testGetAccessTokenBadMethodType() throws Exception {
+    FakeHttpServletRequest req = new FakeHttpServletRequest(
+        "http://localhost:8080/oauth2");
+    req.setContentType("application/x-www-form-urlencoded");
+    req.setPostData(
+        "client_id=" + PUBLIC_CLIENT_ID
+            + "&grant_type=authorization_code&redirect_uri="
+            + URLEncoder.encode(PUBLIC_REDIRECT_URI, "UTF-8") + "&code="
+            + PUBLIC_AUTH_CODE, "UTF-8");
+    req.setMethod("GET");
+    req.setServletPath("/oauth2");
+    req.setPathInfo("/access_token");
+
+    HttpServletResponse resp = mock(HttpServletResponse.class);
+    resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED, "The client MUST use the HTTP \"POST\" method " +
+        "when making access token requests.");
+
+    replay();
+    servlet.service(req, resp);
+
+    verify();
   }
 
 }

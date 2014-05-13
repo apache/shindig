@@ -42,6 +42,8 @@ import com.google.inject.Inject;
  */
 public class OAuth2Servlet extends InjectedServlet {
 
+  private static final String AUTHORIZE = "authorize";
+  private static final String TOKEN = "token";
   private static final long serialVersionUID = -4257719224664564922L;
   private static OAuth2AuthorizationHandler authorizationHandler;
   private static OAuth2TokenHandler tokenHandler;
@@ -66,10 +68,12 @@ public class OAuth2Servlet extends InjectedServlet {
       throws ServletException, IOException {
     HttpUtil.setNoCache(response);
     String path = request.getPathInfo();
-    if (path.endsWith("authorize")) {
+    if (path.endsWith(AUTHORIZE)) {
       sendOAuth2Response(response, authorizationHandler.handle(request, response));
-    } else if (path.endsWith("token")) {
-      sendOAuth2Response(response, tokenHandler.handle(request, response));
+    } else if (path.endsWith(TOKEN)) {
+      //token endpoint must use POST method
+      response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED, "The client MUST use the HTTP \"POST\" method " +
+      "when making access token requests.");
     } else {
       response.sendError(HttpServletResponse.SC_NOT_FOUND, "Unknown URL");
     }
@@ -78,7 +82,14 @@ public class OAuth2Servlet extends InjectedServlet {
   @Override
   protected void doPost(HttpServletRequest request, HttpServletResponse response)
       throws ServletException, IOException {
-    doGet(request, response);
+    String path = request.getPathInfo();
+    if(path.endsWith(TOKEN)){
+      HttpUtil.setNoCache(response);
+      sendOAuth2Response(response, tokenHandler.handle(request, response));
+    }else{
+      // authorization endpoint must support GET method and may support POST as well
+      doGet(request, response);
+    }
   }
 
   /**

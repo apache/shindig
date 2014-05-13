@@ -103,6 +103,7 @@ public class ClientCredentialsGrantTypeHandlerTest extends MockUtils {
     Assert.assertNotNull( result.getSecurityToken() );
     Assert.assertTrue( result.getSecurityToken().isAnonymous() );
     Assert.assertEquals( accessor.getGadgetUri(), result.getSecurityToken().getAppUrl() );
+    Assert.assertEquals("POST", result.getMethod());
   }
 
   @Test(expected = OAuth2RequestException.class)

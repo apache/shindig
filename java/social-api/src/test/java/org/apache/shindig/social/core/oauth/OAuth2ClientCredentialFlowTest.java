@@ -30,6 +30,7 @@ import org.junit.Test;
 import javax.servlet.http.HttpServletResponse;
 
 import java.io.PrintWriter;
+import java.net.URLEncoder;
 
 public class OAuth2ClientCredentialFlowTest extends AbstractLargeRestfulTests {
 
@@ -56,7 +57,7 @@ public class OAuth2ClientCredentialFlowTest extends AbstractLargeRestfulTests {
     FakeHttpServletRequest req = new FakeHttpServletRequest(
         "http://localhost:8080", "/oauth2", "grant_type=client_credentials");
     req.setHeader("Authorization", "Basic *^%#");
-    req.setMethod("GET");
+    req.setMethod("POST");
     req.setServletPath("/oauth2");
     req.setPathInfo("/access_token");
     HttpServletResponse resp = mock(HttpServletResponse.class);
@@ -89,7 +90,7 @@ public class OAuth2ClientCredentialFlowTest extends AbstractLargeRestfulTests {
         "Basic "
             + Base64.encodeBase64String((CLIENT_CRED_CLIENT + ":badsecret")
                 .getBytes("UTF-8")));
-    req.setMethod("GET");
+    req.setMethod("POST");
     req.setServletPath("/oauth2");
     req.setPathInfo("/access_token");
     HttpServletResponse resp = mock(HttpServletResponse.class);
@@ -123,7 +124,7 @@ public class OAuth2ClientCredentialFlowTest extends AbstractLargeRestfulTests {
             + Base64
                 .encodeBase64String((CLIENT_CRED_CLIENT + ":" + CLIENT_CRED_SECRET)
                     .getBytes("UTF-8")));
-    req.setMethod("GET");
+    req.setMethod("POST");
     req.setServletPath("/oauth2");
     req.setPathInfo("/access_token");
     HttpServletResponse resp = mock(HttpServletResponse.class);
@@ -156,7 +157,7 @@ public class OAuth2ClientCredentialFlowTest extends AbstractLargeRestfulTests {
         "http://localhost:8080", "/oauth2", "client_id=" + CLIENT_CRED_CLIENT
             + "&grant_type=client_credentials&client_secret="
             + CLIENT_CRED_SECRET);
-    req.setMethod("GET");
+    req.setMethod("POST");
     req.setServletPath("/oauth2");
     req.setPathInfo("/access_token");
     HttpServletResponse resp = mock(HttpServletResponse.class);
@@ -175,6 +176,29 @@ public class OAuth2ClientCredentialFlowTest extends AbstractLargeRestfulTests {
     assertEquals("bearer", tokenResponse.getString("token_type"));
     assertNotNull(tokenResponse.getString("access_token"));
     assertTrue(tokenResponse.getLong("expires_in") > 0);
+    verify();
+  }
+
+  /**
+   * Test attempting to get access token via GET request
+   */
+  @Test
+  public void testGetAccessTokenBadMethodType() throws Exception {
+    FakeHttpServletRequest req = new FakeHttpServletRequest(
+        "http://localhost:8080", "/oauth2", "client_id=" + CLIENT_CRED_CLIENT
+            + "&grant_type=client_credentials&client_secret="
+            + CLIENT_CRED_SECRET);
+    req.setMethod("GET");
+    req.setServletPath("/oauth2");
+    req.setPathInfo("/access_token");
+
+    HttpServletResponse resp = mock(HttpServletResponse.class);
+    resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED, "The client MUST use the HTTP \"POST\" method " +
+        "when making access token requests.");
+
+    replay();
+    servlet.service(req, resp);
+
     verify();
   }
 
