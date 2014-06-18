@@ -192,7 +192,7 @@ OpenAjax.hub.IframeContainer = function( hub, clientID, params )
         var relay = params.IframeContainer.clientRelay;
         var transportName = OpenAjax.gadgets.rpc.getRelayChannel();
         if ( params.IframeContainer.tunnelURI ) {
-            if ( transportName !== "wpm" && transportName !== "ifpc" ) {
+            if ( transportName !== "wpm" && transportName !== "ifpc" && transportName !== "flash") {
                 throw new Error( OpenAjax.hub.Error.IncompatBrowser );
             }
         } else {
