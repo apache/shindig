@@ -61,7 +61,6 @@ import org.apache.shindig.gadgets.rewrite.MutableContent;
 import org.apache.shindig.gadgets.rewrite.RewritingException;
 import org.apache.shindig.gadgets.spec.Feature;
 import org.apache.shindig.gadgets.spec.MessageBundle;
-import org.apache.shindig.gadgets.spec.ModulePrefs;
 import org.apache.shindig.gadgets.spec.UserPref;
 import org.apache.shindig.gadgets.spec.View;
 import org.apache.shindig.gadgets.templates.MessageELResolver;
@@ -240,14 +239,6 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
 
       // Insert new content before any of the existing children of the head element
       Node firstHeadChild = head.getFirstChild();
-
-      ModulePrefs mps = gadget.getSpec().getModulePrefs();
-      if (mps != null && mps.getTitle() != null && !mps.getTitle().isEmpty()
-          && !"".equals(mps.getTitle().trim())) {
-        Element title = document.createElement("title");
-        title.appendChild(title.getOwnerDocument().createTextNode(mps.getTitle().trim()));
-        head.insertBefore(title, firstHeadChild);
-      }
 
       Element injectedStyle = document.createElement("style");
       injectedStyle.setAttribute("type", "text/css");
