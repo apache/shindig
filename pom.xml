@@ -53,7 +53,7 @@
   </properties>
 
   <prerequisites>
-    <maven>2.2.1</maven>
+    <maven>3.0.4</maven>
   </prerequisites>
 
   <!-- ====================================================================== -->
@@ -1246,7 +1246,7 @@
         <plugin>
           <groupId>net.alchim31.maven</groupId>
           <artifactId>yuicompressor-maven-plugin</artifactId>
-          <version>1.1</version>
+          <version>1.4.0</version>
         </plugin>
 
         <plugin>
