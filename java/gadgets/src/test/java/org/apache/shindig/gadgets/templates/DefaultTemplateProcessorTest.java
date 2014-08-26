@@ -50,9 +50,9 @@ import org.w3c.dom.NodeList;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
+import java.util.WeakHashMap;
 
 import javax.el.ELResolver;
 
@@ -258,7 +258,7 @@ public class DefaultTemplateProcessorTest {
     }
     // Access is typically protected so just bypass
     userDataField.setAccessible(true);
-    Hashtable<?, ?> userDataMap = (Hashtable<?, ?>) userDataField.get(doc);
+    WeakHashMap<?, ?> userDataMap = (WeakHashMap<?, ?>) userDataField.get(doc);
 
     // There should be only one element in the user data map, if there are more then the
     // cloning process has put them there which can be a nasty source of memory leaks. Consider

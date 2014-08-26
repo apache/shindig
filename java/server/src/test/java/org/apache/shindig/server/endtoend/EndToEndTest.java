@@ -29,6 +29,7 @@ import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.NicelyResynchronizingAjaxController;
 import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gargoylesoftware.htmlunit.html.DomNode;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.html.HtmlElement;
@@ -284,7 +285,7 @@ public class EndToEndTest {
     HtmlPage page = executePageTest("templateRewriter", null);
 
     // Verify that iteration attributes were processed
-    HtmlElement attrs = page.getElementById("attrs");
+    DomElement attrs = page.getElementById("attrs");
     List<HtmlElement> attrsList = attrs.getElementsByTagName("li");
     assertEquals(3, attrsList.size());
 
@@ -297,13 +298,13 @@ public class EndToEndTest {
     assertEquals("Maija", element.getTextContent().trim());
 
     // Verify that the repeatTag was processed
-    HtmlElement repeat = page.getElementById("repeatTag");
+    DomElement repeat = page.getElementById("repeatTag");
     List<HtmlElement> repeatList = repeat.getElementsByTagName("li");
     assertEquals(1, repeatList.size());
     assertEquals("George", repeatList.get(0).getTextContent().trim());
 
     // Verify that the ifTag was processed
-    HtmlElement ifTag = page.getElementById("ifTag");
+    DomElement ifTag = page.getElementById("ifTag");
     List<HtmlElement> ifList = ifTag.getElementsByTagName("li");
     assertEquals(3, ifList.size());
     assertEquals(1, page.getElementsByTagName("b").getLength());
@@ -337,7 +338,7 @@ public class EndToEndTest {
   @Test
   public void testJavaScriptCompile() throws Exception {
     // AllJsFilter will redirect to a url with all features being requested
-    webClient.setRedirectEnabled(true);
+    webClient.getOptions().setRedirectEnabled(true);
 
     String containerJsUrl = EndToEndServer.SERVER_URL + "/gadgets/js/all-features-please.js?container=default&c=1";
     String gadgetJsUrl = EndToEndServer.SERVER_URL + "/gadgets/js/all-features-please.js?container=default&c=0";
@@ -369,7 +370,7 @@ public class EndToEndTest {
     webClient.setAjaxController(new NicelyResynchronizingAjaxController());
     webClient.waitForBackgroundJavaScript(120000);  // Closure can take a long time...
     webClient.setHTMLParserListener(HTMLParserListener.LOG_REPORTER);
-    webClient.setTimeout(120000);  // Closure can take a long time...
+    webClient.getOptions().setTimeout(120000);  // Closure can take a long time...
 
     alertHandler = new CollectingAlertHandler();
     webClient.setAlertHandler(alertHandler);
