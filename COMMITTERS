@@ -9,38 +9,35 @@ people directly.
 
 Blanket commit access:
 
-	   lindner	Paul Lindner        lindner@apache.org       PMC Chair 
-	   agektmr	Eiji Kitamura       agektmr@apache.org       PMC Member
-	  bhofmann	Bastian Hofmann     bhofmann@apache.org      PMC Member
-	    brianm	Brian McCallister   brianm@apache.org        PMC Member Mentor
-	   chabotc	Chris Chabot        chabotc@apache.org       PMC Member
-	  dbentley	Daniel Bentley      dbentley@apache.org      PMC Member
-	      doll	Cassie Doll         doll@apache.org          PMC Member
-	 dpeterson	Dan Peterson        dpeterson@apache.org     PMC Member
-	      etnu	Kevin Brown         etnu@apache.org          PMC Member
-	       ieb	Ian Boston          ieb@apache.org           PMC Member
-	      evan	Evan Gilbert        evan@apache.org          PMC Member
-	    jasvir	Jasvir Nagra        jasvir@apache.org        PMC Member
-	     johnh	John Hjelmstad      johnh@apache.org         PMC Member
-	     jyang	Jun Yang            jyang@apache.org         PMC Member
-	     sgala	Santiago Gala       sgala@hisitech.com       Emeritus Mentor
-	     lryan	Louis Ryan          lryan@apache.org         PMC Member
-	   martint	Martin Traverso     martint@apache.org       PMC Member
-	  vsiveton	Vincent Siveton     vsiveton@apache.org      PMC Member
-	      zhen	Zhen Wang           zhen@apache.org          PMC Member
-	    awiner	Adam Winer          awiner@apache.org        PMC Member
-	     chico	Chico Charlesworth  chico@apache.org         PMC Member
-	    chirag	Chirag Shah         chirag@apache.org        PMC Member
-	  hsaputra	Henry Saputra       hsaputra@apache.org      PMC Member
-	  chaowang	Jacky Wang          chaowang@apache.org      PMC Member
-	   zhoresh	Ziv Horesh          zhoresh@apache.org       PMC Member
-	     gagan	Gagandeep Singh     gagan@apache.org         PMC Member
-	     hnguy	Han Nguyen          hnguy@apache.org         PMC Member
-	      fitz	Brian Fitzpatrick   fitz@apache.org          Mentor    
-	    gstein	Greg Stein          gstein@apache.org        Emeritus Mentor
-	   sylvain	Sylvain Wallez      sylvain@apache.org       Mentor    
-	     tomdz	Thomas Dudziak      tomdz@apache.org         Mentor    
-	 upayavira	Upayavira           upayavira@apache.org     Mentor    
-	 dharkness	David Harkness      dharkness@apache.org     Emeritus  
-	   henning	Henning Schmiedehausenhenning@apache.org     Emeritus
-	   woodser	Eric Woods			woodser@apache.org		 PMC Member
+    Adam Winer                 <awiner@apache.org>                               (emeritus)
+    Andreas Kohn               <ankon@apache.org>               [2013-12-08]
+    Bastian Hofmann            <bhofmann@apache.org>            [2010-08-14]
+    Cassie Doll                <doll@apache.org>                                 (emeritus)
+    Chico Charlesworth         <chico@apache.org>
+    Chirag Shah                <chirag@apache.org>              [2010-02-20]
+    Chris Chabot               <chabotc@apache.org>                              (emeritus)
+    Dan Dumont                 <ddumont@apache.org>             [2011-11-29]
+    Daniel Peterson            <dpeterson@apache.org>
+    Eric Woods                 <woodser@apache.org>             [2011-03-05]
+    Evan Gilbert               <evan@apache.org>
+    Gagandeep Singh            <gagan@apache.org>               [2010-09-01]
+    Han Thi Ngoc Nguyen        <hnguy@apache.org>               [2010-09-01]
+    Henning Schmiedehausen     <henning@apache.org>                          (*) (emeritus)
+    Henry Saputra              <hsaputra@apache.org>            [2010-06-25] (*) (emeritus)
+    Ian Boston                 <ieb@apache.org>                              (*) (emeritus)
+    Jacky Wang                 <chaowang@apache.org>            [2010-03-14]
+    Jacobo Tarrio Barreiro     <jtarrio@apache.org>             [2011-03-05]
+    Jesse Ciancetta            <jcian@apache.org>               [2011-11-29]     (emeritus)
+    John Hjelmstad             <johnh@apache.org>
+    Kevin Brown                <etnu@apache.org>                                 (emeritus)
+    Li Xu                      <lixu@apache.org>                [2011-11-29]
+    Louis Ryan                 <lryan@apache.org>                                (emeritus)
+    Mathew Mannion             <mmannion@apache.org>            [2011-03-05]
+    Michael Hermanto           <mhermanto@apache.org>           [2010-09-01]
+    Paul Lindner               <lindner@apache.org>                          (*)
+    Ryan Baxter (chair)        <rbaxter85@apache.org>           [2011-11-29]
+    Santiago Gala              <sgala@apache.org>                            (*)
+    Stanton Sievers            <ssievers@apache.org>            [2011-11-29]
+    Upayavira                  <upayavira@apache.org>                        (*)
+    Vincent Siveton            <vsiveton@apache.org>                         (*) (emeritus)
+    Ziv Horesh                 <zhoresh@apache.org>             [2010-04-18]
