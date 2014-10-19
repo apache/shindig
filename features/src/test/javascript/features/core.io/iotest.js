@@ -1291,3 +1291,73 @@ IoTest.prototype.testPreload_oauthApproval = function() {
       params);
   this.assertEquals("not preloaded", resp.text);
 };
+
+IoTest.prototype.testNoCacheOnUrlParam = function () {
+
+  this.getUrlParameters = gadgets.util.getUrlParameters;
+  gadgets.util.getUrlParameters = function () {
+    return { "st": "authtoken", "url": "http://www.gadget.com/gadget.xml", "container": "foo",
+      "nocache": "1"};
+  };
+
+  var req = new fakeXhr.Expectation("GET", "http://example.com/json");
+  this.setStandardArgs(req, false);
+  req.setQueryArg("url", "http://target.example.com/somepage");
+  req.setQueryArg("bypassSpecCache", "1");
+  req.setQueryArg("nocache", "1");
+
+  var resp = this.makeFakeResponse(
+    "{ 'http://target.example.com/somepage' : { 'body' : 'some data', 'rc' : 200 }}");
+
+  this.fakeXhrs.expect(req, resp);
+
+  var resp = null;
+  gadgets.io.makeRequest("http://target.example.com/somepage",
+    function (data) {
+      resp = data;
+    });
+  this.assertEquals('some data', resp.text);
+};
+
+IoTest.prototype.testNoCacheOnRequestParam = function () {
+
+  var req = new fakeXhr.Expectation("GET", "http://example.com/json");
+  this.setStandardArgs(req, false);
+  req.setQueryArg("url", "http://target.example.com/somepage");
+  req.setQueryArg("nocache", "1");
+
+  var resp = this.makeFakeResponse(
+    "{ 'http://target.example.com/somepage' : { 'body' : 'some data', 'rc' : 200 }}");
+
+  this.fakeXhrs.expect(req, resp);
+
+  var resp = null;
+  params = {};
+  params[gadgets.io.RequestParameters.NO_CACHE] = 1;
+  gadgets.io.makeRequest("http://target.example.com/somepage",
+    function (data) {
+      resp = data;
+    }, params);
+  this.assertEquals('some data', resp.text);
+};
+
+IoTest.prototype.testNoNoCache = function () {
+
+  var req = new fakeXhr.Expectation("GET", "http://example.com/json");
+  this.setStandardArgs(req, false);
+  req.setQueryArg("url", "http://target.example.com/somepage");
+
+  var resp = this.makeFakeResponse(
+    "{ 'http://target.example.com/somepage' : { 'body' : 'some data', 'rc' : 200 }}");
+
+  this.fakeXhrs.expect(req, resp);
+
+  var resp = null;
+  params = {};
+  gadgets.io.makeRequest("http://target.example.com/somepage",
+    function (data) {
+      resp = data;
+    }, params);
+  this.assertEquals('some data', resp.text);
+  this.assertUndefined(resp.nocache);
+};

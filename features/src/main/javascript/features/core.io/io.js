@@ -462,6 +462,15 @@ gadgets.io = function() {
         'getFullHeaders': !!params['GET_FULL_HEADERS']
       };
 
+      // add the nocache parameter if necessary
+      // request param NO_CACHE takes precedence over osapi.container.RenderParam.NO_CACHE
+
+      if (params.hasOwnProperty('NO_CACHE')) {
+        paramData['nocache'] = params['NO_CACHE'];
+      } else if (urlParams.hasOwnProperty('nocache')) {
+        paramData['nocache'] = urlParams['nocache'];
+      }
+
       // OAuth goodies
       if (auth === 'oauth' || auth === 'signed' || auth === 'oauth2') {
         if (gadgets.io.oauthReceivedCallbackUrl_) {
@@ -648,7 +657,8 @@ gadgets.io.RequestParameters = gadgets.util.makeEnum([
   'OAUTH_TOKEN_NAME',
   'OAUTH_REQUEST_TOKEN',
   'OAUTH_REQUEST_TOKEN_SECRET',
-  'OAUTH_RECEIVED_CALLBACK'
+  'OAUTH_RECEIVED_CALLBACK',
+  'NO_CACHE'
 ]);
 
 /**
