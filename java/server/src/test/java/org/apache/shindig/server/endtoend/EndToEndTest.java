@@ -215,7 +215,10 @@ public class EndToEndTest {
   @Test
   public void testPipelining() throws Exception {
     HtmlPage page = executePageTest("pipeliningTest", null);
-    JSONArray array = new JSONArray(page.asText());
+    String text = page.asText();
+    String title = page.getTitleText();
+    assertEquals("EndToEndTest", title);
+    JSONArray array = new JSONArray(text.substring(title.length(), text.length()));
     assertEquals(3, array.length());
     Map<String, JSONObject> jsonObjects = Maps.newHashMap();
     for (int i = 0; i < array.length(); i++) {

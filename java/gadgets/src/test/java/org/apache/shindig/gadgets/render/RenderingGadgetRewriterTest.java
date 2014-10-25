@@ -177,6 +177,11 @@ public class RenderingGadgetRewriterTest extends EasyMockTestCase{
     return makeGadgetWithSpec(defaultXml);
   }
 
+  private Gadget makeDefaultOpenSocial2GadgetWithTitle(boolean useQuirks, String title) throws GadgetException {
+    String defaultXml = "<Module specificationVersion='2' ><ModulePrefs " + (useQuirks ? "doctype='quirksmode'" : "") +" title='" + title + "'/><Content type='html'/></Module>";
+    return makeGadgetWithSpec(defaultXml);
+  }
+
   private String rewrite(Gadget gadget, String content) throws Exception {
     MutableContent mc = new MutableContent(parser, content);
     rewriter.rewrite(gadget, mc);
@@ -223,6 +228,34 @@ public class RenderingGadgetRewriterTest extends EasyMockTestCase{
     assertTrue("Output is not valid HTML.", matcher.matches());
     assertTrue("DOCTYPE not preserved", matcher.group(BEFORE_HEAD_GROUP).contains(CUSTOM_DOCTYPE));
 
+  }
+
+  @Test
+  public void createDefaultTitleElement() throws Exception{
+    Gadget gadget = makeDefaultOpenSocial2Gadget(false);
+    String body = "hello, world.";
+    String doc = new StringBuilder()
+        .append("<html><head>")
+        .append("</head><body>")
+        .append(body)
+        .append("</body></html>")
+        .toString();
+    String rewritten = rewrite(gadget, doc);
+    assertTrue(rewritten.contains("<title>default title</title>"));
+  }
+
+  @Test
+  public void createSpecifiedTitleElement() throws Exception{
+    Gadget gadget = makeDefaultOpenSocial2GadgetWithTitle(false, "Here is title");
+    String body = "hello, world.";
+    String doc = new StringBuilder()
+        .append("<html><head>")
+        .append("</head><body>")
+        .append(body)
+        .append("</body></html>")
+        .toString();
+    String rewritten = rewrite(gadget, doc);
+    assertTrue(rewritten.contains("<title>Here is title</title>"));
   }
 
   @Test
