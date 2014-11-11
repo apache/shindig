@@ -23,12 +23,12 @@
   <parent>
     <groupId>org.apache.shindig</groupId>
     <artifactId>shindig-project</artifactId>
-    <version>2.5.2-SNAPSHOT</version>
+    <version>2.5.2</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
   <artifactId>shindig-features</artifactId>
-  <version>2.5.2-SNAPSHOT</version>
+  <version>2.5.2</version>
   <packaging>jar</packaging>
 
   <name>Apache Shindig Features</name>
@@ -37,9 +37,9 @@
   </description>
 
   <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/shindig/trunk/features</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/shindig/trunk/features</developerConnection>
-    <url>http://svn.apache.org/viewvc/shindig/trunk/features</url>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/shindig/tags/shindig-project-2.5.2/features</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/shindig/tags/shindig-project-2.5.2/features</developerConnection>
+    <url>http://svn.apache.org/viewvc/shindig/tags/shindig-project-2.5.2/features</url>
   </scm>
 
   <pluginRepositories>
