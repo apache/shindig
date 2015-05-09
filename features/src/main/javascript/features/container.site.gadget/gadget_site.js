@@ -189,12 +189,14 @@ osapi.container.GadgetSite.prototype.navigateTo = function(
 
       message = ['Detailed error: ', gadgetInfo.error.code || '', ' ', gadgetInfo.error.message || ''].join('');
       gadgets.log(message);
+      callback(gadgetInfo);
     } else {
       var moduleId = renderParams[osapi.container.RenderParam.MODULE_ID] || 0;
       self.setModuleId_(gadgetUrl, moduleId, function() {
         self.container_.applyLifecycleCallbacks_(osapi.container.CallbackType.ON_BEFORE_RENDER,
                 gadgetInfo);
         self.render(gadgetInfo, viewParams, renderParams);
+        callback(gadgetInfo);
       });
     }
 
@@ -206,8 +208,6 @@ osapi.container.GadgetSite.prototype.navigateTo = function(
     timingInfo[osapi.container.NavigateTiming.XRT] = xrt;
     self.onNavigateTo(timingInfo);
 
-    // Possibly with an error. Leave to user to deal with raw response.
-    callback(gadgetInfo);
   });
 };
 
