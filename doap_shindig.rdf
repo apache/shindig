@@ -26,7 +26,7 @@
     <license rdf:resource="http://usefulinc.com/doap/licenses/asl20" />
     <name>Apache Shindig</name>
     <homepage rdf:resource="http://shindig.apache.org" />
-    <asfext:pmc rdf:resource="http://shindig.apache.org" />
+    <asfext:pmc rdf:resource="http://attic.apache.org" />
     <shortdesc>Apache Shindig software is an OpenSocial container and helps you to start hosting OpenSocial apps quickly by providing the code to render gadgets, proxy requests, and handle REST and RPC requests.</shortdesc>
     <description>Apache Shindig is a container for hosting social application consisting of four parts:
 
@@ -41,6 +41,7 @@ Apache Shindig is the reference implementation of OpenSocial API specifications,
     <download-page rdf:resource="http://shindig.apache.org/download" />
     <programming-language>Java</programming-language>
     <category rdf:resource="http://projects.apache.org/category/javaee" />
+    <category rdf:resource="http://projects.apache.org/category/retired" />
     <release>
       <Version>
         <name>Apache Shindig 2.0.0</name>
@@ -56,8 +57,8 @@ Apache Shindig is the reference implementation of OpenSocial API specifications,
     </repository>
     <maintainer>
       <foaf:Person>
-        <foaf:name>Apache Shindig PMC</foaf:name>
-          <foaf:mbox rdf:resource="mailto:dev@shindig.apache.org"/>
+        <foaf:name>Apache Attic PMC</foaf:name>
+          <foaf:mbox rdf:resource="mailto:general@attic.apache.org"/>
       </foaf:Person>
     </maintainer>
   </Project>
